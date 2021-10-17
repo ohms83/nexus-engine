@@ -1,11 +1,17 @@
 #include <iostream>
-
-#include <GL/gl.h>
-#include <SDL2/SDL.h>
-#include <glm/glm.hpp>
+#include "platform/Application.hpp"
 
 int main(int, char**)
 {
-    glm::vec3 position(10, 0, 0);
-    std::cout << "Hello, world!\n";
+    int result = EXIT_SUCCESS;
+    try {
+        nexus::Application app("Hello, world!\n", 1024, 768);
+        app.mainLoop();
+    }
+    catch(const std::exception& e) {
+        std::cout << e.what() << std::endl;
+        result = EXIT_FAILURE;
+    }
+    
+    return result;
 }

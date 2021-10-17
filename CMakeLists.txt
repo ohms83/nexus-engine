@@ -12,6 +12,7 @@ set(CMAKE_COLOR_MAKEFILE   ON)
 include(CTest)
 enable_testing()
 
+add_subdirectory(nexus)
 add_subdirectory(examples/01-HelloWorld)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})

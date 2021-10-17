@@ -12,16 +12,5 @@ set(CMAKE_COLOR_MAKEFILE   ON)
 
 add_executable(${PROJECT_NAME} main.cpp)
 
-# GLM
-target_include_directories(${PROJECT_NAME}
-    PUBLIC "${CMAKE_SOURCE_DIR}/nexus/thirdparty"
-)
-
-# OpenGL
-set(OpenGL_GL_PREFERENCE GLVND) 
-find_package(OpenGL REQUIRED)
-target_link_libraries(${PROJECT_NAME} GL)
-
-# SDL2
-find_package(SDL2 REQUIRED)
-target_link_libraries(${PROJECT_NAME} SDL2)
+find_library(engine ${CMAKE_SOURCE_DIR}/nexus)
+target_link_libraries(${PROJECT_NAME} Nexus)
