@@ -34,6 +34,8 @@ find_package(OpenGL REQUIRED)
 # SDL
 target_link_libraries(${PROJECT_NAME}
     SDL2main
+    SDL2_ttf
+    SDL2_image
 )
 
 # SDL2
