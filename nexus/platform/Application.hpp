@@ -1,8 +1,11 @@
+#pragma once
+#include "nxsMacros.h"
+
 #include <SDL2/SDL.h>
 
 #include <string>
 
-namespace nexus {
+NXS_NAMESPACE {
     class Application
     {
     public:
@@ -12,6 +15,7 @@ namespace nexus {
         void mainLoop();
 
     protected:
+        virtual void onUpdate(float dt);
         virtual void onEvent(const SDL_Event& event);
 
     private:
