@@ -12,6 +12,12 @@ set(CMAKE_COLOR_MAKEFILE   ON)
 include(CTest)
 enable_testing()
 
+if(UNIX AND NOT APPLE)
+    # Use a combination of UNIX and NOT APPLE to specify Linux since there's
+    # no specific variable for Linux
+    set(LINUX true)
+endif()
+
 add_subdirectory(nexus)
 add_subdirectory(examples/01-HelloWorld)
 

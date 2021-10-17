@@ -53,6 +53,10 @@ elseif(APPLE)
         ADD_DEFINITIONS (-DTARGET_MACOS)
     endif()
 elseif(LINUX)
+    target_link_directories(${PROJECT_NAME}
+        PUBLIC "${ENGINE_ROOT}/thirdparty/lib/linux"
+    )
+
     ADD_DEFINITIONS (-DTARGET_LINUX)
 elseif(ANDROID)
     ADD_DEFINITIONS (-DTARGET_ANDROID)
