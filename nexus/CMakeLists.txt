@@ -33,14 +33,11 @@ find_package(OpenGL REQUIRED)
 
 # SDL
 target_link_libraries(${PROJECT_NAME}
+    SDL2
     SDL2main
     SDL2_ttf
     SDL2_image
 )
-
-# SDL2
-# find_package(SDL2 REQUIRED)
-# target_link_libraries(${PROJECT_NAME} SDL2)
 
 # Platform specific macros and libraries
 if(WINDOWS)
@@ -48,10 +45,6 @@ if(WINDOWS)
 elseif(APPLE)
     target_link_directories(${PROJECT_NAME}
         PUBLIC "${ENGINE_ROOT}/thirdparty/lib/macos"
-    )
-
-    target_link_libraries(${PROJECT_NAME}
-        libSDL2-2.0.0.dylib
     )
 
     if(IOS)
