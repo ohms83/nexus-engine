@@ -1,8 +1,10 @@
 #include "Application.hpp"
 
+#include "base/SystemClock.hpp"
+
 #include <sstream>
 
-using namespace nexus;
+USING_NAMESPACE_NXS;
 
 Application::Application(const std::string& appName, uint32_t width, uint32_t height)
 {
@@ -44,22 +46,30 @@ Application::~Application()
 
 void Application::mainLoop()
 {
+    SystemClock clock;
+    clock.tick();
+
     SDL_Event event;
     while(_running) {
+        float dt = (float)clock.getDiffMilliseconds() / 1000.0f;
+        clock.tick();
+
         while(SDL_PollEvent(&event)) {
+            // SDL_QUIT needs to be processed here to prevent child classes from ignoring it.
+            if (event.type == SDL_QUIT) {
+                _running = false;
+            }
             onEvent(event);
+            onUpdate(dt);
         }
     }
 }
 
+void Application::onUpdate(float dt)
+{
+
+}
+
 void Application::onEvent(const SDL_Event& event)
 {
-    switch (event.type)
-    {
-    case SDL_QUIT:
-        _running = false;
-        break;
-    default:
-        break;
-    }
 }

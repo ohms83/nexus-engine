@@ -15,6 +15,9 @@ set(ENGINE_HEADER)
 
 set(ENGINE_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 
+include(base/CMakeLists.txt)
+include(io/CMakeLists.txt)
+include(os/CMakeLists.txt)
 include(platform/CMakeLists.txt)
 
 add_library(${PROJECT_NAME}
@@ -63,3 +66,11 @@ elseif(ANDROID)
 else()
     message( FATAL_ERROR "Unsupported platform, CMake will exit" )
 endif()
+
+set(TOOLS_DIR "${CMAKE_SOURCE_DIR}/tools")
+
+add_custom_command(
+    TARGET ${PROJECT_NAME} POST_BUILD
+    
+    COMMAND python3 ${TOOLS_DIR}/generate-header-list.py
+)

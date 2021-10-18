@@ -1,5 +1,5 @@
 #include <iostream>
-#include "platform/Application.hpp"
+#include "nexus.h"
 
 int main(int, char**)
 {
