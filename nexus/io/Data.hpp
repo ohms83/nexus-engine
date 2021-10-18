@@ -1,4 +1,6 @@
-#pragma once
+#ifndef __NXS_DATA_H__
+#define __NXS_DATA_H__
+
 #include "nxsMacros.h"
 
 #include <memory>
@@ -53,3 +55,5 @@ NXS_NAMESPACE {
         uint64_t _size = 0;
     };
 }
+
+#endif // __NXS_DATA_H__

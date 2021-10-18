@@ -1,4 +1,6 @@
-#pragma once
+#ifndef __NXS_PATH_H__
+#define __NXS_PATH_H__
+
 #include "nxsMacros.h"
 
 #include <utility>
@@ -59,3 +61,5 @@ NXS_NAMESPACE {
         std::string _path;
     };
 }
+
+#endif // __NXS_PATH_H__

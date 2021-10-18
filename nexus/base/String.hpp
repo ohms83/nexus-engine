@@ -1,4 +1,6 @@
-#pragma once
+#ifndef __NXS_STRING_H__
+#define __NXS_STRING_H__
+
 #include "nxsMacros.h"
 
 #include <string>
@@ -44,3 +46,5 @@ NXS_NAMESPACE {
         static const std::string DELIMITERS;
     };
 }
+
+#endif // __NXS_STRING_H__

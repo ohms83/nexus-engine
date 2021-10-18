@@ -1,4 +1,6 @@
-#pragma once
+#ifndef __NXS_APPLICATION_H__
+#define __NXS_APPLICATION_H__
+
 #include "nxsMacros.h"
 
 #include <SDL2/SDL.h>
@@ -27,3 +29,5 @@ NXS_NAMESPACE {
         SDL_Surface* _screenSurface = NULL;
     };
 }
+
+#endif // __NXS_APPLICATION_H__

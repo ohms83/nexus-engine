@@ -5,8 +5,8 @@
 //  Created by nuttachai on 21/5/20.
 //
 
-#ifndef SystemClock_hpp
-#define SystemClock_hpp
+#ifndef __NXS_SYSTEM_CLOCK_H__
+#define __NXS_SYSTEM_CLOCK_H__
 
 #include "nxsMacros.h"
 #include <chrono>
@@ -62,4 +62,4 @@ NXS_NAMESPACE {
     };
 }
 
-#endif /* SystemClock_hpp */
+#endif // __NXS_SYSTEM_CLOCK_H__
