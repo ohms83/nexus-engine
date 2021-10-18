@@ -16,6 +16,7 @@ set(ENGINE_HEADER)
 set(ENGINE_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 
 include(base/CMakeLists.txt)
+include(graphics/CMakeLists.txt)
 include(io/CMakeLists.txt)
 include(os/CMakeLists.txt)
 include(platform/CMakeLists.txt)
@@ -34,6 +35,8 @@ target_include_directories(
 set(OpenGL_GL_PREFERENCE GLVND) 
 find_package(OpenGL REQUIRED)
 
+find_package(GLEW REQUIRED)
+
 # SDL
 target_link_libraries(${PROJECT_NAME}
     SDL2
@@ -49,6 +52,12 @@ elseif(APPLE)
     target_link_directories(${PROJECT_NAME}
         PUBLIC "${ENGINE_ROOT}/thirdparty/lib/macos"
     )
+
+    target_link_libraries(${PROJECT_NAME}
+        "-framework OpenGL"
+    )
+
+    message("Hello World!")
 
     if(IOS)
         ADD_DEFINITIONS (-DTARGET_IOS)

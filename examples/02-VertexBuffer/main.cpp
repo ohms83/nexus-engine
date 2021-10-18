@@ -1,12 +1,12 @@
 #include <iostream>
 #include "nexus.h"
 
-class ExampleApp01 : public nexus::Application
+class ExampleApp02 : public nexus::Application
 {
 protected:
     nexus::RenderSystem* createRenderSystem() override
     {
-        return nullptr;
+        return new nexus::GLRenderSystem();
     }
 };
 
@@ -14,8 +14,8 @@ int main(int, char**)
 {
     int result = EXIT_SUCCESS;
     try {
-        ExampleApp01 app;
-        app.init("Hello, world!", 1024, 768);
+        ExampleApp02 app;
+        app.init("Vertex Buffer", 1024, 768);
         app.mainLoop();
     }
     catch(const std::exception& e) {

@@ -6,11 +6,23 @@
 
 USING_NAMESPACE_NXS;
 
-Application::Application(const std::string& appName, uint32_t width, uint32_t height)
+Application::Application()
+{
+}
+
+Application::~Application()
+{
+    SDL_DestroyWindow(_window);
+    SDL_Quit();
+}
+
+void Application::init(const std::string& appName, uint32_t width, uint32_t height)
 {
     _name = appName;
     _screenWidth = width;
     _screenHeight = height;
+
+    _renderSystem = std::unique_ptr<RenderSystem>(createRenderSystem());
 
     if( SDL_Init(SDL_INIT_EVERYTHING) < 0)
     {
@@ -19,14 +31,13 @@ Application::Application(const std::string& appName, uint32_t width, uint32_t he
         throw std::runtime_error(ss.str());
     }
 
-    _window = SDL_CreateWindow(appName.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, _screenWidth, _screenHeight, SDL_WINDOW_SHOWN );
+    _window = SDL_CreateWindow(_name.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, _screenWidth, _screenHeight, SDL_WINDOW_SHOWN );
     if( _window == NULL )
     {
         std::stringstream ss;
         ss << "Failed to create window. SDL_Error=" << SDL_GetError();
         throw std::runtime_error(ss.str());
     }
-
 
     //Get window surface
     _screenSurface = SDL_GetWindowSurface(_window);
@@ -36,12 +47,8 @@ Application::Application(const std::string& appName, uint32_t width, uint32_t he
     
     //Update the surface
     SDL_UpdateWindowSurface(_window);
-}
 
-Application::~Application()
-{
-    SDL_DestroyWindow(_window);
-    SDL_Quit();
+    onInit();
 }
 
 void Application::mainLoop()
@@ -63,6 +70,11 @@ void Application::mainLoop()
             onUpdate(dt);
         }
     }
+}
+
+void Application::onInit()
+{
+    
 }
 
 void Application::onUpdate(float dt)
