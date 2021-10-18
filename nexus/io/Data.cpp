@@ -1,5 +1,7 @@
 #include "Data.hpp"
+
 #include <iostream>
+#include <cstring>
 
 USING_NAMESPACE_NXS;
 

@@ -1,5 +1,7 @@
 #include "String.hpp"
 
+#include <cstring>
+
 USING_NAMESPACE_NXS;
 using namespace std;
 
