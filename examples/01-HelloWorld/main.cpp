@@ -3,11 +3,6 @@
 
 class ExampleApp01 : public nexus::Application
 {
-protected:
-    nexus::RenderSystem* createRenderSystem() override
-    {
-        return nullptr;
-    }
 };
 
 int main(int, char**)
@@ -15,7 +10,9 @@ int main(int, char**)
     int result = EXIT_SUCCESS;
     try {
         ExampleApp01 app;
-        app.init("Hello, world!", 1024, 768);
+        app.init({
+            "Hello, world!", 1024, 768, nexus::RENDER_SYSTEM_GL, false
+        });
         app.mainLoop();
     }
     catch(const std::exception& e) {

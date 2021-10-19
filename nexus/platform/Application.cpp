@@ -12,18 +12,14 @@ Application::Application()
 
 Application::~Application()
 {
+    _renderSystem = nullptr;
+
     SDL_DestroyWindow(_window);
     SDL_Quit();
 }
 
-void Application::init(const std::string& appName, uint32_t width, uint32_t height)
+void Application::init(const Info& info)
 {
-    _name = appName;
-    _screenWidth = width;
-    _screenHeight = height;
-
-    _renderSystem = std::unique_ptr<RenderSystem>(createRenderSystem());
-
     if( SDL_Init(SDL_INIT_EVERYTHING) < 0)
     {
         std::stringstream ss;
@@ -31,13 +27,21 @@ void Application::init(const std::string& appName, uint32_t width, uint32_t heig
         throw std::runtime_error(ss.str());
     }
 
-    _window = SDL_CreateWindow(_name.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, _screenWidth, _screenHeight, SDL_WINDOW_SHOWN );
+    _info = info;
+    _renderSystem = std::unique_ptr<RenderSystem>(RenderSystem::create(info.renderSystem));
+
+    int flags = SDL_WINDOW_SHOWN;
+    flags |= _renderSystem->getSDLInitFlag();
+
+    _window = SDL_CreateWindow(_info.appName.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, _info.screenWidth, _info.screenHeight, flags );
     if( _window == NULL )
     {
         std::stringstream ss;
         ss << "Failed to create window. SDL_Error=" << SDL_GetError();
         throw std::runtime_error(ss.str());
     }
+
+    _renderSystem->init(_window);
 
     //Get window surface
     _screenSurface = SDL_GetWindowSurface(_window);
@@ -68,6 +72,9 @@ void Application::mainLoop()
             }
             onEvent(event);
             onUpdate(dt);
+            
+            render(*_renderSystem);
+            _renderSystem->swapBuffer();
         }
     }
 }
@@ -84,4 +91,9 @@ void Application::onUpdate(float dt)
 
 void Application::onEvent(const SDL_Event& event)
 {
+}
+
+void Application::render(RenderSystem& renderSystem)
+{
+
 }

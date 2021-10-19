@@ -13,10 +13,28 @@ NXS_NAMESPACE {
     class Application
     {
     public:
+        /**
+         * @c Application::Info contains information about how the application should be initialized.
+         */
+        struct Info
+        {
+            /// Application's name.
+            std::string appName;
+            uint32_t screenWidth;
+            uint32_t screenHeight;
+            /**
+             * Must be either @c nexus::RENDER_SYSTEM_GL or @c nexus::RENDER_SYSTEM_VULKAN .
+             * @see GraphicsConst.h
+             */
+            int renderSystem;
+            /// Whether or not the application will launch in fullscreen mode.
+            bool fullScreen;
+        };
+
         Application();
         virtual ~Application();
 
-        void init(const std::string& appName, uint32_t width, uint32_t height);
+        void init(const Info& info);
         void mainLoop();
 
     protected:
@@ -24,13 +42,11 @@ NXS_NAMESPACE {
         virtual void onUpdate(float dt);
         virtual void onEvent(const SDL_Event& event);
 
-        virtual RenderSystem* createRenderSystem() = 0;
+        virtual void render(RenderSystem& renderSystem);
 
     private:
-        std::string _name;
+        Info _info;
         bool _running = true;
-        uint32_t _screenWidth = 0;
-        uint32_t _screenHeight = 0;
         SDL_Window* _window = NULL;
         SDL_Surface* _screenSurface = NULL;
         
