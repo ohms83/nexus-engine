@@ -27,8 +27,13 @@ void Data::copy(char* data, uint64_t size)
     _size   = size;
 }
 
-void Data::set(char* data, uint64_t size)
+void Data::take(char* data, uint64_t size)
 {
     _buffer = std::unique_ptr<char>(data);
     _size = size;
+}
+
+char* Data::give(uint64_t& outSize)
+{
+    outSize = _size;
 }

@@ -2,9 +2,12 @@
 #ifndef __NEXUS_HEADER__
 #define __NEXUS_HEADER__
 
+#include "base/ResourceManager.hpp"
 #include "base/String.hpp"
 #include "base/SystemClock.hpp"
 #include "base/Utils.hpp"
+#include "graphics/Color.hpp"
+#include "graphics/GraphicsConst.h"
 #include "graphics/RenderSystem.hpp"
 #include "graphics/VertexBuffer.hpp"
 #include "graphics/opengl/GLRenderSystem.hpp"

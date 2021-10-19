@@ -4,52 +4,66 @@
 #include "nxsMacros.h"
 #include "glm/glm.hpp"
 
+#include "io/Data.hpp"
+
 #include <memory>
+#include <array>
 
 NXS_NAMESPACE {
     class VertexBuffer
     {
     public:
-        enum Stride
+        /**
+         * A data structure describing how vertex data is aligned within buffer.
+         */
+        struct VertexAlignment
         {
-            NONE = -1,
-            /**
-             * Position and normal as 3D vectors, texture coordinate as 2D a vector, and an RGBA color.
-             * This is commonly used for 3D models.
-             */
-            P3_N3_T2_C4,
-            /**
-             * Position as a 3D vector, texture coordinate as 2D a vector, and an RGBA color with no normal.
-             */
-            P3_T2_C4,
-            /**
-             * Position a 3D vector, and an RGBA color.
-             */
-            P3_C4,
-            /**
-             * Position and texture coordinate as 2D vectors, and an RGBA color.
-             * This is commonly used for 2D sprites or UIs.
-             */
-            P2_T2_C4,
-            /**
-             * Position a 2D vector, and an RGBA color.
-             */
-            P2_C4,
-        };
+            /// How many component per position.
+            uint32_t positionComponent;
+            uint32_t positionOffset;
 
-        void allocateBuffer(uint32_t vertexCount, Stride stride);
+            /// How many component per normal.
+            uint32_t normalComponent;
+            uint32_t normalOffset;
+
+            /// How many component per normal.
+            uint32_t colorComponent;
+            uint32_t colorOffset;
+
+            /// How many component per normal.
+            std::array<uint32_t, 4> texCoordComponents;
+            std::array<uint32_t, 4> texCoordOffset;
+        };
+        void allocate(uint32_t vertexCount, const VertexAlignment& align);
+
+        /**
+         * Take over the specified @c buffer and manage it.
+         * @warning buffer's ownership will be taken over by this object.
+         *          Please DO NOT delete it.
+         * @warning The pointer must be dynamically allocated on heap. Please DO NOT
+         *          pass the stack's pointer to this function because it will cause
+         *          memory corruption when this object is destroyed.
+         */
+        void take(float* buffer, uint64_t size, const VertexAlignment& align);
+
+        /**
+         * Take over the buffer from specified @c data .
+         * @note The size of data must be divisible by the stride's size.
+         * @warning After taking over, @c data will remain in undefined state and can't be reused.
+         */
+        void take(Data& data, const VertexAlignment& align);
 
         void setPosition(uint32_t vertextIndex, const glm::vec3 position) const;
         glm::vec3 getPosition(uint32_t vertextIndex) const;
 
-        static uint32_t getStrideSize(Stride stride);
-        static uint32_t getStrideElementCount(Stride stride);
-        static uint32_t getVertexOffset(Stride stride, uint32_t vertexIndex);
+        static uint32_t getVertexSize(const VertexAlignment& align);
+        /// Return a total number of data component per vertex.
+        static uint32_t getNumComponent(const VertexAlignment& align);
 
     private:
         std::unique_ptr<float[]> _buffer;
         uint32_t _vertexCount = 0;
-        Stride _stride = Stride::NONE;
+        VertexAlignment _alignment;
     };
 }
 

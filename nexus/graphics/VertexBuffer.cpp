@@ -4,62 +4,44 @@
 
 USING_NAMESPACE_NXS;
 
-static std::map<VertexBuffer::Stride, uint32_t> STRIDE_ELEMENT_COUNT = {
-    { VertexBuffer::P3_N3_T2_C4, 12 },
-    { VertexBuffer::P3_T2_C4,     9 },
-    { VertexBuffer::P2_T2_C4,     8 },
-    { VertexBuffer::P3_C4,        7 },
-    { VertexBuffer::P2_C4,        6 },
-};
-
-static std::map<VertexBuffer::Stride, uint32_t> STRIDE_SIZE_MAP = {
-    { VertexBuffer::P3_N3_T2_C4, sizeof(float) * 12 },
-    { VertexBuffer::P3_T2_C4,    sizeof(float) *  9 },
-    { VertexBuffer::P2_T2_C4,    sizeof(float) *  8 },
-    { VertexBuffer::P3_C4,       sizeof(float) *  7 },
-    { VertexBuffer::P2_C4,       sizeof(float) *  6 },
-};
-
-uint32_t VertexBuffer::getStrideSize(Stride stride)
+uint32_t VertexBuffer::getVertexSize(const VertexAlignment& align)
 {
-    return STRIDE_SIZE_MAP[stride];
+    return getNumComponent(align) * sizeof(float);
 }
 
-uint32_t VertexBuffer::getStrideElementCount(Stride stride)
+uint32_t VertexBuffer::getNumComponent(const VertexAlignment& align)
 {
-    return STRIDE_ELEMENT_COUNT[stride];
+    uint32_t componentCount = align.positionComponent + align.colorComponent + align.normalComponent;
+    for (const auto texCoordComponent : align.texCoordComponents) {
+        componentCount += texCoordComponent;
+    }
+
+    return componentCount;
 }
 
-uint32_t VertexBuffer::getVertexOffset(Stride stride, uint32_t vertexIndex)
+void VertexBuffer::allocate(uint32_t vertexCount, const VertexAlignment& align)
 {
-    return STRIDE_ELEMENT_COUNT[stride] * vertexIndex;
-}
-
-void VertexBuffer::allocateBuffer(uint32_t vertexCount, Stride stride)
-{
-    _buffer = std::unique_ptr<float[]>(new float[getVertexOffset(stride, vertexCount)]);
+    _buffer = std::unique_ptr<float[]>(new float[getNumComponent(align)]);
     _vertexCount = vertexCount;
-    _stride = stride;
+    _alignment = align;
+}
+
+void VertexBuffer::take(float* buffer, uint64_t size, const VertexAlignment& align)
+{
+    _buffer = std::unique_ptr<float[]>(buffer);
+    _vertexCount = (uint32_t)(size / getVertexSize(align));
+    _alignment = align;
+}
+
+void VertexBuffer::take(Data& data, const VertexAlignment& align)
+{
+    uint64_t size = 0;
+    _buffer = std::unique_ptr<float[]>(reinterpret_cast<float*>(data.give(size)));
+    _vertexCount = (uint32_t)(size / getVertexSize(align));
+    _alignment = align;
 }
 
 glm::vec3 VertexBuffer::getPosition(uint32_t vertextIndex) const
 {
-    if (_stride == Stride::NONE || _buffer == nullptr || _vertexCount == 0) {
-        throw std::runtime_error("Failed to get vertex's position. REASON=Unitialized vertex buffer");
-    }
-    
-    glm::vec3 pos;
-
-    if (vertextIndex <= _vertexCount)
-    {
-        uint32_t offset = getVertexOffset(_stride, vertextIndex);
-        pos.x = _buffer[offset];
-        pos.y = _buffer[offset+1];
-
-        if (_stride != P2_T2_C4 && _stride != P2_C4) {
-            pos.z = _buffer[offset+2];
-        }
-    }
-
-    return pos;
+    return glm::vec3();
 }

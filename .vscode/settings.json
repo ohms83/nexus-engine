@@ -67,6 +67,7 @@
         "fstream": "cpp",
         "map": "cpp",
         "regex": "cpp",
-        "stack": "cpp"
+        "stack": "cpp",
+        "memory_resource": "cpp"
     }
 }

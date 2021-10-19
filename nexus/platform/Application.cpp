@@ -73,6 +73,7 @@ void Application::mainLoop()
             onEvent(event);
             onUpdate(dt);
             
+            _renderSystem->clear();
             render(*_renderSystem);
             _renderSystem->swapBuffer();
         }

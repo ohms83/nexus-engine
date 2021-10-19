@@ -24,6 +24,10 @@ NXS_NAMESPACE {
         Data& operator = (Data&& rhs) noexcept;
         Data& operator = (const Data& rhs) = delete;
 
+        bool isNull() const {
+            return _buffer == nullptr;
+        }
+
         /**
          * Copies data from the specified address.
          * @param data Pointer to an array where the storing data will be read from.
@@ -33,13 +37,19 @@ NXS_NAMESPACE {
 
         /**
          * Takes over the array of data pointed by @c data and manages it.
-         * @note The specified array's ownership will be taken over by this object.
-         *       Please DO NOT delete it.
-         * @note The pointer must be dynamically allocated on heap. Please DO NOT
-         *       pass the pointer of buffers allocated on stack to this function because
-         *       @c Data will try to destroy it in its destructor and that will cause memory corruption.
+         * @warning The specified array's ownership will be taken over by this object.
+         *          Please DO NOT delete it.
+         * @warning The pointer must be dynamically allocated on heap. Please DO NOT
+         *          pass the stack's pointer to this function because @c Data will try to destroy it
+         *          in its destructor and that will cause memory corruption.
          */
-        void set(char* data, uint64_t size);
+        void take(char* data, uint64_t size);
+
+        /**
+         * Returns the ownership of currently managed buffer to the caller.
+         * The caller will now responsible for managing the returned buffer.
+         */
+        char* give(uint64_t& outSize);
 
         const char* get() const {
             return _buffer.get();

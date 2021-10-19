@@ -1,4 +1,5 @@
 list(APPEND ENGINE_HEADER
+    "base/ResourceManager.hpp"
     "base/String.hpp"
     "base/SystemClock.hpp"
     "base/Utils.hpp"

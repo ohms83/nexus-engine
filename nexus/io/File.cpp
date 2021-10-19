@@ -49,7 +49,7 @@ Data File::read()
     _stream.read(tmpBuf, _size);
     
     Data data;
-    data.set(tmpBuf, _size);
+    data.take(tmpBuf, _size);
     return data;
 }
 
