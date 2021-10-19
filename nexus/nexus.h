@@ -12,6 +12,9 @@
 #include "io/File.hpp"
 #include "nxsMacros.h"
 #include "os/Path.hpp"
+#include "pattern/Factory.hpp"
+#include "pattern/Singleton.hpp"
+#include "pattern/StateMachine.hpp"
 #include "platform/Application.hpp"
 
 #endif // __NEXUS_HEADER__

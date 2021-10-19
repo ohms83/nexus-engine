@@ -19,6 +19,7 @@ include(base/CMakeLists.txt)
 include(graphics/CMakeLists.txt)
 include(io/CMakeLists.txt)
 include(os/CMakeLists.txt)
+include(pattern/CMakeLists.txt)
 include(platform/CMakeLists.txt)
 
 add_library(${PROJECT_NAME}
@@ -34,6 +35,7 @@ target_include_directories(
 # OpenGL
 set(OpenGL_GL_PREFERENCE GLVND) 
 find_package(OpenGL REQUIRED)
+include_directories(${OPENGL_INCLUDE_DIR})
 
 find_package(GLEW REQUIRED)
 
@@ -56,8 +58,6 @@ elseif(APPLE)
     target_link_libraries(${PROJECT_NAME}
         "-framework OpenGL"
     )
-
-    message("Hello World!")
 
     if(IOS)
         ADD_DEFINITIONS (-DTARGET_IOS)
