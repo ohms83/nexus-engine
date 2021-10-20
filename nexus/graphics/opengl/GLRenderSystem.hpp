@@ -1,6 +1,7 @@
 #ifndef __NXS_GL_RENDER_SYSTEM_H__
 #define __NXS_GL_RENDER_SYSTEM_H__
 
+#include "NxsGL.h"
 #include "graphics/RenderSystem.hpp"
 
 NXS_NAMESPACE {

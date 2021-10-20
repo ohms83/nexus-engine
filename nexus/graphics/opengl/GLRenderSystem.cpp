@@ -1,6 +1,7 @@
 #include "GLRenderSystem.hpp"
 
-#include <SDL2/SDL_opengl.h>
+#include <iostream>
+#include <sstream>
 
 USING_NAMESPACE_NXS;
 
@@ -29,6 +30,14 @@ void GLRenderSystem::init(SDL_Window* window)
 
     _window = window;
     _context = SDL_GL_CreateContext(_window);
+
+    std::stringstream ss;
+    ss  << "OpenGL\n"
+        << "  Version : " << glGetString(GL_VERSION) << "\n"
+        << "  GLSL    : " << glGetString(GL_SHADING_LANGUAGE_VERSION) << "\n"
+        << "  Vendor  : " << glGetString(GL_VENDOR) << "\n"
+        << "  Renderer: " << glGetString(GL_RENDERER);
+    std::cout << ss.str() << std::endl;
 }
 
 int GLRenderSystem::getSDLInitFlag() const

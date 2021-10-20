@@ -1,7 +1,7 @@
 #ifndef __NXS_VERTEX_BUFFER_H__
 #define __NXS_VERTEX_BUFFER_H__
 
-#include "nxsMacros.h"
+#include "NxsMacros.h"
 #include "glm/glm.hpp"
 
 #include "io/Data.hpp"

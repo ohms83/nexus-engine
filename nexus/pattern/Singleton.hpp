@@ -8,7 +8,7 @@
 #ifndef __NXS_SINGLETON_H__
 #define __NXS_SINGLETON_H__
 
-#include "nxsMacros.h"
+#include "NxsMacros.h"
 
 NXS_NAMESPACE {
     template <typename _Class>

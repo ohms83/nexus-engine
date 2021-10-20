@@ -1,6 +1,6 @@
 #ifndef __NXS_FILE_H__
 #define __NXS_FILE_H__
-#include "nxsMacros.h"
+#include "NxsMacros.h"
 
 #include <memory>
 #include <fstream>

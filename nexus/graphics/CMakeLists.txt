@@ -1,5 +1,6 @@
 list(APPEND ENGINE_HEADER
     "graphics/opengl/GLRenderSystem.hpp"
+    "graphics/opengl/NxsGL.h"
     "graphics/Color.hpp"
     "graphics/GraphicsConst.h"
     "graphics/RenderSystem.hpp"

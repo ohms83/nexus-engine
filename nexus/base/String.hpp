@@ -1,7 +1,7 @@
 #ifndef __NXS_STRING_H__
 #define __NXS_STRING_H__
 
-#include "nxsMacros.h"
+#include "NxsMacros.h"
 
 #include <string>
 #include <sstream>

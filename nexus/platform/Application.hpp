@@ -1,7 +1,7 @@
 #ifndef __NXS_APPLICATION_H__
 #define __NXS_APPLICATION_H__
 
-#include "nxsMacros.h"
+#include "NxsMacros.h"
 #include "graphics/RenderSystem.hpp"
 
 #include <SDL2/SDL.h>

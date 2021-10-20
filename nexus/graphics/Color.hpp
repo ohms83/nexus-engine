@@ -1,7 +1,7 @@
 #ifndef __NXS_COLOR_H__
 #define __NXS_COLOR_H__
 
-#include "nxsMacros.h"
+#include "NxsMacros.h"
 
 #include <cstdint>
 

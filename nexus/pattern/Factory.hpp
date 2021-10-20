@@ -1,7 +1,7 @@
 #ifndef __NXS_FACTORY_H__
 #define __NXS_FACTORY_H__
 
-#include "nxsMacros.h"
+#include "NxsMacros.h"
 
 #include <map>
 #include <functional>

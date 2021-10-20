@@ -1,7 +1,7 @@
 #ifndef __NXS_DATA_H__
 #define __NXS_DATA_H__
 
-#include "nxsMacros.h"
+#include "NxsMacros.h"
 
 #include <memory>
 

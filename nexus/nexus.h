@@ -2,6 +2,7 @@
 #ifndef __NEXUS_HEADER__
 #define __NEXUS_HEADER__
 
+#include "NxsMacros.h"
 #include "base/ResourceManager.hpp"
 #include "base/String.hpp"
 #include "base/SystemClock.hpp"
@@ -11,9 +12,9 @@
 #include "graphics/RenderSystem.hpp"
 #include "graphics/VertexBuffer.hpp"
 #include "graphics/opengl/GLRenderSystem.hpp"
+#include "graphics/opengl/NxsGL.h"
 #include "io/Data.hpp"
 #include "io/File.hpp"
-#include "nxsMacros.h"
 #include "os/Path.hpp"
 #include "pattern/Factory.hpp"
 #include "pattern/Singleton.hpp"
