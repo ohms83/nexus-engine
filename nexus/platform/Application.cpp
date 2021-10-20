@@ -43,15 +43,6 @@ void Application::init(const Info& info)
 
     _renderSystem->init(_window);
 
-    //Get window surface
-    _screenSurface = SDL_GetWindowSurface(_window);
-
-    //Fill the surface white
-    SDL_FillRect(_screenSurface, NULL, SDL_MapRGB(_screenSurface->format, 0x00, 0x00, 0x00));
-    
-    //Update the surface
-    SDL_UpdateWindowSurface(_window);
-
     onInit();
 }
 

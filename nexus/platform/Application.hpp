@@ -48,7 +48,6 @@ NXS_NAMESPACE {
         Info _info;
         bool _running = true;
         SDL_Window* _window = NULL;
-        SDL_Surface* _screenSurface = NULL;
         
         std::unique_ptr<RenderSystem> _renderSystem;
     };
