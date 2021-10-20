@@ -3,10 +3,6 @@
 
 #include "nexus.h"
 
-static uint32_t s_Indices[] = {
-    0, 1, 2
-};
-
 class ExampleApp02 : public nexus::Application
 {
 protected:
