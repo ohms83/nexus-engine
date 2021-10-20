@@ -19,6 +19,15 @@ Application::~Application()
 
 void Application::init(const Info& info)
 {
+    SDL_version compiledVersion;
+    SDL_version linkedVersion;
+
+    SDL_VERSION(&compiledVersion);
+    SDL_GetVersion(&linkedVersion);
+    printf("SDL\n");
+    printf("  Compiled Version : %d.%d.%d\n", compiledVersion.major, compiledVersion.minor, compiledVersion.patch);
+    printf("  Linked Version   : %d.%d.%d\n", linkedVersion.major, linkedVersion.minor, linkedVersion.patch);
+
     if( SDL_Init(SDL_INIT_EVERYTHING) < 0)
     {
         std::stringstream ss;
