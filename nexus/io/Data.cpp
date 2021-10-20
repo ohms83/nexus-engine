@@ -36,4 +36,9 @@ void Data::take(char* data, uint64_t size)
 char* Data::give(uint64_t& outSize)
 {
     outSize = _size;
+    char* data = _buffer.get();
+    
+    _size = 0;
+    _buffer.release();
+    return data;
 }
