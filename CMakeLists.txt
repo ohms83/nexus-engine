@@ -20,7 +20,7 @@ endif()
 
 add_subdirectory(nexus)
 add_subdirectory(examples/01-HelloWorld)
-add_subdirectory(examples/02-FirstTriangle)
+add_subdirectory(examples/02-FirstPolygon)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
