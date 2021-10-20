@@ -4,6 +4,8 @@
 #include "NxsGL.h"
 #include "graphics/RenderSystem.hpp"
 
+#include <string>
+
 NXS_NAMESPACE {
     class GLRenderSystem : public RenderSystem
     {
@@ -11,8 +13,11 @@ NXS_NAMESPACE {
         GLRenderSystem();
         virtual ~GLRenderSystem();
 
-        void init(SDL_Window* window) override;
-        int getSDLInitFlag() const override;
+        void init(
+            std::string appName,
+            uint32_t screenWidth,
+            uint32_t screenHeight
+        ) override;
 
         void setClearColor(const Color& color) override;
 

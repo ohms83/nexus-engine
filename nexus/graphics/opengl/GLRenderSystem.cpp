@@ -13,9 +13,10 @@ GLRenderSystem::GLRenderSystem()
 GLRenderSystem::~GLRenderSystem()
 {
     SDL_GL_DeleteContext(_context);
+    SDL_DestroyWindow(_window);
 }
 
-void GLRenderSystem::init(SDL_Window* window)
+void GLRenderSystem::init(std::string appName, uint32_t screenWidth, uint32_t screenHeight)
 {
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
@@ -28,8 +29,23 @@ void GLRenderSystem::init(SDL_Window* window)
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
-    _window = window;
+    int flags = SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL;
+
+    _window = SDL_CreateWindow(appName.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, screenWidth, screenHeight, flags );
+    if( _window == NULL )
+    {
+        std::stringstream ss;
+        ss << "Failed to create window! SDL_Error=" << SDL_GetError();
+        throw std::runtime_error(ss.str());
+    }
+
     _context = SDL_GL_CreateContext(_window);
+    if (!_context)
+    {
+        std::stringstream ss;
+        ss << "Failed to created OpenGL's context! SDL_Error=" << SDL_GetError();
+        throw std::runtime_error(ss.str());
+    }
 
     std::stringstream ss;
     ss  << "OpenGL\n"
@@ -38,11 +54,6 @@ void GLRenderSystem::init(SDL_Window* window)
         << "  Vendor  : " << glGetString(GL_VENDOR) << "\n"
         << "  Renderer: " << glGetString(GL_RENDERER);
     std::cout << ss.str() << std::endl;
-}
-
-int GLRenderSystem::getSDLInitFlag() const
-{
-    return SDL_WINDOW_OPENGL;
 }
 
 void GLRenderSystem::setClearColor(const Color& color)

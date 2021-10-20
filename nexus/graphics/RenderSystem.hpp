@@ -2,9 +2,9 @@
 #define __NXS_RENDER_SYSTEM_H__
 
 #include "NxsMacros.h"
-
 #include "Color.hpp"
 
+#include <string>
 #include <SDL2/SDL.h>
 
 NXS_NAMESPACE {
@@ -14,8 +14,11 @@ NXS_NAMESPACE {
         RenderSystem();
         virtual ~RenderSystem();
 
-        virtual void init(SDL_Window* window) = 0;
-        virtual int getSDLInitFlag() const = 0;
+        virtual void init(
+            std::string appName,
+            uint32_t screenWidth,
+            uint32_t screenHeight
+        ) = 0;
 
         /* --- Pipline related functions --- */
         // TODO: Move all of these to RenderPipeline class.
