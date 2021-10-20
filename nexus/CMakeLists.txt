@@ -69,10 +69,6 @@ elseif(LINUX)
         PUBLIC "${ENGINE_ROOT}/thirdparty/lib/linux"
     )
 
-    target_link_libraries(${PROJECT_NAME}
-        GL
-    )
-
     ADD_DEFINITIONS (-DTARGET_LINUX)
 elseif(ANDROID)
     ADD_DEFINITIONS (-DTARGET_ANDROID)
