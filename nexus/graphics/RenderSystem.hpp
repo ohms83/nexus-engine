@@ -20,12 +20,12 @@ NXS_NAMESPACE {
             uint32_t screenHeight
         ) = 0;
 
-        /* --- Pipline related functions --- */
-        // TODO: Move all of these to RenderPipeline class.
         virtual void clear() = 0;
-        virtual void draw() = 0;
         virtual void swapBuffer() = 0;
 
+        /* --- Pipline related functions --- */
+        // TODO: Move all of these to RenderPipeline class.
+        virtual void draw() = 0;
         const Color& getClearColor() const;
         virtual void setClearColor(const Color& color);
         /* --- Pipline related functions --- */
