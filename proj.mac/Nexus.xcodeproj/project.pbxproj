@@ -9,8 +9,10 @@
 /* Begin PBXBuildFile section */
 		870FD4C42721767100A376DD /* GLShader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 870FD4C22721767100A376DD /* GLShader.cpp */; };
 		870FD4C52721767100A376DD /* GLShader.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 870FD4C32721767100A376DD /* GLShader.hpp */; };
+		870FD4DE272187CF00A376DD /* SDL2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 870FD4DD272187CF00A376DD /* SDL2.framework */; };
+		870FD4DF272187CF00A376DD /* SDL2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 870FD4DD272187CF00A376DD /* SDL2.framework */; };
+		870FD4E0272187CF00A376DD /* SDL2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 870FD4DD272187CF00A376DD /* SDL2.framework */; };
 		87B8C64527214D520087BA8B /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 87B8C64427214D520087BA8B /* OpenGL.framework */; };
-		87B8C64727214D690087BA8B /* SDL2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 87B8C64627214D690087BA8B /* SDL2.framework */; };
 		87B8C88227214E050087BA8B /* Application.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 87B8C64B27214E040087BA8B /* Application.hpp */; };
 		87B8C88327214E050087BA8B /* Application.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 87B8C64D27214E040087BA8B /* Application.cpp */; };
 		87B8C88427214E050087BA8B /* File.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 87B8C65027214E040087BA8B /* File.hpp */; };
@@ -330,12 +332,10 @@
 		87B8CCE427214E5F0087BA8B /* type_aligned.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 87B8CBC527214E5F0087BA8B /* type_aligned.hpp */; };
 		87B8CD1B272163850087BA8B /* libNexus.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 87B8C63C272147B20087BA8B /* libNexus.a */; };
 		87B8CD1E272163900087BA8B /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 87B8C64427214D520087BA8B /* OpenGL.framework */; };
-		87B8CD1F2721639F0087BA8B /* SDL2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 87B8C64627214D690087BA8B /* SDL2.framework */; };
 		87B8CD21272163DA0087BA8B /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 87B8CCF627214F930087BA8B /* main.cpp */; };
 		87B8CD2D2721641B0087BA8B /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 87B8CCF327214F930087BA8B /* main.cpp */; };
 		87B8CD312721642F0087BA8B /* libNexus.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 87B8C63C272147B20087BA8B /* libNexus.a */; };
 		87B8CD32272164340087BA8B /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 87B8C64427214D520087BA8B /* OpenGL.framework */; };
-		87B8CD33272164440087BA8B /* SDL2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 87B8C64627214D690087BA8B /* SDL2.framework */; };
 		87B8CD37272171690087BA8B /* Shader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 87B8CD35272171690087BA8B /* Shader.cpp */; };
 		87B8CD38272171690087BA8B /* Shader.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 87B8CD36272171690087BA8B /* Shader.hpp */; };
 /* End PBXBuildFile section */
@@ -381,9 +381,9 @@
 /* Begin PBXFileReference section */
 		870FD4C22721767100A376DD /* GLShader.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = GLShader.cpp; sourceTree = "<group>"; };
 		870FD4C32721767100A376DD /* GLShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = GLShader.hpp; sourceTree = "<group>"; };
+		870FD4DD272187CF00A376DD /* SDL2.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL2.framework; path = Frameworks/SDL2.framework; sourceTree = "<group>"; };
 		87B8C63C272147B20087BA8B /* libNexus.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libNexus.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		87B8C64427214D520087BA8B /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
-		87B8C64627214D690087BA8B /* SDL2.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL2.framework; path = ../../../../../Library/Frameworks/SDL2.framework; sourceTree = "<group>"; };
 		87B8C64927214E040087BA8B /* CMakeLists.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CMakeLists.txt; sourceTree = "<group>"; };
 		87B8C64B27214E040087BA8B /* Application.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Application.hpp; sourceTree = "<group>"; };
 		87B8C64C27214E040087BA8B /* CMakeLists.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CMakeLists.txt; sourceTree = "<group>"; };
@@ -865,8 +865,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				87B8C64727214D690087BA8B /* SDL2.framework in Frameworks */,
 				87B8C64527214D520087BA8B /* OpenGL.framework in Frameworks */,
+				870FD4DE272187CF00A376DD /* SDL2.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -874,7 +874,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				87B8CD1F2721639F0087BA8B /* SDL2.framework in Frameworks */,
+				870FD4DF272187CF00A376DD /* SDL2.framework in Frameworks */,
 				87B8CD1E272163900087BA8B /* OpenGL.framework in Frameworks */,
 				87B8CD1B272163850087BA8B /* libNexus.a in Frameworks */,
 			);
@@ -884,7 +884,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				87B8CD33272164440087BA8B /* SDL2.framework in Frameworks */,
+				870FD4E0272187CF00A376DD /* SDL2.framework in Frameworks */,
 				87B8CD32272164340087BA8B /* OpenGL.framework in Frameworks */,
 				87B8CD312721642F0087BA8B /* libNexus.a in Frameworks */,
 			);
@@ -918,7 +918,7 @@
 		87B8C64327214D520087BA8B /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				87B8C64627214D690087BA8B /* SDL2.framework */,
+				870FD4DD272187CF00A376DD /* SDL2.framework */,
 				87B8C64427214D520087BA8B /* OpenGL.framework */,
 			);
 			name = Frameworks;
@@ -2066,7 +2066,7 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				FRAMEWORK_SEARCH_PATHS = /Library/Frameworks;
+				FRAMEWORK_SEARCH_PATHS = "\"$(SRCROOT)\"/Frameworks";
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -2082,8 +2082,8 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
-					"$(SRCROOT)/../nexus",
-					"$(SRCROOT)/../nexus/thirdparty",
+					"\"$(SRCROOT)\"/../nexus",
+					"\"$(SRCROOT)\"/../nexus/thirdparty",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.3;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
@@ -2135,7 +2135,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				FRAMEWORK_SEARCH_PATHS = /Library/Frameworks;
+				FRAMEWORK_SEARCH_PATHS = "\"$(SRCROOT)\"/Frameworks";
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -2145,8 +2145,8 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
-					"$(SRCROOT)/../nexus",
-					"$(SRCROOT)/../nexus/thirdparty",
+					"\"$(SRCROOT)\"/../nexus",
+					"\"$(SRCROOT)\"/../nexus/thirdparty",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.3;
 				MTL_ENABLE_DEBUG_INFO = NO;
@@ -2168,6 +2168,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(LOCAL_LIBRARY_DIR)/Frameworks",
+					"$(PROJECT_DIR)/Frameworks",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -2183,6 +2184,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(LOCAL_LIBRARY_DIR)/Frameworks",
+					"$(PROJECT_DIR)/Frameworks",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -2199,6 +2201,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(LOCAL_LIBRARY_DIR)/Frameworks",
+					"$(PROJECT_DIR)/Frameworks",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -2214,6 +2217,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(LOCAL_LIBRARY_DIR)/Frameworks",
+					"$(PROJECT_DIR)/Frameworks",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -2229,6 +2233,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(LOCAL_LIBRARY_DIR)/Frameworks",
+					"$(PROJECT_DIR)/Frameworks",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -2244,6 +2249,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(LOCAL_LIBRARY_DIR)/Frameworks",
+					"$(PROJECT_DIR)/Frameworks",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
