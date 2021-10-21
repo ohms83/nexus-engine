@@ -12,6 +12,8 @@
 		870FD4DE272187CF00A376DD /* SDL2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 870FD4DD272187CF00A376DD /* SDL2.framework */; };
 		870FD4DF272187CF00A376DD /* SDL2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 870FD4DD272187CF00A376DD /* SDL2.framework */; };
 		870FD4E0272187CF00A376DD /* SDL2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 870FD4DD272187CF00A376DD /* SDL2.framework */; };
+		870FD4E327218ADA00A376DD /* Vertex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 870FD4E127218ADA00A376DD /* Vertex.cpp */; };
+		870FD4E427218ADA00A376DD /* Vertex.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 870FD4E227218ADA00A376DD /* Vertex.hpp */; };
 		87B8C64527214D520087BA8B /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 87B8C64427214D520087BA8B /* OpenGL.framework */; };
 		87B8C88227214E050087BA8B /* Application.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 87B8C64B27214E040087BA8B /* Application.hpp */; };
 		87B8C88327214E050087BA8B /* Application.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 87B8C64D27214E040087BA8B /* Application.cpp */; };
@@ -382,6 +384,8 @@
 		870FD4C22721767100A376DD /* GLShader.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = GLShader.cpp; sourceTree = "<group>"; };
 		870FD4C32721767100A376DD /* GLShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = GLShader.hpp; sourceTree = "<group>"; };
 		870FD4DD272187CF00A376DD /* SDL2.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL2.framework; path = Frameworks/SDL2.framework; sourceTree = "<group>"; };
+		870FD4E127218ADA00A376DD /* Vertex.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Vertex.cpp; sourceTree = "<group>"; };
+		870FD4E227218ADA00A376DD /* Vertex.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Vertex.hpp; sourceTree = "<group>"; };
 		87B8C63C272147B20087BA8B /* libNexus.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libNexus.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		87B8C64427214D520087BA8B /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
 		87B8C64927214E040087BA8B /* CMakeLists.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CMakeLists.txt; sourceTree = "<group>"; };
@@ -896,12 +900,12 @@
 		87B8C633272147B20087BA8B = {
 			isa = PBXGroup;
 			children = (
-				87B8CD2E272164220087BA8B /* 02-FirstPolygon.entitlements */,
 				87B8CD20272163A60087BA8B /* 01-HelloWorld.entitlements */,
+				87B8CD2E272164220087BA8B /* 02-FirstPolygon.entitlements */,
 				87B8CCF027214F930087BA8B /* examples */,
+				87B8C64327214D520087BA8B /* Frameworks */,
 				87B8C64827214E040087BA8B /* nexus */,
 				87B8C63D272147B20087BA8B /* Products */,
-				87B8C64327214D520087BA8B /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -945,9 +949,9 @@
 		87B8C64A27214E040087BA8B /* platform */ = {
 			isa = PBXGroup;
 			children = (
+				87B8C64D27214E040087BA8B /* Application.cpp */,
 				87B8C64B27214E040087BA8B /* Application.hpp */,
 				87B8C64C27214E040087BA8B /* CMakeLists.txt */,
-				87B8C64D27214E040087BA8B /* Application.cpp */,
 			);
 			path = platform;
 			sourceTree = "<group>";
@@ -956,10 +960,10 @@
 			isa = PBXGroup;
 			children = (
 				87B8C64F27214E040087BA8B /* CMakeLists.txt */,
-				87B8C65027214E040087BA8B /* File.hpp */,
 				87B8C65127214E040087BA8B /* Data.cpp */,
-				87B8C65227214E040087BA8B /* File.cpp */,
 				87B8C65327214E040087BA8B /* Data.hpp */,
+				87B8C65227214E040087BA8B /* File.cpp */,
+				87B8C65027214E040087BA8B /* File.hpp */,
 			);
 			path = io;
 			sourceTree = "<group>";
@@ -977,10 +981,10 @@
 		87B8C65A27214E040087BA8B /* pattern */ = {
 			isa = PBXGroup;
 			children = (
-				87B8C65B27214E040087BA8B /* Factory.hpp */,
 				87B8C65C27214E040087BA8B /* CMakeLists.txt */,
-				87B8C65D27214E040087BA8B /* StateMachine.cpp */,
+				87B8C65B27214E040087BA8B /* Factory.hpp */,
 				87B8C65E27214E040087BA8B /* Singleton.hpp */,
+				87B8C65D27214E040087BA8B /* StateMachine.cpp */,
 				87B8C65F27214E040087BA8B /* StateMachine.hpp */,
 			);
 			path = pattern;
@@ -989,17 +993,19 @@
 		87B8C66027214E040087BA8B /* graphics */ = {
 			isa = PBXGroup;
 			children = (
-				87B8C66127214E040087BA8B /* VertexBuffer.cpp */,
 				87B8C66227214E040087BA8B /* CMakeLists.txt */,
 				87B8C66327214E040087BA8B /* Color.cpp */,
+				87B8C66627214E040087BA8B /* Color.hpp */,
+				87B8C66C27214E040087BA8B /* GraphicsConst.h */,
+				87B8C66827214E040087BA8B /* opengl */,
 				87B8C66427214E040087BA8B /* RenderSystem.cpp */,
 				87B8C66527214E040087BA8B /* RenderSystem.hpp */,
-				87B8C66627214E040087BA8B /* Color.hpp */,
-				87B8C66727214E040087BA8B /* VertexBuffer.hpp */,
-				87B8C66827214E040087BA8B /* opengl */,
-				87B8C66C27214E040087BA8B /* GraphicsConst.h */,
 				87B8CD35272171690087BA8B /* Shader.cpp */,
 				87B8CD36272171690087BA8B /* Shader.hpp */,
+				870FD4E127218ADA00A376DD /* Vertex.cpp */,
+				870FD4E227218ADA00A376DD /* Vertex.hpp */,
+				87B8C66127214E040087BA8B /* VertexBuffer.cpp */,
+				87B8C66727214E040087BA8B /* VertexBuffer.hpp */,
 			);
 			path = graphics;
 			sourceTree = "<group>";
@@ -1019,11 +1025,11 @@
 		87B8C87A27214E050087BA8B /* base */ = {
 			isa = PBXGroup;
 			children = (
-				87B8C87B27214E050087BA8B /* SystemClock.cpp */,
 				87B8C87C27214E050087BA8B /* CMakeLists.txt */,
 				87B8C87D27214E050087BA8B /* ResourceManager.hpp */,
 				87B8C87E27214E050087BA8B /* String.cpp */,
 				87B8C87F27214E050087BA8B /* String.hpp */,
+				87B8C87B27214E050087BA8B /* SystemClock.cpp */,
 				87B8C88027214E050087BA8B /* SystemClock.hpp */,
 				87B8C88127214E050087BA8B /* Utils.hpp */,
 			);
@@ -1041,35 +1047,35 @@
 		87B8CA1527214E5E0087BA8B /* glm */ = {
 			isa = PBXGroup;
 			children = (
-				87B8CA1627214E5E0087BA8B /* vec4.hpp */,
-				87B8CA1727214E5E0087BA8B /* integer.hpp */,
-				87B8CA1827214E5E0087BA8B /* vector_relational.hpp */,
-				87B8CA1927214E5E0087BA8B /* mat2x3.hpp */,
-				87B8CA1A27214E5E0087BA8B /* mat4x4.hpp */,
-				87B8CA1B27214E5E0087BA8B /* mat2x2.hpp */,
-				87B8CA1C27214E5E0087BA8B /* exponential.hpp */,
-				87B8CA1D27214E5E0087BA8B /* vec2.hpp */,
 				87B8CA1E27214E5E0087BA8B /* CMakeLists.txt */,
-				87B8CA1F27214E5E0087BA8B /* vec3.hpp */,
-				87B8CA2027214E5E0087BA8B /* fwd.hpp */,
-				87B8CA2127214E5E0087BA8B /* mat4x3.hpp */,
-				87B8CA2227214E5E0087BA8B /* mat4x2.hpp */,
-				87B8CA2327214E5E0087BA8B /* mat2x4.hpp */,
-				87B8CA2427214E5E0087BA8B /* packing.hpp */,
-				87B8CA2527214E5E0087BA8B /* mat3x3.hpp */,
-				87B8CA2627214E5E0087BA8B /* mat3x2.hpp */,
-				87B8CA2727214E5E0087BA8B /* ext */,
-				87B8CAD127214E5E0087BA8B /* simd */,
-				87B8CADC27214E5E0087BA8B /* mat3x4.hpp */,
-				87B8CADD27214E5E0087BA8B /* matrix.hpp */,
-				87B8CADE27214E5E0087BA8B /* glm.hpp */,
-				87B8CADF27214E5E0087BA8B /* trigonometric.hpp */,
-				87B8CAE027214E5E0087BA8B /* geometric.hpp */,
-				87B8CAE127214E5E0087BA8B /* detail */,
-				87B8CB1F27214E5E0087BA8B /* ext.hpp */,
-				87B8CB2027214E5E0087BA8B /* gtc */,
 				87B8CB4627214E5F0087BA8B /* common.hpp */,
+				87B8CAE127214E5E0087BA8B /* detail */,
+				87B8CA1C27214E5E0087BA8B /* exponential.hpp */,
+				87B8CA2727214E5E0087BA8B /* ext */,
+				87B8CB1F27214E5E0087BA8B /* ext.hpp */,
+				87B8CA2027214E5E0087BA8B /* fwd.hpp */,
+				87B8CAE027214E5E0087BA8B /* geometric.hpp */,
+				87B8CADE27214E5E0087BA8B /* glm.hpp */,
+				87B8CB2027214E5E0087BA8B /* gtc */,
 				87B8CB4727214E5F0087BA8B /* gtx */,
+				87B8CA1727214E5E0087BA8B /* integer.hpp */,
+				87B8CA1B27214E5E0087BA8B /* mat2x2.hpp */,
+				87B8CA1927214E5E0087BA8B /* mat2x3.hpp */,
+				87B8CA2327214E5E0087BA8B /* mat2x4.hpp */,
+				87B8CA2627214E5E0087BA8B /* mat3x2.hpp */,
+				87B8CA2527214E5E0087BA8B /* mat3x3.hpp */,
+				87B8CADC27214E5E0087BA8B /* mat3x4.hpp */,
+				87B8CA2227214E5E0087BA8B /* mat4x2.hpp */,
+				87B8CA2127214E5E0087BA8B /* mat4x3.hpp */,
+				87B8CA1A27214E5E0087BA8B /* mat4x4.hpp */,
+				87B8CADD27214E5E0087BA8B /* matrix.hpp */,
+				87B8CA2427214E5E0087BA8B /* packing.hpp */,
+				87B8CAD127214E5E0087BA8B /* simd */,
+				87B8CADF27214E5E0087BA8B /* trigonometric.hpp */,
+				87B8CA1D27214E5E0087BA8B /* vec2.hpp */,
+				87B8CA1F27214E5E0087BA8B /* vec3.hpp */,
+				87B8CA1627214E5E0087BA8B /* vec4.hpp */,
+				87B8CA1827214E5E0087BA8B /* vector_relational.hpp */,
 			);
 			path = glm;
 			sourceTree = "<group>";
@@ -1761,6 +1767,7 @@
 				87B8CBF727214E5F0087BA8B /* vector_uint2.hpp in Headers */,
 				87B8CBEE27214E5F0087BA8B /* matrix_int3x4_sized.hpp in Headers */,
 				87B8CC3227214E5F0087BA8B /* matrix_double2x2.hpp in Headers */,
+				870FD4E427218ADA00A376DD /* Vertex.hpp in Headers */,
 				87B8CCD227214E5F0087BA8B /* handed_coordinate_space.hpp in Headers */,
 				87B8CC7D27214E5F0087BA8B /* type_mat3x2.hpp in Headers */,
 				87B8CCB027214E5F0087BA8B /* fast_trigonometry.hpp in Headers */,
@@ -1986,6 +1993,7 @@
 				87B8C89727214E050087BA8B /* GLRenderSystem.cpp in Sources */,
 				87B8C89127214E050087BA8B /* Color.cpp in Sources */,
 				87B8C88627214E050087BA8B /* File.cpp in Sources */,
+				870FD4E327218ADA00A376DD /* Vertex.cpp in Sources */,
 				87B8C88D27214E050087BA8B /* StateMachine.cpp in Sources */,
 				87B8C88327214E050087BA8B /* Application.cpp in Sources */,
 				87B8C88B27214E050087BA8B /* Path.cpp in Sources */,

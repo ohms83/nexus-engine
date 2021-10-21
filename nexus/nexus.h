@@ -11,6 +11,7 @@
 #include "graphics/GraphicsConst.h"
 #include "graphics/RenderSystem.hpp"
 #include "graphics/Shader.hpp"
+#include "graphics/Vertex.hpp"
 #include "graphics/VertexBuffer.hpp"
 #include "graphics/opengl/GLRenderSystem.hpp"
 #include "graphics/opengl/GLShader.hpp"
