@@ -22,28 +22,30 @@ static const char *fragmentShaderSource =
     "    FragColor = vec4(vertexColor, 1.0f);\n"
     "}";
 
+
+nexus::VertexC vertices[] {
+    { glm::vec3(  0.5f,  0.5f,  0.0f ), nexus::Color( 1, 0, 0 ) },
+    { glm::vec3(  0.5f, -0.5f,  0.0f ), nexus::Color( 0, 1, 0 ) },
+    { glm::vec3( -0.5f, -0.5f,  0.0f ), nexus::Color( 0, 0, 1 ) },
+    { glm::vec3( -0.5f,  0.5f,  0.0f ), nexus::Color( 1, 1, 1 ) },
+};
+
+unsigned int indices[] = {  // note that we start from 0!
+    0, 1, 3,   // first triangle
+    1, 2, 3    // second triangle
+};
+
 class ExampleApp02 : public nexus::Application
 {
 protected:
     void onInit() override
     {
-        createTriangle();
+        createQuad();
         _shader.initWithSource(vertexShaderSource, fragmentShaderSource);
     }
 
-    void createTriangle()
+    void createQuad()
     {
-        float vertices[] = {
-             0.5f,  0.5f,  1.0f, 0.0f, 0.0f,  // top right
-             0.5f, -0.5f,  0.0f, 1.0f, 0.0f,  // bottom right
-            -0.5f, -0.5f,  0.0f, 0.0f, 1.0f,  // bottom left
-            -0.5f,  0.5f,  1.0f, 1.0f, 1.0f,  // top left 
-        };
-        unsigned int indices[] = {  // note that we start from 0!
-            0, 1, 3,   // first triangle
-            1, 2, 3    // second triangle
-        }; 
-
         glGenVertexArrays(1, &_vao);
         CHECK_GL_ERROR();
         glBindVertexArray(_vao);
@@ -65,13 +67,13 @@ protected:
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
         CHECK_GL_ERROR();
 
-        const GLsizei STRIDE = 5 * sizeof(float);
-        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, STRIDE, (GLvoid*)0);
+        const GLsizei STRIDE = sizeof(nexus::VertexC);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, STRIDE, (GLvoid*)offsetof(nexus::VertexC, position));
         CHECK_GL_ERROR();
         glEnableVertexAttribArray(0);
         CHECK_GL_ERROR();
 
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, STRIDE, (GLvoid*)(2 * sizeof(float)));
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, STRIDE, (GLvoid*)offsetof(nexus::VertexC, color));
         CHECK_GL_ERROR();
         glEnableVertexAttribArray(1);
         CHECK_GL_ERROR(); 
