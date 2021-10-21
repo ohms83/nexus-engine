@@ -38,6 +38,33 @@ const Color Color::MAGENTA(1.00f, 0.00f, 1.00f, 1.00f);
 const Color Color::ORANGE (1.00f, 0.50f, 0.00f, 1.00f);
 const Color Color::GRAY   (0.65f, 0.65f, 0.65f, 1.00f);
 
+Color3::Color3()
+{
+    r = g = b = 0;
+}
+
+Color3::Color3(float red, float green, float blue)
+: r(red)
+, g(green)
+, b(blue)
+{}
+
+Color3::Color3(const Color3B& rhs)
+: r(rhs.r / 255.0f)
+, g(rhs.g / 255.0f)
+, b(rhs.b / 255.0f)
+{}
+
+const Color3 Color3::WHITE  (1.00f, 1.00f, 1.00f);
+const Color3 Color3::BLACK  (0.00f, 0.00f, 0.00f);
+const Color3 Color3::RED    (1.00f, 0.00f, 0.00f);
+const Color3 Color3::GREEN  (0.00f, 1.00f, 0.00f);
+const Color3 Color3::BLUE   (0.00f, 0.00f, 1.00f);
+const Color3 Color3::YELLOW (1.00f, 1.00f, 0.00f);
+const Color3 Color3::MAGENTA(1.00f, 0.00f, 1.00f);
+const Color3 Color3::ORANGE (1.00f, 0.50f, 0.00f);
+const Color3 Color3::GRAY   (0.65f, 0.65f, 0.65f);
+
 Color4B::Color4B()
 {
     r = g = b = a = 0;
@@ -73,3 +100,30 @@ const Color4B Color4B::YELLOW (0xFF, 0xFF, 0x00, 0xFF);
 const Color4B Color4B::MAGENTA(0xFF, 0x00, 0xFF, 0xFF);
 const Color4B Color4B::ORANGE (0xFF, 0x9B, 0x00, 0xFF);
 const Color4B Color4B::GRAY   (0xA6, 0xA6, 0xA6, 0xFF);
+
+Color3B::Color3B()
+{
+    r = g = b = 0;
+}
+
+Color3B::Color3B(float red, float green, float blue)
+: r(red)
+, g(green)
+, b(blue)
+{}
+
+Color3B::Color3B(const Color3& rhs)
+: r(rhs.r * 255)
+, g(rhs.g * 255)
+, b(rhs.b * 255)
+{}
+
+const Color3B Color3B::WHITE  (0xFF, 0xFF, 0xFF);
+const Color3B Color3B::BLACK  (0x00, 0x00, 0x00);
+const Color3B Color3B::RED    (0xFF, 0x00, 0x00);
+const Color3B Color3B::GREEN  (0x00, 0xFF, 0x00);
+const Color3B Color3B::BLUE   (0x00, 0x00, 0xFF);
+const Color3B Color3B::YELLOW (0xFF, 0xFF, 0x00);
+const Color3B Color3B::MAGENTA(0xFF, 0x00, 0xFF);
+const Color3B Color3B::ORANGE (0xFF, 0x9B, 0x00);
+const Color3B Color3B::GRAY   (0xA6, 0xA6, 0xA6);
