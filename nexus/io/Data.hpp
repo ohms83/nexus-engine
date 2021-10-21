@@ -55,7 +55,7 @@ NXS_NAMESPACE {
             return _buffer.get();
         }
 
-        uint32_t size() const {
+        uint64_t size() const {
             return _size;
         }
 
