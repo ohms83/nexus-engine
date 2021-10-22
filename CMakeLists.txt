@@ -16,6 +16,9 @@ if(UNIX AND NOT APPLE)
     # Use a combination of UNIX and NOT APPLE to specify Linux since there's
     # no specific variable for Linux
     set(LINUX true)
+    ADD_DEFINITIONS (-DTARGET_LINUX)
+else()
+    message( FATAL_ERROR "This project is not configured for the current platform." )
 endif()
 
 add_subdirectory(nexus)

@@ -17,6 +17,7 @@
 #include <cstdio>
 #include <cstddef>
 #include <vector>
+#include <stdexcept>
 
 NXS_NAMESPACE {
     /**

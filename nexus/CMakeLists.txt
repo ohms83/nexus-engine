@@ -35,50 +35,22 @@ target_include_directories(
 # OpenGL
 set(OpenGL_GL_PREFERENCE GLVND) 
 find_package(OpenGL REQUIRED)
+message(STATUS "OPENGL_INCLUDE_DIR: ${OPENGL_INCLUDE_DIR}")
 include_directories(${OPENGL_INCLUDE_DIR})
-
-find_package(GLEW REQUIRED)
+target_link_libraries(${PROJECT_NAME}
+    GL
+)
 
 # SDL
+find_package(SDL2 REQUIRED)
+message(STATUS "SDL2_INCLUDE_DIRS: ${SDL2_INCLUDE_DIRS}")
+include_directories(${SDL2_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME}
     SDL2
     SDL2main
     SDL2_ttf
     SDL2_image
 )
-
-# Platform specific macros and libraries
-if(WINDOWS)
-    ADD_DEFINITIONS (-DTARGET_WINDOWS)
-elseif(APPLE)
-    target_link_directories(${PROJECT_NAME}
-        PUBLIC "${ENGINE_ROOT}/thirdparty/lib/macos"
-    )
-
-    target_link_libraries(${PROJECT_NAME}
-        "-framework OpenGL"
-    )
-
-    if(IOS)
-        ADD_DEFINITIONS (-DTARGET_IOS)
-    else()
-        ADD_DEFINITIONS (-DTARGET_MACOS)
-    endif()
-elseif(LINUX)
-    target_link_directories(${PROJECT_NAME}
-        PUBLIC "${ENGINE_ROOT}/thirdparty/lib/linux"
-    )
-
-    target_link_libraries(${PROJECT_NAME}
-        GL
-    )
-
-    ADD_DEFINITIONS (-DTARGET_LINUX)
-elseif(ANDROID)
-    ADD_DEFINITIONS (-DTARGET_ANDROID)
-else()
-    message( FATAL_ERROR "Unsupported platform, CMake will exit" )
-endif()
 
 set(TOOLS_DIR "${CMAKE_SOURCE_DIR}/tools")
 

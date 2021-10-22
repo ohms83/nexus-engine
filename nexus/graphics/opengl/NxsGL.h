@@ -8,6 +8,7 @@
 #include <iostream>
 #include <sstream>
 #include <exception>
+#include <cassert>
 
 #define GL_STRICT_CHECK
 
