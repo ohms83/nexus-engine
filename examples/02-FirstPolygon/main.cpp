@@ -55,6 +55,8 @@ protected:
         nexus::VertexBufferCreateInfo bufferInfo = {
             // usage
             nexus::STATIC_DRAW,
+            // Primitives
+            nexus::TRIANGLES,
             // vertexCount
             vertices.size(),
             // vertices
@@ -76,7 +78,7 @@ protected:
         CHECK_GL_ERROR();
         glBindVertexArray(_vertexBuffer.getVAO());
         CHECK_GL_ERROR();
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glDrawElements(_vertexBuffer.getPrimitiveType(), _vertexBuffer.getIndexCount(), GL_UNSIGNED_INT, 0);
         CHECK_GL_ERROR();
     }
 private:

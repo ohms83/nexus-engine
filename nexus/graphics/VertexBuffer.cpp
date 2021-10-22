@@ -7,6 +7,7 @@ void VertexBuffer::init(const VertexBufferCreateInfo& info)
     if (!isInit())
     {
         _usage          = info.usage;
+        _primitiveType  = info.primitiveType;
         _vertexCount    = info.vertexCount;
         _indexCount     = info.indexCount;
         _description    = info.description;

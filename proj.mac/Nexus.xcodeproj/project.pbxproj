@@ -16,6 +16,7 @@
 		870FD4E427218ADA00A376DD /* Vertex.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 870FD4E227218ADA00A376DD /* Vertex.hpp */; };
 		870FD4E727219F7900A376DD /* GLVertexBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 870FD4E527219F7900A376DD /* GLVertexBuffer.cpp */; };
 		870FD4E827219F7900A376DD /* GLVertexBuffer.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 870FD4E627219F7900A376DD /* GLVertexBuffer.hpp */; };
+		870FD4F8272302D800A376DD /* GraphicsConst.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 870FD4F7272302D800A376DD /* GraphicsConst.cpp */; };
 		87B8C64527214D520087BA8B /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 87B8C64427214D520087BA8B /* OpenGL.framework */; };
 		87B8C88227214E050087BA8B /* Application.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 87B8C64B27214E040087BA8B /* Application.hpp */; };
 		87B8C88327214E050087BA8B /* Application.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 87B8C64D27214E040087BA8B /* Application.cpp */; };
@@ -390,6 +391,7 @@
 		870FD4E227218ADA00A376DD /* Vertex.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Vertex.hpp; sourceTree = "<group>"; };
 		870FD4E527219F7900A376DD /* GLVertexBuffer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = GLVertexBuffer.cpp; sourceTree = "<group>"; };
 		870FD4E627219F7900A376DD /* GLVertexBuffer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = GLVertexBuffer.hpp; sourceTree = "<group>"; };
+		870FD4F7272302D800A376DD /* GraphicsConst.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = GraphicsConst.cpp; sourceTree = "<group>"; };
 		87B8C63C272147B20087BA8B /* libNexus.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libNexus.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		87B8C64427214D520087BA8B /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
 		87B8C64927214E040087BA8B /* CMakeLists.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CMakeLists.txt; sourceTree = "<group>"; };
@@ -1000,6 +1002,7 @@
 				87B8C66227214E040087BA8B /* CMakeLists.txt */,
 				87B8C66327214E040087BA8B /* Color.cpp */,
 				87B8C66627214E040087BA8B /* Color.hpp */,
+				870FD4F7272302D800A376DD /* GraphicsConst.cpp */,
 				87B8C66C27214E040087BA8B /* GraphicsConst.h */,
 				87B8C66827214E040087BA8B /* opengl */,
 				87B8C66427214E040087BA8B /* RenderSystem.cpp */,
@@ -2008,6 +2011,7 @@
 				87B8C89227214E050087BA8B /* RenderSystem.cpp in Sources */,
 				87B8CA0E27214E070087BA8B /* SystemClock.cpp in Sources */,
 				87B8CA1027214E070087BA8B /* String.cpp in Sources */,
+				870FD4F8272302D800A376DD /* GraphicsConst.cpp in Sources */,
 				870FD4E727219F7900A376DD /* GLVertexBuffer.cpp in Sources */,
 				87B8C89027214E050087BA8B /* VertexBuffer.cpp in Sources */,
 			);

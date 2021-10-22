@@ -20,63 +20,13 @@ NXS_NAMESPACE {
     struct VertexBufferCreateInfo
     {
         int usage;
+        int primitiveType;
         uint32_t vertexCount;
         float* vertices;
         uint32_t indexCount;
         uint32_t* indices;
         VertexDescription description;
     };
-    
-//    template<typename _VertexType>
-//    class VertexBuffer
-//    {
-//    public:
-//        VertexBuffer() {}
-//
-//        virtual void init(const VertexBufferCreateInfo& info)
-//        {
-//            if (!isInit()) {
-//                _usage = info.usage;
-//                _numTexCoord = info.numTexCoord;
-//
-//                if (info.reserveSize != 0) {
-//                    vertices.reserve(info.reserveSize);
-//                }
-//            }
-//            else {
-//                // TODO: Error message
-//            }
-//        }
-//
-//        virtual void release()
-//        {
-//            if (isInit()) {
-//                _usage = UNDEFINED;
-//            }
-//        }
-//
-//        bool isInit() const {
-//            return _usage != UNDEFINED;
-//        }
-//
-//        int getUsage() const {
-//            return _usage;
-//        }
-//
-//        uint32_t getBufferSize() const {
-//            return (uint32_t)vertices.size() * sizeof(_VertexType);
-//        }
-//
-//    public:
-//        /// Vertex buffer data
-//        std::vector<_VertexType> vertices;
-//        /// Index buffer
-//        std::vector<uint32_t> indices;
-//
-//    protected:
-//        int _usage = UNDEFINED;
-//        uint32_t _numTexCoord = 0;
-//    };
     
     class VertexBuffer
     {
@@ -87,12 +37,29 @@ NXS_NAMESPACE {
             return _usage != UNDEFINED;
         }
         
+        uint32_t getVertexCount() const  {
+            return _vertexCount;
+        }
+        
+        uint32_t getIndexCount() const  {
+            return _indexCount;
+        }
+        
+        int getPrimitiveType() const {
+            return _primitiveType;
+        }
+        
+        int getPolygonCount() const {
+            return nexus::getPolygonCount(_primitiveType, _vertexCount);
+        }
+        
     protected:
         /// Child class's implementation of init function.
         virtual void initImpl(const VertexBufferCreateInfo& info) = 0;
         
     protected:
         int _usage = UNDEFINED;
+        int _primitiveType = UNDEFINED;
         uint32_t _vertexCount = 0;
         uint32_t _indexCount = 0;
         VertexDescription _description;
