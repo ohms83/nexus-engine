@@ -14,6 +14,8 @@
 		870FD4E0272187CF00A376DD /* SDL2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 870FD4DD272187CF00A376DD /* SDL2.framework */; };
 		870FD4E327218ADA00A376DD /* Vertex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 870FD4E127218ADA00A376DD /* Vertex.cpp */; };
 		870FD4E427218ADA00A376DD /* Vertex.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 870FD4E227218ADA00A376DD /* Vertex.hpp */; };
+		870FD4E727219F7900A376DD /* GLVertexBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 870FD4E527219F7900A376DD /* GLVertexBuffer.cpp */; };
+		870FD4E827219F7900A376DD /* GLVertexBuffer.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 870FD4E627219F7900A376DD /* GLVertexBuffer.hpp */; };
 		87B8C64527214D520087BA8B /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 87B8C64427214D520087BA8B /* OpenGL.framework */; };
 		87B8C88227214E050087BA8B /* Application.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 87B8C64B27214E040087BA8B /* Application.hpp */; };
 		87B8C88327214E050087BA8B /* Application.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 87B8C64D27214E040087BA8B /* Application.cpp */; };
@@ -386,6 +388,8 @@
 		870FD4DD272187CF00A376DD /* SDL2.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL2.framework; path = Frameworks/SDL2.framework; sourceTree = "<group>"; };
 		870FD4E127218ADA00A376DD /* Vertex.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Vertex.cpp; sourceTree = "<group>"; };
 		870FD4E227218ADA00A376DD /* Vertex.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Vertex.hpp; sourceTree = "<group>"; };
+		870FD4E527219F7900A376DD /* GLVertexBuffer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = GLVertexBuffer.cpp; sourceTree = "<group>"; };
+		870FD4E627219F7900A376DD /* GLVertexBuffer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = GLVertexBuffer.hpp; sourceTree = "<group>"; };
 		87B8C63C272147B20087BA8B /* libNexus.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libNexus.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		87B8C64427214D520087BA8B /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
 		87B8C64927214E040087BA8B /* CMakeLists.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CMakeLists.txt; sourceTree = "<group>"; };
@@ -1018,6 +1022,8 @@
 				87B8C66B27214E040087BA8B /* NxsGL.h */,
 				870FD4C22721767100A376DD /* GLShader.cpp */,
 				870FD4C32721767100A376DD /* GLShader.hpp */,
+				870FD4E527219F7900A376DD /* GLVertexBuffer.cpp */,
+				870FD4E627219F7900A376DD /* GLVertexBuffer.hpp */,
 			);
 			path = opengl;
 			sourceTree = "<group>";
@@ -1795,6 +1801,7 @@
 				87B8C89327214E050087BA8B /* RenderSystem.hpp in Headers */,
 				87B8CCD027214E5F0087BA8B /* matrix_decompose.hpp in Headers */,
 				87B8CBC827214E5F0087BA8B /* vector_relational.hpp in Headers */,
+				870FD4E827219F7900A376DD /* GLVertexBuffer.hpp in Headers */,
 				87B8CC3327214E5F0087BA8B /* matrix_uint4x4_sized.hpp in Headers */,
 				87B8CBE027214E5F0087BA8B /* vector_bool1.hpp in Headers */,
 				87B8CC3C27214E5F0087BA8B /* vector_int4.hpp in Headers */,
@@ -2001,6 +2008,7 @@
 				87B8C89227214E050087BA8B /* RenderSystem.cpp in Sources */,
 				87B8CA0E27214E070087BA8B /* SystemClock.cpp in Sources */,
 				87B8CA1027214E070087BA8B /* String.cpp in Sources */,
+				870FD4E727219F7900A376DD /* GLVertexBuffer.cpp in Sources */,
 				87B8C89027214E050087BA8B /* VertexBuffer.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

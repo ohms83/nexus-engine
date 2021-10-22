@@ -18,11 +18,11 @@ RenderSystem::~RenderSystem()
 
 }
 
-const Color& RenderSystem::getClearColor() const
+const Color4F& RenderSystem::getClearColor() const
 {
     return _clearColor;
 }
-void RenderSystem::setClearColor(const Color& color)
+void RenderSystem::setClearColor(const Color4F& color)
 {
     _clearColor = color;
 }

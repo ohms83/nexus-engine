@@ -26,14 +26,14 @@ NXS_NAMESPACE {
         /* --- Pipline related functions --- */
         // TODO: Move all of these to RenderPipeline class.
         virtual void draw() = 0;
-        const Color& getClearColor() const;
-        virtual void setClearColor(const Color& color);
+        const Color4F& getClearColor() const;
+        virtual void setClearColor(const Color4F& color);
         /* --- Pipline related functions --- */
 
         static RenderSystem* create(int renderSystem);
     
     protected:
-        Color _clearColor = Color::BLACK;
+        Color4F _clearColor = COLOR4F_BLACK;
     private:
     };
 }

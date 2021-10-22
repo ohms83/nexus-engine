@@ -2,68 +2,100 @@
 #define __NXS_VERTEX_BUFFER_H__
 
 #include "NxsMacros.h"
-#include "glm/glm.hpp"
-
+#include "GraphicsConst.h"
+#include "Vertex.hpp"
 #include "io/Data.hpp"
 
 #include <memory>
-#include <array>
+#include <vector>
 
 NXS_NAMESPACE {
+    /**
+     * VertexBufferCreateInfo identifies vertex buffer's usage and properties.
+     * - @c usage identifies vertex buffer usage. Can only be one of the following values.
+     *   - nexus::STATIC_DRAW  The buffer will be optimized for read-only data.
+     *   - nexus::DYNAMIC_DRAW The buffer will be optimized for read/write data.
+     *   - nexus::STREAM_DRAW  The buffer will be optimized for read-only data that might not be accessed so often.
+     */
+    struct VertexBufferCreateInfo
+    {
+        int usage;
+        uint32_t vertexCount;
+        float* vertices;
+        uint32_t indexCount;
+        uint32_t* indices;
+        VertexDescription description;
+    };
+    
+//    template<typename _VertexType>
+//    class VertexBuffer
+//    {
+//    public:
+//        VertexBuffer() {}
+//
+//        virtual void init(const VertexBufferCreateInfo& info)
+//        {
+//            if (!isInit()) {
+//                _usage = info.usage;
+//                _numTexCoord = info.numTexCoord;
+//
+//                if (info.reserveSize != 0) {
+//                    vertices.reserve(info.reserveSize);
+//                }
+//            }
+//            else {
+//                // TODO: Error message
+//            }
+//        }
+//
+//        virtual void release()
+//        {
+//            if (isInit()) {
+//                _usage = UNDEFINED;
+//            }
+//        }
+//
+//        bool isInit() const {
+//            return _usage != UNDEFINED;
+//        }
+//
+//        int getUsage() const {
+//            return _usage;
+//        }
+//
+//        uint32_t getBufferSize() const {
+//            return (uint32_t)vertices.size() * sizeof(_VertexType);
+//        }
+//
+//    public:
+//        /// Vertex buffer data
+//        std::vector<_VertexType> vertices;
+//        /// Index buffer
+//        std::vector<uint32_t> indices;
+//
+//    protected:
+//        int _usage = UNDEFINED;
+//        uint32_t _numTexCoord = 0;
+//    };
+    
     class VertexBuffer
     {
     public:
-        /**
-         * A data structure describing how vertex data is aligned within buffer.
-         */
-        struct VertexAlignment
-        {
-            /// How many component per position.
-            uint32_t positionComponent;
-            uint32_t positionOffset;
-
-            /// How many component per normal.
-            uint32_t normalComponent;
-            uint32_t normalOffset;
-
-            /// How many component per normal.
-            uint32_t colorComponent;
-            uint32_t colorOffset;
-
-            /// How many component per normal.
-            std::array<uint32_t, 4> texCoordComponents;
-            std::array<uint32_t, 4> texCoordOffset;
-        };
-        void allocate(uint32_t vertexCount, const VertexAlignment& align);
-
-        /**
-         * Take over the specified @c buffer and manage it.
-         * @warning buffer's ownership will be taken over by this object.
-         *          Please DO NOT delete it.
-         * @warning The pointer must be dynamically allocated on heap. Please DO NOT
-         *          pass the stack's pointer to this function because it will cause
-         *          memory corruption when this object is destroyed.
-         */
-        void take(float* buffer, uint64_t size, const VertexAlignment& align);
-
-        /**
-         * Take over the buffer from specified @c data .
-         * @note The size of data must be divisible by the stride's size.
-         * @warning After taking over, @c data will remain in undefined state and can't be reused.
-         */
-        void take(Data& data, const VertexAlignment& align);
-
-        void setPosition(uint32_t vertextIndex, const glm::vec3 position) const;
-        glm::vec3 getPosition(uint32_t vertextIndex) const;
-
-        static uint32_t getVertexSize(const VertexAlignment& align);
-        /// Return a total number of data component per vertex.
-        static uint32_t getNumComponent(const VertexAlignment& align);
-
-    private:
-        std::unique_ptr<float[]> _buffer;
+        void init(const VertexBufferCreateInfo& info);
+        
+        bool isInit() const {
+            return _usage != UNDEFINED;
+        }
+        
+    protected:
+        /// Child class's implementation of init function.
+        virtual void initImpl(const VertexBufferCreateInfo& info) = 0;
+        
+    protected:
+        int _usage = UNDEFINED;
         uint32_t _vertexCount = 0;
-        VertexAlignment _alignment;
+        uint32_t _indexCount = 0;
+        VertexDescription _description;
     };
 }
 

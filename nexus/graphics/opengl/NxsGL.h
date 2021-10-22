@@ -17,7 +17,8 @@
         if (error != GL_NO_ERROR) {\
             std::stringstream ss;\
             ss << "OPENGL ERROR! ERROR CODE=" << error;\
-            throw std::runtime_error(ss.str());\
+            std::cout << ss.str() << std::endl;\
+            assert(false);\
         }\
     }
 #else

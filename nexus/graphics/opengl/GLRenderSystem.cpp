@@ -56,7 +56,7 @@ void GLRenderSystem::init(std::string appName, uint32_t screenWidth, uint32_t sc
     std::cout << ss.str() << std::endl;
 }
 
-void GLRenderSystem::setClearColor(const Color& color)
+void GLRenderSystem::setClearColor(const Color4F& color)
 {
     glClearColor(_clearColor.r, _clearColor.g, _clearColor.b, _clearColor.a);
 }

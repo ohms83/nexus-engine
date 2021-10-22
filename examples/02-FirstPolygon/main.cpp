@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <array>
 
 #include "nexus.h"
 
@@ -22,19 +23,6 @@ static const char *fragmentShaderSource =
     "    FragColor = vec4(vertexColor, 1.0f);\n"
     "}";
 
-
-nexus::VertexC vertices[] {
-    { glm::vec3(  0.5f,  0.5f,  0.0f ), nexus::Color( 1, 0, 0 ) },
-    { glm::vec3(  0.5f, -0.5f,  0.0f ), nexus::Color( 0, 1, 0 ) },
-    { glm::vec3( -0.5f, -0.5f,  0.0f ), nexus::Color( 0, 0, 1 ) },
-    { glm::vec3( -0.5f,  0.5f,  0.0f ), nexus::Color( 1, 1, 1 ) },
-};
-
-unsigned int indices[] = {  // note that we start from 0!
-    0, 1, 3,   // first triangle
-    1, 2, 3    // second triangle
-};
-
 class ExampleApp02 : public nexus::Application
 {
 protected:
@@ -46,55 +34,54 @@ protected:
 
     void createQuad()
     {
-        glGenVertexArrays(1, &_vao);
-        CHECK_GL_ERROR();
-        glBindVertexArray(_vao);
-        CHECK_GL_ERROR();
+        std::array<nexus::Vertex_t<1, 0, 0>, 4> vertices;
+        vertices[0].position()  = glm::vec3(  0.5f,  0.5f,  0.0f );
+        vertices[0].color()     = nexus::COLOR4F_ORANGE;
         
-        // Create VBO
-        glGenBuffers(1, &_vbo);
-        CHECK_GL_ERROR();
-        glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-        CHECK_GL_ERROR();
-        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-        CHECK_GL_ERROR();
+        vertices[1].position()  = glm::vec3(  0.5f, -0.5f,  0.0f );
+        vertices[1].color()     = nexus::COLOR4F_ORANGE;
         
-        // Create EBO
-        glGenBuffers(1, &_ebo);
-        CHECK_GL_ERROR();
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ebo);
-        CHECK_GL_ERROR();
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-        CHECK_GL_ERROR();
-
-        const GLsizei STRIDE = sizeof(nexus::VertexC);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, STRIDE, (GLvoid*)offsetof(nexus::VertexC, position));
-        CHECK_GL_ERROR();
-        glEnableVertexAttribArray(0);
-        CHECK_GL_ERROR();
-
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, STRIDE, (GLvoid*)offsetof(nexus::VertexC, color));
-        CHECK_GL_ERROR();
-        glEnableVertexAttribArray(1);
-        CHECK_GL_ERROR(); 
-
-        glBindVertexArray(0);
-        CHECK_GL_ERROR();
+        vertices[2].position()  = glm::vec3( -0.5f, -0.5f,  0.0f );
+        vertices[2].color()     = nexus::COLOR4F_ORANGE;
+        
+        vertices[3].position()  = glm::vec3( -0.5f,  0.5f,  0.0f );
+        vertices[3].color()     = nexus::COLOR4F_ORANGE;
+        
+        uint32_t indices[] {
+            0, 1, 3,   // first triangle
+            1, 2, 3    // second triangle
+        };
+        
+        nexus::VertexBufferCreateInfo bufferInfo = {
+            // usage
+            nexus::STATIC_DRAW,
+            // vertexCount
+            vertices.size(),
+            // vertices
+            (float*)vertices.data(),
+            // indexCount
+            6,
+            // indices
+            indices,
+            // description
+            nexus::Vertex_t<1, 0, 0>::getDescription()
+        };
+        
+        _vertexBuffer.init(bufferInfo);
     }
 
     void render(nexus::RenderSystem& renderSystem) override
     {
         glUseProgram(_shader.getShaderProgram());
         CHECK_GL_ERROR();
-        glBindVertexArray(_vao);
+        glBindVertexArray(_vertexBuffer.getVAO());
         CHECK_GL_ERROR();
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         CHECK_GL_ERROR();
     }
 private:
-    nexus::VertexBuffer _vertexBuffer;
+    nexus::GLVertexBuffer _vertexBuffer;
     nexus::GLShader _shader;
-    uint32_t _vao, _vbo, _ebo;
 };
 
 int main(int, char**)

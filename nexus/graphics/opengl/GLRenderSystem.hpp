@@ -19,7 +19,7 @@ NXS_NAMESPACE {
             uint32_t screenHeight
         ) override;
 
-        void setClearColor(const Color& color) override;
+        void setClearColor(const Color4F& color) override;
 
         void clear() override;
         void draw() override;

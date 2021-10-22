@@ -15,6 +15,7 @@
 #include "graphics/VertexBuffer.hpp"
 #include "graphics/opengl/GLRenderSystem.hpp"
 #include "graphics/opengl/GLShader.hpp"
+#include "graphics/opengl/GLVertexBuffer.hpp"
 #include "graphics/opengl/NxsGL.h"
 #include "io/Data.hpp"
 #include "io/File.hpp"
