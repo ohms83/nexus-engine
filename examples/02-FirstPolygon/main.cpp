@@ -52,21 +52,24 @@ protected:
             1, 2, 3    // second triangle
         };
         
-        nexus::VertexBufferCreateInfo bufferInfo = {
-            // usage
-            nexus::STATIC_DRAW,
-            // Primitives
-            nexus::TRIANGLES,
-            // vertexCount
-            vertices.size(),
+        nexus::VertexBufferCreateInfo bufferInfo =
+        {
+            {
+                // usage
+                nexus::STATIC_DRAW,
+                // Primitives
+                nexus::TRIANGLES,
+                // vertexCount
+                vertices.size(),
+                // indexCount
+                6,
+                // description
+                nexus::Vertex_t<1, 0, 0>::getDescription()
+            },
             // vertices
             (float*)vertices.data(),
-            // indexCount
-            6,
             // indices
             indices,
-            // description
-            nexus::Vertex_t<1, 0, 0>::getDescription()
         };
         
         _vertexBuffer.init(bufferInfo);
@@ -74,11 +77,12 @@ protected:
 
     void render(nexus::RenderSystem& renderSystem) override
     {
+        const nexus::VertexBufferInfo& bufferInfo = _vertexBuffer.getInfo();
         glUseProgram(_shader.getShaderProgram());
         CHECK_GL_ERROR();
         glBindVertexArray(_vertexBuffer.getVAO());
         CHECK_GL_ERROR();
-        glDrawElements(_vertexBuffer.getPrimitiveType(), _vertexBuffer.getIndexCount(), GL_UNSIGNED_INT, 0);
+        glDrawElements(bufferInfo.primitiveType, bufferInfo.indexCount, GL_UNSIGNED_INT, 0);
         CHECK_GL_ERROR();
     }
 private:

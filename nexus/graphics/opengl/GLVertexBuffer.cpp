@@ -25,40 +25,41 @@ GLVertexBuffer::~GLVertexBuffer()
     }
 }
 
-void GLVertexBuffer::initImpl(const VertexBufferCreateInfo& info)
+void GLVertexBuffer::initImpl(const VertexBufferCreateInfo& createInfo)
 {
     glGenVertexArrays(1, &_vao);
     CHECK_GL_ERROR();
     glBindVertexArray(_vao);
     CHECK_GL_ERROR();
     
-    const GLsizei stride = (GLsizei)_description.getVertexSize();
+    const VertexDescription& description = _info.description;
+    const GLsizei stride = (GLsizei)description.getVertexSize();
 
     // Create VBO
-    const uint32_t size = stride * _vertexCount;
+    const uint32_t size = stride * _info.vertexCount;
     glGenBuffers(1, &_vbo);
     CHECK_GL_ERROR();
     glBindBuffer(GL_ARRAY_BUFFER, _vbo);
     CHECK_GL_ERROR();
-    glBufferData(GL_ARRAY_BUFFER, size, info.vertices, _usage);
+    glBufferData(GL_ARRAY_BUFFER, size, createInfo.vertices, _info.usage);
     CHECK_GL_ERROR();
 
     // Create EBO
-    if (_indexCount > 0 && info.indices != nullptr)
+    if (_info.indexCount > 0 && createInfo.indices != nullptr)
     {
         glGenBuffers(1, &_ebo);
         CHECK_GL_ERROR();
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ebo);
         CHECK_GL_ERROR();
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * _indexCount, info.indices, _usage);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * _info.indexCount, createInfo.indices, _info.usage);
         CHECK_GL_ERROR();
     }
     
     GLuint attribIndex = 0;
 
-    if (_description.positionComponentCount > 0)
+    if (description.positionComponentCount > 0)
     {
-        glVertexAttribPointer(attribIndex, _description.positionComponentCount, GL_FLOAT, GL_FALSE, stride, (GLvoid*)_description.positionOffset);
+        glVertexAttribPointer(attribIndex, description.positionComponentCount, GL_FLOAT, GL_FALSE, stride, (GLvoid*)description.positionOffset);
         CHECK_GL_ERROR();
         glEnableVertexAttribArray(attribIndex);
         CHECK_GL_ERROR();
@@ -66,9 +67,9 @@ void GLVertexBuffer::initImpl(const VertexBufferCreateInfo& info)
         ++attribIndex;
     }
     
-    if (_description.normalComponentCount > 0)
+    if (description.normalComponentCount > 0)
     {
-        glVertexAttribPointer(attribIndex, _description.normalComponentCount, GL_FLOAT, GL_FALSE, stride, (GLvoid*)_description.normalOffset);
+        glVertexAttribPointer(attribIndex, description.normalComponentCount, GL_FLOAT, GL_FALSE, stride, (GLvoid*)description.normalOffset);
         CHECK_GL_ERROR();
         glEnableVertexAttribArray(attribIndex);
         CHECK_GL_ERROR();
@@ -76,9 +77,9 @@ void GLVertexBuffer::initImpl(const VertexBufferCreateInfo& info)
         ++attribIndex;
     }
     
-    if (_description.colorComponentCount > 0)
+    if (description.colorComponentCount > 0)
     {
-        glVertexAttribPointer(attribIndex, _description.colorComponentCount, GL_FLOAT, GL_FALSE, stride, (GLvoid*)_description.colorOffset);
+        glVertexAttribPointer(attribIndex, description.colorComponentCount, GL_FLOAT, GL_FALSE, stride, (GLvoid*)description.colorOffset);
         CHECK_GL_ERROR();
         glEnableVertexAttribArray(attribIndex);
         CHECK_GL_ERROR();
@@ -86,9 +87,9 @@ void GLVertexBuffer::initImpl(const VertexBufferCreateInfo& info)
         ++attribIndex;
     }
 
-    for (uint32_t i = 0; i < _description.textureUnit; ++i)
+    for (uint32_t i = 0; i < description.textureUnit; ++i)
     {
-        glVertexAttribPointer(attribIndex, _description.texCoordComponentCount, GL_FLOAT, GL_FALSE, stride, (GLvoid*)_description.texCoordOffsets[i]);
+        glVertexAttribPointer(attribIndex, description.texCoordComponentCount, GL_FLOAT, GL_FALSE, stride, (GLvoid*)description.texCoordOffsets[i]);
         CHECK_GL_ERROR();
         glEnableVertexAttribArray(attribIndex);
         CHECK_GL_ERROR();

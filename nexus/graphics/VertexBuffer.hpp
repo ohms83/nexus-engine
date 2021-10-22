@@ -17,15 +17,20 @@ NXS_NAMESPACE {
      *   - nexus::DYNAMIC_DRAW The buffer will be optimized for read/write data.
      *   - nexus::STREAM_DRAW  The buffer will be optimized for read-only data that might not be accessed so often.
      */
-    struct VertexBufferCreateInfo
+    struct VertexBufferInfo
     {
         int usage;
         int primitiveType;
         uint32_t vertexCount;
-        float* vertices;
         uint32_t indexCount;
-        uint32_t* indices;
         VertexDescription description;
+    };
+    
+    struct VertexBufferCreateInfo
+    {
+        VertexBufferInfo bufferInfo;
+        float* vertices;
+        uint32_t* indices;
     };
     
     class VertexBuffer
@@ -34,23 +39,15 @@ NXS_NAMESPACE {
         void init(const VertexBufferCreateInfo& info);
         
         bool isInit() const {
-            return _usage != UNDEFINED;
+            return _info.usage != UNDEFINED;
         }
         
-        uint32_t getVertexCount() const  {
-            return _vertexCount;
-        }
-        
-        uint32_t getIndexCount() const  {
-            return _indexCount;
-        }
-        
-        int getPrimitiveType() const {
-            return _primitiveType;
+        const VertexBufferInfo& getInfo() const {
+            return _info;
         }
         
         int getPolygonCount() const {
-            return nexus::getPolygonCount(_primitiveType, _vertexCount);
+            return nexus::getPolygonCount(_info.primitiveType, _info.vertexCount);
         }
         
     protected:
@@ -58,11 +55,7 @@ NXS_NAMESPACE {
         virtual void initImpl(const VertexBufferCreateInfo& info) = 0;
         
     protected:
-        int _usage = UNDEFINED;
-        int _primitiveType = UNDEFINED;
-        uint32_t _vertexCount = 0;
-        uint32_t _indexCount = 0;
-        VertexDescription _description;
+        VertexBufferInfo _info = { UNDEFINED, UNDEFINED, 0, 0, {} };
     };
 }
 
