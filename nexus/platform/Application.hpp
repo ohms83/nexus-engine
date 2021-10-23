@@ -41,8 +41,8 @@ NXS_NAMESPACE {
         virtual void onInit();
         virtual void onUpdate(float dt);
         virtual void onEvent(const SDL_Event& event);
-
-        virtual void render(RenderSystem& renderSystem);
+        
+        RenderSystem& getRenderSystem();
 
     private:
         Info _info;

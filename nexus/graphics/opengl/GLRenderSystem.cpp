@@ -3,6 +3,10 @@
 #include <iostream>
 #include <sstream>
 
+#include "GLVertexBuffer.hpp"
+#include "GLShader.hpp"
+#include "GLRenderCommand.hpp"
+
 USING_NAMESPACE_NXS;
 
 GLRenderSystem::GLRenderSystem()
@@ -56,6 +60,21 @@ void GLRenderSystem::init(std::string appName, uint32_t screenWidth, uint32_t sc
     std::cout << ss.str() << std::endl;
 }
 
+VertexBuffer* GLRenderSystem::createVertexBuffer()
+{
+    return new GLVertexBuffer();
+}
+
+Shader* GLRenderSystem::createShader()
+{
+    return new GLShader();
+}
+
+RenderCommand* GLRenderSystem::createCommand()
+{
+    return new GLRenderCommand();
+}
+
 void GLRenderSystem::setClearColor(const Color4F& color)
 {
     glClearColor(_clearColor.r, _clearColor.g, _clearColor.b, _clearColor.a);
@@ -64,10 +83,6 @@ void GLRenderSystem::setClearColor(const Color4F& color)
 void GLRenderSystem::clear()
 {
     glClear(GL_COLOR_BUFFER_BIT);
-}
-
-void GLRenderSystem::draw()
-{
 }
 
 void GLRenderSystem::swapBuffer()

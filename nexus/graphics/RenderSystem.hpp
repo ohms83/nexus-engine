@@ -3,11 +3,23 @@
 
 #include "NxsMacros.h"
 #include "Color.hpp"
+#include "RenderCommand.hpp"
 
 #include <string>
 #include <SDL2/SDL.h>
+#include <vector>
 
 NXS_NAMESPACE {
+    class VertexBuffer;
+    class Shader;
+    class RenderCommand;
+    
+    /**
+     * @c RenderSystem acts as a proxy between application and graphics API.
+     * Application doesn't need to know about which API it's using and only needs to communicate with the
+     * underlying graphics hardware using @c Rendersystem 's interfaces. This adds more degree of flexibility
+     * and, in turn, makes the codes more portable.
+     */
     class RenderSystem
     {
     public:
@@ -19,21 +31,29 @@ NXS_NAMESPACE {
             uint32_t screenWidth,
             uint32_t screenHeight
         ) = 0;
-
-        virtual void clear() = 0;
-        virtual void swapBuffer() = 0;
-
-        /* --- Pipline related functions --- */
-        // TODO: Move all of these to RenderPipeline class.
-        virtual void draw() = 0;
+        
+        virtual void beginDraw();
+        virtual void draw();
+        virtual void endDraw();
+        
         const Color4F& getClearColor() const;
         virtual void setClearColor(const Color4F& color);
-        /* --- Pipline related functions --- */
+        
+        virtual VertexBuffer* createVertexBuffer() = 0;
+        virtual Shader* createShader() = 0;
+        virtual RenderCommand* createCommand() = 0;
+        
+        void registerCommand(const RenderCommand* command);
 
         static RenderSystem* create(int renderSystem);
+        
+    protected:
+        virtual void clear() = 0;
+        virtual void swapBuffer() = 0;
     
     protected:
         Color4F _clearColor = COLOR4F_BLACK;
+        std::vector<const RenderCommand*> _commandPools;
     private:
     };
 }

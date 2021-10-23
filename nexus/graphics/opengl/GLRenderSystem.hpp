@@ -18,11 +18,14 @@ NXS_NAMESPACE {
             uint32_t screenWidth,
             uint32_t screenHeight
         ) override;
+        
+        VertexBuffer* createVertexBuffer() override;
+        Shader* createShader() override;
+        RenderCommand* createCommand() override;
 
         void setClearColor(const Color4F& color) override;
 
         void clear() override;
-        void draw() override;
         void swapBuffer() override;
 
     private:

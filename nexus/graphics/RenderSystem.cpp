@@ -27,6 +27,30 @@ void RenderSystem::setClearColor(const Color4F& color)
     _clearColor = color;
 }
 
+
+void RenderSystem::beginDraw()
+{
+    clear();
+}
+
+void RenderSystem::draw()
+{
+    for (auto command : _commandPools) {
+        command->execute();
+    }
+    
+    _commandPools.clear();
+}
+void RenderSystem::endDraw()
+{
+    swapBuffer();
+}
+
+void RenderSystem::registerCommand(const RenderCommand* command)
+{
+    _commandPools.emplace_back(command);
+}
+
 RenderSystem* RenderSystem::create(int renderSystem)
 {
     RenderSystem* result = nullptr;

@@ -2,6 +2,14 @@
 
 USING_NAMESPACE_NXS;
 
+VertexBuffer::VertexBuffer()
+{
+}
+
+VertexBuffer::~VertexBuffer()
+{
+}
+
 void VertexBuffer::init(const VertexBufferCreateInfo& info)
 {
     if (!isInit())

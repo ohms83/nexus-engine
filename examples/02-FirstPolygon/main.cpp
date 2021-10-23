@@ -28,23 +28,29 @@ class ExampleApp02 : public nexus::Application
 protected:
     void onInit() override
     {
-        createQuad();
-        _shader.initWithSource(vertexShaderSource, fragmentShaderSource);
+        _renderCommand = std::unique_ptr<nexus::RenderCommand>(getRenderSystem().createCommand());
+        
+        _shader = std::unique_ptr<nexus::Shader>(getRenderSystem().createShader());
+        _shader->initWithSource(vertexShaderSource, fragmentShaderSource);
+        _renderCommand->setShader(_shader.get());
+        
+        creatQuad();
+        createTriangle();
     }
-
-    void createQuad()
+    
+    void creatQuad()
     {
         std::array<nexus::Vertex_t<1, 0, 0>, 4> vertices;
-        vertices[0].position()  = glm::vec3(  0.5f,  0.5f,  0.0f );
+        vertices[0].position()  = glm::vec3( -0.1f,  0.9f,  0.0f ); // top right
         vertices[0].color()     = nexus::COLOR4F_ORANGE;
         
-        vertices[1].position()  = glm::vec3(  0.5f, -0.5f,  0.0f );
+        vertices[1].position()  = glm::vec3( -0.1f,  0.1f,  0.0f ); // bottom right
         vertices[1].color()     = nexus::COLOR4F_ORANGE;
         
-        vertices[2].position()  = glm::vec3( -0.5f, -0.5f,  0.0f );
+        vertices[2].position()  = glm::vec3( -0.9f,  0.1f,  0.0f ); // bottom left
         vertices[2].color()     = nexus::COLOR4F_ORANGE;
         
-        vertices[3].position()  = glm::vec3( -0.5f,  0.5f,  0.0f );
+        vertices[3].position()  = glm::vec3( -0.9f,  0.9f,  0.0f ); // top left
         vertices[3].color()     = nexus::COLOR4F_ORANGE;
         
         uint32_t indices[] {
@@ -72,22 +78,60 @@ protected:
             indices,
         };
         
-        _vertexBuffer.init(bufferInfo);
+        auto vertexBuffer = std::unique_ptr<nexus::VertexBuffer>(getRenderSystem().createVertexBuffer());
+        vertexBuffer->init(bufferInfo);
+        
+        _renderCommand->addVertexBuffer(vertexBuffer.get());
+        _vertexBuffers.emplace_back(std::move(vertexBuffer));
+    }
+    
+    void createTriangle()
+    {
+        std::array<nexus::Vertex_t<1, 0, 0>, 3> vertices;
+        vertices[0].position()  = glm::vec3(  0.5f, -0.1f,  0.0f ); // top
+        vertices[0].color()     = nexus::COLOR4F_MAGENTA;
+        
+        vertices[1].position()  = glm::vec3(  0.9f, -0.9f,  0.0f ); // bottom right
+        vertices[1].color()     = nexus::COLOR4F_MAGENTA;
+        
+        vertices[2].position()  = glm::vec3(  0.1f, -0.9f,  0.0f ); // bottom left
+        vertices[2].color()     = nexus::COLOR4F_MAGENTA;
+        
+        nexus::VertexBufferCreateInfo bufferInfo =
+        {
+            {
+                // usage
+                nexus::STATIC_DRAW,
+                // Primitives
+                nexus::TRIANGLES,
+                // vertexCount
+                vertices.size(),
+                // indexCount
+                0,
+                // description
+                nexus::Vertex_t<1, 0, 0>::getDescription()
+            },
+            // vertices
+            (float*)vertices.data(),
+            // indices
+            nullptr,
+        };
+        
+        auto vertexBuffer = std::unique_ptr<nexus::VertexBuffer>(getRenderSystem().createVertexBuffer());
+        vertexBuffer->init(bufferInfo);
+        
+        _renderCommand->addVertexBuffer(vertexBuffer.get());
+        _vertexBuffers.emplace_back(std::move(vertexBuffer));
     }
 
-    void render(nexus::RenderSystem& renderSystem) override
+    void onUpdate(float dt) override
     {
-        const nexus::VertexBufferInfo& bufferInfo = _vertexBuffer.getInfo();
-        glUseProgram(_shader.getShaderProgram());
-        CHECK_GL_ERROR();
-        glBindVertexArray(_vertexBuffer.getVAO());
-        CHECK_GL_ERROR();
-        glDrawElements(bufferInfo.primitiveType, bufferInfo.indexCount, GL_UNSIGNED_INT, 0);
-        CHECK_GL_ERROR();
+        getRenderSystem().registerCommand(_renderCommand.get());
     }
 private:
-    nexus::GLVertexBuffer _vertexBuffer;
-    nexus::GLShader _shader;
+    std::unique_ptr<nexus::RenderCommand> _renderCommand;
+    std::unique_ptr<nexus::Shader> _shader;
+    std::vector<std::unique_ptr<nexus::VertexBuffer>> _vertexBuffers;
 };
 
 int main(int, char**)

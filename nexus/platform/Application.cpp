@@ -37,6 +37,12 @@ void Application::init(const Info& info)
 
     _info = info;
     _renderSystem = std::unique_ptr<RenderSystem>(RenderSystem::create(info.renderSystem));
+    if(_renderSystem == nullptr)
+    {
+        std::stringstream ss;
+        ss << "Failed to create RenderSystem. API=" << info.renderSystem;
+        throw std::runtime_error(ss.str());
+    }
     _renderSystem->init(info.appName, info.screenWidth, info.screenHeight);
 
     onInit();
@@ -60,28 +66,26 @@ void Application::mainLoop()
             onEvent(event);
             onUpdate(dt);
             
-            _renderSystem->clear();
-            render(*_renderSystem);
-            _renderSystem->swapBuffer();
+            _renderSystem->beginDraw();
+            _renderSystem->draw();
+            _renderSystem->endDraw();
         }
     }
 }
 
 void Application::onInit()
 {
-    
 }
 
 void Application::onUpdate(float dt)
 {
-
 }
 
 void Application::onEvent(const SDL_Event& event)
 {
 }
 
-void Application::render(RenderSystem& renderSystem)
+RenderSystem& Application::getRenderSystem()
 {
-
+    return *_renderSystem;
 }

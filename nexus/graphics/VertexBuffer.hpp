@@ -36,6 +36,9 @@ NXS_NAMESPACE {
     class VertexBuffer
     {
     public:
+        VertexBuffer();
+        virtual ~VertexBuffer();
+        
         void init(const VertexBufferCreateInfo& info);
         
         bool isInit() const {
