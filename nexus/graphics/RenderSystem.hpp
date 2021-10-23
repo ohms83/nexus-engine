@@ -32,6 +32,11 @@ NXS_NAMESPACE {
             uint32_t screenHeight
         ) = 0;
         
+        /// Initialize @c ImGui library for the underlying graphics API.
+        virtual void initGui();
+        virtual void beginDrawGui();
+        virtual void endDrawGui();
+        
         virtual void beginDraw();
         virtual void draw();
         virtual void endDraw();
@@ -47,14 +52,24 @@ NXS_NAMESPACE {
 
         static RenderSystem* create(int renderSystem);
         
+        void* const getRenderContext() const {
+            return _renderContext;
+        }
+        
+        SDL_Window* getWindow() const {
+            return _window;
+        }
+        
     protected:
         virtual void clear() = 0;
         virtual void swapBuffer() = 0;
     
     protected:
+        void* _renderContext = nullptr;
+        SDL_Window* _window = nullptr;
+        
         Color4F _clearColor = COLOR4F_BLACK;
         std::vector<const RenderCommand*> _commandPools;
-    private:
     };
 }
 

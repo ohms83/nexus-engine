@@ -10,6 +10,7 @@
 #include <array>
 
 #include "nexus.h"
+#include "imgui.h"
 
 static const char *vertexShaderSource =
 "#version 410 core\n"
@@ -43,6 +44,12 @@ protected:
         
         creatQuad();
         createTriangle();
+    }
+    
+    void renderUI() override
+    {
+        bool show_demo_window = true;
+        ImGui::ShowDemoWindow(&show_demo_window);
     }
     
     void creatQuad()

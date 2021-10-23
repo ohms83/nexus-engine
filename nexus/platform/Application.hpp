@@ -36,6 +36,8 @@ NXS_NAMESPACE {
 
         void init(const Info& info);
         void mainLoop();
+        
+        virtual void renderUI();
 
     protected:
         virtual void onInit();

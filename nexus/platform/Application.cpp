@@ -44,6 +44,7 @@ void Application::init(const Info& info)
         throw std::runtime_error(ss.str());
     }
     _renderSystem->init(info.appName, info.screenWidth, info.screenHeight);
+    _renderSystem->initGui();
 
     onInit();
 }
@@ -67,10 +68,19 @@ void Application::mainLoop()
             onUpdate(dt);
             
             _renderSystem->beginDraw();
+            _renderSystem->beginDrawGui();
+            
             _renderSystem->draw();
+            renderUI();
+            
+            _renderSystem->endDrawGui();
             _renderSystem->endDraw();
         }
     }
+}
+
+void Application::renderUI()
+{
 }
 
 void Application::onInit()

@@ -7,6 +7,10 @@
 #include "GLShader.hpp"
 #include "GLRenderCommand.hpp"
 
+#include "imgui.h"
+#include "imgui_impl_sdl.h"
+#include "imgui_impl_opengl3.h"
+
 USING_NAMESPACE_NXS;
 
 GLRenderSystem::GLRenderSystem()
@@ -16,7 +20,7 @@ GLRenderSystem::GLRenderSystem()
 
 GLRenderSystem::~GLRenderSystem()
 {
-    SDL_GL_DeleteContext(_context);
+    SDL_GL_DeleteContext(_renderContext);
     SDL_DestroyWindow(_window);
 }
 
@@ -49,13 +53,14 @@ void GLRenderSystem::init(std::string appName, uint32_t screenWidth, uint32_t sc
         throw std::runtime_error(ss.str());
     }
 
-    _context = SDL_GL_CreateContext(_window);
-    if (!_context)
+    _renderContext = SDL_GL_CreateContext(_window);
+    if (!_renderContext)
     {
         std::stringstream ss;
         ss << "Failed to created OpenGL's context! SDL_Error=" << SDL_GetError();
         throw std::runtime_error(ss.str());
     }
+    SDL_GL_MakeCurrent(_window, _renderContext);
 
     std::stringstream ss;
     ss  << "OpenGL\n"
@@ -64,6 +69,31 @@ void GLRenderSystem::init(std::string appName, uint32_t screenWidth, uint32_t sc
         << "  Vendor  : " << glGetString(GL_VENDOR) << "\n"
         << "  Renderer: " << glGetString(GL_RENDERER);
     std::cout << ss.str() << std::endl;
+}
+
+void GLRenderSystem::initGui()
+{
+    RenderSystem::initGui();
+    
+    // Setup Platform/Renderer backends
+    const char* glslVersion = "#version 150";
+    ImGui_ImplSDL2_InitForOpenGL(getWindow(), (SDL_GLContext)getRenderContext());
+    ImGui_ImplOpenGL3_Init(glslVersion);
+}
+
+void GLRenderSystem::beginDrawGui()
+{
+    // Start the Dear ImGui frame
+    ImGui_ImplOpenGL3_NewFrame();
+    
+    RenderSystem::beginDrawGui();
+}
+
+void GLRenderSystem::endDrawGui()
+{
+    RenderSystem::endDrawGui();
+    
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
 VertexBuffer* GLRenderSystem::createVertexBuffer()

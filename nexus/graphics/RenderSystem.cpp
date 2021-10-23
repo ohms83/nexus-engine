@@ -3,6 +3,9 @@
 #include "GraphicsConst.h"
 #include "opengl/GLRenderSystem.hpp"
 
+#include "imgui.h"
+#include "imgui_impl_sdl.h"
+
 #include <exception>
 #include <sstream>
 
@@ -15,7 +18,9 @@ RenderSystem::RenderSystem()
 
 RenderSystem::~RenderSystem()
 {
-
+    // Cleanup
+    ImGui_ImplSDL2_Shutdown();
+    ImGui::DestroyContext();
 }
 
 const Color4F& RenderSystem::getClearColor() const
@@ -27,6 +32,30 @@ void RenderSystem::setClearColor(const Color4F& color)
     _clearColor = color;
 }
 
+void RenderSystem::initGui()
+{
+    // Setup Dear ImGui context
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+    
+    // Setup Dear ImGui style
+    ImGui::StyleColorsDark();
+}
+
+void RenderSystem::beginDrawGui()
+{
+    // Start the Dear ImGui frame
+    ImGui_ImplSDL2_NewFrame();
+    ImGui::NewFrame();
+}
+
+void RenderSystem::endDrawGui()
+{
+    ImGui::Render();
+}
 
 void RenderSystem::beginDraw()
 {

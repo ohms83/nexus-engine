@@ -19,6 +19,10 @@ NXS_NAMESPACE {
             uint32_t screenHeight
         ) override;
         
+        void initGui() override;
+        void beginDrawGui() override;
+        void endDrawGui() override;
+        
         VertexBuffer* createVertexBuffer() override;
         Shader* createShader() override;
         RenderCommand* createCommand() override;
@@ -27,10 +31,6 @@ NXS_NAMESPACE {
 
         void clear() override;
         void swapBuffer() override;
-
-    private:
-        SDL_GLContext _context;
-        SDL_Window* _window = nullptr;
     };
 }
 
