@@ -1,7 +1,7 @@
 #ifndef __NXS_PATH_H__
 #define __NXS_PATH_H__
 
-#include "NxsMacros.h"
+#include "NxsDefine.h"
 
 #include <utility>
 #include <string>

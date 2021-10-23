@@ -70,3 +70,18 @@ GLuint GLShader::createGLShader(const char* source, GLenum type)
     
     return shader;
 }
+
+void GLShader::setUniformImpl(uint32_t location, Uniform::Type type, float* value)
+{
+    
+}
+
+void GLShader::updateUniformImpl(uint32_t location, float* value)
+{
+    
+}
+
+uint32_t GLShader::findUniform(const std::string& name)
+{
+    return glGetUniformLocation(_shaderProgram, name.c_str());
+}

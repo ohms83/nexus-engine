@@ -2,7 +2,7 @@
 #ifndef __NEXUS_HEADER__
 #define __NEXUS_HEADER__
 
-#include "NxsMacros.h"
+#include "NxsDefine.h"
 #include "base/ResourceManager.hpp"
 #include "base/String.hpp"
 #include "base/SystemClock.hpp"

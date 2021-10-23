@@ -1,7 +1,7 @@
 #ifndef __NXS_VERTEX_BUFFER_H__
 #define __NXS_VERTEX_BUFFER_H__
 
-#include "NxsMacros.h"
+#include "NxsDefine.h"
 #include "GraphicsConst.h"
 #include "Vertex.hpp"
 #include "io/Data.hpp"

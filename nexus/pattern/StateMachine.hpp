@@ -8,7 +8,7 @@
 #ifndef __NXS_STATE_MACHINE_H__
 #define __NXS_STATE_MACHINE_H__
 
-#include "NxsMacros.h"
+#include "NxsDefine.h"
 
 NXS_NAMESPACE {
     class StateMachine;

@@ -1,7 +1,7 @@
 #ifndef __NXS_RESOURCE_MANAGER_H__
 #define __NXS_RESOURCE_MANAGER_H__
 
-#include "NxsMacros.h"
+#include "NxsDefine.h"
 #include "pattern/Singleton.hpp"
 
 #include <unordered_map>

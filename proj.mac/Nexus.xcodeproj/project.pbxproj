@@ -51,6 +51,11 @@
 		870FD5552723DBF800A376DD /* libfreetype.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 870FD5532723DBF800A376DD /* libfreetype.a */; };
 		870FD5562723DBF800A376DD /* libfreetype.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 870FD5532723DBF800A376DD /* libfreetype.a */; };
 		870FD5572723DBF800A376DD /* libfreetype.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 870FD5532723DBF800A376DD /* libfreetype.a */; };
+		870FD55F2724345100A376DD /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 870FD55E2724345100A376DD /* main.cpp */; };
+		870FD5652724348600A376DD /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 87B8C64427214D520087BA8B /* OpenGL.framework */; };
+		870FD5662724349900A376DD /* SDL2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 870FD4DD272187CF00A376DD /* SDL2.framework */; };
+		870FD567272434A300A376DD /* libNexus.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 87B8C63C272147B20087BA8B /* libNexus.a */; };
+		870FD56B2724380D00A376DD /* resources in CopyFiles */ = {isa = PBXBuildFile; fileRef = 870FD5692724366700A376DD /* resources */; };
 		87B8C64527214D520087BA8B /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 87B8C64427214D520087BA8B /* OpenGL.framework */; };
 		87B8C88227214E050087BA8B /* Application.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 87B8C64B27214E040087BA8B /* Application.hpp */; };
 		87B8C88327214E050087BA8B /* Application.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 87B8C64D27214E040087BA8B /* Application.cpp */; };
@@ -58,7 +63,7 @@
 		87B8C88527214E050087BA8B /* Data.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 87B8C65127214E040087BA8B /* Data.cpp */; };
 		87B8C88627214E050087BA8B /* File.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 87B8C65227214E040087BA8B /* File.cpp */; };
 		87B8C88727214E050087BA8B /* Data.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 87B8C65327214E040087BA8B /* Data.hpp */; };
-		87B8C88827214E050087BA8B /* NxsMacros.h in Headers */ = {isa = PBXBuildFile; fileRef = 87B8C65427214E040087BA8B /* NxsMacros.h */; };
+		87B8C88827214E050087BA8B /* NxsDefine.h in Headers */ = {isa = PBXBuildFile; fileRef = 87B8C65427214E040087BA8B /* NxsDefine.h */; };
 		87B8C88927214E050087BA8B /* nexus.h in Headers */ = {isa = PBXBuildFile; fileRef = 87B8C65527214E040087BA8B /* nexus.h */; };
 		87B8C88A27214E050087BA8B /* Path.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 87B8C65827214E040087BA8B /* Path.hpp */; };
 		87B8C88B27214E050087BA8B /* Path.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 87B8C65927214E040087BA8B /* Path.cpp */; };
@@ -387,6 +392,13 @@
 			remoteGlobalIDString = 87B8C63B272147B20087BA8B;
 			remoteInfo = Nexus;
 		};
+		870FD5632724347800A376DD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 87B8C634272147B20087BA8B /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 87B8C63B272147B20087BA8B;
+			remoteInfo = Nexus;
+		};
 		87B8CD1C272163890087BA8B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 87B8C634272147B20087BA8B /* Project object */;
@@ -412,6 +424,26 @@
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 1;
+		};
+		870FD55A2724345100A376DD /* Copy Files */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			name = "Copy Files";
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+		870FD56A272437F300A376DD /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 7;
+			files = (
+				870FD56B2724380D00A376DD /* resources in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 		87B8CD12272163660087BA8B /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
@@ -485,6 +517,10 @@
 		870FD53B2723D6D700A376DD /* imgui_demo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = imgui_demo.cpp; sourceTree = "<group>"; };
 		870FD53C2723D6D700A376DD /* imgui_draw.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = imgui_draw.cpp; sourceTree = "<group>"; };
 		870FD5532723DBF800A376DD /* libfreetype.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfreetype.a; path = Frameworks/libfreetype.a; sourceTree = "<group>"; };
+		870FD55C2724345100A376DD /* 04-3DTransform */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "04-3DTransform"; sourceTree = BUILT_PRODUCTS_DIR; };
+		870FD55E2724345100A376DD /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		870FD568272434D500A376DD /* 04-3DTransform.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "04-3DTransform.entitlements"; sourceTree = "<group>"; };
+		870FD5692724366700A376DD /* resources */ = {isa = PBXFileReference; lastKnownFileType = folder; name = resources; path = ../resources; sourceTree = "<group>"; };
 		87B8C63C272147B20087BA8B /* libNexus.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libNexus.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		87B8C64427214D520087BA8B /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
 		87B8C64B27214E040087BA8B /* Application.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Application.hpp; sourceTree = "<group>"; };
@@ -493,7 +529,7 @@
 		87B8C65127214E040087BA8B /* Data.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Data.cpp; sourceTree = "<group>"; };
 		87B8C65227214E040087BA8B /* File.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = File.cpp; sourceTree = "<group>"; };
 		87B8C65327214E040087BA8B /* Data.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Data.hpp; sourceTree = "<group>"; };
-		87B8C65427214E040087BA8B /* NxsMacros.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NxsMacros.h; sourceTree = "<group>"; };
+		87B8C65427214E040087BA8B /* NxsDefine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NxsDefine.h; sourceTree = "<group>"; };
 		87B8C65527214E040087BA8B /* nexus.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = nexus.h; sourceTree = "<group>"; };
 		87B8C65827214E040087BA8B /* Path.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Path.hpp; sourceTree = "<group>"; };
 		87B8C65927214E040087BA8B /* Path.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Path.cpp; sourceTree = "<group>"; };
@@ -965,6 +1001,16 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		870FD5592724345100A376DD /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				870FD567272434A300A376DD /* libNexus.a in Frameworks */,
+				870FD5652724348600A376DD /* OpenGL.framework in Frameworks */,
+				870FD5662724349900A376DD /* SDL2.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		87B8C63A272147B20087BA8B /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -1106,15 +1152,25 @@
 			path = backends;
 			sourceTree = "<group>";
 		};
+		870FD55D2724345100A376DD /* 04-3DTransform */ = {
+			isa = PBXGroup;
+			children = (
+				870FD55E2724345100A376DD /* main.cpp */,
+			);
+			path = "04-3DTransform";
+			sourceTree = "<group>";
+		};
 		87B8C633272147B20087BA8B = {
 			isa = PBXGroup;
 			children = (
 				87B8CD20272163A60087BA8B /* 01-HelloWorld.entitlements */,
 				87B8CD2E272164220087BA8B /* 02-FirstPolygon.entitlements */,
 				870FD50C2723CCB900A376DD /* 03-GUI.entitlements */,
+				870FD568272434D500A376DD /* 04-3DTransform.entitlements */,
 				87B8CCF027214F930087BA8B /* examples */,
 				87B8C64327214D520087BA8B /* Frameworks */,
 				87B8C64827214E040087BA8B /* nexus */,
+				870FD5692724366700A376DD /* resources */,
 				87B8C63D272147B20087BA8B /* Products */,
 			);
 			sourceTree = "<group>";
@@ -1126,6 +1182,7 @@
 				87B8CD14272163660087BA8B /* 01-HelloWorld */,
 				87B8CD26272164110087BA8B /* 02-FirstPolygon */,
 				870FD5052723CC4300A376DD /* 03-GUI */,
+				870FD55C2724345100A376DD /* 04-3DTransform */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1147,7 +1204,7 @@
 				87B8C66027214E040087BA8B /* graphics */,
 				87B8C64E27214E040087BA8B /* io */,
 				87B8C65527214E040087BA8B /* nexus.h */,
-				87B8C65427214E040087BA8B /* NxsMacros.h */,
+				87B8C65427214E040087BA8B /* NxsDefine.h */,
 				87B8C65627214E040087BA8B /* os */,
 				87B8C65A27214E040087BA8B /* pattern */,
 				87B8C64A27214E040087BA8B /* platform */,
@@ -1736,6 +1793,7 @@
 				87B8CCF427214F930087BA8B /* 01-HelloWorld */,
 				87B8CCF127214F930087BA8B /* 02-FirstPolygon */,
 				870FD5062723CC4300A376DD /* 03-GUI */,
+				870FD55D2724345100A376DD /* 04-3DTransform */,
 			);
 			name = examples;
 			path = ../examples;
@@ -2084,7 +2142,7 @@
 				87B8CCAC27214E5F0087BA8B /* color_space_YCoCg.hpp in Headers */,
 				87B8CC3627214E5F0087BA8B /* matrix_projection.hpp in Headers */,
 				87B8CBFE27214E5F0087BA8B /* vector_int3_sized.hpp in Headers */,
-				87B8C88827214E050087BA8B /* NxsMacros.h in Headers */,
+				87B8C88827214E050087BA8B /* NxsDefine.h in Headers */,
 				87B8CCCE27214E5F0087BA8B /* normal.hpp in Headers */,
 				87B8CBF427214E5F0087BA8B /* matrix_float3x4_precision.hpp in Headers */,
 			);
@@ -2109,6 +2167,25 @@
 			name = "03-GUI";
 			productName = "03-GUI";
 			productReference = 870FD5052723CC4300A376DD /* 03-GUI */;
+			productType = "com.apple.product-type.tool";
+		};
+		870FD55B2724345100A376DD /* 04-3DTransform */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 870FD5602724345100A376DD /* Build configuration list for PBXNativeTarget "04-3DTransform" */;
+			buildPhases = (
+				870FD5582724345100A376DD /* Sources */,
+				870FD5592724345100A376DD /* Frameworks */,
+				870FD55A2724345100A376DD /* Copy Files */,
+				870FD56A272437F300A376DD /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				870FD5642724347800A376DD /* PBXTargetDependency */,
+			);
+			name = "04-3DTransform";
+			productName = "04-3DTransform";
+			productReference = 870FD55C2724345100A376DD /* 04-3DTransform */;
 			productType = "com.apple.product-type.tool";
 		};
 		87B8C63B272147B20087BA8B /* Nexus */ = {
@@ -2177,6 +2254,9 @@
 					870FD5042723CC4300A376DD = {
 						CreatedOnToolsVersion = 13.0;
 					};
+					870FD55B2724345100A376DD = {
+						CreatedOnToolsVersion = 13.0;
+					};
 					87B8C63B272147B20087BA8B = {
 						CreatedOnToolsVersion = 13.0;
 					};
@@ -2205,6 +2285,7 @@
 				87B8CD13272163660087BA8B /* 01-HelloWorld */,
 				87B8CD25272164110087BA8B /* 02-FirstPolygon */,
 				870FD5042723CC4300A376DD /* 03-GUI */,
+				870FD55B2724345100A376DD /* 04-3DTransform */,
 			);
 		};
 /* End PBXProject section */
@@ -2236,6 +2317,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				870FD5082723CC4300A376DD /* main.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		870FD5582724345100A376DD /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				870FD55F2724345100A376DD /* main.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2299,6 +2388,11 @@
 			target = 87B8C63B272147B20087BA8B /* Nexus */;
 			targetProxy = 870FD50D2723CCC400A376DD /* PBXContainerItemProxy */;
 		};
+		870FD5642724347800A376DD /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 87B8C63B272147B20087BA8B /* Nexus */;
+			targetProxy = 870FD5632724347800A376DD /* PBXContainerItemProxy */;
+		};
 		87B8CD1D272163890087BA8B /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 87B8C63B272147B20087BA8B /* Nexus */;
@@ -2337,6 +2431,36 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Frameworks",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+		870FD5612724345100A376DD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = "04-3DTransform.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = U69CE95225;
+				ENABLE_HARDENED_RUNTIME = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Frameworks",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		870FD5622724345100A376DD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = "04-3DTransform.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = U69CE95225;
+				ENABLE_HARDENED_RUNTIME = YES;
+				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Frameworks",
 				);
@@ -2596,6 +2720,15 @@
 			buildConfigurations = (
 				870FD50A2723CC4300A376DD /* Debug */,
 				870FD50B2723CC4300A376DD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		870FD5602724345100A376DD /* Build configuration list for PBXNativeTarget "04-3DTransform" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				870FD5612724345100A376DD /* Debug */,
+				870FD5622724345100A376DD /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

@@ -24,7 +24,13 @@ NXS_NAMESPACE {
             return _shaderProgram;
         }
         
+        uint32_t findUniform(const std::string& name) override;
+        
         static GLuint createGLShader(const char* source, GLenum type);
+        
+    protected:
+        void setUniformImpl(uint32_t location, Uniform::Type type, float* value) override;
+        void updateUniformImpl(uint32_t location, float* value) override;
         
     private:
         GLuint _shaderProgram = 0;

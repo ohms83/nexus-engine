@@ -1,7 +1,7 @@
 #ifndef __NXS_GRAPHCIS_CONST_H__
 #define __NXS_GRAPHCIS_CONST_H__
 
-#include "NxsMacros.h"
+#include "NxsDefine.h"
 
 #include <cstdint>
 

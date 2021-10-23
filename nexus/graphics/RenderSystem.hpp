@@ -1,7 +1,7 @@
 #ifndef __NXS_RENDER_SYSTEM_H__
 #define __NXS_RENDER_SYSTEM_H__
 
-#include "NxsMacros.h"
+#include "NxsDefine.h"
 #include "Color.hpp"
 #include "RenderCommand.hpp"
 

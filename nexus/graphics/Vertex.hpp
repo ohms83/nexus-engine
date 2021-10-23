@@ -8,7 +8,7 @@
 #ifndef __NXS_VERTEX_H__
 #define __NXS_VERTEX_H__
 
-#include "NxsMacros.h"
+#include "NxsDefine.h"
 #include "Color.hpp"
 
 #include "glm/glm.hpp"

@@ -8,7 +8,7 @@
 #ifndef __NXS_SYSTEM_CLOCK_H__
 #define __NXS_SYSTEM_CLOCK_H__
 
-#include "NxsMacros.h"
+#include "NxsDefine.h"
 #include <chrono>
 
 NXS_NAMESPACE {

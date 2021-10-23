@@ -69,6 +69,11 @@ void GLRenderSystem::init(std::string appName, uint32_t screenWidth, uint32_t sc
         << "  Vendor  : " << glGetString(GL_VENDOR) << "\n"
         << "  Renderer: " << glGetString(GL_RENDERER);
     std::cout << ss.str() << std::endl;
+    
+    // Enable depth test
+    glEnable(GL_DEPTH_TEST);
+    // Accept fragment if it closer to the camera than the former one
+    glDepthFunc(GL_LESS);
 }
 
 void GLRenderSystem::initGui()
@@ -118,7 +123,7 @@ void GLRenderSystem::setClearColor(const Color4F& color)
 
 void GLRenderSystem::clear()
 {
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void GLRenderSystem::swapBuffer()

@@ -8,7 +8,7 @@
 #ifndef __NXS_RENDER_COMMAND_H__
 #define __NXS_RENDER_COMMAND_H__
 
-#include "NxsMacros.h"
+#include "NxsDefine.h"
 #include "Color.hpp"
 
 #include <vector>
