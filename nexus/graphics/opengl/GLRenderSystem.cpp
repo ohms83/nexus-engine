@@ -118,7 +118,8 @@ RenderCommand* GLRenderSystem::createCommand()
 
 void GLRenderSystem::setClearColor(const Color4F& color)
 {
-    glClearColor(_clearColor.r, _clearColor.g, _clearColor.b, _clearColor.a);
+    RenderSystem::setClearColor(color);
+    glClearColor(color.r, color.g, color.b, color.a);
 }
 
 void GLRenderSystem::clear()
