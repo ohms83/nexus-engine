@@ -7,8 +7,11 @@ layout (location = 1) in vec3 in_Color;
 
 out vec3 vertexColor;
 
+// Obviously not Most Valuable Person.
+uniform mat4 matrixMVP;
+
 void main()
 {
-    gl_Position = vec4(in_Pos, 1.0);
+    gl_Position = matrixMVP * vec4(in_Pos, 1.0);
     vertexColor = in_Color;
 }
