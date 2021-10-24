@@ -154,7 +154,6 @@ int main(int, char** argv)
 {
     int result = EXIT_SUCCESS;
     try {
-        std::cout << argv[0] << std::endl;
         ExampleApp04 app;
         app.init({
             "3DTransform", 800, 800, nexus::RENDER_SYSTEM_GL, false
