@@ -31,6 +31,7 @@ NXS_NAMESPACE {
         File(const std::string& path, Type type, Mode mode = Mode::READ);
 
         void open(const std::string& path, Type type, Mode mode = Mode::READ);
+        bool isOpen() const;
         /**
          *  Reads and return the data from the currently opened file.
          */
@@ -50,6 +51,8 @@ NXS_NAMESPACE {
     private:
         std::fstream _stream;
         uint64_t _size = 0;
+        Type _type = TEXT;
+        Mode _mode = READ;
     };
 }
 
