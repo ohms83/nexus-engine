@@ -19,8 +19,6 @@
 		870FD4F8272302D800A376DD /* GraphicsConst.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 870FD4F7272302D800A376DD /* GraphicsConst.cpp */; };
 		870FD4FB27232FBD00A376DD /* RenderCommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 870FD4F927232FBD00A376DD /* RenderCommand.cpp */; };
 		870FD4FC27232FBD00A376DD /* RenderCommand.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 870FD4FA27232FBD00A376DD /* RenderCommand.hpp */; };
-		870FD4FF2723356600A376DD /* GLRenderCommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 870FD4FD2723356600A376DD /* GLRenderCommand.cpp */; };
-		870FD5002723356600A376DD /* GLRenderCommand.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 870FD4FE2723356600A376DD /* GLRenderCommand.hpp */; };
 		870FD5082723CC4300A376DD /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 870FD5072723CC4300A376DD /* main.cpp */; };
 		870FD50F2723CCCD00A376DD /* libNexus.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 87B8C63C272147B20087BA8B /* libNexus.a */; };
 		870FD5102723CCD400A376DD /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 87B8C64427214D520087BA8B /* OpenGL.framework */; };
@@ -476,8 +474,6 @@
 		870FD4F7272302D800A376DD /* GraphicsConst.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = GraphicsConst.cpp; sourceTree = "<group>"; };
 		870FD4F927232FBD00A376DD /* RenderCommand.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = RenderCommand.cpp; sourceTree = "<group>"; };
 		870FD4FA27232FBD00A376DD /* RenderCommand.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = RenderCommand.hpp; sourceTree = "<group>"; };
-		870FD4FD2723356600A376DD /* GLRenderCommand.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = GLRenderCommand.cpp; sourceTree = "<group>"; };
-		870FD4FE2723356600A376DD /* GLRenderCommand.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = GLRenderCommand.hpp; sourceTree = "<group>"; };
 		870FD5052723CC4300A376DD /* 03-GUI */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "03-GUI"; sourceTree = BUILT_PRODUCTS_DIR; };
 		870FD5072723CC4300A376DD /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		870FD50C2723CCB900A376DD /* 03-GUI.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "03-GUI.entitlements"; sourceTree = "<group>"; };
@@ -1286,8 +1282,6 @@
 				870FD4E527219F7900A376DD /* GLVertexBuffer.cpp */,
 				870FD4E627219F7900A376DD /* GLVertexBuffer.hpp */,
 				87B8C66B27214E040087BA8B /* NxsGL.h */,
-				870FD4FD2723356600A376DD /* GLRenderCommand.cpp */,
-				870FD4FE2723356600A376DD /* GLRenderCommand.hpp */,
 			);
 			path = opengl;
 			sourceTree = "<group>";
@@ -2053,7 +2047,6 @@
 				87B8CC7D27214E5F0087BA8B /* type_mat3x2.hpp in Headers */,
 				87B8CCB027214E5F0087BA8B /* fast_trigonometry.hpp in Headers */,
 				87B8C89527214E050087BA8B /* VertexBuffer.hpp in Headers */,
-				870FD5002723356600A376DD /* GLRenderCommand.hpp in Headers */,
 				87B8CA0F27214E070087BA8B /* ResourceManager.hpp in Headers */,
 				87B8CCA727214E5F0087BA8B /* hash.hpp in Headers */,
 				87B8CC0027214E5F0087BA8B /* matrix_transform.hpp in Headers */,
@@ -2356,7 +2349,6 @@
 				870FD53F2723D6D800A376DD /* imgui_freetype.cpp in Sources */,
 				87B8CA0E27214E070087BA8B /* SystemClock.cpp in Sources */,
 				87B8CA1027214E070087BA8B /* String.cpp in Sources */,
-				870FD4FF2723356600A376DD /* GLRenderCommand.cpp in Sources */,
 				870FD4F8272302D800A376DD /* GraphicsConst.cpp in Sources */,
 				870FD4E727219F7900A376DD /* GLVertexBuffer.cpp in Sources */,
 				870FD5512723D6D800A376DD /* imgui_demo.cpp in Sources */,

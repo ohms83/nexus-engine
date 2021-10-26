@@ -12,12 +12,12 @@
 		<key>02-FirstPolygon.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>3</integer>
+			<integer>2</integer>
 		</dict>
 		<key>03-GUI.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>2</integer>
+			<integer>3</integer>
 		</dict>
 		<key>04-3DTransform.xcscheme_^#shared#^_</key>
 		<dict>
@@ -58,6 +58,11 @@
 			<true/>
 		</dict>
 		<key>87B8CD13272163660087BA8B</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>87B8CD25272164110087BA8B</key>
 		<dict>
 			<key>primary</key>
 			<true/>
