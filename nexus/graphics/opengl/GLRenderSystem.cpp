@@ -5,7 +5,6 @@
 
 #include "GLVertexBuffer.hpp"
 #include "GLShader.hpp"
-#include "GLRenderCommand.hpp"
 
 #include "imgui.h"
 #include "imgui_impl_sdl.h"
@@ -111,11 +110,6 @@ Shader* GLRenderSystem::createShader()
     return new GLShader();
 }
 
-RenderCommand* GLRenderSystem::createCommand()
-{
-    return new GLRenderCommand();
-}
-
 void GLRenderSystem::setClearColor(const Color4F& color)
 {
     RenderSystem::setClearColor(color);
@@ -130,4 +124,64 @@ void GLRenderSystem::clear()
 void GLRenderSystem::swapBuffer()
 {
     SDL_GL_SwapWindow(_window);
+}
+
+void GLRenderSystem::useShader(std::shared_ptr<const Shader> shader) const
+{
+    glUseProgram(shader->getProgramId());
+    CHECK_GL_ERROR();
+}
+
+void GLRenderSystem::execute(std::shared_ptr<const RenderCommand> command) const
+{
+    for (const auto& keyValue : command->getVec2Uniforms()) {
+        const glm::vec2& value = keyValue.second;
+        glUniform2f(keyValue.first, value.x, value.y);
+        CHECK_GL_ERROR();
+    }
+    
+    for (const auto& keyValue : command->getVec3Uniforms()) {
+        const glm::vec3& value = keyValue.second;
+        glUniform3fv(keyValue.first, 1, (float*)&value);
+        CHECK_GL_ERROR();
+    }
+    
+    for (const auto& keyValue : command->getVec4Uniforms()) {
+        const glm::vec4& value = keyValue.second;
+        glUniform4fv(keyValue.first, 1, (float*)&value);
+        CHECK_GL_ERROR();
+    }
+    
+    for (const auto& keyValue : command->getMat3Uniforms()) {
+        const glm::mat3& value = keyValue.second;
+        glUniformMatrix3fv(keyValue.first, 1, GL_FALSE, (float*)&value);
+        CHECK_GL_ERROR();
+    }
+    
+    for (const auto& keyValue : command->getMat4Uniforms()) {
+        const glm::mat4& value = keyValue.second;
+        glUniformMatrix4fv(keyValue.first, 1, GL_FALSE, (float*)&value);
+        CHECK_GL_ERROR();
+    }
+    
+    for (const auto& vertexBuffer : command->getBufferList())
+    {
+        const GLVertexBuffer* glVertexBuffer = dynamic_cast<const GLVertexBuffer*>(vertexBuffer.get());
+        if (!glVertexBuffer) {
+            continue;
+        }
+        
+        const VertexBufferInfo& bufferInfo = glVertexBuffer->getInfo();
+        
+        glBindVertexArray(glVertexBuffer->getVAO());
+        CHECK_GL_ERROR();
+        
+        if (bufferInfo.indexCount > 0) {
+            glDrawElements(bufferInfo.primitiveType, bufferInfo.indexCount, GL_UNSIGNED_INT, 0);
+        }
+        else {
+            glDrawArrays(bufferInfo.primitiveType, 0, bufferInfo.vertexCount);
+        }
+        CHECK_GL_ERROR();
+    }
 }

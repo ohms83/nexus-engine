@@ -36,20 +36,14 @@ class ExampleApp03 : public nexus::Application
 protected:
     void onInit() override
     {
-        _renderCommand = std::unique_ptr<nexus::RenderCommand>(getRenderSystem().createCommand());
+        _renderCommand = std::shared_ptr<nexus::RenderCommand>(new nexus::RenderCommand());
         
-        _shader = std::unique_ptr<nexus::Shader>(getRenderSystem().createShader());
+        _shader = std::shared_ptr<nexus::Shader>(getRenderSystem().createShader());
         _shader->initWithSource(vertexShaderSource, fragmentShaderSource);
-        _renderCommand->setShader(_shader.get());
+        _renderCommand->setShader(_shader);
         
         creatQuad();
         createTriangle();
-    }
-    
-    void renderUI() override
-    {
-        bool show_demo_window = true;
-        ImGui::ShowDemoWindow(&show_demo_window);
     }
     
     void creatQuad()
@@ -92,11 +86,11 @@ protected:
             indices,
         };
         
-        auto vertexBuffer = std::unique_ptr<nexus::VertexBuffer>(getRenderSystem().createVertexBuffer());
+        auto vertexBuffer = std::shared_ptr<nexus::VertexBuffer>(getRenderSystem().createVertexBuffer());
         vertexBuffer->init(bufferInfo);
         
-        _renderCommand->addVertexBuffer(vertexBuffer.get());
-        _vertexBuffers.emplace_back(std::move(vertexBuffer));
+        _renderCommand->addVertexBuffer(vertexBuffer);
+        _vertexBuffers.emplace_back(vertexBuffer);
     }
     
     void createTriangle()
@@ -131,21 +125,24 @@ protected:
             nullptr,
         };
         
-        auto vertexBuffer = std::unique_ptr<nexus::VertexBuffer>(getRenderSystem().createVertexBuffer());
+        auto vertexBuffer = std::shared_ptr<nexus::VertexBuffer>(getRenderSystem().createVertexBuffer());
         vertexBuffer->init(bufferInfo);
         
-        _renderCommand->addVertexBuffer(vertexBuffer.get());
-        _vertexBuffers.emplace_back(std::move(vertexBuffer));
+        _renderCommand->addVertexBuffer(vertexBuffer);
+        _vertexBuffers.emplace_back(vertexBuffer);
     }
     
-    void onUpdate(float dt) override
+    void onDraw(nexus::RenderSystem& renderSystem) override
     {
-        getRenderSystem().registerCommand(_renderCommand.get());
+        renderSystem.registerCommand(_renderCommand);
+        
+        bool show_demo_window = true;
+        ImGui::ShowDemoWindow(&show_demo_window);
     }
 private:
-    std::unique_ptr<nexus::RenderCommand> _renderCommand;
-    std::unique_ptr<nexus::Shader> _shader;
-    std::vector<std::unique_ptr<nexus::VertexBuffer>> _vertexBuffers;
+    std::shared_ptr<nexus::RenderCommand> _renderCommand;
+    std::shared_ptr<nexus::Shader> _shader;
+    std::vector<std::shared_ptr<nexus::VertexBuffer>> _vertexBuffers;
 };
 
 int main(int, char**)

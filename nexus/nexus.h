@@ -14,7 +14,6 @@
 #include "graphics/Shader.hpp"
 #include "graphics/Vertex.hpp"
 #include "graphics/VertexBuffer.hpp"
-#include "graphics/opengl/GLRenderCommand.hpp"
 #include "graphics/opengl/GLRenderSystem.hpp"
 #include "graphics/opengl/GLShader.hpp"
 #include "graphics/opengl/GLVertexBuffer.hpp"

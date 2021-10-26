@@ -20,20 +20,9 @@ NXS_NAMESPACE {
         
         void initWithSource(const char* vertexShaderSource, const char* fragmentShaderSource) override;
         
-        const GLuint getShaderProgram() const {
-            return _shaderProgram;
-        }
-        
-        uint32_t findUniform(const std::string& name) override;
+        uint32_t findUniform(const std::string& name) const override;
         
         static GLuint createGLShader(const char* source, GLenum type);
-        
-    protected:
-        void setUniformImpl(uint32_t location, Uniform::Type type, float* value) override;
-        void updateUniformImpl(uint32_t location, float* value) override;
-        
-    private:
-        GLuint _shaderProgram = 0;
     };
 }
 

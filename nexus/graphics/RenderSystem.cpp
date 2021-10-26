@@ -64,8 +64,18 @@ void RenderSystem::beginDraw()
 
 void RenderSystem::draw()
 {
-    for (auto command : _commandPools) {
-        command->execute();
+    uint32_t bindingShader = 0;
+    
+    for (const auto& command : _commandPools)
+    {
+        auto shader = command->getShader();
+        const uint32_t shaderId = shader->getProgramId();
+        // TODO: Batch rendering commands that using same shader/materials together.
+        if (shaderId > 0 && shaderId != bindingShader) {
+            bindingShader = shaderId;
+            useShader(shader);
+        }
+        execute(command);
     }
     
     _commandPools.clear();
@@ -75,7 +85,7 @@ void RenderSystem::endDraw()
     swapBuffer();
 }
 
-void RenderSystem::registerCommand(const RenderCommand* command)
+void RenderSystem::registerCommand(std::shared_ptr<RenderCommand> command)
 {
     _commandPools.emplace_back(command);
 }

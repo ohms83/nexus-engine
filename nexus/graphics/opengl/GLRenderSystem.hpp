@@ -25,12 +25,15 @@ NXS_NAMESPACE {
         
         VertexBuffer* createVertexBuffer() override;
         Shader* createShader() override;
-        RenderCommand* createCommand() override;
 
         void setClearColor(const Color4F& color) override;
 
         void clear() override;
         void swapBuffer() override;
+        
+    protected:
+        void useShader(std::shared_ptr<const Shader> shader) const override;
+        void execute(std::shared_ptr<const RenderCommand> command) const override;
     };
 }
 

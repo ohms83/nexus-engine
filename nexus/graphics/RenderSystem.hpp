@@ -6,8 +6,10 @@
 #include "RenderCommand.hpp"
 
 #include <string>
-#include <SDL2/SDL.h>
 #include <vector>
+#include <memory>
+
+#include <SDL2/SDL.h>
 
 NXS_NAMESPACE {
     class VertexBuffer;
@@ -46,9 +48,8 @@ NXS_NAMESPACE {
         
         virtual VertexBuffer* createVertexBuffer() = 0;
         virtual Shader* createShader() = 0;
-        virtual RenderCommand* createCommand() = 0;
         
-        void registerCommand(const RenderCommand* command);
+        void registerCommand(std::shared_ptr<RenderCommand> command);
 
         static RenderSystem* create(int renderSystem);
         
@@ -63,13 +64,17 @@ NXS_NAMESPACE {
     protected:
         virtual void clear() = 0;
         virtual void swapBuffer() = 0;
+        /// Bind @c shader to the current rendering pipeline.
+        virtual void useShader(std::shared_ptr<const Shader> shader) const = 0;
+        virtual void execute(std::shared_ptr<const RenderCommand> command) const = 0;
     
     protected:
         void* _renderContext = nullptr;
         SDL_Window* _window = nullptr;
         
         Color4F _clearColor = COLOR4F_BLACK;
-        std::vector<const RenderCommand*> _commandPools;
+        uint32_t _bindingShader = 0;
+        std::vector<std::shared_ptr<RenderCommand>> _commandPools;
     };
 }
 

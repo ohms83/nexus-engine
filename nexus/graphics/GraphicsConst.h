@@ -9,8 +9,6 @@ NXS_NAMESPACE {
     const int RENDER_SYSTEM_GL              = 1;
     const int RENDER_SYSTEM_VULKAN          = 2;
     
-    const int UNDEFINED                     = 0xFFFF;
-    
     /* Buffer usages */
     const int STREAM_DRAW                   = 0x88E0;
     const int STREAM_READ                   = 0x88E1;

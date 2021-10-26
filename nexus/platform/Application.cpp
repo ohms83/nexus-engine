@@ -64,23 +64,26 @@ void Application::mainLoop()
             if (event.type == SDL_QUIT) {
                 _running = false;
             }
+            
             onEvent(event);
-            onUpdate(dt);
-            
-            _renderSystem->beginDraw();
-            _renderSystem->beginDrawGui();
-            
-            _renderSystem->draw();
-            renderUI();
-            
-            _renderSystem->endDrawGui();
-            _renderSystem->endDraw();
         }
+        
+        onUpdate(dt);
+        draw();
     }
 }
 
-void Application::renderUI()
+void Application::draw()
 {
+    _renderSystem->beginDraw();
+    _renderSystem->beginDrawGui();
+    
+    // Calling child class' screen rendering function here.
+    onDraw(*_renderSystem);
+    _renderSystem->draw();
+    
+    _renderSystem->endDrawGui();
+    _renderSystem->endDraw();
 }
 
 void Application::onInit()
@@ -92,6 +95,10 @@ void Application::onUpdate(float dt)
 }
 
 void Application::onEvent(const SDL_Event& event)
+{
+}
+
+void Application::onDraw(RenderSystem& renderSystem)
 {
 }
 

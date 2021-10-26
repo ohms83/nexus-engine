@@ -36,13 +36,13 @@ NXS_NAMESPACE {
 
         void init(const Info& info);
         void mainLoop();
-        
-        virtual void renderUI();
+        void draw();
 
     protected:
         virtual void onInit();
         virtual void onUpdate(float dt);
         virtual void onEvent(const SDL_Event& event);
+        virtual void onDraw(RenderSystem& renderSystem);
         
         RenderSystem& getRenderSystem();
 
