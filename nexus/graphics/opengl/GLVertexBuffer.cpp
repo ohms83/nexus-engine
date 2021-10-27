@@ -100,3 +100,22 @@ void GLVertexBuffer::initImpl(const VertexBufferCreateInfo& createInfo)
     glBindVertexArray(0);
     CHECK_GL_ERROR();
 }
+
+void GLVertexBuffer::updateVertexData(float* vertices, uint32_t* indices)
+{
+    auto& description = _info.description;
+    if (vertices)
+    {
+        glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+        CHECK_GL_ERROR();
+        glBufferSubData(GL_ARRAY_BUFFER, 0, description.getVertexSize() * _info.vertexCount, vertices);
+        CHECK_GL_ERROR();
+    }
+    if (indices)
+    {
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ebo);
+        CHECK_GL_ERROR();
+        glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(uint32_t) * _info.indexCount, indices);
+        CHECK_GL_ERROR();
+    }
+}

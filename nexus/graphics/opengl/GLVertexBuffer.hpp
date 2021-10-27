@@ -33,6 +33,8 @@ NXS_NAMESPACE {
             return _vao;
         }
         
+        void updateVertexData(float* vertices, uint32_t* indices) override;
+        
     private:
         GLuint _vbo = 0;
         GLuint _vao = 0;
