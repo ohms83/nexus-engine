@@ -42,6 +42,9 @@ NXS_NAMESPACE {
                 return false;
             }
         }
+        
+        /// Concatenate strings from @c stringList and put the specified @c separator between them.
+        static std::string join( const std::vector<std::string>& stringList, const std::string& separator );
 
         static const std::string DELIMITERS;
     };

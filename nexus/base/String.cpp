@@ -9,7 +9,7 @@ const string String::DELIMITERS = " \f\n\r\t\v";
 
 string String::trim(const string& original, const string delimiters)
 {
-    string result = std::move(trimLeft(original, delimiters));
+    string result = trimLeft(original, delimiters);
     return trimRight(result, delimiters);
 }
 
@@ -20,7 +20,7 @@ string String::trimLeft(const string& original, const string delimiters)
     
     if(index != string::npos)
     {
-        result = std::move(original.substr(index));
+        result = original.substr(index);
     }
 
     return result;
@@ -33,7 +33,7 @@ string String::trimRight(const string& original, const string delimiters)
     
     if(index != string::npos)
     {
-        result = std::move(original.substr(index));
+        result = original.substr(index);
     }
 
     return result;
@@ -61,4 +61,22 @@ vector<string> String::split(const string& str, const std::string& delimeters)
     }
     
     return tokens;
+}
+
+std::string String::join( const std::vector<std::string>& stringList, const std::string& separator )
+{
+    std::stringstream ss;
+    const size_t numStr = stringList.size();
+    
+    for (size_t i = 0; i < numStr; ++i)
+    {
+        const string& str = stringList[i];
+        
+        ss << str;
+        if( i != numStr - 1) {
+            ss << separator;
+        }
+    }
+    
+    return ss.str();
 }
