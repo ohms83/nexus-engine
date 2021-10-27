@@ -3,6 +3,7 @@
 #define __NEXUS_HEADER__
 
 #include "NxsDefine.h"
+#include "base/Math.hpp"
 #include "base/ResourceManager.hpp"
 #include "base/String.hpp"
 #include "base/SystemClock.hpp"

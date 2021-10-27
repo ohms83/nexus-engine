@@ -380,6 +380,8 @@
 		87B8CD32272164340087BA8B /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 87B8C64427214D520087BA8B /* OpenGL.framework */; };
 		87B8CD37272171690087BA8B /* Shader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 87B8CD35272171690087BA8B /* Shader.cpp */; };
 		87B8CD38272171690087BA8B /* Shader.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 87B8CD36272171690087BA8B /* Shader.hpp */; };
+		87C06F7227299FCE00DBE4D4 /* Math.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 87C06F7027299FCD00DBE4D4 /* Math.cpp */; };
+		87C06F7327299FCE00DBE4D4 /* Math.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 87C06F7127299FCE00DBE4D4 /* Math.hpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -983,6 +985,8 @@
 		87B8CD2E272164220087BA8B /* 02-FirstPolygon.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "02-FirstPolygon.entitlements"; sourceTree = "<group>"; };
 		87B8CD35272171690087BA8B /* Shader.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Shader.cpp; sourceTree = "<group>"; };
 		87B8CD36272171690087BA8B /* Shader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Shader.hpp; sourceTree = "<group>"; };
+		87C06F7027299FCD00DBE4D4 /* Math.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Math.cpp; sourceTree = "<group>"; };
+		87C06F7127299FCE00DBE4D4 /* Math.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Math.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1295,6 +1299,8 @@
 				87B8C87B27214E050087BA8B /* SystemClock.cpp */,
 				87B8C88027214E050087BA8B /* SystemClock.hpp */,
 				87B8C88127214E050087BA8B /* Utils.hpp */,
+				87C06F7027299FCD00DBE4D4 /* Math.cpp */,
+				87C06F7127299FCE00DBE4D4 /* Math.hpp */,
 			);
 			path = base;
 			sourceTree = "<group>";
@@ -1887,6 +1893,7 @@
 				87B8CC4D27214E5F0087BA8B /* vector_packing.hpp in Headers */,
 				870FD54F2723D6D800A376DD /* imstb_rectpack.h in Headers */,
 				87B8CC4027214E5F0087BA8B /* vector_ulp.hpp in Headers */,
+				87C06F7327299FCE00DBE4D4 /* Math.hpp in Headers */,
 				87B8CC4427214E5F0087BA8B /* matrix_uint2x2.hpp in Headers */,
 				87B8CBE827214E5F0087BA8B /* matrix_float2x4_precision.hpp in Headers */,
 				87B8CC7527214E5F0087BA8B /* qualifier.hpp in Headers */,
@@ -2353,6 +2360,7 @@
 				870FD4E727219F7900A376DD /* GLVertexBuffer.cpp in Sources */,
 				870FD5512723D6D800A376DD /* imgui_demo.cpp in Sources */,
 				87B8C89027214E050087BA8B /* VertexBuffer.cpp in Sources */,
+				87C06F7227299FCE00DBE4D4 /* Math.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
