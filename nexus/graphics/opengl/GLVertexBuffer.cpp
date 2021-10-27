@@ -101,16 +101,19 @@ void GLVertexBuffer::initImpl(const VertexBufferCreateInfo& createInfo)
     CHECK_GL_ERROR();
 }
 
-void GLVertexBuffer::updateVertexData(float* vertices, uint32_t* indices)
+void GLVertexBuffer::updateVertexData(float* vertices)
 {
-    auto& description = _info.description;
     if (vertices)
     {
         glBindBuffer(GL_ARRAY_BUFFER, _vbo);
         CHECK_GL_ERROR();
-        glBufferSubData(GL_ARRAY_BUFFER, 0, description.getVertexSize() * _info.vertexCount, vertices);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, _info.description.getVertexSize() * _info.vertexCount, vertices);
         CHECK_GL_ERROR();
     }
+}
+
+void GLVertexBuffer::updateIndexData(uint32_t* indices)
+{
     if (indices)
     {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ebo);

@@ -178,14 +178,14 @@ protected:
                 for (auto& vertex : _quadVertices) {
                     vertex.color() = _quadColor;
                 }
-                _quadVertexBuffer->updateVertexData((float*)_quadVertices.data(), _quadIndices.data());
+                _quadVertexBuffer->updateVertexData((float*)_quadVertices.data());
             }
             if (ImGui::ColorEdit4("Triangle's Color", (float*)&_triangleColor))
             {
                 for (auto& vertex : _triangleVertices) {
                     vertex.color() = _triangleColor;
                 }
-                _triangleVertexBuffer->updateVertexData((float*)_triangleVertices.data(), nullptr);
+                _triangleVertexBuffer->updateVertexData((float*)_triangleVertices.data());
             }
             if (ImGui::ColorEdit4("Background Color", (float*)&_bgColor))
             {

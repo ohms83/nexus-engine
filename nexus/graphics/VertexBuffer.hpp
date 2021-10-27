@@ -53,7 +53,8 @@ NXS_NAMESPACE {
             return nexus::getPolygonCount(_info.primitiveType, _info.vertexCount);
         }
         
-        virtual void updateVertexData(float* vertices, uint32_t* indices) = 0;
+        virtual void updateVertexData(float* vertices) = 0;
+        virtual void updateIndexData(uint32_t* indices) = 0;
         
     protected:
         /// Child class's implementation of init function.
