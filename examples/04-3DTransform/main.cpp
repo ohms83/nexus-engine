@@ -142,37 +142,6 @@ protected:
     
     void onDraw(nexus::RenderSystem& renderSystem) override
     {
-#if 0
-        GLuint location = glGetUniformLocation(_shader->getProgramId(), "matrixMVP");
-        GLuint shaderId = _shader->getProgramId();
-        glUseProgram(shaderId);
-        CHECK_GL_ERROR();
-
-        for (const auto& node : _nodes)
-        {
-            glm::mat4 mvp = _projection * _view * node.getTransform();
-            glUniformMatrix4fv(location, 1, GL_FALSE, (GLfloat*)&mvp);
-            CHECK_GL_ERROR();
-
-            const nexus::GLVertexBuffer* glVertexBuffer = dynamic_cast<const nexus::GLVertexBuffer*>(node.vertexBuffer.get());
-            if (!glVertexBuffer) {
-                continue;
-            }
-
-            const nexus::VertexBufferInfo& bufferInfo = glVertexBuffer->getInfo();
-
-            glBindVertexArray(glVertexBuffer->getVAO());
-            CHECK_GL_ERROR();
-
-            if (bufferInfo.indexCount > 0) {
-                glDrawElements(bufferInfo.primitiveType, bufferInfo.indexCount, GL_UNSIGNED_INT, 0);
-            }
-            else {
-                glDrawArrays(bufferInfo.primitiveType, 0, bufferInfo.vertexCount);
-            }
-            CHECK_GL_ERROR();
-        }
-#else
         for (const auto& node : _nodes)
         {
             std::shared_ptr<nexus::RenderCommand> command = std::shared_ptr<nexus::RenderCommand>(new nexus::RenderCommand());
@@ -182,7 +151,6 @@ protected:
             
             renderSystem.registerCommand(command);
         }
-#endif
     }
     
     void onUpdate(float dt) override
