@@ -4,7 +4,6 @@
 
 #include "NxsDefine.h"
 #include "base/Math.hpp"
-#include "base/ResourceManager.hpp"
 #include "base/String.hpp"
 #include "base/SystemClock.hpp"
 #include "base/Utils.hpp"
@@ -26,5 +25,9 @@
 #include "pattern/Singleton.hpp"
 #include "pattern/StateMachine.hpp"
 #include "platform/Application.hpp"
+#include "resource/ResourceManager.hpp"
+#include "scene/Node.hpp"
+#include "scene/Scene.hpp"
+#include "scene/Transform.hpp"
 
 #endif // __NEXUS_HEADER__

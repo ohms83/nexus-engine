@@ -10,24 +10,30 @@
 #include <array>
 #include <cmath>
 
+#include <glm/ext.hpp>
+#include <glm/ext.hpp>
+
 #include "nexus.h"
 #include "imgui.h"
 
+void printMatrix(const glm::mat4& mtx, const std::string& name)
+{
+    printf("%s = {\n"
+           "  [%.3f] [%.3f] [%.3f] [%.3f]\n"
+           "  [%.3f] [%.3f] [%.3f] [%.3f]\n"
+           "  [%.3f] [%.3f] [%.3f] [%.3f]\n"
+           "  [%.3f] [%.3f] [%.3f] [%.3f]\n"
+           "}\n",
+           name.c_str(),
+           mtx[0][0], mtx[1][0], mtx[2][0], mtx[3][0],
+           mtx[0][1], mtx[1][1], mtx[2][1], mtx[3][1],
+           mtx[0][2], mtx[1][2], mtx[2][2], mtx[3][2],
+           mtx[0][3], mtx[1][3], mtx[2][3], mtx[3][3]);
+}
+
 struct Node
 {
-    glm::vec3 position = {};
-    glm::vec3 scale = { 1, 1, 1 };
-    glm::vec3 axis = { 0, 1, 0  };
-    float rotation = 0;
-    
-    glm::mat4 getTransform() const
-    {
-        glm::mat4 translate = glm::translate(position);
-        glm::mat4 rotate    = glm::rotate(glm::radians(rotation), axis);
-        glm::mat4 scaling   = glm::scale(scale);
-        return translate * rotate * scaling;
-    }
-    
+    nexus::Transform transform;
     std::shared_ptr<nexus::VertexBuffer> vertexBuffer;
 };
 
@@ -94,9 +100,8 @@ protected:
         vertexBuffer->init(bufferInfo);
         
         Node node;
-        node.position.x = -0.5f;
+        node.transform.setPosition(glm::vec3(-0.5f, 1.0f, 0));
         node.vertexBuffer = vertexBuffer;
-        node.axis = { 0, 0, 1 };
         _nodes.emplace_back(node);
     }
     
@@ -142,13 +147,12 @@ protected:
     
     void onDraw(nexus::RenderSystem& renderSystem) override
     {
-        for (const auto& node : _nodes)
+        for (auto& node : _nodes)
         {
             std::shared_ptr<nexus::RenderCommand> command = std::shared_ptr<nexus::RenderCommand>(new nexus::RenderCommand());
             command->addVertexBuffer(node.vertexBuffer);
             command->setShader(_shader);
-            command->setUniform("matrixMVP", _projection * _view * node.getTransform());
-            
+            command->setUniform("matrixMVP", _projection * _view * node.transform.getMatrix());
             renderSystem.registerCommand(command);
         }
     }
@@ -174,7 +178,7 @@ protected:
         _cameraAccel = 0;
         
         // Rotate quad
-        _nodes[0].rotation += ROTATION_SPEED * dt;
+        _nodes[0].transform.rotate(ROTATION_SPEED * dt, glm::vec3 { 0, 0, 1 });
     }
     
     void onEvent(const SDL_Event& event) override

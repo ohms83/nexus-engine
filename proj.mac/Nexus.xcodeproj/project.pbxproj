@@ -382,6 +382,12 @@
 		87B8CD38272171690087BA8B /* Shader.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 87B8CD36272171690087BA8B /* Shader.hpp */; };
 		87C06F7227299FCE00DBE4D4 /* Math.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 87C06F7027299FCD00DBE4D4 /* Math.cpp */; };
 		87C06F7327299FCE00DBE4D4 /* Math.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 87C06F7127299FCE00DBE4D4 /* Math.hpp */; };
+		87C06F78272A3C4000DBE4D4 /* Scene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 87C06F76272A3C4000DBE4D4 /* Scene.cpp */; };
+		87C06F79272A3C4000DBE4D4 /* Scene.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 87C06F77272A3C4000DBE4D4 /* Scene.hpp */; };
+		87C06F7C272A3CD700DBE4D4 /* Node.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 87C06F7A272A3CD700DBE4D4 /* Node.cpp */; };
+		87C06F7D272A3CD700DBE4D4 /* Node.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 87C06F7B272A3CD700DBE4D4 /* Node.hpp */; };
+		87C06F87272A938900DBE4D4 /* Transform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 87C06F85272A938900DBE4D4 /* Transform.cpp */; };
+		87C06F88272A938900DBE4D4 /* Transform.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 87C06F86272A938900DBE4D4 /* Transform.hpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -987,6 +993,12 @@
 		87B8CD36272171690087BA8B /* Shader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Shader.hpp; sourceTree = "<group>"; };
 		87C06F7027299FCD00DBE4D4 /* Math.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Math.cpp; sourceTree = "<group>"; };
 		87C06F7127299FCE00DBE4D4 /* Math.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Math.hpp; sourceTree = "<group>"; };
+		87C06F76272A3C4000DBE4D4 /* Scene.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Scene.cpp; sourceTree = "<group>"; };
+		87C06F77272A3C4000DBE4D4 /* Scene.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Scene.hpp; sourceTree = "<group>"; };
+		87C06F7A272A3CD700DBE4D4 /* Node.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Node.cpp; sourceTree = "<group>"; };
+		87C06F7B272A3CD700DBE4D4 /* Node.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Node.hpp; sourceTree = "<group>"; };
+		87C06F85272A938900DBE4D4 /* Transform.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Transform.cpp; sourceTree = "<group>"; };
+		87C06F86272A938900DBE4D4 /* Transform.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Transform.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1200,6 +1212,8 @@
 		87B8C64827214E040087BA8B /* nexus */ = {
 			isa = PBXGroup;
 			children = (
+				87C06F75272A3C2100DBE4D4 /* scene */,
+				87C06F74272A3B9900DBE4D4 /* resource */,
 				87B8C87A27214E050087BA8B /* base */,
 				87B8C66027214E040087BA8B /* graphics */,
 				87B8C64E27214E040087BA8B /* io */,
@@ -1293,7 +1307,6 @@
 		87B8C87A27214E050087BA8B /* base */ = {
 			isa = PBXGroup;
 			children = (
-				87B8C87D27214E050087BA8B /* ResourceManager.hpp */,
 				87B8C87E27214E050087BA8B /* String.cpp */,
 				87B8C87F27214E050087BA8B /* String.hpp */,
 				87B8C87B27214E050087BA8B /* SystemClock.cpp */,
@@ -1815,6 +1828,27 @@
 			path = "01-HelloWorld";
 			sourceTree = "<group>";
 		};
+		87C06F74272A3B9900DBE4D4 /* resource */ = {
+			isa = PBXGroup;
+			children = (
+				87B8C87D27214E050087BA8B /* ResourceManager.hpp */,
+			);
+			path = resource;
+			sourceTree = "<group>";
+		};
+		87C06F75272A3C2100DBE4D4 /* scene */ = {
+			isa = PBXGroup;
+			children = (
+				87C06F76272A3C4000DBE4D4 /* Scene.cpp */,
+				87C06F77272A3C4000DBE4D4 /* Scene.hpp */,
+				87C06F7A272A3CD700DBE4D4 /* Node.cpp */,
+				87C06F7B272A3CD700DBE4D4 /* Node.hpp */,
+				87C06F85272A938900DBE4D4 /* Transform.cpp */,
+				87C06F86272A938900DBE4D4 /* Transform.hpp */,
+			);
+			path = scene;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -2031,6 +2065,7 @@
 				87B8CC8D27214E5F0087BA8B /* type_mat2x4.hpp in Headers */,
 				87B8CC8627214E5F0087BA8B /* _swizzle_func.hpp in Headers */,
 				87B8CC1F27214E5F0087BA8B /* quaternion_double.hpp in Headers */,
+				87C06F88272A938900DBE4D4 /* Transform.hpp in Headers */,
 				87B8CBE627214E5F0087BA8B /* matrix_common.hpp in Headers */,
 				87B8CC2927214E5F0087BA8B /* vector_uint3_sized.hpp in Headers */,
 				87B8CC6D27214E5F0087BA8B /* platform.h in Headers */,
@@ -2071,6 +2106,7 @@
 				87B8CC6527214E5F0087BA8B /* neon.h in Headers */,
 				87B8CC3927214E5F0087BA8B /* matrix_int4x3_sized.hpp in Headers */,
 				87B8CC3A27214E5F0087BA8B /* matrix_double2x4_precision.hpp in Headers */,
+				87C06F79272A3C4000DBE4D4 /* Scene.hpp in Headers */,
 				87B8CCDB27214E5F0087BA8B /* scalar_multiplication.hpp in Headers */,
 				87B8CCAD27214E5F0087BA8B /* extended_min_max.hpp in Headers */,
 				87B8CC2427214E5F0087BA8B /* matrix_float3x2_precision.hpp in Headers */,
@@ -2085,6 +2121,7 @@
 				87B8CD38272171690087BA8B /* Shader.hpp in Headers */,
 				870FD5402723D6D800A376DD /* imgui_stdlib.h in Headers */,
 				87B8CC0427214E5F0087BA8B /* matrix_double2x2_precision.hpp in Headers */,
+				87C06F7D272A3CD700DBE4D4 /* Node.hpp in Headers */,
 				87B8CCBA27214E5F0087BA8B /* bit.hpp in Headers */,
 				87B8CCB127214E5F0087BA8B /* dual_quaternion.hpp in Headers */,
 				87B8CC7727214E5F0087BA8B /* type_half.hpp in Headers */,
@@ -2350,12 +2387,15 @@
 				870FD4FB27232FBD00A376DD /* RenderCommand.cpp in Sources */,
 				87B8C88B27214E050087BA8B /* Path.cpp in Sources */,
 				870FD5462723D6D800A376DD /* imgui_widgets.cpp in Sources */,
+				87C06F78272A3C4000DBE4D4 /* Scene.cpp in Sources */,
+				87C06F7C272A3CD700DBE4D4 /* Node.cpp in Sources */,
 				87B8C88527214E050087BA8B /* Data.cpp in Sources */,
 				870FD54C2723D6D800A376DD /* imgui_impl_sdl.cpp in Sources */,
 				87B8C89227214E050087BA8B /* RenderSystem.cpp in Sources */,
 				870FD53F2723D6D800A376DD /* imgui_freetype.cpp in Sources */,
 				87B8CA0E27214E070087BA8B /* SystemClock.cpp in Sources */,
 				87B8CA1027214E070087BA8B /* String.cpp in Sources */,
+				87C06F87272A938900DBE4D4 /* Transform.cpp in Sources */,
 				870FD4F8272302D800A376DD /* GraphicsConst.cpp in Sources */,
 				870FD4E727219F7900A376DD /* GLVertexBuffer.cpp in Sources */,
 				870FD5512723D6D800A376DD /* imgui_demo.cpp in Sources */,

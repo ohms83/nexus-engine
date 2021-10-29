@@ -6,10 +6,23 @@
 
 #define GLM_EXT_INCLUDED
 #include <glm/glm.hpp>
+#include <glm/ext.hpp>
 #include <glm/gtx/transform.hpp>
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/quaternion.hpp>
+
+#include <memory>
 
 NXS_NAMESPACE {
     const int UNDEFINED     = 0xFFFF;
+    
+    /**
+     * Reference counting type. This is just an alias to std::shared_ptr
+     */
+    template<class T>
+    class Ref : public std::shared_ptr<T> {
+
+    };
 }
 
 #endif // __NXS_DEFINE_H__
