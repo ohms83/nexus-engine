@@ -1,6 +1,7 @@
 #include "String.hpp"
 
 #include <cstring>
+#include <algorithm>
 
 USING_NAMESPACE_NXS;
 using namespace std;
@@ -39,7 +40,42 @@ string String::trimRight(const string& original, const string delimiters)
     return result;
 }
 
-vector<string> String::split(const string& str, const std::string& delimeters)
+const string& String::replace(string& src, const string& subStr, const string& newSubStr)
+{
+    const size_t index = src.find(subStr);
+    if(index != src.npos)
+    {
+        src.replace(index, subStr.size(), newSubStr);
+    }
+    
+    return src;
+}
+
+const string& String::replaceAll( string& src, const string& subStr, const string& newSubStr )
+{
+    size_t index = src.find( subStr );
+    while( index != src.npos )
+    {
+        src.replace( index, subStr.size(), newSubStr );
+        index = src.find( subStr, index + newSubStr.size() );
+    }
+    
+    return src;
+}
+
+const string& String::toupper(string& str)
+{
+    transform(str.begin(), str.end(), str.begin(), ::toupper);
+    return str;
+}
+
+const string& String::tolower(string& str)
+{
+    transform(str.begin(), str.end(), str.begin(), ::tolower);
+    return str;
+}
+
+vector<string> String::split(const string& str, const string& delimeters)
 {
     vector<string> tokens;
     
@@ -63,9 +99,9 @@ vector<string> String::split(const string& str, const std::string& delimeters)
     return tokens;
 }
 
-std::string String::join( const std::vector<std::string>& stringList, const std::string& separator )
+string String::join( const vector<string>& stringList, const string& separator )
 {
-    std::stringstream ss;
+    stringstream ss;
     const size_t numStr = stringList.size();
     
     for (size_t i = 0; i < numStr; ++i)

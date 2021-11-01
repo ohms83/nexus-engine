@@ -20,6 +20,32 @@ NXS_NAMESPACE {
         static std::string trim(const std::string& original, const std::string delimeters = DELIMITERS);
         static std::string trimLeft(const std::string& original, const std::string delimeters = DELIMITERS);
         static std::string trimRight(const std::string& original, const std::string delimeters = DELIMITERS);
+        
+        /**
+         *  Find the first occurence of the given @c subStr and replace it with @c newSubStr. If the sub-string to be replaced cannot be found,
+         *  the source string will be kept unchange.
+         *  @return A constant reference of @c src.
+         */
+        static const std::string& replace(std::string& src, const std::string& subStr, const std::string& newSubStr);
+        
+        /**
+         *  Find all occurences of the given @c subStr and replace them with @c newSubStr. If the sub-string to be replaced cannot be found,
+         *  the source string will be kept unchange.
+         *  @return A constant reference of @c src.
+         */
+        static const std::string& replaceAll(std::string& src, const std::string& subStr, const std::string& newSubStr);
+        
+        /**
+         *  Transform all characters in the given string into lower case.
+         *  @return A constant reference of @c str.
+         */
+        static const std::string& tolower(std::string& str);
+        
+        /**
+         *  Transform all characters in the given string into upper case.
+         *  @return A constant reference of @c str.
+         */
+        static const std::string& toupper(std::string& str);
 
         /// Splits string into tokens.
         static std::vector<std::string> split(const std::string& str, const std::string& delimeters);
