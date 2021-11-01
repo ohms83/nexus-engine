@@ -7,6 +7,7 @@
 #include "base/String.hpp"
 #include "base/SystemClock.hpp"
 #include "base/Utils.hpp"
+#include "debug/Debug.hpp"
 #include "graphics/Color.hpp"
 #include "graphics/GraphicsConst.h"
 #include "graphics/RenderCommand.hpp"

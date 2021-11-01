@@ -388,6 +388,8 @@
 		87C06F7D272A3CD700DBE4D4 /* Node.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 87C06F7B272A3CD700DBE4D4 /* Node.hpp */; };
 		87C06F87272A938900DBE4D4 /* Transform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 87C06F85272A938900DBE4D4 /* Transform.cpp */; };
 		87C06F88272A938900DBE4D4 /* Transform.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 87C06F86272A938900DBE4D4 /* Transform.hpp */; };
+		87C878C3272BC25D007DF1F0 /* Debug.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 87C878C1272BC25D007DF1F0 /* Debug.cpp */; };
+		87C878C4272BC25D007DF1F0 /* Debug.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 87C878C2272BC25D007DF1F0 /* Debug.hpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -999,6 +1001,8 @@
 		87C06F7B272A3CD700DBE4D4 /* Node.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Node.hpp; sourceTree = "<group>"; };
 		87C06F85272A938900DBE4D4 /* Transform.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Transform.cpp; sourceTree = "<group>"; };
 		87C06F86272A938900DBE4D4 /* Transform.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Transform.hpp; sourceTree = "<group>"; };
+		87C878C1272BC25D007DF1F0 /* Debug.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Debug.cpp; sourceTree = "<group>"; };
+		87C878C2272BC25D007DF1F0 /* Debug.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Debug.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1212,6 +1216,7 @@
 		87B8C64827214E040087BA8B /* nexus */ = {
 			isa = PBXGroup;
 			children = (
+				87C878C0272BC02D007DF1F0 /* debug */,
 				87C06F75272A3C2100DBE4D4 /* scene */,
 				87C06F74272A3B9900DBE4D4 /* resource */,
 				87B8C87A27214E050087BA8B /* base */,
@@ -1849,6 +1854,15 @@
 			path = scene;
 			sourceTree = "<group>";
 		};
+		87C878C0272BC02D007DF1F0 /* debug */ = {
+			isa = PBXGroup;
+			children = (
+				87C878C1272BC25D007DF1F0 /* Debug.cpp */,
+				87C878C2272BC25D007DF1F0 /* Debug.hpp */,
+			);
+			path = debug;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -2080,6 +2094,7 @@
 				87B8CC5327214E5F0087BA8B /* vector_uint2_sized.hpp in Headers */,
 				87B8CC7627214E5F0087BA8B /* _noise.hpp in Headers */,
 				870FD54A2723D6D800A376DD /* imgui_impl_opengl3_loader.h in Headers */,
+				87C878C4272BC25D007DF1F0 /* Debug.hpp in Headers */,
 				870FD5442723D6D800A376DD /* imstb_textedit.h in Headers */,
 				87B8CBF727214E5F0087BA8B /* vector_uint2.hpp in Headers */,
 				87B8CBEE27214E5F0087BA8B /* matrix_int3x4_sized.hpp in Headers */,
@@ -2377,6 +2392,7 @@
 				870FD5412723D6D800A376DD /* imgui_stdlib.cpp in Sources */,
 				87B8C89727214E050087BA8B /* GLRenderSystem.cpp in Sources */,
 				870FD5522723D6D800A376DD /* imgui_draw.cpp in Sources */,
+				87C878C3272BC25D007DF1F0 /* Debug.cpp in Sources */,
 				87B8C89127214E050087BA8B /* Color.cpp in Sources */,
 				87B8C88627214E050087BA8B /* File.cpp in Sources */,
 				870FD4E327218ADA00A376DD /* Vertex.cpp in Sources */,
