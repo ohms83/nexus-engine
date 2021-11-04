@@ -3,6 +3,7 @@
 #define __NEXUS_HEADER__
 
 #include "NxsDefine.h"
+#include "base/CString.hpp"
 #include "base/Math.hpp"
 #include "base/String.hpp"
 #include "base/SystemClock.hpp"
@@ -26,6 +27,9 @@
 #include "pattern/Singleton.hpp"
 #include "pattern/StateMachine.hpp"
 #include "platform/Application.hpp"
+#include "resource/Mesh.hpp"
+#include "resource/MeshResourceManager.hpp"
+#include "resource/OBJMesh.hpp"
 #include "resource/ResourceManager.hpp"
 #include "scene/Node.hpp"
 #include "scene/Scene.hpp"
