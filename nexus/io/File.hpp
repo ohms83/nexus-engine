@@ -44,6 +44,10 @@ NXS_NAMESPACE {
         uint64_t getSize() const {
             return _size;
         }
+        
+        std::fstream& getStream() {
+            return _stream;
+        }
 
         /// Opens and returns the data read from specified path.
         static Data readData(const std::string& path, Type type);
