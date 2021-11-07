@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		870555672733761400307BBE /* OBJMeshLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 870555652733761400307BBE /* OBJMeshLoader.cpp */; };
+		870555682733761400307BBE /* OBJMeshLoader.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 870555662733761400307BBE /* OBJMeshLoader.hpp */; };
+		8705556B2733784000307BBE /* CString.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 870555692733784000307BBE /* CString.cpp */; };
+		8705556C2733784000307BBE /* CString.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 8705556A2733784000307BBE /* CString.hpp */; };
 		870FD4C42721767100A376DD /* GLShader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 870FD4C22721767100A376DD /* GLShader.cpp */; };
 		870FD4C52721767100A376DD /* GLShader.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 870FD4C32721767100A376DD /* GLShader.hpp */; };
 		870FD4DE272187CF00A376DD /* SDL2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 870FD4DD272187CF00A376DD /* SDL2.framework */; };
@@ -54,6 +58,10 @@
 		870FD5662724349900A376DD /* SDL2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 870FD4DD272187CF00A376DD /* SDL2.framework */; };
 		870FD567272434A300A376DD /* libNexus.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 87B8C63C272147B20087BA8B /* libNexus.a */; };
 		870FD56B2724380D00A376DD /* resources in CopyFiles */ = {isa = PBXBuildFile; fileRef = 870FD5692724366700A376DD /* resources */; };
+		879723A0272ED019000D83C2 /* Mesh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8797239E272ED019000D83C2 /* Mesh.cpp */; };
+		879723A1272ED019000D83C2 /* Mesh.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 8797239F272ED019000D83C2 /* Mesh.hpp */; };
+		879723A4272EF5B1000D83C2 /* MeshResourceManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 879723A2272EF5B1000D83C2 /* MeshResourceManager.cpp */; };
+		879723A5272EF5B1000D83C2 /* MeshResourceManager.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 879723A3272EF5B1000D83C2 /* MeshResourceManager.hpp */; };
 		87B8C64527214D520087BA8B /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 87B8C64427214D520087BA8B /* OpenGL.framework */; };
 		87B8C88227214E050087BA8B /* Application.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 87B8C64B27214E040087BA8B /* Application.hpp */; };
 		87B8C88327214E050087BA8B /* Application.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 87B8C64D27214E040087BA8B /* Application.cpp */; };
@@ -474,6 +482,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		870555652733761400307BBE /* OBJMeshLoader.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = OBJMeshLoader.cpp; sourceTree = "<group>"; };
+		870555662733761400307BBE /* OBJMeshLoader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = OBJMeshLoader.hpp; sourceTree = "<group>"; };
+		870555692733784000307BBE /* CString.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CString.cpp; sourceTree = "<group>"; };
+		8705556A2733784000307BBE /* CString.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = CString.hpp; sourceTree = "<group>"; };
 		870FD4C22721767100A376DD /* GLShader.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = GLShader.cpp; sourceTree = "<group>"; };
 		870FD4C32721767100A376DD /* GLShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = GLShader.hpp; sourceTree = "<group>"; };
 		870FD4DD272187CF00A376DD /* SDL2.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL2.framework; path = Frameworks/SDL2.framework; sourceTree = "<group>"; };
@@ -527,6 +539,10 @@
 		870FD55E2724345100A376DD /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		870FD568272434D500A376DD /* 04-3DTransform.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "04-3DTransform.entitlements"; sourceTree = "<group>"; };
 		870FD5692724366700A376DD /* resources */ = {isa = PBXFileReference; lastKnownFileType = folder; name = resources; path = ../resources; sourceTree = "<group>"; };
+		8797239E272ED019000D83C2 /* Mesh.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Mesh.cpp; sourceTree = "<group>"; };
+		8797239F272ED019000D83C2 /* Mesh.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Mesh.hpp; sourceTree = "<group>"; };
+		879723A2272EF5B1000D83C2 /* MeshResourceManager.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = MeshResourceManager.cpp; sourceTree = "<group>"; };
+		879723A3272EF5B1000D83C2 /* MeshResourceManager.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = MeshResourceManager.hpp; sourceTree = "<group>"; };
 		87B8C63C272147B20087BA8B /* libNexus.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libNexus.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		87B8C64427214D520087BA8B /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
 		87B8C64B27214E040087BA8B /* Application.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Application.hpp; sourceTree = "<group>"; };
@@ -1216,10 +1232,8 @@
 		87B8C64827214E040087BA8B /* nexus */ = {
 			isa = PBXGroup;
 			children = (
-				87C878C0272BC02D007DF1F0 /* debug */,
-				87C06F75272A3C2100DBE4D4 /* scene */,
-				87C06F74272A3B9900DBE4D4 /* resource */,
 				87B8C87A27214E050087BA8B /* base */,
+				87C878C0272BC02D007DF1F0 /* debug */,
 				87B8C66027214E040087BA8B /* graphics */,
 				87B8C64E27214E040087BA8B /* io */,
 				87B8C65527214E040087BA8B /* nexus.h */,
@@ -1227,6 +1241,8 @@
 				87B8C65627214E040087BA8B /* os */,
 				87B8C65A27214E040087BA8B /* pattern */,
 				87B8C64A27214E040087BA8B /* platform */,
+				87C06F74272A3B9900DBE4D4 /* resource */,
+				87C06F75272A3C2100DBE4D4 /* scene */,
 				87B8CA1427214E5E0087BA8B /* thirdparty */,
 			);
 			name = nexus;
@@ -1312,13 +1328,15 @@
 		87B8C87A27214E050087BA8B /* base */ = {
 			isa = PBXGroup;
 			children = (
+				870555692733784000307BBE /* CString.cpp */,
+				8705556A2733784000307BBE /* CString.hpp */,
+				87C06F7027299FCD00DBE4D4 /* Math.cpp */,
+				87C06F7127299FCE00DBE4D4 /* Math.hpp */,
 				87B8C87E27214E050087BA8B /* String.cpp */,
 				87B8C87F27214E050087BA8B /* String.hpp */,
 				87B8C87B27214E050087BA8B /* SystemClock.cpp */,
 				87B8C88027214E050087BA8B /* SystemClock.hpp */,
 				87B8C88127214E050087BA8B /* Utils.hpp */,
-				87C06F7027299FCD00DBE4D4 /* Math.cpp */,
-				87C06F7127299FCE00DBE4D4 /* Math.hpp */,
 			);
 			path = base;
 			sourceTree = "<group>";
@@ -1836,6 +1854,12 @@
 		87C06F74272A3B9900DBE4D4 /* resource */ = {
 			isa = PBXGroup;
 			children = (
+				8797239E272ED019000D83C2 /* Mesh.cpp */,
+				8797239F272ED019000D83C2 /* Mesh.hpp */,
+				879723A2272EF5B1000D83C2 /* MeshResourceManager.cpp */,
+				879723A3272EF5B1000D83C2 /* MeshResourceManager.hpp */,
+				870555652733761400307BBE /* OBJMeshLoader.cpp */,
+				870555662733761400307BBE /* OBJMeshLoader.hpp */,
 				87B8C87D27214E050087BA8B /* ResourceManager.hpp */,
 			);
 			path = resource;
@@ -1924,6 +1948,7 @@
 				87B8CC1E27214E5F0087BA8B /* vector_bool2_precision.hpp in Headers */,
 				87B8CCD627214E5F0087BA8B /* color_encoding.hpp in Headers */,
 				870FD5452723D6D800A376DD /* imconfig.h in Headers */,
+				8705556C2733784000307BBE /* CString.hpp in Headers */,
 				87B8CBF927214E5F0087BA8B /* vector_reciprocal.hpp in Headers */,
 				87B8CCCA27214E5F0087BA8B /* wrap.hpp in Headers */,
 				870FD53D2723D6D700A376DD /* imgui_single_file.h in Headers */,
@@ -2078,6 +2103,7 @@
 				87B8CC3127214E5F0087BA8B /* vector_double1_precision.hpp in Headers */,
 				87B8CC8D27214E5F0087BA8B /* type_mat2x4.hpp in Headers */,
 				87B8CC8627214E5F0087BA8B /* _swizzle_func.hpp in Headers */,
+				879723A5272EF5B1000D83C2 /* MeshResourceManager.hpp in Headers */,
 				87B8CC1F27214E5F0087BA8B /* quaternion_double.hpp in Headers */,
 				87C06F88272A938900DBE4D4 /* Transform.hpp in Headers */,
 				87B8CBE627214E5F0087BA8B /* matrix_common.hpp in Headers */,
@@ -2118,6 +2144,7 @@
 				87B8CC0727214E5F0087BA8B /* vector_uint4.hpp in Headers */,
 				87B8CC0627214E5F0087BA8B /* quaternion_float.hpp in Headers */,
 				87B8CC7227214E5F0087BA8B /* trigonometric.hpp in Headers */,
+				870555682733761400307BBE /* OBJMeshLoader.hpp in Headers */,
 				87B8CC6527214E5F0087BA8B /* neon.h in Headers */,
 				87B8CC3927214E5F0087BA8B /* matrix_int4x3_sized.hpp in Headers */,
 				87B8CC3A27214E5F0087BA8B /* matrix_double2x4_precision.hpp in Headers */,
@@ -2168,6 +2195,7 @@
 				87B8CC0127214E5F0087BA8B /* matrix_int3x3_sized.hpp in Headers */,
 				87B8C88227214E050087BA8B /* Application.hpp in Headers */,
 				87B8CBED27214E5F0087BA8B /* vector_float2_precision.hpp in Headers */,
+				879723A1272ED019000D83C2 /* Mesh.hpp in Headers */,
 				87B8CCAE27214E5F0087BA8B /* fast_square_root.hpp in Headers */,
 				87B8CC2A27214E5F0087BA8B /* vector_int3.hpp in Headers */,
 				87B8CC1A27214E5F0087BA8B /* vector_float2.hpp in Headers */,
@@ -2384,6 +2412,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				870555672733761400307BBE /* OBJMeshLoader.cpp in Sources */,
 				87B8CD37272171690087BA8B /* Shader.cpp in Sources */,
 				870FD54D2723D6D800A376DD /* imgui.cpp in Sources */,
 				870FD4C42721767100A376DD /* GLShader.cpp in Sources */,
@@ -2407,13 +2436,16 @@
 				87C06F7C272A3CD700DBE4D4 /* Node.cpp in Sources */,
 				87B8C88527214E050087BA8B /* Data.cpp in Sources */,
 				870FD54C2723D6D800A376DD /* imgui_impl_sdl.cpp in Sources */,
+				879723A0272ED019000D83C2 /* Mesh.cpp in Sources */,
 				87B8C89227214E050087BA8B /* RenderSystem.cpp in Sources */,
 				870FD53F2723D6D800A376DD /* imgui_freetype.cpp in Sources */,
 				87B8CA0E27214E070087BA8B /* SystemClock.cpp in Sources */,
 				87B8CA1027214E070087BA8B /* String.cpp in Sources */,
+				8705556B2733784000307BBE /* CString.cpp in Sources */,
 				87C06F87272A938900DBE4D4 /* Transform.cpp in Sources */,
 				870FD4F8272302D800A376DD /* GraphicsConst.cpp in Sources */,
 				870FD4E727219F7900A376DD /* GLVertexBuffer.cpp in Sources */,
+				879723A4272EF5B1000D83C2 /* MeshResourceManager.cpp in Sources */,
 				870FD5512723D6D800A376DD /* imgui_demo.cpp in Sources */,
 				87B8C89027214E050087BA8B /* VertexBuffer.cpp in Sources */,
 				87C06F7227299FCE00DBE4D4 /* Math.cpp in Sources */,

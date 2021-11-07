@@ -29,7 +29,7 @@
 #include "platform/Application.hpp"
 #include "resource/Mesh.hpp"
 #include "resource/MeshResourceManager.hpp"
-#include "resource/OBJMesh.hpp"
+#include "resource/OBJMeshLoader.hpp"
 #include "resource/ResourceManager.hpp"
 #include "scene/Node.hpp"
 #include "scene/Scene.hpp"

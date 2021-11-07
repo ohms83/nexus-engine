@@ -19,18 +19,14 @@ NXS_NAMESPACE {
     /**
      * Reference counting type. This is just an alias to @c std::shared_ptr.
      */
-    template<class T>
-    class Ref : public std::shared_ptr<T> {
-
-    };
+    template<typename T>
+    using Ref = std::shared_ptr<T>;
     
     /**
      * Auto-release pointer. This is jus an alias to @c std::unique_ptr.
      */
-    template<class T>
-    class Ptr : public std::unique_ptr<T> {
-        
-    };
+    template<typename T>
+    using Ptr = std::unique_ptr<T>;
 }
 
 #endif // __NXS_DEFINE_H__

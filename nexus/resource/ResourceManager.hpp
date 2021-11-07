@@ -8,6 +8,7 @@
 #include <memory>
 #include <string>
 #include <exception>
+#include <functional>
 
 NXS_NAMESPACE {
     template<typename _ResourceType>
@@ -16,34 +17,43 @@ NXS_NAMESPACE {
     public:
         /**
          * Get or create a resource from @c path .
-         * Return @c nullptr if the resource cant' be created or doesn't exist.
+         * Return @c nullptr if the resource can't be created or doesn't exist.
          */
-        std::shared_ptr<_ResourceType> get(const std::string& path)
+        Ref<_ResourceType> get(const std::string& path)
         {
-            std::shared_ptr<_ResourceType> result;
+            size_t resourceId = std::hash<std::string> {} (path);
+            Ref<_ResourceType> result = get(resourceId);
 
-            auto itr = _resources.find(path);
-            if (itr == _resources.end()) {
-                result = std::shared_ptr<_ResourceType>(create(path));
-                _resources.emplace(path, result);
-            }
-            else {
-                result = itr->second;
+            if (!result) {
+                result = Ref<_ResourceType>(create(path));
+                if (result) {
+                _resources.emplace(resourceId, result);
+                }
             }
 
             return result;
+        }
+        
+        /**
+         * Get a resource from the @c resourceId .
+         * Return @c nullptr if the resource doesn't exist.
+         */
+        Ref<_ResourceType> get(uint64_t resourceId)
+        {
+            auto itr = _resources.find(resourceId);
+            return (itr != _resources.end()) ? itr->second : nullptr;
         }
     protected:
         /**
          * Create a resource from the specified @c path .
          */
-        virtual _ResourceType* create(const std::string& path) const
+        virtual Ref<_ResourceType> create(const std::string& path)
         {
             throw std::runtime_error("ResourceManager::create is not implemented!");
-            return nullptr;
+            return Ref<_ResourceType>();
         }
     private:
-        std::unordered_map<std::string, std::shared_ptr<_ResourceType>> _resources;
+        std::unordered_map<uint64_t, Ref<_ResourceType>> _resources;
     };
 }
 
