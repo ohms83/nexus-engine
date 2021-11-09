@@ -13,23 +13,23 @@
 #include "imgui.h"
 
 static const char *vertexShaderSource =
-"#version 410 core\n"
-"layout (location = 0) in vec3 aPos;\n"
-"layout (location = 1) in vec3 aColor;\n"
-"out vec3 vertexColor;"
-"void main()\n"
-"{\n"
-"    gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-"    vertexColor = aColor;"
-"}";
+    "#version 410 core\n"
+    "layout (location = 0) in vec3 aPos;\n"
+    "layout (location = 1) in vec3 aColor;\n"
+    "out vec3 vertexColor;"
+    "void main()\n"
+    "{\n"
+    "    gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+    "    vertexColor = aColor;"
+    "}";
 
 static const char *fragmentShaderSource =
-"#version 410 core\n"
-"in vec3 vertexColor;\n"
-"out vec4 FragColor;\n"
-"void main() {\n"
-"    FragColor = vec4(vertexColor, 1.0f);\n"
-"}";
+    "#version 410 core\n"
+    "in vec3 vertexColor;\n"
+    "out vec4 FragColor;\n"
+    "void main() {\n"
+    "    FragColor = vec4(vertexColor, 1.0f);\n"
+    "}";
 
 class ExampleApp03 : public nexus::Application
 {

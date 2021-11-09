@@ -19,10 +19,10 @@
 struct Node
 {
     nexus::Transform transform;
-    std::shared_ptr<nexus::VertexBuffer> vertexBuffer;
+    nexus::Ref<nexus::VertexBuffer> vertexBuffer;
 };
 
-class ExampleApp04 : public nexus::Application
+class ExampleApp05 : public nexus::Application
 {
 protected:
     void onInit() override
@@ -30,7 +30,7 @@ protected:
         nexus::Data vertexShaderData = nexus::File::readData("resources/shaders/vertex-color-mvp.vert", nexus::File::TEXT);
         nexus::Data fragmentShaderData = nexus::File::readData("resources/shaders/vertex-color.frag", nexus::File::TEXT);
         
-        _shader = std::shared_ptr<nexus::Shader>(getRenderSystem().createShader());
+        _shader = nexus::Ref<nexus::Shader>(getRenderSystem().createShader());
         _shader->initWithData(vertexShaderData, fragmentShaderData);
         
         creatQuad();
@@ -38,7 +38,7 @@ protected:
         
         _projection = glm::perspective(glm::radians(45.0f), (float)800 / (float)800, 0.1f, 100.0f);
         
-        getRenderSystem().setClearColor(nexus::COLOR4F_BLUE + glm::vec4( 0.2f, 0.2f, 0.0f, 0.0f ));
+        getRenderSystem().setClearColor(glm::vec4( 0.55f, 0.55f, 0.55f, 1.0f ));
     }
     
     void creatQuad()
@@ -81,7 +81,7 @@ protected:
             indices,
         };
         
-        auto vertexBuffer = std::shared_ptr<nexus::VertexBuffer>(getRenderSystem().createVertexBuffer());
+        auto vertexBuffer = nexus::Ref<nexus::VertexBuffer>(getRenderSystem().createVertexBuffer());
         vertexBuffer->init(bufferInfo);
         
         Node node;
@@ -122,7 +122,7 @@ protected:
             nullptr,
         };
         
-        auto vertexBuffer = std::shared_ptr<nexus::VertexBuffer>(getRenderSystem().createVertexBuffer());
+        auto vertexBuffer = nexus::Ref<nexus::VertexBuffer>(getRenderSystem().createVertexBuffer());
         vertexBuffer->init(bufferInfo);
         
         Node node;
@@ -134,7 +134,7 @@ protected:
     {
         for (auto& node : _nodes)
         {
-            std::shared_ptr<nexus::RenderCommand> command = std::shared_ptr<nexus::RenderCommand>(new nexus::RenderCommand());
+            nexus::Ref<nexus::RenderCommand> command = nexus::Ref<nexus::RenderCommand>(new nexus::RenderCommand());
             command->addVertexBuffer(node.vertexBuffer);
             command->setShader(_shader);
             command->setUniform("matrixMVP", _projection * _view * node.transform.getMatrix());
@@ -161,9 +161,6 @@ protected:
                             glm::vec3(0, 1, 0.0)  // Head is up (set to 0,-1,0 to look upside-down)
                             );
         _cameraAccel = 0;
-        
-        // Rotate quad
-        _nodes[0].transform.rotate(ROTATION_SPEED * dt, glm::vec3 { 0, 0, 1 });
     }
     
     void onEvent(const SDL_Event& event) override
@@ -175,8 +172,8 @@ protected:
         }
     }
 private:
-    std::shared_ptr<nexus::Shader> _shader;
-    std::vector<std::shared_ptr<nexus::VertexBuffer>> _vertexBuffers;
+    nexus::Ref<nexus::Shader> _shader;
+    std::vector<nexus::Ref<nexus::VertexBuffer>> _vertexBuffers;
     std::vector<Node> _nodes;
     
     glm::mat4 _projection;
@@ -195,9 +192,9 @@ int main(int, char** argv)
 {
     int result = EXIT_SUCCESS;
     try {
-        ExampleApp04 app;
+        ExampleApp05 app;
         app.init({
-            "3DTransform", 800, 800, nexus::RENDER_SYSTEM_GL, false
+            "MeshResource", 800, 800, nexus::RENDER_SYSTEM_GL, false
         });
         app.mainLoop();
     }

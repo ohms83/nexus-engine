@@ -24,6 +24,11 @@
 			<key>orderHint</key>
 			<integer>4</integer>
 		</dict>
+		<key>05-MeshResource.xcscheme_^#shared#^_</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>5</integer>
+		</dict>
 		<key>Nexus.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
@@ -63,6 +68,11 @@
 			<true/>
 		</dict>
 		<key>87B8CD25272164110087BA8B</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>87F163CD27381B1E004F314A</key>
 		<dict>
 			<key>primary</key>
 			<true/>
