@@ -17,6 +17,8 @@ if(UNIX AND NOT APPLE)
     # no specific variable for Linux
     set(LINUX true)
     ADD_DEFINITIONS (-DTARGET_LINUX)
+elseif(WIN32)
+    ADD_DEFINITIONS (-DTARGET_WINDOWS)
 else()
     message( FATAL_ERROR "This project is not configured for the current platform." )
 endif()
