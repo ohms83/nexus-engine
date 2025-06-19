@@ -1,0 +1,6 @@
+[submodule "nexus/thirdparty/SDL"]
+	path = nexus/thirdparty/SDL
+	url = https://github.com/libsdl-org/SDL.git
+[submodule "engine/3rdparty/SDL"]
+	path = engine/3rdparty/SDL
+	url = https://github.com/libsdl-org/SDL.git
