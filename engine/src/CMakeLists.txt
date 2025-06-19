@@ -1,4 +1,7 @@
+file(GLOB ENGINE_ROOT_SOURCES src/*.cpp)
+file(GLOB_RECURSE ENGINE_GRAPHICS_SOURCES src/graphics/*.cpp)
+
 list(APPEND ENGINE_SOURCES
-    src/Stub.cpp
-    src/Application.cpp
+    ${ENGINE_ROOT_SOURCES}
+    ${ENGINE_GRAPHICS_SOURCES}
 )

@@ -1,4 +1,5 @@
 file(GLOB ENGINE_ROOT_HEADERS include/nexus/*.h)
+file(GLOB_RECURSE ENGINE_GRAPHICS_HEADERS include/nexus/graphics/*.h)
 file(GLOB_RECURSE ENGINE_MATH_HEADERS include/nexus/math/*.h)
 
 # message("ENGINE_ROOT_HEADERS ${ENGINE_ROOT_HEADERS}")
@@ -6,5 +7,6 @@ file(GLOB_RECURSE ENGINE_MATH_HEADERS include/nexus/math/*.h)
 
 list(APPEND ENGINE_HEADERS
     ${ENGINE_ROOT_HEADERS}
+    ${ENGINE_GRAPHICS_HEADERS}
     ${ENGINE_MATH_HEADERS}
 )

@@ -11,6 +11,9 @@ Application::Application()
 
 Application::~Application()
 {
+    delete m_renderSystem;
+    m_renderSystem = nullptr;
+
     //Destroy the window
     SDL_DestroyWindow(m_window);
     m_window = nullptr;
@@ -18,7 +21,7 @@ Application::~Application()
     SDL_Quit();
 }
 
-bool Application::Init()
+bool Application::Init(const ApplicationInitInfo& info)
 {
     //Initialize SDL
     if( SDL_Init( SDL_INIT_VIDEO ) == false )
@@ -26,6 +29,19 @@ bool Application::Init()
         SDL_Log( "SDL could not initialize! SDL error: %s\n", SDL_GetError() );
         return false;
     }
+
+    m_screenWidth = info.screenWidth;
+    m_screenHeight = info.screenHeight;
+    SDL_Window* m_window = SDL_CreateWindow(
+        info.title.c_str(), m_screenWidth, m_screenHeight, SDL_WINDOW_OPENGL);
+
+    if (!m_window) {
+        SDL_Log("Window could not be created. SDL_Error: %s\n", SDL_GetError());
+        return false;
+    }
+
+    m_renderSystem = new RenderSystem(info.renderAPI);
+    assert(m_renderSystem);
 
     return Init_Internal();
 }
@@ -40,6 +56,11 @@ int Application::BeginMainLoop()
     {
         PollEvents(e);
         Update();
+
+        m_renderSystem->ClearScreen();
+        m_renderSystem->BeginDraw();
+        m_renderSystem->Draw();
+        m_renderSystem->EndDraw();
     }
     return 0;
 }
