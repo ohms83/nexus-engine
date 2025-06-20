@@ -1,7 +1,7 @@
-#include <nexus/NxsDefine.h>
+#include <format>
+#include <iostream>
+#include <ostream>
 #include <nexus/Nexus.h>
-
-extern void Test();
 
 int main()
 {

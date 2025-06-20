@@ -9,7 +9,7 @@ void Test()
 {
     constexpr auto v1 = glm::vec3(1.0f, 2.0f, 3.0f);
     constexpr auto v2 = glm::vec3(2.0f, 4.0f, -10.0f);
-    const auto v3 = nexus::Math::Lerp(v1, v2, 0.5f);
+    const auto v3 = nexus::Math::VLerp(v1, v2, 0.5f);
     std::cout << "Hello World!\n";
     std::cout << std::format("v3: {:.2f}, {:.2f}, {:.2f}!\n", v3.x, v3.y, v3.z);
 }

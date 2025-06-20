@@ -26,18 +26,19 @@ NXS_NAMESPACE
     class Application
     {
     public:
-        Application();
+        Application() = default;
         virtual ~Application();
 
         bool Init(const ApplicationInitInfo& info);
         int BeginMainLoop();
 
         void RequestQuit();
-        bool IsQuitRequested() const;
+        [[nodiscard]] bool IsQuitRequested() const;
 
-        RenderSystem& GetRenderSystem() const
+        [[nodiscard]] RenderSystem& GetRenderSystem() const
         {
             assert(m_renderSystem);
+            // ReSharper disable once CppDFANullDereference
             return *m_renderSystem;
         }
 

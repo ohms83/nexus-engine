@@ -3,11 +3,11 @@
 //
 #include "Application.h"
 
-USING_NAMESPACE_NXS;
+#if defined(SDL_PLATFORM_WIN32)
+#include <windows.h>
+#endif
 
-Application::Application()
-{
-}
+USING_NAMESPACE_NXS;
 
 Application::~Application()
 {
@@ -40,7 +40,28 @@ bool Application::Init(const ApplicationInitInfo& info)
         return false;
     }
 
-    m_renderSystem = new RenderSystem(info.renderAPI);
+    RenderSystemConfig renderConfig{};
+#if defined(SDL_PLATFORM_WIN32)
+    HWND hwnd = nullptr;
+    hwnd = CAST<HWND>(
+        SDL_GetPointerProperty(SDL_GetWindowProperties(m_window),
+            SDL_PROP_WINDOW_WIN32_HWND_POINTER, nullptr));
+    renderConfig.windowHandle = hwnd;
+#else
+    // No implementation.
+    assert(false);
+#endif
+
+    renderConfig.screenWidth = m_screenWidth;
+    renderConfig.screenHeight = m_screenHeight;
+    renderConfig.api = info.renderAPI;
+    renderConfig.vsync = false;
+#ifdef _DEBUG
+    renderConfig.debugFlags = RenderDebugFlags::NoIFS;
+#else
+    renderConfig.debugFlags = RenderDebugFlags::None;
+#endif
+    m_renderSystem = new RenderSystem(renderConfig);
     assert(m_renderSystem);
 
     return Init_Internal();
@@ -56,12 +77,10 @@ int Application::BeginMainLoop()
     {
         PollEvents(e);
         Update();
-
         m_renderSystem->ClearScreen();
         m_renderSystem->BeginDraw();
         m_renderSystem->Draw();
-        m_renderSystem->EndDraw();
-    }
+        m_renderSystem->EndDraw();    }
     return 0;
 }
 

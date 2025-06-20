@@ -21,9 +21,15 @@ target_include_directories(nexus-engine
     PUBLIC ${ENGINE_INCLUDE_DIR}
     PRIVATE ${ENGINE_INCLUDE_DIR}/nexus
     PRIVATE ${ENGINE_3RD_PARTY_DIR}/SDL/include
+    PRIVATE ${ENGINE_3RD_PARTY_DIR}/bgfx.cmake/bgfx/include
+    PRIVATE ${ENGINE_3RD_PARTY_DIR}/bgfx.cmake/bx/include
+    PRIVATE ${ENGINE_3RD_PARTY_DIR}/bgfx.cmake/bimg/include
 )
 
 target_link_libraries(nexus-engine SDL3::SDL3)
+target_link_libraries(nexus-engine bgfx)
+target_link_libraries(nexus-engine bx)
+target_link_libraries(nexus-engine bimg)
 
 install(TARGETS nexus-engine
     LIBRARY DESTINATION lib)
