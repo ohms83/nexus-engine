@@ -1,6 +1,6 @@
 [submodule "engine/3rdparty/SDL"]
 	path = engine/3rdparty/SDL
 	url = https://github.com/libsdl-org/SDL.git
-[submodule "engine/3rdparty/bgfx"]
-	path = engine/3rdparty/bgfx
-	url = https://github.com/bkaradzic/bgfx.git
+[submodule "engine/3rdparty/bgfx.cmake"]
+	path = engine/3rdparty/bgfx.cmake
+	url = git@github.com:ohms83/bgfx.cmake.git
