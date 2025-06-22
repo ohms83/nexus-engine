@@ -1,6 +1,9 @@
 #include <nexus/graphics/RenderSystem.h>
+#include <nexus/graphics/Shader.h>
 #include <bgfx/bgfx.h>
 #include <map>
+
+#include "graphics/Shader.h"
 
 USING_NAMESPACE_NXS;
 
@@ -28,6 +31,7 @@ RenderSystem::RenderSystem(RenderSystemConfig config)
     init.resolution.height = config.screenHeight;
     init.resolution.width = config.screenWidth;
     init.resolution.reset = config.vsync ? BGFX_RESET_VSYNC : BGFX_RESET_NONE;
+    init.resolution.reset |= BGFX_RESET_FULLSCREEN;
 #ifdef _DEBUG
     init.debug = true;
 #else
@@ -36,8 +40,10 @@ RenderSystem::RenderSystem(RenderSystemConfig config)
     bgfx::init(init);
 
 #ifdef _DEBUG
-    bgfx::setDebug(true);
+    bgfx::setDebug(BGFX_DEBUG_TEXT);
 #endif
+
+    bgfx::reset(m_config.screenWidth, m_config.screenHeight, BGFX_RESET_FULLSCREEN | BGFX_RESET_VSYNC);
 }
 
 RenderSystem::~RenderSystem()
@@ -55,6 +61,9 @@ void RenderSystem::ClearScreen() const
     // This dummy draw call is here to make sure that view 0 is cleared
     // if no other draw calls are submitted to view 0.
     bgfx::touch(0);
+
+    // Use debug font to print information about this example.
+    bgfx::dbgTextClear();
 }
 
 void RenderSystem::BeginDraw() const
@@ -75,4 +84,13 @@ void RenderSystem::Draw()
 void RenderSystem::EndDraw()
 {
     bgfx::frame();
+}
+
+void RenderSystem::OnResize(const uint32_t width, const uint32_t height)
+{
+    // Important: bgfx::reset with the actual pixel dimensions
+    bgfx::reset(width, height, BGFX_RESET_VSYNC);
+
+    // Also update your bgfx viewports to match the new size
+    bgfx::setViewRect(0, 0, 0, CAST<uint16_t>(width), CAST<uint16_t>(height));
 }

@@ -5,6 +5,8 @@
 
 NXS_NAMESPACE
 {
+    class Shader;
+
     enum class GraphicsAPI
     {
         /// If set to @c Undefined, the engine will automatically decide
@@ -85,6 +87,9 @@ NXS_NAMESPACE
         void BeginDraw() const;
         void Draw();
         void EndDraw();
+
+        //! An event handler called when the window resize event occured.
+        void OnResize(uint32_t width, uint32_t height);
 
     protected:
         RenderSystemConfig m_config;

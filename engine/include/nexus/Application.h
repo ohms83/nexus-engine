@@ -21,6 +21,8 @@ NXS_NAMESPACE
         int32_t screenWidth;
         int32_t screenHeight;
         GraphicsAPI renderAPI;
+        bool fullscreen;
+        int32_t quitKey = SDLK_ESCAPE;
     };
     
     class Application
@@ -45,13 +47,20 @@ NXS_NAMESPACE
     protected:
         virtual bool Init_Internal() { return true; }
         virtual void Update() {}
+        virtual void Render(RenderSystem* renderSystem) {}
+
+        virtual void OnKeyDown(SDL_Keycode key);
+        virtual void OnResize();
 
         void PollEvents(SDL_Event& e);
 
     protected:
         SDL_Window* m_window = nullptr;
-        int32_t m_screenWidth = 800;
-        int32_t m_screenHeight = 600;
+        int32_t m_screenWidth = 1280;
+        int32_t m_screenHeight = 960;
+        int32_t m_actualWidth = 1280;
+        int32_t m_actualHeight = 960;
+        SDL_Keycode m_escapeKey = SDLK_ESCAPE;
 
     private:
         bool m_quit = false;
