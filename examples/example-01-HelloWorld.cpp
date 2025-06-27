@@ -1,12 +1,9 @@
 #include <format>
-#include <iostream>
-#include <ostream>
 #include <nexus/Nexus.h>
 
 #include "bgfx/bgfx.h"
-#include "bx/math.h"
 
-class Example_1 final : public nexus::Application
+class Example_01 final : public nexus::Application
 {
 public:
     void Render(nexus::RenderSystem* renderSystem) override
@@ -35,7 +32,7 @@ protected:
 
 int main()
 {
-    return nexus::RunApplication<Example_1>({
+    return nexus::RunApplication<Example_01>({
         "Example 1",
         1280, 960,
         nexus::GraphicsAPI::OpenGL,
