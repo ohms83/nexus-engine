@@ -1,3 +1,5 @@
-add_executable(example-1 example-1.cpp)
+add_executable(example-01 example-01-HelloWorld.cpp)
+add_executable(example-02 example-02-Cubes.cpp)
 
-target_link_libraries(example-1 nexus-engine)
+target_link_libraries(example-01 nexus-engine)
+target_link_libraries(example-02 nexus-engine)
