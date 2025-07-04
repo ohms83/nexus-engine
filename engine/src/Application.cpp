@@ -24,7 +24,7 @@ Application::~Application()
     SDL_Quit();
 }
 
-bool Application::Init(const ApplicationInitInfo& info)
+bool Application::Init(const ApplicationConfig& info)
 {
     //Initialize SDL
     if( SDL_Init( SDL_INIT_VIDEO ) == false )
@@ -34,7 +34,9 @@ bool Application::Init(const ApplicationInitInfo& info)
     }
 
     int flags = info.fullscreen ? SDL_WINDOW_FULLSCREEN : 0;
-    switch (info.renderAPI)
+
+    const auto& graphicsConfig = info.graphicsConfig;
+    switch (graphicsConfig.api)
     {
     case GraphicsAPI::OpenGL:
         flags |= SDL_WINDOW_OPENGL;
@@ -48,8 +50,8 @@ bool Application::Init(const ApplicationInitInfo& info)
 
     flags |= SDL_WINDOW_HIGH_PIXEL_DENSITY | SDL_WINDOW_INPUT_FOCUS | SDL_WINDOW_MOUSE_FOCUS;
 
-    m_screenWidth = info.screenWidth;
-    m_screenHeight = info.screenHeight;
+    m_screenWidth = graphicsConfig.screenWidth;
+    m_screenHeight = graphicsConfig.screenHeight;
     m_escapeKey = info.quitKey;
     m_window = SDL_CreateWindow(
         info.title.c_str(), m_screenWidth, m_screenHeight, flags);
@@ -62,28 +64,10 @@ bool Application::Init(const ApplicationInitInfo& info)
     SDL_GetWindowSizeInPixels(m_window, &m_actualWidth, &m_actualHeight);
     std::cout << "Actual window size width: " << m_actualWidth << " height: " << m_actualHeight << std::endl;
 
-    RenderSystemConfig renderConfig{};
-#if defined(SDL_PLATFORM_WIN32)
-    HWND hwnd = nullptr;
-    hwnd = CAST<HWND>(
-        SDL_GetPointerProperty(SDL_GetWindowProperties(m_window),
-            SDL_PROP_WINDOW_WIN32_HWND_POINTER, nullptr));
-    renderConfig.windowHandle = hwnd;
-#else
-    // No implementation.
-    assert(false);
-#endif
-
-    renderConfig.screenWidth = m_actualWidth;
-    renderConfig.screenHeight = m_actualHeight;
-    renderConfig.api = info.renderAPI;
-    renderConfig.vsync = false;
 #ifdef _DEBUG
-    renderConfig.debugFlags = RenderDebugFlags::NoIFS;
 #else
-    renderConfig.debugFlags = RenderDebugFlags::None;
 #endif
-    m_renderSystem = new RenderSystem(renderConfig);
+    m_renderSystem = new RenderSystem(graphicsConfig);
     assert(m_renderSystem);
 
     return Init_Internal();

@@ -5,24 +5,22 @@
 #pragma once
 
 #include "NxsDefine.h"
-#include "graphics/RenderSystem.h"
-
 #include <SDL3/SDL.h>
 
 #include <concepts>
 #include <string>
 #include <cassert>
 
+#include <nexus/graphics/RenderSystem.h>
+
 NXS_NAMESPACE
 {
-    struct ApplicationInitInfo
+    struct ApplicationConfig
     {
         std::string title;
-        int32_t screenWidth;
-        int32_t screenHeight;
-        GraphicsAPI renderAPI;
+        GraphicsConfig graphicsConfig;
         bool fullscreen;
-        int32_t quitKey = SDLK_ESCAPE;
+        int32 quitKey = SDLK_ESCAPE;
     };
     
     class Application
@@ -31,7 +29,7 @@ NXS_NAMESPACE
         Application() = default;
         virtual ~Application();
 
-        bool Init(const ApplicationInitInfo& info);
+        bool Init(const ApplicationConfig& info);
         int BeginMainLoop();
 
         void RequestQuit();
@@ -55,11 +53,11 @@ NXS_NAMESPACE
         void PollEvents(SDL_Event& e);
 
     protected:
-        SDL_Window* m_window = nullptr;
-        int32_t m_screenWidth = 1280;
-        int32_t m_screenHeight = 960;
-        int32_t m_actualWidth = 1280;
-        int32_t m_actualHeight = 960;
+        WindowContext* m_window = nullptr;
+        int32 m_screenWidth = 1280;
+        int32 m_screenHeight = 960;
+        int32 m_actualWidth = 1280;
+        int32 m_actualHeight = 960;
         SDL_Keycode m_escapeKey = SDLK_ESCAPE;
 
     private:
@@ -69,7 +67,7 @@ NXS_NAMESPACE
 
     template<typename T>
     requires std::derived_from<T, Application>
-    int RunApplication(const ApplicationInitInfo& initInfo)
+    int RunApplication(const ApplicationConfig& initInfo)
     {
         T application = T();
         application.Init(initInfo);

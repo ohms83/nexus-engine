@@ -6,29 +6,29 @@
 
 #include <nexus/NxsDefine.h>
 #include <string>
-#include <bgfx/bgfx.h>
 
 NXS_NAMESPACE
 {
     class Shader
     {
     public:
-        virtual ~Shader();
+        Shader() = default;
+        virtual ~Shader() {}
 
-        bgfx::ProgramHandle GetHandle() const
+        uint32 GetProgramHandle() const
         {
-            return m_program;
+            return m_shaderProgram;
         }
 
-        void InitFromCompiledShaders(const std::string& vertexShaderFile, const std::string& fragmentShaderFile);
+        /**
+         * Find the location of a uniform variable with the specified name.
+         * A uniform can be considered as shader's global variable where application
+         * can use it to control vertex and fragment shader's behaviour.
+         */
+        virtual uint32 FindUniform(const std::string& name) const = 0;
 
     protected:
-        static bgfx::Memory* CompileShader(const std::string& shaderCode);
-        static const bgfx::Memory* LoadFromMemory(const std::string& shaderPath);
-
-    protected:
-        bgfx::ProgramHandle m_program = BGFX_INVALID_HANDLE;
-        bgfx::ShaderHandle m_vertexShader = BGFX_INVALID_HANDLE;
-        bgfx::ShaderHandle m_fragmentShader = BGFX_INVALID_HANDLE;
+        /// Shader program's object ID.
+        uint32 m_shaderProgram = 0;
     };
 }
