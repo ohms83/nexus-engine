@@ -10,7 +10,7 @@ public:
 protected:
     bool Init_Internal() override
     {
-        GetRenderSystem().SetClearColor(0x303030ff);
+        GetRenderSystem().SetClearColor(nexus::COLOR4F_GREY);
         return true;
     }
 };

@@ -10,7 +10,8 @@
 #endif
 #endif
 
-#include <cstdint>
+#include <array>
+#include <cassert>
 
 #define NXS_NAMESPACE namespace nexus
 #define USING_NAMESPACE_NXS using namespace nexus
@@ -58,7 +59,25 @@ NXS_NAMESPACE
         Num
     };
 
-    using WindowContext = SDL_Window;
+    inline size_t NxsDataTypeSize(DataType type)
+    {
+        static std::array<size_t, SIZE_CAST(DataType::Num)> s_dataSizes = {
+            sizeof(uint8),
+            sizeof(uint16),
+            sizeof(uint32),
+            sizeof(uint64),
+            sizeof(int8),
+            sizeof(int16),
+            sizeof(int32),
+            sizeof(int64),
+            sizeof(float),
+            sizeof(double),
+        };
+        assert(type != DataType::Num);
+        return s_dataSizes[INT_CAST(type)];
+    }
+
+    using WindowContext = SDL_Window*;
 #ifdef WIN32
     using NativeWindowHandle = HWND;
 #else

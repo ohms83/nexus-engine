@@ -53,7 +53,7 @@ NXS_NAMESPACE
         void PollEvents(SDL_Event& e);
 
     protected:
-        WindowContext* m_window = nullptr;
+        WindowContext m_window = nullptr;
         int32 m_screenWidth = 1280;
         int32 m_screenHeight = 960;
         int32 m_actualWidth = 1280;

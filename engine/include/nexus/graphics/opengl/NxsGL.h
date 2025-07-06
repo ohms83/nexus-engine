@@ -1,12 +1,10 @@
 #pragma once
 
 #define GL_GLEXT_PROTOTYPES
-#include <SDL3/SDL_opengl.h>
-#include <SDL3/SDL_opengl_glext.h>
+#include <glad/glad.h>
 
 #include <iostream>
 #include <sstream>
-#include <exception>
 #include <cassert>
 
 #include <nexus/NxsDefine.h>
@@ -31,3 +29,25 @@
         }\
     }
 #endif
+
+NXS_NAMESPACE
+{
+    namespace GL
+    {
+        inline GLenum NxsDataToGLenum(const DataType dataType)
+        {
+            const std::array<GLenum, SIZE_CAST(DataType::Num)> glDataTypes = {
+                GL_BYTE,
+                GL_UNSIGNED_BYTE,
+                GL_SHORT,
+                GL_UNSIGNED_SHORT,
+                GL_INT,
+                GL_UNSIGNED_INT,
+                GL_FLOAT,
+                GL_DOUBLE,
+            };
+            assert(dataType == DataType::Num);
+            return glDataTypes[INT_CAST(dataType)];
+        }
+    }
+}

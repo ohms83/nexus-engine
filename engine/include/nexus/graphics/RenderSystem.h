@@ -6,19 +6,15 @@
 
 NXS_NAMESPACE
 {
-    class VertexBuffer;
-    class IndexBuffer;
-    class Shader;
-
     class RenderSystem final
     {
     public:
-        explicit RenderSystem(GraphicsConfig config);
+        explicit RenderSystem(WindowContext window, GraphicsConfig config);
         ~RenderSystem();
 
         void ClearScreen() const;
 
-        void SetClearColor(const Color4B& color = COLOR4B_GREY)
+        void SetClearColor(const Color4F& color)
         {
             m_clearColor = color;
         }
@@ -28,7 +24,7 @@ NXS_NAMESPACE
             m_clearColor = rgba;
         }
 
-        [[nodiscard]] const Color4B& GetClearColor() const
+        [[nodiscard]] const Color4F& GetClearColor() const
         {
             return m_clearColor;
         }
@@ -45,15 +41,15 @@ NXS_NAMESPACE
         
         void BeginDraw() const;
         void Draw();
-        void EndDraw();
+        void EndDraw() const;
 
         //! An event handler called when the window resize event occured.
-        void OnResize(uint32_t width, uint32_t height);
+        void OnResize(uint32_t pixel_w, uint32_t pixel_h) const;
 
     protected:
         GraphicsConfig m_config;
         RenderingInterface* m_renderingInterface = nullptr;
-        Color4B m_clearColor = COLOR4B_GREY;
+        Color4F m_clearColor = COLOR4F_GREY;
         float m_clearDepth = 1.0f;
     };
 }

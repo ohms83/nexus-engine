@@ -1,12 +1,10 @@
 #pragma once
 
-#include <array>
+#include <nexus/NxsDefine.h>
 #include <vector>
 
-#include <nexus/NxsDefine.h>
-
-#include "GraphicsBuffer.h"
-#include "memory/Buffer.h"
+#include "GPUBuffer.h"
+#include <nexus/memory/Buffer.h>
 
 NXS_NAMESPACE
 {
@@ -39,17 +37,18 @@ NXS_NAMESPACE
     class VertexBuffer
     {
     public:
-        VertexBuffer();
+        VertexBuffer() = default;
         virtual ~VertexBuffer() = default;
 
         /**
          *   Start building this vertex buffer. This must be called before,
          *   @anchor AddAttribute @anchor SetUsage and @anchor Build.
+         *   @param vertexData
+         *   @param usage Buffer usage hint.
          */
-        VertexBuffer& Begin();
-        VertexBuffer& AddAttribute(const VertexAttribute& attribute);
-        VertexBuffer& SetUsage(BufferUsage usage);
-        VertexBuffer& SetVertexData(Buffer&& buffer);
+        virtual VertexBuffer& Begin(Buffer&& vertexData, BufferUsage usage);
+        virtual VertexBuffer& Begin(uint8* data, size_t size, BufferUsage usage);
+        virtual VertexBuffer& AddAttribute(const VertexAttribute& attribute);
         void Build();
 
         uint32 GetStride() const
@@ -57,19 +56,16 @@ NXS_NAMESPACE
             return m_stride;
         }
 
-        virtual void Bind() = 0;
-
     protected:
         //! API specific vertex buffer generation function.
         virtual void Build_Impl() = 0;
 
     protected:
         bool m_hasBuilt = false;
-        int32 m_handle = -1;
         uint32 m_stride = 0;
         uint32 m_vertexCount = 0;
         Buffer m_vertexData;
-        BufferUsage m_usage = BufferUsage::Static;
-        std::array<int16, SIZE_CAST(VertexAttribute::Type::Num)> m_attribOffsets;
+        BufferUsage m_usage = BufferUsage::StaticDraw;
+        std::vector<VertexAttribute> m_attributes;
     };
 }

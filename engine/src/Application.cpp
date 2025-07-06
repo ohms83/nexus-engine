@@ -64,10 +64,7 @@ bool Application::Init(const ApplicationConfig& info)
     SDL_GetWindowSizeInPixels(m_window, &m_actualWidth, &m_actualHeight);
     std::cout << "Actual window size width: " << m_actualWidth << " height: " << m_actualHeight << std::endl;
 
-#ifdef _DEBUG
-#else
-#endif
-    m_renderSystem = new RenderSystem(graphicsConfig);
+    m_renderSystem = new RenderSystem(m_window, graphicsConfig);
     assert(m_renderSystem);
 
     return Init_Internal();

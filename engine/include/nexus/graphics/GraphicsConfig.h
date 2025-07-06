@@ -49,7 +49,5 @@ NXS_NAMESPACE
         int32 screenHeight = 0;
         //! Enable/disable VSync.
         bool vsync = false;
-        //! Native window handle. MUST be provided by the application.
-        NativeWindowHandle windowHandle = nullptr;
     };
 }

@@ -20,10 +20,18 @@ add_library(nexus-engine
 target_include_directories(nexus-engine
     PUBLIC ${ENGINE_INCLUDE_DIR}
     PRIVATE ${ENGINE_INCLUDE_DIR}/nexus
-    PRIVATE ${ENGINE_3RD_PARTY_DIR}/SDL/include
+
+    PUBLIC ${ENGINE_3RD_PARTY_DIR}/SDL/include
 )
 
-target_link_libraries(nexus-engine SDL3::SDL3)
+target_link_libraries(nexus-engine PRIVATE SDL3::SDL3)
+target_link_libraries(nexus-engine PRIVATE glad)
+
+find_package(OpenGL REQUIRED)
+# Link OpenGL library
+target_link_libraries(nexus-engine PRIVATE
+    OpenGL::GL
+)
 
 install(TARGETS nexus-engine
     LIBRARY DESTINATION lib)

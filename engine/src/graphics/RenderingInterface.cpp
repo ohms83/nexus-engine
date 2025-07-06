@@ -10,7 +10,7 @@ USING_NAMESPACE_NXS;
 
 RenderingInterface* RenderingInterface::m_singleton = nullptr;
 
-RenderingInterface* RenderingInterface::Create(WindowContext* window, const GraphicsConfig& config)
+RenderingInterface* RenderingInterface::Create(WindowContext window, const GraphicsConfig& config)
 {
     // The previously created singleton must be destroyed first.
     assert(m_singleton == nullptr);

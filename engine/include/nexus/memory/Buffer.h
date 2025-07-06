@@ -5,7 +5,7 @@
 #pragma once
 
 #include <memory>
-#include <nexus/Nexus.h>
+#include <nexus/NxsDefine.h>
 
 NXS_NAMESPACE
 {
