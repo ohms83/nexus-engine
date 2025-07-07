@@ -15,19 +15,19 @@ GLIndexBuffer::~GLIndexBuffer()
     CHECK_GL_ERROR();
 }
 
-void GLIndexBuffer::Bind()
+void GLIndexBuffer::Bind() const
 {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_handle);
     CHECK_GL_ERROR();
 }
 
-void GLIndexBuffer::Unbind()
+void GLIndexBuffer::Unbind() const
 {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     CHECK_GL_ERROR();
 }
 
-uint32 GLIndexBuffer::GenBuffer()
+uint32 GLIndexBuffer::Alloc()
 {
     glGenBuffers(1, &m_handle);
     CHECK_GL_ERROR();

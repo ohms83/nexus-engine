@@ -24,8 +24,6 @@ VertexBuffer& GLVertexBuffer::Begin()
 {
     VertexBuffer::Begin();
 
-    glGenVertexArrays(1, &m_handle);
-    CHECK_GL_ERROR();
     glBindVertexArray(m_handle);
     CHECK_GL_ERROR();
     return *this;
@@ -85,4 +83,11 @@ void GLVertexBuffer::Build_Impl()
     // Unbind VAO
     glBindVertexArray(0);
     CHECK_GL_ERROR();
+}
+
+uint32 GLVertexBuffer::Alloc()
+{
+    glGenVertexArrays(1, &m_handle);
+    CHECK_GL_ERROR();
+    return m_handle;
 }

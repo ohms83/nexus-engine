@@ -8,8 +8,9 @@ USING_NAMESPACE_NXS;
 
 Shader& Shader::BeginCompile()
 {
-    assert(m_shaderProgram == 0 && !m_compiling);
+    assert(m_handle == 0 && !m_compiling);
     m_compiling = true;
+    m_handle = Alloc();
     return *this;
 }
 

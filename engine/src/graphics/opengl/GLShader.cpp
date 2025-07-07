@@ -49,13 +49,13 @@ static GLuint CompileShader(const std::string& source, Shader::Type type)
 
 GLShader::~GLShader()
 {
-    glDeleteProgram(m_shaderProgram);
+    glDeleteProgram(m_handle);
 }
 
 Shader& GLShader::BeginCompile()
 {
     Shader::BeginCompile();
-    m_shaderProgram = glCreateProgram();
+    m_handle = Alloc();
     return *this;
 }
 
@@ -71,15 +71,15 @@ void GLShader::Compile()
     Shader::Compile();
 
     for (const auto shaderId : m_shaderHandles)
-        glAttachShader(m_shaderProgram, shaderId);
-    glLinkProgram(m_shaderProgram);
+        glAttachShader(m_handle, shaderId);
+    glLinkProgram(m_handle);
     CHECK_GL_ERROR();
     int success;
     char infoLog[512];
-    glGetProgramiv(m_shaderProgram, GL_LINK_STATUS, &success);
+    glGetProgramiv(m_handle, GL_LINK_STATUS, &success);
     CHECK_GL_ERROR();
     if (!success) {
-        glGetProgramInfoLog(m_shaderProgram, 512, nullptr, infoLog);
+        glGetProgramInfoLog(m_handle, 512, nullptr, infoLog);
         CHECK_GL_ERROR();
         std::cerr << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
     }
@@ -92,12 +92,12 @@ void GLShader::Compile()
 
 int32 GLShader::FindUniform(const std::string& name) const
 {
-    return glGetUniformLocation(m_shaderProgram, name.c_str());
+    return glGetUniformLocation(m_handle, name.c_str());
 }
 
 void GLShader::SetUniformVector(const std::string& name, const glm::vec2& vec)
 {
-    const auto location = glGetUniformLocation(m_shaderProgram, name.c_str());
+    const auto location = glGetUniformLocation(m_handle, name.c_str());
     CHECK_GL_ERROR();
     glUniform2fv(location, 1, glm::value_ptr(vec));
     CHECK_GL_ERROR();
@@ -105,7 +105,7 @@ void GLShader::SetUniformVector(const std::string& name, const glm::vec2& vec)
 
 void GLShader::SetUniformVector(const std::string& name, const glm::vec3& vec)
 {
-    const auto location = glGetUniformLocation(m_shaderProgram, name.c_str());
+    const auto location = glGetUniformLocation(m_handle, name.c_str());
     CHECK_GL_ERROR();
     glUniform3fv(location, 1, glm::value_ptr(vec));
     CHECK_GL_ERROR();
@@ -113,7 +113,7 @@ void GLShader::SetUniformVector(const std::string& name, const glm::vec3& vec)
 
 void GLShader::SetUniformVector(const std::string& name, const glm::vec4& vec)
 {
-    const auto location = glGetUniformLocation(m_shaderProgram, name.c_str());
+    const auto location = glGetUniformLocation(m_handle, name.c_str());
     CHECK_GL_ERROR();
     glUniform4fv(location, 1, glm::value_ptr(vec));
     CHECK_GL_ERROR();
@@ -121,7 +121,7 @@ void GLShader::SetUniformVector(const std::string& name, const glm::vec4& vec)
 
 void GLShader::SetUniformMatrix(const std::string& name, const glm::mat3& matrix, const bool tranpose)
 {
-    const auto location = glGetUniformLocation(m_shaderProgram, name.c_str());
+    const auto location = glGetUniformLocation(m_handle, name.c_str());
     CHECK_GL_ERROR();
     glUniformMatrix3fv(location, 1, tranpose ? GL_TRUE : GL_FALSE, glm::value_ptr(matrix));
     CHECK_GL_ERROR();
@@ -129,18 +129,23 @@ void GLShader::SetUniformMatrix(const std::string& name, const glm::mat3& matrix
 
 void GLShader::SetUniformMatrix(const std::string& name, const glm::mat4& matrix, const bool tranpose)
 {
-    const auto location = glGetUniformLocation(m_shaderProgram, name.c_str());
+    const auto location = glGetUniformLocation(m_handle, name.c_str());
     CHECK_GL_ERROR();
     glUniformMatrix4fv(location, 1, tranpose ? GL_TRUE : GL_FALSE, glm::value_ptr(matrix));
     CHECK_GL_ERROR();
 }
 
-void GLShader::Bind()
+void GLShader::Bind() const
 {
-    glUseProgram(m_shaderProgram);
+    glUseProgram(m_handle);
 }
 
-void GLShader::Unbind()
+void GLShader::Unbind() const
 {
     glUseProgram(0);
+}
+
+uint32 GLShader::Alloc()
+{
+    return glCreateProgram();
 }

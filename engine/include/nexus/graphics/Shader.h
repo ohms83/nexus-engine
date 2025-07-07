@@ -7,9 +7,11 @@
 #include <nexus/NxsCommon.h>
 #include <string>
 
+#include "GpuResrouce.h"
+
 NXS_NAMESPACE
 {
-    class Shader
+    class Shader : public GpuResrouce
     {
     public:
         enum class Type
@@ -22,12 +24,6 @@ NXS_NAMESPACE
         };
 
         Shader() = default;
-        virtual ~Shader() = default;
-
-        [[nodiscard]] uint32 GetProgramHandle() const
-        {
-            return m_shaderProgram;
-        }
 
         virtual Shader& BeginCompile();
         virtual Shader& AddSource(const std::string& source, Type shaderType);
@@ -46,12 +42,7 @@ NXS_NAMESPACE
         virtual void SetUniformMatrix(const std::string& name, const glm::mat3& matrix, bool tranpose) = 0;
         virtual void SetUniformMatrix(const std::string& name, const glm::mat4& matrix, bool tranpose) = 0;
 
-        virtual void Bind() = 0;
-        virtual void Unbind() = 0;
-
     protected:
-        //! Shader program's object ID.
-        uint32 m_shaderProgram = 0;
         bool m_compiling = false;
     };
 }

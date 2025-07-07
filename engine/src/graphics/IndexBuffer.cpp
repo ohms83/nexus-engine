@@ -9,7 +9,7 @@ IndexBuffer& IndexBuffer::Begin()
 {
     assert(!m_hasBuilt && m_handle == 0);
     m_hasBuilt = true;
-    m_handle = GenBuffer();
+    m_handle = Alloc();
     Bind();
     return *this;
 }

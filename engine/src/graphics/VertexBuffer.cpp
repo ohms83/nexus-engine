@@ -11,6 +11,7 @@ VertexBuffer& VertexBuffer::Begin()
     // Cannot rebuild the buffer.
     assert(m_stride == 0 && !m_hasBuilt);
     m_hasBuilt = true;
+    m_handle = Alloc();
     return *this;
 }
 

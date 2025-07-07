@@ -23,11 +23,10 @@ NXS_NAMESPACE
     protected:
         //! API specific vertex buffer generation function.
         void Build_Impl() override;
+        [[nodiscard]] uint32 Alloc() override;
 
     private:
         //! Vertex buffer handle
         GLuint m_vbo = 0;
-        //! Index buffer handle
-        GLuint m_ebo = 0;
     };
 }

@@ -15,11 +15,11 @@ NXS_NAMESPACE
         GLIndexBuffer() = default;
         ~GLIndexBuffer() override;
 
-        void Bind() override;
-        void Unbind() override;
+        void Bind() const override;
+        void Unbind() const override;
 
     private:
-        uint32 GenBuffer() override;
+        uint32 Alloc() override;
         void Build_Impl() override;
     };
 }

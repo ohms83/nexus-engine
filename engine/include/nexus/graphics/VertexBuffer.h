@@ -6,6 +6,8 @@
 #include "GPUBuffer.h"
 #include <nexus/memory/Buffer.h>
 
+#include "GpuResrouce.h"
+
 NXS_NAMESPACE
 {
     struct VertexAttribute
@@ -34,14 +36,13 @@ NXS_NAMESPACE
         int32 numElements;
     };
 
-    class VertexBuffer
+    class VertexBuffer : public GpuResrouce
     {
     public:
         VertexBuffer() = default;
-        virtual ~VertexBuffer() = default;
 
         /**
-         *   Start building this vertex buffer. This must be called before,
+         * Start building this vertex buffer.
          */
         virtual VertexBuffer& Begin();
         virtual VertexBuffer& SetVertices(const uint8* vertexData, size_t size);
@@ -54,20 +55,11 @@ NXS_NAMESPACE
             return m_stride;
         }
 
-        [[nodiscard]] uint32 GetHandle() const
-        {
-            return m_handle;
-        }
-
-        virtual void Bind() const = 0;
-        virtual void Unbind() const = 0;
-
     private:
         //! API specific vertex buffer generation function.
         virtual void Build_Impl() = 0;
 
     protected:
-        uint32 m_handle = 0;
         bool m_hasBuilt = false;
         uint32 m_stride = 0;
         uint32 m_vertexCount = 0;
