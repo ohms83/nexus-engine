@@ -5,7 +5,9 @@
 #include "graphics/opengl/GLRenderingInterface.h"
 
 #include "graphics/opengl/GLIndexBuffer.h"
+#include "graphics/opengl/GLShader.h"
 #include "graphics/opengl/GLVertexBuffer.h"
+#include "SDL3/SDL_error.h"
 
 USING_NAMESPACE_NXS;
 
@@ -89,14 +91,44 @@ void GLRenderingInterface::SwapBuffer()
     SDL_GL_SwapWindow(m_window);
 }
 
-VertexBuffer* GLRenderingInterface::CreateVertexBuffer()
+void GLRenderingInterface::SetViewport(int32 x, int32 y, int32 w, int32 h)
+{
+    glViewport(x, y, w, h);
+}
+
+VertexBuffer* GLRenderingInterface::CreateVertexBuffer() const
 {
     return new GLVertexBuffer();
 }
 
-IndexBuffer* GLRenderingInterface::CreateIndexBuffer(std::vector<uint32>&& indices, BufferUsage usage)
+IndexBuffer* GLRenderingInterface::CreateIndexBuffer() const
 {
-    return new GLIndexBuffer(std::move(indices), usage);
+    return new GLIndexBuffer();
+}
+
+Shader* GLRenderingInterface::CreateShader() const
+{
+    return new GLShader();
+}
+
+void GLRenderingInterface::Draw_Internal(const RenderCommand& command)
+{
+    const std::array<GLuint, SIZE_CAST(DrawMode::Num)> drawModes = {
+        GL_POINT,
+        GL_LINE,
+        GL_LINE_LOOP,
+        GL_TRIANGLES,
+        GL_TRIANGLE_STRIP,
+        GL_TRIANGLE_FAN,
+        GL_QUADS,
+    };
+    glDrawElements(
+         drawModes[INT_CAST(command.indexBuffer->GetDrawMode())],      // mode
+         CAST<GLsizei>(command.indexBuffer->NumIndex()),    // count
+         GL_UNSIGNED_INT,   // type
+         R_CAST<void*>(0)           // element array buffer offset
+     );
+    CHECK_GL_ERROR();
 }
 
 void GLRenderingInterface::OnResize(uint32_t pixel_w, uint32_t pixel_h)

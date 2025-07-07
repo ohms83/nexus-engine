@@ -80,7 +80,6 @@ int Application::BeginMainLoop()
     {
         PollEvents(e);
         Update();
-        m_renderSystem->ClearScreen();
         m_renderSystem->BeginDraw();
         Render(m_renderSystem);
         m_renderSystem->Draw();
@@ -96,6 +95,11 @@ void Application::RequestQuit()
 bool Application::IsQuitRequested() const
 {
     return m_quit;
+}
+
+WindowContext Application::GetWindowContext() const
+{
+    return m_window;
 }
 
 void Application::OnKeyDown(const SDL_Keycode key)

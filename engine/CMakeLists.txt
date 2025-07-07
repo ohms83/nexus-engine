@@ -22,6 +22,7 @@ target_include_directories(nexus-engine
     PRIVATE ${ENGINE_INCLUDE_DIR}/nexus
 
     PUBLIC ${ENGINE_3RD_PARTY_DIR}/SDL/include
+    PUBLIC ${ENGINE_3RD_PARTY_DIR}/glad/include
 )
 
 target_link_libraries(nexus-engine PRIVATE SDL3::SDL3)

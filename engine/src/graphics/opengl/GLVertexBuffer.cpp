@@ -8,16 +8,10 @@
 
 USING_NAMESPACE_NXS;
 
-GLVertexBuffer::GLVertexBuffer()
-    : m_vbo(0)
-    , m_vao(0)
-{
-}
-
 GLVertexBuffer::~GLVertexBuffer()
 {
-    if (m_vao){
-        glDeleteVertexArrays(1, &m_vao);
+    if (m_handle) {
+        glDeleteVertexArrays(1, &m_handle);
         CHECK_GL_ERROR();
     }
     if (m_vbo) {
@@ -26,46 +20,27 @@ GLVertexBuffer::~GLVertexBuffer()
     }
 }
 
-VertexBuffer& GLVertexBuffer::Begin(Buffer&& vertexData, BufferUsage usage)
+VertexBuffer& GLVertexBuffer::Begin()
 {
-    VertexBuffer::Begin(std::move(vertexData), usage);
+    VertexBuffer::Begin();
 
-    glGenVertexArrays(1, &m_vao);
+    glGenVertexArrays(1, &m_handle);
     CHECK_GL_ERROR();
-    glBindVertexArray(m_vao);
+    glBindVertexArray(m_handle);
     CHECK_GL_ERROR();
-    // Create a VBO
-    glGenBuffers(1, &m_vbo);
-    CHECK_GL_ERROR();
-    glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-    CHECK_GL_ERROR();
-
-    GLenum glUsage = NxsBufferUsageToGLenum(usage);
-    glBufferData(GL_ARRAY_BUFFER, m_vertexData.Size(), m_vertexData.Get(), glUsage);
-    CHECK_GL_ERROR();
-
     return *this;
 }
 
-VertexBuffer& GLVertexBuffer::Begin(uint8* data, size_t size, BufferUsage usage)
+void GLVertexBuffer::Bind() const
 {
-    VertexBuffer::Begin(data, size, usage);
+    glBindVertexArray(m_handle);
+    CHECK_GL_ERROR();
+}
 
-    glGenVertexArrays(1, &m_vao);
+void GLVertexBuffer::Unbind() const
+{
+    glBindVertexArray(0);
     CHECK_GL_ERROR();
-    glBindVertexArray(m_vao);
-    CHECK_GL_ERROR();
-    // Create a VBO
-    glGenBuffers(1, &m_vbo);
-    CHECK_GL_ERROR();
-    glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-    CHECK_GL_ERROR();
-
-    GLenum glUsage = NxsBufferUsageToGLenum(usage);
-    glBufferData(GL_ARRAY_BUFFER, m_vertexData.Size(), m_vertexData.Get(), glUsage);
-    CHECK_GL_ERROR();
-
-    return *this;
 }
 
 void GLVertexBuffer::Build_Impl()
@@ -74,17 +49,33 @@ void GLVertexBuffer::Build_Impl()
     // https://www.reddit.com/r/opengl/comments/18rkgg3/one_vao_for_multiple_vbos/
     // https://github.com/fendevel/Guide-to-Modern-OpenGL-Functions#glbuffer
 
-    size_t offset = 0;
+    // Create a VBO
+    glGenBuffers(1, &m_vbo);
+    CHECK_GL_ERROR();
+    glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+    CHECK_GL_ERROR();
+
+    const GLenum glUsage = NxsBufferUsageToGLenum(m_usage);
+    glBufferData(GL_ARRAY_BUFFER, m_bufferSize, m_vertices.get(), glUsage);
+    CHECK_GL_ERROR();
+
+    GLint offset = 0;
     for (const auto& [type, dataType, numElements] : m_attributes)
     {
         const auto attribIndex = INT_CAST(type);
         const auto glDataType = GL::NxsDataToGLenum(dataType);
-        glVertexAttribPointer(attribIndex, offset, glDataType, GL_FALSE, m_stride, R_CAST<GLvoid*>(offset));
+        glVertexAttribPointer(
+            attribIndex,
+            numElements,
+            glDataType,
+            GL_FALSE,
+            INT_CAST(m_stride),
+            R_CAST<const void *>(offset));
         CHECK_GL_ERROR();
         glEnableVertexAttribArray(attribIndex);
         CHECK_GL_ERROR();
 
-        offset += NxsDataTypeSize(dataType) * numElements;
+        offset += numElements * NxsDataTypeSize(dataType);
     }
 
     // Unbind VBO (it's safe to unbind after glVertexAttribPointer calls,

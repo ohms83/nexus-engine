@@ -9,25 +9,35 @@
 
 USING_NAMESPACE_NXS;
 
-GLIndexBuffer::GLIndexBuffer(std::vector<uint32>&& indices, BufferUsage usage)
-    : IndexBuffer(std::move(indices), usage)
-{
-    glGenBuffers(1, &m_ebo);
-    CHECK_GL_ERROR();
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ebo);
-    CHECK_GL_ERROR();
-    const auto glUsage = NxsBufferUsageToGLenum(usage);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32) * indices.size(), indices.data(), glUsage);
-    CHECK_GL_ERROR();
-}
-
 GLIndexBuffer::~GLIndexBuffer()
 {
-    glDeleteBuffers(1, &m_ebo);
+    glDeleteBuffers(1, &m_handle);
     CHECK_GL_ERROR();
 }
 
 void GLIndexBuffer::Bind()
 {
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ebo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_handle);
+    CHECK_GL_ERROR();
+}
+
+void GLIndexBuffer::Unbind()
+{
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    CHECK_GL_ERROR();
+}
+
+uint32 GLIndexBuffer::GenBuffer()
+{
+    glGenBuffers(1, &m_handle);
+    CHECK_GL_ERROR();
+    return m_handle;
+}
+
+void GLIndexBuffer::Build_Impl()
+{
+    const auto glUsage = NxsBufferUsageToGLenum(m_usage);
+    const auto bufferSize = CAST<GLsizeiptr>(sizeof(uint32) * m_indices.size());
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, bufferSize, m_indices.data(), glUsage);
+    CHECK_GL_ERROR();
 }

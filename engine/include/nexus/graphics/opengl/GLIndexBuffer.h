@@ -12,12 +12,14 @@ NXS_NAMESPACE
     class GLIndexBuffer final : public IndexBuffer
     {
     public:
-        GLIndexBuffer(std::vector<uint32>&& indices, BufferUsage usage);
+        GLIndexBuffer() = default;
         ~GLIndexBuffer() override;
 
         void Bind() override;
+        void Unbind() override;
 
     private:
-        GLuint m_ebo = 0;
+        uint32 GenBuffer() override;
+        void Build_Impl() override;
     };
 }

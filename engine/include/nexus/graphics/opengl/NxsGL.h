@@ -1,6 +1,5 @@
 #pragma once
 
-#define GL_GLEXT_PROTOTYPES
 #include <glad/glad.h>
 
 #include <iostream>
@@ -38,16 +37,19 @@ NXS_NAMESPACE
         {
             const std::array<GLenum, SIZE_CAST(DataType::Num)> glDataTypes = {
                 GL_BYTE,
-                GL_UNSIGNED_BYTE,
                 GL_SHORT,
-                GL_UNSIGNED_SHORT,
                 GL_INT,
+                GL_INT64_ARB,
+                GL_UNSIGNED_BYTE,
+                GL_UNSIGNED_SHORT,
                 GL_UNSIGNED_INT,
+                GL_UNSIGNED_INT64_ARB,
                 GL_FLOAT,
                 GL_DOUBLE,
             };
-            assert(dataType == DataType::Num);
-            return glDataTypes[INT_CAST(dataType)];
+            assert(dataType < DataType::Num);
+            auto dataTypeIndex = INT_CAST(dataType);
+            return glDataTypes[dataTypeIndex];
         }
     }
 }

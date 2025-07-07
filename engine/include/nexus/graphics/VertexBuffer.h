@@ -31,7 +31,7 @@ NXS_NAMESPACE
 
         Type type;
         DataType dataType;
-        uint32 numElements;
+        int32 numElements;
     };
 
     class VertexBuffer
@@ -42,29 +42,37 @@ NXS_NAMESPACE
 
         /**
          *   Start building this vertex buffer. This must be called before,
-         *   @anchor AddAttribute @anchor SetUsage and @anchor Build.
-         *   @param vertexData
-         *   @param usage Buffer usage hint.
          */
-        virtual VertexBuffer& Begin(Buffer&& vertexData, BufferUsage usage);
-        virtual VertexBuffer& Begin(uint8* data, size_t size, BufferUsage usage);
+        virtual VertexBuffer& Begin();
+        virtual VertexBuffer& SetVertices(const uint8* vertexData, size_t size);
+        virtual VertexBuffer& SetUsage(BufferUsage usage);
         virtual VertexBuffer& AddAttribute(const VertexAttribute& attribute);
         void Build();
 
-        uint32 GetStride() const
+        [[nodiscard]] uint32 GetStride() const
         {
             return m_stride;
         }
 
-    protected:
+        [[nodiscard]] uint32 GetHandle() const
+        {
+            return m_handle;
+        }
+
+        virtual void Bind() const = 0;
+        virtual void Unbind() const = 0;
+
+    private:
         //! API specific vertex buffer generation function.
         virtual void Build_Impl() = 0;
 
     protected:
+        uint32 m_handle = 0;
         bool m_hasBuilt = false;
         uint32 m_stride = 0;
         uint32 m_vertexCount = 0;
-        Buffer m_vertexData;
+        std::unique_ptr<uint8[]> m_vertices;
+        size_t m_bufferSize = 0;
         BufferUsage m_usage = BufferUsage::StaticDraw;
         std::vector<VertexAttribute> m_attributes;
     };

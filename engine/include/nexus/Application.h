@@ -35,6 +35,8 @@ NXS_NAMESPACE
         void RequestQuit();
         [[nodiscard]] bool IsQuitRequested() const;
 
+        [[nodiscard]] WindowContext GetWindowContext() const;
+
         [[nodiscard]] RenderSystem& GetRenderSystem() const
         {
             assert(m_renderSystem);

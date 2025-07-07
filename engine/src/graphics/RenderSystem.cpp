@@ -22,10 +22,16 @@ void RenderSystem::ClearScreen() const
 
 void RenderSystem::BeginDraw() const
 {
+    ClearScreen();
+    m_renderingInterface->SetViewport(0, 0, m_config.screenWidth, m_config.screenHeight);
 }
 
 void RenderSystem::Draw()
 {
+    for (const auto& command : m_renderCommands)
+    {
+        m_renderingInterface->Draw(command);
+    }
 }
 
 void RenderSystem::EndDraw() const
@@ -36,4 +42,9 @@ void RenderSystem::EndDraw() const
 void RenderSystem::OnResize(const uint32 pixel_w, const uint32 pixel_h) const
 {
     m_renderingInterface->OnResize(pixel_w, pixel_h);
+}
+
+void RenderSystem::RegisterDrawCommand(const RenderCommand& command)
+{
+    m_renderCommands.emplace_back(command);
 }

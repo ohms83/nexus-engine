@@ -46,10 +46,18 @@ NXS_NAMESPACE
         //! An event handler called when the window resize event occured.
         void OnResize(uint32_t pixel_w, uint32_t pixel_h) const;
 
+        void RegisterDrawCommand(const RenderCommand& command);
+
+        [[nodiscard]] RenderingInterface* GetRenderInterface() const
+        {
+            return m_renderingInterface;
+        }
+
     protected:
         GraphicsConfig m_config;
         RenderingInterface* m_renderingInterface = nullptr;
         Color4F m_clearColor = COLOR4F_GREY;
         float m_clearDepth = 1.0f;
+        std::vector<RenderCommand> m_renderCommands;
     };
 }

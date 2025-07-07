@@ -48,3 +48,19 @@ void RenderingInterface::Destroy()
 {
     delete m_singleton;
 }
+
+void RenderingInterface::Draw(const RenderCommand& command)
+{
+    assert(!command.shaders.empty());
+    assert(command.vertexBuffer);
+    assert(command.indexBuffer);
+
+    for (const auto shader : command.shaders)
+    {
+        shader->Bind();
+    }
+    command.vertexBuffer->Bind();
+    command.indexBuffer->Bind();
+
+    Draw_Internal(command);
+}
