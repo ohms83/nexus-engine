@@ -28,10 +28,18 @@ void RenderSystem::BeginDraw() const
 
 void RenderSystem::Draw()
 {
+    m_drawCount = 0;
+    m_polygonCount = 0;
+
     for (const auto& command : m_renderCommands)
     {
         m_renderingInterface->Draw(command);
+        m_drawCount++;
+        m_polygonCount += command.GetPolygonCount();
     }
+    m_frameIndex++;
+
+    m_renderCommands.clear();
 }
 
 void RenderSystem::EndDraw() const

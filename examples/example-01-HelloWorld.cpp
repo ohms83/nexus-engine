@@ -1,6 +1,5 @@
 #include <iostream>
 #include <nexus/Nexus.h>
-#include <nexus/graphics/opengl/GLShader.h>
 
 // Define Vertex structure
 struct Vertex {
@@ -64,8 +63,6 @@ public:
 
     void Render(nexus::RenderSystem* renderSystem) override
     {
-        m_shader->Bind();
-
         // Calculate matrices (simple orthographic for 2D, or perspective for 3D)
         glm::mat4 model = glm::mat4(1.0f);
         // glm::mat4 view = glm::lookAt(glm::vec3(0, 0, 3), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0)); // For 3D
@@ -73,51 +70,46 @@ public:
         glm::mat4 view = glm::mat4(1.0f); // Identity for 2D
         glm::mat4 projection = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f); // Ortho for 2D
 
-        // Set uniforms
-        m_shader->SetUniformMatrix("model", model, false);
-        m_shader->SetUniformMatrix("view", view, false);
-        m_shader->SetUniformMatrix("projection", projection, false);
+        const nexus::RenderCommand renderCommand
+        {
+            m_shader,
+            m_vertexBuffer,
+            m_indexBuffer,
+            {
+                {"model", model},
+                {"view", view},
+                {"projection", projection},
+            }
+        };
 
-        // Bind VAO and draw using EBO
-        m_vertexBuffer->Bind();
-        m_indexBuffer->Bind();
-        glDrawElements(
-            GL_TRIANGLES,                     // Draw triangles
-            squareIndices.size(),           // Number of indices to draw (6 for our square)
-            GL_UNSIGNED_INT,                  // Type of indices
-            (void*)0                          // Offset into the EBO (0 means start from the beginning)
-        );
-
-        m_vertexBuffer->Unbind();
-        m_indexBuffer->Unbind();
-
-        m_shader->Unbind();
+        renderSystem->RegisterDrawCommand(renderCommand);
     }
 
 protected:
     bool Init_Internal() override
     {
         auto& renderSystem = GetRenderSystem();
+        const auto& renderInterface = renderSystem.GetRenderInterface();
         renderSystem.SetClearColor({0.2f, 0.3f, 0.3f, 1.0f});
 
         constexpr auto vertexSize = sizeof(Vertex);
         const auto bufferSize = squareVertices.size() * vertexSize;
-        m_vertexBuffer = new nexus::GLVertexBuffer();
+        m_vertexBuffer = renderInterface.CreateVertexBuffer();
         m_vertexBuffer->Begin()
             .SetVertices(R_CAST<const uint8_t*>(squareVertices.data()), bufferSize)
             .SetUsage(nexus::BufferUsage::StaticDraw)
             .AddAttribute(nexus::VertexAttribute {nexus::VertexAttribute::Type::Position, nexus::DataType::Float, 3})
             .AddAttribute(nexus::VertexAttribute {nexus::VertexAttribute::Type::Color0, nexus::DataType::Float, 3})
-            .Build();
+        .Build();
 
-        m_indexBuffer = new nexus::GLIndexBuffer();
+        m_indexBuffer = renderInterface.CreateIndexBuffer();
         m_indexBuffer->Begin()
             .SetIndices(C_CAST<uint32_t*>(squareIndices.data()), squareIndices.size())
             .SetUsage(nexus::BufferUsage::StaticDraw)
             .SetDrawMode(nexus::DrawMode::Triangle)
         .Build();
 
-        m_shader = new nexus::GLShader();
+        m_shader = renderInterface.CreateShader();
         m_shader->BeginCompile()
             .AddSource(vertexShaderSource, nexus::Shader::Type::Vertex)
             .AddSource(fragmentShaderSource, nexus::Shader::Type::Fragment)

@@ -26,6 +26,7 @@ NXS_NAMESPACE
         virtual void Build();
 
         [[nodiscard]] uint32 NumIndex() const { return m_indices.size(); }
+        [[nodiscard]] uint32 NumPolygons() const;
 
         [[nodiscard]] BufferUsage GetUsage() const
         {

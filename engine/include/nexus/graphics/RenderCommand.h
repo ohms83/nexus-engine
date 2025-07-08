@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <map>
 #include <nexus/NxsDefine.h>
 
 #include "IndexBuffer.h"
@@ -14,8 +15,14 @@ NXS_NAMESPACE
 {
     struct RenderCommand
     {
-        std::vector<Shader*> shaders;
+        Shader* shader;
         VertexBuffer* vertexBuffer = nullptr;
         IndexBuffer* indexBuffer = nullptr;
+        std::map<std::string, glm::mat4> uniformMatrices;
+
+        uint32 GetPolygonCount() const
+        {
+            return shader && indexBuffer && vertexBuffer ? indexBuffer->NumPolygons() : 0;
+        }
     };
 }

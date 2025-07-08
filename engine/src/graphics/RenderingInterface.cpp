@@ -51,16 +51,22 @@ void RenderingInterface::Destroy()
 
 void RenderingInterface::Draw(const RenderCommand& command)
 {
-    assert(!command.shaders.empty());
+    assert(command.shader);
     assert(command.vertexBuffer);
     assert(command.indexBuffer);
 
-    for (const auto shader : command.shaders)
-    {
-        shader->Bind();
-    }
+    command.shader->Bind();
     command.vertexBuffer->Bind();
     command.indexBuffer->Bind();
 
+    for (const auto& [name, mtx] : command.uniformMatrices)
+    {
+        command.shader->SetUniformMatrix(name, mtx, false);
+    }
+
     Draw_Internal(command);
+
+    command.shader->Unbind();
+    command.vertexBuffer->Unbind();
+    command.indexBuffer->Unbind();
 }

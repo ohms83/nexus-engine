@@ -49,3 +49,29 @@ void IndexBuffer::Build()
     Build_Impl();
     Unbind();
 }
+
+uint32 IndexBuffer::NumPolygons() const
+{
+    const uint32 numIndices = m_indices.size();
+    switch (m_drawMode)
+    {
+    case DrawMode::Line:
+        return numIndices / 2;
+    case DrawMode::Triangle:
+        return numIndices / 3;
+    case DrawMode::Point:
+        return numIndices;
+    case DrawMode::LineLoop:
+    case DrawMode::LineStrip:
+        return numIndices - 1;
+    case DrawMode::TriangleFan:
+    case DrawMode::TriangleStrip:
+        return numIndices - 2;
+    case DrawMode::Quad:
+        return numIndices / 4;
+    default:
+        assert(false);
+        break;
+    }
+    return 0;
+}

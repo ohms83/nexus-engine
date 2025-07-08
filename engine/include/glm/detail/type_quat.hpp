@@ -77,6 +77,7 @@ namespace glm
 
 		GLM_FUNC_DECL GLM_CONSTEXPR T & operator[](length_type i);
 		GLM_FUNC_DECL GLM_CONSTEXPR T const& operator[](length_type i) const;
+		static void identity();
 
 		// -- Implicit basic constructors --
 
