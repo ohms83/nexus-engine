@@ -14,7 +14,7 @@
 #include <nexus/graphics/RenderSystem.h>
 #include <glm/glm.hpp>
 
-#include "core/SystemClock.h"
+#include "core/Timer.h"
 
 NXS_NAMESPACE
 {
@@ -68,9 +68,6 @@ NXS_NAMESPACE
 
         void PollEvents(SDL_Event& e);
 
-    private:
-        void CalculateDeltaTime();
-
     protected:
         WindowContext m_window = nullptr;
         int32 m_screenWidth = 1280;
@@ -83,7 +80,7 @@ NXS_NAMESPACE
         bool m_quit = false;
         RenderSystem* m_renderSystem = nullptr;
 
-        uint64 m_tick = 0;
+        Timer m_timer;
         float m_deltaTime = 0.0f;
     };
 

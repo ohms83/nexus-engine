@@ -72,7 +72,7 @@ bool Application::Init(const ApplicationConfig& info)
 
 int Application::BeginMainLoop()
 {
-    m_tick = SDL_GetPerformanceCounter();
+    m_timer.Stamp();
 
     //The event data
     SDL_Event e;
@@ -80,7 +80,8 @@ int Application::BeginMainLoop()
 
     while(!m_quit)
     {
-        CalculateDeltaTime();
+        m_deltaTime = m_timer.GetDeltaTime();
+        m_timer.Stamp();
 
         PollEvents(e);
         Update();
@@ -147,11 +148,4 @@ void Application::PollEvents(SDL_Event& e)
             break;
         }
     }
-}
-
-void Application::CalculateDeltaTime()
-{
-    const auto currentTick = SDL_GetPerformanceCounter();
-    m_deltaTime = CAST<float>(currentTick - m_tick) / CAST<float>(SDL_GetPerformanceFrequency());
-    m_tick = currentTick;
 }
