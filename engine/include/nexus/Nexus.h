@@ -15,4 +15,7 @@
 
 #include "math/Math.h"
 
+#include "scene/Camera.h"
+#include "scene/Transform.h"
+
 #include <glad/glad.h>

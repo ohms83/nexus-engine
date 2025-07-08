@@ -56,13 +56,13 @@ void RenderingInterface::Draw(const RenderCommand& command)
     assert(command.indexBuffer);
 
     command.shader->Bind();
-    command.vertexBuffer->Bind();
-    command.indexBuffer->Bind();
-
     for (const auto& [name, mtx] : command.uniformMatrices)
     {
         command.shader->SetUniformMatrix(name, mtx, false);
     }
+
+    command.vertexBuffer->Bind();
+    command.indexBuffer->Bind();
 
     Draw_Internal(command);
 

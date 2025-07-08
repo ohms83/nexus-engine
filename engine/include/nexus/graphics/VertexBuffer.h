@@ -55,6 +55,18 @@ NXS_NAMESPACE
             return m_stride;
         }
 
+        template<typename T>
+        std::vector<T> GetVertices() const
+        {
+            std::vector<T> result;
+            T* vertex = reinterpret_cast<T*>(m_vertices.get());
+            for (uint32 index = 0; index < m_vertexCount; index++)
+            {
+                result.push_back(vertex[index]);
+            }
+            return result;
+        }
+
     private:
         //! API specific vertex buffer generation function.
         virtual void Build_Impl() = 0;

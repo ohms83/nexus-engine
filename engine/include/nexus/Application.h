@@ -12,6 +12,9 @@
 #include <cassert>
 
 #include <nexus/graphics/RenderSystem.h>
+#include <glm/glm.hpp>
+
+#include "core/SystemClock.h"
 
 NXS_NAMESPACE
 {
@@ -44,15 +47,29 @@ NXS_NAMESPACE
             return *m_renderSystem;
         }
 
+        glm::ivec2 GetWindowSize() const
+        {
+            return {m_screenWidth, m_screenHeight};
+        }
+
+        //! Get the duration between this and the previous frame in seconds.
+        float GetDeltaTime() const
+        {
+            return m_deltaTime;
+        }
+
     protected:
         virtual bool Init_Internal() { return true; }
         virtual void Update() {}
-        virtual void Render(RenderSystem* renderSystem) {}
+        virtual void Render(RenderSystem& renderSystem) {}
 
         virtual void OnKeyDown(SDL_Keycode key);
         virtual void OnResize();
 
         void PollEvents(SDL_Event& e);
+
+    private:
+        void CalculateDeltaTime();
 
     protected:
         WindowContext m_window = nullptr;
@@ -65,6 +82,9 @@ NXS_NAMESPACE
     private:
         bool m_quit = false;
         RenderSystem* m_renderSystem = nullptr;
+
+        uint64 m_tick = 0;
+        float m_deltaTime = 0.0f;
     };
 
     template<typename T>

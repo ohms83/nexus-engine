@@ -72,18 +72,23 @@ bool Application::Init(const ApplicationConfig& info)
 
 int Application::BeginMainLoop()
 {
+    m_tick = SDL_GetPerformanceCounter();
+
     //The event data
     SDL_Event e;
     SDL_zero(e);
 
     while(!m_quit)
     {
+        CalculateDeltaTime();
+
         PollEvents(e);
         Update();
         m_renderSystem->BeginDraw();
-        Render(m_renderSystem);
+        Render(*m_renderSystem);
         m_renderSystem->Draw();
-        m_renderSystem->EndDraw();    }
+        m_renderSystem->EndDraw();
+    }
     return 0;
 }
 
@@ -112,10 +117,10 @@ void Application::OnKeyDown(const SDL_Keycode key)
 
 void Application::OnResize()
 {
-    int new_width, new_height;
-    SDL_GetWindowSizeInPixels(m_window, &new_width, &new_height);
+    SDL_GetWindowSize(m_window, &m_screenWidth, &m_screenHeight);
+    SDL_GetWindowSizeInPixels(m_window, &m_actualWidth, &m_actualHeight);
 
-    m_renderSystem->OnResize(new_width, new_height);
+    m_renderSystem->OnResize(m_actualWidth, m_actualHeight);
 }
 
 void Application::PollEvents(SDL_Event& e)
@@ -142,4 +147,11 @@ void Application::PollEvents(SDL_Event& e)
             break;
         }
     }
+}
+
+void Application::CalculateDeltaTime()
+{
+    const auto currentTick = SDL_GetPerformanceCounter();
+    m_deltaTime = CAST<float>(currentTick - m_tick) / CAST<float>(SDL_GetPerformanceFrequency());
+    m_tick = currentTick;
 }

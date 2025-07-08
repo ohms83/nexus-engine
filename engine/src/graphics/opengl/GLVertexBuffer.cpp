@@ -2,6 +2,7 @@
 // Created by nutta on 7/4/2025.
 //
 
+#include <format>
 #include <nexus/graphics/opengl/GLVertexBuffer.h>
 
 #include "graphics/opengl/GLGpuBuffer.h"

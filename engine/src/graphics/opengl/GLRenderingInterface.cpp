@@ -113,14 +113,24 @@ Shader* GLRenderingInterface::CreateShader() const
 
 void GLRenderingInterface::Draw_Internal(const RenderCommand& command)
 {
-    const std::array<GLuint, SIZE_CAST(DrawMode::Num)> drawModes = {
+    const std::array<GLuint, SIZE_CAST(nexus::DrawMode::Num)> drawModes = {
+        // Point,
         GL_POINT,
+        // Line,
         GL_LINE,
+        // LineLoop,
         GL_LINE_LOOP,
+        // LineStrip,
+        GL_LINE_STRIP,
+        // Triangle,
         GL_TRIANGLES,
+        // TriangleStrip,
         GL_TRIANGLE_STRIP,
+        // TriangleFan,
         GL_TRIANGLE_FAN,
+        // Quad,
         GL_QUADS,
+        // Num
     };
     glDrawElements(
          drawModes[INT_CAST(command.indexBuffer->GetDrawMode())],      // mode

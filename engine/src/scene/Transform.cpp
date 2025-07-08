@@ -3,10 +3,11 @@
 //
 
 #include <nexus/scene/Transform.h>
+#include "glm/gtx/quaternion.hpp"
 
 USING_NAMESPACE_NXS;
 
-glm::mat4 Transform::GetTransformMatrix(const Space transformSpace) const
+glm::mat4 Transform::GetMatrix(const Space transformSpace) const
 {
     glm::mat4 transform = glm::translate(glm::identity<glm::mat4>(), m_position);
     transform *= glm::mat4_cast(m_orientation);
@@ -14,14 +15,14 @@ glm::mat4 Transform::GetTransformMatrix(const Space transformSpace) const
 
     if (transformSpace == Space::Global && m_parent)
     {
-        transform *= m_parent->GetTransformMatrix(Space::Global);
+        transform *= m_parent->GetMatrix(Space::Global);
     }
     return transform;
 }
 
 void Transform::AddChild(Transform* child)
 {
-    if (auto childParent = child->GetParent())
+    if (const auto childParent = child->GetParent())
         childParent->RemoveChild(child);
 
     child->m_parent = this;

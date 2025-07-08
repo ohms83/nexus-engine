@@ -43,6 +43,6 @@ VertexBuffer& VertexBuffer::AddAttribute(const VertexAttribute& attribute)
 void VertexBuffer::Build()
 {
     assert(m_hasBuilt);
-    m_vertexCount = sizeof(m_vertices) / m_stride;
+    m_vertexCount = m_bufferSize / m_stride;
     Build_Impl();
 }

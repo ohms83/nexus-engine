@@ -61,7 +61,7 @@ public:
         delete m_shader;
     }
 
-    void Render(nexus::RenderSystem* renderSystem) override
+    void Render(nexus::RenderSystem& renderSystem) override
     {
         // Calculate matrices (simple orthographic for 2D, or perspective for 3D)
         glm::mat4 model = glm::mat4(1.0f);
@@ -82,7 +82,7 @@ public:
             }
         };
 
-        renderSystem->RegisterDrawCommand(renderCommand);
+        renderSystem.RegisterDrawCommand(renderCommand);
     }
 
 protected:

@@ -48,7 +48,13 @@ NXS_NAMESPACE
         }
 
         // TODO: Should consider using a matrix 4x3 instead, since the homogenous coordinate barely relevant.
-        glm::mat4 GetTransformMatrix(Space transformSpace = Space::Local) const;
+        /**
+         * Compute a 4x4 transformation matrix of this Transform object.
+         * @param transformSpace Local space will return the transformation matrix relative to its local coordinate,
+         * while Global will base the transformation on its parent and predecessors.
+         * @return A 4x4 transformation matrix.
+         */
+        glm::mat4 GetMatrix(Space transformSpace = Space::Local) const;
 
         void AddChild(Transform* child);
         void RemoveChild(Transform* child);
@@ -70,6 +76,8 @@ NXS_NAMESPACE
         glm::vec3 m_position{};
         glm::quat m_orientation{ 1, 0, 0, 0 };
         glm::vec3 m_scale{1, 1, 1};
+
+        glm::mat4x3 m_transformMtx{1.0f};
 
         bool m_needUpdate = false;
     };
