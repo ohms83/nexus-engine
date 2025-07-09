@@ -15,6 +15,7 @@
 #include <glm/glm.hpp>
 
 #include "core/Timer.h"
+#include "editor/Editor.h"
 
 NXS_NAMESPACE
 {
@@ -22,7 +23,8 @@ NXS_NAMESPACE
     {
         std::string title;
         GraphicsConfig graphicsConfig;
-        bool fullscreen;
+        bool fullscreen = false;
+        bool editMode = true;
         int32 quitKey = SDLK_ESCAPE;
     };
     
@@ -79,6 +81,7 @@ NXS_NAMESPACE
     private:
         bool m_quit = false;
         RenderSystem* m_renderSystem = nullptr;
+        std::unique_ptr<Editor> m_editor;
 
         Timer m_timer;
         float m_deltaTime = 0.0f;

@@ -20,8 +20,9 @@ void RenderSystem::ClearScreen() const
     m_renderingInterface->ClearBuffer(m_clearColor, m_clearDepth);
 }
 
-void RenderSystem::BeginDraw() const
+void RenderSystem::BeginDraw()
 {
+    m_timer.Stamp();
     ClearScreen();
     m_renderingInterface->SetViewport(0, 0, m_config.screenWidth, m_config.screenHeight);
 }
@@ -42,9 +43,10 @@ void RenderSystem::Draw()
     m_renderCommands.clear();
 }
 
-void RenderSystem::EndDraw() const
+void RenderSystem::EndDraw()
 {
     m_renderingInterface->SwapBuffer();
+    m_renderTime = m_timer.GetDeltaTime();
 }
 
 void RenderSystem::OnResize(const uint32 pixel_w, const uint32 pixel_h) const

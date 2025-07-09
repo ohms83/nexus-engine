@@ -83,4 +83,9 @@ NXS_NAMESPACE
 #else
     static_assert("Unimplemented platform!")
 #endif
+
+    union RenderContext
+    {
+        SDL_GLContext gl_context;
+    };
 }

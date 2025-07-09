@@ -3,6 +3,7 @@
 #include <nexus/NxsDefine.h>
 #include "Color.h"
 #include "RenderingInterface.h"
+#include "core/HighResTimer.h"
 
 NXS_NAMESPACE
 {
@@ -39,9 +40,9 @@ NXS_NAMESPACE
             return m_clearDepth;
         }
         
-        void BeginDraw() const;
+        void BeginDraw();
         void Draw();
-        void EndDraw() const;
+        void EndDraw();
 
         //! An event handler called when the window resize event occured.
         void OnResize(uint32_t pixel_w, uint32_t pixel_h) const;
@@ -55,6 +56,35 @@ NXS_NAMESPACE
             return *m_renderingInterface;
         }
 
+        RenderContext GetRenderContext() const
+        {
+            assert(m_renderingInterface);
+            // ReSharper disable once CppDFANullDereference
+            return m_renderingInterface->GetRenderContext();
+        }
+
+        [[nodiscard]] float GetrenderTime() const
+        {
+            return m_renderTime;
+        }
+
+        [[nodiscard]] uint32 GetFrameIndex() const
+        {
+            return m_frameIndex;
+        }
+
+        //! Get the number of draw-calls from the previous frame.
+        [[nodiscard]] uint32 GetDrawCount() const
+        {
+            return m_drawCount;
+        }
+
+        //! Get the total number of polygons drawn in the previous frame.
+        [[nodiscard]] uint32 GetPolygonCount() const
+        {
+            return m_polygonCount;
+        }
+
     protected:
         GraphicsConfig m_config;
         RenderingInterface* m_renderingInterface = nullptr;
@@ -65,5 +95,9 @@ NXS_NAMESPACE
         uint32 m_frameIndex = 0;
         uint32 m_drawCount = 0;
         uint32 m_polygonCount = 0;
+
+        //! Time spent rendering the last frame in milliseconds. Mainly used for profiling.
+        float m_renderTime = 0.0f;
+        HighResTimer m_timer;
     };
 }

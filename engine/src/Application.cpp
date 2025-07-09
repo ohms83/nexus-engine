@@ -17,6 +17,8 @@ Application::~Application()
     delete m_renderSystem;
     m_renderSystem = nullptr;
 
+    m_editor.release();
+
     //Destroy the window
     SDL_DestroyWindow(m_window);
     m_window = nullptr;
@@ -67,6 +69,15 @@ bool Application::Init(const ApplicationConfig& info)
     m_renderSystem = new RenderSystem(m_window, graphicsConfig);
     assert(m_renderSystem);
 
+    if (info.editMode)
+    {
+        EditorConfig editorConfig {
+            info.graphicsConfig.api
+        };
+        RenderContext renderContext = m_renderSystem->GetRenderContext();
+        m_editor = std::make_unique<Editor>(m_window, renderContext, editorConfig);
+    }
+
     return Init_Internal();
 }
 
@@ -85,9 +96,19 @@ int Application::BeginMainLoop()
 
         PollEvents(e);
         Update();
+
+        if (m_editor)
+        {
+            m_editor->BeginDraw();
+            m_editor->Draw(*m_renderSystem);
+        }
+
         m_renderSystem->BeginDraw();
         Render(*m_renderSystem);
+
         m_renderSystem->Draw();
+
+        if (m_editor) m_editor->EndDraw();
         m_renderSystem->EndDraw();
     }
     return 0;
@@ -129,6 +150,8 @@ void Application::PollEvents(SDL_Event& e)
     //Get event data
     while(SDL_PollEvent(&e))
     {
+        if (m_editor) m_editor->Update(e);
+
         switch (e.type)
         {
         case SDL_EVENT_KEY_DOWN:

@@ -34,6 +34,5 @@ NXS_NAMESPACE
 
     protected:
         SDL_Window* m_window = nullptr;
-        SDL_GLContext m_renderContext;
     };
 }

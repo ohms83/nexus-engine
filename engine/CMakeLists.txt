@@ -12,6 +12,23 @@ add_subdirectory(3rdparty EXCLUDE_FROM_ALL)
 include(src/CMakeLists.txt)
 include(include/CMakeLists.txt)
 
+# Dear-Imgui
+set(IMGUI_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/imgui" CACHE PATH "Path to Dear ImGui source root")
+
+# Core ImGui sources
+list(APPEND ENGINE_SOURCES
+    "${IMGUI_SOURCE_DIR}/imgui.cpp"
+    "${IMGUI_SOURCE_DIR}/imgui_draw.cpp"
+    "${IMGUI_SOURCE_DIR}/imgui_widgets.cpp"
+    "${IMGUI_SOURCE_DIR}/imgui_tables.cpp"
+    "${IMGUI_SOURCE_DIR}/imgui_demo.cpp" # Include this for demo window, useful for testing
+)
+# ImGui backends for SDL3 and OpenGL3
+list(APPEND ENGINE_SOURCES
+    "${IMGUI_SOURCE_DIR}/backends/imgui_impl_sdl3.cpp"
+    "${IMGUI_SOURCE_DIR}/backends/imgui_impl_opengl3.cpp"
+)
+
 add_library(nexus-engine
     ${ENGINE_SOURCES}
     ${ENGINE_HEADERS}
@@ -21,8 +38,12 @@ target_include_directories(nexus-engine
     PUBLIC ${ENGINE_INCLUDE_DIR}
     PRIVATE ${ENGINE_INCLUDE_DIR}/nexus
 
+    # 3rd parties
     PUBLIC ${ENGINE_3RD_PARTY_DIR}/SDL/include
     PUBLIC ${ENGINE_3RD_PARTY_DIR}/glad/include
+    # Dear-Imgui
+    PUBLIC "${IMGUI_SOURCE_DIR}"
+    PUBLIC "${IMGUI_SOURCE_DIR}/backends"
 )
 
 target_link_libraries(nexus-engine PRIVATE SDL3::SDL3)
@@ -33,6 +54,9 @@ find_package(OpenGL REQUIRED)
 target_link_libraries(nexus-engine PRIVATE
     OpenGL::GL
 )
+
+# Define IMGUI_IMPL_OPENGL_LOADER_GLAD for OpenGL3 backend to use glad
+target_compile_definitions(nexus-engine PUBLIC IMGUI_IMPL_OPENGL_LOADER_GLAD)
 
 install(TARGETS nexus-engine
     LIBRARY DESTINATION lib)

@@ -124,14 +124,16 @@ protected:
 
 int main()
 {
+    constexpr auto vsync = true;
+    constexpr auto fullscreen = false;
     nexus::GraphicsConfig graphicsConfig {
         nexus::GraphicsAPI::OpenGL,
         1280, 960,
-        false,
+        vsync,
     };
     return nexus::RunApplication<Example_01>({
         "Example 1",
         graphicsConfig,
-        false,
+        fullscreen,
     });
 }

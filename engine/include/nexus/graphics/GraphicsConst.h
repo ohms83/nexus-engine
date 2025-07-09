@@ -5,6 +5,7 @@
 #pragma once
 
 #include <nexus/NxsDefine.h>
+#include <string>
 
 NXS_NAMESPACE
 {
@@ -41,6 +42,20 @@ NXS_NAMESPACE
         D3D12,
         Num
     };
+
+    inline const std::string& GraphicsAPIToString(GraphicsAPI api)
+    {
+        static const std::array<std::string, SIZE_CAST(GraphicsAPI::Num)> apiNames = {
+            "Undefined",
+            "OpenGL",
+            "OpenGLES",
+            "Vulkan",
+            "D3D11",
+            "D3D12",
+        };
+        assert(api < GraphicsAPI::Num);
+        return apiNames[INT_CAST(api)];
+    }
 
     enum class DrawMode
     {

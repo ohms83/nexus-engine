@@ -29,24 +29,26 @@ GLRenderingInterface::GLRenderingInterface(WindowContext window, const GraphicsC
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
     m_window = window;
-    m_renderContext = SDL_GL_CreateContext(window);
-    if (!m_renderContext)
+    const auto renderContext = SDL_GL_CreateContext(window);
+    if (!renderContext)
     {
         std::stringstream ss;
         ss << "Failed to created OpenGL's context! SDL_Error=" << SDL_GetError();
         throw std::runtime_error(ss.str());
     }
 
+    m_renderContext.gl_context = renderContext;
+
     if (!gladLoadGLLoader(R_CAST<GLADloadproc>(SDL_GL_GetProcAddress))) {
         std::stringstream ss;
         ss << "Failed to initialize GLAD" << std::endl;
-        SDL_GL_DestroyContext(m_renderContext);
+        SDL_GL_DestroyContext(renderContext);
         SDL_DestroyWindow(window);
         SDL_Quit();
         throw std::runtime_error(ss.str());
     }
 
-    SDL_GL_MakeCurrent(window, m_renderContext);
+    SDL_GL_MakeCurrent(window, renderContext);
 
     std::stringstream ss;
     ss  << "OpenGL\n"
@@ -64,7 +66,7 @@ GLRenderingInterface::GLRenderingInterface(WindowContext window, const GraphicsC
 
 GLRenderingInterface::~GLRenderingInterface()
 {
-    SDL_GL_DestroyContext(m_renderContext);
+    SDL_GL_DestroyContext(m_renderContext.gl_context);
 }
 
 void GLRenderingInterface::ClearColor(const Color4F& color)

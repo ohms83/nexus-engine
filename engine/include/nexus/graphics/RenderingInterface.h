@@ -5,7 +5,6 @@
 #pragma once
 
 #include <cassert>
-#include <string>
 #include <nexus/NxsDefine.h>
 
 #include "Color.h"
@@ -33,6 +32,11 @@ NXS_NAMESPACE
             return *m_singleton;
         }
 
+        RenderContext GetRenderContext() const
+        {
+            return m_renderContext;
+        }
+
         virtual void ClearColor(const Color4F& color) = 0;
         virtual void ClearDepth(float depth) = 0;
         virtual void ClearBuffer(const Color4F& color, float depth) = 0;
@@ -57,5 +61,8 @@ NXS_NAMESPACE
 
     private:
         static RenderingInterface* m_singleton;
+
+    protected:
+        RenderContext m_renderContext{};
     };
 }
