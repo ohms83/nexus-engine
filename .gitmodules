@@ -7,3 +7,9 @@
 [submodule "engine/3rdparty/imgui"]
 	path = engine/3rdparty/imgui
 	url = https://github.com/ocornut/imgui.git
+[submodule "thirdparty/implot"]
+	path = thirdparty/implot
+	url = https://github.com/epezent/implot.git
+[submodule "engine/3rdparty/implot"]
+	path = engine/3rdparty/implot
+	url = https://github.com/epezent/implot.git

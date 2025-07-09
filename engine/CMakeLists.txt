@@ -29,6 +29,18 @@ list(APPEND ENGINE_SOURCES
     "${IMGUI_SOURCE_DIR}/backends/imgui_impl_opengl3.cpp"
 )
 
+# ImPlot
+set(IMPLOT_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/implot" CACHE PATH "Path to ImPlot source root")
+list(APPEND ENGINE_SOURCES
+    "${IMPLOT_SOURCE_DIR}/implot.cpp"
+    "${IMPLOT_SOURCE_DIR}/implot_demo.cpp"
+    "${IMPLOT_SOURCE_DIR}/implot_items.cpp"
+)
+list(APPEND ENGINE_HEADERS
+    "${IMPLOT_SOURCE_DIR}/implot.h"
+    "${IMPLOT_SOURCE_DIR}/implot_internal.h"
+)
+
 add_library(nexus-engine
     ${ENGINE_SOURCES}
     ${ENGINE_HEADERS}
@@ -44,6 +56,8 @@ target_include_directories(nexus-engine
     # Dear-Imgui
     PUBLIC "${IMGUI_SOURCE_DIR}"
     PUBLIC "${IMGUI_SOURCE_DIR}/backends"
+    # ImPlot
+    PUBLIC "${IMPLOT_SOURCE_DIR}"
 )
 
 target_link_libraries(nexus-engine PRIVATE SDL3::SDL3)

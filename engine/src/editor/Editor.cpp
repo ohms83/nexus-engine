@@ -10,7 +10,11 @@
 #include <imgui_impl_sdl3.h>
 #include <imgui_impl_opengl3.h>
 
+#include <implot.h>
+
 USING_NAMESPACE_NXS;
+
+#define MAX_PROFILED_FRAMES 20
 
 Editor::Editor(const WindowContext window, const RenderContext renderContext, const EditorConfig& config)
 {
@@ -21,7 +25,7 @@ Editor::Editor(const WindowContext window, const RenderContext renderContext, co
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;    // Enable Gamepad Controls
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;       // Enable Docking
     io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;     // Enable Multi-Viewport / Platform Windows
-    io.FontGlobalScale = 1.75f;
+    io.FontGlobalScale = 1.5f;
     io.ConfigDpiScaleFonts = true;                          // [Experimental] Automatically overwrite style.FontScaleDpi in Begin() when Monitor DPI changes. This will scale fonts but _NOT_ scale sizes/padding for now.
     io.ConfigDpiScaleViewports = true;                      // [Experimental] Scale Dear ImGui and Platform Windows when Monitor DPI changes.
 
@@ -54,10 +58,24 @@ Editor::Editor(const WindowContext window, const RenderContext renderContext, co
         // Not yet implemented
         assert(false);
     }
+
+    // Initializes ImPlot
+    ImPlot::CreateContext();
+
+    m_frameTimes.reserve(MAX_PROFILED_FRAMES);
+    m_frameCounters.reserve(MAX_PROFILED_FRAMES);
+
+    for (int i = 0; i < MAX_PROFILED_FRAMES; i++)
+    {
+        m_frameTimes.push_back(0);
+        m_frameCounters.push_back(0);
+    }
 }
 
 Editor::~Editor()
 {
+    ImPlot::DestroyContext();
+
     if (m_config.renderingBackend == GraphicsAPI::OpenGL)
     {
         ImGui_ImplOpenGL3_Shutdown();
@@ -88,37 +106,9 @@ void Editor::BeginDraw() const
     ImGui::NewFrame();
 }
 
-void Editor::Draw(const RenderSystem& renderSystem) const
+void Editor::Draw(const RenderSystem& renderSystem)
 {
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
-    bool mainWindowActive = false;
-    ImGui::Begin("Profiler", &mainWindowActive);
-    {
-        const auto& api = GraphicsAPIToString(m_config.renderingBackend);
-        ImGui::Text("Graphics API: %s", api.c_str());
-        ImGui::Text("FPS: %.2f", io.Framerate);
-        ImGui::Text("Game Thread: %.2f ms", 1000.0f / io.Framerate);
-        ImGui::Text("Render Thread: %.2f ms", renderSystem.GetrenderTime() * 1000.f);
-        ImGui::Text("Draw Calls: %d", renderSystem.GetDrawCount());
-        ImGui::Text("Polygons: %d", renderSystem.GetPolygonCount());
-    }
-    ImGui::End();
-
-    // Example of how to implement a toolbar.
-    // ImGui::Begin("Profiler", &mainWindowActive, ImGuiWindowFlags_MenuBar);
-    // {
-    //     if (ImGui::BeginMenuBar())
-    //     {
-    //         if (ImGui::BeginMenu("File"))
-    //         {
-    //             if (ImGui::MenuItem("Open..", "Ctrl+O")) { /* Do stuff */ }
-    //             if (ImGui::MenuItem("Save", "Ctrl+S"))   { /* Do stuff */ }
-    //             if (ImGui::MenuItem("Close", "Ctrl+W"))  { /* Do stuff */ }
-    //             ImGui::EndMenu();
-    //         }
-    //         ImGui::EndMenuBar();
-    //     }
-    // }
+    DrawProfiler(renderSystem);
 }
 
 void Editor::EndDraw() const
@@ -142,4 +132,42 @@ void Editor::EndDraw() const
         ImGui::RenderPlatformWindowsDefault();
         SDL_GL_MakeCurrent(backup_current_window, backup_current_context);
     }
+}
+
+void Editor::DrawProfiler(const RenderSystem& renderSystem)
+{
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    bool mainWindowActive = false;
+    ImGui::Begin("Profiler", &mainWindowActive);
+    {
+        static uint32 frameIndex = 0;
+        const auto frameTime = 1000.0f / io.Framerate; // Frame update time in seconds.
+        const auto& api = GraphicsAPIToString(m_config.renderingBackend);
+        ImGui::Text("Graphics API: %s", api.c_str());
+        ImGui::Text("FPS: %.2f", io.Framerate);
+        ImGui::Text("Frame Update: %.2f ms", frameTime);
+        ImGui::Text("Render: %.2f ms", renderSystem.GetrenderTime() * 1000.f);
+        ImGui::Text("Draw Calls: %d", renderSystem.GetDrawCount());
+        ImGui::Text("Polygons: %d", renderSystem.GetPolygonCount());
+
+        if (ImPlot::BeginPlot("Frame Rates"))
+        {
+            uint32 x_data[MAX_PROFILED_FRAMES] = {};
+            uint32 y_data[MAX_PROFILED_FRAMES] = {};
+            ImPlot::SetupAxes("Frame Index", "Milliseconds", ImPlotAxisFlags_NoTickLabels);
+            ImPlot::PushStyleVar(ImPlotStyleVar_FillAlpha, 0.25f);
+            ImPlot::SetupAxisLimits(ImAxis_X1,frameIndex > MAX_PROFILED_FRAMES ? frameIndex - MAX_PROFILED_FRAMES : 0, frameIndex++, ImGuiCond_Always);
+            ImPlot::SetupAxisLimits(ImAxis_Y1,0,60);
+            ImPlot::SetNextFillStyle(ImVec4(1,1,0,1),0.25f);
+            m_frameCounters.push_back(renderSystem.GetFrameIndex());
+            m_frameTimes.push_back(frameTime);
+
+            if (m_frameCounters.size() > MAX_PROFILED_FRAMES) m_frameCounters.erase(m_frameCounters.begin());
+            if (m_frameTimes.size() > MAX_PROFILED_FRAMES) m_frameTimes.erase(m_frameTimes.begin());
+
+            ImPlot::PlotShaded("Frame", m_frameCounters.data(), m_frameTimes.data(), MAX_PROFILED_FRAMES);
+            ImPlot::EndPlot();
+        }
+    }
+    ImGui::End();
 }
