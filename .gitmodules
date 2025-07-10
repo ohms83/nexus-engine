@@ -1,15 +1,12 @@
 [submodule "engine/3rdparty/SDL"]
 	path = engine/3rdparty/SDL
 	url = https://github.com/libsdl-org/SDL.git
-[submodule "engine/3rdparty/bgfx.cmake"]
-	path = engine/3rdparty/bgfx.cmake
-	url = git@github.com:ohms83/bgfx.cmake.git
 [submodule "engine/3rdparty/imgui"]
 	path = engine/3rdparty/imgui
 	url = https://github.com/ocornut/imgui.git
-[submodule "thirdparty/implot"]
-	path = thirdparty/implot
-	url = https://github.com/epezent/implot.git
 [submodule "engine/3rdparty/implot"]
 	path = engine/3rdparty/implot
 	url = https://github.com/epezent/implot.git
+[submodule "engine/3rdparty/xxHash"]
+	path = engine/3rdparty/xxHash
+	url = https://github.com/Cyan4973/xxHash.git
