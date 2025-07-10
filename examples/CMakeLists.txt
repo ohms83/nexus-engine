@@ -1,5 +1,23 @@
-add_executable(example-01 example-01-HelloWorld.cpp)
-add_executable(example-02 example-02-Cubes.cpp)
+macro(add_example_executable TARGET)
+    cmake_parse_arguments(ARG "" "" "SOURCES;DATAFILES" ${ARGN})
+    if(AST_UNPARSED_ARGUMENTS)
+        message(FATAL_ERROR "Unknown argument(s): ${ARG_UNPARSED_ARGUMENTS}")
+    endif()
+    if(NOT ARG_SOURCES)
+        message(FATAL_ERROR "add_example_executable needs at least one source")
+    endif()
 
-target_link_libraries(example-01 nexus-engine)
-target_link_libraries(example-02 nexus-engine)
+    add_executable(${TARGET} ${ARG_SOURCES})
+    # Recursively copy the entire assets directory
+    add_custom_command(TARGET ${TARGET} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${ASSETS_DIR}"
+        "${ASSETS_DEST_DIR}/assets" # Copies 'assets' folder and its contents
+        COMMENT "Copying application resources..."
+    )
+    target_link_libraries(${TARGET} nexus-engine)
+endmacro()
+
+add_example_executable(example-01 SOURCES example-01-HelloWorld.cpp)
+add_example_executable(example-02 SOURCES example-02-Cubes.cpp)
+add_example_executable(example-03 SOURCES example-03-Texture.cpp)

@@ -1,15 +1,15 @@
+#pragma once
+
 #include <nexus/NxsDefine.h>
-#include <bgfx/bgfx.h>
+
+#include "Resource.h"
 
 NXS_NAMESPACE
 {
-    class Mesh
+    class Mesh : public Resource
     {
     public:
         
     protected:
-        bgfx::VertexBufferHandle m_vertexBuffer{};
-        bgfx::IndexBufferHandle m_indexBuffer{};
-        bgfx::ProgramHandle m_shader{};
     };
 }

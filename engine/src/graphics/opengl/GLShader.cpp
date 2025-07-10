@@ -92,46 +92,55 @@ void GLShader::Compile()
 
 int32 GLShader::FindUniform(const std::string& name) const
 {
-    return glGetUniformLocation(m_handle, name.c_str());
+    const auto location = glGetUniformLocation(m_handle, name.c_str());
+    CHECK_GL_ERROR();
+    return location;
 }
 
 void GLShader::SetUniformVector(const std::string& name, const glm::vec2& vec)
 {
-    const auto location = glGetUniformLocation(m_handle, name.c_str());
-    CHECK_GL_ERROR();
+    const auto location = FindUniform(name);
     glUniform2fv(location, 1, glm::value_ptr(vec));
     CHECK_GL_ERROR();
 }
 
 void GLShader::SetUniformVector(const std::string& name, const glm::vec3& vec)
 {
-    const auto location = glGetUniformLocation(m_handle, name.c_str());
-    CHECK_GL_ERROR();
+    const auto location = FindUniform(name);
     glUniform3fv(location, 1, glm::value_ptr(vec));
     CHECK_GL_ERROR();
 }
 
 void GLShader::SetUniformVector(const std::string& name, const glm::vec4& vec)
 {
-    const auto location = glGetUniformLocation(m_handle, name.c_str());
-    CHECK_GL_ERROR();
+    const auto location = FindUniform(name);
     glUniform4fv(location, 1, glm::value_ptr(vec));
     CHECK_GL_ERROR();
 }
 
 void GLShader::SetUniformMatrix(const std::string& name, const glm::mat3& matrix, const bool tranpose)
 {
-    const auto location = glGetUniformLocation(m_handle, name.c_str());
-    CHECK_GL_ERROR();
+    const auto location = FindUniform(name);
     glUniformMatrix3fv(location, 1, tranpose ? GL_TRUE : GL_FALSE, glm::value_ptr(matrix));
     CHECK_GL_ERROR();
 }
 
 void GLShader::SetUniformMatrix(const std::string& name, const glm::mat4& matrix, const bool tranpose)
 {
-    const auto location = glGetUniformLocation(m_handle, name.c_str());
-    CHECK_GL_ERROR();
+    const auto location = FindUniform(name);
     glUniformMatrix4fv(location, 1, tranpose ? GL_TRUE : GL_FALSE, glm::value_ptr(matrix));
+    CHECK_GL_ERROR();
+}
+
+void GLShader::SetUniformTexture2D(const std::string& name, const TextureProxy* texture, const int32 textureUnit)
+{
+    const auto location = FindUniform(name);
+    const GLint gl_textureUnit = GL_TEXTURE0 + textureUnit;
+    glActiveTexture(gl_textureUnit);
+    CHECK_GL_ERROR();
+    glBindTexture(GL_TEXTURE_2D, texture->GetHandle());
+    CHECK_GL_ERROR();
+    glUniform1i(location, textureUnit);
     CHECK_GL_ERROR();
 }
 
@@ -148,4 +157,9 @@ void GLShader::Unbind() const
 uint32 GLShader::Alloc()
 {
     return glCreateProgram();
+}
+
+void GLShader::Release()
+{
+    glDeleteProgram(m_handle);
 }

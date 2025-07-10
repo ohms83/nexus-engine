@@ -12,6 +12,7 @@
 #include "IndexBuffer.h"
 #include "RenderCommand.h"
 #include "Shader.h"
+#include "TextureProxy.h"
 #include "VertexBuffer.h"
 
 NXS_NAMESPACE
@@ -48,6 +49,7 @@ NXS_NAMESPACE
         [[nodiscard]] virtual VertexBuffer* CreateVertexBuffer() const = 0;
         [[nodiscard]] virtual IndexBuffer* CreateIndexBuffer() const = 0;
         [[nodiscard]] virtual Shader* CreateShader() const = 0;
+        [[nodiscard]] virtual TextureProxy* CreateTexture() const = 0;
 
         virtual void OnResize(uint32_t pixel_w, uint32_t pixel_h) = 0;
 

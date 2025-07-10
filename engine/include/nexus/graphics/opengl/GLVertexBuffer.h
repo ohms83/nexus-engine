@@ -20,10 +20,12 @@ NXS_NAMESPACE
         void Bind() const override;
         void Unbind() const override;
 
-    protected:
+    private:
         //! API specific vertex buffer generation function.
         void Build_Impl() override;
+    protected:
         [[nodiscard]] uint32 Alloc() override;
+        void Release() override;
 
     private:
         //! Vertex buffer handle

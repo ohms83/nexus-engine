@@ -92,3 +92,15 @@ uint32 GLVertexBuffer::Alloc()
     CHECK_GL_ERROR();
     return m_handle;
 }
+
+void GLVertexBuffer::Release()
+{
+    if (m_handle) {
+        glDeleteVertexArrays(1, &m_handle);
+        CHECK_GL_ERROR();
+    }
+    if (m_vbo) {
+        glDeleteBuffers(1, &m_vbo);
+        CHECK_GL_ERROR();
+    }
+}

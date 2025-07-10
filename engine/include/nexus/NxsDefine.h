@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SDL3/SDL.h>
+#include <memory>
 
 #if defined(_WIN32)
 #include <windows.h>
@@ -46,6 +47,7 @@ NXS_NAMESPACE
 
     enum class DataType
     {
+        None,
         Byte,
         Short,
         Int32,
@@ -59,22 +61,30 @@ NXS_NAMESPACE
         Num
     };
 
-    inline size_t NxsDataTypeSize(DataType type)
+    inline size_t NxsDataTypeSize(const DataType type)
     {
-        static std::array<size_t, SIZE_CAST(DataType::Num)> s_dataSizes = {
-            sizeof(uint8),
-            sizeof(uint16),
-            sizeof(uint32),
-            sizeof(uint64),
-            sizeof(int8),
-            sizeof(int16),
-            sizeof(int32),
-            sizeof(int64),
-            sizeof(float),
-            sizeof(double),
-        };
-        assert(type != DataType::Num);
-        return s_dataSizes[INT_CAST(type)];
+        switch (type)
+        {
+        case DataType::UByte:
+        case DataType::Byte:
+            return sizeof(uint8);
+        case DataType::UShort:
+        case DataType::Short:
+            return sizeof(uint16);
+        case DataType::UInt32:
+        case DataType::Int32:
+            return sizeof(uint32);
+        case DataType::UInt64:
+        case DataType::Int64:
+            return sizeof(uint64);
+        case DataType::Float:
+            return sizeof(float);
+        case DataType::Double:
+            return sizeof(double);
+        default:
+            assert(0);
+            return 0;
+        }
     }
 
     using WindowContext = SDL_Window*;
@@ -87,5 +97,38 @@ NXS_NAMESPACE
     union RenderContext
     {
         SDL_GLContext gl_context;
+    };
+
+    /**
+     * Reference counting type. This is just an alias to @c std::shared_ptr.
+     */
+    template<typename T>
+    using Ref = std::shared_ptr<T>;
+
+    /**
+     * Auto-release pointer. This is jus an alias to @c std::unique_ptr.
+     */
+    template<typename T>
+    using Ptr = std::unique_ptr<T>;
+
+    enum class PixelFormat
+    {
+        None,
+        //! 8-bit Red channel
+        Red,
+        //! 8-bit Green channel
+        Green,
+        //! 8-bit Blue channel
+        Blue,
+        //! 8-bit Alpha channel
+        Alpha,
+        //! 24-bit RGB color without alpha
+        RGB,
+        //! 32-bit RGBA color.
+        RGBA,
+        Depth,
+        Stencil,
+
+        Num
     };
 }

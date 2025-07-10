@@ -26,6 +26,7 @@ NXS_NAMESPACE
         [[nodiscard]] VertexBuffer* CreateVertexBuffer() const override;
         [[nodiscard]] IndexBuffer* CreateIndexBuffer() const override;
         [[nodiscard]] Shader* CreateShader() const override;
+        [[nodiscard]] TextureProxy* CreateTexture() const override;
 
         void OnResize(uint32_t pixel_w, uint32_t pixel_h) override;
 

@@ -35,21 +35,32 @@ NXS_NAMESPACE
     {
         inline GLenum NxsDataToGLenum(const DataType dataType)
         {
-            const std::array<GLenum, SIZE_CAST(DataType::Num)> glDataTypes = {
-                GL_BYTE,
-                GL_SHORT,
-                GL_INT,
-                GL_INT64_ARB,
-                GL_UNSIGNED_BYTE,
-                GL_UNSIGNED_SHORT,
-                GL_UNSIGNED_INT,
-                GL_UNSIGNED_INT64_ARB,
-                GL_FLOAT,
-                GL_DOUBLE,
-            };
-            assert(dataType < DataType::Num);
-            auto dataTypeIndex = INT_CAST(dataType);
-            return glDataTypes[dataTypeIndex];
+            switch (dataType)
+            {
+            case DataType::Byte:
+                return GL_BYTE;
+            case DataType::Short:
+                return GL_SHORT;
+            case DataType::Int32:
+                return GL_INT;
+            case DataType::Int64:
+                return GL_INT64_ARB;
+            case DataType::UByte:
+                return GL_UNSIGNED_BYTE;
+            case DataType::UShort:
+                return GL_UNSIGNED_SHORT;
+            case DataType::UInt32:
+                return GL_UNSIGNED_INT;
+            case DataType::UInt64:
+                return GL_UNSIGNED_INT64_ARB;
+            case DataType::Float:
+                return GL_FLOAT;
+            case DataType::Double:
+                return GL_DOUBLE;
+            default:
+                assert(false);
+                return GL_NONE;
+            }
         }
     }
 }

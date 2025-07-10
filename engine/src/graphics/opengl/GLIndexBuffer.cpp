@@ -34,6 +34,12 @@ uint32 GLIndexBuffer::Alloc()
     return m_handle;
 }
 
+void GLIndexBuffer::Release()
+{
+    glDeleteBuffers(1, &m_handle);
+    CHECK_GL_ERROR();
+}
+
 void GLIndexBuffer::Build_Impl()
 {
     const auto glUsage = NxsBufferUsageToGLenum(m_usage);

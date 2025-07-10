@@ -20,6 +20,8 @@ Buffer& Buffer::operator = (Buffer&& rhs) noexcept
 
 void Buffer::Copy(const uint8_t* data, const uint64_t size)
 {
+    if (!size || !data) return;
+
     m_buffer = std::make_unique<uint8_t[]>(size);
     memcpy(m_buffer.get(), data, size);
     m_size   = size;
@@ -27,6 +29,8 @@ void Buffer::Copy(const uint8_t* data, const uint64_t size)
 
 void Buffer::Take(uint8_t* data, const uint64_t size)
 {
+    if (!size || !data) return;
+
     m_buffer = std::unique_ptr<uint8_t[]>(data);
     m_size = size;
 }

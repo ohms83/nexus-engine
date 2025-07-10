@@ -34,11 +34,11 @@ Editor::Editor(const WindowContext window, const RenderContext renderContext, co
     // When viewports are enabled, tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
     ImGuiStyle& style = ImGui::GetStyle();
     // --- Make windows transparent ---
-    style.Colors[ImGuiCol_WindowBg].w = 0.65f;
+    style.Colors[ImGuiCol_WindowBg].w = 0.5f;
 
     if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
         style.WindowRounding = 0.0f;
-        style.Colors[ImGuiCol_WindowBg].w = 0.65f;
+        style.Colors[ImGuiCol_WindowBg].w = 0.5f;
     }
 
     // You might also want to adjust the title bar background if it's too opaque

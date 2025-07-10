@@ -101,6 +101,9 @@ int Application::BeginMainLoop()
         {
             m_editor->BeginDraw();
             m_editor->Draw(*m_renderSystem);
+
+            UpdateEditor();
+            RenderEditor(*m_renderSystem);
         }
 
         m_renderSystem->BeginDraw();

@@ -101,8 +101,6 @@ void main()
 }
 )";
 
-GLuint VAO, VBO, EBO;
-
 class Example_02 final : public nexus::Application
 {
 public:

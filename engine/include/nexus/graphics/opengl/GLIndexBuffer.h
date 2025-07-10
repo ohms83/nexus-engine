@@ -19,7 +19,10 @@ NXS_NAMESPACE
         void Unbind() const override;
 
     private:
-        uint32 Alloc() override;
         void Build_Impl() override;
+
+    protected:
+        uint32 Alloc() override;
+        void Release() override;
     };
 }

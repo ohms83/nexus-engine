@@ -19,8 +19,9 @@ NXS_NAMESPACE
         VertexBuffer* vertexBuffer = nullptr;
         IndexBuffer* indexBuffer = nullptr;
         std::map<std::string, glm::mat4> uniformMatrices;
+        std::vector<std::tuple<std::string, int32, TextureProxy*>> uniform2DTextures;
 
-        uint32 GetPolygonCount() const
+        [[nodiscard]] uint32 GetPolygonCount() const
         {
             return shader && indexBuffer && vertexBuffer ? indexBuffer->NumPolygons() : 0;
         }

@@ -30,6 +30,9 @@ NXS_NAMESPACE
          */
         virtual [[nodiscard]] uint32 Alloc() = 0;
 
+        //! Release the allocated GPU resource.
+        virtual void Release() = 0;
+
     protected:
         uint32 m_handle = 0;
     };

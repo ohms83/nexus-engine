@@ -6,6 +6,7 @@
 
 #include "graphics/opengl/GLIndexBuffer.h"
 #include "graphics/opengl/GLShader.h"
+#include "graphics/opengl/GLTexture.h"
 #include "graphics/opengl/GLVertexBuffer.h"
 #include "SDL3/SDL_error.h"
 
@@ -111,6 +112,11 @@ IndexBuffer* GLRenderingInterface::CreateIndexBuffer() const
 Shader* GLRenderingInterface::CreateShader() const
 {
     return new GLShader();
+}
+
+TextureProxy* GLRenderingInterface::CreateTexture() const
+{
+    return new GLTexture();
 }
 
 void GLRenderingInterface::Draw_Internal(const RenderCommand& command)

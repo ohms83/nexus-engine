@@ -55,10 +55,16 @@ void RenderingInterface::Draw(const RenderCommand& command)
     assert(command.vertexBuffer);
     assert(command.indexBuffer);
 
-    command.shader->Bind();
+    auto shader = command.shader;
+    shader->Bind();
     for (const auto& [name, mtx] : command.uniformMatrices)
     {
-        command.shader->SetUniformMatrix(name, mtx, false);
+        shader->SetUniformMatrix(name, mtx, false);
+    }
+
+    for (const auto& [name, textureUnit, texture] : command.uniform2DTextures)
+    {
+        shader->SetUniformTexture2D(name, texture, textureUnit);
     }
 
     command.vertexBuffer->Bind();

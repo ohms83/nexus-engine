@@ -11,7 +11,7 @@
 
 NXS_NAMESPACE
 {
-    class GLShader : public Shader
+    class GLShader final : public Shader
     {
     public:
         GLShader() = default;
@@ -28,11 +28,14 @@ NXS_NAMESPACE
         void SetUniformMatrix(const std::string& name, const glm::mat3& matrix, bool tranpose) override;
         void SetUniformMatrix(const std::string& name, const glm::mat4& matrix, bool tranpose) override;
 
+        void SetUniformTexture2D(const std::string& name, const TextureProxy* texture, int32 textureUnit) override;
+
         void Bind() const override;
         void Unbind() const override;
 
     protected:
         uint32 Alloc() override;
+        void Release() override;
 
     private:
         std::vector<GLuint> m_shaderHandles;

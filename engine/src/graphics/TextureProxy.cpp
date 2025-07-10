@@ -1,0 +1,44 @@
+//
+// Created by nutta on 7/10/2025.
+//
+#include <nexus/graphics/TextureProxy.h>
+
+USING_NAMESPACE_NXS;
+
+TextureProxy& TextureProxy::Begin(const TextureCreationInfo& info)
+{
+    assert(m_handle == 0);
+    m_handle = Alloc();
+
+    m_width = info.width;
+    m_height = info.height;
+    m_format = info.format;
+    m_channels = info.channels;
+    m_componentType = info.componentType;
+    m_filterMin = info.filterMin;
+    m_filterMag = info.filterMag;
+    m_wrapModeS = info.wrapModeS;
+    m_wrapModeT = info.wrapModeT;
+    m_numMips = info.numMips;
+
+    Bind();
+    return *this;
+}
+
+TextureProxy& TextureProxy::LoadData(const uint8* data, uint32 size)
+{
+    assert(m_handle != 0);
+    return *this;
+}
+
+TextureProxy& TextureProxy::LoadMipData(const uint8* data, uint32 size, uint32 mip)
+{
+    assert(m_handle != 0);
+    return *this;
+}
+
+void TextureProxy::End()
+{
+    assert(m_handle != 0);
+    Unbind();
+}

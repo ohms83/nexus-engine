@@ -68,6 +68,9 @@ NXS_NAMESPACE
         virtual void OnKeyDown(SDL_Keycode key);
         virtual void OnResize();
 
+        virtual void UpdateEditor() {}
+        virtual void RenderEditor(const RenderSystem& renderSystem) {}
+
         void PollEvents(SDL_Event& e);
 
     protected:

@@ -6,8 +6,10 @@
 
 #include <nexus/NxsCommon.h>
 #include <string>
+#include <unordered_map>
 
 #include "GpuResrouce.h"
+#include "TextureProxy.h"
 
 NXS_NAMESPACE
 {
@@ -41,6 +43,8 @@ NXS_NAMESPACE
         virtual void SetUniformVector(const std::string& name, const glm::vec4& vec) = 0;
         virtual void SetUniformMatrix(const std::string& name, const glm::mat3& matrix, bool tranpose) = 0;
         virtual void SetUniformMatrix(const std::string& name, const glm::mat4& matrix, bool tranpose) = 0;
+
+        virtual void SetUniformTexture2D(const std::string& name, const TextureProxy* texture, int32 textureUnit) = 0;
 
     protected:
         bool m_compiling = false;

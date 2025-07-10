@@ -14,20 +14,20 @@ NXS_NAMESPACE
     {
         enum class Type
         {
-            Position,
-            Normal,
-            Color0,
-            Color1,
-            Tangent,
-            Binormal,
-            TexCoord0,
-            TexCoord1,
-            TexCoord2,
-            TexCoord3,
-            TexCoord4,
-            TexCoord5,
-            TexCoord6,
-            TexCoord7,
+            Position,   // 0
+            Normal,     // 1
+            Color0,     // 2
+            Color1,     // 3
+            Tangent,    // 4
+            Binormal,   // 5
+            TexCoord0,  // 6
+            TexCoord1,  // 7
+            TexCoord2,  // 8
+            TexCoord3,  // 9
+            TexCoord4,  // 10
+            TexCoord5,  // 11
+            TexCoord6,  // 12
+            TexCoord7,  // 13
             Num
         };
 
