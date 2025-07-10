@@ -5,29 +5,32 @@
 #include <iostream>
 #include <sstream>
 #include <cassert>
+#include <format>
 
 #include <nexus/NxsDefine.h>
 
 #define GL_STRICT_CHECK
 
 #ifdef GL_STRICT_CHECK
-    #define CHECK_GL_ERROR() {\
+    #define CHECK_GL_ERROR(func_name) {\
         GLenum error = glGetError();\
         if (error != GL_NO_ERROR) {\
-            std::stringstream ss;\
-            ss << "OPENGL ERROR! ERROR CODE=" << error;\
-            std::cout << ss.str() << std::endl;\
+            std::cout << std::format("Error calling function {0}. Error Code={1}", #func_name, error) << std::endl;\
             assert(false);\
         }\
     }
 #else
-    #define CHECK_GL_ERROR() {\
+    #define CHECK_GL_ERROR(func_name) {\
         GLenum error = glGetError();\
         if (error != GL_NO_ERROR) {\
-            std::cout << "OPENGL ERROR! ERROR CODE=" << error << std::endl;\
+            std::cout << std::format("Error calling function {0}. Error Code={1}", func_name, error) << std::endl;\
         }\
     }
 #endif
+#define CALL_GL_FUNC(func) {\
+    func;\
+    CHECK_GL_ERROR(#func)\
+}
 
 NXS_NAMESPACE
 {

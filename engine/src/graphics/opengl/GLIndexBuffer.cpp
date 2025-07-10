@@ -11,39 +11,33 @@ USING_NAMESPACE_NXS;
 
 GLIndexBuffer::~GLIndexBuffer()
 {
-    glDeleteBuffers(1, &m_handle);
-    CHECK_GL_ERROR();
+    CALL_GL_FUNC(glDeleteBuffers(1, &m_handle));
 }
 
 void GLIndexBuffer::Bind() const
 {
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_handle);
-    CHECK_GL_ERROR();
+    CALL_GL_FUNC(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_handle));
 }
 
 void GLIndexBuffer::Unbind() const
 {
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    CHECK_GL_ERROR();
+    CALL_GL_FUNC(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
 }
 
 uint32 GLIndexBuffer::Alloc()
 {
-    glGenBuffers(1, &m_handle);
-    CHECK_GL_ERROR();
+    CALL_GL_FUNC(glGenBuffers(1, &m_handle));
     return m_handle;
 }
 
 void GLIndexBuffer::Release()
 {
-    glDeleteBuffers(1, &m_handle);
-    CHECK_GL_ERROR();
+    CALL_GL_FUNC(glDeleteBuffers(1, &m_handle));
 }
 
 void GLIndexBuffer::Build_Impl()
 {
-    const auto glUsage = NxsBufferUsageToGLenum(m_usage);
+    const auto gl_usage = NxsBufferUsageToGLenum(m_usage);
     const auto bufferSize = CAST<GLsizeiptr>(sizeof(uint32) * m_indices.size());
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, bufferSize, m_indices.data(), glUsage);
-    CHECK_GL_ERROR();
+    CALL_GL_FUNC(glBufferData(GL_ELEMENT_ARRAY_BUFFER, bufferSize, m_indices.data(), gl_usage));
 }

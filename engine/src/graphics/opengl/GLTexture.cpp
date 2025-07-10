@@ -4,74 +4,86 @@
 
 #include <nexus/graphics/opengl/GLTexture.h>
 
+NXS_NAMESPACE
+{
+    namespace GL
+    {
+        static GLuint NxsTextureWrapModeToGL(const TextureWrapMode mode)
+        {
+            switch (mode)
+            {
+            case TextureWrapMode::Clamp:
+                return GL_CLAMP;
+            case TextureWrapMode::Repeat:
+                return GL_REPEAT;
+            case TextureWrapMode::MirroredRepeat:
+                return GL_MIRRORED_REPEAT;
+            case TextureWrapMode::ClampToEdge:
+                return GL_CLAMP_TO_EDGE;
+            case TextureWrapMode::ClampToBorder:
+                return GL_CLAMP_TO_BORDER;
+            case TextureWrapMode::MirroredClampToEdge:
+                return GL_MIRROR_CLAMP_TO_EDGE;
+            default:
+                assert(false);
+                return GL_NONE;
+            }
+        }
+    }
+}
+
 USING_NAMESPACE_NXS;
+
+static GLuint NxsTextureFilterModeToGL(const TextureFilterMode mode)
+{
+    switch (mode)
+    {
+    case TextureFilterMode::Nearest:
+        return GL_NEAREST;
+    case TextureFilterMode::Linear:
+        return GL_LINEAR;
+    case TextureFilterMode::NearestMipmapNearest:
+        return GL_NEAREST_MIPMAP_NEAREST;
+    case TextureFilterMode::LinearMipmapNearest:
+        return GL_LINEAR_MIPMAP_NEAREST;
+    case TextureFilterMode::NearestMipmapLinear:
+        return GL_NEAREST_MIPMAP_LINEAR;
+    case TextureFilterMode::LinearMipmapLinear:
+        return GL_LINEAR_MIPMAP_LINEAR;
+    default:
+        assert(false);
+        return GL_NONE;
+    }
+}
 
 void GLTexture::Bind() const
 {
-    glBindTexture(GL_TEXTURE_2D, m_handle);
-    CHECK_GL_ERROR();
+    CALL_GL_FUNC(glBindTexture(GL_TEXTURE_2D, m_handle));
 }
 
 void GLTexture::Unbind() const
 {
-    glBindTexture(GL_TEXTURE_2D, 0);
-    CHECK_GL_ERROR();
+    CALL_GL_FUNC(glBindTexture(GL_TEXTURE_2D, 0));
 }
 
 TextureProxy& GLTexture::Begin(const TextureCreationInfo& info)
 {
     TextureProxy::Begin(info);
 
-    const std::array<GLuint, SIZE_CAST(TextureWrapMode::Num)> gl_wrapModes = {
-        // None
-        GL_NONE,
-        // Clamp
-        GL_CLAMP,
-        // Repeat
-        GL_REPEAT,
-        // MirroredRepeat
-        GL_MIRRORED_REPEAT,
-        // ClampToEdge
-        GL_MIRRORED_REPEAT,
-        // ClampToBorder
-        GL_CLAMP_TO_BORDER,
-        // MirroredClampToEdgex
-        GL_MIRROR_CLAMP_TO_EDGE,
-    };
-    assert(info.wrapModeS != TextureWrapMode::Num);
-    assert(info.wrapModeT != TextureWrapMode::Num);
+    GLuint gl_wrapModeS = GL::NxsTextureWrapModeToGL(info.wrapModeS);
+    GLuint gl_wrapModeT = GL::NxsTextureWrapModeToGL(info.wrapModeT);
 
-    const std::array<GLuint, SIZE_CAST(TextureFilterMode::Num)> gl_filterModes = {
-        // None
-        GL_NONE,
-        // Nearest
-        GL_NEAREST,
-        // Linear
-        GL_LINEAR,
-        // NearestMipmapNearest
-        GL_NEAREST_MIPMAP_NEAREST,
-        // LinearMipmapLinear
-        GL_LINEAR_MIPMAP_LINEAR,
-        // NearestMipmapLinear
-        GL_NEAREST_MIPMAP_LINEAR,
-        // LinearMipmapNearest
-        GL_LINEAR_MIPMAP_NEAREST,
-    };
-    assert(info.filterMag != TextureFilterMode::Num);
-    assert(info.filterMin != TextureFilterMode::Num);
+    GLuint gl_filterMin = NxsTextureFilterModeToGL(info.filterMin);
+    GLuint gl_filterMag = NxsTextureFilterModeToGL(info.filterMag);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, gl_wrapModes[INT_CAST(info.wrapModeS)]);
-    CHECK_GL_ERROR();
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, gl_wrapModes[INT_CAST(info.wrapModeT)]);
-    CHECK_GL_ERROR();
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filterModes[INT_CAST(info.filterMag)]);
-    CHECK_GL_ERROR();
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filterModes[INT_CAST(info.filterMin)]);
-    CHECK_GL_ERROR();
+    CALL_GL_FUNC(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, gl_wrapModeS));
+    CALL_GL_FUNC(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, gl_wrapModeT));
+    CALL_GL_FUNC(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filterMin));
+    CALL_GL_FUNC(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filterMag));
     return *this;
 }
 
-TextureProxy& GLTexture::LoadData(const uint8* data, uint32 size)
+TextureProxy& GLTexture::LoadData(const uint8* data, const uint32 size)
 {
     TextureProxy::LoadData(data, size);
 
@@ -110,13 +122,11 @@ TextureProxy& GLTexture::LoadData(const uint8* data, uint32 size)
     }
 
     const auto gl_dataType = nexus::GL::NxsDataToGLenum(m_componentType);
-    glTexImage2D(GL_TEXTURE_2D, 0, gl_pixelFormats, m_width, m_height, 0, gl_pixelFormats, gl_dataType, data);
-    CHECK_GL_ERROR();
+    CALL_GL_FUNC(glTexImage2D(GL_TEXTURE_2D, 0, gl_pixelFormats, m_width, m_height, 0, gl_pixelFormats, gl_dataType, data));
 
     if (m_numMips > 1)
     {
-        glGenerateMipmap(GL_TEXTURE_2D);
-        CHECK_GL_ERROR();
+        CALL_GL_FUNC(glGenerateMipmap(GL_TEXTURE_2D));
     }
     return *this;
 }
@@ -128,19 +138,16 @@ TextureProxy& GLTexture::LoadMipData(const uint8* data, uint32 size, uint32 mip)
 
 uint32 GLTexture::Alloc()
 {
-    glGenTextures(1, &m_handle);
-    CHECK_GL_ERROR();
+    CALL_GL_FUNC(glGenTextures(1, &m_handle));
     return m_handle;
 }
 
 void GLTexture::Release()
 {
-    glDeleteTextures(1, &m_handle);
-    CHECK_GL_ERROR();
+    CALL_GL_FUNC(glDeleteTextures(1, &m_handle));
 }
 
 GLTexture::~GLTexture()
 {
-    glDeleteTextures(1, &m_handle);
-    CHECK_GL_ERROR();
+    CALL_GL_FUNC(glDeleteTextures(1, &m_handle));
 }

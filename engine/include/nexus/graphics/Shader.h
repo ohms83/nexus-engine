@@ -21,7 +21,7 @@ NXS_NAMESPACE
             None,
             Vertex,
             Fragment,
-            Compute,
+            Geometry,
             Num
         };
 

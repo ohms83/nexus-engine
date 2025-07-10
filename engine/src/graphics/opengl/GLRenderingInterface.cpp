@@ -60,9 +60,9 @@ GLRenderingInterface::GLRenderingInterface(WindowContext window, const GraphicsC
     std::cout << ss.str() << std::endl;
 
     // Enable depth test
-    glEnable(GL_DEPTH_TEST);
+    CALL_GL_FUNC(glEnable(GL_DEPTH_TEST));
     // Accept fragment if it closer to the camera than the former one
-    glDepthFunc(GL_LESS);
+    CALL_GL_FUNC(glDepthFunc(GL_LESS));
 }
 
 GLRenderingInterface::~GLRenderingInterface()
@@ -72,21 +72,21 @@ GLRenderingInterface::~GLRenderingInterface()
 
 void GLRenderingInterface::ClearColor(const Color4F& color)
 {
-    glClearColor(color.r, color.g, color.b, color.a);
-    glClear(GL_COLOR_BUFFER_BIT);
+    CALL_GL_FUNC(glClearColor(color.r, color.g, color.b, color.a));
+    CALL_GL_FUNC(glClear(GL_COLOR_BUFFER_BIT));
 }
 
 void GLRenderingInterface::ClearDepth(float depth)
 {
-    glClearDepth(depth);
-    glClear(GL_DEPTH_BUFFER_BIT);
+    CALL_GL_FUNC(glClearDepth(depth));
+    CALL_GL_FUNC(glClear(GL_DEPTH_BUFFER_BIT));
 }
 
 void GLRenderingInterface::ClearBuffer(const Color4F& color, float depth)
 {
-    glClearColor(color.r, color.g, color.b, color.a);
-    glClearDepth(depth);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    CALL_GL_FUNC(glClearColor(color.r, color.g, color.b, color.a));
+    CALL_GL_FUNC(glClearDepth(depth));
+    CALL_GL_FUNC(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 }
 
 void GLRenderingInterface::SwapBuffer()
@@ -96,7 +96,7 @@ void GLRenderingInterface::SwapBuffer()
 
 void GLRenderingInterface::SetViewport(int32 x, int32 y, int32 w, int32 h)
 {
-    glViewport(x, y, w, h);
+    CALL_GL_FUNC(glViewport(x, y, w, h));
 }
 
 VertexBuffer* GLRenderingInterface::CreateVertexBuffer() const
@@ -121,35 +121,49 @@ TextureProxy* GLRenderingInterface::CreateTexture() const
 
 void GLRenderingInterface::Draw_Internal(const RenderCommand& command)
 {
-    const std::array<GLuint, SIZE_CAST(nexus::DrawMode::Num)> drawModes = {
-        // Point,
-        GL_POINT,
-        // Line,
-        GL_LINE,
-        // LineLoop,
-        GL_LINE_LOOP,
-        // LineStrip,
-        GL_LINE_STRIP,
-        // Triangle,
-        GL_TRIANGLES,
-        // TriangleStrip,
-        GL_TRIANGLE_STRIP,
-        // TriangleFan,
-        GL_TRIANGLE_FAN,
-        // Quad,
-        GL_QUADS,
-        // Num
-    };
-    glDrawElements(
-         drawModes[INT_CAST(command.indexBuffer->GetDrawMode())],      // mode
+    const auto indexBuffer = command.indexBuffer;
+    assert(indexBuffer != nullptr);
+
+    GLuint gl_drawMode = 0;
+    switch (indexBuffer->GetDrawMode())
+    {
+    case DrawMode::Point:
+        gl_drawMode = GL_POINT;
+        break;
+    case DrawMode::Line:
+        gl_drawMode = GL_LINE;
+        break;
+    case DrawMode::LineStrip:
+        gl_drawMode = GL_LINE_STRIP;
+        break;
+    case DrawMode::LineLoop:
+        gl_drawMode = GL_LINE_LOOP;
+        break;
+    case DrawMode::Triangle:
+        gl_drawMode = GL_TRIANGLES;
+        break;
+    case DrawMode::TriangleStrip:
+        gl_drawMode = GL_TRIANGLE_STRIP;
+        break;
+    case DrawMode::TriangleFan:
+        gl_drawMode = GL_TRIANGLE_FAN;
+        break;
+    case DrawMode::Quad:
+        gl_drawMode = GL_QUADS;
+        break;
+    default:
+        assert(false);
+        break;
+    }
+    CALL_GL_FUNC(glDrawElements(
+         gl_drawMode,      // mode
          CAST<GLsizei>(command.indexBuffer->NumIndex()),    // count
          GL_UNSIGNED_INT,   // type
          R_CAST<void*>(0)           // element array buffer offset
-     );
-    CHECK_GL_ERROR();
+     ));
 }
 
 void GLRenderingInterface::OnResize(uint32_t pixel_w, uint32_t pixel_h)
 {
-    glViewport(0, 0, INT_CAST(pixel_w), INT_CAST(pixel_h));
+    CALL_GL_FUNC(glViewport(0, 0, INT_CAST(pixel_w), INT_CAST(pixel_h)));
 }
