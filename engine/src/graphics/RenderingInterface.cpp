@@ -67,6 +67,16 @@ void RenderingInterface::Draw(const RenderCommand& command)
         shader->SetUniformTexture2D(name, texture, textureUnit);
     }
 
+    for (const auto& [name, uVec3] : command.uniformVec3)
+    {
+        shader->SetUniformVector(name, uVec3);
+    }
+
+    for (const auto& [name, uVec4] : command.uniformVec4)
+    {
+        shader->SetUniformVector(name, uVec4);
+    }
+
     command.vertexBuffer->Bind();
     command.indexBuffer->Bind();
 

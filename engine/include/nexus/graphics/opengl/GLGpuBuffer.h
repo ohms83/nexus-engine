@@ -5,24 +5,36 @@
 #pragma once
 
 #include <array>
-#include "graphics/GPUBuffer.h"
+#include <nexus/graphics/GPUBuffer.h>
+#include "NxsGL.h"
 
 NXS_NAMESPACE
 {
     inline GLenum NxsBufferUsageToGLenum(const BufferUsage usage)
     {
-        const std::array<GLenum, SIZE_CAST(BufferUsage::Num)> glUsages = {
-            GL_STATIC_DRAW,
-            GL_STATIC_READ,
-            GL_STATIC_COPY,
-            GL_DYNAMIC_DRAW,
-            GL_DYNAMIC_READ,
-            GL_DYNAMIC_COPY,
-            GL_STREAM_DRAW,
-            GL_STREAM_READ,
-            GL_STREAM_COPY,
-        };
-        assert(usage != BufferUsage::Num);
-        return glUsages[INT_CAST(usage)];
+        switch(usage)
+        {
+        case BufferUsage::StaticDraw:
+            return GL_STATIC_DRAW;
+        case BufferUsage::StaticRead:
+            return GL_STATIC_READ;
+        case BufferUsage::StaticCopy:
+            return GL_STATIC_COPY;
+        case BufferUsage::DynamicDraw:
+            return GL_DYNAMIC_DRAW;
+        case BufferUsage::DynamicRead:
+            return GL_DYNAMIC_READ;
+        case BufferUsage::DynamicCopy:
+            return GL_DYNAMIC_COPY;
+        case BufferUsage::StreamDraw:
+            return GL_STREAM_DRAW;
+        case BufferUsage::StreamRead:
+            return GL_STREAM_READ;
+        case BufferUsage::StreamCopy:
+            return GL_STREAM_COPY;
+        default:
+            assert(false);
+            return GL_NONE;
+        }
     }
 }

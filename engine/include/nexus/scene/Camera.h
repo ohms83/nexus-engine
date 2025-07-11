@@ -5,12 +5,11 @@
 #pragma once
 
 #include <nexus/NxsDefine.h>
-
-#include "Transform.h"
+#include "SceneNode.h"
 
 NXS_NAMESPACE
 {
-    class Camera
+    class Camera : public SceneNode
     {
     public:
         Camera() = default;
@@ -35,8 +34,6 @@ NXS_NAMESPACE
         {
             return m_projMtx;
         }
-
-        Transform transform;
 
     protected:
         glm::mat4 m_projMtx{1.0f};

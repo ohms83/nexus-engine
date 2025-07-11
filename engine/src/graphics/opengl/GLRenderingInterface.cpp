@@ -63,6 +63,10 @@ GLRenderingInterface::GLRenderingInterface(WindowContext window, const GraphicsC
     CALL_GL_FUNC(glEnable(GL_DEPTH_TEST));
     // Accept fragment if it closer to the camera than the former one
     CALL_GL_FUNC(glDepthFunc(GL_LESS));
+    
+    CALL_GL_FUNC(glEnable(GL_CULL_FACE));
+    CALL_GL_FUNC(glCullFace(GL_BACK));
+    CALL_GL_FUNC(glFrontFace(GL_CW));
 }
 
 GLRenderingInterface::~GLRenderingInterface()

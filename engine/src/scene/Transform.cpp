@@ -42,8 +42,13 @@ void Transform::RemoveChild(Transform* child)
 
 void Transform::LookAt(const glm::vec3& position, const glm::vec3& target, const glm::vec3& up)
 {
-    const auto lookMtx = glm::lookAt(position, target, up);
     m_position = position;
-    m_orientation = glm::toQuat(lookMtx);
+    m_orientation = glm::quatLookAt(target - position, up);
     m_scale = {1, 1, 1};
+}
+
+glm::vec3 Transform::GetLookVector() const
+{
+    const auto localZ = glm::vec3{0, 0, 1};
+    return glm::rotate(m_orientation, localZ);
 }

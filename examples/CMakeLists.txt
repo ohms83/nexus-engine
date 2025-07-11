@@ -10,7 +10,7 @@ macro(add_example_executable TARGET)
     add_executable(${TARGET} ${ARG_SOURCES})
     # Recursively copy the entire assets directory
     add_custom_command(TARGET ${TARGET} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different
         "${ASSETS_DIR}"
         "${ASSETS_DEST_DIR}/assets" # Copies 'assets' folder and its contents
         COMMENT "Copying application resources..."
@@ -21,3 +21,4 @@ endmacro()
 add_example_executable(example-01 SOURCES example-01-HelloWorld.cpp)
 add_example_executable(example-02 SOURCES example-02-Cubes.cpp)
 add_example_executable(example-03 SOURCES example-03-Texture.cpp)
+add_example_executable(example-04 SOURCES example-04-Lighting.cpp)

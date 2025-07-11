@@ -7,6 +7,8 @@
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
 
+#define NXS_INFINITE 0xFFFFFFFF
+
 NXS_NAMESPACE
 {
     namespace Math

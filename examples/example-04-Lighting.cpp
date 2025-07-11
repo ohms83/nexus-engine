@@ -6,49 +6,48 @@
 #include "nexus/scene/Transform.h"
 #include <glm/gtc/type_ptr.hpp>
 
+#include "nexus/resource/Texture.h"
+
 struct Vertex
 {
     glm::vec3 position;
-    glm::vec3 color;
+    glm::vec3 normal;
+    glm::vec2 texCoord0;
 };
 
 // Vertices for a standard cube (24 vertices for 6 faces * 4 vertices/face)
 const std::vector<Vertex> cubeVertices = {
-    // Front face (red)
-    {{-0.5f, -0.5f,  0.5f}, {1.0f, 0.0f, 0.0f}}, // 0
-    {{ 0.5f, -0.5f,  0.5f}, {1.0f, 0.0f, 0.0f}}, // 1
-    {{ 0.5f,  0.5f,  0.5f}, {1.0f, 0.0f, 0.0f}}, // 2
-    {{-0.5f,  0.5f,  0.5f}, {1.0f, 0.0f, 0.0f}}, // 3
-
-    // Back face (green)
-    {{-0.5f, -0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}}, // 4
-    {{ 0.5f, -0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}}, // 5
-    {{ 0.5f,  0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}}, // 6
-    {{-0.5f,  0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}}, // 7
-
-    // Top face (blue)
-    {{-0.5f,  0.5f,  0.5f}, {0.0f, 0.0f, 1.0f}}, // 8
-    {{ 0.5f,  0.5f,  0.5f}, {0.0f, 0.0f, 1.0f}}, // 9
-    {{ 0.5f,  0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}}, // 10
-    {{-0.5f,  0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}}, // 11
-
-    // Bottom face (yellow)
-    {{-0.5f, -0.5f,  0.5f}, {1.0f, 1.0f, 0.0f}}, // 12
-    {{ 0.5f, -0.5f,  0.5f}, {1.0f, 1.0f, 0.0f}}, // 13
-    {{ 0.5f, -0.5f, -0.5f}, {1.0f, 1.0f, 0.0f}}, // 14
-    {{-0.5f, -0.5f, -0.5f}, {1.0f, 1.0f, 0.0f}}, // 15
-
-    // Right face (cyan)
-    {{ 0.5f, -0.5f,  0.5f}, {0.0f, 1.0f, 1.0f}}, // 16
-    {{ 0.5f, -0.5f, -0.5f}, {0.0f, 1.0f, 1.0f}}, // 17
-    {{ 0.5f,  0.5f, -0.5f}, {0.0f, 1.0f, 1.0f}}, // 18
-    {{ 0.5f,  0.5f,  0.5f}, {0.0f, 1.0f, 1.0f}}, // 19
-
-    // Left face (magenta)
-    {{-0.5f, -0.5f,  0.5f}, {1.0f, 0.0f, 1.0f}}, // 20
-    {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 1.0f}}, // 21
-    {{-0.5f,  0.5f, -0.5f}, {1.0f, 0.0f, 1.0f}}, // 22
-    {{-0.5f,  0.5f,  0.5f}, {1.0f, 0.0f, 1.0f}}  // 23
+    // Front face (Z+)
+    // Position             Normal                 TexCoord
+    {{-0.5f, -0.5f,  0.5f}, { 0.0f,  0.0f,  1.0f}, {0.0f, 0.0f}}, // 0
+    {{ 0.5f, -0.5f,  0.5f}, { 0.0f,  0.0f,  1.0f}, {1.0f, 0.0f}}, // 1
+    {{ 0.5f,  0.5f,  0.5f}, { 0.0f,  0.0f,  1.0f}, {1.0f, 1.0f}}, // 2
+    {{-0.5f,  0.5f,  0.5f}, { 0.0f,  0.0f,  1.0f}, {0.0f, 1.0f}}, // 3
+    // Back face (Z-)
+    {{-0.5f, -0.5f, -0.5f}, { 0.0f,  0.0f, -1.0f}, {1.0f, 0.0f}}, // 4
+    {{ 0.5f, -0.5f, -0.5f}, { 0.0f,  0.0f, -1.0f}, {0.0f, 0.0f}}, // 5
+    {{ 0.5f,  0.5f, -0.5f}, { 0.0f,  0.0f, -1.0f}, {0.0f, 1.0f}}, // 6
+    {{-0.5f,  0.5f, -0.5f}, { 0.0f,  0.0f, -1.0f}, {1.0f, 1.0f}}, // 7
+    // Top face (Y+)
+    {{-0.5f,  0.5f,  0.5f}, { 0.0f,  1.0f,  0.0f}, {0.0f, 1.0f}}, // 8 (same pos as 3)
+    {{ 0.5f,  0.5f,  0.5f}, { 0.0f,  1.0f,  0.0f}, {1.0f, 1.0f}}, // 9 (same pos as 2)
+    {{ 0.5f,  0.5f, -0.5f}, { 0.0f,  1.0f,  0.0f}, {1.0f, 0.0f}}, // 10 (same pos as 6)
+    {{-0.5f,  0.5f, -0.5f}, { 0.0f,  1.0f,  0.0f}, {0.0f, 0.0f}}, // 11 (same pos as 7)
+    // Bottom face (Y-)
+    {{-0.5f, -0.5f,  0.5f}, { 0.0f, -1.0f,  0.0f}, {0.0f, 0.0f}}, // 12 (same pos as 0)
+    {{ 0.5f, -0.5f,  0.5f}, { 0.0f, -1.0f,  0.0f}, {1.0f, 0.0f}}, // 13 (same pos as 1)
+    {{ 0.5f, -0.5f, -0.5f}, { 0.0f, -1.0f,  0.0f}, {1.0f, 1.0f}}, // 14 (same pos as 5)
+    {{-0.5f, -0.5f, -0.5f}, { 0.0f, -1.0f,  0.0f}, {0.0f, 1.0f}}, // 15 (same pos as 4)
+    // Right face (X+)
+    {{ 0.5f, -0.5f,  0.5f}, { 1.0f,  0.0f,  0.0f}, {0.0f, 0.0f}}, // 16 (same pos as 1)
+    {{ 0.5f, -0.5f, -0.5f}, { 1.0f,  0.0f,  0.0f}, {1.0f, 0.0f}}, // 17 (same pos as 5)
+    {{ 0.5f,  0.5f, -0.5f}, { 1.0f,  0.0f,  0.0f}, {1.0f, 1.0f}}, // 18 (same pos as 6)
+    {{ 0.5f,  0.5f,  0.5f}, { 1.0f,  0.0f,  0.0f}, {0.0f, 1.0f}}, // 19 (same pos as 2)
+    // Left face (X-)
+    {{-0.5f, -0.5f,  0.5f}, {-1.0f,  0.0f,  0.0f}, {1.0f, 0.0f}}, // 20 (same pos as 0)
+    {{-0.5f, -0.5f, -0.5f}, {-1.0f,  0.0f,  0.0f}, {0.0f, 0.0f}}, // 21 (same pos as 4)
+    {{-0.5f,  0.5f, -0.5f}, {-1.0f,  0.0f,  0.0f}, {0.0f, 1.0f}}, // 22 (same pos as 7)
+    {{-0.5f,  0.5f,  0.5f}, {-1.0f,  0.0f,  0.0f}, {1.0f, 1.0f}}
 };
 
 static const std::vector<uint32_t> cubeIndices = {
@@ -86,9 +85,12 @@ static const std::vector<uint32_t> cubeIndices = {
 const char* vertexShaderSource = R"(
 #version 330 core
 layout (location = 0) in vec3 aPos;
-layout (location = 2) in vec3 aColor;
+layout (location = 1) in vec3 aNormal;
+layout (location = 6) in vec2 aTexCoord0;
 
-out vec3 outColor;
+out vec3 FragPos;  
+out vec3 Normal;
+out vec2 texCoord0;
 
 uniform mat4 model;
 uniform mat4 view;
@@ -96,26 +98,58 @@ uniform mat4 projection;
 
 void main()
 {
-    gl_Position = projection * view * model * vec4(aPos, 1.0);
-    outColor = aColor;
+    vec4 worldPos = model * vec4(aPos, 1.0);
+    gl_Position = projection * view * worldPos;
+    FragPos = vec3(worldPos);
+    texCoord0 = aTexCoord0;
+    Normal = vec3(model * vec4(aNormal, 1.0));
 }
 )";
 
 const char* fragmentShaderSource = R"(
 #version 330 core
 out vec4 FragColor;
-in vec3 outColor;
+
+in vec3 FragPos;
+in vec3 Normal;
+in vec2 texCoord0;
+
+uniform sampler2D ourTexture;
+
+uniform vec3 u_Ambient;
+
+struct Light {
+    // Set w component to 0 for the directional light
+    vec3 position;
+    // Diffuse color
+    vec3 diffuse;
+    // Specular color
+    vec3 specular;
+};
+uniform Light u_Light;
+
+vec3 CalcDirLight(Light light, vec3 normal)
+{
+    vec3 lightDir = normalize(light.position);
+    float diff = max(dot(normal, lightDir), 0.0);
+    return light.diffuse * diff;
+}
 
 void main()
 {
-    FragColor = vec4(outColor, 1.0);
+    vec4 albedo = texture(ourTexture, texCoord0);
+    vec4 ambient = albedo * vec4(u_Ambient, 1);
+    vec4 diffuse = albedo * vec4(CalcDirLight(u_Light, Normal), 1);
+    FragColor = ambient + diffuse;
 }
 )";
 
-class Example_02 final : public nexus::Application
+static const std::string assetsPath = "assets/textures/Crate/Wood_Crate_001_basecolor.jpg";
+
+class Example_03 final : public nexus::Application
 {
 public:
-    ~Example_02() override
+    ~Example_03() override
     {
     }
     void Render(nexus::RenderSystem& renderSystem) override
@@ -135,10 +169,18 @@ public:
             m_vertexBuffer.get(),
             m_indexBuffer.get(),
             {
-                    {"model", m_cubeTransform.GetMatrix()},
-                    {"view", view},
-                    {"projection", projection},
-                }
+                {"model", m_cubeTransform.GetMatrix()},
+                {"view", view},
+                {"projection", projection},
+            },
+            {
+                { "ourTexture", 0, m_textureProxy.get() },
+            },
+            {
+                { "u_Ambient", glm::vec3(0.2, 0.2, 0.2) },
+                { "u_Light.position", glm::vec3(1, 1, 0) },
+                { "u_Light.diffuse", glm::vec3(1, 1, 1) },
+            }
         };
 
         renderSystem.RegisterDrawCommand(renderCommand);
@@ -158,8 +200,10 @@ protected:
             .SetVertices(R_CAST<const uint8_t*>(cubeVertices.data()), bufferSize)
             .SetUsage(nexus::BufferUsage::StaticDraw)
             .AddAttribute(nexus::VertexAttribute {nexus::VertexAttribute::Type::Position, nexus::DataType::Float, 3})
-            .AddAttribute(nexus::VertexAttribute {nexus::VertexAttribute::Type::Color0, nexus::DataType::Float, 3})
+            .AddAttribute(nexus::VertexAttribute {nexus::VertexAttribute::Type::Normal, nexus::DataType::Float, 3})
+            .AddAttribute(nexus::VertexAttribute {nexus::VertexAttribute::Type::TexCoord0, nexus::DataType::Float, 2})
         .Build();
+        std::cout << "Vertex stride = " << vertexSize << std::endl;
 
         m_indexBuffer.reset(renderInterface.CreateIndexBuffer());
         m_indexBuffer->Begin()
@@ -173,12 +217,19 @@ protected:
             .AddSource(vertexShaderSource, nexus::Shader::Type::Vertex)
             .AddSource(fragmentShaderSource, nexus::Shader::Type::Fragment)
         .Compile();
+
+        m_texture = nexus::TextureManager::GetInstance().Get(assetsPath);
+        m_texture->SetWrapMode(nexus::TextureWrapMode::Clamp, nexus::TextureWrapMode::Clamp);
+        m_texture->SetFiltering(nexus::TextureFilterMode::Linear, nexus::TextureFilterMode::Linear);
+        m_textureProxy.reset(m_texture->AllocateGpuResource(renderInterface));
         return true;
     }
 
     nexus::Ptr<nexus::VertexBuffer> m_vertexBuffer;
     nexus::Ptr<nexus::IndexBuffer> m_indexBuffer;
     nexus::Ptr<nexus::Shader> m_shader;
+    nexus::Ptr<nexus::TextureProxy> m_textureProxy;
+    nexus::Ref<nexus::Texture> m_texture;
     nexus::Transform m_cubeTransform;
 };
 
@@ -192,8 +243,8 @@ int main()
         1280, 960,
         vsync,
     };
-    return nexus::RunApplication<Example_02>({
-        "Example 02",
+    return nexus::RunApplication<Example_03>({
+        "Example 03",
         graphicsConfig,
         fullscreen
     });

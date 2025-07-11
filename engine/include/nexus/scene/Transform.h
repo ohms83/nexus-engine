@@ -68,6 +68,7 @@ NXS_NAMESPACE
         }
 
         void LookAt(const glm::vec3& position, const glm::vec3& target, const glm::vec3& up);
+        glm::vec3 GetLookVector() const;
 
     private:
         Transform* m_parent = nullptr;

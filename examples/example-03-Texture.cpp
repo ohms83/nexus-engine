@@ -49,30 +49,35 @@ const std::vector<Vertex> cubeVertices = {
     {{-0.5f,  0.5f,  0.5f}, {1.0f, 1.0f}}
 };
 
-static const std::vector<uint32_t> cubeIndices  = {
-    // Front face
-    0, 1, 2,  // First triangle
-    2, 3, 0,  // Second triangle
+static const std::vector<uint32_t> cubeIndices = {
+    // Front face (Z+): Vertices 0, 1, 2, 3. View from +Z. (BL, BR, TR, TL)
+    0, 3, 2,  // Triangle 1: Bottom-Left, Top-Left, Top-Right (CCW)
+    0, 2, 1,  // Triangle 2: Bottom-Left, Top-Right, Bottom-Right (CCW)
 
-    // Back face
-    4, 5, 6,
-    6, 7, 4,
+    // Back face (Z-): Vertices 4, 5, 6, 7. View from -Z.
+    // Relative order when viewed from -Z: 6 (BL), 7 (BR), 4 (TR), 5 (TL)
+    6, 4, 5,  // Triangle 1: Bottom-Left, Top-Left, Top-Right (CCW)
+    6, 7, 4,  // Triangle 2: Bottom-Left, Bottom-Right, Top-Right (CCW)
 
-    // Top face
-    8, 9, 10,
-    10, 11, 8,
+    // Top face (Y+): Vertices 8, 9, 10, 11. View from +Y.
+    // Relative order when viewed from +Y: 8 (BL), 9 (BR), 10 (TR), 11 (TL)
+    8, 11, 10, // Triangle 1: Bottom-Left, Top-Left, Top-Right (CCW)
+    8, 10, 9,  // Triangle 2: Bottom-Left, Top-Right, Bottom-Right (CCW)
 
-    // Bottom face
-    12, 13, 14,
-    14, 15, 12,
+    // Bottom face (Y-): Vertices 12, 13, 14, 15. View from -Y.
+    // Relative order when viewed from -Y: 15 (BL), 14 (BR), 13 (TR), 12 (TL)
+    15, 12, 13, // Triangle 1: Bottom-Left, Top-Left, Top-Right (CCW)
+    15, 13, 14, // Triangle 2: Bottom-Left, Top-Right, Bottom-Right (CCW)
 
-    // Right face
-    16, 17, 18,
-    18, 19, 16,
+    // Right face (X+): Vertices 16, 17, 18, 19. View from +X.
+    // Relative order when viewed from +X: 16 (BL), 17 (BR), 18 (TR), 19 (TL)
+    16, 19, 18, // Triangle 1: Bottom-Left, Top-Left, Top-Right (CCW)
+    16, 18, 17, // Triangle 2: Bottom-Left, Top-Right, Bottom-Right (CCW)
 
-    // Left face
-    20, 21, 22,
-    22, 23, 20
+    // Left face (X-): Vertices 20, 21, 22, 23. View from -X.
+    // Relative order when viewed from -X: 21 (BL), 20 (BR), 23 (TR), 22 (TL)
+    21, 22, 23, // Triangle 1: Bottom-Left, Top-Left, Top-Right (CCW)
+    21, 23, 20  // Triangle 2: Bottom-Left, Top-Right, Bottom-Right (CCW)
 };
 
 // Shader sources
@@ -114,9 +119,6 @@ class Example_03 final : public nexus::Application
 public:
     ~Example_03() override
     {
-        delete m_vertexBuffer;
-        delete m_indexBuffer;
-        delete m_shader;
     }
     void Render(nexus::RenderSystem& renderSystem) override
     {
@@ -131,9 +133,9 @@ public:
 
         const nexus::RenderCommand renderCommand
         {
-            m_shader,
-            m_vertexBuffer,
-            m_indexBuffer,
+            m_shader.get(),
+            m_vertexBuffer.get(),
+            m_indexBuffer.get(),
             {
                 {"model", m_cubeTransform.GetMatrix()},
                 {"view", view},
@@ -156,7 +158,7 @@ protected:
 
         constexpr auto vertexSize = sizeof(Vertex);
         const auto bufferSize = cubeVertices.size() * vertexSize;
-        m_vertexBuffer = renderInterface.CreateVertexBuffer();
+        m_vertexBuffer.reset(renderInterface.CreateVertexBuffer());
         m_vertexBuffer->Begin()
             .SetVertices(R_CAST<const uint8_t*>(cubeVertices.data()), bufferSize)
             .SetUsage(nexus::BufferUsage::StaticDraw)
@@ -165,14 +167,14 @@ protected:
         .Build();
         std::cout << "Vertex stride = " << vertexSize << std::endl;
 
-        m_indexBuffer = renderInterface.CreateIndexBuffer();
+        m_indexBuffer.reset(renderInterface.CreateIndexBuffer());
         m_indexBuffer->Begin()
             .SetIndices(C_CAST<uint32_t*>(cubeIndices .data()), cubeIndices .size())
             .SetUsage(nexus::BufferUsage::StaticDraw)
             .SetDrawMode(nexus::DrawMode::Triangle)
         .Build();
 
-        m_shader = renderInterface.CreateShader();
+        m_shader.reset(renderInterface.CreateShader());
         m_shader->BeginCompile()
             .AddSource(vertexShaderSource, nexus::Shader::Type::Vertex)
             .AddSource(fragmentShaderSource, nexus::Shader::Type::Fragment)
@@ -185,9 +187,9 @@ protected:
         return true;
     }
 
-    nexus::VertexBuffer* m_vertexBuffer = nullptr;
-    nexus::IndexBuffer* m_indexBuffer = nullptr;
-    nexus::Shader* m_shader = nullptr;
+    nexus::Ptr<nexus::VertexBuffer> m_vertexBuffer;
+    nexus::Ptr<nexus::IndexBuffer> m_indexBuffer;
+    nexus::Ptr<nexus::Shader> m_shader;
     nexus::Ptr<nexus::TextureProxy> m_textureProxy;
     nexus::Ref<nexus::Texture> m_texture;
     nexus::Transform m_cubeTransform;
@@ -196,7 +198,7 @@ protected:
 
 int main()
 {
-    constexpr auto vsync = true;
+    constexpr auto vsync = false;
     constexpr auto fullscreen = false;
     nexus::GraphicsConfig graphicsConfig {
         nexus::GraphicsAPI::OpenGL,

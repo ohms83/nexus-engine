@@ -20,6 +20,8 @@ NXS_NAMESPACE
         IndexBuffer* indexBuffer = nullptr;
         std::map<std::string, glm::mat4> uniformMatrices;
         std::vector<std::tuple<std::string, int32, TextureProxy*>> uniform2DTextures;
+        std::vector<std::tuple<std::string, glm::vec3>> uniformVec3;
+        std::vector<std::tuple<std::string, glm::vec4>> uniformVec4;
 
         [[nodiscard]] uint32 GetPolygonCount() const
         {
