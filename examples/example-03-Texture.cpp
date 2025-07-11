@@ -117,7 +117,6 @@ public:
         delete m_vertexBuffer;
         delete m_indexBuffer;
         delete m_shader;
-        delete m_textureProxy;
     }
     void Render(nexus::RenderSystem& renderSystem) override
     {
@@ -141,7 +140,7 @@ public:
                 {"projection", projection},
             },
             {
-                { "ourTexture", 0, m_textureProxy }
+                { "ourTexture", 0, m_textureProxy.get() }
             }
         };
 
@@ -182,14 +181,14 @@ protected:
         m_texture = nexus::TextureManager::GetInstance().Get(assetsPath);
         m_texture->SetWrapMode(nexus::TextureWrapMode::Clamp, nexus::TextureWrapMode::Clamp);
         m_texture->SetFiltering(nexus::TextureFilterMode::Linear, nexus::TextureFilterMode::Linear);
-        m_textureProxy = m_texture->AllocateGpuResource(renderInterface);
+        m_textureProxy.reset(m_texture->AllocateGpuResource(renderInterface));
         return true;
     }
 
     nexus::VertexBuffer* m_vertexBuffer = nullptr;
     nexus::IndexBuffer* m_indexBuffer = nullptr;
     nexus::Shader* m_shader = nullptr;
-    nexus::TextureProxy* m_textureProxy = nullptr;
+    nexus::Ptr<nexus::TextureProxy> m_textureProxy;
     nexus::Ref<nexus::Texture> m_texture;
     nexus::Transform m_cubeTransform;
 };
