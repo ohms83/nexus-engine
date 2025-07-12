@@ -51,7 +51,7 @@ void main()
 }
 )";
 
-class Example_01 final : public nexus::Application
+class Example_01 final : public nxs::Application
 {
 public:
     ~Example_01() override
@@ -61,7 +61,7 @@ public:
         delete m_shader;
     }
 
-    void Render(nexus::RenderSystem& renderSystem) override
+    void Render(nxs::RenderSystem& renderSystem) override
     {
         // Calculate matrices (simple orthographic for 2D, or perspective for 3D)
         glm::mat4 model = glm::mat4(1.0f);
@@ -70,7 +70,7 @@ public:
         glm::mat4 view = glm::mat4(1.0f); // Identity for 2D
         glm::mat4 projection = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f); // Ortho for 2D
 
-        const nexus::RenderCommand renderCommand
+        const nxs::RenderCommand renderCommand
         {
             m_shader,
             m_vertexBuffer,
@@ -97,41 +97,41 @@ protected:
         m_vertexBuffer = renderInterface.CreateVertexBuffer();
         m_vertexBuffer->Begin()
             .SetVertices(R_CAST<const uint8_t*>(squareVertices.data()), bufferSize)
-            .SetUsage(nexus::BufferUsage::StaticDraw)
-            .AddAttribute(nexus::VertexAttribute {nexus::VertexAttribute::Type::Position, nexus::DataType::Float, 3})
-            .AddAttribute(nexus::VertexAttribute {nexus::VertexAttribute::Type::Color0, nexus::DataType::Float, 3})
+            .SetUsage(nxs::BufferUsage::StaticDraw)
+            .AddAttribute(nxs::VertexAttribute {nxs::VertexAttribute::Type::Position, nxs::DataType::Float, 3})
+            .AddAttribute(nxs::VertexAttribute {nxs::VertexAttribute::Type::Color0, nxs::DataType::Float, 3})
         .Build();
 
         m_indexBuffer = renderInterface.CreateIndexBuffer();
         m_indexBuffer->Begin()
             .SetIndices(C_CAST<uint32_t*>(squareIndices.data()), squareIndices.size())
-            .SetUsage(nexus::BufferUsage::StaticDraw)
-            .SetDrawMode(nexus::DrawMode::Triangle)
+            .SetUsage(nxs::BufferUsage::StaticDraw)
+            .SetDrawMode(nxs::DrawMode::Triangle)
         .Build();
 
         m_shader = renderInterface.CreateShader();
         m_shader->BeginCompile()
-            .AddSource(vertexShaderSource, nexus::Shader::Type::Vertex)
-            .AddSource(fragmentShaderSource, nexus::Shader::Type::Fragment)
+            .AddSource(vertexShaderSource, nxs::Shader::Type::Vertex)
+            .AddSource(fragmentShaderSource, nxs::Shader::Type::Fragment)
         .Compile();
         return true;
     }
 
-    nexus::VertexBuffer* m_vertexBuffer = nullptr;
-    nexus::IndexBuffer* m_indexBuffer = nullptr;
-    nexus::Shader* m_shader = nullptr;
+    nxs::VertexBuffer* m_vertexBuffer = nullptr;
+    nxs::IndexBuffer* m_indexBuffer = nullptr;
+    nxs::Shader* m_shader = nullptr;
 };
 
 int main()
 {
     constexpr auto vsync = true;
     constexpr auto fullscreen = false;
-    nexus::GraphicsConfig graphicsConfig {
-        nexus::GraphicsAPI::OpenGL,
+    nxs::GraphicsConfig graphicsConfig {
+        nxs::GraphicsAPI::OpenGL,
         1280, 960,
         vsync,
     };
-    return nexus::RunApplication<Example_01>({
+    return nxs::RunApplication<Example_01>({
         "Example 1",
         graphicsConfig,
         fullscreen,

@@ -52,19 +52,19 @@ bool Application::Init(const ApplicationConfig& info)
 
     flags |= SDL_WINDOW_HIGH_PIXEL_DENSITY | SDL_WINDOW_INPUT_FOCUS | SDL_WINDOW_MOUSE_FOCUS;
 
-    m_screenWidth = graphicsConfig.screenWidth;
-    m_screenHeight = graphicsConfig.screenHeight;
+    m_screenSize.x = graphicsConfig.screenWidth;
+    m_screenSize.y = graphicsConfig.screenHeight;
     m_escapeKey = info.quitKey;
     m_window = SDL_CreateWindow(
-        info.title.c_str(), m_screenWidth, m_screenHeight, flags);
+        info.title.c_str(), m_screenSize.x, m_screenSize.y, flags);
 
     if (!m_window) {
         SDL_Log("Window could not be created. SDL_Error: %s\n", SDL_GetError());
         return false;
     }
 
-    SDL_GetWindowSizeInPixels(m_window, &m_actualWidth, &m_actualHeight);
-    std::cout << "Actual window size width: " << m_actualWidth << " height: " << m_actualHeight << std::endl;
+    SDL_GetWindowSizeInPixels(m_window, &m_actualSize.x, &m_actualSize.y);
+    std::cout << "Actual window size width: " << m_actualSize.x << " height: " << m_actualSize.y << std::endl;
 
     m_renderSystem = new RenderSystem(m_window, graphicsConfig);
     assert(m_renderSystem);
@@ -140,12 +140,9 @@ void Application::OnKeyDown(const SDL_Keycode key)
     }
 }
 
-void Application::OnResize()
+void Application::OnResize(const glm::ivec2& screenSize, const glm::ivec2& actualSize)
 {
-    SDL_GetWindowSize(m_window, &m_screenWidth, &m_screenHeight);
-    SDL_GetWindowSizeInPixels(m_window, &m_actualWidth, &m_actualHeight);
-
-    m_renderSystem->OnResize(m_actualWidth, m_actualHeight);
+    m_renderSystem->OnResize(actualSize.x, actualSize.x);
 }
 
 void Application::PollEvents(SDL_Event& e)
@@ -168,7 +165,11 @@ void Application::PollEvents(SDL_Event& e)
         case SDL_EVENT_WINDOW_METAL_VIEW_RESIZED:
         case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
         case SDL_EVENT_WINDOW_RESIZED:
-            OnResize();
+            {
+                SDL_GetWindowSize(m_window, &m_screenSize.x, &m_screenSize.y);
+                SDL_GetWindowSizeInPixels(m_window, &m_actualSize.x, &m_actualSize.y);
+                OnResize(m_screenSize, m_actualSize);
+            }
             break;
         default:
             break;

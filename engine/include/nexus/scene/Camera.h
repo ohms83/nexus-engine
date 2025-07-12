@@ -28,7 +28,7 @@ NXS_NAMESPACE
 
         glm::mat4 GetViewMtx() const
         {
-            return transform.GetMatrix();
+            return transform.GetViewMatrix();
         }
         const glm::mat4& GetProjectionMtx() const
         {

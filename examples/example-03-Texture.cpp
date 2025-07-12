@@ -114,32 +114,27 @@ void main()
 
 static const std::string assetsPath = "assets/textures/Crate/Wood_Crate_001_basecolor.jpg";
 
-class Example_03 final : public nexus::Application
+class Example_03 final : public nxs::Application
 {
 public:
     ~Example_03() override
     {
     }
-    void Render(nexus::RenderSystem& renderSystem) override
+    void Render(nxs::RenderSystem& renderSystem) override
     {
-        const auto screenSize = GetWindowSize();
-
         // Calculate matrices for a rotating cube
         const auto dt = GetDeltaTime();
         m_cubeTransform.Rotate(90.f * dt, glm::vec3(0.5f, 1.0f, 0.0f));
 
-        glm::mat4 view = glm::lookAt(glm::vec3(0, 0, 3), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0)); // Camera position
-        glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)screenSize.x / (float)screenSize.y, 0.1f, 100.0f);
-
-        const nexus::RenderCommand renderCommand
+        const nxs::RenderCommand renderCommand
         {
             m_shader.get(),
             m_vertexBuffer.get(),
             m_indexBuffer.get(),
             {
                 {"model", m_cubeTransform.GetMatrix()},
-                {"view", view},
-                {"projection", projection},
+                {"view", m_camera.GetViewMtx()},
+                {"projection", m_camera.GetProjectionMtx()},
             },
             {
                 { "ourTexture", 0, m_textureProxy.get() }
@@ -161,38 +156,50 @@ protected:
         m_vertexBuffer.reset(renderInterface.CreateVertexBuffer());
         m_vertexBuffer->Begin()
             .SetVertices(R_CAST<const uint8_t*>(cubeVertices.data()), bufferSize)
-            .SetUsage(nexus::BufferUsage::StaticDraw)
-            .AddAttribute(nexus::VertexAttribute {nexus::VertexAttribute::Type::Position, nexus::DataType::Float, 3})
-            .AddAttribute(nexus::VertexAttribute {nexus::VertexAttribute::Type::TexCoord0, nexus::DataType::Float, 2})
+            .SetUsage(nxs::BufferUsage::StaticDraw)
+            .AddAttribute(nxs::VertexAttribute {nxs::VertexAttribute::Type::Position, nxs::DataType::Float, 3})
+            .AddAttribute(nxs::VertexAttribute {nxs::VertexAttribute::Type::TexCoord0, nxs::DataType::Float, 2})
         .Build();
         std::cout << "Vertex stride = " << vertexSize << std::endl;
 
         m_indexBuffer.reset(renderInterface.CreateIndexBuffer());
         m_indexBuffer->Begin()
             .SetIndices(C_CAST<uint32_t*>(cubeIndices .data()), cubeIndices .size())
-            .SetUsage(nexus::BufferUsage::StaticDraw)
-            .SetDrawMode(nexus::DrawMode::Triangle)
+            .SetUsage(nxs::BufferUsage::StaticDraw)
+            .SetDrawMode(nxs::DrawMode::Triangle)
         .Build();
 
         m_shader.reset(renderInterface.CreateShader());
         m_shader->BeginCompile()
-            .AddSource(vertexShaderSource, nexus::Shader::Type::Vertex)
-            .AddSource(fragmentShaderSource, nexus::Shader::Type::Fragment)
+            .AddSource(vertexShaderSource, nxs::Shader::Type::Vertex)
+            .AddSource(fragmentShaderSource, nxs::Shader::Type::Fragment)
         .Compile();
 
-        m_texture = nexus::TextureManager::GetInstance().Get(assetsPath);
-        m_texture->SetWrapMode(nexus::TextureWrapMode::Clamp, nexus::TextureWrapMode::Clamp);
-        m_texture->SetFiltering(nexus::TextureFilterMode::Linear, nexus::TextureFilterMode::Linear);
+        m_texture = nxs::TextureManager::GetInstance().Get(assetsPath);
+        m_texture->SetWrapMode(nxs::TextureWrapMode::Clamp, nxs::TextureWrapMode::Clamp);
+        m_texture->SetFiltering(nxs::TextureFilterMode::Linear, nxs::TextureFilterMode::Linear);
         m_textureProxy.reset(m_texture->AllocateGpuResource(renderInterface));
+
+        const auto& screenSize = GetScreenSize();
+        m_camera.transform.LookAt({0, 0, 3}, {0, 0, 0}, {0, 1, 0});
+        m_camera.SetProjection(45.f, screenSize.x, screenSize.y, 0.1f, 100.f);
         return true;
     }
 
-    nexus::Ptr<nexus::VertexBuffer> m_vertexBuffer;
-    nexus::Ptr<nexus::IndexBuffer> m_indexBuffer;
-    nexus::Ptr<nexus::Shader> m_shader;
-    nexus::Ptr<nexus::TextureProxy> m_textureProxy;
-    nexus::Ref<nexus::Texture> m_texture;
-    nexus::Transform m_cubeTransform;
+    void OnResize(const glm::ivec2& screenSize, const glm::ivec2& actualSize) override
+    {
+        Application::OnResize(screenSize, actualSize);
+        m_camera.transform.LookAt({0, 0, 3}, {0, 0, 0}, {0, 1, 0});
+        m_camera.SetProjection(45.f, CAST<float>(screenSize.x), CAST<float>(screenSize.y), 0.1f, 100.f);
+    }
+
+    nxs::Ptr<nxs::VertexBuffer> m_vertexBuffer;
+    nxs::Ptr<nxs::IndexBuffer> m_indexBuffer;
+    nxs::Ptr<nxs::Shader> m_shader;
+    nxs::Ptr<nxs::TextureProxy> m_textureProxy;
+    nxs::Ref<nxs::Texture> m_texture;
+    nxs::Transform m_cubeTransform;
+    nxs::Camera m_camera;
 };
 
 
@@ -200,12 +207,12 @@ int main()
 {
     constexpr auto vsync = false;
     constexpr auto fullscreen = false;
-    nexus::GraphicsConfig graphicsConfig {
-        nexus::GraphicsAPI::OpenGL,
+    nxs::GraphicsConfig graphicsConfig {
+        nxs::GraphicsAPI::OpenGL,
         1280, 960,
         vsync,
     };
-    return nexus::RunApplication<Example_03>({
+    return nxs::RunApplication<Example_03>({
         "Example 03",
         graphicsConfig,
         fullscreen

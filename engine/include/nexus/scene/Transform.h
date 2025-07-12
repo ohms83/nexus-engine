@@ -29,6 +29,7 @@ NXS_NAMESPACE
             m_position = position;
             m_needUpdate = true;
         }
+        const glm::vec3& GetPosition(Space space = Space::Local) const;
 
         void Rotate(const float degree, const glm::vec3& axis)
         {
@@ -40,12 +41,14 @@ NXS_NAMESPACE
             m_orientation = orientation;
             m_needUpdate = true;
         }
+        const glm::quat& GetOrient(Space space = Space::Local) const;
 
         void Scale(const glm::vec3& scale)
         {
             m_scale *= scale;
             m_needUpdate = true;
         }
+        const glm::vec3& GetScale(Space space = Space::Local) const;
 
         // TODO: Should consider using a matrix 4x3 instead, since the homogenous coordinate barely relevant.
         /**
@@ -55,6 +58,8 @@ NXS_NAMESPACE
          * @return A 4x4 transformation matrix.
          */
         glm::mat4 GetMatrix(Space transformSpace = Space::Local) const;
+
+        glm::mat4 GetViewMatrix(Space transformSpace = Space::Local) const;
 
         void AddChild(Transform* child);
         void RemoveChild(Transform* child);

@@ -49,9 +49,24 @@ NXS_NAMESPACE
             return *m_renderSystem;
         }
 
-        glm::ivec2 GetWindowSize() const
+        /**
+         * Get the desired screen size. This is the same value requested during application
+         * initialization.
+         * @return The desired screen size in pixels.
+         */
+        const glm::ivec2& GetScreenSize() const
         {
-            return {m_screenWidth, m_screenHeight};
+            return m_screenSize;
+        }
+
+        /**
+         * Actual screen size in pixel. The value might be higher than screen size in case of
+         * the high dpi display.
+         * @return The actual screen size in pixel.
+         */
+        const glm::ivec2& GetActualSize() const
+        {
+            return m_actualSize;
         }
 
         //! Get the duration between this and the previous frame in seconds.
@@ -66,7 +81,7 @@ NXS_NAMESPACE
         virtual void Render(RenderSystem& renderSystem) {}
 
         virtual void OnKeyDown(SDL_Keycode key);
-        virtual void OnResize();
+        virtual void OnResize(const glm::ivec2& screenSize, const glm::ivec2& actualSize);
 
         virtual void UpdateEditor() {}
         virtual void RenderEditor(const RenderSystem& renderSystem) {}
@@ -75,10 +90,8 @@ NXS_NAMESPACE
 
     protected:
         WindowContext m_window = nullptr;
-        int32 m_screenWidth = 1280;
-        int32 m_screenHeight = 960;
-        int32 m_actualWidth = 1280;
-        int32 m_actualHeight = 960;
+        glm::ivec2 m_screenSize = glm::ivec2(1280, 960);
+        glm::ivec2 m_actualSize = glm::ivec2(1280, 960);
         SDL_Keycode m_escapeKey = SDLK_ESCAPE;
 
     private:

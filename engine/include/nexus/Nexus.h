@@ -4,6 +4,9 @@
 
 #include "Application.h"
 
+#include "core/Hasher.h"
+#include "core/HighResTimer.h"
+#include "core/Timer.h"
 #include "core/UniqueID.h"
 
 #include "graphics/Color.h"
@@ -20,9 +23,9 @@
 #include "math/Math.h"
 
 #include "scene/Camera.h"
-#include "scene/DirectionalLight.h"
 #include "scene/Light.h"
 #include "scene/SceneNode.h"
 #include "scene/Transform.h"
 
+// TODO: Shouldn't expose OpenGL's APIs in the public interface.
 #include <glad/glad.h>

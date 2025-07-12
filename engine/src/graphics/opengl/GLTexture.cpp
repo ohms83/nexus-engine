@@ -121,7 +121,7 @@ TextureProxy& GLTexture::LoadData(const uint8* data, const uint32 size)
         break;
     }
 
-    const auto gl_dataType = nexus::GL::NxsDataToGLenum(m_componentType);
+    const auto gl_dataType = GL::NxsDataToGLenum(m_componentType);
     CALL_GL_FUNC(glTexImage2D(GL_TEXTURE_2D, 0, gl_pixelFormats, m_width, m_height, 0, gl_pixelFormats, gl_dataType, data));
 
     if (m_numMips > 1)

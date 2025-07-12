@@ -112,33 +112,28 @@ void main()
 }
 )";
 
-class Example_02 final : public nexus::Application
+class Example_02 final : public nxs::Application
 {
 public:
     ~Example_02() override
     {
     }
-    void Render(nexus::RenderSystem& renderSystem) override
+    void Render(nxs::RenderSystem& renderSystem) override
     {
-        const auto screenSize = GetWindowSize();
-
         // Calculate matrices for a rotating cube
         const auto dt = GetDeltaTime();
         m_cubeTransform.Rotate(90.f * dt, glm::vec3(0.5f, 1.0f, 0.0f));
 
-        glm::mat4 view = glm::lookAt(glm::vec3(0, 0, 3), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0)); // Camera position
-        glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)screenSize.x / (float)screenSize.y, 0.1f, 100.0f);
-
-        const nexus::RenderCommand renderCommand
+        const nxs::RenderCommand renderCommand
         {
             m_shader.get(),
             m_vertexBuffer.get(),
             m_indexBuffer.get(),
             {
-                    {"model", m_cubeTransform.GetMatrix()},
-                    {"view", view},
-                    {"projection", projection},
-                }
+                {"model", m_cubeTransform.GetMatrix()},
+                {"view", m_camera.GetViewMtx()},
+                {"projection", m_camera.GetProjectionMtx()},
+            }
         };
 
         renderSystem.RegisterDrawCommand(renderCommand);
@@ -156,43 +151,50 @@ protected:
         m_vertexBuffer.reset(renderInterface.CreateVertexBuffer());
         m_vertexBuffer->Begin()
             .SetVertices(R_CAST<const uint8_t*>(cubeVertices.data()), bufferSize)
-            .SetUsage(nexus::BufferUsage::StaticDraw)
-            .AddAttribute(nexus::VertexAttribute {nexus::VertexAttribute::Type::Position, nexus::DataType::Float, 3})
-            .AddAttribute(nexus::VertexAttribute {nexus::VertexAttribute::Type::Color0, nexus::DataType::Float, 3})
+            .SetUsage(nxs::BufferUsage::StaticDraw)
+            .AddAttribute(nxs::VertexAttribute {nxs::VertexAttribute::Type::Position, nxs::DataType::Float, 3})
+            .AddAttribute(nxs::VertexAttribute {nxs::VertexAttribute::Type::Color0, nxs::DataType::Float, 3})
         .Build();
 
         m_indexBuffer.reset(renderInterface.CreateIndexBuffer());
         m_indexBuffer->Begin()
             .SetIndices(C_CAST<uint32_t*>(cubeIndices .data()), cubeIndices .size())
-            .SetUsage(nexus::BufferUsage::StaticDraw)
-            .SetDrawMode(nexus::DrawMode::Triangle)
+            .SetUsage(nxs::BufferUsage::StaticDraw)
+            .SetDrawMode(nxs::DrawMode::Triangle)
         .Build();
 
         m_shader.reset(renderInterface.CreateShader());
         m_shader->BeginCompile()
-            .AddSource(vertexShaderSource, nexus::Shader::Type::Vertex)
-            .AddSource(fragmentShaderSource, nexus::Shader::Type::Fragment)
+            .AddSource(vertexShaderSource, nxs::Shader::Type::Vertex)
+            .AddSource(fragmentShaderSource, nxs::Shader::Type::Fragment)
         .Compile();
         return true;
     }
 
-    nexus::Ptr<nexus::VertexBuffer> m_vertexBuffer;
-    nexus::Ptr<nexus::IndexBuffer> m_indexBuffer;
-    nexus::Ptr<nexus::Shader> m_shader;
-    nexus::Transform m_cubeTransform;
-};
+    void OnResize(const glm::ivec2& screenSize, const glm::ivec2& actualSize) override
+    {
+        Application::OnResize(screenSize, actualSize);
+        m_camera.transform.LookAt({0, 0, 3}, {0, 0, 0}, {0, 1, 0});
+        m_camera.SetProjection(45.f, CAST<float>(screenSize.x), CAST<float>(screenSize.y), 0.1f, 100.f);
+    }
 
+    nxs::Ptr<nxs::VertexBuffer> m_vertexBuffer;
+    nxs::Ptr<nxs::IndexBuffer> m_indexBuffer;
+    nxs::Ptr<nxs::Shader> m_shader;
+    nxs::Transform m_cubeTransform;
+    nxs::Camera m_camera;
+};
 
 int main()
 {
     constexpr auto vsync = true;
     constexpr auto fullscreen = false;
-    nexus::GraphicsConfig graphicsConfig {
-        nexus::GraphicsAPI::OpenGL,
+    nxs::GraphicsConfig graphicsConfig {
+        nxs::GraphicsAPI::OpenGL,
         1280, 960,
         vsync,
     };
-    return nexus::RunApplication<Example_02>({
+    return nxs::RunApplication<Example_02>({
         "Example 02",
         graphicsConfig,
         fullscreen

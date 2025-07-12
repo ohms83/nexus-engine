@@ -14,8 +14,8 @@
 #include <array>
 #include <cassert>
 
-#define NXS_NAMESPACE namespace nexus
-#define USING_NAMESPACE_NXS using namespace nexus
+#define NXS_NAMESPACE namespace nxs
+#define USING_NAMESPACE_NXS using namespace nxs
 
 //! A shorthand definition for static_cast<>
 #define CAST static_cast
