@@ -1,14 +1,28 @@
+// This is an auto-generated file. Please DO NOT manually edit!!
+
 #pragma once
 
 #include "NxsCommon.h"
 
 #include "Application.h"
-
+#include "Nexus.h"
+#include "core/Hasher.h"
+#include "core/HighResTimer.h"
+#include "core/Timer.h"
 #include "core/UniqueID.h"
-
+#include "editor/Editor.h"
 #include "graphics/Color.h"
+#include "graphics/GPUBuffer.h"
+#include "graphics/GpuResrouce.h"
+#include "graphics/GraphicsConfig.h"
+#include "graphics/GraphicsConst.h"
+#include "graphics/IndexBuffer.h"
+#include "graphics/RenderCommand.h"
+#include "graphics/RenderingInterface.h"
 #include "graphics/RenderSystem.h"
-
+#include "graphics/Shader.h"
+#include "graphics/TextureProxy.h"
+#include "graphics/VertexBuffer.h"
 #include "graphics/opengl/GLGpuBuffer.h"
 #include "graphics/opengl/GLIndexBuffer.h"
 #include "graphics/opengl/GLRenderingInterface.h"
@@ -16,21 +30,15 @@
 #include "graphics/opengl/GLTexture.h"
 #include "graphics/opengl/GLVertexBuffer.h"
 #include "graphics/opengl/NxsGL.h"
-
 #include "math/Math.h"
-
 #include "memory/Buffer.h"
-
-#include "resource/mesh/Cube.h"
 #include "resource/Mesh.h"
 #include "resource/Resource.h"
 #include "resource/ResourceManager.h"
 #include "resource/Texture.h"
-
+#include "resource/mesh/Cube.h"
 #include "scene/Camera.h"
 #include "scene/DirectionalLight.h"
 #include "scene/Light.h"
 #include "scene/SceneNode.h"
 #include "scene/Transform.h"
-
-#include <glad/glad.h>

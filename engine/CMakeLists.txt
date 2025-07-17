@@ -4,6 +4,8 @@ set(ENGINE_INSTALL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 set(ENGINE_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 set(ENGINE_3RD_PARTY_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty)
 
+set(TOOLS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/tools)
+
 set(ENGINE_SOURCES)
 set(ENGINE_HEADERS)
 
@@ -55,6 +57,16 @@ list(APPEND ENGINE_SOURCES
 
 include(src/CMakeLists.txt)
 include(include/CMakeLists.txt)
+
+find_package(Python3 COMPONENTS Interpreter REQUIRED)
+
+# Auto generate source files
+add_custom_command(
+    OUTPUT ${ENGINE_INCLUDE_DIR}/nexus/Nexus.h
+    COMMAND ${Python3_EXECUTABLE} ${TOOLS_DIR}/header_tool.py
+    DEPENDS ${TOOLS_DIR}/header_tool.py
+    COMMENT "Auto generate source files..."
+)
 
 add_library(nexus-engine
     ${ENGINE_SOURCES}
