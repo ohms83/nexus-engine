@@ -55,12 +55,10 @@ NXS_NAMESPACE
         {
             for (auto itr = m_resources.begin(); itr != m_resources.end();)
             {
-                if (auto& resource = itr->second; resource.use_count() <= 1)
-                {
+                if (auto& resource = itr->second; resource.use_count() <= 1) {
                     itr = m_resources.erase(itr);
                 }
-                else
-                {
+                else {
                     ++itr;
                 }
             }

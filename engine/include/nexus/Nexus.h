@@ -19,6 +19,14 @@
 
 #include "math/Math.h"
 
+#include "memory/Buffer.h"
+
+#include "resource/mesh/Cube.h"
+#include "resource/Mesh.h"
+#include "resource/Resource.h"
+#include "resource/ResourceManager.h"
+#include "resource/Texture.h"
+
 #include "scene/Camera.h"
 #include "scene/DirectionalLight.h"
 #include "scene/Light.h"
