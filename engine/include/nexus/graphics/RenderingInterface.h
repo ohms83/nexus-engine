@@ -26,7 +26,7 @@ NXS_NAMESPACE
         static RenderingInterface* Create(WindowContext window, const GraphicsConfig& config);
         static void Destroy();
 
-        static RenderingInterface& Get()
+        static RenderingInterface& GetInstance()
         {
             assert(m_singleton);
             // ReSharper disable once CppDFANullDereference

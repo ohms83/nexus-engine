@@ -6,6 +6,7 @@
 
 #include "nexus/NxsDefine.h"
 #include <vector>
+#include <string>
 
 NXS_NAMESPACE
 {
@@ -18,6 +19,7 @@ NXS_NAMESPACE
 
         uint32 Hash32(const void* data, size_t size) const;
         uint32 Hash32(const std::vector<uint8>& buffer) const;
+        uint32 Hash32(const std::string& str) const;
 
     private:
         uint32 m_seed = 0;

@@ -6,8 +6,6 @@
 
 #include <string>
 #include <nexus/NxsDefine.h>
-#include <xxhash.h>
-
 #include <nexus/memory/Buffer.h>
 
 NXS_NAMESPACE
@@ -24,7 +22,7 @@ NXS_NAMESPACE
         }
 
         //! Initialize this resource from the specified path.
-        bool Load(const std::string& path);
+        virtual bool Load(const std::string& path);
 
     protected:
         /**

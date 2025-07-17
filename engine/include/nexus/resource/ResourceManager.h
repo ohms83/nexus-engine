@@ -24,10 +24,9 @@ NXS_NAMESPACE
          * @param filepath Resource's filepath.
          * @return A pointer of @c ResourceType or null, if the resource is not found.
          */
-        [[nodiscard]] Ref<ResourceType> Get(const std::string& filepath)
+        [[nodiscard]] virtual Ref<ResourceType> Get(const std::string& filepath)
         {
-            const auto size = sizeof(char) * filepath.size();
-            const auto hash = m_hasher.Hash32(filepath.data(), size);
+            const auto hash = m_hasher.Hash32(filepath);
 
             if (const auto itr = m_resources.find(hash); itr != m_resources.end()) {
                 return itr->second;
@@ -42,7 +41,7 @@ NXS_NAMESPACE
             return resource;
         }
 
-        [[nodiscard]] Ref<ResourceType> Get(uint32 hash) const
+        [[nodiscard]] virtual Ref<ResourceType> Get(uint32 hash) const
         {
             if (const auto itr = m_resources.find(hash); itr != m_resources.end()) {
                 return itr->second;
@@ -55,12 +54,10 @@ NXS_NAMESPACE
         {
             for (auto itr = m_resources.begin(); itr != m_resources.end();)
             {
-                if (auto& resource = itr->second; resource.use_count() <= 1)
-                {
+                if (auto& resource = itr->second; resource.use_count() <= 1) {
                     itr = m_resources.erase(itr);
                 }
-                else
-                {
+                else {
                     ++itr;
                 }
             }
@@ -72,8 +69,8 @@ NXS_NAMESPACE
             return instance;
         }
 
-    private:
-        std::unordered_map<uint32, Ref<ResourceType>> m_resources;
+    protected:
         Hasher m_hasher;
+        std::unordered_map<uint32, Ref<ResourceType>> m_resources;
     };
 }
