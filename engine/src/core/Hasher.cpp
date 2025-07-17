@@ -25,3 +25,8 @@ uint32 Hasher::Hash32(const std::vector<uint8>& buffer) const
 {
     return XXH32(buffer.data(), buffer.size() * sizeof(uint8), m_seed);
 }
+
+uint32 Hasher::Hash32(const std::string& str) const
+{
+    return XXH32(str.data(), sizeof(char) * str.size(), m_seed);
+}

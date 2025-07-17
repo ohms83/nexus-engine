@@ -34,6 +34,11 @@ NXS_NAMESPACE
         {
             return m_shader;
         }
+
+        static const std::string CubeMesh;
+
+    protected:
+        uint8* Load_Impl(const std::string& path, size_t& out_size) override;
         
     protected:
         Ptr<VertexBuffer> m_vertexBuffer;
@@ -42,5 +47,14 @@ NXS_NAMESPACE
     };
 
     class MeshManager final : public ResourceManager<Mesh>
-    {};
+    {
+    public:
+        MeshManager();
+        virtual ~MeshManager() = default;
+
+        Ref<Mesh> GetStaticMesh(const std::string& meshName);
+
+    private:
+        Ref<Mesh> m_cubeMesh;
+    };
 }
