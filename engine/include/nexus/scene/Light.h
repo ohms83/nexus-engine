@@ -16,12 +16,20 @@ NXS_NAMESPACE
         float cutoffRange = NXS_INFINITE;
     };
 
-    class DirectionalLight : public Light
+    class DirectionalLight final : public Light
     {
     public:
         glm::vec3 GetDirection() const
         {
             return -transform.GetPosition();
         }
+    };
+
+    class PointLight final : public Light
+    {
+    public:
+        float constantAttenuation = 1.0f;
+        float linearAttenuation = 0.1f;
+        float quadraticAttenuation = 0.05f;
     };
 }

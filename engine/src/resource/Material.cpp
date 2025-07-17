@@ -10,3 +10,8 @@ Material::Material(const uint32 hash)
     : Resource(hash)
 {
 }
+
+uint8* Material::Load_Impl(const std::string& path, size_t& out_size)
+{
+    return nullptr;
+}

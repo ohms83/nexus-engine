@@ -1,0 +1,150 @@
+//
+// Created by nutta on 7/16/2025.
+//
+
+#include <algorithm>
+#include <ranges>
+#include <sstream>
+#include <nexus/editor/Console.h>
+
+USING_NAMESPACE_NXS;
+
+Console::Console()
+{
+    memset(m_inputBuffer, 0, sizeof(m_inputBuffer));
+    m_scrollToBottom = true;
+
+    // Register built-in commands
+    RegisterCommand("help", [this](const std::vector<std::string>& args) {
+        AddMessage("Available commands:");
+        for (const auto& key : m_commands | std::views::keys) {
+            AddMessage("- " + key);
+        }
+    });
+
+    RegisterCommand("clear", [this](const std::vector<std::string>& args) {
+        m_messages.clear();
+    });
+
+    // Example of a custom command
+    RegisterCommand("echo", [this](const std::vector<std::string>& args) {
+        if (args.size() > 1) {
+            std::string message = "";
+            for (size_t i = 1; i < args.size(); ++i) {
+                message += args[i] + (i < args.size() - 1 ? " " : "");
+            }
+            AddMessage(message);
+        }
+    });
+}
+
+void Console::Draw(const RenderSystem& renderSystem)
+{
+    bool isOpen = true;
+    if (!ImGui::Begin("Console", &isOpen)) {
+        ImGui::End();
+        return;
+    }
+
+    // Message log
+    const float footer_height_to_reserve = ImGui::GetStyle().ItemSpacing.y + ImGui::GetFrameHeightWithSpacing();
+    ImGui::BeginChild("ScrollingRegion", ImVec2(0, -footer_height_to_reserve), false, ImGuiWindowFlags_HorizontalScrollbar);
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4, 1)); // Tighter spacing
+
+    for (const auto& message : m_messages) {
+        ImGui::TextUnformatted(message.c_str());
+    }
+
+    if (m_scrollToBottom && ImGui::GetScrollY() >= ImGui::GetScrollMaxY()) {
+        ImGui::SetScrollHereY(1.0f);
+        m_scrollToBottom = false;
+    }
+
+    ImGui::PopStyleVar();
+    ImGui::EndChild();
+    ImGui::Separator();
+
+    // Command input field
+    const auto textInputHandler = [](ImGuiInputTextCallbackData* data) {
+        Console* console = CAST<Console*>(data->UserData);
+        return console->InputCallback(data);
+    };
+    constexpr auto inputTextFlags = ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_CallbackCompletion | ImGuiInputTextFlags_CallbackHistory;
+    ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.x);
+    bool reclaim_focus = false;
+    if (ImGui::InputText(
+        "##Input", m_inputBuffer, IM_ARRAYSIZE(m_inputBuffer), inputTextFlags,
+        textInputHandler,
+        (void*)this))
+    {
+        HandleCommand();
+        reclaim_focus = true;
+    }
+    ImGui::PopItemWidth();
+
+    // Autofocus on the input field
+    ImGui::SetItemDefaultFocus();
+    if (reclaim_focus) {
+        ImGui::SetKeyboardFocusHere(-1); // Focus on previous item
+    }
+
+    ImGui::End();
+}
+
+void Console::AddMessage(const std::string& message)
+{
+    m_messages.push_back(message);
+    m_scrollToBottom = true;
+}
+
+void Console::RegisterCommand(const std::string& commandName, CommandHandler handler)
+{
+    m_commands[commandName] = handler;
+}
+
+std::vector<std::string> Console::ParseCommand(const std::string& input)
+{
+    std::vector<std::string> tokens;
+    std::stringstream ss(input);
+    std::string token;
+    while (ss >> token) {
+        tokens.push_back(token);
+    }
+    return tokens;
+}
+
+void Console::HandleCommand()
+{
+    const std::string input = m_inputBuffer;
+    AddMessage("> " + input); // Echo the command
+
+    if (const std::vector<std::string> args = ParseCommand(input); !args.empty())
+    {
+        std::string commandName = args[0];
+        // Convert to lowercase for case-insensitive lookup
+        std::ranges::transform(commandName, commandName.begin(), ::tolower);
+
+        if (const auto it = m_commands.find(commandName); it != m_commands.end())
+        {
+            it->second(args); // Execute the command handler
+        }
+        else
+        {
+            AddMessage("Unknown command: " + args[0]);
+            AddMessage("Available commands: ");
+            for (const auto command : m_commands | std::views::keys)
+            {
+                AddMessage("  " + command);
+            }
+        }
+    }
+
+    // Reset input buffer
+    memset(m_inputBuffer, 0, sizeof(m_inputBuffer));
+    m_scrollToBottom = true;
+}
+
+int Console::InputCallback(ImGuiInputTextCallbackData* data)
+{
+    return 0;
+}

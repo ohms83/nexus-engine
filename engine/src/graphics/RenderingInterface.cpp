@@ -46,6 +46,7 @@ RenderingInterface* RenderingInterface::Create(WindowContext window, const Graph
 
 void RenderingInterface::Destroy()
 {
+    std::cout << "RenderingInterface::Destroy()" << std::endl;
     delete m_singleton;
 }
 

@@ -8,6 +8,7 @@
 #include <nexus/NxsDefine.h>
 
 #include "nexus/graphics/GraphicsConst.h"
+#include "Console.h"
 
 NXS_NAMESPACE
 {
@@ -32,11 +33,14 @@ NXS_NAMESPACE
 
     protected:
         void DrawProfiler(const RenderSystem& renderSystem);
+        void DrawMainMenu(const RenderSystem& renderSystem);
 
     protected:
         EditorConfig m_config{};
         //! For the profiler
         std::vector<uint32> m_frameTimes;
         std::vector<uint32> m_frameCounters;
+
+        Ptr<Console> m_console;
     };
 }

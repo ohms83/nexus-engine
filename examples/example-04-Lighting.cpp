@@ -7,6 +7,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "imgui.h"
+#include "nexus/resource/Material.h"
 #include "nexus/resource/Texture.h"
 
 struct Vertex
@@ -126,14 +127,32 @@ struct Light {
     vec3 diffuse;
     // Specular color
     vec3 specular;
+    float cutoff;
+
+    float constantAtt;
+    float linearAtt;
+    float quadraticAtt;
 };
 uniform Light u_Light;
+uniform Light u_PointLights[2];
 
 vec3 CalcDirLight(Light light, vec3 normal)
 {
     vec3 lightDir = normalize(light.position);
     float diff = max(dot(normal, lightDir), 0.0);
     return light.diffuse * diff;
+}
+
+vec3 CalcPointLight(Light light, vec3 fragPos, vec3 normal)
+{
+    vec3 lightDir = light.position - fragPos;
+    float dist = length(lightDir);
+    if (dist >= light.cutoff) return vec3(0);
+
+    lightDir = normalize(lightDir);
+    float diff = max(dot(normal, lightDir), 0.0);
+    float attenuation = 1 / (light.constantAtt + (light.linearAtt * diff) + (light.quadraticAtt * diff * diff));
+    return light.diffuse * diff * attenuation;
 }
 
 void main()
@@ -147,10 +166,10 @@ void main()
 
 static const std::string assetsPath = "assets/textures/Crate/Wood_Crate_001_basecolor.jpg";
 
-class Example_03 final : public nxs::Application
+class Example_04 final : public nxs::Application
 {
 public:
-    ~Example_03() override
+    ~Example_04() override
     {
     }
     void Render(nxs::RenderSystem& renderSystem) override
@@ -170,12 +189,12 @@ public:
                     {"projection", m_camera.GetProjectionMtx()},
             },
             {
-                { "ourTexture", 0, m_textureProxy.get() },
+                { "ourTexture", 0, m_texture->GetProxy() },
             },
             {
                 { "u_Ambient", m_ambient },
                 { "u_Light.position", glm::vec3(1, 1, 0) },
-                { "u_Light.diffuse", m_light.diffuseColor },
+                { "u_Light.diffuse", m_directionalLight.diffuseColor    },
             }
         };
 
@@ -186,10 +205,36 @@ public:
     {
         ImGui::Begin("Lighting");
         {
-            float ambient[3] = {};
-            float directional[3] = {};
-            ImGui::ColorEdit3("Ambient", R_CAST<float*>(&m_ambient));
-            ImGui::ColorEdit3("Directional", R_CAST<float*>(&m_light.diffuseColor));
+            if (ImGui::TreeNode("Ambient"))
+            {
+                ImGui::ColorEdit3("Color", R_CAST<float*>(&m_ambient));
+                ImGui::TreePop();
+            }
+
+            if (ImGui::TreeNode("Directional"))
+            {
+                ImGui::ColorEdit3("Color", R_CAST<float*>(&m_directionalLight.diffuseColor));
+                ImGui::TreePop();
+            }
+
+            ImGui::SeparatorText("Point Lights");
+            if (ImGui::TreeNode("Light 0"))
+            {
+                static bool enableLight = false;
+                static float position[] = {0, 0, 0};
+                ImGui::Checkbox("Enable", &enableLight);
+                ImGui::ColorEdit3("Color", R_CAST<float*>(&m_pointLights[0].diffuseColor));
+                ImGui::InputFloat3("Position", position);
+                ImGui::TreePop();
+            }
+
+            if (ImGui::TreeNode("Light 1"))
+            {
+                static bool enableLight = false;
+                ImGui::Checkbox("Enable", &enableLight);
+                ImGui::ColorEdit3("Color", R_CAST<float*>(&m_pointLights[1].diffuseColor));
+                ImGui::TreePop();
+            }
         }
         ImGui::End();
     }
@@ -229,9 +274,9 @@ protected:
         m_texture = nxs::TextureManager::GetInstance().Get(assetsPath);
         m_texture->SetWrapMode(nxs::TextureWrapMode::Clamp, nxs::TextureWrapMode::Clamp);
         m_texture->SetFiltering(nxs::TextureFilterMode::Linear, nxs::TextureFilterMode::Linear);
-        m_textureProxy.reset(m_texture->AllocateGpuResource(renderInterface));
+        m_texture->AllocateGpuResource(renderInterface);
 
-        m_light.diffuseColor = {1, 1, 1};
+        InitLights();
         return true;
     }
 
@@ -242,15 +287,31 @@ protected:
         m_camera.SetProjection(45.f, CAST<float>(screenSize.x), CAST<float>(screenSize.y), 0.1f, 100.f);
     }
 
+private:
+    void InitLights()
+    {
+        m_ambient = {0.5, 0.5, 0.5};
+
+        m_directionalLight.diffuseColor = {1, 1, 1};
+        m_directionalLight.transform.SetPosition({10, 10, 0});
+
+        m_pointLights[0].diffuseColor = {0.5, 0, 0};
+        m_pointLights[0].transform.SetPosition({10, 10, 0});
+
+        m_pointLights[1].diffuseColor = {0, 0.5, 0};
+        m_pointLights[1].transform.SetPosition({-10, 10, 0});
+    }
+
+protected:
     nxs::Ptr<nxs::VertexBuffer> m_vertexBuffer;
     nxs::Ptr<nxs::IndexBuffer> m_indexBuffer;
     nxs::Ptr<nxs::Shader> m_shader;
-    nxs::Ptr<nxs::TextureProxy> m_textureProxy;
     nxs::Ref<nxs::Texture> m_texture;
     nxs::Transform m_cubeTransform;
     nxs::Camera m_camera;
-    nxs::DirectionalLight m_light {};
-    glm::vec3 m_ambient {2.0, 2.0, 2.0};
+    nxs::DirectionalLight m_directionalLight {};
+    nxs::PointLight m_pointLights[2] {};
+    glm::vec3 m_ambient {0.5, 0.5, 0.5};
 };
 
 
@@ -263,7 +324,7 @@ int main()
         1280, 960,
         vsync,
     };
-    return nxs::RunApplication<Example_03>({
+    return nxs::RunApplication<Example_04>({
         "Example 03",
         graphicsConfig,
         fullscreen

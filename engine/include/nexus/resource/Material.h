@@ -10,17 +10,21 @@
 
 NXS_NAMESPACE
 {
-    class Material : public Resource
+    class Material final : public Resource
     {
     public:
         explicit Material(const uint32 hash);
 
-        float diffuse = 0;
-        float specular = 0;
-        float emissive = 0;
+        Color3F diffuse;
+        Color3F specular;
+        Color3F emissive;
+        float shininess = 0;
 
-        Texture* diffuseMap = nullptr;
-        Texture* specularMap = nullptr;
-        Texture* normalMap = nullptr;
+        Ref<Texture> diffuseMap;
+        Ref<Texture> specularMap;
+        Ref<Texture> normalMap;
+
+    protected:
+        uint8* Load_Impl(const std::string& path, size_t& out_size) override;
     };
 }

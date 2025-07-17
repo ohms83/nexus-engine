@@ -10,6 +10,10 @@
 
 USING_NAMESPACE_NXS;
 
+Texture::~Texture()
+{
+}
+
 void Texture::SetWrapMode(const TextureWrapMode wrapS, const TextureWrapMode wrapT)
 {
     m_wrapModeS = wrapS;
@@ -29,7 +33,7 @@ void Texture::SetNumMips(const int32 numMips)
 
 TextureProxy* Texture::AllocateGpuResource(const RenderingInterface& renderingInterface, const bool keepCopy)
 {
-    auto texture = renderingInterface.CreateTexture();
+    m_textureProxy.reset(renderingInterface.CreateTexture());
     const TextureCreationInfo info = {
         m_width, m_height, m_channels,
         m_format, m_componentType,
@@ -37,12 +41,12 @@ TextureProxy* Texture::AllocateGpuResource(const RenderingInterface& renderingIn
         m_filterMin, m_filterMag,
         m_numMips,
     };
-    texture->Begin(info)
+    m_textureProxy->Begin(info)
         .LoadData(m_data.Data(), m_data.Size())
     .End();
 
     if (!keepCopy) m_data.Release();
-    return texture;
+    return m_textureProxy.get();
 }
 
 uint8* Texture::Load_Impl(const std::string& path, size_t& out_size)

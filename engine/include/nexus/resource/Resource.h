@@ -2,6 +2,8 @@
 // Created by nutta on 7/9/2025.
 //
 
+#pragma once
+
 #include <string>
 #include <nexus/NxsDefine.h>
 #include <xxhash.h>

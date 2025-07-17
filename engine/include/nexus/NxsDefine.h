@@ -131,4 +131,10 @@ NXS_NAMESPACE
 
         Num
     };
+
+    template<typename T>
+    bool IsA(T* obj)
+    {
+        return D_CAST<T>(obj) != nullptr;
+    }
 }

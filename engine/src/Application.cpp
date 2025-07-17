@@ -6,6 +6,8 @@
 #include <iostream>
 #include <ostream>
 
+#include "resource/Texture.h"
+
 #if defined(SDL_PLATFORM_WIN32)
 #include <windows.h>
 #endif
@@ -14,6 +16,8 @@ USING_NAMESPACE_NXS;
 
 Application::~Application()
 {
+    TextureManager::GetInstance().PurgeUnused();
+
     delete m_renderSystem;
     m_renderSystem = nullptr;
 
