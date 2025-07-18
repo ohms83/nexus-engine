@@ -12,6 +12,7 @@
 USING_NAMESPACE_NXS;
 
 Console::Console()
+    : EditorWidget("Console")
 {
     memset(m_inputBuffer, 0, sizeof(m_inputBuffer));
     m_scrollToBottom = true;
@@ -48,13 +49,8 @@ Console::Console()
     AddMessage(logger.Message());
 }
 
-void Console::Draw(const RenderSystem& renderSystem)
+void Console::Draw_Internal(const RenderSystem& renderSystem)
 {
-    if (!ImGui::Begin("Console", &visible)) {
-        ImGui::End();
-        return;
-    }
-
     // Message log
     const float footer_height_to_reserve = ImGui::GetStyle().ItemSpacing.y + ImGui::GetFrameHeightWithSpacing();
     ImGui::BeginChild("ScrollingRegion", ImVec2(0, -footer_height_to_reserve), false, ImGuiWindowFlags_HorizontalScrollbar);
@@ -96,8 +92,6 @@ void Console::Draw(const RenderSystem& renderSystem)
     if (reclaim_focus) {
         ImGui::SetKeyboardFocusHere(-1); // Focus on previous item
     }
-
-    ImGui::End();
 }
 
 void Console::AddMessage(const std::string& message)

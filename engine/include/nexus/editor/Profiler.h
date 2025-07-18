@@ -15,7 +15,9 @@ NXS_NAMESPACE
     {
     public:
         Profiler();
-        void Draw(const RenderSystem& renderSystem) override;
+
+    protected:
+        void Draw_Internal(const RenderSystem& renderSystem) override;
 
     private:
         std::vector<uint32> m_frameTimes;

@@ -27,12 +27,13 @@ NXS_NAMESPACE
 
         Console();
 
-        //! Render this widget.
-        void Draw(const RenderSystem& renderSystem) override;
         //! Add a message to the console
         void AddMessage(const std::string& message);
         //! Register a command with a handler function
         void RegisterCommand(const std::string& commandName, CommandHandler handler);
+
+    protected:
+        void Draw_Internal(const RenderSystem& renderSystem) override;
 
     private:
         //! A simple parser for the command input string
@@ -41,6 +42,7 @@ NXS_NAMESPACE
         void HandleCommand();
         int InputCallback(ImGuiInputTextCallbackData* data);
 
+    private:
         char m_inputBuffer[CONSOLE_INPUT_BUFFER_SIZE] = {};
         std::vector<std::string> m_history;
         std::vector<std::string> m_messages;
