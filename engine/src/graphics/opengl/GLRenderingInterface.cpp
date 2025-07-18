@@ -167,7 +167,7 @@ void GLRenderingInterface::Draw_Internal(const RenderCommand& command)
      ));
 }
 
-void GLRenderingInterface::OnResize(uint32_t pixel_w, uint32_t pixel_h)
+void GLRenderingInterface::OnResize(const uint32_t pixel_w, const uint32_t pixel_h)
 {
     CALL_GL_FUNC(glViewport(0, 0, INT_CAST(pixel_w), INT_CAST(pixel_h)));
 }

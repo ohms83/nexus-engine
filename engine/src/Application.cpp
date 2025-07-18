@@ -21,7 +21,7 @@ Application::~Application()
     delete m_renderSystem;
     m_renderSystem = nullptr;
 
-    m_editor.release();
+    m_editor.reset();
 
     //Destroy the window
     SDL_DestroyWindow(m_window);
@@ -40,6 +40,7 @@ bool Application::Init(const ApplicationConfig& info)
     }
 
     int flags = info.fullscreen ? SDL_WINDOW_FULLSCREEN : 0;
+    flags |= info.resizable ? SDL_WINDOW_RESIZABLE : 0;
 
     const auto& graphicsConfig = info.graphicsConfig;
     switch (graphicsConfig.api)
@@ -146,7 +147,7 @@ void Application::OnKeyDown(const SDL_Keycode key)
 
 void Application::OnResize(const glm::ivec2& screenSize, const glm::ivec2& actualSize)
 {
-    m_renderSystem->OnResize(actualSize.x, actualSize.x);
+    m_renderSystem->OnResize(actualSize.x, actualSize.y);
 }
 
 void Application::PollEvents(SDL_Event& e)

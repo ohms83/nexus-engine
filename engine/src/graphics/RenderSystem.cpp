@@ -1,9 +1,11 @@
+#include <format>
+#include <iostream>
 #include <nexus/graphics/RenderSystem.h>
 #include <nexus/graphics/Shader.h>
 
 USING_NAMESPACE_NXS;
 
-RenderSystem::RenderSystem(WindowContext window, GraphicsConfig config)
+RenderSystem::RenderSystem(const WindowContext window, const GraphicsConfig& config)
     : m_config(config)
 {
     m_renderingInterface = RenderingInterface::Create(window, config);
@@ -49,8 +51,10 @@ void RenderSystem::EndDraw()
     m_renderTime = m_timer.GetDeltaTime();
 }
 
-void RenderSystem::OnResize(const uint32 pixel_w, const uint32 pixel_h) const
+void RenderSystem::OnResize(const uint32 pixel_w, const uint32 pixel_h)
 {
+    m_config.screenWidth = pixel_w;
+    m_config.screenHeight = pixel_h;
     m_renderingInterface->OnResize(pixel_w, pixel_h);
 }
 

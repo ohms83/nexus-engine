@@ -24,6 +24,7 @@ NXS_NAMESPACE
         std::string title;
         GraphicsConfig graphicsConfig;
         bool fullscreen = false;
+        bool resizable = false;
         bool editMode = true;
         int32 quitKey = SDLK_ESCAPE;
     };

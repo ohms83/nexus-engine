@@ -284,7 +284,7 @@ protected:
     {
         Application::OnResize(screenSize, actualSize);
         m_camera.transform.LookAt({0, 0, 3}, {0, 0, 0}, {0, 1, 0});
-        m_camera.SetProjection(45.f, CAST<float>(screenSize.x), CAST<float>(screenSize.y), 0.1f, 100.f);
+        m_camera.SetProjection(45.f, CAST<float>(actualSize.x), CAST<float>(actualSize.y), 0.1f, 100.f);
     }
 
 private:
@@ -327,6 +327,7 @@ int main()
     return nxs::RunApplication<Example_04>({
         "Example 03",
         graphicsConfig,
-        fullscreen
+        fullscreen,
+        true
     });
 }

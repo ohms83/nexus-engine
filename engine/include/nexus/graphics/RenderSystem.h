@@ -10,7 +10,7 @@ NXS_NAMESPACE
     class RenderSystem final
     {
     public:
-        explicit RenderSystem(WindowContext window, GraphicsConfig config);
+        explicit RenderSystem(WindowContext window, const GraphicsConfig& config);
         ~RenderSystem();
 
         void ClearScreen() const;
@@ -45,7 +45,7 @@ NXS_NAMESPACE
         void EndDraw();
 
         //! An event handler called when the window resize event occured.
-        void OnResize(uint32_t pixel_w, uint32_t pixel_h) const;
+        void OnResize(uint32_t pixel_w, uint32_t pixel_h);
 
         void RegisterDrawCommand(const RenderCommand& command);
 
@@ -83,6 +83,11 @@ NXS_NAMESPACE
         [[nodiscard]] uint32 GetPolygonCount() const
         {
             return m_polygonCount;
+        }
+
+        [[nodiscard]] const GraphicsConfig& GetGraphicsConfig() const
+        {
+            return m_config;
         }
 
     protected:
