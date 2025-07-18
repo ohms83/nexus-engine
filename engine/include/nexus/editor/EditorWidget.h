@@ -17,5 +17,8 @@ NXS_NAMESPACE
 
         //! Render this widget.
         virtual void Draw(const RenderSystem& renderSystem) = 0;
+        virtual void Update() {}
+
+        bool visible = true;
     };
 }

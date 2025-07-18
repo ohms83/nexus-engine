@@ -9,6 +9,7 @@
 
 #include "nexus/graphics/GraphicsConst.h"
 #include "Console.h"
+#include "Profiler.h"
 
 NXS_NAMESPACE
 {
@@ -18,6 +19,16 @@ NXS_NAMESPACE
     {
         GraphicsAPI renderingBackend;
     };
+
+    struct MenuItem
+    {
+        std::string name;
+        std::string category;
+        std::string description;
+        std::string shortcut;
+        Ref<EditorWidget> widget;
+    };
+
     class Editor
     {
     public:
@@ -31,6 +42,8 @@ NXS_NAMESPACE
         virtual void Draw(const RenderSystem& renderSystem);
         void EndDraw() const;
 
+        void AddMenuItem(const std::string& menu, const MenuItem& menuItem);
+
     protected:
         void DrawProfiler(const RenderSystem& renderSystem);
         void DrawMainMenu(const RenderSystem& renderSystem);
@@ -42,5 +55,14 @@ NXS_NAMESPACE
         std::vector<uint32> m_frameCounters;
 
         Ptr<Console> m_console;
+
+        struct MenuItemList
+        {
+            std::string menu;
+            std::vector<MenuItem> items;
+        };
+
+        std::vector<MenuItemList> m_menuItems;
+        std::vector<Ref<EditorWidget>> m_widgets;
     };
 }

@@ -14,8 +14,6 @@
 
 USING_NAMESPACE_NXS;
 
-#define MAX_PROFILED_FRAMES 20
-
 Editor::Editor(const WindowContext window, const RenderContext renderContext, const EditorConfig& config)
 {
     IMGUI_CHECKVERSION();
@@ -62,16 +60,24 @@ Editor::Editor(const WindowContext window, const RenderContext renderContext, co
     // Initializes ImPlot
     ImPlot::CreateContext();
 
-    m_frameTimes.reserve(MAX_PROFILED_FRAMES);
-    m_frameCounters.reserve(MAX_PROFILED_FRAMES);
+    const MenuItem console = {
+        "Console",
+        "Developer",
+        "Open a debug console",
+        "",
+        std::make_shared<Console>()
+    };
 
-    for (int i = 0; i < MAX_PROFILED_FRAMES; i++)
-    {
-        m_frameTimes.push_back(0);
-        m_frameCounters.push_back(0);
-    }
+    const MenuItem profiler = {
+        "Profiler",
+        "Developer",
+        "Open a profiler",
+        "",
+        std::make_shared<Profiler>()
+    };
 
-    m_console = std::make_unique<Console>();
+    AddMenuItem("Tools", console);
+    AddMenuItem("Tools", profiler);
 }
 
 Editor::~Editor()
@@ -91,6 +97,11 @@ Editor::~Editor()
 void Editor::Update(const SDL_Event& event)
 {
     ImGui_ImplSDL3_ProcessEvent(&event);
+
+    for (const auto widget : m_widgets)
+    {
+        widget->Update();
+    }
 }
 
 void Editor::BeginDraw() const
@@ -113,8 +124,13 @@ void Editor::BeginDraw() const
 void Editor::Draw(const RenderSystem& renderSystem)
 {
     DrawMainMenu(renderSystem);
-    DrawProfiler(renderSystem);
-    m_console->Draw(renderSystem);
+
+    for (const auto widget : m_widgets)
+    {
+        if (widget && widget->visible) {
+            widget->Draw(renderSystem);
+        }
+    }
 }
 
 void Editor::EndDraw() const
@@ -131,7 +147,8 @@ void Editor::EndDraw() const
         assert(false);
     }
 
-    if (const ImGuiIO& io = ImGui::GetIO(); io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+    if (const ImGuiIO& io = ImGui::GetIO(); io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+    {
         SDL_Window* backup_current_window = SDL_GL_GetCurrentWindow();
         const SDL_GLContext backup_current_context = SDL_GL_GetCurrentContext();
         ImGui::UpdatePlatformWindows();
@@ -140,42 +157,25 @@ void Editor::EndDraw() const
     }
 }
 
-void Editor::DrawProfiler(const RenderSystem& renderSystem)
+void Editor::AddMenuItem(const std::string& menu, const MenuItem& menuItem)
 {
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
-    bool mainWindowActive = false;
-    ImGui::Begin("Profiler", &mainWindowActive);
+    const auto itr = std::ranges::find_if(m_menuItems, [&menu] (const MenuItemList& itemList)
     {
-        static uint32 frameIndex = 0;
-        const auto frameTime = 1000.0f / io.Framerate; // Frame update time in seconds.
-        const auto& api = GraphicsAPIToString(m_config.renderingBackend);
-        ImGui::Text("Graphics API: %s", api.c_str());
-        ImGui::Text("FPS: %.2f", io.Framerate);
-        ImGui::Text("Frame Update: %.2f ms", frameTime);
-        ImGui::Text("Render: %.2f ms", renderSystem.GetrenderTime() * 1000.f);
-        ImGui::Text("Draw Calls: %d", renderSystem.GetDrawCount());
-        ImGui::Text("Polygons: %d", renderSystem.GetPolygonCount());
-
-        if (ImPlot::BeginPlot("Frame Rates"))
-        {
-            uint32 x_data[MAX_PROFILED_FRAMES] = {};
-            uint32 y_data[MAX_PROFILED_FRAMES] = {};
-            ImPlot::SetupAxes("Frame Index", "Milliseconds", ImPlotAxisFlags_NoTickLabels);
-            ImPlot::PushStyleVar(ImPlotStyleVar_FillAlpha, 0.25f);
-            ImPlot::SetupAxisLimits(ImAxis_X1,frameIndex > MAX_PROFILED_FRAMES ? frameIndex - MAX_PROFILED_FRAMES : 0, frameIndex++, ImGuiCond_Always);
-            ImPlot::SetupAxisLimits(ImAxis_Y1,0,60);
-            ImPlot::SetNextFillStyle(ImVec4(1,1,0,1),0.25f);
-            m_frameCounters.push_back(renderSystem.GetFrameIndex());
-            m_frameTimes.push_back(frameTime);
-
-            if (m_frameCounters.size() > MAX_PROFILED_FRAMES) m_frameCounters.erase(m_frameCounters.begin());
-            if (m_frameTimes.size() > MAX_PROFILED_FRAMES) m_frameTimes.erase(m_frameTimes.begin());
-
-            ImPlot::PlotShaded("Frame", m_frameCounters.data(), m_frameTimes.data(), MAX_PROFILED_FRAMES);
-            ImPlot::EndPlot();
-        }
+        return menu == itemList.menu;
+    });
+    if (itr == m_menuItems.end())
+    {
+        MenuItemList itemList = {
+            menu,
+            {menuItem}
+        };
+        m_menuItems.emplace_back(itemList);
     }
-    ImGui::End();
+    else
+    {
+        itr->items.push_back(menuItem);
+    }
+    m_widgets.push_back(menuItem.widget);
 }
 
 void Editor::DrawMainMenu(const RenderSystem& renderSystem)
@@ -207,27 +207,29 @@ void Editor::DrawMainMenu(const RenderSystem& renderSystem)
             ImGui::EndMenu(); // End "File" menu
         }
 
-        if (ImGui::BeginMenu("Edit")) {
-            if (ImGui::MenuItem("Undo", "Ctrl+Z", false, false)) { // disabled, not greyed out
-                // Do something on "Undo" click
-            }
-            if (ImGui::MenuItem("Redo", "Ctrl+Y", false, false)) { // disabled, not greyed out
-                // Do something on "Redo" click
-            }
-            ImGui::Separator();
-            if (ImGui::MenuItem("Cut", "Ctrl+X")) {}
-            if (ImGui::MenuItem("Copy", "Ctrl+C")) {}
-            if (ImGui::MenuItem("Paste", "Ctrl+V")) {}
-            ImGui::EndMenu(); // End "Edit" menu
-        }
+        // if (ImGui::BeginMenu("Edit")) {
+        //     if (ImGui::MenuItem("Undo", "Ctrl+Z", false, false)) { // disabled, not greyed out
+        //         // Do something on "Undo" click
+        //     }
+        //     if (ImGui::MenuItem("Redo", "Ctrl+Y", false, false)) { // disabled, not greyed out
+        //         // Do something on "Redo" click
+        //     }
+        //     ImGui::Separator();
+        //     if (ImGui::MenuItem("Cut", "Ctrl+X")) {}
+        //     if (ImGui::MenuItem("Copy", "Ctrl+C")) {}
+        //     if (ImGui::MenuItem("Paste", "Ctrl+V")) {}
+        //     ImGui::EndMenu(); // End "Edit" menu
+        // }
 
-        if (ImGui::BeginMenu("View")) {
-            // Example: toggle visibility of your debug console
-            static bool show_console_menu_item = true; // Make sure this matches your actual console visibility flag
-            if (ImGui::MenuItem("Console", "", &show_console_menu_item)) {
-                // TODO:
+        for (const auto& [menu, items] : m_menuItems)
+        {
+            if (ImGui::BeginMenu(menu.c_str()))
+            {
+                for (const auto& item : items) {
+                    ImGui::MenuItem(item.name.c_str(), item.shortcut.c_str(), &item.widget->visible);
+                }
+                ImGui::EndMenu();
             }
-            ImGui::EndMenu(); // End "View" menu
         }
 
         ImGui::EndMainMenuBar(); // End the main menu bar
