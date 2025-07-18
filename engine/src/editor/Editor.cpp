@@ -38,7 +38,7 @@ Editor::Editor(const WindowContext window, const RenderContext renderContext, co
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;    // Enable Gamepad Controls
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;       // Enable Docking
     io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;     // Enable Multi-Viewport / Platform Windows
-    io.FontGlobalScale = 1.5f;
+    io.FontGlobalScale = 1.75f;
     io.ConfigDpiScaleFonts = true;                          // [Experimental] Automatically overwrite style.FontScaleDpi in Begin() when Monitor DPI changes. This will scale fonts but _NOT_ scale sizes/padding for now.
     io.ConfigDpiScaleViewports = true;                      // [Experimental] Scale Dear ImGui and Platform Windows when Monitor DPI changes.
 
@@ -188,7 +188,7 @@ void Editor::InitMenu()
             nullptr,
             [](const MenuItem&)
             {
-                Logger::Instance().Log(EditorLog, "TODO: Open a file creating dialogue");
+                Logger::Instance().Info(EditorLog, "TODO: Open a file creating dialogue");
             }
         },
         {
@@ -199,7 +199,7 @@ void Editor::InitMenu()
             nullptr,
             [](const MenuItem&)
             {
-                Logger::Instance().Log(EditorLog, "TODO: Open a file opening dialogue");
+                Logger::Instance().Info(EditorLog, "TODO: Open a file opening dialogue");
             }
         },
         {
@@ -210,7 +210,7 @@ void Editor::InitMenu()
             nullptr,
             [](const MenuItem&)
             {
-                Logger::Instance().Log(EditorLog, "TODO: Save a file");
+                Logger::Instance().Info(EditorLog, "TODO: Save a file");
             }
         },
         {
@@ -221,7 +221,7 @@ void Editor::InitMenu()
             nullptr,
             [](const MenuItem&)
             {
-                Logger::Instance().Log(EditorLog, "TODO: Quit app");
+                Logger::Instance().Info(EditorLog, "TODO: Quit app");
             }
         }
     };
@@ -235,7 +235,7 @@ void Editor::InitMenu()
             nullptr,
             [](const MenuItem&)
             {
-                Logger::Instance().Log(EditorLog, "TODO: Undo");
+                Logger::Instance().Info(EditorLog, "TODO: Undo");
             }
         },
         {
@@ -246,7 +246,7 @@ void Editor::InitMenu()
             nullptr,
             [](const MenuItem&)
             {
-                Logger::Instance().Log(EditorLog, "TODO: Redo");
+                Logger::Instance().Info(EditorLog, "TODO: Redo");
             }
         },
         {
@@ -257,7 +257,7 @@ void Editor::InitMenu()
             nullptr,
             [](const MenuItem&)
             {
-                Logger::Instance().Log(EditorLog, "TODO: Cut");
+                Logger::Instance().Info(EditorLog, "TODO: Cut");
             }
         },
         {
@@ -268,7 +268,7 @@ void Editor::InitMenu()
             nullptr,
             [](const MenuItem&)
             {
-                Logger::Instance().Log(EditorLog, "TODO: Copy");
+                Logger::Instance().Info(EditorLog, "TODO: Copy");
             }
         },
         {
@@ -279,7 +279,7 @@ void Editor::InitMenu()
             nullptr,
             [](const MenuItem&)
             {
-                Logger::Instance().Log(EditorLog, "TODO: Paste");
+                Logger::Instance().Info(EditorLog, "TODO: Paste");
             }
         }
     };

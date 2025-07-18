@@ -9,44 +9,83 @@
 
 USING_NAMESPACE_NXS;
 
-#define LOG_MSG(Type, Category, Message, callback) \
-    const auto formatted = std::format("[{}][{}] {}\n", #Type, Category, Message); \
-    if (IsFlagSet(LogToFile)) m_logFile << formatted; \
-    if (IsFlagSet(LogToStdOut)) std::cout << formatted; \
-    callback(formatted);
+DEFINE_LOG(Logger);
+
+#define LOG_FORMAT(Level, Category, Message) std::format("[{}][{}] {}\n", #Level, Category, Message);
+
+Logger* Logger::m_instance = new Logger();
 
 void Logger::Init(const int32 initFlags)
 {
     Logger& instance = Instance();
     instance.m_flags = initFlags;
-
-    if (instance.IsFlagSet(LogToFile))
-    {
-        instance.OpenLogFile();
-    }
+    instance.OpenLogFile();
 }
 
-void Logger::Log(const std::string& category, const std::string& message)
+void Logger::Destroy()
 {
-    // const auto formatted = std::format("[Log][{}] {}\n", category, message);
-    // if (IsFlagSet(LogToFile)) m_logFile << formatted;
-    // if (IsFlagSet(LogToStdOut)) std::cout << formatted;
-    LOG_MSG(Log, category, message, logCallback);
+    delete m_instance;
+}
+
+void Logger::Log(LogLevel level, const std::string& category, const std::string& message)
+{
+    std::string formatted;
+    switch (level)
+    {
+    case LogLevel::Debug:
+        formatted = LOG_FORMAT(Debug, category, message);
+        break;
+    case LogLevel::Warning:
+        formatted = LOG_FORMAT(Warning, category, message);
+        break;
+    case LogLevel::Error:
+        formatted = LOG_FORMAT(Error, category, message);
+        break;
+    case LogLevel::Fatal:
+        formatted = LOG_FORMAT(Fatal, category, message);
+        break;
+    default:
+        formatted = LOG_FORMAT(Info, category, message);
+        break;
+    }
+    if (IsFlagSet(LogToFile)) m_logFile << formatted;
+    if (IsFlagSet(LogToStdOut)) std::cout << formatted;
+    m_message += formatted;
+    logCallback(level, formatted);
+}
+
+void Logger::Debug(const std::string& category, const std::string& message)
+{
+    Log(LogLevel::Debug, category, message);
+}
+
+void Logger::Info(const std::string& category, const std::string& message)
+{
+    Log(LogLevel::Info, category, message);
 }
 
 void Logger::Warning(const std::string& category, const std::string& message)
 {
-    LOG_MSG(Warning, category, message, warningCallback);
+    Log(LogLevel::Warning, category, message);
 }
 
 void Logger::Error(const std::string& category, const std::string& message)
 {
-    LOG_MSG(Error, category, message, errorCallback);
+    Log(LogLevel::Error, category, message);
 }
 
-void Logger::Assert(const std::string& category, const std::string& message)
+void Logger::Fatal(const std::string& category, const std::string& message)
 {
-    LOG_MSG(Assert, category, message, assertCallback);
+    Log(LogLevel::Fatal, category, message);
+    Disconnect();
+    CloseLogFile();
+    assert(false);
+}
+
+void Logger::Disconnect()
+{
+    Info(LogLogger, "Disconnect all delegates");
+    logCallback.disconnect_all();
 }
 
 Logger::Logger()
@@ -56,16 +95,19 @@ Logger::Logger()
 
 Logger::~Logger()
 {
-    if (IsFlagSet(LogToFile)) CloseLogFile();
+    Disconnect();
+    CloseLogFile();
 }
 
 void Logger::OpenLogFile()
 {
+    if (!IsFlagSet(LogToFile)) return;
     // TODO: Support multiple log files.
     m_logFile.open(m_logPath, std::ios::out);
 }
 
 void Logger::CloseLogFile()
 {
+    if (!IsFlagSet(LogToFile)) return;
     m_logFile.close();
 }

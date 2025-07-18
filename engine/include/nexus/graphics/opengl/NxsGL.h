@@ -2,28 +2,26 @@
 
 #include <glad/glad.h>
 
-#include <iostream>
-#include <sstream>
 #include <cassert>
 #include <format>
 
 #include <nexus/NxsDefine.h>
+#include <nexus/core/Logger.h>
 
 #define GL_STRICT_CHECK
+
+DECLARE_LOG_EXTERN(OpenGL);
 
 #ifdef GL_STRICT_CHECK
     #define CHECK_GL_ERROR(func_name) {\
         GLenum error = glGetError();\
-        if (error != GL_NO_ERROR) {\
-            std::cout << std::format("Error calling function {0}. Error Code={1}", #func_name, error) << std::endl;\
-            assert(false);\
-        }\
+        NXS_ASSERT_MSG(error == GL_NO_ERROR, std::format("Error calling function {0}. Error Code={1}", #func_name, error));\
     }
 #else
     #define CHECK_GL_ERROR(func_name) {\
         GLenum error = glGetError();\
         if (error != GL_NO_ERROR) {\
-            std::cout << std::format("Error calling function {0}. Error Code={1}", func_name, error) << std::endl;\
+            Logger::Instance().Log(Logger::LogLevel::Fatal, LogOpenGL, std::format("Error calling function {0}. Error Code={1}", func_name, error);\
         }\
     }
 #endif
@@ -61,7 +59,7 @@ NXS_NAMESPACE
             case DataType::Double:
                 return GL_DOUBLE;
             default:
-                assert(false);
+                NXS_ASSERT(false);
                 return GL_NONE;
             }
         }

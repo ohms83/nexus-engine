@@ -9,15 +9,21 @@
 #include <nexus/NxsDefine.h>
 #include <nexus/core/Hasher.h>
 
+#include "Resource.h"
+
+#define PURGE_UNUSED_RESOURCES(Manager) do { \
+        LOG_INFO(LogResource, "Purge unused resources. Class="#Manager); \
+        Manager::Instance().PurgeUnused(); \
+    } while(0);
+
 NXS_NAMESPACE
 {
-    class Resource;
-
     template<typename ResourceType>
     requires std::derived_from<ResourceType, Resource>
     class ResourceManager
     {
     public:
+        virtual ~ResourceManager() = default;
         /**
          * Get a resource from the specified path. If it hasn't been loaded yet,
          * it will be loaded.
@@ -63,7 +69,7 @@ NXS_NAMESPACE
             }
         }
 
-        static ResourceManager& GetInstance()
+        static ResourceManager& Instance()
         {
             static ResourceManager instance;
             return instance;

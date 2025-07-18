@@ -60,7 +60,5 @@ NXS_NAMESPACE
     };
 
     class TextureManager final : public ResourceManager<Texture>
-    {
-    public:
-    };
+    {};
 }

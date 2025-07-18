@@ -8,6 +8,7 @@
 #include <ostream>
 
 #include "core/Logger.h"
+#include "resource/Mesh.h"
 #include "resource/Texture.h"
 
 #if defined(SDL_PLATFORM_WIN32)
@@ -16,9 +17,17 @@
 
 USING_NAMESPACE_NXS;
 
+DEFINE_LOG(Application);
+
 Application::~Application()
 {
-    TextureManager::GetInstance().PurgeUnused();
+    auto& logger = Logger::Instance();
+    // Shouldn't send out any callback at this point.
+    logger.Disconnect();
+    logger.Info(LogApplication, "Shutting down...");
+
+    PURGE_UNUSED_RESOURCES(TextureManager);
+    PURGE_UNUSED_RESOURCES(MeshManager);
 
     delete m_renderSystem;
     m_renderSystem = nullptr;
@@ -30,14 +39,19 @@ Application::~Application()
     m_window = nullptr;
 
     SDL_Quit();
+
+    logger.Info(LogApplication, "Shut down");
 }
 
 bool Application::Init(const ApplicationConfig& info)
 {
+    auto& logger = Logger::Instance();
+    Logger::Init(Logger::LogToFile | Logger::LogToStdOut);
+
     //Initialize SDL
     if( SDL_Init( SDL_INIT_VIDEO ) == false )
     {
-        SDL_Log( "SDL could not initialize! SDL error: %s\n", SDL_GetError() );
+        LOG_FATAL(LogApplication, std::format("SDL could not initialize! SDL error: {}\n", SDL_GetError()));
         return false;
     }
 
@@ -66,16 +80,16 @@ bool Application::Init(const ApplicationConfig& info)
         info.title.c_str(), m_screenSize.x, m_screenSize.y, flags);
 
     if (!m_window) {
-        SDL_Log("Window could not be created. SDL_Error: %s\n", SDL_GetError());
+        LOG_FATAL(LogApplication, std::format("Window could not be created. SDL_Error: {}\n", SDL_GetError()));
         return false;
     }
 
     SDL_GetWindowSizeInPixels(m_window, &m_actualSize.x, &m_actualSize.y);
     const auto log = std::format("Actual window size width: {} height: {}", m_actualSize.x, m_actualSize.y);
-    Logger::Instance().Log("Application", log);
+    logger.Info(LogApplication, log);
 
     m_renderSystem = new RenderSystem(m_window, graphicsConfig);
-    assert(m_renderSystem);
+    NXS_ASSERT(m_renderSystem);
 
     if (info.editMode)
     {
@@ -85,8 +99,6 @@ bool Application::Init(const ApplicationConfig& info)
         RenderContext renderContext = m_renderSystem->GetRenderContext();
         m_editor = std::make_unique<Editor>(m_window, renderContext, editorConfig);
     }
-
-    Logger::Init(Logger::LogToFile | Logger::LogToStdOut);
 
     return Init_Internal();
 }
@@ -129,6 +141,10 @@ int Application::BeginMainLoop()
 
 void Application::RequestQuit()
 {
+    // Check whether the application has already begun to quit.
+    if (m_quit) return;
+
+    LOG_INFO(LogApplication, "RequestQuit");
     m_quit = true;
 }
 

@@ -47,7 +47,7 @@ static GLuint CompileShader(const std::string& source, Shader::Type type)
     CALL_GL_FUNC(glGetShaderiv(shader, GL_COMPILE_STATUS, &success));
     if (!success) {
         CALL_GL_FUNC(glGetShaderInfoLog(shader, 512, nullptr, infoLog));
-        std::cerr << "ERROR::SHADER::COMPILATION_FAILED\n" << infoLog << std::endl;
+        LOG_ERROR(LogOpenGL, std::format("SHADER COMPILATION FAILED\nErrorLogs={}", infoLog));
     }
     return shader;
 }
@@ -84,7 +84,7 @@ void GLShader::Compile()
     CALL_GL_FUNC(glGetProgramiv(m_handle, GL_LINK_STATUS, &success));
     if (!success) {
         CALL_GL_FUNC(glGetProgramInfoLog(m_handle, 512, nullptr, infoLog));
-        std::cerr << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
+        LOG_ERROR(LogOpenGL, std::format("ERROR LINKING SHADER PROGRAM\nErrorLogs={}", infoLog));
     }
 
     // We don't need to keep the handles anymore.

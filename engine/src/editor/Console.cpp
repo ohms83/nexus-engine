@@ -39,26 +39,18 @@ Console::Console()
         }
     });
 
-    Logger::Instance().logCallback.connect([this](const std::string& message)
+    auto& logger = Logger::Instance();
+    logger.logCallback.connect([this](Logger::LogLevel level, const std::string& message)
     {
+        // TODO: Coloring messages based on log level.
         AddMessage(message);
     });
-    Logger::Instance().warningCallback.connect([this](const std::string& message)
-    {
-        // TODO: Change message color
-        AddMessage(message);
-    });
-    Logger::Instance().errorCallback.connect([this](const std::string& message)
-    {
-        // TODO: Change message color
-        AddMessage(message);
-    });
+    AddMessage(logger.Message());
 }
 
 void Console::Draw(const RenderSystem& renderSystem)
 {
-    bool isOpen = true;
-    if (!ImGui::Begin("Console", &isOpen)) {
+    if (!ImGui::Begin("Console", &visible)) {
         ImGui::End();
         return;
     }

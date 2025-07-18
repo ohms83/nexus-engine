@@ -160,7 +160,6 @@ protected:
             .AddAttribute(nxs::VertexAttribute {nxs::VertexAttribute::Type::Position, nxs::DataType::Float, 3})
             .AddAttribute(nxs::VertexAttribute {nxs::VertexAttribute::Type::TexCoord0, nxs::DataType::Float, 2})
         .Build();
-        std::cout << "Vertex stride = " << vertexSize << std::endl;
 
         m_indexBuffer.reset(renderInterface.CreateIndexBuffer());
         m_indexBuffer->Begin()
@@ -175,7 +174,7 @@ protected:
             .AddSource(fragmentShaderSource, nxs::Shader::Type::Fragment)
         .Compile();
 
-        m_texture = nxs::TextureManager::GetInstance().Get(assetsPath);
+        m_texture = nxs::TextureManager::Instance().Get(assetsPath);
         m_texture->SetWrapMode(nxs::TextureWrapMode::Clamp, nxs::TextureWrapMode::Clamp);
         m_texture->SetFiltering(nxs::TextureFilterMode::Linear, nxs::TextureFilterMode::Linear);
         m_textureProxy.reset(m_texture->AllocateGpuResource(renderInterface));

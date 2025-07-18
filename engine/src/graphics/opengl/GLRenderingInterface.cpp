@@ -4,6 +4,9 @@
 
 #include "graphics/opengl/GLRenderingInterface.h"
 
+#include <sstream>
+
+#include "core/Logger.h"
 #include "graphics/opengl/GLIndexBuffer.h"
 #include "graphics/opengl/GLShader.h"
 #include "graphics/opengl/GLTexture.h"
@@ -33,20 +36,16 @@ GLRenderingInterface::GLRenderingInterface(WindowContext window, const GraphicsC
     const auto renderContext = SDL_GL_CreateContext(window);
     if (!renderContext)
     {
-        std::stringstream ss;
-        ss << "Failed to created OpenGL's context! SDL_Error=" << SDL_GetError();
-        throw std::runtime_error(ss.str());
+        LOG_FATAL(LogOpenGL, std::format("Failed to created OpenGL's context! SDL_Error={}", SDL_GetError()));
+        return;
     }
 
     m_renderContext.gl_context = renderContext;
 
-    if (!gladLoadGLLoader(R_CAST<GLADloadproc>(SDL_GL_GetProcAddress))) {
-        std::stringstream ss;
-        ss << "Failed to initialize GLAD" << std::endl;
-        SDL_GL_DestroyContext(renderContext);
-        SDL_DestroyWindow(window);
-        SDL_Quit();
-        throw std::runtime_error(ss.str());
+    if (!gladLoadGLLoader(R_CAST<GLADloadproc>(SDL_GL_GetProcAddress)))
+    {
+        LOG_FATAL(LogOpenGL, "Failed to initialize GLAD");
+        return;
     }
 
     SDL_GL_MakeCurrent(window, renderContext);
@@ -57,7 +56,7 @@ GLRenderingInterface::GLRenderingInterface(WindowContext window, const GraphicsC
         << "  GLSL    : " << glGetString(GL_SHADING_LANGUAGE_VERSION) << "\n"
         << "  Vendor  : " << glGetString(GL_VENDOR) << "\n"
         << "  Renderer: " << glGetString(GL_RENDERER);
-    std::cout << ss.str() << std::endl;
+    LOG_INFO(LogOpenGL, ss.str());
 
     // Enable depth test
     CALL_GL_FUNC(glEnable(GL_DEPTH_TEST));
@@ -126,9 +125,10 @@ TextureProxy* GLRenderingInterface::CreateTexture() const
 void GLRenderingInterface::Draw_Internal(const RenderCommand& command)
 {
     const auto indexBuffer = command.indexBuffer;
-    assert(indexBuffer != nullptr);
+    NXS_ASSERT(indexBuffer != nullptr);
 
     GLuint gl_drawMode = 0;
+    // ReSharper disable once CppDFANullDereference
     switch (indexBuffer->GetDrawMode())
     {
     case DrawMode::Point:
@@ -156,7 +156,7 @@ void GLRenderingInterface::Draw_Internal(const RenderCommand& command)
         gl_drawMode = GL_QUADS;
         break;
     default:
-        assert(false);
+        NXS_ASSERT(false);
         break;
     }
     CALL_GL_FUNC(glDrawElements(
