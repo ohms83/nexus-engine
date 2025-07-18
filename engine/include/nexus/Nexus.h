@@ -8,6 +8,7 @@
 #include "Nexus.h"
 #include "core/Hasher.h"
 #include "core/HighResTimer.h"
+#include "core/Logger.h"
 #include "core/Timer.h"
 #include "core/UniqueID.h"
 #include "editor/Console.h"
