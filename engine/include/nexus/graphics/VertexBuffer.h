@@ -50,7 +50,7 @@ NXS_NAMESPACE
         virtual VertexBuffer& AddAttribute(const VertexAttribute& attribute);
         void Build();
 
-        [[nodiscard]] uint32 GetStride() const
+        NODISCARD uint32 GetStride() const
         {
             return m_stride;
         }

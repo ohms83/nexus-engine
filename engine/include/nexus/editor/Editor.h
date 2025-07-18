@@ -4,29 +4,21 @@
 
 #pragma once
 
-#include <vector>
 #include <nexus/NxsDefine.h>
 
+#include <vector>
+
+#include "MenuItem.h"
 #include "nexus/graphics/GraphicsConst.h"
-#include "Console.h"
-#include "Profiler.h"
 
 NXS_NAMESPACE
 {
+    class EditorWidget;
     class RenderSystem;
 
     struct EditorConfig
     {
         GraphicsAPI renderingBackend;
-    };
-
-    struct MenuItem
-    {
-        std::string name;
-        std::string category;
-        std::string description;
-        std::string shortcut;
-        Ref<EditorWidget> widget;
     };
 
     class Editor
@@ -45,7 +37,7 @@ NXS_NAMESPACE
         void AddMenuItem(const std::string& menu, const MenuItem& menuItem);
 
     protected:
-        void DrawProfiler(const RenderSystem& renderSystem);
+        void InitMenu();
         void DrawMainMenu(const RenderSystem& renderSystem);
 
     protected:
@@ -53,8 +45,6 @@ NXS_NAMESPACE
         //! For the profiler
         std::vector<uint32> m_frameTimes;
         std::vector<uint32> m_frameCounters;
-
-        Ptr<Console> m_console;
 
         struct MenuItemList
         {

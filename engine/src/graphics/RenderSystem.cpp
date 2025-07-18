@@ -26,7 +26,6 @@ void RenderSystem::BeginDraw()
 {
     m_timer.Stamp();
     ClearScreen();
-    m_renderingInterface->SetViewport(0, 0, m_config.screenWidth, m_config.screenHeight);
 }
 
 void RenderSystem::Draw()

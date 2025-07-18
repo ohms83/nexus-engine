@@ -23,10 +23,10 @@ NXS_NAMESPACE
 
         void SetViewport(int32 x, int32 y, int32 w, int32 h) override;
 
-        [[nodiscard]] VertexBuffer* CreateVertexBuffer() const override;
-        [[nodiscard]] IndexBuffer* CreateIndexBuffer() const override;
-        [[nodiscard]] Shader* CreateShader() const override;
-        [[nodiscard]] TextureProxy* CreateTexture() const override;
+        NODISCARD VertexBuffer* CreateVertexBuffer() const override;
+        NODISCARD IndexBuffer* CreateIndexBuffer() const override;
+        NODISCARD Shader* CreateShader() const override;
+        NODISCARD TextureProxy* CreateTexture() const override;
 
         void OnResize(uint32_t pixel_w, uint32_t pixel_h) override;
 

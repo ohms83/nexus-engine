@@ -37,7 +37,7 @@ NXS_NAMESPACE
             const RenderingInterface& renderingInterface,
             bool keepCopy = false);
 
-        [[nodiscard]] TextureProxy* GetProxy() const
+        NODISCARD TextureProxy* GetProxy() const
         {
             return m_textureProxy.get();
         }

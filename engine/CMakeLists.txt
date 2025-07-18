@@ -60,6 +60,8 @@ include(include/CMakeLists.txt)
 
 find_package(Python3 COMPONENTS Interpreter REQUIRED)
 
+message("TOOLS_DIR=${TOOLS_DIR}")
+
 # Auto generate source files
 add_custom_command(
     OUTPUT ${ENGINE_INCLUDE_DIR}/nexus/Nexus.h

@@ -23,7 +23,7 @@ NXS_NAMESPACE
         std::vector<std::tuple<std::string, glm::vec3>> uniformVec3;
         std::vector<std::tuple<std::string, glm::vec4>> uniformVec4;
 
-        [[nodiscard]] uint32 GetPolygonCount() const
+        NODISCARD uint32 GetPolygonCount() const
         {
             return shader && indexBuffer && vertexBuffer ? indexBuffer->NumPolygons() : 0;
         }

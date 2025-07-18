@@ -25,15 +25,15 @@ NXS_NAMESPACE
         virtual IndexBuffer& SetDrawMode(DrawMode mode);
         virtual void Build();
 
-        [[nodiscard]] uint32 NumIndex() const { return m_indices.size(); }
-        [[nodiscard]] uint32 NumPolygons() const;
+        NODISCARD uint32 NumIndex() const { return m_indices.size(); }
+        NODISCARD uint32 NumPolygons() const;
 
-        [[nodiscard]] BufferUsage GetUsage() const
+        NODISCARD BufferUsage GetUsage() const
         {
             return m_usage;
         }
 
-        [[nodiscard]] DrawMode GetDrawMode() const
+        NODISCARD DrawMode GetDrawMode() const
         {
             return m_drawMode;
         }

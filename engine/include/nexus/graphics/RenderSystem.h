@@ -3,7 +3,7 @@
 #include <nexus/NxsDefine.h>
 #include "Color.h"
 #include "RenderingInterface.h"
-#include "core/HighResTimer.h"
+#include <nexus/core/HighResTimer.h>
 
 NXS_NAMESPACE
 {
@@ -25,7 +25,7 @@ NXS_NAMESPACE
             m_clearColor = rgba;
         }
 
-        [[nodiscard]] const Color4F& GetClearColor() const
+        NODISCARD const Color4F& GetClearColor() const
         {
             return m_clearColor;
         }
@@ -35,7 +35,7 @@ NXS_NAMESPACE
             m_clearDepth = depth;
         }
 
-        [[nodiscard]] float GetClearDepth() const
+        NODISCARD float GetClearDepth() const
         {
             return m_clearDepth;
         }
@@ -49,7 +49,7 @@ NXS_NAMESPACE
 
         void RegisterDrawCommand(const RenderCommand& command);
 
-        [[nodiscard]] RenderingInterface& GetRenderInterface() const
+        NODISCARD RenderingInterface& GetRenderInterface() const
         {
             assert(m_renderingInterface);
             // ReSharper disable once CppDFANullDereference
@@ -63,29 +63,29 @@ NXS_NAMESPACE
             return m_renderingInterface->GetRenderContext();
         }
 
-        [[nodiscard]] float GetrenderTime() const
+        NODISCARD float GetrenderTime() const
         {
             return m_renderTime;
         }
 
-        [[nodiscard]] uint32 GetFrameIndex() const
+        NODISCARD uint32 GetFrameIndex() const
         {
             return m_frameIndex;
         }
 
         //! Get the number of draw-calls from the previous frame.
-        [[nodiscard]] uint32 GetDrawCount() const
+        NODISCARD uint32 GetDrawCount() const
         {
             return m_drawCount;
         }
 
         //! Get the total number of polygons drawn in the previous frame.
-        [[nodiscard]] uint32 GetPolygonCount() const
+        NODISCARD uint32 GetPolygonCount() const
         {
             return m_polygonCount;
         }
 
-        [[nodiscard]] const GraphicsConfig& GetGraphicsConfig() const
+        NODISCARD const GraphicsConfig& GetGraphicsConfig() const
         {
             return m_config;
         }

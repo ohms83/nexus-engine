@@ -24,7 +24,7 @@ NXS_NAMESPACE
          * @param filepath Resource's filepath.
          * @return A pointer of @c ResourceType or null, if the resource is not found.
          */
-        [[nodiscard]] virtual Ref<ResourceType> Get(const std::string& filepath)
+        NODISCARD virtual Ref<ResourceType> Get(const std::string& filepath)
         {
             const auto hash = m_hasher.Hash32(filepath);
 
@@ -41,7 +41,7 @@ NXS_NAMESPACE
             return resource;
         }
 
-        [[nodiscard]] virtual Ref<ResourceType> Get(uint32 hash) const
+        NODISCARD virtual Ref<ResourceType> Get(uint32 hash) const
         {
             if (const auto itr = m_resources.find(hash); itr != m_resources.end()) {
                 return itr->second;

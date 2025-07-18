@@ -39,11 +39,11 @@ NXS_NAMESPACE
         int BeginMainLoop();
 
         void RequestQuit();
-        [[nodiscard]] bool IsQuitRequested() const;
+        NODISCARD bool IsQuitRequested() const;
 
-        [[nodiscard]] WindowContext GetWindowContext() const;
+        NODISCARD WindowContext GetWindowContext() const;
 
-        [[nodiscard]] RenderSystem& GetRenderSystem() const
+        NODISCARD RenderSystem& GetRenderSystem() const
         {
             assert(m_renderSystem);
             // ReSharper disable once CppDFANullDereference

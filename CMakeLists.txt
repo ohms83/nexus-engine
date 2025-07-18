@@ -16,15 +16,9 @@ set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_SOURCE_DIR})
 # --- Define resource directory ---
 set(ASSETS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/assets")
 
-if (MSVC)
-    # For Visual Studio, the output directory includes Debug/Release/etc.
-    set(CONFIG_SUBDIR "$<IF:$<CONFIG:Debug>,Debug,$<IF:$<CONFIG:Release>,Release,>>")
-    # Copy the resources next to the exe for all configs:
-    set(ASSETS_DEST_DIR "${CMAKE_CURRENT_BINARY_DIR}/${CONFIG_SUBDIR}")
-else()
-    # For single-config generators (MinGW, Linux Makefiles, Ninja),
-    set(ASSETS_DEST_DIR "${CMAKE_CURRENT_BINARY_DIR}")
-endif()
+set(CONFIG_SUBDIR "$<IF:$<CONFIG:Debug>,Debug,$<IF:$<CONFIG:Release>,Release,>>")
+# Copy the resources next to the exe for all configs:
+set(ASSETS_DEST_DIR "${CMAKE_CURRENT_BINARY_DIR}/${CONFIG_SUBDIR}")
 
 add_subdirectory(engine)
 add_subdirectory(examples)

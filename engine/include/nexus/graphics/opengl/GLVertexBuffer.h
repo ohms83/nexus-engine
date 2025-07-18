@@ -24,7 +24,7 @@ NXS_NAMESPACE
         //! API specific vertex buffer generation function.
         void Build_Impl() override;
     protected:
-        [[nodiscard]] uint32 Alloc() override;
+        NODISCARD uint32 Alloc() override;
         void Release() override;
 
     private:

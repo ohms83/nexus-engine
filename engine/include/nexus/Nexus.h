@@ -13,6 +13,8 @@
 #include "editor/Console.h"
 #include "editor/Editor.h"
 #include "editor/EditorWidget.h"
+#include "editor/MenuItem.h"
+#include "editor/Profiler.h"
 #include "graphics/Color.h"
 #include "graphics/GPUBuffer.h"
 #include "graphics/GpuResrouce.h"

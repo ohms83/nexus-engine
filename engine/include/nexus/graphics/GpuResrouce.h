@@ -14,7 +14,7 @@ NXS_NAMESPACE
         GpuResrouce() = default;
         virtual ~GpuResrouce() = default;
 
-        [[nodiscard]] uint32 GetHandle() const
+        NODISCARD uint32 GetHandle() const
         {
             return m_handle;
         }
@@ -28,7 +28,7 @@ NXS_NAMESPACE
          * must provide the implementation of this function.
          * @return The generated resource handle; otherwise 0, if failed.
          */
-        virtual [[nodiscard]] uint32 Alloc() = 0;
+        NODISCARD virtual uint32 Alloc() = 0;
 
         //! Release the allocated GPU resource.
         virtual void Release() = 0;

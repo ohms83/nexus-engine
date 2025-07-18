@@ -5,7 +5,7 @@
 #pragma once
 
 #include "NxsGL.h"
-#include "graphics/TextureProxy.h"
+#include <nexus/graphics/TextureProxy.h>
 
 NXS_NAMESPACE
 {
@@ -22,7 +22,7 @@ NXS_NAMESPACE
         TextureProxy& LoadMipData(const uint8* data, uint32 size, uint32 mip) override;
 
     protected:
-        [[nodiscard]] uint32 Alloc() override;
+        NODISCARD uint32 Alloc() override;
         void Release() override;
     };
 }

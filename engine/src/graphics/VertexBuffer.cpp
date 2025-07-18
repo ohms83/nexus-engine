@@ -2,6 +2,7 @@
 // Created by nutta on 6/27/2025.
 //
 
+#include <cstring>
 #include <nexus/graphics/VertexBuffer.h>
 
 USING_NAMESPACE_NXS;

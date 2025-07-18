@@ -21,7 +21,7 @@ NXS_NAMESPACE
         Shader& AddSource(const std::string& source, Type shaderType) override;
         void Compile() override;
 
-        [[nodiscard]] int32 FindUniform(const std::string& name) const override;
+        NODISCARD int32 FindUniform(const std::string& name) const override;
         void SetUniformVector(const std::string& name, const glm::vec2& vec) override;
         void SetUniformVector(const std::string& name, const glm::vec3& vec) override;
         void SetUniformVector(const std::string& name, const glm::vec4& vec) override;

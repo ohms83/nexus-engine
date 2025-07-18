@@ -27,7 +27,7 @@ NXS_NAMESPACE
         Buffer& operator = (Buffer&& rhs) noexcept;
         Buffer& operator = (const Buffer& rhs) = delete;
 
-        [[nodiscard]] bool IsNull() const
+        NODISCARD bool IsNull() const
         {
             return m_buffer == nullptr;
         }
@@ -53,14 +53,14 @@ NXS_NAMESPACE
          * Returns the ownership of currently managed buffer to the caller.
          * The caller will now be responsible for managing the returned buffer.
          */
-        [[nodiscard]] uint8* Give(uint64& outSize);
+        NODISCARD uint8* Give(uint64& outSize);
 
-        [[nodiscard]] const uint8* Data() const
+        NODISCARD const uint8* Data() const
         {
             return m_buffer.get();
         }
 
-        [[nodiscard]] uint64 Size() const
+        NODISCARD uint64 Size() const
         {
             return m_size;
         }

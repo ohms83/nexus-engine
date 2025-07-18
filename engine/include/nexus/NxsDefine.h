@@ -4,14 +4,14 @@
 #include <memory>
 
 #if defined(_WIN32)
-#include <windows.h>
-
-#ifndef NXS_PLATFORM_WINDOWS
+    #include <windows.h>
+    #ifndef NXS_PLATFORM_WINDOWS
 #define NXS_PLATFORM_WINDOWS 1
-#endif
+    #endif
 #endif
 
-#include <array>
+#define NODISCARD [[nodiscard]]
+
 #include <cassert>
 
 #define NXS_NAMESPACE namespace nxs

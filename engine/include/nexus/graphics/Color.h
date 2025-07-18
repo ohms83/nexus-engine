@@ -106,7 +106,7 @@ NXS_NAMESPACE
             : Color4(color)
         {}
 
-        [[nodiscard]] uint32 ToRGBA() const
+        NODISCARD uint32 ToRGBA() const
         {
             const auto _r = CAST<uint8>(this->r * 255);
             const auto _g = CAST<uint8>(this->g * 255);
@@ -153,7 +153,7 @@ NXS_NAMESPACE
             : Color3(color)
         {}
 
-        [[nodiscard]] uint32 ToRGB() const
+        NODISCARD uint32 ToRGB() const
         {
             const auto _r = CAST<uint8>(this->r * 255);
             const auto _g = CAST<uint8>(this->g * 255);
@@ -202,7 +202,7 @@ NXS_NAMESPACE
             : Color4(color)
         {}
 
-        [[nodiscard]] uint32 ToRGBA() const
+        NODISCARD uint32 ToRGBA() const
         {
             return this->a | this->b << 8 | this->g << 16 | this->r << 24;
         }
@@ -245,7 +245,7 @@ NXS_NAMESPACE
             : Color3(color)
         {}
 
-        [[nodiscard]] uint32 ToRGB() const
+        NODISCARD uint32 ToRGB() const
         {
             return this->b | this->g << 8 | this->r << 16;
         }

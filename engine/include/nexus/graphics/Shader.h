@@ -36,7 +36,7 @@ NXS_NAMESPACE
          * A uniform can be considered as shader's global variable where application
          * can use it to control vertex and fragment shader's behavior.
          */
-        [[nodiscard]] virtual int32 FindUniform(const std::string& name) const = 0;
+        NODISCARD virtual int32 FindUniform(const std::string& name) const = 0;
 
         virtual void SetUniformVector(const std::string& name, const glm::vec2& vec) = 0;
         virtual void SetUniformVector(const std::string& name, const glm::vec3& vec) = 0;

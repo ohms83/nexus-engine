@@ -46,10 +46,10 @@ NXS_NAMESPACE
 
         virtual void SetViewport(int32 x, int32 y, int32 w, int32 h) = 0;
 
-        [[nodiscard]] virtual VertexBuffer* CreateVertexBuffer() const = 0;
-        [[nodiscard]] virtual IndexBuffer* CreateIndexBuffer() const = 0;
-        [[nodiscard]] virtual Shader* CreateShader() const = 0;
-        [[nodiscard]] virtual TextureProxy* CreateTexture() const = 0;
+        NODISCARD virtual VertexBuffer* CreateVertexBuffer() const = 0;
+        NODISCARD virtual IndexBuffer* CreateIndexBuffer() const = 0;
+        NODISCARD virtual Shader* CreateShader() const = 0;
+        NODISCARD virtual TextureProxy* CreateTexture() const = 0;
 
         virtual void OnResize(uint32_t pixel_w, uint32_t pixel_h) = 0;
 

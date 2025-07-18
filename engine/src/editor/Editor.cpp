@@ -11,8 +11,20 @@
 #include <imgui_impl_opengl3.h>
 
 #include <implot.h>
+#include <iostream>
+
+#include "nexus/editor/Console.h"
+#include "nexus/editor/Profiler.h"
 
 USING_NAMESPACE_NXS;
+
+#define FILE_MENU_OPEN_SAVE 0
+#define FILE_MENU_QUIT_APP 1
+
+#define EDIT_UNDO_REDO 0
+#define EDIT_COPY_PASTE 1
+
+#define DEVELOPER_TOOLS 0
 
 Editor::Editor(const WindowContext window, const RenderContext renderContext, const EditorConfig& config)
 {
@@ -60,24 +72,7 @@ Editor::Editor(const WindowContext window, const RenderContext renderContext, co
     // Initializes ImPlot
     ImPlot::CreateContext();
 
-    const MenuItem console = {
-        "Console",
-        "Developer",
-        "Open a debug console",
-        "",
-        std::make_shared<Console>()
-    };
-
-    const MenuItem profiler = {
-        "Profiler",
-        "Developer",
-        "Open a profiler",
-        "",
-        std::make_shared<Profiler>()
-    };
-
-    AddMenuItem("Tools", console);
-    AddMenuItem("Tools", profiler);
+    InitMenu();
 }
 
 Editor::~Editor()
@@ -175,7 +170,145 @@ void Editor::AddMenuItem(const std::string& menu, const MenuItem& menuItem)
     {
         itr->items.push_back(menuItem);
     }
-    m_widgets.push_back(menuItem.widget);
+
+    if (menuItem.widget) m_widgets.push_back(menuItem.widget);
+}
+
+void Editor::InitMenu()
+{
+    std::vector<MenuItem> fileMenuItems = {
+        {
+            FILE_MENU_OPEN_SAVE,
+            "New",
+            "",
+            "Ctrl+N",
+            nullptr,
+            [](const MenuItem&)
+            {
+                std::cout << "TODO: Open a file creating dialogue" << std::endl;
+            }
+        },
+        {
+            FILE_MENU_OPEN_SAVE,
+            "Open...",
+            "",
+            "Ctrl+O",
+            nullptr,
+            [](const MenuItem&)
+            {
+                std::cout << "TODO: Open a file opening dialogue" << std::endl;
+            }
+        },
+        {
+            FILE_MENU_OPEN_SAVE,
+            "Save",
+            "",
+            "Ctrl+S",
+            nullptr,
+            [](const MenuItem&)
+            {
+                std::cout << "TODO: Save a file" << std::endl;
+            }
+        },
+        {
+            FILE_MENU_QUIT_APP,
+            "Quit",
+            "",
+            "Alt+F4",
+            nullptr,
+            [](const MenuItem&)
+            {
+                std::cout << "TODO: Quit app" << std::endl;
+            }
+        }
+    };
+
+    std::vector<MenuItem> editMenuItems = {
+        {
+            EDIT_UNDO_REDO,
+            "Undo",
+            "",
+            "Ctrl+Z",
+            nullptr,
+            [](const MenuItem&)
+            {
+                std::cout << "TODO: Undo" << std::endl;
+            }
+        },
+        {
+            EDIT_UNDO_REDO,
+            "Redo",
+            "",
+            "Ctrl+Y",
+            nullptr,
+            [](const MenuItem&)
+            {
+                std::cout << "TODO: Redo" << std::endl;
+            }
+        },
+        {
+            EDIT_COPY_PASTE,
+            "Cut",
+            "",
+            "Ctrl+X",
+            nullptr,
+            [](const MenuItem&)
+            {
+                std::cout << "TODO: Cut" << std::endl;
+            }
+        },
+        {
+            EDIT_COPY_PASTE,
+            "Copy",
+            "",
+            "Ctrl+C",
+            nullptr,
+            [](const MenuItem&)
+            {
+                std::cout << "TODO: Copy" << std::endl;
+            }
+        },
+        {
+            EDIT_COPY_PASTE,
+            "Paste",
+            "",
+            "Ctrl+V",
+            nullptr,
+            [](const MenuItem&)
+            {
+                std::cout << "TODO: Paste" << std::endl;
+            }
+        }
+    };
+    std::vector<MenuItem> toolsMenuItems = {
+        {
+            DEVELOPER_TOOLS,
+            "Console",
+            "Open a debug console",
+            "",
+            std::make_shared<Console>()
+        },
+        {
+            DEVELOPER_TOOLS,
+            "Profiler",
+            "Open a profiler",
+            "",
+            std::make_shared<Profiler>()
+        }
+    };
+
+    for (const auto menuItem : fileMenuItems)
+    {
+        AddMenuItem("File", menuItem);
+    }
+    for (const auto menuItem : editMenuItems)
+    {
+        AddMenuItem("Edit", menuItem);
+    }
+    for (const auto menuItem : toolsMenuItems)
+    {
+        AddMenuItem("Tools", menuItem);
+    }
 }
 
 void Editor::DrawMainMenu(const RenderSystem& renderSystem)
@@ -188,45 +321,25 @@ void Editor::DrawMainMenu(const RenderSystem& renderSystem)
     // For a standalone app, just a plain BeginMainMenuBar is fine.
 
     if (ImGui::BeginMainMenuBar()) {
-        if (ImGui::BeginMenu("File")) {
-            if (ImGui::MenuItem("New", "Ctrl+N")) {
-                // Do something on "New" click
-                // For example:
-            }
-            if (ImGui::MenuItem("Open...", "Ctrl+O")) {
-                // Do something on "Open" click
-            }
-            if (ImGui::MenuItem("Save", "Ctrl+S")) {
-                // Do something on "Save" click
-            }
-            ImGui::Separator(); // Adds a horizontal line separator
-            if (ImGui::MenuItem("Quit", "Alt+F4")) {
-                // Set your application's quit flag
-                // For example: quit = true; (if `quit` is your main loop control variable)
-            }
-            ImGui::EndMenu(); // End "File" menu
-        }
-
-        // if (ImGui::BeginMenu("Edit")) {
-        //     if (ImGui::MenuItem("Undo", "Ctrl+Z", false, false)) { // disabled, not greyed out
-        //         // Do something on "Undo" click
-        //     }
-        //     if (ImGui::MenuItem("Redo", "Ctrl+Y", false, false)) { // disabled, not greyed out
-        //         // Do something on "Redo" click
-        //     }
-        //     ImGui::Separator();
-        //     if (ImGui::MenuItem("Cut", "Ctrl+X")) {}
-        //     if (ImGui::MenuItem("Copy", "Ctrl+C")) {}
-        //     if (ImGui::MenuItem("Paste", "Ctrl+V")) {}
-        //     ImGui::EndMenu(); // End "Edit" menu
-        // }
-
         for (const auto& [menu, items] : m_menuItems)
         {
             if (ImGui::BeginMenu(menu.c_str()))
             {
-                for (const auto& item : items) {
-                    ImGui::MenuItem(item.name.c_str(), item.shortcut.c_str(), &item.widget->visible);
+                int group = -1;
+                for (const auto& item : items)
+                {
+                    if (group != -1 && group != item.group)
+                    {
+                        ImGui::Separator(); // Adds a horizontal line separator
+                    }
+
+                    // ReSharper disable once CppTooWideScopeInitStatement
+                    bool* p_visibility = item.widget ? &item.widget->visible : nullptr;
+                    if (ImGui::MenuItem(item.name.c_str(), item.shortcut.c_str(), p_visibility))
+                    {
+                        if (item.handler) item.handler(item);
+                    }
+                    group = item.group;
                 }
                 ImGui::EndMenu();
             }
