@@ -13,6 +13,7 @@
 #include <implot.h>
 #include <iostream>
 
+#include "core/Logger.h"
 #include "nexus/editor/Console.h"
 #include "nexus/editor/Profiler.h"
 
@@ -25,6 +26,8 @@ USING_NAMESPACE_NXS;
 #define EDIT_COPY_PASTE 1
 
 #define DEVELOPER_TOOLS 0
+
+static const std::string EditorLog = "Editor";
 
 Editor::Editor(const WindowContext window, const RenderContext renderContext, const EditorConfig& config)
 {
@@ -185,7 +188,7 @@ void Editor::InitMenu()
             nullptr,
             [](const MenuItem&)
             {
-                std::cout << "TODO: Open a file creating dialogue" << std::endl;
+                Logger::Instance().Log(EditorLog, "TODO: Open a file creating dialogue");
             }
         },
         {
@@ -196,7 +199,7 @@ void Editor::InitMenu()
             nullptr,
             [](const MenuItem&)
             {
-                std::cout << "TODO: Open a file opening dialogue" << std::endl;
+                Logger::Instance().Log(EditorLog, "TODO: Open a file opening dialogue");
             }
         },
         {
@@ -207,7 +210,7 @@ void Editor::InitMenu()
             nullptr,
             [](const MenuItem&)
             {
-                std::cout << "TODO: Save a file" << std::endl;
+                Logger::Instance().Log(EditorLog, "TODO: Save a file");
             }
         },
         {
@@ -218,7 +221,7 @@ void Editor::InitMenu()
             nullptr,
             [](const MenuItem&)
             {
-                std::cout << "TODO: Quit app" << std::endl;
+                Logger::Instance().Log(EditorLog, "TODO: Quit app");
             }
         }
     };
@@ -232,7 +235,7 @@ void Editor::InitMenu()
             nullptr,
             [](const MenuItem&)
             {
-                std::cout << "TODO: Undo" << std::endl;
+                Logger::Instance().Log(EditorLog, "TODO: Undo");
             }
         },
         {
@@ -243,7 +246,7 @@ void Editor::InitMenu()
             nullptr,
             [](const MenuItem&)
             {
-                std::cout << "TODO: Redo" << std::endl;
+                Logger::Instance().Log(EditorLog, "TODO: Redo");
             }
         },
         {
@@ -254,7 +257,7 @@ void Editor::InitMenu()
             nullptr,
             [](const MenuItem&)
             {
-                std::cout << "TODO: Cut" << std::endl;
+                Logger::Instance().Log(EditorLog, "TODO: Cut");
             }
         },
         {
@@ -265,7 +268,7 @@ void Editor::InitMenu()
             nullptr,
             [](const MenuItem&)
             {
-                std::cout << "TODO: Copy" << std::endl;
+                Logger::Instance().Log(EditorLog, "TODO: Copy");
             }
         },
         {
@@ -276,7 +279,7 @@ void Editor::InitMenu()
             nullptr,
             [](const MenuItem&)
             {
-                std::cout << "TODO: Paste" << std::endl;
+                Logger::Instance().Log(EditorLog, "TODO: Paste");
             }
         }
     };
@@ -313,13 +316,6 @@ void Editor::InitMenu()
 
 void Editor::DrawMainMenu(const RenderSystem& renderSystem)
 {
-    // In your main.cpp render loop, after ImGui::NewFrame()
-
-    // (Optional) If you have a docking setup with PassthruCentralNode,
-    // you might want to ensure the menu bar doesn't interfere,
-    // or use ImGui::GetMainViewport()->Pos to offset if needed.
-    // For a standalone app, just a plain BeginMainMenuBar is fine.
-
     if (ImGui::BeginMainMenuBar()) {
         for (const auto& [menu, items] : m_menuItems)
         {

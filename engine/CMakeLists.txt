@@ -1,3 +1,6 @@
+# Use cmake_path to get the absolute path
+get_filename_component(PROJECT_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/.." ABSOLUTE)
+
 set(ENGINE_PUBLIC_HEADER_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 set(ENGINE_INSTALL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 
@@ -60,8 +63,6 @@ include(include/CMakeLists.txt)
 
 find_package(Python3 COMPONENTS Interpreter REQUIRED)
 
-message("TOOLS_DIR=${TOOLS_DIR}")
-
 # Auto generate source files
 add_custom_command(
     OUTPUT ${ENGINE_INCLUDE_DIR}/nexus/Nexus.h
@@ -88,9 +89,9 @@ target_include_directories(nexus-engine
     # ImPlot
     PUBLIC "${IMPLOT_SOURCE_DIR}"
     # xxHash
-    PUBLIC "${XXHASH_SOURCE_DIR}"
+    PRIVATE "${XXHASH_SOURCE_DIR}"
     # stb_image
-    PUBLIC "${STB_SOURCE_DIR}"
+    PRIVATE "${STB_SOURCE_DIR}"
 )
 
 target_link_libraries(nexus-engine PRIVATE SDL3::SDL3)
@@ -105,6 +106,7 @@ target_link_libraries(nexus-engine PRIVATE
 # Define IMGUI_IMPL_OPENGL_LOADER_GLAD for OpenGL3 backend to use glad
 target_compile_definitions(nexus-engine
     PUBLIC IMGUI_IMPL_OPENGL_LOADER_GLAD
+    PUBLIC NXS_PROJECT_PATH="${PROJECT_ROOT}"
 )
 
 install(TARGETS nexus-engine

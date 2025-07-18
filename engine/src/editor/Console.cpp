@@ -7,6 +7,8 @@
 #include <sstream>
 #include <nexus/editor/Console.h>
 
+#include "core/Logger.h"
+
 USING_NAMESPACE_NXS;
 
 Console::Console()
@@ -35,6 +37,21 @@ Console::Console()
             }
             AddMessage(message);
         }
+    });
+
+    Logger::Instance().logCallback.connect([this](const std::string& message)
+    {
+        AddMessage(message);
+    });
+    Logger::Instance().warningCallback.connect([this](const std::string& message)
+    {
+        // TODO: Change message color
+        AddMessage(message);
+    });
+    Logger::Instance().errorCallback.connect([this](const std::string& message)
+    {
+        // TODO: Change message color
+        AddMessage(message);
     });
 }
 

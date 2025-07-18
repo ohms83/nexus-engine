@@ -3,9 +3,11 @@
 //
 #include "Application.h"
 
+#include <format>
 #include <iostream>
 #include <ostream>
 
+#include "core/Logger.h"
 #include "resource/Texture.h"
 
 #if defined(SDL_PLATFORM_WIN32)
@@ -69,7 +71,8 @@ bool Application::Init(const ApplicationConfig& info)
     }
 
     SDL_GetWindowSizeInPixels(m_window, &m_actualSize.x, &m_actualSize.y);
-    std::cout << "Actual window size width: " << m_actualSize.x << " height: " << m_actualSize.y << std::endl;
+    const auto log = std::format("Actual window size width: {} height: {}", m_actualSize.x, m_actualSize.y);
+    Logger::Instance().Log("Application", log);
 
     m_renderSystem = new RenderSystem(m_window, graphicsConfig);
     assert(m_renderSystem);
@@ -82,6 +85,8 @@ bool Application::Init(const ApplicationConfig& info)
         RenderContext renderContext = m_renderSystem->GetRenderContext();
         m_editor = std::make_unique<Editor>(m_window, renderContext, editorConfig);
     }
+
+    Logger::Init(Logger::LogToFile | Logger::LogToStdOut);
 
     return Init_Internal();
 }
