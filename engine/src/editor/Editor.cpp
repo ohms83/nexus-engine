@@ -125,9 +125,7 @@ void Editor::Draw(const RenderSystem& renderSystem)
 
     for (const auto widget : m_widgets)
     {
-        if (widget && widget->visible) {
-            widget->Draw(renderSystem);
-        }
+        widget->Draw(renderSystem);
     }
 }
 
@@ -330,10 +328,21 @@ void Editor::DrawMainMenu(const RenderSystem& renderSystem)
                     }
 
                     // ReSharper disable once CppTooWideScopeInitStatement
-                    bool* p_visibility = item.widget ? &item.widget->visible : nullptr;
-                    if (ImGui::MenuItem(item.name.c_str(), item.shortcut.c_str(), p_visibility))
+                    bool selected = item.widget ? item.widget->GetVisibility() != EditorWidget::Visibility::Hidden : false;
+                    if (ImGui::MenuItem(item.name.c_str(), item.shortcut.c_str(), &selected))
                     {
                         if (item.handler) item.handler(item);
+                    }
+                    if (item.widget)
+                    {
+                        if (selected)
+                        {
+                            item.widget->Show();
+                        }
+                        else
+                        {
+                            item.widget->Hide();
+                        }
                     }
                     group = item.group;
                 }

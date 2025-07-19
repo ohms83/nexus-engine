@@ -9,17 +9,35 @@ USING_NAMESPACE_NXS;
 
 void EditorWidget::Draw(const RenderSystem& renderSystem)
 {
-    BeginDraw(renderSystem);
-    if (visible) {
-        Draw_Internal(renderSystem);
+    if (m_visibility == Visibility::Hidden) {
+        return;
     }
+
+    BeginDraw(renderSystem);
+    Draw_Internal(renderSystem);
     EndDraw();
+}
+
+void EditorWidget::Show()
+{
+    m_visible = true;
+    m_visibility = m_visibility == Visibility::Hidden ? Visibility::Visible : m_visibility;
+}
+
+void EditorWidget::Hide()
+{
+    m_visible = false;
+    m_visibility = Visibility::Hidden;
 }
 
 void EditorWidget::BeginDraw(const RenderSystem& renderSystem)
 {
-    if (!ImGui::Begin(m_name.data(), &visible)) {
-        ImGui::End();
+    const bool isCollapsed = !ImGui::Begin(m_name.data(), &m_visible);
+    if (m_visible) {
+        m_visibility = isCollapsed ? Visibility::Collapsed : Visibility::Visible;
+    }
+    else {
+        m_visibility = Visibility::Hidden;
     }
 }
 

@@ -30,7 +30,7 @@ NXS_NAMESPACE
         //! Add a message to the console
         void AddMessage(const std::string& message);
         //! Register a command with a handler function
-        void RegisterCommand(const std::string& commandName, CommandHandler handler);
+        void RegisterCommand(const std::string& commandName, const CommandHandler& handler);
 
     protected:
         void Draw_Internal(const RenderSystem& renderSystem) override;

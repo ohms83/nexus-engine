@@ -14,6 +14,14 @@ NXS_NAMESPACE
     class EditorWidget
     {
     public:
+        enum class Visibility
+        {
+            Visible,
+            Collapsed,
+            //! The widget is closed or hidden.
+            Hidden,
+        };
+
         explicit EditorWidget(const std::string& name): m_name(name) {}
         virtual ~EditorWidget() = default;
 
@@ -21,7 +29,9 @@ NXS_NAMESPACE
         void Draw(const RenderSystem& renderSystem);
         virtual void Update() {}
 
-        bool visible = true;
+        Visibility GetVisibility() const { return m_visibility; }
+        void Show();
+        void Hide();
 
     protected:
         virtual void BeginDraw(const RenderSystem& renderSystem);
@@ -30,5 +40,13 @@ NXS_NAMESPACE
 
     protected:
         std::string m_name;
+        Visibility m_visibility = Visibility::Visible;
+
+    private:
+        /**
+         * Internally used for ImGui::Begin. Please don't use this flag for visibility checking
+         * but refer to the Visibility status instead.
+         */
+        bool m_visible = true;
     };
 }

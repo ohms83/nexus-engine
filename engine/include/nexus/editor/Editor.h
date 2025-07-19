@@ -42,9 +42,6 @@ NXS_NAMESPACE
 
     protected:
         EditorConfig m_config{};
-        //! For the profiler
-        std::vector<uint32> m_frameTimes;
-        std::vector<uint32> m_frameCounters;
 
         struct MenuItemList
         {

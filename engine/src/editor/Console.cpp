@@ -100,7 +100,7 @@ void Console::AddMessage(const std::string& message)
     m_scrollToBottom = true;
 }
 
-void Console::RegisterCommand(const std::string& commandName, CommandHandler handler)
+void Console::RegisterCommand(const std::string& commandName, const CommandHandler& handler)
 {
     m_commands[commandName] = handler;
 }
