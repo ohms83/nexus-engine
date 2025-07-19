@@ -41,12 +41,17 @@ Console::Console()
     });
 
     auto& logger = Logger::Instance();
-    logger.logCallback.connect([this](Logger::LogLevel level, const std::string& message)
+    m_logConnection = logger.logCallback.connect([this](Logger::LogLevel level, const std::string& message)
     {
         // TODO: Coloring messages based on log level.
         AddMessage(message);
     });
     AddMessage(logger.Message());
+}
+
+Console::~Console()
+{
+    m_logConnection.disconnect();
 }
 
 void Console::Draw_Internal(const RenderSystem& renderSystem)

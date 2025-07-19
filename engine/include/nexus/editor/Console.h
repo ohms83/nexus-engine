@@ -11,6 +11,7 @@
 
 #include "EditorWidget.h"
 #include "imgui.h"
+#include "sigslot/signal.hpp"
 
 #define CONSOLE_INPUT_BUFFER_SIZE 1024
 
@@ -26,6 +27,7 @@ NXS_NAMESPACE
         using CommandHandler = std::function<void(const std::vector<std::string>&)>;
 
         Console();
+        virtual ~Console();
 
         //! Add a message to the console
         void AddMessage(const std::string& message);
@@ -47,6 +49,7 @@ NXS_NAMESPACE
         std::vector<std::string> m_history;
         std::vector<std::string> m_messages;
         std::map<std::string, CommandHandler> m_commands;
+        sigslot::connection m_logConnection;
         bool m_scrollToBottom = false;
     };
 }
