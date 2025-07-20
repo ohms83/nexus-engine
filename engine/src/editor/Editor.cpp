@@ -27,7 +27,7 @@ USING_NAMESPACE_NXS;
 
 #define DEVELOPER_TOOLS 0
 
-static const std::string EditorLog = "Editor";
+DEFINE_LOG(Editor);
 
 Editor::Editor()
 {
@@ -86,7 +86,7 @@ void Editor::InitMenu()
             nullptr,
             [](const MenuItem&)
             {
-                Logger::Instance().Info(EditorLog, "TODO: Open a file creating dialogue");
+                LOG_INFO(LogEditor, "TODO: Open a file creating dialogue");
             }
         },
         {
@@ -97,7 +97,7 @@ void Editor::InitMenu()
             nullptr,
             [](const MenuItem&)
             {
-                Logger::Instance().Info(EditorLog, "TODO: Open a file opening dialogue");
+                LOG_INFO(LogEditor, "TODO: Open a file opening dialogue");
             }
         },
         {
@@ -108,7 +108,7 @@ void Editor::InitMenu()
             nullptr,
             [](const MenuItem&)
             {
-                Logger::Instance().Info(EditorLog, "TODO: Save a file");
+                LOG_INFO(LogEditor, "TODO: Save a file");
             }
         },
         {
@@ -119,7 +119,12 @@ void Editor::InitMenu()
             nullptr,
             [](const MenuItem&)
             {
-                Logger::Instance().Info(EditorLog, "TODO: Quit app");
+                SDL_QuitEvent quitEvent {
+                    SDL_EVENT_QUIT,
+                    0,
+                    SDL_GetTicksNS()
+                };
+                SDL_PushEvent(R_CAST<SDL_Event*>(&quitEvent));
             }
         }
     };
@@ -133,7 +138,7 @@ void Editor::InitMenu()
             nullptr,
             [](const MenuItem&)
             {
-                Logger::Instance().Info(EditorLog, "TODO: Undo");
+                LOG_INFO(LogEditor, "TODO: Undo");
             }
         },
         {
@@ -144,7 +149,7 @@ void Editor::InitMenu()
             nullptr,
             [](const MenuItem&)
             {
-                Logger::Instance().Info(EditorLog, "TODO: Redo");
+                LOG_INFO(LogEditor, "TODO: Redo");
             }
         },
         {
@@ -155,7 +160,7 @@ void Editor::InitMenu()
             nullptr,
             [](const MenuItem&)
             {
-                Logger::Instance().Info(EditorLog, "TODO: Cut");
+                LOG_INFO(LogEditor, "TODO: Cut");
             }
         },
         {
@@ -166,7 +171,7 @@ void Editor::InitMenu()
             nullptr,
             [](const MenuItem&)
             {
-                Logger::Instance().Info(EditorLog, "TODO: Copy");
+                LOG_INFO(LogEditor, "TODO: Copy");
             }
         },
         {
@@ -177,7 +182,7 @@ void Editor::InitMenu()
             nullptr,
             [](const MenuItem&)
             {
-                Logger::Instance().Info(EditorLog, "TODO: Paste");
+                LOG_INFO(LogEditor, "TODO: Paste");
             }
         }
     };

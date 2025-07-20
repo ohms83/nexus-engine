@@ -193,6 +193,7 @@ void Application::OnKeyDown(const SDL_Keycode key)
 
 void Application::OnResize(const glm::ivec2& screenSize, const glm::ivec2& actualSize)
 {
+    LOG_INFO(LogApplication, std::format("OnResize screenSize: {}x{} actualSize: {}x{}", screenSize.x, screenSize.y, actualSize.x, actualSize.y));
     m_renderSystem->OnResize(actualSize.x, actualSize.y);
 }
 
