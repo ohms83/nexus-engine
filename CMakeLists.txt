@@ -22,3 +22,4 @@ set(ASSETS_DEST_DIR "${CMAKE_CURRENT_BINARY_DIR}/${CONFIG_SUBDIR}")
 
 add_subdirectory(engine)
 add_subdirectory(examples)
+add_subdirectory(editor)

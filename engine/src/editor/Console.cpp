@@ -54,7 +54,7 @@ Console::~Console()
     m_logConnection.disconnect();
 }
 
-void Console::Draw_Internal(const RenderSystem& renderSystem)
+void Console::Draw_Internal(RenderSystem& renderSystem)
 {
     // Message log
     const float footer_height_to_reserve = ImGui::GetStyle().ItemSpacing.y + ImGui::GetFrameHeightWithSpacing();

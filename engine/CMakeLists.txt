@@ -87,7 +87,7 @@ target_include_directories(nexus-engine
     PUBLIC "${IMGUI_SOURCE_DIR}"
     PUBLIC "${IMGUI_SOURCE_DIR}/backends"
     # ImPlot
-    PRIVATE "${IMPLOT_SOURCE_DIR}"
+    PUBLIC "${IMPLOT_SOURCE_DIR}"
     # xxHash
     PRIVATE "${XXHASH_SOURCE_DIR}"
     # stb_image

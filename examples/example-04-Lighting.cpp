@@ -201,7 +201,7 @@ public:
         renderSystem.RegisterDrawCommand(renderCommand);
     }
 
-    void RenderEditor(const nxs::RenderSystem& renderSystem) override
+    void DrawUI() override
     {
         ImGui::Begin("Lighting");
         {

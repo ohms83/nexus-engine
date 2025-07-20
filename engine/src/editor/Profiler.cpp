@@ -6,6 +6,7 @@
 
 #include "imgui.h"
 #include "implot.h"
+#include "core/Logger.h"
 #include "nexus/graphics/GraphicsConst.h"
 #include "nexus/graphics/RenderSystem.h"
 
@@ -20,7 +21,7 @@ Profiler::Profiler()
     m_frameCounters.reserve(MAX_PROFILED_FRAMES);
 }
 
-void Profiler::Draw_Internal(const RenderSystem& renderSystem)
+void Profiler::Draw_Internal(RenderSystem& renderSystem)
 {
     const ImGuiIO& io = ImGui::GetIO(); (void)io;
 
@@ -42,7 +43,7 @@ void Profiler::Draw_Internal(const RenderSystem& renderSystem)
         ImPlot::SetupAxisLimits(ImAxis_Y1,0,60);
         ImPlot::SetNextFillStyle(ImVec4(1,1,0,1),0.25f);
         m_frameCounters.push_back(frameIndex);
-        m_frameTimes.push_back(frameTime);
+        m_frameTimes.push_back(CAST<uint32>(frameTime));
 
         if (m_frameCounters.size() > MAX_PROFILED_FRAMES) m_frameCounters.erase(m_frameCounters.begin());
         if (m_frameTimes.size() > MAX_PROFILED_FRAMES) m_frameTimes.erase(m_frameTimes.begin());

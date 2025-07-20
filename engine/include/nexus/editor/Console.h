@@ -35,7 +35,7 @@ NXS_NAMESPACE
         void RegisterCommand(const std::string& commandName, const CommandHandler& handler);
 
     protected:
-        void Draw_Internal(const RenderSystem& renderSystem) override;
+        void Draw_Internal(RenderSystem& renderSystem) override;
 
     private:
         //! A simple parser for the command input string

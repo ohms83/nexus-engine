@@ -55,7 +55,7 @@ NXS_NAMESPACE
          * initialization.
          * @return The desired screen size in pixels.
          */
-        const glm::ivec2& GetScreenSize() const
+        NODISCARD const glm::ivec2& GetScreenSize() const
         {
             return m_screenSize;
         }
@@ -65,13 +65,13 @@ NXS_NAMESPACE
          * the high dpi display.
          * @return The actual screen size in pixel.
          */
-        const glm::ivec2& GetActualSize() const
+        NODISCARD const glm::ivec2& GetActualSize() const
         {
             return m_actualSize;
         }
 
         //! Get the duration between this and the previous frame in seconds.
-        float GetDeltaTime() const
+        NODISCARD float GetDeltaTime() const
         {
             return m_deltaTime;
         }
@@ -81,13 +81,19 @@ NXS_NAMESPACE
         virtual void Update() {}
         virtual void Render(RenderSystem& renderSystem) {}
 
+        virtual void OnEvent(const SDL_Event& e);
         virtual void OnKeyDown(SDL_Keycode key);
         virtual void OnResize(const glm::ivec2& screenSize, const glm::ivec2& actualSize);
 
-        virtual void UpdateEditor() {}
-        virtual void RenderEditor(const RenderSystem& renderSystem) {}
+        virtual void DrawUI() {}
 
         void PollEvents(SDL_Event& e);
+
+    private:
+        void InitImGui() const;
+        void BeginDrawUI();
+        void EndDrawUI();
+        void DestroyImGui();
 
     protected:
         WindowContext m_window = nullptr;

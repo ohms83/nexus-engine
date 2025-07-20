@@ -7,13 +7,13 @@
 
 USING_NAMESPACE_NXS;
 
-void EditorWidget::Draw(const RenderSystem& renderSystem)
+void EditorWidget::Draw(RenderSystem& renderSystem)
 {
     if (m_visibility == Visibility::Hidden) {
         return;
     }
 
-    BeginDraw(renderSystem);
+    BeginDraw();
     Draw_Internal(renderSystem);
     EndDraw();
 }
@@ -30,7 +30,7 @@ void EditorWidget::Hide()
     m_visibility = Visibility::Hidden;
 }
 
-void EditorWidget::BeginDraw(const RenderSystem& renderSystem)
+void EditorWidget::BeginDraw()
 {
     const bool isCollapsed = !ImGui::Begin(m_name.data(), &m_visible);
     if (m_visible) {

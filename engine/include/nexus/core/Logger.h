@@ -8,6 +8,7 @@
 #include <functional>
 #include <string>
 #include <ranges>
+#include <format>
 #include <nexus/NxsDefine.h>
 #include <sigslot/signal.hpp>
 

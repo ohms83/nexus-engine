@@ -16,33 +16,21 @@ NXS_NAMESPACE
     class EditorWidget;
     class RenderSystem;
 
-    struct EditorConfig
-    {
-        GraphicsAPI renderingBackend;
-    };
-
-    class Editor
+    class Editor final
     {
     public:
-        Editor() = delete;
-        Editor(WindowContext window, RenderContext renderContext, const EditorConfig& config);
-        virtual ~Editor();
+        Editor();
 
-        void Update(const SDL_Event& event);
-
-        void BeginDraw() const;
-        virtual void Draw(const RenderSystem& renderSystem);
-        void EndDraw() const;
+        void Update() const;
+        void Draw(RenderSystem& renderSystem);
 
         void AddMenuItem(const std::string& menu, const MenuItem& menuItem);
 
     protected:
         void InitMenu();
-        void DrawMainMenu(const RenderSystem& renderSystem);
+        void DrawMainMenu();
 
     protected:
-        EditorConfig m_config{};
-
         struct MenuItemList
         {
             std::string menu;

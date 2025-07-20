@@ -7,6 +7,10 @@
 #include <iostream>
 #include <ostream>
 
+#include "imgui.h"
+#include "imgui_impl_opengl3.h"
+#include "imgui_impl_sdl3.h"
+#include "implot.h"
 #include "core/Logger.h"
 #include "resource/Mesh.h"
 #include "resource/Texture.h"
@@ -21,6 +25,8 @@ DEFINE_LOG(Application);
 
 Application::~Application()
 {
+    DestroyImGui();
+
     auto& logger = Logger::Instance();
     // Shouldn't send out any callback at this point.
     logger.Disconnect();
@@ -93,12 +99,10 @@ bool Application::Init(const ApplicationConfig& info)
 
     if (info.editMode)
     {
-        EditorConfig editorConfig {
-            info.graphicsConfig.api
-        };
-        RenderContext renderContext = m_renderSystem->GetRenderContext();
-        m_editor = std::make_unique<Editor>(m_window, renderContext, editorConfig);
+        m_editor = std::make_unique<Editor>();
     }
+
+    InitImGui();
 
     return Init_Internal();
 }
@@ -118,22 +122,20 @@ int Application::BeginMainLoop()
 
         PollEvents(e);
         Update();
-
-        if (m_editor)
-        {
-            m_editor->BeginDraw();
-            m_editor->Draw(*m_renderSystem);
-
-            UpdateEditor();
-            RenderEditor(*m_renderSystem);
-        }
+        if (m_editor) m_editor->Update();
 
         m_renderSystem->BeginDraw();
-        Render(*m_renderSystem);
+        BeginDrawUI();
 
+        // Render UIs
+        DrawUI();
+        if (m_editor) m_editor->Draw(*m_renderSystem);
+
+        // Render the scene
+        Render(*m_renderSystem);
         m_renderSystem->Draw();
 
-        if (m_editor) m_editor->EndDraw();
+        EndDrawUI();
         m_renderSystem->EndDraw();
     }
     return 0;
@@ -158,6 +160,29 @@ WindowContext Application::GetWindowContext() const
     return m_window;
 }
 
+void Application::OnEvent(const SDL_Event& e)
+{
+    ImGui_ImplSDL3_ProcessEvent(&e);
+
+    switch (e.type)
+    {
+    case SDL_EVENT_KEY_DOWN:
+        OnKeyDown(e.key.key);
+        break;
+    case SDL_EVENT_WINDOW_METAL_VIEW_RESIZED:
+    case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
+    case SDL_EVENT_WINDOW_RESIZED:
+        {
+            SDL_GetWindowSize(m_window, &m_screenSize.x, &m_screenSize.y);
+            SDL_GetWindowSizeInPixels(m_window, &m_actualSize.x, &m_actualSize.y);
+            OnResize(m_screenSize, m_actualSize);
+        }
+        break;
+    default:
+        break;
+    }
+}
+
 void Application::OnKeyDown(const SDL_Keycode key)
 {
     if (key == m_escapeKey)
@@ -176,29 +201,114 @@ void Application::PollEvents(SDL_Event& e)
     //Get event data
     while(SDL_PollEvent(&e))
     {
-        if (m_editor) m_editor->Update(e);
-
-        switch (e.type)
+        if (e.type == SDL_EVENT_QUIT || e.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED)
         {
-        case SDL_EVENT_KEY_DOWN:
-            OnKeyDown(e.key.key);
-            break;
-        case SDL_EVENT_QUIT:
-        case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
-            //End the main loop
             RequestQuit();
             break;
-        case SDL_EVENT_WINDOW_METAL_VIEW_RESIZED:
-        case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
-        case SDL_EVENT_WINDOW_RESIZED:
-            {
-                SDL_GetWindowSize(m_window, &m_screenSize.x, &m_screenSize.y);
-                SDL_GetWindowSizeInPixels(m_window, &m_actualSize.x, &m_actualSize.y);
-                OnResize(m_screenSize, m_actualSize);
-            }
-            break;
-        default:
-            break;
         }
+
+        OnEvent(e);
     }
+}
+
+void Application::InitImGui() const
+{
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;   // Enable Keyboard Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;    // Enable Gamepad Controls
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;       // Enable Docking
+    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;     // Enable Multi-Viewport / Platform Windows
+    io.FontGlobalScale = 1.75f;
+    io.ConfigDpiScaleFonts = true;                          // [Experimental] Automatically overwrite style.FontScaleDpi in Begin() when Monitor DPI changes. This will scale fonts but _NOT_ scale sizes/padding for now.
+    io.ConfigDpiScaleViewports = true;                      // [Experimental] Scale Dear ImGui and Platform Windows when Monitor DPI changes.
+
+    // Setup ImGui style
+    ImGui::StyleColorsDark();
+    // When viewports are enabled, tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
+    ImGuiStyle& style = ImGui::GetStyle();
+    // --- Make windows transparent ---
+    style.Colors[ImGuiCol_WindowBg].w = 0.5f;
+
+    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+        style.WindowRounding = 0.0f;
+        style.Colors[ImGuiCol_WindowBg].w = 0.5f;
+    }
+
+    // You might also want to adjust the title bar background if it's too opaque
+    style.Colors[ImGuiCol_TitleBg].w = 0.8f;
+    style.Colors[ImGuiCol_TitleBgActive].w = 0.85f; // Active title bar
+    style.Colors[ImGuiCol_TitleBgCollapsed].w =.7f; // Collapsed title bar
+
+    if (const auto api = RenderingInterface::Instance().GetAPI(); api == GraphicsAPI::OpenGL)
+    {
+        // Setup Platform/Renderer backends
+        ImGui_ImplSDL3_InitForOpenGL(m_window, m_renderSystem->GetRenderContext().gl_context);
+        ImGui_ImplOpenGL3_Init(nullptr); // Match your core profile version
+    }
+    else
+    {
+        // Not yet implemented
+        NXS_ASSERT_MSG(false, std::format("Unimplemented graphics API: {}", GraphicsAPIToString(api)));
+    }
+
+    // Initializes ImPlot
+    ImPlot::CreateContext();
+}
+
+// ReSharper disable once CppMemberFunctionMayBeStatic
+void Application::BeginDrawUI()
+{
+    if (const auto api = RenderingInterface::Instance().GetAPI(); api == GraphicsAPI::OpenGL)
+    {
+        ImGui_ImplOpenGL3_NewFrame();
+    }
+    else
+    {
+        // Not yet implemented
+        NXS_ASSERT_MSG(false, std::format("Unimplemented graphics API: {}", GraphicsAPIToString(api)));
+    }
+    ImGui_ImplSDL3_NewFrame();
+    ImGui::NewFrame();
+
+    ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
+}
+
+void Application::EndDrawUI()
+{
+    ImGui::Render();
+
+    if (const auto api = RenderingInterface::Instance().GetAPI(); api == GraphicsAPI::OpenGL)
+    {
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    }
+    else
+    {
+        // Not yet implemented
+        NXS_ASSERT_MSG(false, std::format("Unimplemented graphics API: {}", GraphicsAPIToString(api)));
+    }
+
+    if (const ImGuiIO& io = ImGui::GetIO(); io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+    {
+        SDL_Window* backup_current_window = SDL_GL_GetCurrentWindow();
+        SDL_GLContext backup_current_context = SDL_GL_GetCurrentContext();
+        ImGui::UpdatePlatformWindows();
+        ImGui::RenderPlatformWindowsDefault();
+        SDL_GL_MakeCurrent(backup_current_window, backup_current_context);
+    }
+}
+
+// ReSharper disable once CppMemberFunctionMayBeStatic
+void Application::DestroyImGui()
+{
+    ImPlot::DestroyContext();
+
+    if (const auto api = RenderingInterface::Instance().GetAPI(); api == GraphicsAPI::OpenGL)
+    {
+        ImGui_ImplOpenGL3_Shutdown();
+    }
+
+    ImGui_ImplSDL3_Shutdown();
+    ImGui::DestroyContext();
 }
