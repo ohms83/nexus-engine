@@ -14,27 +14,27 @@
 #define DECLARE_LOG_EXTERN(LogCategory) extern const std::string Log##LogCategory
 #define DEFINE_LOG(LogCategory) const std::string Log##LogCategory = #LogCategory
 
-#define LOG_DEBUG(Category, Message) Logger::Instance().Debug(Category, Message)
-#define LOG_INFO(Category, Message) Logger::Instance().Info(Category, Message)
-#define LOG_WARNING(Category, Message) Logger::Instance().Warning(Category, Message)
+#define LOG_DEBUG(Category, Message) nxs::Logger::Instance().Debug(Category, Message)
+#define LOG_INFO(Category, Message) nxs::Logger::Instance().Info(Category, Message)
+#define LOG_WARNING(Category, Message) nxs::Logger::Instance().Warning(Category, Message)
 #define LOG_ERROR(Category, Message) \
     do { \
         const auto formatted = std::format("({}:{}) {}", __FILE__, __LINE__, Message); \
-        Logger::Instance().Error(Category, formatted); \
+        nxs::Logger::Instance().Error(Category, formatted); \
     } while(0);
 
 #define LOG_FATAL(Category, Message) \
     do { \
         const auto formatted = std::format("({}:{}) {}", __FILE__, __LINE__, Message); \
-        Logger::Instance().Fatal(Category, formatted); \
+        nxs::Logger::Instance().Fatal(Category, formatted); \
     } while(0);
 
 #define NXS_ASSERT(Condition) \
     do { \
         if (!(Condition)) { \
             const auto formatted = std::format("Assertion Failed! ({}:{}) {}", __FILE__, __LINE__, #Condition); \
-            Logger::Instance().Log(Logger::LogLevel::Fatal, "Assert", formatted); \
-            Logger::Destroy(); \
+            nxs::Logger::Instance().Log(nxs::Logger::LogLevel::Fatal, "Assert", formatted); \
+            nxs::Logger::Destroy(); \
         } \
         assert(Condition); \
     } while(0);
@@ -43,8 +43,8 @@
     do { \
         if (!(Condition)) { \
             const auto formatted = std::format("Assertion Failed! ({}:{}) {}. {}", __FILE__, __LINE__, #Condition, Message); \
-            Logger::Instance().Log(Logger::LogLevel::Fatal, "Assert", formatted); \
-            Logger::Destroy(); \
+            nxs::Logger::Instance().Log(nxs::Logger::LogLevel::Fatal, "Assert", formatted); \
+            nxs::Logger::Destroy(); \
         } \
         assert(Condition); \
     } while(0);
