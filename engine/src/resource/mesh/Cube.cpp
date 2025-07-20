@@ -82,7 +82,7 @@ static const std::vector<uint32_t> cubeIndices = {
 Cube::Cube(uint32 hash)
     : Mesh(hash)
 {
-    const auto& renderInterface = RenderingInterface::GetInstance();
+    const auto& renderInterface = RenderingInterface::Instance();
 
     constexpr auto vertexSize = sizeof(Vertex);
     const auto bufferSize = cubeVertices.size() * vertexSize;

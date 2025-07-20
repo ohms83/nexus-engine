@@ -18,6 +18,7 @@ USING_NAMESPACE_NXS;
 GLRenderingInterface::GLRenderingInterface(WindowContext window, const GraphicsConfig& config)
     : RenderingInterface()
 {
+    m_graphicsAPI = GraphicsAPI::OpenGL;
     // TODO: Make it configurable.
     SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);

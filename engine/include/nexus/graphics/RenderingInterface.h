@@ -26,7 +26,7 @@ NXS_NAMESPACE
         static RenderingInterface* Create(WindowContext window, const GraphicsConfig& config);
         static void Destroy();
 
-        static RenderingInterface& GetInstance()
+        static RenderingInterface& Instance()
         {
             assert(m_singleton);
             // ReSharper disable once CppDFANullDereference
@@ -55,6 +55,11 @@ NXS_NAMESPACE
 
         void Draw(const RenderCommand& command);
 
+        GraphicsAPI GetAPI() const
+        {
+            return m_graphicsAPI;
+        }
+
     protected:
         RenderingInterface() = default;
         virtual ~RenderingInterface() = default;
@@ -66,5 +71,6 @@ NXS_NAMESPACE
 
     protected:
         RenderContext m_renderContext{};
+        GraphicsAPI m_graphicsAPI = GraphicsAPI::Undefined;
     };
 }
