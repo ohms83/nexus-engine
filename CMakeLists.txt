@@ -23,7 +23,7 @@ set(CONFIG_SUBDIR "$<IF:$<CONFIG:Debug>,Debug,$<IF:$<CONFIG:Release>,Release,>>"
 # Copy the resources next to the exe for all configs:
 set(ASSETS_DEST_DIR "${CMAKE_CURRENT_BINARY_DIR}/${CONFIG_SUBDIR}")
 
-# Googl Test
+# Google Test
 include(FetchContent)
 FetchContent_Declare(
   googletest
@@ -32,6 +32,14 @@ FetchContent_Declare(
 )
 # Make googletest's targets available (e.g., googletest::gtest_main)
 FetchContent_MakeAvailable(googletest)
+
+# Flecs
+FetchContent_Declare(
+  flecs
+  GIT_REPOSITORY https://github.com/SanderMertens/flecs.git
+  GIT_TAG        release-3.2.0 # Or any other specific release tag, e.g., "master" for latest
+)
+FetchContent_MakeAvailable(flecs)
 
 add_subdirectory(engine)
 add_subdirectory(examples)

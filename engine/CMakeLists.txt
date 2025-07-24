@@ -94,8 +94,10 @@ target_include_directories(nexus-engine
     PRIVATE "${STB_SOURCE_DIR}"
 )
 
-target_link_libraries(nexus-engine PRIVATE SDL3::SDL3)
-target_link_libraries(nexus-engine PRIVATE glad)
+target_link_libraries(nexus-engine
+    PRIVATE SDL3::SDL3
+    PRIVATE glad
+    PRIVATE flecs::flecs_static)
 
 find_package(OpenGL REQUIRED)
 # Link OpenGL library
