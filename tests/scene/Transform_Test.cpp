@@ -15,7 +15,7 @@ std::string FormatVector(const glm::vec3& vec)
 }
 
 TEST(TransformTest, ForwardVector) {
-    const float epsilon = 0.00001f; // A small tolerance valu
+    const float epsilon = 0.00001f; // A small tolerance value
     const int iteration = 10; // Try testing with the 10 random data.
     
     for (int i = 0; i < iteration; ++i)
@@ -40,7 +40,7 @@ TEST(TransformTest, ForwardVector) {
 }
 
 TEST(TransformTest, RightVector) {
-    const float epsilon = 0.00001f; // A small tolerance valu
+    const float epsilon = 0.00001f; // A small tolerance value
     const int iteration = 10; // Try testing with the 10 random data.
     
     for (int i = 0; i < iteration; ++i)
@@ -66,7 +66,7 @@ TEST(TransformTest, RightVector) {
 }
 
 TEST(TransformTest, UpVector) {
-    const float epsilon = 0.00001f; // A small tolerance valu
+    const float epsilon = 0.00001f; // A small tolerance value
     const int iteration = 1; // Try testing with the 10 random data.
     
     for (int i = 0; i < iteration; ++i)
@@ -93,7 +93,7 @@ TEST(TransformTest, UpVector) {
 }
 
 TEST(TransformTest, CalculateViewMatrix) {
-    const float epsilon = 0.0001f; // A small tolerance valu
+    const float epsilon = 0.0001f; // A small tolerance value
     const int iteration = 10; // Try testing with the 10 random data.
 
     for (int i = 0; i < iteration; ++i)
