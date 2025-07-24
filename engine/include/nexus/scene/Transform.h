@@ -59,8 +59,6 @@ NXS_NAMESPACE
          */
         glm::mat4 GetMatrix(Space transformSpace = Space::Local) const;
 
-        glm::mat4 GetViewMatrix(Space transformSpace = Space::Local) const;
-
         void AddChild(Transform* child);
         void RemoveChild(Transform* child);
         Transform* GetParent() const
@@ -72,8 +70,19 @@ NXS_NAMESPACE
             return m_parent != nullptr;
         }
 
-        void LookAt(const glm::vec3& position, const glm::vec3& target, const glm::vec3& up);
-        glm::vec3 GetLookVector() const;
+        /**
+         * Orienting this transform to make its forward vector pointing at the target.
+         * @param target The target position.
+         * @param up The up vector telling how this transform is oriented. Typically (0, 1, 0).
+         */
+        void LookAt(const glm::vec3& target, const glm::vec3& up);
+
+        //! Returns transform's right vector
+        glm::vec3 Right() const;
+        //! Returns transform's up vector
+        glm::vec3 Up() const;
+        //! Returns transform's forward vector
+        glm::vec3 Forward() const;
 
     private:
         Transform* m_parent = nullptr;

@@ -174,7 +174,8 @@ protected:
     void OnResize(const glm::ivec2& screenSize, const glm::ivec2& actualSize) override
     {
         Application::OnResize(screenSize, actualSize);
-        m_camera.transform.LookAt({0, 0, 3}, {0, 0, 0}, {0, 1, 0});
+        m_camera.transform.SetPosition({0, 0, 3});
+        m_camera.transform.LookAt({0, 0, 0}, {0, 1, 0});
         m_camera.SetProjection(45.f, CAST<float>(screenSize.x), CAST<float>(screenSize.y), 0.1f, 100.f);
     }
 

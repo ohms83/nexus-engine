@@ -46,5 +46,6 @@
 #include "resource/mesh/PlaneMesh.h"
 #include "scene/Camera.h"
 #include "scene/Light.h"
+#include "scene/Scene.h"
 #include "scene/SceneNode.h"
 #include "scene/Transform.h"

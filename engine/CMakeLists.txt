@@ -63,17 +63,17 @@ include(include/CMakeLists.txt)
 
 find_package(Python3 COMPONENTS Interpreter REQUIRED)
 
-# Auto generate source files
-add_custom_command(
-    OUTPUT ${ENGINE_INCLUDE_DIR}/nexus/Nexus.h
-    COMMAND ${Python3_EXECUTABLE} ${TOOLS_DIR}/header_tool.py
-    DEPENDS ${TOOLS_DIR}/header_tool.py
-    COMMENT "Auto generate source files..."
-)
-
 add_library(nexus-engine
     ${ENGINE_SOURCES}
     ${ENGINE_HEADERS}
+)
+
+# Auto generate source files
+add_custom_command(
+    TARGET nexus-engine
+    PRE_BUILD
+    COMMAND ${Python3_EXECUTABLE} ${TOOLS_DIR}/header_tool.py
+    COMMENT "Generating header files..."
 )
 
 target_include_directories(nexus-engine
@@ -94,8 +94,10 @@ target_include_directories(nexus-engine
     PRIVATE "${STB_SOURCE_DIR}"
 )
 
-target_link_libraries(nexus-engine PRIVATE SDL3::SDL3)
-target_link_libraries(nexus-engine PRIVATE glad)
+target_link_libraries(nexus-engine
+    PRIVATE SDL3::SDL3
+    PRIVATE glad
+    PRIVATE flecs::flecs_static)
 
 find_package(OpenGL REQUIRED)
 # Link OpenGL library
