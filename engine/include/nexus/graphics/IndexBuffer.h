@@ -19,8 +19,8 @@ NXS_NAMESPACE
         IndexBuffer() = default;
 
         virtual IndexBuffer& Begin();
-        virtual IndexBuffer& SetIndices(uint32* indices, size_t num);
-        virtual IndexBuffer& SetIndices(std::vector<uint32>&& indices);
+        virtual IndexBuffer& SetIndices(uint32* indices, size_t num, FrontFace frontFace);
+        virtual IndexBuffer& SetIndices(std::vector<uint32>&& indices, FrontFace frontFace);
         virtual IndexBuffer& SetUsage(BufferUsage usage);
         virtual IndexBuffer& SetDrawMode(DrawMode mode);
         virtual void Build();
@@ -38,13 +38,22 @@ NXS_NAMESPACE
             return m_drawMode;
         }
 
+        NODISCARD FrontFace GetFrontFace() const
+        {
+            return m_frontFace;
+        }
+
+        void ReArrangeIndex(FrontFace frontFace);
+
+
     private:
         //! Finalizing the buffer generation based on all the provided data.
         virtual void Build_Impl() = 0;
 
     protected:
         bool m_hasBuilt = false;
-        BufferUsage m_usage;
+        BufferUsage m_usage = BufferUsage::StaticDraw;
+        FrontFace m_frontFace = FrontFace::CounterClockWise;
         DrawMode m_drawMode = DrawMode::Triangle;
         std::vector<uint32> m_indices;
     };

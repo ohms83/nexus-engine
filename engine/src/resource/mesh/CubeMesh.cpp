@@ -1,4 +1,4 @@
-#include <nexus/resource/mesh/Cube.h>
+#include <nexus/resource/mesh/CubeMesh.h>
 #include <nexus/graphics/RenderingInterface.h>
 
 USING_NAMESPACE_NXS;
@@ -79,7 +79,7 @@ static const std::vector<uint32_t> cubeIndices = {
     21, 23, 20  // Triangle 2: Bottom-Left, Top-Right, Bottom-Right (CCW)
 };
 
-Cube::Cube(uint32 hash)
+CubeMesh::CubeMesh(const uint32 hash)
     : Mesh(hash)
 {
     const auto& renderInterface = RenderingInterface::Instance();
@@ -97,7 +97,7 @@ Cube::Cube(uint32 hash)
 
     m_indexBuffer.reset(renderInterface.CreateIndexBuffer());
     m_indexBuffer->Begin()
-        .SetIndices(C_CAST<uint32_t*>(cubeIndices .data()), cubeIndices .size())
+        .SetIndices(C_CAST<uint32_t*>(cubeIndices .data()), cubeIndices .size(), FrontFace::ClockWise)
         .SetUsage(BufferUsage::StaticDraw)
         .SetDrawMode(DrawMode::Triangle)
     .Build();

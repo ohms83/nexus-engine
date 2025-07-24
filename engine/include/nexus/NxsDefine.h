@@ -33,6 +33,8 @@
 #define UINT_CAST(x)    CAST<uint32_t>(x)
 #define SIZE_CAST(x)    CAST<size_t>(x)
 
+#define SINGLETON(Type) static Type& Instance() { static Type instance; return instance; }
+
 NXS_NAMESPACE
 {
     typedef int8_t      int8;

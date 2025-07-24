@@ -128,38 +128,11 @@ void GLRenderingInterface::Draw_Internal(const RenderCommand& command)
     const auto indexBuffer = command.indexBuffer;
     NXS_ASSERT(indexBuffer != nullptr);
 
-    GLuint gl_drawMode = 0;
+    CALL_GL_FUNC(glFrontFace(GL::NxsFrontFaceToGL(indexBuffer->GetFrontFace())));
+
     // ReSharper disable once CppDFANullDereference
-    switch (indexBuffer->GetDrawMode())
-    {
-    case DrawMode::Point:
-        gl_drawMode = GL_POINT;
-        break;
-    case DrawMode::Line:
-        gl_drawMode = GL_LINE;
-        break;
-    case DrawMode::LineStrip:
-        gl_drawMode = GL_LINE_STRIP;
-        break;
-    case DrawMode::LineLoop:
-        gl_drawMode = GL_LINE_LOOP;
-        break;
-    case DrawMode::Triangle:
-        gl_drawMode = GL_TRIANGLES;
-        break;
-    case DrawMode::TriangleStrip:
-        gl_drawMode = GL_TRIANGLE_STRIP;
-        break;
-    case DrawMode::TriangleFan:
-        gl_drawMode = GL_TRIANGLE_FAN;
-        break;
-    case DrawMode::Quad:
-        gl_drawMode = GL_QUADS;
-        break;
-    default:
-        NXS_ASSERT(false);
-        break;
-    }
+    const GLuint gl_drawMode = GL::NxsDrawModeToGL(indexBuffer->GetDrawMode());
+    NXS_ASSERT_MSG(gl_drawMode != GL_QUADS, "GL_QUADS is not a valid primitive type.")
     CALL_GL_FUNC(glDrawElements(
          gl_drawMode,      // mode
          CAST<GLsizei>(command.indexBuffer->NumIndex()),    // count

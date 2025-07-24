@@ -13,15 +13,15 @@ NXS_NAMESPACE
     class Mesh : public Resource
     {
     public:
-        Mesh(uint32 hash): Resource(hash) {}
-        virtual ~Mesh() = default;
+        explicit Mesh(uint32 hash);
+        ~Mesh() override = default;
 
-        VertexBuffer* GetVertexBuffer() const
+        NODISCARD VertexBuffer* GetVertexBuffer() const
         {
             return m_vertexBuffer.get();
         }
 
-        IndexBuffer* GetIndexBuffer() const
+        NODISCARD IndexBuffer* GetIndexBuffer() const
         {
             return m_indexBuffer.get();
         }
@@ -30,12 +30,13 @@ NXS_NAMESPACE
         {
             m_shader = shader;
         }
-        Shader* GetShader() const
+        NODISCARD Shader* GetShader() const
         {
             return m_shader;
         }
 
         static const std::string CubeMesh;
+        static const std::string PlaneMesh;
 
     protected:
         uint8* Load_Impl(const std::string& path, size_t& out_size) override;
@@ -50,11 +51,12 @@ NXS_NAMESPACE
     {
     public:
         MeshManager();
-        virtual ~MeshManager() = default;
+        ~MeshManager() override;
 
         Ref<Mesh> GetStaticMesh(const std::string& meshName);
 
     private:
         Ref<Mesh> m_cubeMesh;
+        Ref<Mesh> m_planeMesh;
     };
 }

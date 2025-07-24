@@ -163,7 +163,7 @@ protected:
 
         m_indexBuffer.reset(renderInterface.CreateIndexBuffer());
         m_indexBuffer->Begin()
-            .SetIndices(C_CAST<uint32_t*>(cubeIndices .data()), cubeIndices .size())
+            .SetIndices(C_CAST<uint32_t*>(cubeIndices .data()), cubeIndices .size(), nxs::FrontFace::ClockWise)
             .SetUsage(nxs::BufferUsage::StaticDraw)
             .SetDrawMode(nxs::DrawMode::Triangle)
         .Build();

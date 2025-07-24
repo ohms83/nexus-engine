@@ -70,4 +70,10 @@ NXS_NAMESPACE
         Quad,
         Num
     };
+
+    enum class FrontFace
+    {
+        ClockWise,
+        CounterClockWise,
+    };
 }

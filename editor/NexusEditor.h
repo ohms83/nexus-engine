@@ -18,19 +18,10 @@ protected:
     void OnKeyDown(SDL_Keycode key) override;
     void OnResize(const glm::ivec2& screenSize, const glm::ivec2& actualSize) override;
 
-    void InitMenu();
-    void DrawMainMenu(nxs::RenderSystem& renderSystem);
-
-    void AddMenuItem(const std::string& menu, const nxs::MenuItem& menuItem);
-
 private:
-
-    struct MenuItemList
-    {
-        std::string menu;
-        std::vector<nxs::MenuItem> items;
-    };
-
-    std::vector<MenuItemList> m_menuItems;
-    std::vector<nxs::Ref<nxs::EditorWidget>> m_widgets;
+    //! Editor camera.
+    nxs::Camera m_camera;
+    nxs::Ref<nxs::Mesh> m_planeMesh;
+    nxs::Ref<nxs::Texture> m_texture;
+    nxs::Ptr<nxs::Shader> m_shader;
 };

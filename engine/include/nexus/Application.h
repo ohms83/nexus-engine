@@ -16,6 +16,13 @@
 
 #include "core/Timer.h"
 #include "editor/Editor.h"
+#include "resource/Mesh.h"
+#include "resource/Texture.h"
+
+#define PURGE_UNUSED_RESOURCES(Manager) do { \
+    LOG_INFO(LogResource, "Purge unused resources. Class="#Manager); \
+    Get##Manager().PurgeUnused(); \
+} while(0);
 
 NXS_NAMESPACE
 {
@@ -26,6 +33,7 @@ NXS_NAMESPACE
         bool fullscreen = false;
         bool resizable = false;
         bool editMode = true;
+        bool maximize = true;
         int32 quitKey = SDLK_ESCAPE;
     };
     
@@ -76,6 +84,18 @@ NXS_NAMESPACE
             return m_deltaTime;
         }
 
+        NODISCARD MeshManager& GetMeshManager() const
+        {
+            NXS_ASSERT(m_meshManager);
+            return *m_meshManager.get();
+        }
+
+        NODISCARD TextureManager& GetTextureManager() const
+        {
+            NXS_ASSERT(m_textureManager);
+            return *m_textureManager.get();
+        }
+
     protected:
         virtual bool Init_Internal() { return true; }
         virtual void Update() {}
@@ -108,6 +128,9 @@ NXS_NAMESPACE
 
         Timer m_timer;
         float m_deltaTime = 0.0f;
+
+        Ptr<MeshManager> m_meshManager;
+        Ptr<TextureManager> m_textureManager;
     };
 
     template<typename T>

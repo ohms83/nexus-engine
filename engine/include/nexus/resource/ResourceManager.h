@@ -11,11 +11,6 @@
 
 #include "Resource.h"
 
-#define PURGE_UNUSED_RESOURCES(Manager) do { \
-        LOG_INFO(LogResource, "Purge unused resources. Class="#Manager); \
-        Manager::Instance().PurgeUnused(); \
-    } while(0);
-
 NXS_NAMESPACE
 {
     template<typename ResourceType>
@@ -67,12 +62,6 @@ NXS_NAMESPACE
                     ++itr;
                 }
             }
-        }
-
-        static ResourceManager& Instance()
-        {
-            static ResourceManager instance;
-            return instance;
         }
 
     protected:

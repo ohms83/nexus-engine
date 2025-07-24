@@ -8,6 +8,8 @@
 #include <nexus/NxsDefine.h>
 #include <nexus/core/Logger.h>
 
+#include "graphics/GraphicsConst.h"
+
 #define GL_STRICT_CHECK
 
 DECLARE_LOG_EXTERN(OpenGL);
@@ -62,6 +64,46 @@ NXS_NAMESPACE
                 NXS_ASSERT(false);
                 return GL_NONE;
             }
+        }
+
+        inline GLuint NxsDrawModeToGL(const DrawMode mode)
+        {
+            switch (mode)
+            {
+            case DrawMode::Point:
+                return GL_POINT;
+            case DrawMode::Line:
+                return GL_LINE;
+            case DrawMode::LineStrip:
+                return GL_LINE_STRIP;
+            case DrawMode::LineLoop:
+                return GL_LINE_LOOP;
+            case DrawMode::Triangle:
+                return GL_TRIANGLES;
+            case DrawMode::TriangleStrip:
+                return GL_TRIANGLE_STRIP;
+            case DrawMode::TriangleFan:
+                return GL_TRIANGLE_FAN;
+            case DrawMode::Quad:
+                return GL_QUADS;
+            default:
+                NXS_ASSERT(false);
+                break;
+            }
+            return GL_NONE;
+        }
+
+        inline GLuint NxsFrontFaceToGL(const FrontFace frontFace)
+        {
+            switch (frontFace)
+            {
+            case FrontFace::ClockWise:
+                return GL_CW;
+            case FrontFace::CounterClockWise:
+                return GL_CCW;
+            }
+            NXS_ASSERT(false);
+            return GL_NONE;
         }
     }
 }

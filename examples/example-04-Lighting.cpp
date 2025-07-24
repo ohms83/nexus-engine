@@ -170,23 +170,27 @@ class Example_04 final : public nxs::Application
 {
 public:
     ~Example_04() override
-    {
-    }
+    = default;
     void Render(nxs::RenderSystem& renderSystem) override
     {
         // Calculate matrices for a rotating cube
         const auto dt = GetDeltaTime();
         m_cubeTransform.Rotate(90.f * dt, glm::vec3(0.5f, 1.0f, 0.0f));
+        glm::mat4 view = glm::lookAt(glm::vec3(0.0f, 0.0f, 5.0f), // Camera position
+                                     glm::vec3(0.0f, 0.0f, 0.0f), // Look at origin
+                                     glm::vec3(0.0f, 1.0f, 0.0f)  // Up direction
+                                    );
 
         const nxs::RenderCommand renderCommand
         {
             m_shader.get(),
-            m_vertexBuffer.get(),
-            m_indexBuffer.get(),
+            m_cubeMesh->GetVertexBuffer(),
+            m_cubeMesh->GetIndexBuffer(),
             {
-                    {"model", m_cubeTransform.GetMatrix()},
-                    {"view", m_camera.GetViewMtx()},
-                    {"projection", m_camera.GetProjectionMtx()},
+                {"model", m_cubeTransform.GetMatrix()},
+                // {"view", m_camera.GetViewMtx()},
+                {"view", view},
+                {"projection", m_camera.GetProjectionMtx()},
             },
             {
                 { "ourTexture", 0, m_texture->GetProxy() },
@@ -246,34 +250,18 @@ protected:
         const auto& renderInterface = renderSystem.GetRenderInterface();
         renderSystem.SetClearColor(0x303030ff);
 
-        constexpr auto vertexSize = sizeof(Vertex);
-        const auto bufferSize = cubeVertices.size() * vertexSize;
-        m_vertexBuffer.reset(renderInterface.CreateVertexBuffer());
-        m_vertexBuffer->Begin()
-            .SetVertices(R_CAST<const uint8_t*>(cubeVertices.data()), bufferSize)
-            .SetUsage(nxs::BufferUsage::StaticDraw)
-            .AddAttribute(nxs::VertexAttribute {nxs::VertexAttribute::Type::Position, nxs::DataType::Float, 3})
-            .AddAttribute(nxs::VertexAttribute {nxs::VertexAttribute::Type::Normal, nxs::DataType::Float, 3})
-            .AddAttribute(nxs::VertexAttribute {nxs::VertexAttribute::Type::TexCoord0, nxs::DataType::Float, 2})
-        .Build();
-
-        m_indexBuffer.reset(renderInterface.CreateIndexBuffer());
-        m_indexBuffer->Begin()
-            .SetIndices(C_CAST<uint32_t*>(cubeIndices .data()), cubeIndices .size())
-            .SetUsage(nxs::BufferUsage::StaticDraw)
-            .SetDrawMode(nxs::DrawMode::Triangle)
-        .Build();
-
         m_shader.reset(renderInterface.CreateShader());
         m_shader->BeginCompile()
             .AddSource(vertexShaderSource, nxs::Shader::Type::Vertex)
             .AddSource(fragmentShaderSource, nxs::Shader::Type::Fragment)
         .Compile();
 
-        m_texture = nxs::TextureManager::Instance().Get(assetsPath);
+        m_texture = GetTextureManager().Get(assetsPath);
         m_texture->SetWrapMode(nxs::TextureWrapMode::Clamp, nxs::TextureWrapMode::Clamp);
         m_texture->SetFiltering(nxs::TextureFilterMode::Linear, nxs::TextureFilterMode::Linear);
         m_texture->AllocateGpuResource(renderInterface);
+
+        m_cubeMesh = GetMeshManager().GetStaticMesh(nxs::Mesh::CubeMesh);
 
         InitLights();
         return true;
@@ -282,7 +270,7 @@ protected:
     void OnResize(const glm::ivec2& screenSize, const glm::ivec2& actualSize) override
     {
         Application::OnResize(screenSize, actualSize);
-        m_camera.transform.LookAt({0, 0, 3}, {0, 0, 0}, {0, 1, 0});
+        m_camera.transform.LookAt({0, -5, 5}, {0, 0, 0}, {0, 1, 0});
         m_camera.SetProjection(45.f, CAST<float>(actualSize.x), CAST<float>(actualSize.y), 0.1f, 100.f);
     }
 
@@ -302,10 +290,9 @@ private:
     }
 
 protected:
-    nxs::Ptr<nxs::VertexBuffer> m_vertexBuffer;
-    nxs::Ptr<nxs::IndexBuffer> m_indexBuffer;
     nxs::Ptr<nxs::Shader> m_shader;
     nxs::Ref<nxs::Texture> m_texture;
+    nxs::Ref<nxs::Mesh> m_cubeMesh;
     nxs::Transform m_cubeTransform;
     nxs::Camera m_camera;
     nxs::DirectionalLight m_directionalLight {};

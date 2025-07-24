@@ -3,7 +3,11 @@
 //
 #include <nexus/graphics/IndexBuffer.h>
 
+#include "core/Logger.h"
+
 USING_NAMESPACE_NXS;
+
+DEFINE_LOG(IndexBuffer);
 
 IndexBuffer& IndexBuffer::Begin()
 {
@@ -14,38 +18,40 @@ IndexBuffer& IndexBuffer::Begin()
     return *this;
 }
 
-IndexBuffer& IndexBuffer::SetIndices(uint32* indices, const size_t num)
+IndexBuffer& IndexBuffer::SetIndices(uint32* indices, const size_t num, FrontFace frontFace)
 {
-    assert(m_hasBuilt);
+    NXS_ASSERT_MSG(m_hasBuilt, "Begin function hasn't been called yet.");
     m_indices.reserve(num);
     m_indices.assign(indices, indices + num);
+    m_frontFace = frontFace;
     return *this;
 }
 
-IndexBuffer& IndexBuffer::SetIndices(std::vector<uint32>&& indices)
+IndexBuffer& IndexBuffer::SetIndices(std::vector<uint32>&& indices, FrontFace frontFace)
 {
-    assert(m_hasBuilt);
+    NXS_ASSERT_MSG(m_hasBuilt, "Begin function hasn't been called yet.");
     m_indices = std::move(indices);
+    m_frontFace = frontFace;
     return *this;
 }
 
 IndexBuffer& IndexBuffer::SetUsage(const BufferUsage usage)
 {
-    assert(m_hasBuilt);
+    NXS_ASSERT_MSG(m_hasBuilt, "Begin function hasn't been called yet.");
     m_usage = usage;
     return *this;
 }
 
 IndexBuffer& IndexBuffer::SetDrawMode(const DrawMode mode)
 {
-    assert(m_hasBuilt);
+    NXS_ASSERT_MSG(m_hasBuilt, "Begin function hasn't been called yet.");
     m_drawMode = mode;
     return *this;
 }
 
 void IndexBuffer::Build()
 {
-    assert(m_hasBuilt);
+    NXS_ASSERT_MSG(m_hasBuilt, "Begin function hasn't been called yet.");
     Build_Impl();
     Unbind();
 }
@@ -70,8 +76,36 @@ uint32 IndexBuffer::NumPolygons() const
     case DrawMode::Quad:
         return numIndices / 4;
     default:
-        assert(false);
+        NXS_ASSERT_MSG(false, std::format("Invalid draw mode {}", CAST<int>(m_drawMode)));
         break;
     }
     return 0;
+}
+
+void IndexBuffer::ReArrangeIndex(const FrontFace frontFace)
+{
+    if (m_indices.empty())
+    {
+        LOG_WARNING(LogIndexBuffer, "The index buffer is empty.");
+        return;
+    }
+    if (frontFace == m_frontFace)
+    {
+        LOG_WARNING(LogIndexBuffer, "The new front-face is the same as the existing. There's no need to re-arrange");
+        return;
+    }
+    if (m_drawMode != DrawMode::Triangle && m_drawMode != DrawMode::Quad)
+    {
+        LOG_WARNING(LogIndexBuffer, std::format("Cannot re-arrange indexes of this type {}", CAST<int>(m_drawMode)));
+        return;
+    }
+
+    auto* indexData = m_indices.data();
+    const auto stride = m_drawMode == DrawMode::Triangle ? 3 : 4;
+    const auto swapIndex = m_drawMode == DrawMode::Triangle ? 2 : 3;
+    for (size_t i = 0; i < NumPolygons(); i++)
+    {
+        const size_t faceIndex = i * stride;
+        std::swap(indexData[faceIndex + 1], indexData[faceIndex + swapIndex]);
+    }
 }

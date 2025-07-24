@@ -34,6 +34,8 @@ Application::~Application()
 
     PURGE_UNUSED_RESOURCES(TextureManager);
     PURGE_UNUSED_RESOURCES(MeshManager);
+    m_textureManager.reset();
+    m_meshManager.reset();
 
     delete m_renderSystem;
     m_renderSystem = nullptr;
@@ -63,6 +65,7 @@ bool Application::Init(const ApplicationConfig& info)
 
     int flags = info.fullscreen ? SDL_WINDOW_FULLSCREEN : 0;
     flags |= info.resizable ? SDL_WINDOW_RESIZABLE : 0;
+    flags |= info.maximize ? SDL_WINDOW_MAXIMIZED : 0;
 
     const auto& graphicsConfig = info.graphicsConfig;
     switch (graphicsConfig.api)
@@ -101,6 +104,9 @@ bool Application::Init(const ApplicationConfig& info)
     {
         m_editor = std::make_unique<Editor>();
     }
+
+    m_meshManager = std::make_unique<MeshManager>();
+    m_textureManager = std::make_unique<TextureManager>();
 
     InitImGui();
 

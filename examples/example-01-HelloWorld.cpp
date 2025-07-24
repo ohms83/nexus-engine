@@ -104,7 +104,7 @@ protected:
 
         m_indexBuffer = renderInterface.CreateIndexBuffer();
         m_indexBuffer->Begin()
-            .SetIndices(C_CAST<uint32_t*>(squareIndices.data()), squareIndices.size())
+            .SetIndices(C_CAST<uint32_t*>(squareIndices.data()), squareIndices.size(), nxs::FrontFace::ClockWise)
             .SetUsage(nxs::BufferUsage::StaticDraw)
             .SetDrawMode(nxs::DrawMode::Triangle)
         .Build();

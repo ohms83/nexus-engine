@@ -51,7 +51,7 @@ TextureProxy* Texture::AllocateGpuResource(const RenderingInterface& renderingIn
 
 uint8* Texture::Load_Impl(const std::string& path, size_t& out_size)
 {
-    stbi_set_flip_vertically_on_load(true);
+    stbi_set_flip_vertically_on_load(0);
     const auto pixels = stbi_load(path.c_str(), &m_width, &m_height, &m_channels, 0);
     if (!pixels)
     {
