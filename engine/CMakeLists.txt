@@ -63,17 +63,17 @@ include(include/CMakeLists.txt)
 
 find_package(Python3 COMPONENTS Interpreter REQUIRED)
 
-# Auto generate source files
-add_custom_command(
-    OUTPUT ${ENGINE_INCLUDE_DIR}/nexus/Nexus.h
-    COMMAND ${Python3_EXECUTABLE} ${TOOLS_DIR}/header_tool.py
-    DEPENDS ${TOOLS_DIR}/header_tool.py
-    COMMENT "Auto generate source files..."
-)
-
 add_library(nexus-engine
     ${ENGINE_SOURCES}
     ${ENGINE_HEADERS}
+)
+
+# Auto generate source files
+add_custom_command(
+    TARGET nexus-engine
+    PRE_BUILD
+    COMMAND ${Python3_EXECUTABLE} ${TOOLS_DIR}/header_tool.py
+    COMMENT "Generating header files..."
 )
 
 target_include_directories(nexus-engine
