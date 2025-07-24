@@ -81,6 +81,6 @@ glm::vec3 Transform::Up() const
 
 glm::vec3 Transform::Forward() const
 {
-    const auto localZ = glm::vec3{0, 0, 1};
+    const auto localZ = glm::vec3{0, 0, -1};
     return glm::rotate(m_orientation, localZ);
 }
