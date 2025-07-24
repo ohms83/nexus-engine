@@ -27,24 +27,19 @@ const glm::vec3& Transform::GetScale(Space space) const
 
 glm::mat4 Transform::GetMatrix(const Space transformSpace) const
 {
-    glm::mat4 transform = glm::translate(glm::identity<glm::mat4>(), m_position);
-    transform *= glm::mat4_cast(m_orientation);
-    transform = glm::scale(transform, m_scale);
+    glm::mat4 modelMatrix = glm::mat4(1.0f);
+    // Apply Scaling
+    modelMatrix = glm::scale(modelMatrix, m_scale);
+    // Apply Rotation
+    modelMatrix = glm::mat4_cast(m_orientation) * modelMatrix;
+    // Apply Translation
+    modelMatrix = glm::translate(modelMatrix, m_position);
 
     if (transformSpace == Space::Global && m_parent)
     {
-        transform *= m_parent->GetMatrix(Space::Global);
+        modelMatrix = m_parent->GetMatrix() * modelMatrix;
     }
-    return transform;
-}
-
-glm::mat4 Transform::GetViewMatrix(Space transformSpace) const
-{
-    glm::mat4 transform = glm::translate(glm::identity<glm::mat4>(), -m_position);
-    transform *= glm::mat4_cast(-m_orientation);
-    transform = glm::scale(transform, m_scale);
-    // TODO: Compute global view matrix.
-    return transform;
+    return modelMatrix;
 }
 
 void Transform::AddChild(Transform* child)
@@ -67,14 +62,24 @@ void Transform::RemoveChild(Transform* child)
     m_children.erase(it);
 }
 
-void Transform::LookAt(const glm::vec3& position, const glm::vec3& target, const glm::vec3& up)
+void Transform::LookAt(const glm::vec3& target, const glm::vec3& up)
 {
-    m_position = position;
-    m_orientation = glm::quatLookAt(target - position, up);
-    m_scale = {1, 1, 1};
+    m_orientation = glm::quatLookAt(glm::normalize(target - m_position), up);
 }
 
-glm::vec3 Transform::GetLookVector() const
+glm::vec3 Transform::Right() const
+{
+    const auto localX = glm::vec3{1, 0, 0};
+    return glm::rotate(m_orientation, localX);
+}
+
+glm::vec3 Transform::Up() const
+{
+    const auto localY = glm::vec3{0, 1, 0};
+    return glm::rotate(m_orientation, localY);
+}
+
+glm::vec3 Transform::Forward() const
 {
     const auto localZ = glm::vec3{0, 0, 1};
     return glm::rotate(m_orientation, localZ);
