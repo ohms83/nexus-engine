@@ -29,7 +29,7 @@ NXS_NAMESPACE
             m_position = position;
             m_needUpdate = true;
         }
-        const glm::vec3& GetPosition(Space space = Space::Local) const;
+        NODISCARD const glm::vec3& GetPosition(Space space = Space::Local) const;
 
         void Rotate(const float degree, const glm::vec3& axis)
         {
@@ -41,14 +41,14 @@ NXS_NAMESPACE
             m_orientation = orientation;
             m_needUpdate = true;
         }
-        const glm::quat& GetOrient(Space space = Space::Local) const;
+        NODISCARD const glm::quat& GetOrient(Space space = Space::Local) const;
 
         void Scale(const glm::vec3& scale)
         {
             m_scale *= scale;
             m_needUpdate = true;
         }
-        const glm::vec3& GetScale(Space space = Space::Local) const;
+        NODISCARD const glm::vec3& GetScale(Space space = Space::Local) const;
 
         // TODO: Should consider using a matrix 4x3 instead, since the homogenous coordinate barely relevant.
         /**
@@ -57,15 +57,15 @@ NXS_NAMESPACE
          * while Global will base the transformation on its parent and predecessors.
          * @return A 4x4 transformation matrix.
          */
-        glm::mat4 GetMatrix(Space transformSpace = Space::Local) const;
+        NODISCARD glm::mat4 GetMatrix(Space transformSpace = Space::Local) const;
 
         void AddChild(Transform* child);
         void RemoveChild(Transform* child);
-        Transform* GetParent() const
+        NODISCARD Transform* GetParent() const
         {
             return m_parent;
         }
-        bool HasParent() const
+        NODISCARD bool HasParent() const
         {
             return m_parent != nullptr;
         }
@@ -77,12 +77,12 @@ NXS_NAMESPACE
          */
         void LookAt(const glm::vec3& target, const glm::vec3& up);
 
-        //! Returns transform's right vector
-        glm::vec3 Right() const;
-        //! Returns transform's up vector
-        glm::vec3 Up() const;
-        //! Returns transform's forward vector
-        glm::vec3 Forward() const;
+        //! Return transform's right vector
+        NODISCARD glm::vec3 Right() const;
+        //! Return transform's up vector
+        NODISCARD glm::vec3 Up() const;
+        //! Return transform's forward vector
+        NODISCARD glm::vec3 Forward() const;
 
     private:
         Transform* m_parent = nullptr;

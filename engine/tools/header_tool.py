@@ -1,8 +1,8 @@
 import os
 from pathlib import Path
 
-def find_header_guard(header_file):
-    with open(header_file, 'r') as aFile:
+def find_header_guard(header):
+    with open(header, 'r') as aFile:
         is_comment = False
         for line in aFile:
             line = line.strip()
@@ -26,7 +26,7 @@ def find_header_guard(header_file):
                 if tokens[0] == '#pragma' and tokens[1] == 'once':
                     return
                 else:
-                    raise RuntimeError(f"Header guard not found. File={header_file}")
+                    raise RuntimeError(f"Header guard not found. File={header}")
 
 
 script_path = Path(__file__).resolve()

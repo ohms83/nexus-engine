@@ -7,6 +7,8 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "imgui.h"
+#include "nexus/ecs/scene/CameraComponent.h"
+#include "nexus/ecs/scene/LightComponent.h"
 #include "nexus/resource/Material.h"
 #include "nexus/resource/Texture.h"
 
@@ -157,9 +159,10 @@ vec3 CalcPointLight(Light light, vec3 fragPos, vec3 normal)
 
 void main()
 {
+    vec3 N = normalize(Normal);
     vec4 albedo = texture(ourTexture, texCoord0);
     vec4 ambient = albedo * vec4(u_Ambient, 1);
-    vec4 diffuse = albedo * vec4(CalcDirLight(u_Light, Normal), 1);
+    vec4 diffuse = albedo * vec4(CalcDirLight(u_Light, N), 1);
     FragColor = ambient + diffuse;
 }
 )";
@@ -181,6 +184,7 @@ public:
                                      glm::vec3(0.0f, 1.0f, 0.0f)  // Up direction
                                     );
 
+        glm::mat4 projection = glm::perspective(glm::radians(m_camera.fov), m_camera.width / m_camera.height, m_camera.nearZ, m_camera.farZ);
         const nxs::RenderCommand renderCommand
         {
             m_shader.get(),
@@ -188,9 +192,8 @@ public:
             m_cubeMesh->GetIndexBuffer(),
             {
                 {"model", m_cubeTransform.GetMatrix()},
-                // {"view", m_camera.GetViewMtx()},
                 {"view", view},
-                {"projection", m_camera.GetProjectionMtx()},
+                {"projection", projection},
             },
             {
                 { "ourTexture", 0, m_texture->GetProxy() },
@@ -198,7 +201,7 @@ public:
             {
                 { "u_Ambient", m_ambient },
                 { "u_Light.position", glm::vec3(1, 1, 0) },
-                { "u_Light.diffuse", m_directionalLight.diffuseColor    },
+                { "u_Light.diffuse", m_directionalLight.light.diffuseColor    },
             }
         };
 
@@ -217,7 +220,7 @@ public:
 
             if (ImGui::TreeNode("Directional"))
             {
-                ImGui::ColorEdit3("Color", R_CAST<float*>(&m_directionalLight.diffuseColor));
+                ImGui::ColorEdit3("Color", R_CAST<float*>(&m_directionalLight.light.diffuseColor));
                 ImGui::TreePop();
             }
 
@@ -227,7 +230,7 @@ public:
                 static bool enableLight = false;
                 static float position[] = {0, 0, 0};
                 ImGui::Checkbox("Enable", &enableLight);
-                ImGui::ColorEdit3("Color", R_CAST<float*>(&m_pointLights[0].diffuseColor));
+                ImGui::ColorEdit3("Color", R_CAST<float*>(&m_pointLights[0].light.diffuseColor));
                 ImGui::InputFloat3("Position", position);
                 ImGui::TreePop();
             }
@@ -236,7 +239,7 @@ public:
             {
                 static bool enableLight = false;
                 ImGui::Checkbox("Enable", &enableLight);
-                ImGui::ColorEdit3("Color", R_CAST<float*>(&m_pointLights[1].diffuseColor));
+                ImGui::ColorEdit3("Color", R_CAST<float*>(&m_pointLights[1].light.diffuseColor));
                 ImGui::TreePop();
             }
         }
@@ -260,9 +263,6 @@ protected:
         m_texture->SetWrapMode(nxs::TextureWrapMode::Clamp, nxs::TextureWrapMode::Clamp);
         m_texture->SetFiltering(nxs::TextureFilterMode::Linear, nxs::TextureFilterMode::Linear);
         m_texture->AllocateGpuResource(renderInterface);
-        
-        m_camera.transform.SetPosition({0, 0, 3});
-        m_camera.transform.LookAt({0, 0, 0}, {0, 1, 0});
 
         m_cubeMesh = GetMeshManager().GetStaticMesh(nxs::Mesh::CubeMesh);
 
@@ -273,7 +273,8 @@ protected:
     void OnResize(const glm::ivec2& screenSize, const glm::ivec2& actualSize) override
     {
         Application::OnResize(screenSize, actualSize);
-        m_camera.SetProjection(45.f, CAST<float>(actualSize.x), CAST<float>(actualSize.y), 0.1f, 100.f);
+        m_camera.width = screenSize.x;
+        m_camera.height = screenSize.y;
     }
 
 private:
@@ -281,14 +282,14 @@ private:
     {
         m_ambient = {0.5, 0.5, 0.5};
 
-        m_directionalLight.diffuseColor = {1, 1, 1};
-        m_directionalLight.transform.SetPosition({10, 10, 0});
+        m_directionalLight.light.diffuseColor = {1, 1, 1};
+        m_directionalLight.direction = {10, 10, 0};
 
-        m_pointLights[0].diffuseColor = {0.5, 0, 0};
-        m_pointLights[0].transform.SetPosition({10, 10, 0});
+        m_pointLights[0].light.diffuseColor = {0.5, 0, 0};
+        m_pointLights[0].position = {10, 10, 0};
 
-        m_pointLights[1].diffuseColor = {0, 0.5, 0};
-        m_pointLights[1].transform.SetPosition({-10, 10, 0});
+        m_pointLights[1].light.diffuseColor = {0, 0.5, 0};
+        m_pointLights[1].position = {-10, 10, 0};
     }
 
 protected:
@@ -296,9 +297,9 @@ protected:
     nxs::Ref<nxs::Texture> m_texture;
     nxs::Ref<nxs::Mesh> m_cubeMesh;
     nxs::Transform m_cubeTransform;
-    nxs::Camera m_camera;
-    nxs::DirectionalLight m_directionalLight {};
-    nxs::PointLight m_pointLights[2] {};
+    nxs::CameraComponent m_camera;
+    nxs::DirectLightComponent m_directionalLight {};
+    nxs::PointLightComponent m_pointLights[2] {};
     glm::vec3 m_ambient {0.5, 0.5, 0.5};
 };
 
@@ -313,7 +314,7 @@ int main()
         vsync,
     };
     return nxs::RunApplication<Example_04>({
-        "Example 03",
+        "Example 04",
         graphicsConfig,
         fullscreen,
         true

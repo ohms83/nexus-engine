@@ -4,9 +4,8 @@
 #include <memory>
 
 #if defined(_WIN32)
-    #include <windows.h>
     #ifndef NXS_PLATFORM_WINDOWS
-#define NXS_PLATFORM_WINDOWS 1
+        #define NXS_PLATFORM_WINDOWS 1
     #endif
 #endif
 
@@ -25,6 +24,7 @@
 #define C_CAST const_cast
 //! A shorthand definition for reinterpret_cast<>
 #define R_CAST reinterpret_cast
+#define PTR_CAST std::dynamic_pointer_cast
 
 #define SHORT_CAST(x)   CAST<int16_t>(x)
 #define INT_CAST(x)     CAST<int32_t>(x)
@@ -90,11 +90,6 @@ NXS_NAMESPACE
     }
 
     using WindowContext = SDL_Window*;
-#ifdef WIN32
-    using NativeWindowHandle = HWND;
-#else
-    static_assert("Unimplemented platform!")
-#endif
 
     union RenderContext
     {

@@ -18,6 +18,7 @@
 #include "editor/Editor.h"
 #include "resource/Mesh.h"
 #include "resource/Texture.h"
+#include "scene/Scene.h"
 
 #define PURGE_UNUSED_RESOURCES(Manager) do { \
     LOG_INFO(LogResource, "Purge unused resources. Class="#Manager); \
@@ -96,10 +97,13 @@ NXS_NAMESPACE
             return *m_textureManager.get();
         }
 
+        [[maybe_unused]] Ref<Scene> ChangeScene(const Ref<Scene>& scene);
+        NODISCARD Ref<Scene> GetCurrentScene() const;
+
     protected:
         virtual bool Init_Internal() { return true; }
-        virtual void Update() {}
-        virtual void Render(RenderSystem& renderSystem) {}
+        virtual void Update();
+        virtual void Render(RenderSystem& renderSystem);
 
         virtual void OnEvent(const SDL_Event& e);
         virtual void OnKeyDown(SDL_Keycode key);
@@ -131,6 +135,7 @@ NXS_NAMESPACE
 
         Ptr<MeshManager> m_meshManager;
         Ptr<TextureManager> m_textureManager;
+        Ref<Scene> m_currentScene;
     };
 
     template<typename T>

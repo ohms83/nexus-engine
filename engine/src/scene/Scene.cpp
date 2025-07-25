@@ -1,4 +1,6 @@
 #include "nexus/scene/Scene.h"
+
+#include "ecs/scene/LightComponent.h"
 #include "nexus/graphics/RenderSystem.h"
 #include "nexus/core/Logger.h"
 
@@ -6,35 +8,30 @@ USING_NAMESPACE_NXS;
 
 DEFINE_LOG(Scene);
 
-Ref<SceneNode> Scene::CreateNode(const std::string& name, Ref<SceneNode> parent)
+Scene::Scene()
 {
-    auto& node = m_children.emplace_back(std::make_shared<SceneNode>(name));
-    if (parent) {
-        parent->transform.AddChild(&node->transform);
-    }
-    return node;
-}
-
-Ref<SceneNode> Scene::CreateNode(const std::string &name, const std::string &parentName)
-{
-    auto itr = std::ranges::find_if(m_children, [parentName](Ref<SceneNode> node) {
-        return node->GetName() == parentName;
-    });
-
-    Ref<SceneNode> parent;
-    if (itr == m_children.end()) {
-        LOG_WARNING(LogScene, std::format("Cannot find a parent node {}", parentName));
-    }
-    else {
-        parent = *itr;
-    }
-    return CreateNode(name, parent);
+    m_ambient = m_registry.create();
 }
 
 void Scene::Update()
 {
+    for (auto& node : m_children)
+    {
+        node->Update();
+    }
 }
 
 void Scene::Render(RenderSystem &renderSystem)
 {
+    if (m_renderer) m_renderer->Render(renderSystem, GetRegistry());
+}
+
+void Scene::SetRenderer(Ptr<ISceneRenderer> renderer)
+{
+    m_renderer = std::move(renderer);
+}
+
+void Scene::SetAmbient(const Color3F& color)
+{
+    m_registry.emplace<AmbientLightComponent>(m_ambient, color);
 }

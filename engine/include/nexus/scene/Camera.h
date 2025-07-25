@@ -12,8 +12,8 @@ NXS_NAMESPACE
     class Camera : public SceneNode
     {
     public:
-        Camera() = default;
-        ~Camera() = default;
+        explicit Camera(entt::registry& registry);
+        explicit Camera(entt::registry& registry, const std::string& name);
 
         /**
          * Setup camera's projection.
@@ -26,8 +26,8 @@ NXS_NAMESPACE
         void SetProjection(float fov, float width, float height, float nearZ, float farZ);
         void SetOrthographic(float width, float height, float nearZ, float farZ);
 
-        glm::mat4 GetViewMtx() const;
-        const glm::mat4& GetProjectionMtx() const
+        NODISCARD glm::mat4 GetViewMtx() const;
+        NODISCARD const glm::mat4& GetProjectionMtx() const
         {
             return m_projMtx;
         }
@@ -37,6 +37,8 @@ NXS_NAMESPACE
         float GetHeight() const { return m_height; }
         float GetNearZ() const { return m_nearZ; }
         float GetFarZ() const { return m_farZ; }
+
+        void SetScale(const glm::vec3& scale) override {}
 
     protected:
         /**

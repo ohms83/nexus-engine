@@ -20,7 +20,7 @@ protected:
 
 private:
     //! Editor camera.
-    nxs::Camera m_camera;
+    nxs::Ref<nxs::Camera> m_camera;
     nxs::Ref<nxs::Mesh> m_planeMesh;
     nxs::Ref<nxs::Texture> m_texture;
     nxs::Ptr<nxs::Shader> m_shader;

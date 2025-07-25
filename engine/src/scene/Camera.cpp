@@ -4,26 +4,51 @@
 
 #include "nexus/scene/Camera.h"
 
+#include "ecs/scene/CameraComponent.h"
+#include "ecs/scene/TransformComponent.h"
+
 USING_NAMESPACE_NXS;
+
+Camera::Camera(entt::registry& registry)
+    : SceneNode(registry)
+{
+    registry.emplace<CameraComponent>(m_entity);
+    registry.emplace<PositionComponent>(m_entity);
+    registry.emplace<RotationComponent>(m_entity);
+}
+
+Camera::Camera(entt::registry& registry, const std::string& name)
+    : SceneNode(registry, name)
+{
+    registry.emplace<CameraComponent>(m_entity);
+    registry.emplace<PositionComponent>(m_entity);
+    registry.emplace<RotationComponent>(m_entity);
+}
 
 void Camera::SetProjection(const float fov, const float width, const float height, const float nearZ, const float farZ)
 {
-    m_fov = fov;
-    m_width = width;
-    m_height = height;
-    m_nearZ = nearZ,
-    m_farZ = farZ;
-    m_projMtx = glm::perspective(glm::radians(fov), width / height, nearZ, farZ);
+    auto& registry = GetRegistry();
+    auto& camera = registry.get<CameraComponent>(m_entity);
+    camera.fov = fov;
+    camera.width = width;
+    camera.height = height;
+    camera.nearZ = nearZ,
+    camera.farZ = farZ;
+    camera.projectionType = ProjectionType::Perspective;
+    m_projMtx = glm::perspective(glm::radians(fov), float(width) / float(height), nearZ, farZ);
 }
 
 void Camera::SetOrthographic(const float width, const float height, const float nearZ, const float farZ)
 {
-    m_fov = 90;
-    m_width = width;
-    m_height = height;
-    m_nearZ = nearZ,
-    m_farZ = farZ;
-    m_projMtx = glm::ortho(-width/2, width/2, -height, height, nearZ, farZ);
+    auto& registry = GetRegistry();
+    auto& camera = registry.get<CameraComponent>(m_entity);
+    camera.fov = 90;
+    camera.width = width;
+    camera.height = height;
+    camera.nearZ = nearZ,
+    camera.farZ = farZ;
+    camera.projectionType = ProjectionType::Orthographic;
+    m_projMtx = glm::ortho(-width/2, width/2, -height/2, height/2, nearZ, farZ);
 }
 
 glm::mat4 Camera::GetViewMtx() const

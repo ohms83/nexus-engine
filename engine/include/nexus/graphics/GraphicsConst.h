@@ -76,4 +76,11 @@ NXS_NAMESPACE
         ClockWise,
         CounterClockWise,
     };
+
+    enum class ProjectionType
+    {
+        Perspective,
+        Orthographic,
+        Num
+    };
 }

@@ -6,9 +6,9 @@
 
 DEFINE_LOG(NexusEditor);
 
-static nxs::Color3F ambient {0.5, 0.5, 0.5};
-static nxs::DirectionalLight directionalLight {};
-static nxs::PointLight pointLights[2] {};
+// static nxs::Color3F ambient {0.5, 0.5, 0.5};
+// static nxs::DirectionalLight directionalLight {};
+// static nxs::PointLight pointLights[2] {};
 
 // Shader sources
 static auto vertexShaderSource = R"(
@@ -65,7 +65,7 @@ uniform Light u_PointLights[2];
 
 vec3 CalcDirLight(Light light, vec3 normal)
 {
-    vec3 lightDir = normalize(light.position);
+    vec3 lightDir = normalize(-light.position);
     float diff = max(dot(normal, lightDir), 0.0);
     return light.diffuse * diff;
 }
@@ -84,28 +84,31 @@ vec3 CalcPointLight(Light light, vec3 fragPos, vec3 normal)
 
 void main()
 {
+    vec3 N = normalize(Normal);
     vec4 albedo = texture(ourTexture, texCoord0);
     vec4 ambient = albedo * vec4(u_Ambient, 1);
-    vec4 diffuse = albedo * vec4(CalcDirLight(u_Light, Normal), 1);
+    vec4 diffuse = albedo * vec4(CalcDirLight(u_Light, N), 1);
     FragColor = ambient + diffuse;
-    // FragColor = albedo;
 }
 )";
 
-static const std::string assetsPath = "assets/textures/Crate/Wood_Crate_001_basecolor.jpg";
+static const std::string texturePaths[] = {
+    "assets/textures/Wood/Wood052_1K-JPG_Color.jpg",
+    "assets/textures/Crate/Wood_Crate_001_basecolor.jpg",
+};
 
 static void InitLight()
 {
-    ambient = {0.5, 0.5, 0.5};
-
-    directionalLight.diffuseColor = {1, 1, 1};
-    directionalLight.transform.SetPosition({10, 10, 0});
-
-    pointLights[0].diffuseColor = {0.5, 0, 0};
-    pointLights[0].transform.SetPosition({10, 10, 0});
-
-    pointLights[1].diffuseColor = {0, 0.5, 0};
-    pointLights[1].transform.SetPosition({-10, 10, 0});
+    // ambient = {0.5, 0.5, 0.5};
+    //
+    // directionalLight.diffuseColor = {1, 1, 1};
+    // directionalLight.transform.SetPosition({10, 10, 0});
+    //
+    // pointLights[0].diffuseColor = {0.5, 0, 0};
+    // pointLights[0].transform.SetPosition({10, 10, 0});
+    //
+    // pointLights[1].diffuseColor = {0, 0.5, 0};
+    // pointLights[1].transform.SetPosition({-10, 10, 0});
 }
 
 int main()
@@ -139,12 +142,13 @@ bool NexusEditor::Init_Internal()
     auto& renderSystem = GetRenderSystem();
     renderSystem.SetClearColor(0x303030ff);
 
-    m_camera.transform.SetPosition({0, 3, 3});
-    m_camera.transform.LookAt({0, 0, 0}, {0, 1, 0});
-    m_planeMesh = GetMeshManager().GetStaticMesh(nxs::Mesh::PlaneMesh);
-    // m_planeMesh = GetMeshManager().GetStaticMesh(nxs::Mesh::CubeMesh);
+    auto scene = ChangeScene(std::make_shared<nxs::Scene>());
+    scene->SetRenderer(std::make_unique<nxs::BasicSceneRenderer>());
+    scene->SetAmbient({0.2, 0.2, 0.2});
 
-    InitLight();
+    m_camera = scene->CreateNode<nxs::Camera>("Camera Node");
+    m_camera->SetPosition({0, 5, 5});
+    m_camera->LookAt({0, 0, 0}, {0, 1, 0});
 
     auto& renderInterface = renderSystem.GetRenderInterface();
     m_shader.reset(renderInterface.CreateShader());
@@ -153,11 +157,65 @@ bool NexusEditor::Init_Internal()
         .AddSource(fragmentShaderSource, nxs::Shader::Type::Fragment)
     .Compile();
 
-    m_texture = GetTextureManager().Get(assetsPath);
-    m_texture->SetWrapMode(nxs::TextureWrapMode::Clamp, nxs::TextureWrapMode::Clamp);
-    m_texture->SetFiltering(nxs::TextureFilterMode::Linear, nxs::TextureFilterMode::Linear);
-    m_texture->AllocateGpuResource(renderInterface);
+    {
+        auto texture = GetTextureManager().Get(texturePaths[0]);
+        texture->SetWrapMode(nxs::TextureWrapMode::Clamp, nxs::TextureWrapMode::Clamp);
+        texture->SetFiltering(nxs::TextureFilterMode::Linear, nxs::TextureFilterMode::Linear);
+        texture->AllocateGpuResource(renderInterface);
 
+        auto mesh = GetMeshManager().GetStaticMesh(nxs::Mesh::PlaneMesh);
+        auto node = scene->CreateNode<nxs::SceneNode>("Plane Node");
+        nxs::RenderComponent renderComponent = {
+            mesh->GetVertexBuffer(),
+            mesh->GetIndexBuffer(),
+            m_shader.get()
+        };
+        node->AddComponent<nxs::DiffuseMapComponent>(nxs::DiffuseMapComponent {
+            {texture->GetProxy()}
+        });
+        node->AddComponent<nxs::RenderComponent>(renderComponent);
+        node->AddComponent<nxs::TransformComponent>(nxs::TransformComponent {
+            glm::vec3(0, 0, 0),
+            glm::quat(1, 0, 0, 0),
+            glm::vec3(5, 5, 5),
+        });
+    }
+
+    {
+        auto texture = GetTextureManager().Get(texturePaths[1]);
+        texture->SetWrapMode(nxs::TextureWrapMode::Clamp, nxs::TextureWrapMode::Clamp);
+        texture->SetFiltering(nxs::TextureFilterMode::Linear, nxs::TextureFilterMode::Linear);
+        texture->AllocateGpuResource(renderInterface);
+
+        auto mesh = GetMeshManager().GetStaticMesh(nxs::Mesh::CubeMesh);
+        auto node = scene->CreateNode<nxs::SceneNode>("Cube Node");
+        nxs::RenderComponent renderComponent = {
+            mesh->GetVertexBuffer(),
+            mesh->GetIndexBuffer(),
+            m_shader.get()
+        };
+        node->AddComponent<nxs::DiffuseMapComponent>(nxs::DiffuseMapComponent {
+            {texture->GetProxy()}
+        });
+        node->AddComponent<nxs::RenderComponent>(renderComponent);
+        node->AddComponent<nxs::TransformComponent>(nxs::TransformComponent {
+            {0, 1, 0},
+            glm::quat(1, 0, 0, 0),
+            {1, 1, 1}
+        });
+    }
+
+    {
+        auto node = scene->CreateNode<nxs::SceneNode>("Directional Light");
+        node->AddComponent<nxs::DirectLightComponent>(nxs::DirectLightComponent {
+            {
+                nxs::COLOR3F_WHITE,
+            },
+            glm::vec3(1, -1, 0),
+        });
+    }
+
+    InitLight();
     return true;
 }
 
@@ -169,37 +227,6 @@ void NexusEditor::OnEvent(const SDL_Event& e)
 void NexusEditor::Render(nxs::RenderSystem& renderSystem)
 {
     Application::Render(renderSystem);
-    // Calculate matrices for a rotating cube
-    const auto dt = GetDeltaTime();
-    // m_cubeTransform.Rotate(90.f * dt, glm::vec3(0.5f, 1.0f, 0.0f));
-
-    glm::mat4 view = glm::lookAt(glm::vec3(0.0f, 5.0f, 5.0f), // Camera position
-                                 glm::vec3(0.0f, 0.0f, 0.0f), // Look at origin
-                                 glm::vec3(0.0f, 1.0f, 0.0f)  // Up direction
-                                );
-
-    const nxs::RenderCommand renderCommand
-    {
-        m_shader.get(),
-        m_planeMesh->GetVertexBuffer(),
-        m_planeMesh->GetIndexBuffer(),
-        {
-            {"model", glm::identity<glm::mat4>()},
-            // {"view", m_camera.GetViewMtx()},
-            {"view", view},
-            {"projection", m_camera.GetProjectionMtx()},
-        },
-        {
-            { "ourTexture", 0, m_texture->GetProxy() },
-        },
-        {
-            { "u_Ambient", ambient },
-            { "u_Light.position", glm::vec3(1, 1, 0) },
-            { "u_Light.diffuse", directionalLight.diffuseColor    },
-        }
-    };
-
-    renderSystem.RegisterDrawCommand(renderCommand);
 }
 
 void NexusEditor::OnKeyDown(const SDL_Keycode key)
@@ -210,5 +237,5 @@ void NexusEditor::OnKeyDown(const SDL_Keycode key)
 void NexusEditor::OnResize(const glm::ivec2& screenSize, const glm::ivec2& actualSize)
 {
     Application::OnResize(screenSize, actualSize);
-    m_camera.SetProjection(45.f, CAST<float>(actualSize.x), CAST<float>(actualSize.y), 0.1f, 100.f);
+    m_camera->SetProjection(45.f, CAST<float>(actualSize.x), CAST<float>(actualSize.y), 0.1f, 100.f);
 }

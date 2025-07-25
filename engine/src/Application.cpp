@@ -15,10 +15,6 @@
 #include "resource/Mesh.h"
 #include "resource/Texture.h"
 
-#if defined(SDL_PLATFORM_WIN32)
-#include <windows.h>
-#endif
-
 USING_NAMESPACE_NXS;
 
 DEFINE_LOG(Application);
@@ -164,6 +160,32 @@ bool Application::IsQuitRequested() const
 WindowContext Application::GetWindowContext() const
 {
     return m_window;
+}
+
+Ref<Scene> Application::ChangeScene(const Ref<Scene>& scene)
+{
+    return m_currentScene = scene;
+}
+
+Ref<Scene> Application::GetCurrentScene() const
+{
+    return m_currentScene;
+}
+
+void Application::Update()
+{
+    if (m_currentScene)
+    {
+        m_currentScene->Update();
+    }
+}
+
+void Application::Render(RenderSystem& renderSystem)
+{
+    if (m_currentScene)
+    {
+        m_currentScene->Render(renderSystem);
+    }
 }
 
 void Application::OnEvent(const SDL_Event& e)
