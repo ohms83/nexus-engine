@@ -97,7 +97,8 @@ target_include_directories(nexus-engine
 target_link_libraries(nexus-engine
     PRIVATE SDL3::SDL3
     PRIVATE glad
-    PRIVATE flecs::flecs_static)
+    PRIVATE flecs
+)
 
 find_package(OpenGL REQUIRED)
 # Link OpenGL library

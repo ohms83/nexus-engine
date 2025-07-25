@@ -1,5 +1,7 @@
 build/
 lib/
+# FetchContent download directory
+_deps/
 
 # for CLion
 .idea

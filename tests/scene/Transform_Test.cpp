@@ -1,13 +1,10 @@
 #include "gtest/gtest.h"
 #include "nexus/Nexus.h"
-
-#include <glm/glm.hpp>
-#include <glm/ext/matrix_relational.hpp> // For glm::equal (with epsilon)
-#include <glm/gtc/random.hpp>
 #include <iostream>
 #include <sstream>
 #include <format>
 #include <string>
+#include <iomanip>
 
 std::string FormatVector(const glm::vec3& vec)
 {

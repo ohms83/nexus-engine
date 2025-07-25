@@ -174,7 +174,7 @@ protected:
             .AddSource(fragmentShaderSource, nxs::Shader::Type::Fragment)
         .Compile();
 
-        m_texture = nxs::TextureManager::Instance().Get(assetsPath);
+        m_texture = GetTextureManager().Get(assetsPath);
         m_texture->SetWrapMode(nxs::TextureWrapMode::Clamp, nxs::TextureWrapMode::Clamp);
         m_texture->SetFiltering(nxs::TextureFilterMode::Linear, nxs::TextureFilterMode::Linear);
         m_textureProxy.reset(m_texture->AllocateGpuResource(renderInterface));

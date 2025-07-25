@@ -139,7 +139,8 @@ bool NexusEditor::Init_Internal()
     auto& renderSystem = GetRenderSystem();
     renderSystem.SetClearColor(0x303030ff);
 
-    m_camera.transform.LookAt({0, 3, 3}, {0, 0, 0}, {0, 1, 0});
+    m_camera.transform.SetPosition({0, 3, 3});
+    m_camera.transform.LookAt({0, 0, 0}, {0, 1, 0});
     m_planeMesh = GetMeshManager().GetStaticMesh(nxs::Mesh::PlaneMesh);
     // m_planeMesh = GetMeshManager().GetStaticMesh(nxs::Mesh::CubeMesh);
 
