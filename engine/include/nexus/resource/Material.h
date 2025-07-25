@@ -13,7 +13,7 @@ NXS_NAMESPACE
     class Material final : public Resource
     {
     public:
-        explicit Material(const uint32 hash);
+        explicit Material(uint32 resourceId);
 
         Color3F diffuse;
         Color3F specular;

@@ -17,12 +17,12 @@ NXS_NAMESPACE
     class Resource
     {
     public:
-        explicit Resource(const uint32 hash): m_hash(hash) {};
+        explicit Resource(const uint32 resourceId): m_id(resourceId) {};
         virtual ~Resource() = default;
 
-        uint32 GetHash() const
+        NODISCARD uint32 GetId() const
         {
-            return m_hash;
+            return m_id;
         }
 
         //! Initialize this resource from the specified path.
@@ -38,7 +38,7 @@ NXS_NAMESPACE
         virtual uint8* Load_Impl(const std::string& path, size_t& out_size) = 0;
 
     protected:
-        uint32 m_hash = 0;
+        uint32 m_id = 0;
         std::string m_filepath;
         Buffer m_data;
     };

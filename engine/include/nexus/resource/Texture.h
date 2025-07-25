@@ -15,8 +15,8 @@ NXS_NAMESPACE
     class Texture final : public Resource
     {
     public:
-        explicit Texture(const uint32 hash)
-            : Resource(hash)
+        explicit Texture(const uint32 resourceId)
+            : Resource(resourceId)
         {
         }
 

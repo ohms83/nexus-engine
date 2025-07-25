@@ -8,8 +8,8 @@ USING_NAMESPACE_NXS;
 const std::string Mesh::CubeMesh = "CubeMesh";
 const std::string Mesh::PlaneMesh = "PaneMesh";
 
-Mesh::Mesh(const uint32 hash)
-    : Resource(hash)
+Mesh::Mesh(const uint32 resourceId)
+    : Resource(resourceId)
 {
 }
 

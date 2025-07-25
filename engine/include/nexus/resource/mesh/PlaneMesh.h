@@ -14,7 +14,7 @@ NXS_NAMESPACE
     class PlaneMesh final : public Mesh
     {
     public:
-        explicit PlaneMesh(uint32 hash);
+        explicit PlaneMesh(uint32 resourceId);
 
         bool Load(const std::string& path) override
         {

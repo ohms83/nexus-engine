@@ -79,8 +79,8 @@ static const std::vector<uint32_t> cubeIndices = {
     21, 23, 20  // Triangle 2: Bottom-Left, Top-Right, Bottom-Right (CCW)
 };
 
-CubeMesh::CubeMesh(const uint32 hash)
-    : Mesh(hash)
+CubeMesh::CubeMesh(const uint32 resourceId)
+    : Mesh(resourceId)
 {
     const auto& renderInterface = RenderingInterface::Instance();
 

@@ -13,7 +13,7 @@ NXS_NAMESPACE
     class Mesh : public Resource
     {
     public:
-        explicit Mesh(uint32 hash);
+        explicit Mesh(uint32 resourceId);
         ~Mesh() override = default;
 
         NODISCARD VertexBuffer* GetVertexBuffer() const

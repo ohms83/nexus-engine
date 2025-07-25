@@ -6,8 +6,8 @@
 
 USING_NAMESPACE_NXS;
 
-Material::Material(const uint32 hash)
-    : Resource(hash)
+Material::Material(const uint32 resourceId)
+    : Resource(resourceId)
 {
 }
 

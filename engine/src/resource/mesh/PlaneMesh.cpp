@@ -31,8 +31,8 @@ namespace
     };
 }
 
-PlaneMesh::PlaneMesh(const uint32 hash)
-    : Mesh(hash)
+PlaneMesh::PlaneMesh(const uint32 resourceId)
+    : Mesh(resourceId)
 {
     const auto& renderInterface = RenderingInterface::Instance();
 
