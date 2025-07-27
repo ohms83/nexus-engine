@@ -6,9 +6,15 @@
 
 DEFINE_LOG(NexusEditor);
 
-// static nxs::Color3F ambient {0.5, 0.5, 0.5};
-// static nxs::DirectionalLight directionalLight {};
-// static nxs::PointLight pointLights[2] {};
+#define AXIS_PLUS_X  0x01
+#define AXIS_MINUS_X 0x02
+#define AXIS_PLUS_Y  0x04
+#define AXIS_MINUS_Y 0x08
+#define AXIS_PLUS_Z  0x10
+#define AXIS_MINUS_Z 0x20
+
+static int axisInput = 0;
+static float cameraSpeed = 2.0f;
 
 // Shader sources
 static auto vertexShaderSource = R"(
@@ -149,6 +155,10 @@ bool NexusEditor::Init_Internal()
     m_camera = scene->CreateNode<nxs::Camera>("Camera Node");
     m_camera->SetPosition({0, 5, 5});
     m_camera->LookAt({0, 0, 0}, {0, 1, 0});
+    m_camera->AddComponent<nxs::MoveComponent>(nxs::MoveComponent {
+        glm::vec3(0, 0, 0),
+        10
+    });
 
     auto& renderInterface = renderSystem.GetRenderInterface();
     m_shader.reset(renderInterface.CreateShader());
@@ -226,25 +236,49 @@ void NexusEditor::Render(nxs::RenderSystem& renderSystem)
 void NexusEditor::OnKeyDown(const SDL_Keycode key)
 {
     Application::OnKeyDown(key);
-    auto camera = GetCurrentScene()->GetNode("Camera Node");
-    if (!camera) return;
 
-    // camera->Translate()
-    glm::vec3 translation{};
-    if (key == SDLK_W) translation.z = -1;
-    if (key == SDLK_S) translation.z =  1;
-    if (key == SDLK_D) translation.x =  1;
-    if (key == SDLK_A) translation.x = -1;
-    if (key == SDLK_Q) translation.y =  1;
-    if (key == SDLK_E) translation.y = -1;
+    if (key == SDLK_S) axisInput |= AXIS_PLUS_Y;
+    if (key == SDLK_W) axisInput |= AXIS_MINUS_Y;
+    if (key == SDLK_A) axisInput |= AXIS_MINUS_X;
+    if (key == SDLK_D) axisInput |= AXIS_PLUS_X;
+    if (key == SDLK_Q) axisInput |= AXIS_PLUS_Z;
+    if (key == SDLK_E) axisInput |= AXIS_MINUS_Z;
+}
 
-    // Transform the translation vector into the camera's local coordinate.
-    translation = camera->GetRotation() * translation;
-    camera->Translate(translation);
+void NexusEditor::OnKeyUp(const SDL_Keycode key)
+{
+    Application::OnKeyUp(key);
+
+    if (key == SDLK_S) axisInput &= ~AXIS_PLUS_Y;
+    if (key == SDLK_W) axisInput &= ~AXIS_MINUS_Y;
+    if (key == SDLK_A) axisInput &= ~AXIS_MINUS_X;
+    if (key == SDLK_D) axisInput &= ~AXIS_PLUS_X;
+    if (key == SDLK_Q) axisInput &= ~AXIS_PLUS_Z;
+    if (key == SDLK_E) axisInput &= ~AXIS_MINUS_Z;
 }
 
 void NexusEditor::OnResize(const glm::ivec2& screenSize, const glm::ivec2& actualSize)
 {
     Application::OnResize(screenSize, actualSize);
     m_camera->SetProjection(45.f, CAST<float>(actualSize.x), CAST<float>(actualSize.y), 0.1f, 100.f);
+}
+
+void NexusEditor::Update()
+{
+    Application::Update();
+
+    auto camera = GetCurrentScene()->GetNode("Camera Node");
+    if (!camera) return;
+
+    glm::vec3 translation{};
+    if (axisInput & AXIS_PLUS_X)  translation.x += 1.0f;
+    if (axisInput & AXIS_MINUS_X) translation.x -= 1.0f;
+    if (axisInput & AXIS_PLUS_Y)  translation.z += 1.0f;
+    if (axisInput & AXIS_MINUS_Y) translation.z -= 1.0f;
+    if (axisInput & AXIS_PLUS_Z)  translation.y += 1.0f;
+    if (axisInput & AXIS_MINUS_Z) translation.y -= 1.0f;
+
+    // Transform the translation vector into the camera's local coordinate.
+    translation = camera->GetRotation() * translation;
+    camera->Translate(translation * cameraSpeed * GetDeltaTime());
 }

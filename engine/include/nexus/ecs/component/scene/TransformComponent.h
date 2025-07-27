@@ -34,7 +34,7 @@ NXS_NAMESPACE
     struct MoveComponent
     {
         glm::vec3 direction;
-        float speed;
+        float speed = 0;
     };
 
     struct RotationComponent

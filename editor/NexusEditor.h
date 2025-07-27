@@ -16,7 +16,9 @@ protected:
     void OnEvent(const SDL_Event& e) override;
     void Render(nxs::RenderSystem& renderSystem) override;
     void OnKeyDown(SDL_Keycode key) override;
+    void OnKeyUp(SDL_Keycode key) override;
     void OnResize(const glm::ivec2& screenSize, const glm::ivec2& actualSize) override;
+    void Update() override;
 
 private:
     //! Editor camera.
@@ -24,4 +26,5 @@ private:
     nxs::Ref<nxs::Mesh> m_planeMesh;
     nxs::Ref<nxs::Texture> m_texture;
     nxs::Ptr<nxs::Shader> m_shader;
+    glm::vec3 m_cameraMoveDir{};
 };

@@ -113,6 +113,7 @@ NXS_NAMESPACE
 
         virtual void OnEvent(const SDL_Event& e);
         virtual void OnKeyDown(SDL_Keycode key);
+        virtual void OnKeyUp(SDL_Keycode key);
         virtual void OnResize(const glm::ivec2& screenSize, const glm::ivec2& actualSize);
 
         virtual void DrawUI() {}

@@ -200,6 +200,9 @@ void Application::OnEvent(const SDL_Event& e)
     case SDL_EVENT_KEY_DOWN:
         OnKeyDown(e.key.key);
         break;
+    case SDL_EVENT_KEY_UP:
+        OnKeyUp(e.key.key);
+        break;
     case SDL_EVENT_WINDOW_METAL_VIEW_RESIZED:
     case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
     case SDL_EVENT_WINDOW_RESIZED:
@@ -220,6 +223,10 @@ void Application::OnKeyDown(const SDL_Keycode key)
     {
         RequestQuit();
     }
+}
+
+void Application::OnKeyUp(SDL_Keycode key)
+{
 }
 
 void Application::OnResize(const glm::ivec2& screenSize, const glm::ivec2& actualSize)
