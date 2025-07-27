@@ -27,18 +27,18 @@ const glm::vec3& Transform::GetScale(Space space) const
 
 glm::mat4 Transform::GetMatrix(const Space transformSpace) const
 {
-    glm::mat4 modelMatrix = glm::mat4(1.0f);
-    // Apply Scaling
-    modelMatrix = glm::scale(modelMatrix, m_scale);
-    // Apply Rotation
-    modelMatrix = modelMatrix * glm::mat4_cast(m_orientation);
+    auto modelMatrix = glm::mat4(1.0f);
     // Apply Translation
     modelMatrix = glm::translate(modelMatrix, m_position);
+    // Apply Rotation
+    modelMatrix = modelMatrix * glm::mat4_cast(m_orientation);
+    // Apply Scaling
+    modelMatrix = glm::scale(modelMatrix, m_scale);
 
-    if (transformSpace == Space::Global && m_parent)
-    {
-        modelMatrix = m_parent->GetMatrix() * modelMatrix;
-    }
+    // if (transformSpace == Space::Global && m_parent)
+    // {
+    //     modelMatrix = m_parent->GetMatrix(transformSpace) * modelMatrix;
+    // }
     return modelMatrix;
 }
 

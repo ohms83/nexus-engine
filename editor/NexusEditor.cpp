@@ -199,7 +199,7 @@ bool NexusEditor::Init_Internal()
         });
         node->AddComponent<nxs::RenderComponent>(renderComponent);
         node->AddComponent<nxs::TransformComponent>(nxs::TransformComponent {
-            {0, 0, 0},
+            {0, 1, 0},
             glm::quat(1, 0, 0, 0),
             {1, 1, 1}
         });

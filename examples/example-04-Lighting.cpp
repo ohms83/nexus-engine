@@ -177,10 +177,8 @@ public:
     {
         // Calculate matrices for a rotating cube
         const auto dt = GetDeltaTime();
-        auto model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(1.0f, 1.0f, 0.0f));
-        model = glm::rotate(model, glm::radians(90.0f) * GetTimeSinceStart(), glm::vec3(1.0f, 1.0f, 0.0f));
-        // m_cubeTransform.Rotate(90.f * dt, glm::vec3(0.5f, 1.0f, 0.0f));
+        m_cubeTransform.Rotate(90.f * dt, glm::vec3(5.0f, 1.0f, 0.0f));
+        auto model = m_cubeTransform.GetMatrix();
         glm::mat4 view = glm::lookAt(glm::vec3(0.0f, 0.0f, 5.0f), // Camera position
                                      glm::vec3(0.0f, 0.0f, 0.0f), // Look at origin
                                      glm::vec3(0.0f, 1.0f, 0.0f)  // Up direction
@@ -208,8 +206,6 @@ public:
         };
 
         renderSystem.RegisterDrawCommand(renderCommand);
-
-        nxs::Gizmos::DrawPoint(renderSystem, m_cubeTransform.GetPosition(), nxs::COLOR3F_RED, view, projection);
     }
 
     void DrawUI() override
@@ -269,7 +265,7 @@ protected:
         m_texture->AllocateGpuResource(renderInterface);
 
         m_cubeMesh = GetMeshManager().GetStaticMesh(nxs::Mesh::CubeMesh);
-        m_cubeTransform.SetPosition({1, 1, 0});
+        m_cubeTransform.SetPosition({0, 0, 0});
 
         InitLights();
         return true;
