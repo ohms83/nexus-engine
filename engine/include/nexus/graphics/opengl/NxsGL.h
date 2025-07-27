@@ -71,7 +71,7 @@ NXS_NAMESPACE
             switch (mode)
             {
             case DrawMode::Point:
-                return GL_POINT;
+                return GL_POINTS;
             case DrawMode::Line:
                 return GL_LINE;
             case DrawMode::LineStrip:

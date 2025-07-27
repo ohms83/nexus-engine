@@ -31,7 +31,7 @@ glm::mat4 Transform::GetMatrix(const Space transformSpace) const
     // Apply Scaling
     modelMatrix = glm::scale(modelMatrix, m_scale);
     // Apply Rotation
-    modelMatrix = glm::mat4_cast(m_orientation) * modelMatrix;
+    modelMatrix = modelMatrix * glm::mat4_cast(m_orientation);
     // Apply Translation
     modelMatrix = glm::translate(modelMatrix, m_position);
 

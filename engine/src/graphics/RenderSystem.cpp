@@ -33,15 +33,18 @@ void RenderSystem::Draw()
     m_drawCount = 0;
     m_polygonCount = 0;
 
-    for (const auto& command : m_renderCommands)
+    for (auto& commandList : m_renderCommands)
     {
-        m_renderingInterface->Draw(command);
-        m_drawCount++;
-        m_polygonCount += command.GetPolygonCount();
+        for (const auto& command : commandList)
+        {
+            m_renderingInterface->SetDepthFunction(command.depthFunction);
+            m_renderingInterface->Draw(command);
+            m_drawCount++;
+            m_polygonCount += command.GetPolygonCount();
+        }
+        commandList.clear();
     }
     m_frameIndex++;
-
-    m_renderCommands.clear();
 }
 
 void RenderSystem::EndDraw()
@@ -52,12 +55,13 @@ void RenderSystem::EndDraw()
 
 void RenderSystem::OnResize(const uint32 pixel_w, const uint32 pixel_h)
 {
-    m_config.screenWidth = pixel_w;
-    m_config.screenHeight = pixel_h;
+    m_config.screenWidth = CAST<int>(pixel_w);
+    m_config.screenHeight = CAST<int>(pixel_h);
     m_renderingInterface->OnResize(pixel_w, pixel_h);
 }
 
-void RenderSystem::RegisterDrawCommand(const RenderCommand& command)
+void RenderSystem::RegisterDrawCommand(const RenderCommand& command, RenderPass pass)
 {
-    m_renderCommands.emplace_back(command);
+    auto& commands = m_renderCommands[INT_CAST(pass)];
+    commands.emplace_back(command);
 }

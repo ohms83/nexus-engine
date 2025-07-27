@@ -17,8 +17,9 @@ NXS_NAMESPACE
         //! Set the time stamp.
         void Stamp();
 
+        NODISCARD float Seconds() const;
         //! Compute the delta time since the previous Stamp in seconds.
-        float GetDeltaTime() const;
+        NODISCARD float GetDeltaTime() const;
         
     private:
         //! A time stamp since the application started in milliseconds.

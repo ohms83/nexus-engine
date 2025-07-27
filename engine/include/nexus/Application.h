@@ -79,6 +79,12 @@ NXS_NAMESPACE
             return m_actualSize;
         }
 
+        //! Get the time since the begining of the application in seconds
+        NODISCARD float GetTimeSinceStart() const
+        {
+            return m_timer.Seconds();
+        }
+
         //! Get the duration between this and the previous frame in seconds.
         NODISCARD float GetDeltaTime() const
         {
@@ -127,8 +133,8 @@ NXS_NAMESPACE
 
     private:
         bool m_quit = false;
-        RenderSystem* m_renderSystem = nullptr;
-        std::unique_ptr<Editor> m_editor;
+        Ptr<RenderSystem> m_renderSystem;
+        Ptr<Editor> m_editor;
 
         Timer m_timer;
         float m_deltaTime = 0.0f;

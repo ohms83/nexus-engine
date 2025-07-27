@@ -12,6 +12,7 @@
 #include "imgui_impl_sdl3.h"
 #include "implot.h"
 #include "core/Logger.h"
+#include "graphics/debug/Gizmos.h"
 #include "resource/Mesh.h"
 #include "resource/Texture.h"
 
@@ -28,15 +29,15 @@ Application::~Application()
     logger.Disconnect();
     logger.Info(LogApplication, "Shutting down...");
 
+    Gizmos::CleanUp();
+
     PURGE_UNUSED_RESOURCES(TextureManager);
     PURGE_UNUSED_RESOURCES(MeshManager);
     m_textureManager.reset();
     m_meshManager.reset();
 
-    delete m_renderSystem;
-    m_renderSystem = nullptr;
-
     m_editor.reset();
+    m_renderSystem.reset();
 
     //Destroy the window
     SDL_DestroyWindow(m_window);
@@ -93,7 +94,7 @@ bool Application::Init(const ApplicationConfig& info)
     const auto log = std::format("Actual window size width: {} height: {}", m_actualSize.x, m_actualSize.y);
     logger.Info(LogApplication, log);
 
-    m_renderSystem = new RenderSystem(m_window, graphicsConfig);
+    m_renderSystem = std::make_unique<RenderSystem>(m_window, graphicsConfig);
     NXS_ASSERT(m_renderSystem);
 
     if (info.editMode)
@@ -103,6 +104,8 @@ bool Application::Init(const ApplicationConfig& info)
 
     m_meshManager = std::make_unique<MeshManager>();
     m_textureManager = std::make_unique<TextureManager>();
+
+    Gizmos::Init(*m_renderSystem);
 
     InitImGui();
 
@@ -176,7 +179,7 @@ void Application::Update()
 {
     if (m_currentScene)
     {
-        m_currentScene->Update();
+        m_currentScene->Update(GetDeltaTime());
     }
 }
 

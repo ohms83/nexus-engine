@@ -7,6 +7,17 @@
 
 NXS_NAMESPACE
 {
+    enum class RenderPass
+    {
+        //! Depth fill pass
+        Depth,
+        Opaque,
+        AlphaBlend,
+        //! Gizmos will always be rendered last.
+        Gizmo,
+        Num,
+    };
+
     class RenderSystem final
     {
     public:
@@ -47,7 +58,7 @@ NXS_NAMESPACE
         //! An event handler called when the window resize event occured.
         void OnResize(uint32_t pixel_w, uint32_t pixel_h);
 
-        void RegisterDrawCommand(const RenderCommand& command);
+        void RegisterDrawCommand(const RenderCommand& command, RenderPass pass = RenderPass::Opaque);
 
         NODISCARD RenderingInterface& GetRenderInterface() const
         {
@@ -56,7 +67,7 @@ NXS_NAMESPACE
             return *m_renderingInterface;
         }
 
-        RenderContext GetRenderContext() const
+        NODISCARD RenderContext GetRenderContext() const
         {
             assert(m_renderingInterface);
             // ReSharper disable once CppDFANullDereference
@@ -91,11 +102,13 @@ NXS_NAMESPACE
         }
 
     protected:
+        using CommandList = std::vector<RenderCommand>;
+
         GraphicsConfig m_config;
         RenderingInterface* m_renderingInterface = nullptr;
         Color4F m_clearColor = COLOR4F_GREY;
         float m_clearDepth = 1.0f;
-        std::vector<RenderCommand> m_renderCommands;
+        std::array<CommandList, INT_CAST(RenderPass::Num)> m_renderCommands;
 
         uint32 m_frameIndex = 0;
         uint32 m_drawCount = 0;

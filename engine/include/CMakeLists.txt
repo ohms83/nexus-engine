@@ -1,5 +1,6 @@
 file(GLOB ENGINE_ROOT_HEADERS include/nexus/*.h)
 file(GLOB_RECURSE ENGINE_CORE_HEADERS include/nexus/core/*.h)
+file(GLOB_RECURSE ENGINE_DEBUG_HEADERS include/nexus/debug/*.h)
 file(GLOB_RECURSE ENGINE_ECS_HEADERS include/nexus/ecs/*.h)
 file(GLOB_RECURSE ENGINE_EDITOR_HEADERS src/editor/*.h)
 file(GLOB_RECURSE ENGINE_GRAPHICS_HEADERS include/nexus/graphics/*.h)
@@ -10,6 +11,7 @@ file(GLOB_RECURSE ENGINE_SCENE_HEADERS include/nexus/scene/*.h)
 list(APPEND ENGINE_HEADERS
     ${ENGINE_ROOT_HEADERS}
     ${ENGINE_CORE_HEADERS}
+    ${ENGINE_DEBUG_HEADERS}
     ${ENGINE_ECS_HEADERS}
     ${ENGINE_EDITOR_HEADERS}
     ${ENGINE_GRAPHICS_HEADERS}

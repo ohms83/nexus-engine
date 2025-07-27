@@ -11,6 +11,11 @@ void Timer::Stamp()
     m_tick = SDL_GetTicks();
 }
 
+float Timer::Seconds() const
+{
+    return FLOAT_CAST(SDL_GetTicks()) / 1000.0f;
+}
+
 float Timer::GetDeltaTime() const
 {
     const auto currentTick = SDL_GetTicks();

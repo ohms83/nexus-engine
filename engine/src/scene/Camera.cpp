@@ -4,8 +4,8 @@
 
 #include "nexus/scene/Camera.h"
 
-#include "ecs/scene/CameraComponent.h"
-#include "ecs/scene/TransformComponent.h"
+#include "ecs/component/scene/CameraComponent.h"
+#include "ecs/component/scene/TransformComponent.h"
 
 USING_NAMESPACE_NXS;
 
@@ -22,7 +22,7 @@ Camera::Camera(entt::registry& registry, const std::string& name)
 {
     registry.emplace<CameraComponent>(m_entity);
     registry.emplace<PositionComponent>(m_entity);
-    registry.emplace<RotationComponent>(m_entity);
+    registry.emplace<OrientationComponent>(m_entity);
 }
 
 void Camera::SetProjection(const float fov, const float width, const float height, const float nearZ, const float farZ)

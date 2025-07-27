@@ -22,6 +22,7 @@ NXS_NAMESPACE
         void Compile() override;
 
         NODISCARD int32 FindUniform(const std::string& name) const override;
+        void SetUniformFloat(const std::string& name, float value) override;
         void SetUniformVector(const std::string& name, const glm::vec2& vec) override;
         void SetUniformVector(const std::string& name, const glm::vec3& vec) override;
         void SetUniformVector(const std::string& name, const glm::vec4& vec) override;

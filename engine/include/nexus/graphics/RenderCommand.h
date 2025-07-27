@@ -22,6 +22,8 @@ NXS_NAMESPACE
         std::vector<std::tuple<std::string, int32, TextureProxy*>> uniform2DTextures;
         std::vector<std::tuple<std::string, glm::vec3>> uniformVec3;
         std::vector<std::tuple<std::string, glm::vec4>> uniformVec4;
+        std::vector<std::tuple<std::string, float>> uniformFloats;
+        DepthFunction depthFunction = DepthFunction::Lesser;
 
         NODISCARD uint32 GetPolygonCount() const
         {

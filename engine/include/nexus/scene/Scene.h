@@ -4,6 +4,7 @@
 #include "SceneNode.h"
 #include "SceneRenderer.h"
 #include "core/Logger.h"
+#include "ecs/Ecs.h"
 #include "graphics/Color.h"
 
 DECLARE_LOG_EXTERN(Scene);
@@ -47,7 +48,14 @@ NXS_NAMESPACE
             return CreateNode<T>(name, parent);
         }
 
-        virtual void Update();
+        /**
+         * Find a node with the specified @c name.
+         * @param name Node name
+         * @return A scene node with specified name or a nullptr, if not found
+         */
+        Ref<SceneNode> GetNode(const std::string& name);
+
+        virtual void Update(float dt);
         virtual void Render(RenderSystem& renderSystem);
 
         entt::registry& GetRegistry()
@@ -60,10 +68,15 @@ NXS_NAMESPACE
         void SetAmbient(const Color3F& color);
 
     protected:
-        entt::registry m_registry;
+        std::vector<Ref<SceneNode>> m_children;
+
+        // --- Rendering ---
         //! Ambient light.
         entt::entity m_ambient;
-        std::vector<Ref<SceneNode>> m_children;
         Ptr<ISceneRenderer> m_renderer;
+
+        // --- ECS ---
+        entt::registry m_registry;
+        std::vector<ECS::SimulationSystem> m_simulations;
     };
 }

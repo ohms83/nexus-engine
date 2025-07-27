@@ -33,7 +33,7 @@ NXS_NAMESPACE
             return *m_singleton;
         }
 
-        RenderContext GetRenderContext() const
+        NODISCARD RenderContext GetRenderContext() const
         {
             return m_renderContext;
         }
@@ -55,10 +55,12 @@ NXS_NAMESPACE
 
         void Draw(const RenderCommand& command);
 
-        GraphicsAPI GetAPI() const
+        NODISCARD GraphicsAPI GetAPI() const
         {
             return m_graphicsAPI;
         }
+
+        virtual void SetDepthFunction(DepthFunction depthFunction) = 0;
 
     protected:
         RenderingInterface() = default;
@@ -72,5 +74,6 @@ NXS_NAMESPACE
     protected:
         RenderContext m_renderContext{};
         GraphicsAPI m_graphicsAPI = GraphicsAPI::Undefined;
+        DepthFunction m_depthFunction = DepthFunction::None;
     };
 }

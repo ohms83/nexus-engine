@@ -101,6 +101,12 @@ int32 GLShader::FindUniform(const std::string& name) const
     return location;
 }
 
+void GLShader::SetUniformFloat(const std::string& name, float value)
+{
+    const auto location = FindUniform(name);
+    CALL_GL_FUNC(glUniform1f(location, value));
+}
+
 void GLShader::SetUniformVector(const std::string& name, const glm::vec2& vec)
 {
     const auto location = FindUniform(name);

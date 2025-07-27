@@ -36,7 +36,7 @@ NXS_NAMESPACE
             return m_active;
         }
 
-        virtual void Update() {}
+        virtual void Update(float dt) {}
 
         entt::registry& GetRegistry() const
         {
@@ -55,12 +55,15 @@ NXS_NAMESPACE
             return m_registry->get<Type...>(m_entity);
         }
 
+        virtual void Translate(const glm::vec3& translation);
         virtual void SetPosition(const glm::vec3& position);
         virtual const glm::vec3& GetPosition() const;
 
+        virtual void Rotate(float degree, const glm::vec3& axis);
         virtual void SetRotation(const glm::quat& rotation);
         virtual const glm::quat& GetRotation() const;
 
+        virtual void Scale(const glm::vec3& scale);
         virtual void SetScale(const glm::vec3& scale);
         virtual const glm::vec3& GetScale() const;
 

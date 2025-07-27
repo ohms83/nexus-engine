@@ -97,7 +97,7 @@ CubeMesh::CubeMesh(const uint32 resourceId)
 
     m_indexBuffer.reset(renderInterface.CreateIndexBuffer());
     m_indexBuffer->Begin()
-        .SetIndices(C_CAST<uint32_t*>(cubeIndices .data()), cubeIndices .size(), FrontFace::ClockWise)
+        .SetIndices(C_CAST<uint32_t*>(cubeIndices.data()), cubeIndices.size(), FrontFace::ClockWise)
         .SetUsage(BufferUsage::StaticDraw)
         .SetDrawMode(DrawMode::Triangle)
     .Build();

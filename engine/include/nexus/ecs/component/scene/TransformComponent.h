@@ -21,7 +21,7 @@ NXS_NAMESPACE
         glm::vec3 value;
     };
 
-    struct RotationComponent
+    struct OrientationComponent
     {
         glm::quat value;
     };
@@ -29,5 +29,19 @@ NXS_NAMESPACE
     struct ScaleComponent
     {
         glm::vec3 value;
+    };
+
+    struct MoveComponent
+    {
+        glm::vec3 direction;
+        float speed;
+    };
+
+    struct RotationComponent
+    {
+        //! Rotation axis
+        glm::vec3 axis;
+        //! Rotation speed in degree per second
+        float degree = 0;
     };
 }

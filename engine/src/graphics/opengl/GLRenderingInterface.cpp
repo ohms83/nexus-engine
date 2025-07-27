@@ -60,13 +60,13 @@ GLRenderingInterface::GLRenderingInterface(WindowContext window, const GraphicsC
     LOG_INFO(LogOpenGL, ss.str());
 
     // Enable depth test
-    CALL_GL_FUNC(glEnable(GL_DEPTH_TEST));
-    // Accept fragment if it closer to the camera than the former one
-    CALL_GL_FUNC(glDepthFunc(GL_LESS));
+    SetDepthFunction(DepthFunction::Lesser);
     
     CALL_GL_FUNC(glEnable(GL_CULL_FACE));
     CALL_GL_FUNC(glCullFace(GL_BACK));
     CALL_GL_FUNC(glFrontFace(GL_CW));
+
+    CALL_GL_FUNC(glEnable(GL_PROGRAM_POINT_SIZE));
 }
 
 GLRenderingInterface::~GLRenderingInterface()
@@ -144,4 +144,38 @@ void GLRenderingInterface::Draw_Internal(const RenderCommand& command)
 void GLRenderingInterface::OnResize(const uint32_t pixel_w, const uint32_t pixel_h)
 {
     CALL_GL_FUNC(glViewport(0, 0, INT_CAST(pixel_w), INT_CAST(pixel_h)));
+}
+
+void GLRenderingInterface::SetDepthFunction(const DepthFunction depthFunction)
+{
+    if (m_depthFunction == depthFunction) return;
+
+    if (depthFunction == DepthFunction::None)
+    {
+        CALL_GL_FUNC(glDisable(GL_DEPTH_TEST));
+    }
+    else
+    {
+        CALL_GL_FUNC(glEnable(GL_DEPTH_TEST));
+    }
+
+    switch (depthFunction)
+    {
+    case DepthFunction::Lesser:
+        CALL_GL_FUNC(glDepthFunc(GL_LESS));
+        break;
+    case DepthFunction::LesserOrEqual:
+        CALL_GL_FUNC(glDepthFunc(GL_LEQUAL));
+        break;
+    case DepthFunction::Greater:
+        CALL_GL_FUNC(glDepthFunc(GL_GREATER));
+        break;
+    case DepthFunction::Always:
+        CALL_GL_FUNC(glDepthFunc(GL_ALWAYS));
+        break;
+    default:
+        NXS_ASSERT(false);
+        break;
+    }
+    m_depthFunction = depthFunction;
 }

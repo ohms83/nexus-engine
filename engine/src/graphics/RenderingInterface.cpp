@@ -73,6 +73,11 @@ void RenderingInterface::Draw(const RenderCommand& command)
         shader->SetUniformVector(name, uVec4);
     }
 
+    for (const auto& [name, value] : command.uniformFloats)
+    {
+        shader->SetUniformFloat(name, value);
+    }
+
     command.vertexBuffer->Bind();
     command.indexBuffer->Bind();
 

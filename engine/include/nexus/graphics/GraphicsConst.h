@@ -83,4 +83,14 @@ NXS_NAMESPACE
         Orthographic,
         Num
     };
+
+    enum class DepthFunction
+    {
+        //! Disable depth testing.
+        None,
+        Lesser,
+        LesserOrEqual,
+        Greater,
+        Always,
+    };
 }

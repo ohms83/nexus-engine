@@ -31,6 +31,7 @@
 #define BYTE_CAST(x)    CAST<uint8_t>(x)
 #define USHORT_CAST(x)  CAST<uint16_t>(x)
 #define UINT_CAST(x)    CAST<uint32_t>(x)
+#define FLOAT_CAST(x)   CAST<float>(x)
 #define SIZE_CAST(x)    CAST<size_t>(x)
 
 #define SINGLETON(Type) static Type& Instance() { static Type instance; return instance; }

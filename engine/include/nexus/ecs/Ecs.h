@@ -4,16 +4,17 @@
 
 #pragma once
 
-#include "nexus/NxsCommon.h"
+#include "nexus/NxsDefine.h"
 #include <vector>
 
 #include "nexus/scene/SceneRenderer.h"
-#include "scene/LightComponent.h"
 
 NXS_NAMESPACE
 {
     namespace ECS
     {
+        using SimulationSystem = std::function<void(entt::registry&, float)>;
+
         //! Find all components of the specified type in the given @c registry
         template <typename T>
         std::vector<const T*> FindAllComponents(const entt::registry& registry)

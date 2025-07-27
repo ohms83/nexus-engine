@@ -7,9 +7,8 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "imgui.h"
-#include "nexus/ecs/scene/CameraComponent.h"
-#include "nexus/ecs/scene/LightComponent.h"
-#include "nexus/resource/Material.h"
+#include "nexus/ecs/component/scene/CameraComponent.h"
+#include "nexus/ecs/component/scene/LightComponent.h"
 #include "nexus/resource/Texture.h"
 
 struct Vertex
@@ -172,13 +171,16 @@ static const std::string assetsPath = "assets/textures/Crate/Wood_Crate_001_base
 class Example_04 final : public nxs::Application
 {
 public:
-    ~Example_04() override
-    = default;
+    ~Example_04() override = default;
+
     void Render(nxs::RenderSystem& renderSystem) override
     {
         // Calculate matrices for a rotating cube
         const auto dt = GetDeltaTime();
-        m_cubeTransform.Rotate(90.f * dt, glm::vec3(0.5f, 1.0f, 0.0f));
+        auto model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(1.0f, 1.0f, 0.0f));
+        model = glm::rotate(model, glm::radians(90.0f) * GetTimeSinceStart(), glm::vec3(1.0f, 1.0f, 0.0f));
+        // m_cubeTransform.Rotate(90.f * dt, glm::vec3(0.5f, 1.0f, 0.0f));
         glm::mat4 view = glm::lookAt(glm::vec3(0.0f, 0.0f, 5.0f), // Camera position
                                      glm::vec3(0.0f, 0.0f, 0.0f), // Look at origin
                                      glm::vec3(0.0f, 1.0f, 0.0f)  // Up direction
@@ -191,7 +193,7 @@ public:
             m_cubeMesh->GetVertexBuffer(),
             m_cubeMesh->GetIndexBuffer(),
             {
-                {"model", m_cubeTransform.GetMatrix()},
+                {"model", model},
                 {"view", view},
                 {"projection", projection},
             },
@@ -206,6 +208,8 @@ public:
         };
 
         renderSystem.RegisterDrawCommand(renderCommand);
+
+        nxs::Gizmos::DrawPoint(renderSystem, m_cubeTransform.GetPosition(), nxs::COLOR3F_RED, view, projection);
     }
 
     void DrawUI() override
@@ -265,6 +269,7 @@ protected:
         m_texture->AllocateGpuResource(renderInterface);
 
         m_cubeMesh = GetMeshManager().GetStaticMesh(nxs::Mesh::CubeMesh);
+        m_cubeTransform.SetPosition({1, 1, 0});
 
         InitLights();
         return true;

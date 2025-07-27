@@ -97,18 +97,19 @@ static const std::string texturePaths[] = {
     "assets/textures/Crate/Wood_Crate_001_basecolor.jpg",
 };
 
-static void InitLight()
+static void InitLight(nxs::Scene& scene)
 {
-    // ambient = {0.5, 0.5, 0.5};
-    //
-    // directionalLight.diffuseColor = {1, 1, 1};
-    // directionalLight.transform.SetPosition({10, 10, 0});
-    //
-    // pointLights[0].diffuseColor = {0.5, 0, 0};
-    // pointLights[0].transform.SetPosition({10, 10, 0});
-    //
-    // pointLights[1].diffuseColor = {0, 0.5, 0};
-    // pointLights[1].transform.SetPosition({-10, 10, 0});
+    scene.SetAmbient({0.2, 0.2, 0.2});
+
+    {
+        auto node = scene.CreateNode<nxs::SceneNode>("Directional Light");
+        node->AddComponent<nxs::DirectLightComponent>(nxs::DirectLightComponent {
+            {
+                nxs::COLOR3F_WHITE,
+            },
+            glm::vec3(1, -1, 0),
+        });
+    }
 }
 
 int main()
@@ -118,7 +119,7 @@ int main()
     constexpr auto resizeable = true;;
     constexpr auto editMode = true;
     constexpr auto maximize = true;
-    const nxs::GraphicsConfig graphicsConfig {
+    constexpr nxs::GraphicsConfig graphicsConfig {
         nxs::GraphicsAPI::OpenGL,
         1280, 960,
         vsync,
@@ -144,7 +145,6 @@ bool NexusEditor::Init_Internal()
 
     auto scene = ChangeScene(std::make_shared<nxs::Scene>());
     scene->SetRenderer(std::make_unique<nxs::BasicSceneRenderer>());
-    scene->SetAmbient({0.2, 0.2, 0.2});
 
     m_camera = scene->CreateNode<nxs::Camera>("Camera Node");
     m_camera->SetPosition({0, 5, 5});
@@ -199,23 +199,17 @@ bool NexusEditor::Init_Internal()
         });
         node->AddComponent<nxs::RenderComponent>(renderComponent);
         node->AddComponent<nxs::TransformComponent>(nxs::TransformComponent {
-            {0, 1, 0},
+            {0, 0, 0},
             glm::quat(1, 0, 0, 0),
             {1, 1, 1}
         });
-    }
-
-    {
-        auto node = scene->CreateNode<nxs::SceneNode>("Directional Light");
-        node->AddComponent<nxs::DirectLightComponent>(nxs::DirectLightComponent {
-            {
-                nxs::COLOR3F_WHITE,
-            },
-            glm::vec3(1, -1, 0),
+        node->AddComponent<nxs::RotationComponent>(nxs::RotationComponent {
+            glm::normalize(glm::sphericalRand<float>(1)),
+            90.f
         });
     }
 
-    InitLight();
+    InitLight(*scene);
     return true;
 }
 
@@ -232,6 +226,21 @@ void NexusEditor::Render(nxs::RenderSystem& renderSystem)
 void NexusEditor::OnKeyDown(const SDL_Keycode key)
 {
     Application::OnKeyDown(key);
+    auto camera = GetCurrentScene()->GetNode("Camera Node");
+    if (!camera) return;
+
+    // camera->Translate()
+    glm::vec3 translation{};
+    if (key == SDLK_W) translation.z = -1;
+    if (key == SDLK_S) translation.z =  1;
+    if (key == SDLK_D) translation.x =  1;
+    if (key == SDLK_A) translation.x = -1;
+    if (key == SDLK_Q) translation.y =  1;
+    if (key == SDLK_E) translation.y = -1;
+
+    // Transform the translation vector into the camera's local coordinate.
+    translation = camera->GetRotation() * translation;
+    camera->Translate(translation);
 }
 
 void NexusEditor::OnResize(const glm::ivec2& screenSize, const glm::ivec2& actualSize)
