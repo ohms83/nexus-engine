@@ -3,9 +3,9 @@
 #include "nexus/NxsDefine.h"
 #include "SceneNode.h"
 #include "SceneRenderer.h"
-#include "core/Logger.h"
-#include "ecs/Ecs.h"
-#include "graphics/Color.h"
+#include "nexus/ecs/Ecs.h"
+#include "nexus/graphics/Color.h"
+#include "nexus/core/Logger.h"
 
 DECLARE_LOG_EXTERN(Scene);
 

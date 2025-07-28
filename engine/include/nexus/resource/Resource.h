@@ -5,10 +5,10 @@
 #pragma once
 
 #include <string>
-#include <nexus/NxsDefine.h>
-#include <nexus/memory/Buffer.h>
+#include "nexus/NxsDefine.h"
+#include "nexus/memory/Buffer.h"
 
-#include "core/Logger.h"
+#include "nexus/core/Logger.h"
 
 DECLARE_LOG_EXTERN(Resource);
 

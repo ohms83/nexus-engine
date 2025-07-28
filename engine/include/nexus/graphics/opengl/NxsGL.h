@@ -5,10 +5,10 @@
 #include <cassert>
 #include <format>
 
-#include <nexus/NxsDefine.h>
-#include <nexus/core/Logger.h>
+#include "nexus/NxsDefine.h"
+#include "nexus/core/Logger.h"
 
-#include "graphics/GraphicsConst.h"
+#include "nexus/graphics/GraphicsConst.h"
 
 #define GL_STRICT_CHECK
 

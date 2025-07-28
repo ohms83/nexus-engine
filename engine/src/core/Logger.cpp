@@ -103,6 +103,7 @@ void Logger::OpenLogFile()
 {
     if (!IsFlagSet(LogToFile)) return;
     // TODO: Support multiple log files.
+    std::cout << "Opening log file: " << m_logPath << std::endl;
     m_logFile.open(m_logPath, std::ios::out);
 }
 

@@ -83,7 +83,7 @@ NXS_NAMESPACE
         };
         using LogCallback = sigslot::signal<LogLevel, const std::string&>;
 
-        static NODISCARD Logger& Instance()
+        NODISCARD static Logger& Instance()
         {
             return *m_instance;
         }
