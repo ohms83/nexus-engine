@@ -44,6 +44,7 @@
 #include "graphics/opengl/GLTexture.h"
 #include "graphics/opengl/GLVertexBuffer.h"
 #include "graphics/opengl/NxsGL.h"
+#include "io/InputManager.h"
 #include "math/Math.h"
 #include "math/Matrix.h"
 #include "memory/Buffer.h"

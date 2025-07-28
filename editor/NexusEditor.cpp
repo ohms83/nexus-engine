@@ -6,14 +6,6 @@
 
 DEFINE_LOG(NexusEditor);
 
-#define AXIS_PLUS_X  0x01
-#define AXIS_MINUS_X 0x02
-#define AXIS_PLUS_Y  0x04
-#define AXIS_MINUS_Y 0x08
-#define AXIS_PLUS_Z  0x10
-#define AXIS_MINUS_Z 0x20
-
-static int axisInput = 0;
 static float cameraSpeed = 2.0f;
 
 // Shader sources
@@ -220,6 +212,14 @@ bool NexusEditor::Init_Internal()
     }
 
     InitLight(*scene);
+
+    auto& inputManager = nxs::InputManager::Instance();
+    inputManager.MapKeyToAxisInput(SDLK_W, nxs::InputManager::InputAxisMinusZ);
+    inputManager.MapKeyToAxisInput(SDLK_S, nxs::InputManager::InputAxisPlusZ);
+    inputManager.MapKeyToAxisInput(SDLK_A, nxs::InputManager::InputAxisMinusX);
+    inputManager.MapKeyToAxisInput(SDLK_D, nxs::InputManager::InputAxisPlusX);
+    inputManager.MapKeyToAxisInput(SDLK_E, nxs::InputManager::InputAxisMinusY);
+    inputManager.MapKeyToAxisInput(SDLK_Q, nxs::InputManager::InputAxisPlusY);
     return true;
 }
 
@@ -236,25 +236,11 @@ void NexusEditor::Render(nxs::RenderSystem& renderSystem)
 void NexusEditor::OnKeyDown(const SDL_Keycode key)
 {
     Application::OnKeyDown(key);
-
-    if (key == SDLK_S) axisInput |= AXIS_PLUS_Y;
-    if (key == SDLK_W) axisInput |= AXIS_MINUS_Y;
-    if (key == SDLK_A) axisInput |= AXIS_MINUS_X;
-    if (key == SDLK_D) axisInput |= AXIS_PLUS_X;
-    if (key == SDLK_Q) axisInput |= AXIS_PLUS_Z;
-    if (key == SDLK_E) axisInput |= AXIS_MINUS_Z;
 }
 
 void NexusEditor::OnKeyUp(const SDL_Keycode key)
 {
     Application::OnKeyUp(key);
-
-    if (key == SDLK_S) axisInput &= ~AXIS_PLUS_Y;
-    if (key == SDLK_W) axisInput &= ~AXIS_MINUS_Y;
-    if (key == SDLK_A) axisInput &= ~AXIS_MINUS_X;
-    if (key == SDLK_D) axisInput &= ~AXIS_PLUS_X;
-    if (key == SDLK_Q) axisInput &= ~AXIS_PLUS_Z;
-    if (key == SDLK_E) axisInput &= ~AXIS_MINUS_Z;
 }
 
 void NexusEditor::OnResize(const glm::ivec2& screenSize, const glm::ivec2& actualSize)
@@ -267,16 +253,10 @@ void NexusEditor::Update()
 {
     Application::Update();
 
-    auto camera = GetCurrentScene()->GetNode("Camera Node");
+    const auto camera = GetCurrentScene()->GetNode("Camera Node");
     if (!camera) return;
 
-    glm::vec3 translation{};
-    if (axisInput & AXIS_PLUS_X)  translation.x += 1.0f;
-    if (axisInput & AXIS_MINUS_X) translation.x -= 1.0f;
-    if (axisInput & AXIS_PLUS_Y)  translation.z += 1.0f;
-    if (axisInput & AXIS_MINUS_Y) translation.z -= 1.0f;
-    if (axisInput & AXIS_PLUS_Z)  translation.y += 1.0f;
-    if (axisInput & AXIS_MINUS_Z) translation.y -= 1.0f;
+    glm::vec3 translation = nxs::InputManager::Instance().GetAxisValue();
 
     // Transform the translation vector into the camera's local coordinate.
     translation = camera->GetRotation() * translation;

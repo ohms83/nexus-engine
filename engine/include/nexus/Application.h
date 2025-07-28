@@ -103,7 +103,7 @@ NXS_NAMESPACE
             return *m_textureManager.get();
         }
 
-        [[maybe_unused]] Ref<Scene> ChangeScene(const Ref<Scene>& scene);
+        MAYBE_UNUSED Ref<Scene> ChangeScene(const Ref<Scene>& scene);
         NODISCARD Ref<Scene> GetCurrentScene() const;
 
     protected:
@@ -112,6 +112,8 @@ NXS_NAMESPACE
         virtual void Render(RenderSystem& renderSystem);
 
         virtual void OnEvent(const SDL_Event& e);
+        virtual void OnFocusLost();
+        virtual void OnFocusGain();
         virtual void OnKeyDown(SDL_Keycode key);
         virtual void OnKeyUp(SDL_Keycode key);
         virtual void OnResize(const glm::ivec2& screenSize, const glm::ivec2& actualSize);

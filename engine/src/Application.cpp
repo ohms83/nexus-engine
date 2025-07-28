@@ -13,6 +13,7 @@
 #include "implot.h"
 #include "core/Logger.h"
 #include "graphics/debug/Gizmos.h"
+#include "io/InputManager.h"
 #include "resource/Mesh.h"
 #include "resource/Texture.h"
 
@@ -197,6 +198,7 @@ void Application::OnEvent(const SDL_Event& e)
 
     switch (e.type)
     {
+    case SDL_EVENT_WINDOW_FOCUS_LOST:
     case SDL_EVENT_KEY_DOWN:
         OnKeyDown(e.key.key);
         break;
@@ -217,16 +219,26 @@ void Application::OnEvent(const SDL_Event& e)
     }
 }
 
+void Application::OnFocusLost()
+{
+}
+
+void Application::OnFocusGain()
+{
+}
+
 void Application::OnKeyDown(const SDL_Keycode key)
 {
     if (key == m_escapeKey)
     {
         RequestQuit();
     }
+    InputManager::Instance().OnKeyDown(key);
 }
 
-void Application::OnKeyUp(SDL_Keycode key)
+void Application::OnKeyUp(const SDL_Keycode key)
 {
+    InputManager::Instance().OnKeyUp(key);
 }
 
 void Application::OnResize(const glm::ivec2& screenSize, const glm::ivec2& actualSize)

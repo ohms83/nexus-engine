@@ -10,6 +10,7 @@
 #endif
 
 #define NODISCARD [[nodiscard]]
+#define MAYBE_UNUSED [[maybe_unused]]
 
 #include <cassert>
 
