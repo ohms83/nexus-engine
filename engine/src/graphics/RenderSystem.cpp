@@ -13,6 +13,8 @@ RenderSystem::RenderSystem(const WindowContext window, const GraphicsConfig& con
 
 RenderSystem::~RenderSystem()
 {
+    for (auto& commandBuffer : m_renderCommands) commandBuffer.clear();
+
     RenderingInterface::Destroy();
     m_renderingInterface = nullptr;
 }

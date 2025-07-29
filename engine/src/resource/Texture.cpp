@@ -31,12 +31,12 @@ void Texture::SetNumMips(const int32 numMips)
     m_numMips = numMips;
 }
 
-TextureProxy* Texture::AllocateGpuResource(const RenderingInterface& renderingInterface, const bool keepCopy)
+Ref<TextureProxy> Texture::AllocateGpuResource(const RenderingInterface& renderingInterface, const bool keepCopy)
 {
     if (m_textureProxy != nullptr)
     {
         LOG_ERROR(LogTexture, "TextureProxy was already allocated. If you want to re-allocate, the existing texture must be released first.");
-        return m_textureProxy.get();
+        return m_textureProxy;
     }
 
     m_textureProxy.reset(renderingInterface.CreateTexture());
@@ -52,7 +52,7 @@ TextureProxy* Texture::AllocateGpuResource(const RenderingInterface& renderingIn
     .End();
 
     if (!keepCopy) m_data.Release();
-    return m_textureProxy.get();
+    return m_textureProxy;
 }
 
 uint8* Texture::Load_Impl(const std::string& path, size_t& out_size)

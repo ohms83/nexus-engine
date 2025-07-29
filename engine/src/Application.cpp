@@ -30,6 +30,8 @@ Application::~Application()
     logger.Disconnect();
     logger.Info(LogApplication, "Shutting down...");
 
+    m_currentScene.reset();
+
     Gizmos::CleanUp();
 
     PURGE_UNUSED_RESOURCES(TextureManager);

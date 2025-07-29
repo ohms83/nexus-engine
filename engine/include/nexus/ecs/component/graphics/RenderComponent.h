@@ -20,18 +20,18 @@ NXS_NAMESPACE
     };
     struct DiffuseMapComponent
     {
-        std::vector<TextureProxy*> textures;
+        std::vector<Ref<TextureProxy>> textures;
     };
     struct NormalMapComponent
     {
-        TextureProxy* texture;
+        Ref<TextureProxy> texture;
     };
     struct SpecularMapComponent
     {
-        TextureProxy* texture;
+        Ref<TextureProxy> texture;
     };
     struct HeightMapComponent
     {
-        TextureProxy* texture;
+        Ref<TextureProxy> texture;
     };
 }

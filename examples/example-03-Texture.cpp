@@ -144,7 +144,7 @@ public:
                 {"projection", projection},
             },
             {
-                { "ourTexture", 0, m_textureProxy.get() }
+                { "ourTexture", 0, m_textureProxy }
             }
         };
 
@@ -184,7 +184,7 @@ protected:
         m_texture = GetTextureManager().Get(assetsPath);
         m_texture->SetWrapMode(nxs::TextureWrapMode::Clamp, nxs::TextureWrapMode::Clamp);
         m_texture->SetFiltering(nxs::TextureFilterMode::Linear, nxs::TextureFilterMode::Linear);
-        m_textureProxy.reset(m_texture->AllocateGpuResource(renderInterface));
+        m_textureProxy = m_texture->AllocateGpuResource(renderInterface);
 
         return true;
     }
@@ -199,7 +199,7 @@ protected:
     nxs::Ptr<nxs::VertexBuffer> m_vertexBuffer;
     nxs::Ptr<nxs::IndexBuffer> m_indexBuffer;
     nxs::Ptr<nxs::Shader> m_shader;
-    nxs::Ptr<nxs::TextureProxy> m_textureProxy;
+    nxs::Ref<nxs::TextureProxy> m_textureProxy;
     nxs::Ref<nxs::Texture> m_texture;
     nxs::Transform m_cubeTransform;
     nxs::CameraComponent m_camera;

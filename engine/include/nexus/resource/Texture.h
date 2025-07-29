@@ -33,13 +33,13 @@ NXS_NAMESPACE
          * the local copy as soon as the GPU resource is allocated.
          * @return
          */
-        TextureProxy* AllocateGpuResource(
+        Ref<TextureProxy> AllocateGpuResource(
             const RenderingInterface& renderingInterface,
             bool keepCopy = false);
 
-        NODISCARD TextureProxy* GetProxy() const
+        NODISCARD Ref<TextureProxy> GetProxy() const
         {
-            return m_textureProxy.get();
+            return m_textureProxy;
         }
 
     protected:
@@ -56,7 +56,7 @@ NXS_NAMESPACE
         TextureFilterMode m_filterMin = TextureFilterMode::Linear;
         TextureFilterMode m_filterMag = TextureFilterMode::Linear;
         uint32 m_numMips = 0;
-        Ptr<TextureProxy> m_textureProxy;
+        Ref<TextureProxy> m_textureProxy;
     };
 
     class TextureManager final : public ResourceManager<Texture>

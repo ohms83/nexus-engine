@@ -64,7 +64,6 @@ static void SetLightParams(RenderCommand& command, const entt::registry& registr
 
 static void SetTextureParams(RenderCommand& command, const entt::registry& registry, const entt::entity& entity)
 {
-
     if (const auto textureComponent = registry.try_get<DiffuseMapComponent>(entity))
     {
         auto& textures = textureComponent->textures;
@@ -103,8 +102,6 @@ void BasicSceneRenderer::Render(RenderSystem& renderSystem, const entt::registry
                     {"u_View", viewMtx},
                     {"u_Projection", projection},
                 },
-                // Textures
-                {},
             };
 
             SetLightParams(command, registry);

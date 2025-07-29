@@ -102,13 +102,13 @@ NXS_NAMESPACE
         }
 
     protected:
-        using CommandList = std::vector<RenderCommand>;
+        using CommandBuffer = std::vector<RenderCommand>;
 
         GraphicsConfig m_config;
         RenderingInterface* m_renderingInterface = nullptr;
         Color4F m_clearColor = COLOR4F_GREY;
         float m_clearDepth = 1.0f;
-        std::array<CommandList, INT_CAST(RenderPass::Num)> m_renderCommands;
+        std::array<CommandBuffer, INT_CAST(RenderPass::Num)> m_renderCommands;
 
         uint32 m_frameIndex = 0;
         uint32 m_drawCount = 0;
