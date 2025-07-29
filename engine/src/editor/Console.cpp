@@ -12,7 +12,7 @@
 USING_NAMESPACE_NXS;
 
 Console::Console()
-    : EditorWidget("Console")
+    : EditorWidget("Log - Console")
 {
     memset(m_inputBuffer, 0, sizeof(m_inputBuffer));
     m_scrollToBottom = true;
@@ -32,7 +32,7 @@ Console::Console()
     // Example of a custom command
     RegisterCommand("echo", [this](const std::vector<std::string>& args) {
         if (args.size() > 1) {
-            std::string message = "";
+            std::string message;
             for (size_t i = 1; i < args.size(); ++i) {
                 message += args[i] + (i < args.size() - 1 ? " " : "");
             }
@@ -61,6 +61,13 @@ void Console::Draw_Internal(RenderSystem& renderSystem)
     ImGui::BeginChild("ScrollingRegion", ImVec2(0, -footer_height_to_reserve), false, ImGuiWindowFlags_HorizontalScrollbar);
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4, 1)); // Tighter spacing
 
+    if (ImGui::BeginPopupContextWindow("Console Context Menu", ImGuiPopupFlags_MouseButtonRight)) {
+        if (ImGui::MenuItem("Clear All", nullptr, false, true)) {
+            m_messages.clear();
+        }
+        ImGui::EndPopup();
+    }
+
     for (const auto& message : m_messages) {
         ImGui::TextUnformatted(message.c_str());
     }
@@ -76,7 +83,7 @@ void Console::Draw_Internal(RenderSystem& renderSystem)
 
     // Command input field
     const auto textInputHandler = [](ImGuiInputTextCallbackData* data) {
-        Console* console = CAST<Console*>(data->UserData);
+        auto* console = CAST<Console*>(data->UserData);
         return console->InputCallback(data);
     };
     constexpr auto inputTextFlags = ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_CallbackCompletion | ImGuiInputTextFlags_CallbackHistory;

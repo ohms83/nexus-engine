@@ -235,11 +235,14 @@ void Application::OnKeyDown(const SDL_Keycode key)
     {
         RequestQuit();
     }
+
+    if (ImGui::GetIO().WantCaptureKeyboard) return;
     InputManager::Instance().OnKeyDown(key);
 }
 
 void Application::OnKeyUp(const SDL_Keycode key)
 {
+    if (ImGui::GetIO().WantCaptureKeyboard) return;
     InputManager::Instance().OnKeyUp(key);
 }
 
