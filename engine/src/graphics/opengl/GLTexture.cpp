@@ -27,6 +27,7 @@ NXS_NAMESPACE
             default:
                 NXS_ASSERT(false);
             }
+            return GL_NONE;
         }
     }
 }
@@ -52,6 +53,7 @@ static GLuint NxsTextureFilterModeToGL(const TextureFilterMode mode)
     default:
         NXS_ASSERT(false);
     }
+    return GL_NONE;
 }
 
 void GLTexture::Bind() const
