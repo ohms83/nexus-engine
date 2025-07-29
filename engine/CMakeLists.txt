@@ -69,12 +69,12 @@ add_library(nexus-engine
 )
 
 # Auto generate source files
-add_custom_command(
-    TARGET nexus-engine
-    PRE_BUILD
-    COMMAND ${Python3_EXECUTABLE} ${TOOLS_DIR}/header_tool.py
-    COMMENT "Generating header files..."
-)
+#add_custom_command(
+#    TARGET nexus-engine
+#    PRE_BUILD
+#    COMMAND ${Python3_EXECUTABLE} ${TOOLS_DIR}/header_tool.py
+#    COMMENT "Generating header files..."
+#)
 
 target_include_directories(nexus-engine
     PUBLIC ${ENGINE_INCLUDE_DIR}
@@ -110,6 +110,7 @@ target_link_libraries(nexus-engine PRIVATE
 target_compile_definitions(nexus-engine
     PUBLIC IMGUI_IMPL_OPENGL_LOADER_GLAD
     PUBLIC NXS_PROJECT_PATH="${PROJECT_ROOT}"
+    PUBLIC NXS_ASSETS_DIR="${PROJECT_ROOT}/assets"
 )
 
 install(TARGETS nexus-engine

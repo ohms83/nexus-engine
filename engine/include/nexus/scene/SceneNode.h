@@ -57,15 +57,17 @@ NXS_NAMESPACE
 
         virtual void Translate(const glm::vec3& translation);
         virtual void SetPosition(const glm::vec3& position);
-        virtual const glm::vec3& GetPosition() const;
+        NODISCARD virtual const glm::vec3& GetPosition() const;
 
         virtual void Rotate(float degree, const glm::vec3& axis);
+        //! Rotating the node
+        virtual void Rotate(const glm::vec3& eulerAngles);
         virtual void SetRotation(const glm::quat& rotation);
-        virtual const glm::quat& GetRotation() const;
+        NODISCARD virtual const glm::quat& GetRotation() const;
 
         virtual void Scale(const glm::vec3& scale);
         virtual void SetScale(const glm::vec3& scale);
-        virtual const glm::vec3& GetScale() const;
+        NODISCARD virtual const glm::vec3& GetScale() const;
 
         void LookAt(const glm::vec3& center, const glm::vec3& up);
 

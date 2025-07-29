@@ -8,13 +8,6 @@ macro(add_example_executable TARGET)
     endif()
 
     add_executable(${TARGET} ${ARG_SOURCES})
-    # Recursively copy the entire assets directory
-    add_custom_command(TARGET ${TARGET} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different
-        "${ASSETS_DIR}"
-        "${ASSETS_DEST_DIR}/assets" # Copies 'assets' folder and its contents
-        COMMENT "Copying application resources..."
-    )
     target_link_libraries(${TARGET} nexus-engine)
 endmacro()
 

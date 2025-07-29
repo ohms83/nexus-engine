@@ -185,12 +185,23 @@ bool NexusEditor::Init_Internal()
     InitLight(*scene);
 
     auto& inputManager = nxs::InputManager::Instance();
-    inputManager.MapKeyToAxisInput(SDLK_W, nxs::InputManager::InputAxisMinusZ);
-    inputManager.MapKeyToAxisInput(SDLK_S, nxs::InputManager::InputAxisPlusZ);
-    inputManager.MapKeyToAxisInput(SDLK_A, nxs::InputManager::InputAxisMinusX);
-    inputManager.MapKeyToAxisInput(SDLK_D, nxs::InputManager::InputAxisPlusX);
-    inputManager.MapKeyToAxisInput(SDLK_E, nxs::InputManager::InputAxisMinusY);
-    inputManager.MapKeyToAxisInput(SDLK_Q, nxs::InputManager::InputAxisPlusY);
+    nxs::KeyInputMap axisInput = {
+        {
+            {SDLK_W, nxs::KeyInputMap::AxisMinusZ},
+            {SDLK_S, nxs::KeyInputMap::AxisPlusZ},
+            {SDLK_A, nxs::KeyInputMap::AxisMinusX},
+            {SDLK_D, nxs::KeyInputMap::AxisPlusX},
+            {SDLK_Q, nxs::KeyInputMap::AxisMinusY},
+            {SDLK_E, nxs::KeyInputMap::AxisPlusY},
+        }
+    };
+    nxs::MouseAxisMapping axisMapping = {
+        true,
+        SDL_BUTTON_RIGHT,
+        {5, 5}
+    };
+    inputManager.RegisterAxisInputMap("movement", axisInput);
+    inputManager.RegisterMouseAxisInputMap("camera_turn", axisMapping);
     return true;
 }
 
@@ -227,14 +238,12 @@ void NexusEditor::Update()
     const auto camera = GetCurrentScene()->GetNode("Camera Node");
     if (!camera) return;
 
-    glm::vec3 translation = nxs::InputManager::Instance().GetAxisValue();
+    glm::vec3 translation = nxs::InputManager::Instance().GetAxisValue("movement");
 
     // Transform the translation vector into the camera's local coordinate.
     translation = camera->GetRotation() * translation;
     camera->Translate(translation * cameraSpeed * GetDeltaTime());
-}
 
-std::string NexusEditor::GetBaseAssetPath() const
-{
-    return ASSETS_DIR;
+    const glm::vec2 euler = nxs::InputManager::Instance().GetMouseAxisValue("camera_turn") * GetDeltaTime();
+    camera->Rotate(glm::vec3(-euler.y, -euler.x, 0));
 }

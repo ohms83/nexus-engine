@@ -122,13 +122,16 @@ NXS_NAMESPACE
         virtual void OnFocusGain();
         virtual void OnKeyDown(SDL_Keycode key);
         virtual void OnKeyUp(SDL_Keycode key);
+        virtual void OnMouseDown(int32 buttonId, float x, float y);
+        virtual void OnMouseUp(int32 buttonId, float x, float y);
+        virtual void OnMouseMove(float x, float y);
         virtual void OnResize(const glm::ivec2& screenSize, const glm::ivec2& actualSize);
 
         virtual void DrawUI() {}
 
         void PollEvents(SDL_Event& e);
 
-        NODISCARD virtual std::string GetBaseAssetPath() const { return {}; }
+        NODISCARD virtual std::string GetBaseAssetPath() const { return NXS_ASSETS_DIR; }
 
     private:
         void InitImGui() const;

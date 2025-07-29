@@ -52,6 +52,18 @@ void SceneNode::Rotate(const float degree, const glm::vec3& axis)
     // TODO: Warning
 }
 
+void SceneNode::Rotate(const glm::vec3& eulerAngles)
+{
+    // Try TransformComponent first
+    const auto eulerAngleRadians = glm::radians(eulerAngles);
+    if (const auto component = m_registry->try_get<TransformComponent>(m_entity)) {
+        component->rotation *= glm::quat(eulerAngleRadians);
+    }
+    if (const auto component = m_registry->try_get<OrientationComponent>(m_entity)) {
+        component->value *= glm::quat(eulerAngleRadians);
+    }
+}
+
 void SceneNode::Scale(const glm::vec3& scale)
 {
     if (const auto& component = m_registry->try_get<ScaleComponent>(m_entity)) {

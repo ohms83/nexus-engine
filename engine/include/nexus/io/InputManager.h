@@ -8,6 +8,7 @@
 
 #include <unordered_map>
 
+#include "KeyInputMap.h"
 #include "sigslot/signal.hpp"
 
 NXS_NAMESPACE
@@ -21,28 +22,39 @@ NXS_NAMESPACE
         void ClearKeyStates();
 
         using KeyEventCallback = sigslot::signal<SDL_Keycode>;
+        using MouseButtonEventCallback = sigslot::signal<int32, float, float>;
+        using MouseMotionEventCallback = sigslot::signal<float, float>;
 
-        void MapKeyToAxisInput(SDL_Keycode key, int32 axisDirection);
-        int32 GetMappedAxisInput(SDL_Keycode key) const;
+        void RegisterAxisInputMap(const std::string& actionName, const KeyInputMap& inputMap);
+        NODISCARD glm::vec3 GetAxisValue(const std::string& actionName) const;
 
-        NODISCARD glm::vec3 GetAxisValue() const;
+        void RegisterMouseAxisInputMap(const std::string& actionName, const MouseAxisMapping& inputMap);
+        NODISCARD glm::vec2 GetMouseAxisValue(const std::string& actionName) const;
 
         void OnKeyDown(SDL_Keycode key);
         void OnKeyUp(SDL_Keycode key);
 
+        void OnMouseDown(int32 buttonId, float x, float y);
+        void OnMouseUp(int32 buttonId, float x, float y);
+        void OnMouseMove(float x, float y);
+
+        bool IsMouseDown(int32 buttonId) const;
+
         KeyEventCallback keyDownEventCallback;
         KeyEventCallback keyUpEventCallback;
-
-        static constexpr int32 InputAxisPlusX  = 0x01;
-        static constexpr int32 InputAxisMinusX = 0x02;
-        static constexpr int32 InputAxisPlusY  = 0x04;
-        static constexpr int32 InputAxisMinusY = 0x08;
-        static constexpr int32 InputAxisPlusZ  = 0x10;
-        static constexpr int32 InputAxisMinusZ = 0x20;
+        MouseButtonEventCallback mouseDownEventCallback;
+        MouseButtonEventCallback mouseUpEventCallback;
+        MouseMotionEventCallback mouseMotionEventCallback;
 
     private:
+        struct MovieAxisMapValue
+        {
+            MouseAxisMapping mapping;
+            glm::vec2 value;
+        };
         std::unordered_map<SDL_Keycode, bool> m_keys;
-        std::unordered_map<SDL_Keycode, int32> m_keyAxisMap;
-        int32 m_axisState = 0;
+        std::unordered_map<int32, bool> m_mouseButtons;
+        std::unordered_map<std::string, KeyInputMap> m_axisInputMap;
+        std::unordered_map<std::string, MovieAxisMapValue> m_mouseAxisMappings;
     };
 }

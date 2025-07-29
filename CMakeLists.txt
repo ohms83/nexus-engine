@@ -16,13 +16,6 @@ message("CMAKE_BUILD_TYPE  ${CMAKE_BUILD_TYPE}")
 
 set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_SOURCE_DIR})
 
-# --- Define resource directory ---
-set(ASSETS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/assets")
-
-set(CONFIG_SUBDIR "$<IF:$<CONFIG:Debug>,Debug,$<IF:$<CONFIG:Release>,Release,>>")
-# Copy the resources next to the exe for all configs:
-set(ASSETS_DEST_DIR "${CMAKE_CURRENT_BINARY_DIR}/${CONFIG_SUBDIR}")
-
 include(FetchContent)
 
 # Google Test

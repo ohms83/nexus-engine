@@ -207,6 +207,15 @@ void Application::OnEvent(const SDL_Event& e)
     case SDL_EVENT_KEY_UP:
         OnKeyUp(e.key.key);
         break;
+    case SDL_EVENT_MOUSE_BUTTON_DOWN:
+        OnMouseDown(e.button.button, e.button.x, e.button.y);
+        break;
+    case SDL_EVENT_MOUSE_BUTTON_UP:
+        OnMouseUp(e.button.button, e.button.x, e.button.y);
+        break;
+    case SDL_EVENT_MOUSE_MOTION:
+        OnMouseMove(e.motion.xrel, e.motion.yrel);
+        break;
     case SDL_EVENT_WINDOW_METAL_VIEW_RESIZED:
     case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
     case SDL_EVENT_WINDOW_RESIZED:
@@ -244,6 +253,24 @@ void Application::OnKeyUp(const SDL_Keycode key)
 {
     if (ImGui::GetIO().WantCaptureKeyboard) return;
     InputManager::Instance().OnKeyUp(key);
+}
+
+void Application::OnMouseDown(const int32 buttonId, const float x, const float y)
+{
+    if (ImGui::GetIO().WantCaptureMouse) return;
+    InputManager::Instance().OnMouseDown(buttonId, x, y);
+}
+
+void Application::OnMouseUp(const int32 buttonId, const float x, const float y)
+{
+    if (ImGui::GetIO().WantCaptureMouse) return;
+    InputManager::Instance().OnMouseUp(buttonId, x, y);
+}
+
+void Application::OnMouseMove(const float x, const float y)
+{
+    if (ImGui::GetIO().WantCaptureMouse) return;
+    InputManager::Instance().OnMouseMove(x, y);
 }
 
 void Application::OnResize(const glm::ivec2& screenSize, const glm::ivec2& actualSize)
