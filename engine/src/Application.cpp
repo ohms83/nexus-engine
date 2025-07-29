@@ -23,16 +23,18 @@ DEFINE_LOG(Application);
 
 Application::~Application()
 {
-    DestroyImGui();
-
     auto& logger = Logger::Instance();
     // Shouldn't send out any callback at this point.
     logger.Disconnect();
     logger.Info(LogApplication, "Shutting down...");
 
+    DestroyImGui();
+
+    InputManager::Destroy();
+
     m_currentScene.reset();
 
-    Gizmos::CleanUp();
+    Gizmos::Cleanup();
 
     PURGE_UNUSED_RESOURCES(TextureManager);
     PURGE_UNUSED_RESOURCES(MeshManager);
@@ -109,6 +111,7 @@ bool Application::Init(const ApplicationConfig& info)
     m_textureManager = std::make_unique<TextureManager>();
 
     Gizmos::Init(*m_renderSystem);
+    InputManager::Init();
 
     InitImGui();
 
@@ -123,6 +126,9 @@ int Application::BeginMainLoop()
     SDL_Event e;
     SDL_zero(e);
 
+    auto& logger = Logger::Instance();
+    auto& inputManager = InputManager::Instance();
+
     while(!m_quit)
     {
         m_deltaTime = m_timer.GetDeltaTime();
@@ -130,6 +136,10 @@ int Application::BeginMainLoop()
 
         PollEvents(e);
         Update();
+
+        // Update input
+        inputManager.Update();
+
         if (m_editor) m_editor->Update();
 
         m_renderSystem->BeginDraw();
@@ -145,6 +155,9 @@ int Application::BeginMainLoop()
 
         EndDrawUI();
         m_renderSystem->EndDraw();
+
+        // Flush the logs
+        logger.Flush();
     }
     return 0;
 }
@@ -214,7 +227,8 @@ void Application::OnEvent(const SDL_Event& e)
         OnMouseUp(e.button.button, e.button.x, e.button.y);
         break;
     case SDL_EVENT_MOUSE_MOTION:
-        OnMouseMove(e.motion.xrel, e.motion.yrel);
+        // OnMouseMove(e.motion.xrel, e.motion.yrel);
+        OnMouseMove(e.motion.x, e.motion.y);
         break;
     case SDL_EVENT_WINDOW_METAL_VIEW_RESIZED:
     case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:

@@ -29,6 +29,8 @@ void Logger::Destroy()
 
 void Logger::Log(LogLevel level, const std::string& category, const std::string& message)
 {
+    if (level < m_minimumLogLevel || m_disableLogs.contains(category)) return;
+
     std::string formatted;
     switch (level)
     {
@@ -80,6 +82,23 @@ void Logger::Fatal(const std::string& category, const std::string& message)
     Disconnect();
     CloseLogFile();
     assert(false);
+}
+
+void Logger::Flush()
+{
+    if (IsFlagSet(LogToFile)) m_logFile << std::flush;
+    if (IsFlagSet(LogToStdOut)) std::cout << std::flush;
+}
+
+void Logger::SetMinumumLogLevel(const LogLevel level)
+{
+    m_minimumLogLevel = level;
+}
+
+void Logger::EnableCategory(const std::string& category, bool enable)
+{
+    if (!enable) m_disableLogs.insert(category);
+    else m_disableLogs.erase(category);
 }
 
 void Logger::Disconnect()

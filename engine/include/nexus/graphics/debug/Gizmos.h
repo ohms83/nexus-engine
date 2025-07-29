@@ -15,7 +15,7 @@ NXS_NAMESPACE
     {
     public:
         static void Init(const  RenderSystem& renderSystem);
-        static void CleanUp();
+        static void Cleanup();
         static void DrawPoint(RenderSystem& renderSystem,
             const glm::vec3& position,
             const Color3F& color,

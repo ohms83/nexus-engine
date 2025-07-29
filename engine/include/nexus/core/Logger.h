@@ -9,11 +9,15 @@
 #include <string>
 #include <ranges>
 #include <format>
+#include <set>
 #include <nexus/NxsDefine.h>
 #include <sigslot/signal.hpp>
 
 #define DECLARE_LOG_EXTERN(LogCategory) extern const std::string Log##LogCategory
 #define DEFINE_LOG(LogCategory) const std::string Log##LogCategory = #LogCategory
+
+#define ENABLE_LOG(LogCategory) nxs::Logger::Instance().EnableCategory(LogCategory, true)
+#define DISABLE_LOG(LogCategory) nxs::Logger::Instance().EnableCategory(LogCategory, false)
 
 #define LOG_DEBUG(Category, Message) nxs::Logger::Instance().Debug(Category, Message)
 #define LOG_INFO(Category, Message) nxs::Logger::Instance().Info(Category, Message)
@@ -113,6 +117,18 @@ NXS_NAMESPACE
             return m_message;
         }
 
+        void Flush();
+
+        /**
+         * Set the minimum log level and discard all the log below the specified level.
+         * @param level Minimum log level. For example, if this parameter is set to @c LogLevel::Warning,
+         * any logs from @c LogLevel::Debug and @c LogLevel::Info will be discarded.
+         */
+        void SetMinumumLogLevel(LogLevel level);
+        //! Enable/disable logs from a specific category.
+        void EnableCategory(const std::string& category, bool enable);
+
+
         //! Disconnect all registered delegates.
         void Disconnect();
 
@@ -124,6 +140,9 @@ NXS_NAMESPACE
         std::string m_message;
         int32 m_flags = LogToStdOut | LogToFile;
         std::fstream m_logFile;
+        LogLevel m_minimumLogLevel = LogLevel::Debug;
+        //! A set of disabled log categories.
+        std::set<std::string> m_disableLogs;
 
     private:
         Logger();

@@ -67,7 +67,7 @@ void Gizmos::Init(const RenderSystem& renderSystem)
     .Compile();
 }
 
-void Gizmos::CleanUp()
+void Gizmos::Cleanup()
 {
     pointVertex.reset();
     pointIndex.reset();

@@ -245,5 +245,5 @@ void NexusEditor::Update()
     camera->Translate(translation * cameraSpeed * GetDeltaTime());
 
     const glm::vec2 euler = nxs::InputManager::Instance().GetMouseAxisValue("camera_turn") * GetDeltaTime();
-    camera->Rotate(glm::vec3(-euler.y, -euler.x, 0));
+    camera->Rotate(glm::vec3(euler.y, euler.x, 0));
 }

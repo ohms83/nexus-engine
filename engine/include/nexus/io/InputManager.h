@@ -16,7 +16,12 @@ NXS_NAMESPACE
     class InputManager final
     {
     public:
+        static void Init();
+        static void Destroy();
         static InputManager& Instance();
+
+        //! Update input states.
+        void Update();
 
         void Cleanup();
         void ClearKeyStates();
@@ -50,7 +55,8 @@ NXS_NAMESPACE
         struct MovieAxisMapValue
         {
             MouseAxisMapping mapping;
-            glm::vec2 value;
+            glm::vec2 pos;
+            glm::vec2 prevPos;
         };
         std::unordered_map<SDL_Keycode, bool> m_keys;
         std::unordered_map<int32, bool> m_mouseButtons;

@@ -2,23 +2,45 @@
 // Created by nutta on 7/28/2025.
 //
 
+#include "nexus/core/Logger.h"
 #include "nexus/io/InputManager.h"
 
-#include "Application.h"
-#include "Application.h"
-#include "Application.h"
-#include "Application.h"
-#include "core/Logger.h"
+#define ENABLE_LOGGING 0
 
 USING_NAMESPACE_NXS;
 
 DEFINE_LOG(InputManager);
 
-static InputManager inputManager;
+static Ptr<InputManager> inputManager;
+
+void InputManager::Init()
+{
+    inputManager = std::make_unique<InputManager>();
+#if ENABLE_LOGGING
+    ENABLE_LOG(LogInputManager);
+#else
+    DISABLE_LOG(LogInputManager);
+#endif
+}
+
+void InputManager::Destroy()
+{
+    inputManager.reset();
+}
 
 InputManager& InputManager::Instance()
 {
-    return inputManager;
+    NXS_ASSERT_MSG(inputManager != nullptr, "InputManager instance is not initialized.");
+    return *inputManager;
+}
+
+void InputManager::Update()
+{
+    for (auto& mouseAxisMap : m_mouseAxisMappings | std::views::values)
+    {
+        auto& [mapping, pos, prevPos] = mouseAxisMap;
+        prevPos = pos;
+    }
 }
 
 void InputManager::Cleanup()
@@ -32,15 +54,22 @@ void InputManager::Cleanup()
 void InputManager::ClearKeyStates()
 {
     m_keys.clear();
-    for (auto& val : m_axisInputMap | std::views::values)
+    for (auto& [keyAxisMap, keyState] : m_axisInputMap | std::views::values)
     {
-        val.keyState = 0;
+        keyState = 0;
+    }
+
+    m_mouseButtons.clear();
+    for (auto& mouseAxisMap : m_mouseAxisMappings | std::views::values)
+    {
+        auto& [mapping, pos, prevPos] = mouseAxisMap;
+        pos = prevPos = {0, 0};
     }
 }
 
-void InputManager::RegisterAxisInputMap(const std::string& name, const KeyInputMap& inputMap)
+void InputManager::RegisterAxisInputMap(const std::string& actionName, const KeyInputMap& inputMap)
 {
-    m_axisInputMap[name] = inputMap;
+    m_axisInputMap[actionName] = inputMap;
 }
 
 glm::vec3 InputManager::GetAxisValue(const std::string& actionName) const
@@ -68,8 +97,8 @@ glm::vec2 InputManager::GetMouseAxisValue(const std::string& actionName) const
 {
     if (const auto& itr = m_mouseAxisMappings.find(actionName); itr != m_mouseAxisMappings.end())
     {
-        const auto& [mapping, value] = itr->second;
-        return mapping.scale * value;
+        const auto& [mapping, pos, prevPos] = itr->second;
+        return mapping.scale * (prevPos - pos);
     }
     return glm::vec3{0, 0, 0};
 }
@@ -101,8 +130,17 @@ void InputManager::OnKeyUp(const SDL_Keycode key)
 void InputManager::OnMouseDown(const int32 buttonId, const float x, const float y)
 {
     m_mouseButtons[buttonId] = true;
+
+    for (auto& mouseAxisMap : m_mouseAxisMappings | std::views::values)
+    {
+        auto& [mapping, pos, prevPos] = mouseAxisMap;
+        if (!mapping.down || mapping.buttonIndex != buttonId) continue;
+
+        pos = prevPos = {x, y};
+    }
+
     mouseDownEventCallback(buttonId, x, y);
-    // LOG_INFO(LogInputManager, std::format("OnMouseDown button={} x={} y={}", buttonId, x, y));
+    LOG_INFO(LogInputManager, std::format("OnMouseDown button={} x={} y={}", buttonId, x, y));
 }
 
 void InputManager::OnMouseUp(const int32 buttonId, const float x, const float y)
@@ -111,26 +149,26 @@ void InputManager::OnMouseUp(const int32 buttonId, const float x, const float y)
 
     for (auto& mouseAxisMap : m_mouseAxisMappings | std::views::values)
     {
-        auto& [mapping, value] = mouseAxisMap;
-        if (mapping.down && mapping.buttonIndex != buttonId) continue;
+        auto& [mapping, pos, prevPos] = mouseAxisMap;
+        if (!mapping.down || mapping.buttonIndex != buttonId) continue;
 
-        value = {0, 0};
+        pos = prevPos = {0, 0};
     }
 
     mouseUpEventCallback(buttonId, x, y);
-    // LOG_INFO(LogInputManager, std::format("OnMouseUp button={} x={} y={}", buttonId, x, y));
+    LOG_INFO(LogInputManager, std::format("OnMouseUp button={} x={} y={}", buttonId, x, y));
 }
 
 void InputManager::OnMouseMove(const float x, const float y)
 {
     for (auto& mouseAxisMap : m_mouseAxisMappings | std::views::values)
     {
-        auto& [mapping, value] = mouseAxisMap;
+        auto& [mapping, pos, prevPos] = mouseAxisMap;
         if (mapping.down && !IsMouseDown(mapping.buttonIndex)) continue;
 
-        value.x = x;
-        value.y = y;
-        // LOG_INFO(LogInputManager, std::format("OnMouseMove x={} y={}", x, y));
+        pos.x = x;
+        pos.y = y;
+        LOG_INFO(LogInputManager, std::format("OnMouseMove x={} y={}", x, y));
     }
     mouseMotionEventCallback(x, y);
 }
