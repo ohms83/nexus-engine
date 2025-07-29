@@ -78,11 +78,20 @@ void RenderingInterface::Draw(const RenderCommand& command)
         shader->SetUniformFloat(name, value);
     }
 
+    for (const auto& [name, value] : command.uniformInts)
+    {
+        shader->SetUniformInt(name, value);
+    }
+
     command.vertexBuffer->Bind();
     command.indexBuffer->Bind();
 
     Draw_Internal(command);
 
+    for (const auto& [name, textureUnit, texture] : command.uniform2DTextures)
+    {
+        texture->Unbind();
+    }
     command.shader->Unbind();
     command.vertexBuffer->Unbind();
     command.indexBuffer->Unbind();

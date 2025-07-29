@@ -99,10 +99,8 @@ TEST(TransformTest, CalculateViewMatrix) {
         const glm::vec3 randTarget = glm::ballRand(100.f);
         const glm::vec3 up {0, 1, 0};
         
-        nxs::Camera camera;
-        camera.transform.SetPosition(randPos);
-        camera.transform.LookAt(randTarget, up);
-        glm::mat4 cameraView = camera.GetViewMtx();
+        glm::quat rotation = glm::quatLookAt(glm::normalize(randTarget - randPos), up);
+        glm::mat4 cameraView = nxs::Matrix::CreateViewMatrix(randPos, rotation);
 
         glm::mat4 glmView = glm::lookAt(randPos, randTarget, up);
         glm::bvec4 result_columns = glm::equal(glmView, cameraView, epsilon);

@@ -124,6 +124,13 @@ public:
         const auto dt = GetDeltaTime();
         m_cubeTransform.Rotate(90.f * dt, glm::vec3(0.5f, 1.0f, 0.0f));
 
+        glm::mat4 view = glm::lookAt(glm::vec3(0.0f, 0.0f, 3.0f), // Camera position
+                                     glm::vec3(0.0f, 0.0f, 0.0f), // Look at origin
+                                     glm::vec3(0.0f, 1.0f, 0.0f)  // Up direction
+                                    );
+
+        glm::mat4 projection = glm::perspective(glm::radians(m_camera.fov), m_camera.width / m_camera.height, m_camera.nearZ, m_camera.farZ);
+
         const nxs::RenderCommand renderCommand
         {
             m_shader.get(),
@@ -131,8 +138,8 @@ public:
             m_indexBuffer.get(),
             {
                 {"model", m_cubeTransform.GetMatrix()},
-                {"view", m_camera.GetViewMtx()},
-                {"projection", m_camera.GetProjectionMtx()},
+                {"view", view},
+                {"projection", projection},
             }
         };
 
@@ -174,16 +181,15 @@ protected:
     void OnResize(const glm::ivec2& screenSize, const glm::ivec2& actualSize) override
     {
         Application::OnResize(screenSize, actualSize);
-        m_camera.transform.SetPosition({0, 0, 3});
-        m_camera.transform.LookAt({0, 0, 0}, {0, 1, 0});
-        m_camera.SetProjection(45.f, CAST<float>(screenSize.x), CAST<float>(screenSize.y), 0.1f, 100.f);
+        m_camera.width  = CAST<float>(screenSize.x);
+        m_camera.height = CAST<float>(screenSize.y);
     }
 
     nxs::Ptr<nxs::VertexBuffer> m_vertexBuffer;
     nxs::Ptr<nxs::IndexBuffer> m_indexBuffer;
     nxs::Ptr<nxs::Shader> m_shader;
     nxs::Transform m_cubeTransform;
-    nxs::Camera m_camera;
+    nxs::CameraComponent m_camera;
 };
 
 int main()

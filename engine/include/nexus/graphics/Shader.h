@@ -38,6 +38,7 @@ NXS_NAMESPACE
          */
         NODISCARD virtual int32 FindUniform(const std::string& name) const = 0;
 
+        virtual void SetUniformInt(const std::string& name, int32 value) = 0;
         virtual void SetUniformFloat(const std::string& name, float value) = 0;
         virtual void SetUniformVector(const std::string& name, const glm::vec2& vec) = 0;
         virtual void SetUniformVector(const std::string& name, const glm::vec3& vec) = 0;

@@ -20,6 +20,8 @@ protected:
     void OnResize(const glm::ivec2& screenSize, const glm::ivec2& actualSize) override;
     void Update() override;
 
+    NODISCARD std::string GetBaseAssetPath() const override;
+
 private:
     //! Editor camera.
     nxs::Ref<nxs::Camera> m_camera;

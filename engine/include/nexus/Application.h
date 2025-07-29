@@ -10,6 +10,7 @@
 #include <concepts>
 #include <string>
 #include <cassert>
+#include <filesystem>
 
 #include <nexus/graphics/RenderSystem.h>
 #include <glm/glm.hpp>
@@ -106,6 +107,11 @@ NXS_NAMESPACE
         MAYBE_UNUSED Ref<Scene> ChangeScene(const Ref<Scene>& scene);
         NODISCARD Ref<Scene> GetCurrentScene() const;
 
+        NODISCARD std::string GetAssetPath(const std::string& path) const
+        {
+            return (std::filesystem::path(GetBaseAssetPath()) / path).string();
+        }
+
     protected:
         virtual bool Init_Internal() { return true; }
         virtual void Update();
@@ -121,6 +127,8 @@ NXS_NAMESPACE
         virtual void DrawUI() {}
 
         void PollEvents(SDL_Event& e);
+
+        NODISCARD virtual std::string GetBaseAssetPath() const { return {}; }
 
     private:
         void InitImGui() const;

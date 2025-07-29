@@ -4,96 +4,19 @@
 
 #include "NexusEditor.h"
 
+#include <sstream>
+
 DEFINE_LOG(NexusEditor);
 
 static float cameraSpeed = 2.0f;
 
-// Shader sources
-static auto vertexShaderSource = R"(
-#version 330 core
-layout (location = 0) in vec3 aPos;
-layout (location = 1) in vec3 aNormal;
-layout (location = 6) in vec2 aTexCoord0;
-
-out vec3 FragPos;
-out vec3 Normal;
-out vec2 texCoord0;
-
-uniform mat4 model;
-uniform mat4 view;
-uniform mat4 projection;
-
-void main()
-{
-    vec4 worldPos = model * vec4(aPos, 1.0);
-    gl_Position = projection * view * worldPos;
-    FragPos = vec3(worldPos);
-    texCoord0 = aTexCoord0;
-    Normal = vec3(model * vec4(aNormal, 1.0));
-}
-)";
-
-static auto fragmentShaderSource = R"(
-#version 330 core
-out vec4 FragColor;
-
-in vec3 FragPos;
-in vec3 Normal;
-in vec2 texCoord0;
-
-uniform sampler2D ourTexture;
-
-uniform vec3 u_Ambient;
-
-struct Light {
-    // Set w component to 0 for the directional light
-    vec3 position;
-    // Diffuse color
-    vec3 diffuse;
-    // Specular color
-    vec3 specular;
-    float cutoff;
-
-    float constantAtt;
-    float linearAtt;
-    float quadraticAtt;
-};
-uniform Light u_Light;
-uniform Light u_PointLights[2];
-
-vec3 CalcDirLight(Light light, vec3 normal)
-{
-    vec3 lightDir = normalize(-light.position);
-    float diff = max(dot(normal, lightDir), 0.0);
-    return light.diffuse * diff;
-}
-
-vec3 CalcPointLight(Light light, vec3 fragPos, vec3 normal)
-{
-    vec3 lightDir = light.position - fragPos;
-    float dist = length(lightDir);
-    if (dist >= light.cutoff) return vec3(0);
-
-    lightDir = normalize(lightDir);
-    float diff = max(dot(normal, lightDir), 0.0);
-    float attenuation = 1 / (light.constantAtt + (light.linearAtt * diff) + (light.quadraticAtt * diff * diff));
-    return light.diffuse * diff * attenuation;
-}
-
-void main()
-{
-    vec3 N = normalize(Normal);
-    vec4 albedo = texture(ourTexture, texCoord0);
-    vec4 ambient = albedo * vec4(u_Ambient, 1);
-    vec4 diffuse = albedo * vec4(CalcDirLight(u_Light, N), 1);
-    FragColor = ambient + diffuse;
-}
-)";
-
 static const std::string texturePaths[] = {
-    "assets/textures/Wood/Wood052_1K-JPG_Color.jpg",
-    "assets/textures/Crate/Wood_Crate_001_basecolor.jpg",
+    "textures/Wood/Wood052_1K-JPG_Color.jpg",
+    "textures/Crate/Wood_Crate_001_basecolor.jpg",
 };
+
+static constexpr auto vertexShaderPath = "shader/forward_ligthing.vs";
+static constexpr auto fragmentShaderPath = "shader/forward_ligthing.fs";
 
 static void InitLight(nxs::Scene& scene)
 {
@@ -103,9 +26,41 @@ static void InitLight(nxs::Scene& scene)
         auto node = scene.CreateNode<nxs::SceneNode>("Directional Light");
         node->AddComponent<nxs::DirectLightComponent>(nxs::DirectLightComponent {
             {
-                nxs::COLOR3F_WHITE,
+                nxs::COLOR3F_GREY,
             },
-            glm::vec3(1, -1, 0),
+            glm::vec3(-1, -1, 0),
+        });
+    }
+
+    {
+        auto node = scene.CreateNode<nxs::SceneNode>("Point Light 01");
+        node->AddComponent<nxs::PointLightComponent>(nxs::PointLightComponent {
+            {
+                nxs::COLOR3F_YELLOW,
+                nxs::COLOR3F_YELLOW,
+                nxs::COLOR3F_YELLOW,
+                10.f
+            },
+            glm::vec3(5, 5, 0),
+            2.0f,
+            0.5f,
+            0.05f,
+        });
+    }
+
+    {
+        auto node = scene.CreateNode<nxs::SceneNode>("Point Light 02");
+        node->AddComponent<nxs::PointLightComponent>(nxs::PointLightComponent {
+            {
+                nxs::COLOR3F_BLUE,
+                nxs::COLOR3F_BLUE,
+                nxs::COLOR3F_BLUE,
+                10.f
+            },
+            glm::vec3(-5, 5, 0),
+            2.0f,
+            0.5f,
+            0.05f,
         });
     }
 }
@@ -153,14 +108,29 @@ bool NexusEditor::Init_Internal()
     });
 
     auto& renderInterface = renderSystem.GetRenderInterface();
+
+    std::fstream vertexShader(GetAssetPath(vertexShaderPath), std::ios::in);
+    std::fstream fragmentShader(GetAssetPath(fragmentShaderPath), std::ios::in);
+    if (vertexShader.bad() || fragmentShader.bad())
+    {
+        LOG_FATAL(LogNexusEditor,
+            std::format("Failed to load shaders! VS={} FS={}", vertexShaderPath, fragmentShaderPath));
+    }
+    std::stringstream vertexShaderStream;
+    std::stringstream fragmentShaderStream;
+
+    vertexShaderStream << vertexShader.rdbuf();
+    fragmentShaderStream << fragmentShader.rdbuf();
+
     m_shader.reset(renderInterface.CreateShader());
     m_shader->BeginCompile()
-        .AddSource(vertexShaderSource, nxs::Shader::Type::Vertex)
-        .AddSource(fragmentShaderSource, nxs::Shader::Type::Fragment)
+        .AddSource(vertexShaderStream.str(), nxs::Shader::Type::Vertex)
+        .AddSource(fragmentShaderStream.str(), nxs::Shader::Type::Fragment)
     .Compile();
 
     {
-        auto texture = GetTextureManager().Get(texturePaths[0]);
+        const auto texturePath = GetAssetPath(texturePaths[0]);
+        auto texture = GetTextureManager().Get(texturePath);
         texture->SetWrapMode(nxs::TextureWrapMode::Clamp, nxs::TextureWrapMode::Clamp);
         texture->SetFiltering(nxs::TextureFilterMode::Linear, nxs::TextureFilterMode::Linear);
         texture->AllocateGpuResource(renderInterface);
@@ -184,7 +154,8 @@ bool NexusEditor::Init_Internal()
     }
 
     {
-        auto texture = GetTextureManager().Get(texturePaths[1]);
+        const auto texturePath = GetAssetPath(texturePaths[1]);
+        auto texture = GetTextureManager().Get(texturePath);
         texture->SetWrapMode(nxs::TextureWrapMode::Clamp, nxs::TextureWrapMode::Clamp);
         texture->SetFiltering(nxs::TextureFilterMode::Linear, nxs::TextureFilterMode::Linear);
         texture->AllocateGpuResource(renderInterface);
@@ -261,4 +232,9 @@ void NexusEditor::Update()
     // Transform the translation vector into the camera's local coordinate.
     translation = camera->GetRotation() * translation;
     camera->Translate(translation * cameraSpeed * GetDeltaTime());
+}
+
+std::string NexusEditor::GetBaseAssetPath() const
+{
+    return ASSETS_DIR;
 }

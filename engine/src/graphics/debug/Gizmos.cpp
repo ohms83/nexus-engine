@@ -83,7 +83,7 @@ void Gizmos::DrawPoint(
     float size)
 {
     glm::mat4 translationMtx = glm::translate(glm::mat4(1), position);
-    const RenderCommand command = {
+    RenderCommand command = {
         shader.get(),
         pointVertex.get(),
         pointIndex.get(),
@@ -105,7 +105,7 @@ void Gizmos::DrawPoint(
         {
             {"u_PointSize", size}
         },
-        DepthFunction::Always,
     };
+    command.depthFunction = DepthFunction::Always;
     renderSystem.RegisterDrawCommand(command, RenderPass::Gizmo);
 }

@@ -55,6 +55,7 @@ NXS_NAMESPACE
     {
     public:
         TextureProxy() = default;
+        ~TextureProxy() override;
 
         //! Begin building this texture
         virtual TextureProxy& Begin(const TextureCreationInfo& info);

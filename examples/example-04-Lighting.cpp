@@ -196,12 +196,12 @@ public:
                 {"projection", projection},
             },
             {
-                { "ourTexture", 0, m_texture->GetProxy() },
+                { "u_DiffuseMap", 0, m_texture->GetProxy() },
             },
             {
                 { "u_Ambient", m_ambient },
-                { "u_Light.position", glm::vec3(1, 1, 0) },
-                { "u_Light.diffuse", m_directionalLight.light.diffuseColor    },
+                { "u_DirectLight.direction", glm::vec3(1, 1, 0) },
+                { "u_DirectLight.diffuse", m_directionalLight.light.diffuseColor    },
             }
         };
 

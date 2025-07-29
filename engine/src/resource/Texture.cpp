@@ -10,9 +10,9 @@
 
 USING_NAMESPACE_NXS;
 
-Texture::~Texture()
-{
-}
+DEFINE_LOG(Texture);
+
+Texture::~Texture() = default;
 
 void Texture::SetWrapMode(const TextureWrapMode wrapS, const TextureWrapMode wrapT)
 {
@@ -33,6 +33,12 @@ void Texture::SetNumMips(const int32 numMips)
 
 TextureProxy* Texture::AllocateGpuResource(const RenderingInterface& renderingInterface, const bool keepCopy)
 {
+    if (m_textureProxy != nullptr)
+    {
+        LOG_ERROR(LogTexture, "TextureProxy was already allocated. If you want to re-allocate, the existing texture must be released first.");
+        return m_textureProxy.get();
+    }
+
     m_textureProxy.reset(renderingInterface.CreateTexture());
     const TextureCreationInfo info = {
         m_width, m_height, m_channels,

@@ -25,8 +25,7 @@ NXS_NAMESPACE
             case TextureWrapMode::MirroredClampToEdge:
                 return GL_MIRROR_CLAMP_TO_EDGE;
             default:
-                assert(false);
-                return GL_NONE;
+                NXS_ASSERT(false);
             }
         }
     }
@@ -51,8 +50,7 @@ static GLuint NxsTextureFilterModeToGL(const TextureFilterMode mode)
     case TextureFilterMode::LinearMipmapLinear:
         return GL_LINEAR_MIPMAP_LINEAR;
     default:
-        assert(false);
-        return GL_NONE;
+        NXS_ASSERT(false);
     }
 }
 
@@ -117,8 +115,7 @@ TextureProxy& GLTexture::LoadData(const uint8* data, const uint32 size)
         gl_pixelFormats = GL_STENCIL_INDEX;
         break;
     default:
-        assert(false);
-        break;
+        NXS_ASSERT(false);
     }
 
     const auto gl_dataType = GL::NxsDataToGLenum(m_componentType);

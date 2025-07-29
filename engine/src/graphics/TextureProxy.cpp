@@ -1,9 +1,14 @@
 //
 // Created by nutta on 7/10/2025.
 //
-#include <nexus/graphics/TextureProxy.h>
+#include "nexus/graphics/TextureProxy.h"
+#include "nexus/core/Logger.h"
 
 USING_NAMESPACE_NXS;
+
+DEFINE_LOG(Textureproxy);
+
+TextureProxy::~TextureProxy() = default;
 
 TextureProxy& TextureProxy::Begin(const TextureCreationInfo& info)
 {
