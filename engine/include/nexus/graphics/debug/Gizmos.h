@@ -10,7 +10,6 @@
 NXS_NAMESPACE
 {
     class RenderSystem;
-    class Camera;
 
     class Gizmos
     {
