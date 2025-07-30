@@ -6,22 +6,24 @@
 
 #include <nexus/NxsDefine.h>
 
+#include "Timer.h"
+
 NXS_NAMESPACE
 {
     /**
      * A utility class for high resolution timer. This class is preferred for profiling.
      */
-    class HighResTimer
+    class HighResTimer final : public ITimer
     {
     public:
-        HighResTimer() = default;
-        ~HighResTimer() = default;
-
-        //! Set the time stamp.
-        void Stamp();
+        ~HighResTimer() override = default;
 
         //! Compute the delta time since the previous Stamp in seconds.
-        float GetDeltaTime() const;
+        float GetDeltaTime() const override;
+
+    protected:
+        //! Advance the timer counter
+        uint64 Tick_Internal() override;
 
     private:
         //! The value of the high-resolution counter from the latest Stamp call.

@@ -6,13 +6,12 @@
 
 USING_NAMESPACE_NXS;
 
-void HighResTimer::Stamp()
-{
-    m_tick = SDL_GetPerformanceCounter();
-}
-
 float HighResTimer::GetDeltaTime() const
 {
-    const auto currentTick = SDL_GetPerformanceCounter();
-    return CAST<float>(currentTick - m_tick) / CAST<float>(SDL_GetPerformanceFrequency());
+    return CAST<float>(GetTick() - GetPrevTick()) / CAST<float>(SDL_GetPerformanceFrequency());
+}
+
+uint64 HighResTimer::Tick_Internal()
+{
+    return SDL_GetPerformanceCounter();
 }

@@ -12,6 +12,7 @@
 #include "imgui_impl_sdl3.h"
 #include "implot.h"
 #include "core/Logger.h"
+#include "core/TimerManager.h"
 #include "graphics/debug/Gizmos.h"
 #include "io/InputManager.h"
 #include "resource/Mesh.h"
@@ -31,6 +32,7 @@ Application::~Application()
     DestroyImGui();
 
     InputManager::Destroy();
+    TimerManager::Destroy();
 
     m_currentScene.reset();
 
@@ -112,6 +114,7 @@ bool Application::Init(const ApplicationConfig& info)
 
     Gizmos::Init(*m_renderSystem);
     InputManager::Init();
+    TimerManager::Init();
 
     InitImGui();
 
@@ -120,7 +123,7 @@ bool Application::Init(const ApplicationConfig& info)
 
 int Application::BeginMainLoop()
 {
-    m_timer.Stamp();
+    m_timer = PTR_CAST<Timer>(TimerManager::Instance().GetTimer());
 
     //The event data
     SDL_Event e;
@@ -128,11 +131,12 @@ int Application::BeginMainLoop()
 
     auto& logger = Logger::Instance();
     auto& inputManager = InputManager::Instance();
+    auto& timerManager = TimerManager::Instance();
 
     while(!m_quit)
     {
-        m_deltaTime = m_timer.GetDeltaTime();
-        m_timer.Stamp();
+        timerManager.Tick();
+        m_deltaTime = m_timer->GetDeltaTime();
 
         PollEvents(e);
         Update();

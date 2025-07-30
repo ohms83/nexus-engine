@@ -81,9 +81,9 @@ NXS_NAMESPACE
         }
 
         //! Get the time since the begining of the application in seconds
-        NODISCARD float GetTimeSinceStart() const
+        NODISCARD static float GetTimeSinceStart()
         {
-            return m_timer.Seconds();
+            return FLOAT_CAST(SDL_GetTicks()) / 1000.0f;
         }
 
         //! Get the duration between this and the previous frame in seconds.
@@ -150,7 +150,7 @@ NXS_NAMESPACE
         Ptr<RenderSystem> m_renderSystem;
         Ptr<Editor> m_editor;
 
-        Timer m_timer;
+        Ref<Timer> m_timer;
         float m_deltaTime = 0.0f;
 
         Ptr<MeshManager> m_meshManager;

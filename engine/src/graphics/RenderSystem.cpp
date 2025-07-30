@@ -26,7 +26,7 @@ void RenderSystem::ClearScreen() const
 
 void RenderSystem::BeginDraw()
 {
-    m_timer.Stamp();
+    m_timer.Tick();
     ClearScreen();
 }
 
