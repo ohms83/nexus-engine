@@ -12,7 +12,8 @@
 #include "imgui_impl_sdl3.h"
 #include "implot.h"
 #include "core/Logger.h"
-#include "core/TimerManager.h"
+#include "core/TaskManager.h"
+#include "../include/nexus/time/TimerManager.h"
 #include "graphics/debug/Gizmos.h"
 #include "io/InputManager.h"
 #include "resource/Mesh.h"
@@ -33,6 +34,7 @@ Application::~Application()
 
     InputManager::Destroy();
     TimerManager::Destroy();
+    TaskManager::Destroy();
 
     m_currentScene.reset();
 
@@ -57,8 +59,11 @@ Application::~Application()
 
 bool Application::Init(const ApplicationConfig& info)
 {
+    // TaskManager should be initialized before anything.
+    TaskManager::Init();
+
     auto& logger = Logger::Instance();
-    Logger::Init(Logger::LogToFile | Logger::LogToStdOut);
+    Logger::Init(Logger::LogToFile | Logger::LogToStdOut, 5);
 
     //Initialize SDL
     if( SDL_Init( SDL_INIT_VIDEO ) == false )
@@ -123,15 +128,15 @@ bool Application::Init(const ApplicationConfig& info)
 
 int Application::BeginMainLoop()
 {
-    m_timer = PTR_CAST<Timer>(TimerManager::Instance().GetTimer());
+    m_timer = TimerManager::Instance().GetTimer();
 
     //The event data
     SDL_Event e;
     SDL_zero(e);
 
-    auto& logger = Logger::Instance();
     auto& inputManager = InputManager::Instance();
     auto& timerManager = TimerManager::Instance();
+    auto& taskManager = TaskManager::Instance();
 
     while(!m_quit)
     {
@@ -139,7 +144,9 @@ int Application::BeginMainLoop()
         m_deltaTime = m_timer->GetDeltaTime();
 
         PollEvents(e);
+
         Update();
+        taskManager.Update();
 
         // Update input
         inputManager.Update();
@@ -159,9 +166,6 @@ int Application::BeginMainLoop()
 
         EndDrawUI();
         m_renderSystem->EndDraw();
-
-        // Flush the logs
-        logger.Flush();
     }
     return 0;
 }

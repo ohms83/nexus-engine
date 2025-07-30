@@ -20,6 +20,8 @@ protected:
     void OnResize(const glm::ivec2& screenSize, const glm::ivec2& actualSize) override;
     void Update() override;
 
+    void InitCube(nxs::Scene& scene, nxs::int32 row, nxs::int32 col);
+
 private:
     //! Editor camera.
     nxs::Ref<nxs::Camera> m_camera;

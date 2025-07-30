@@ -31,7 +31,7 @@ void Profiler::Draw_Internal(RenderSystem& renderSystem)
     ImGui::Text("Graphics API: %s", api.c_str());
     ImGui::Text("FPS: %.2f", io.Framerate);
     ImGui::Text("Frame Update: %.2f ms", frameTime);
-    ImGui::Text("Render: %.2f ms", renderSystem.GetrenderTime() * 1000.f);
+    ImGui::Text("Render: %.2f ms", renderSystem.GetrenderTime());
     ImGui::Text("Draw Calls: %d", renderSystem.GetDrawCount());
     ImGui::Text("Polygons: %d", renderSystem.GetPolygonCount());
 

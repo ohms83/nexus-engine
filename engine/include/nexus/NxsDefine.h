@@ -13,6 +13,7 @@
 #define MAYBE_UNUSED [[maybe_unused]]
 
 #include <cassert>
+#include <functional>
 
 #define NXS_NAMESPACE namespace nxs
 #define USING_NAMESPACE_NXS using namespace nxs
@@ -105,7 +106,7 @@ NXS_NAMESPACE
     using Ref = std::shared_ptr<T>;
 
     /**
-     * Auto-release pointer. This is jus an alias to @c std::unique_ptr.
+     * Auto-release pointer. This is just an alias to @c std::unique_ptr.
      */
     template<typename T>
     using Ptr = std::unique_ptr<T>;
@@ -136,4 +137,6 @@ NXS_NAMESPACE
     {
         return D_CAST<T>(obj) != nullptr;
     }
+
+    using Action = std::function<void()>;
 }

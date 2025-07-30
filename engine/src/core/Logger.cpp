@@ -7,6 +7,8 @@
 #include <ostream>
 #include <nexus/core/Logger.h>
 
+#include "core/TaskManager.h"
+
 USING_NAMESPACE_NXS;
 
 DEFINE_LOG(Logger);
@@ -15,11 +17,12 @@ DEFINE_LOG(Logger);
 
 Logger* Logger::m_instance = new Logger();
 
-void Logger::Init(const int32 initFlags)
+void Logger::Init(const int32 initFlags, const float flushInterval)
 {
     Logger& instance = Instance();
     instance.m_flags = initFlags;
     instance.OpenLogFile();
+    instance.SetFlushInterval(flushInterval);
 }
 
 void Logger::Destroy()
@@ -88,6 +91,23 @@ void Logger::Flush()
 {
     if (IsFlagSet(LogToFile)) m_logFile << std::flush;
     if (IsFlagSet(LogToStdOut)) std::cout << std::flush;
+}
+
+void Logger::SetFlushInterval(const float seconds)
+{
+    auto& taskManager = TaskManager::Instance();
+    taskManager.StopTask(m_flushTask);
+    m_flushTask = taskManager.CreateTask(
+        // Flush action
+        [&] { Flush(); },
+        // Repeat counts
+        -1,
+        // Delay
+        0,
+        // Task repeat interval
+        seconds,
+        // Run immediately
+        true);
 }
 
 void Logger::SetMinumumLogLevel(const LogLevel level)

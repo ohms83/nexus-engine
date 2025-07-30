@@ -1,0 +1,66 @@
+//
+// Created by nutta on 7/30/2025.
+//
+
+#include "nexus/time/TimerManager.h"
+#include "nexus/core/Logger.h"
+#include "nexus/time/StandardTimeSource.h"
+
+#include <algorithm>
+
+USING_NAMESPACE_NXS;
+
+static Ptr<TimerManager> s_instance;
+
+void TimerManager::Init()
+{
+    s_instance.reset(new TimerManager());
+}
+
+void TimerManager::Destroy()
+{
+    s_instance.reset();
+}
+
+TimerManager& TimerManager::Instance()
+{
+    NXS_ASSERT_MSG(s_instance, "TimerManager instance is not initialized");
+    return *s_instance;
+}
+
+Ref<Timer> TimerManager::GetTimer(Ref<ITimeSource> timeSource)
+{
+    const auto timer = std::make_shared<Timer>(timeSource);
+    timer->Start();
+    m_timers.push_back(timer);
+    return timer;
+}
+
+void TimerManager::RemoveTimer(const Ref<Timer>& timer)
+{
+    std::erase(m_timers, timer);
+}
+
+void TimerManager::ScheduleAction(const Action& action, const float delay, Ref<ITimeSource> timeSource)
+{
+    const auto timer = std::make_shared<Timer>(timeSource);
+    timer->ScheduleAction(action, delay);
+    m_oneShotTimers.push_back(timer);
+}
+
+void TimerManager::Tick()
+{
+    std::ranges::for_each(m_timers, [&](const Ref<Timer>& timer)
+    {
+        timer->Tick();
+    });
+
+    std::ranges::for_each(m_oneShotTimers, [&](const Ref<Timer>& timer)
+    {
+        timer->Tick();
+    });
+    std::erase_if(m_oneShotTimers, [&](const Ref<Timer>& timer)
+    {
+        return timer->IsExecuted();
+    });
+}

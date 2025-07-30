@@ -1,6 +1,5 @@
 #include "gtest/gtest.h"
 #include "nexus/Nexus.h"
-#include <iostream>
 #include <sstream>
 #include <format>
 #include <string>
@@ -12,14 +11,14 @@ std::string FormatVector(const glm::vec3& vec)
 }
 
 TEST(TransformTest, ForwardVector) {
-    const float epsilon = 0.00001f; // A small tolerance value
-    const int iteration = 10; // Try testing with the 10 random data.
+    constexpr int iteration = 10; // Try testing with the 10 random data.
     
     for (int i = 0; i < iteration; ++i)
     {
+        constexpr float epsilon = 0.00001f;
         const glm::vec3 randPos = glm::ballRand(100.f);
         const glm::vec3 randTarget = glm::ballRand(100.f);
-        const glm::vec3 up {0, 1, 0};
+        constexpr glm::vec3 up {0, 1, 0};
         
         nxs::Transform transform;
         transform.SetPosition(randPos);
@@ -37,14 +36,14 @@ TEST(TransformTest, ForwardVector) {
 }
 
 TEST(TransformTest, RightVector) {
-    const float epsilon = 0.00001f; // A small tolerance value
-    const int iteration = 10; // Try testing with the 10 random data.
+    constexpr int iteration = 10; // Try testing with the 10 random data.
     
     for (int i = 0; i < iteration; ++i)
     {
+        constexpr float epsilon = 0.00001f;
         const glm::vec3 randPos = glm::ballRand(100.f);
         const glm::vec3 randTarget = glm::ballRand(100.f);
-        const glm::vec3 up {0, 1, 0};
+        constexpr glm::vec3 up {0, 1, 0};
         
         nxs::Transform transform;
         transform.SetPosition(randPos);
@@ -63,14 +62,14 @@ TEST(TransformTest, RightVector) {
 }
 
 TEST(TransformTest, UpVector) {
-    const float epsilon = 0.00001f; // A small tolerance value
-    const int iteration = 1; // Try testing with the 10 random data.
+    constexpr int iteration = 10; // Try testing with the 10 random data.
     
     for (int i = 0; i < iteration; ++i)
     {
+        constexpr float epsilon = 0.00001f;
         const glm::vec3 randPos = glm::ballRand(100.f);
         const glm::vec3 randTarget = glm::ballRand(100.f);
-        const glm::vec3 up {0, 1, 0};
+        constexpr glm::vec3 up {0, 1, 0};
         
         nxs::Transform transform;
         transform.SetPosition(randPos);
@@ -90,14 +89,14 @@ TEST(TransformTest, UpVector) {
 }
 
 TEST(TransformTest, CalculateViewMatrix) {
-    const float epsilon = 0.0001f; // A small tolerance value
-    const int iteration = 10; // Try testing with the 10 random data.
+    constexpr int iteration = 10; // Try testing with the 10 random data.
 
     for (int i = 0; i < iteration; ++i)
     {
+        constexpr float epsilon = 0.0001f;
         const glm::vec3 randPos = glm::ballRand(100.f);
         const glm::vec3 randTarget = glm::ballRand(100.f);
-        const glm::vec3 up {0, 1, 0};
+        constexpr glm::vec3 up {0, 1, 0};
         
         glm::quat rotation = glm::quatLookAt(glm::normalize(randTarget - randPos), up);
         glm::mat4 cameraView = nxs::Matrix::CreateViewMatrix(randPos, rotation);
@@ -109,13 +108,13 @@ TEST(TransformTest, CalculateViewMatrix) {
 
         errorMessage << "Matrices are NOT approximately equal within epsilon (" << epsilon << ")" << std::endl;
         errorMessage << "Column comparison results (mat1 vs mat2): " << std::endl;
-        for (int i = 0; i < 4; ++i) {
-            errorMessage << "  Column " << i << ": " << (result_columns[i] ? "True" : "False") << std::endl;
-            for (int j = 0; j < 4; ++j) {
+        for (int j = 0; j < 4; ++j) {
+            errorMessage << "  Column " << j << ": " << (result_columns[j] ? "True" : "False") << std::endl;
+            for (int k = 0; k < 4; ++k) {
                 errorMessage << std::fixed << std::setprecision(8)
-                        << "    mat1[" << i << "][" << j << "] = " << glmView[i][j]
-                        << ", mat2[" << i << "][" << j << "] = " << cameraView[i][j]
-                        << ", diff = " << std::abs(glmView[i][j] - cameraView[i][j]) << std::endl;
+                        << "    mat1[" << j << "][" << k << "] = " << glmView[j][k]
+                        << ", mat2[" << j << "][" << k << "] = " << cameraView[j][k]
+                        << ", diff = " << std::abs(glmView[j][k] - cameraView[j][k]) << std::endl;
             }
         }
 

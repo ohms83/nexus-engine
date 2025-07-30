@@ -13,6 +13,8 @@
 #include <nexus/NxsDefine.h>
 #include <sigslot/signal.hpp>
 
+#include "Task.h"
+
 #define DECLARE_LOG_EXTERN(LogCategory) extern const std::string Log##LogCategory
 #define DEFINE_LOG(LogCategory) const std::string Log##LogCategory = #LogCategory
 
@@ -96,7 +98,7 @@ NXS_NAMESPACE
         static constexpr int32 LogToStdOut  = 0x01;
         static constexpr int32 LogToFile    = 0x02;
 
-        static void Init(int32 initFlags);
+        static void Init(int32 initFlags, float flushInterval = 0);
         //! Destroy Logger's singleton.
         static void Destroy();
 
@@ -118,6 +120,8 @@ NXS_NAMESPACE
         }
 
         void Flush();
+        //! Set how frequent the logs should be flushed.
+        void SetFlushInterval(float seconds);
 
         /**
          * Set the minimum log level and discard all the log below the specified level.
@@ -143,6 +147,8 @@ NXS_NAMESPACE
         LogLevel m_minimumLogLevel = LogLevel::Debug;
         //! A set of disabled log categories.
         std::set<std::string> m_disableLogs;
+
+        TaskHandle m_flushTask{};
 
     private:
         Logger();

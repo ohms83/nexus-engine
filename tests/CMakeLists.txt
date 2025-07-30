@@ -1,5 +1,7 @@
 add_executable(nexus-test
     scene/Transform_Test.cpp
+    time/Timer_Test.cpp
+    time/TimeSource_Test.cpp
 )
 
 # 2. Link to Google Test's main library

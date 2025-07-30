@@ -15,7 +15,7 @@
 #include <nexus/graphics/RenderSystem.h>
 #include <glm/glm.hpp>
 
-#include "core/Timer.h"
+#include "time/Timer.h"
 #include "editor/Editor.h"
 #include "resource/Mesh.h"
 #include "resource/Texture.h"

@@ -247,3 +247,40 @@ void NexusEditor::Update()
     const glm::vec2 euler = nxs::InputManager::Instance().GetMouseAxisValue("camera_turn") * GetDeltaTime();
     camera->Rotate(glm::vec3(euler.y, euler.x, 0));
 }
+
+void NexusEditor::InitCube(nxs::Scene& scene, const nxs::int32 row, const nxs::int32 col)
+{
+    const auto& renderInterface = GetRenderSystem().GetRenderInterface();
+    constexpr float gridWidth  = 5;
+    constexpr float gridHeight = 5;
+
+    float x = (col - 1) * gridWidth / 2;
+    float z = 0;
+
+    const auto texturePath = GetAssetPath(texturePaths[1]);
+    auto texture = GetTextureManager().Get(texturePath);
+    texture->SetWrapMode(nxs::TextureWrapMode::Clamp, nxs::TextureWrapMode::Clamp);
+    texture->SetFiltering(nxs::TextureFilterMode::Linear, nxs::TextureFilterMode::Linear);
+    texture->AllocateGpuResource(renderInterface);
+
+    const auto mesh = GetMeshManager().GetStaticMesh(nxs::Mesh::CubeMesh);
+    auto node = scene.CreateNode<nxs::SceneNode>("Cube Node");
+    nxs::RenderComponent renderComponent = {
+        mesh->GetVertexBuffer(),
+        mesh->GetIndexBuffer(),
+        m_shader.get()
+    };
+    node->AddComponent<nxs::DiffuseMapComponent>(nxs::DiffuseMapComponent {
+        {texture->GetProxy()}
+    });
+    node->AddComponent<nxs::RenderComponent>(renderComponent);
+    node->AddComponent<nxs::TransformComponent>(nxs::TransformComponent {
+        {0, 1, 0},
+        glm::quat(1, 0, 0, 0),
+        {1, 1, 1}
+    });
+    node->AddComponent<nxs::RotationComponent>(nxs::RotationComponent {
+        glm::normalize(glm::sphericalRand<float>(1)),
+        90.f
+    });
+}

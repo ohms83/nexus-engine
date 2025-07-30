@@ -3,14 +3,16 @@
 #include <nexus/NxsDefine.h>
 #include "Color.h"
 #include "RenderingInterface.h"
-#include <nexus/core/HighResTimer.h>
+#include <nexus/time/Timer.h>
+
+#include "core/Logger.h"
 
 NXS_NAMESPACE
 {
     enum class RenderPass
     {
         //! Depth fill pass
-        Depth,
+        DepthFill,
         Opaque,
         AlphaBlend,
         //! Gizmos will always be rendered last.
@@ -62,6 +64,7 @@ NXS_NAMESPACE
 
         NODISCARD RenderingInterface& GetRenderInterface() const
         {
+            NXS_ASSERT_MSG(m_renderingInterface, "Rendering interface is not initialized");
             assert(m_renderingInterface);
             // ReSharper disable once CppDFANullDereference
             return *m_renderingInterface;
@@ -69,11 +72,12 @@ NXS_NAMESPACE
 
         NODISCARD RenderContext GetRenderContext() const
         {
-            assert(m_renderingInterface);
+            NXS_ASSERT_MSG(m_renderingInterface, "Rendering interface is not initialized");
             // ReSharper disable once CppDFANullDereference
             return m_renderingInterface->GetRenderContext();
         }
 
+        //! Get the time used for rendering the last frame in milliseconds.
         NODISCARD float GetrenderTime() const
         {
             return m_renderTime;
@@ -116,6 +120,6 @@ NXS_NAMESPACE
 
         //! Time spent rendering the last frame in milliseconds. Mainly used for profiling.
         float m_renderTime = 0.0f;
-        HighResTimer m_timer;
+        Timer m_timer;
     };
 }
