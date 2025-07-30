@@ -140,7 +140,7 @@ void InputManager::OnMouseDown(const int32 buttonId, const float x, const float 
     }
 
     mouseDownEventCallback(buttonId, x, y);
-    LOG_INFO(LogInputManager, std::format("OnMouseDown button={} x={} y={}", buttonId, x, y));
+    LOG_DEBUG(LogInputManager, std::format("OnMouseDown button={} x={} y={}", buttonId, x, y));
 }
 
 void InputManager::OnMouseUp(const int32 buttonId, const float x, const float y)
@@ -156,7 +156,7 @@ void InputManager::OnMouseUp(const int32 buttonId, const float x, const float y)
     }
 
     mouseUpEventCallback(buttonId, x, y);
-    LOG_INFO(LogInputManager, std::format("OnMouseUp button={} x={} y={}", buttonId, x, y));
+    LOG_DEBUG(LogInputManager, std::format("OnMouseUp button={} x={} y={}", buttonId, x, y));
 }
 
 void InputManager::OnMouseMove(const float x, const float y)
@@ -168,7 +168,7 @@ void InputManager::OnMouseMove(const float x, const float y)
 
         pos.x = x;
         pos.y = y;
-        LOG_INFO(LogInputManager, std::format("OnMouseMove x={} y={}", x, y));
+        LOG_DEBUG(LogInputManager, std::format("OnMouseMove x={} y={}", x, y));
     }
     mouseMotionEventCallback(x, y);
 }
