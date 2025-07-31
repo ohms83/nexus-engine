@@ -5,9 +5,7 @@
 #include <format>
 #include <iostream>
 #include <ostream>
-#include <nexus/core/Logger.h>
-
-#include "core/TaskManager.h"
+#include "nexus/core/Logger.h"
 
 USING_NAMESPACE_NXS;
 
@@ -15,19 +13,26 @@ DEFINE_LOG(Logger);
 
 #define LOG_FORMAT(Level, Category, Message) std::format("[{}][{}] {}\n", #Level, Category, Message);
 
-Logger* Logger::m_instance = new Logger();
+static Ptr<Logger> s_instance;
 
-void Logger::Init(const int32 initFlags, const float flushInterval)
+void Logger::Init(const int32 initFlags)
 {
-    Logger& instance = Instance();
-    instance.m_flags = initFlags;
-    instance.OpenLogFile();
-    instance.SetFlushInterval(flushInterval);
+    s_instance.reset(new Logger());
+    s_instance->m_flags = initFlags;
+    s_instance->OpenLogFile();
 }
 
 void Logger::Destroy()
 {
-    delete m_instance;
+    s_instance.reset();
+}
+
+Logger& Logger::Instance()
+{
+    // Can't use NXS_ASSERT since logger hasn't been intialized yet.
+    // TODO: Created a separated assertion module.
+    assert(s_instance);
+    return *s_instance;
 }
 
 void Logger::Log(LogLevel level, const std::string& category, const std::string& message)
@@ -91,23 +96,6 @@ void Logger::Flush()
 {
     if (IsFlagSet(LogToFile)) m_logFile << std::flush;
     if (IsFlagSet(LogToStdOut)) std::cout << std::flush;
-}
-
-void Logger::SetFlushInterval(const float seconds)
-{
-    auto& taskManager = TaskManager::Instance();
-    taskManager.StopTask(m_flushTask);
-    m_flushTask = taskManager.CreateTask(
-        // Flush action
-        [&] { Flush(); },
-        // Repeat counts
-        -1,
-        // Delay
-        0,
-        // Task repeat interval
-        seconds,
-        // Run immediately
-        true);
 }
 
 void Logger::SetMinumumLogLevel(const LogLevel level)

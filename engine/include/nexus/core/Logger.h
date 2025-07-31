@@ -88,17 +88,17 @@ NXS_NAMESPACE
             Num
         };
         using LogCallback = sigslot::signal<LogLevel, const std::string&>;
+        
+        Logger();
+        virtual ~Logger();
 
-        NODISCARD static Logger& Instance()
-        {
-            return *m_instance;
-        }
+        NODISCARD static Logger& Instance();
 
         // Logger init flags
         static constexpr int32 LogToStdOut  = 0x01;
         static constexpr int32 LogToFile    = 0x02;
 
-        static void Init(int32 initFlags, float flushInterval = 0);
+        static void Init(int32 initFlags);
         //! Destroy Logger's singleton.
         static void Destroy();
 
@@ -120,8 +120,6 @@ NXS_NAMESPACE
         }
 
         void Flush();
-        //! Set how frequent the logs should be flushed.
-        void SetFlushInterval(float seconds);
 
         /**
          * Set the minimum log level and discard all the log below the specified level.
@@ -151,9 +149,6 @@ NXS_NAMESPACE
         TaskHandle m_flushTask{};
 
     private:
-        Logger();
-        virtual ~Logger();
-
         NODISCARD bool IsFlagSet(const int32 flag) const
         {
             return (m_flags & flag) == flag;
@@ -161,7 +156,5 @@ NXS_NAMESPACE
 
         void OpenLogFile();
         void CloseLogFile();
-
-        static Logger* m_instance;
     };
 }

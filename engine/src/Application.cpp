@@ -61,9 +61,24 @@ bool Application::Init(const ApplicationConfig& info)
 {
     // TaskManager should be initialized before anything.
     TaskManager::Init();
+    auto& taskManager = TaskManager::Instance();
 
+    Logger::Init(Logger::LogToFile | Logger::LogToStdOut);
     auto& logger = Logger::Instance();
-    Logger::Init(Logger::LogToFile | Logger::LogToStdOut, 5);
+    
+    // TODO: Move to another class
+    // Flush the logs every second.
+    taskManager.CreateTask(
+        // Flush action
+        [] { Logger::Instance().Flush(); },
+        // Repeat counts
+        -1,
+        // Delay
+        0,
+        // Task repeat interval
+        1,
+        // Run immediately
+        true);
 
     //Initialize SDL
     if( SDL_Init( SDL_INIT_VIDEO ) == false )
