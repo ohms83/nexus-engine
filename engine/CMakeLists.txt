@@ -62,6 +62,7 @@ include(src/CMakeLists.txt)
 include(include/CMakeLists.txt)
 
 find_package(Python3 COMPONENTS Interpreter REQUIRED)
+find_package(OpenGL REQUIRED)
 
 add_library(nexus-engine
     ${ENGINE_SOURCES}
@@ -95,15 +96,11 @@ target_include_directories(nexus-engine
 )
 
 target_link_libraries(nexus-engine
+    PRIVATE OpenGL::GL
     PRIVATE SDL3::SDL3
     PRIVATE glad
     PUBLIC  EnTT
-)
-
-find_package(OpenGL REQUIRED)
-# Link OpenGL library
-target_link_libraries(nexus-engine PRIVATE
-    OpenGL::GL
+    PRIVATE RapidJSON
 )
 
 # Define IMGUI_IMPL_OPENGL_LOADER_GLAD for OpenGL3 backend to use glad
