@@ -53,6 +53,7 @@ NXS_NAMESPACE
     enum class DataType
     {
         None,
+        Bool,
         Byte,
         Short,
         Int32,
@@ -63,6 +64,9 @@ NXS_NAMESPACE
         UInt64,
         Float,
         Double,
+        String,
+        Array,
+        Map,
         Num
     };
 

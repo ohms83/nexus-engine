@@ -46,6 +46,7 @@
 #include "graphics/opengl/NxsGL.h"
 #include "io/InputManager.h"
 #include "io/KeyInputMap.h"
+#include "io/Serialize.h"
 #include "math/Math.h"
 #include "math/Matrix.h"
 #include "memory/Buffer.h"

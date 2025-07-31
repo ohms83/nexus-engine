@@ -1,9 +1,8 @@
 #pragma once
 
-#include <type_traits>
-
-#include <nexus/NxsDefine.h>
 #include <nexus/NxsCommon.h>
+
+#include <type_traits>
 
 #define NXS_INFINITE 0xFFFFFFFF
 
@@ -34,6 +33,40 @@ NXS_NAMESPACE
         T VLerp(const T& a, const T& b, float t)
         {
             return T (a + (b - a) * t);
+        }
+
+        //! Compare whether the two float are approximately equal
+        inline bool Approx(float a, float b, float epsilon = FLT_EPSILON)
+        {
+            return abs(a - b) < epsilon;
+        }
+
+        //! Compare whether the two double are approximately equal
+        inline bool Approx(double a, double b, double epsilon = DBL_EPSILON)
+        {
+            return abs(a - b) < epsilon;
+        }
+
+        /**
+         * Compare the two floating-points
+         * @return 0, if both are approximately equal, 1 if a is greater, or -1 if a is lesser.
+         */
+        inline int32 Compare(float a, float b, float epsilon = FLT_EPSILON)
+        {
+            if (Approx(a, b, epsilon)) return 0;
+            else if (a > b) return 1;
+            return -1;
+        }
+
+        /**
+         * Compare the two double precision floating-points
+         * @return 0, if both are approximately equal, 1 if a is greater, or -1 if a is lesser.
+         */
+        inline int32 Compare(double a, double b, double epsilon = DBL_EPSILON)
+        {
+            if (Approx(a, b, epsilon)) return 0;
+            else if (a > b) return 1;
+            return -1;
         }
     }
 }

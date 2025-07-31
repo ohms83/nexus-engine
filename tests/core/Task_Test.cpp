@@ -31,7 +31,7 @@ TEST_F(TaskTest, RunTask)
         // Delay
         0,
         // Interval
-        10,
+        10.f,
         // Run immediately
         true,
         // Time source
@@ -91,7 +91,7 @@ TEST_F(TaskTest, DelayedTask)
         // Repeat counts
         1,
         // Delay
-        5,
+        5.f,
         // Interval
         0,
         // Run immediately

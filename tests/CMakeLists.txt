@@ -1,10 +1,9 @@
+file(GLOB_RECURSE TEST_SOURCES *.cpp)
+file(GLOB_RECURSE TEST_HEADERS *.h)
+
 add_executable(nexus-test
-    helpers/FakeTimeSource.h
-    
-    core/Task_Test.cpp
-    scene/Transform_Test.cpp
-    time/Timer_Test.cpp
-    time/TimeSource_Test.cpp
+    ${TEST_HEADERS}
+    ${TEST_SOURCES}
 )
 
 # 2. Link to Google Test's main library
