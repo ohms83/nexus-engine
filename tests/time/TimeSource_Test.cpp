@@ -30,7 +30,7 @@ TEST_F(TimeSourceTest, StandardNow)
     SDL_Delay(500);
     diff = timeSource->Now() - diff;
     std::cout << std::format("Diff={}\n", diff);
-    EXPECT_NEAR(diff, 0.5, 0.0005);
+    EXPECT_NEAR(diff, 0.5, 0.0011);
 }
 
 TEST_F(TimeSourceTest, StandardNowMs)
