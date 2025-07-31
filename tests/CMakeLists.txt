@@ -1,4 +1,7 @@
 add_executable(nexus-test
+    helpers/FakeTimeSource.h
+    
+    core/Task_Test.cpp
     scene/Transform_Test.cpp
     time/Timer_Test.cpp
     time/TimeSource_Test.cpp
