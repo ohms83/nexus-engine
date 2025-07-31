@@ -23,8 +23,9 @@ NXS_NAMESPACE
          * @param interval How many seconds the task should wait between each repeat. 0 means the task will run every frame.
          * @param runImmediate If @c true, the task will start running immediately; otherwise, it must be manually started
          * by calling @c Run funciton.
-         */
+         */        
         Task(const Action& action, int32 repeatCount, float delay, float interval, bool runImmediate = true);
+        Task(const Action& action, int32 repeatCount, float delay, float interval, bool runImmediate, Ref<ITimeSource> timeSource);
         virtual ~Task() = default;
 
         uint32 GetRepeatCount() const

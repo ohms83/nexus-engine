@@ -148,3 +148,61 @@ TEST_F(TaskTest, RepeatedTask)
     task->Update();
     EXPECT_EQ(numExecution, numRepeat);
 }
+
+// Test whether the task can be manually started
+TEST_F(TaskTest, StartTask)
+{
+    int numExecution = 0;
+    auto timeSource = std::make_shared<FakeTimeSource>();
+    auto task = std::make_unique<nxs::Task> (
+        [&]() { ++numExecution; },
+        // Repeat counts
+        -1,
+        // Delay
+        0,
+        // Interval
+        0,
+        // Do not run immediately
+        false,
+        // Time source
+        timeSource
+    );
+    task->Update();
+    EXPECT_EQ(numExecution, 0);
+
+    timeSource->Advance(10);
+    task->Update();
+    // Still shouldn't have started.
+    EXPECT_EQ(numExecution, 0);
+    
+    task->Run();
+    task->Update();
+    task->Update();
+    task->Update();
+    EXPECT_EQ(numExecution, 3);
+}
+
+// Test whether the task can be stopped correctly
+TEST_F(TaskTest, StopTask)
+{
+    int numExecution = 0;
+    auto task = std::make_unique<nxs::Task> (
+        [&]() { ++numExecution; },
+        // Repeat counts
+        -1,
+        // Delay
+        0,
+        // Interval
+        0,
+        // Run immediately
+        true
+    );
+    task->Update();
+    EXPECT_EQ(numExecution, 1);
+    
+    task->Stop();
+    task->Update();
+    task->Update();
+    task->Update();
+    EXPECT_EQ(numExecution, 1);
+}
