@@ -28,32 +28,32 @@ NXS_NAMESPACE
         Task(const Action& action, int32 repeatCount, float delay, float interval, bool runImmediate, Ref<ITimeSource> timeSource);
         virtual ~Task() = default;
 
-        uint32 GetRepeatCount() const
+        NODISCARD uint32 GetRepeatCount() const
         {
             return m_repeatCount;
         }
 
-        bool IsFinite() const
+        NODISCARD bool IsFinite() const
         {
             return m_repeatCount > 0;
         }
 
-        bool IsRunning() const
+        NODISCARD bool IsRunning() const
         {
             return m_isRunning;
         }
 
-        bool IsFinished() const
+        NODISCARD bool IsFinished() const
         {
             return IsFinite() && m_numRepeats == 0;
         }
 
-        float GetDelay() const
+        NODISCARD float GetDelay() const
         {
             return m_delay;
         }
 
-        float GetDuration() const
+        NODISCARD float GetDuration() const
         {
             return m_interval;
         }
@@ -63,7 +63,7 @@ NXS_NAMESPACE
         void Stop();
 
         //! Get time since the last update.
-        float GetDeltaTime() const
+        NODISCARD float GetDeltaTime() const
         {
             return m_timer.GetDeltaTime();
         }
