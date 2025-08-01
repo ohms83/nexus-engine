@@ -3,6 +3,8 @@
 #include <SDL3/SDL.h>
 #include <memory>
 
+#include "NxsDataType.h"
+
 #if defined(_WIN32)
     #ifndef NXS_PLATFORM_WINDOWS
         #define NXS_PLATFORM_WINDOWS 1
@@ -12,7 +14,6 @@
 #define NODISCARD [[nodiscard]]
 #define MAYBE_UNUSED [[maybe_unused]]
 
-#include <cassert>
 #include <functional>
 
 #define NXS_NAMESPACE namespace nxs
@@ -30,9 +31,11 @@
 
 #define SHORT_CAST(x)   CAST<int16_t>(x)
 #define INT_CAST(x)     CAST<int32_t>(x)
+#define INT64_CAST(x)   CAST<int64_t>(x)
 #define BYTE_CAST(x)    CAST<uint8_t>(x)
 #define USHORT_CAST(x)  CAST<uint16_t>(x)
 #define UINT_CAST(x)    CAST<uint32_t>(x)
+#define UINT64_CAST(x)  CAST<uint64_t>(x)
 #define FLOAT_CAST(x)   CAST<float>(x)
 #define SIZE_CAST(x)    CAST<size_t>(x)
 
@@ -40,62 +43,6 @@
 
 NXS_NAMESPACE
 {
-    typedef int8_t      int8;
-    typedef int16_t     int16;
-    typedef int32_t     int32;
-    typedef int64_t     int64;
-
-    typedef uint8_t     uint8;
-    typedef uint16_t    uint16;
-    typedef uint32_t    uint32;
-    typedef uint64_t    uint64;
-
-    enum class DataType
-    {
-        None,
-        Bool,
-        Byte,
-        Short,
-        Int32,
-        Int64,
-        UByte,
-        UShort,
-        UInt32,
-        UInt64,
-        Float,
-        Double,
-        String,
-        Array,
-        Map,
-        Num
-    };
-
-    inline size_t NxsDataTypeSize(const DataType type)
-    {
-        switch (type)
-        {
-        case DataType::UByte:
-        case DataType::Byte:
-            return sizeof(uint8);
-        case DataType::UShort:
-        case DataType::Short:
-            return sizeof(uint16);
-        case DataType::UInt32:
-        case DataType::Int32:
-            return sizeof(uint32);
-        case DataType::UInt64:
-        case DataType::Int64:
-            return sizeof(uint64);
-        case DataType::Float:
-            return sizeof(float);
-        case DataType::Double:
-            return sizeof(double);
-        default:
-            assert(0);
-            return 0;
-        }
-    }
-
     using WindowContext = SDL_Window*;
 
     union RenderContext

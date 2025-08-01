@@ -7,269 +7,286 @@
 #pragma once
 
 #include "nexus/NxsDefine.h"
+#include "nexus/core/Logger.h"
 
-#include <ios>
+#include <variant>
 #include <string>
 #include <vector>
 #include <map>
-#include <assert.h>
+#include <string_view> // For robust accessors
+#include <iostream>    // For demonstration
 
-// To make a class serializable, just use this macro during the class declaration.
-#define DECLARE_SERIALIZABLE(ClassName) \
-public: ClassName(const nxs::Serializable& obj); \
-public: operator nxs::Serializable () const;
-// Stringtify the given param and insert it into specified serializeMap
-#define PACK_MAP_PARAM(serializeMap, param) serializeMap.insert(std::pair<std::string, serialize::Serializable>(#param, param))
-#define UNPACK_MAP_PARAM(serializeMap, param) param = serializeMap.at(#param)
-// Unpack specified map param into int16_t.
-#define UNPACK_MAP_PARAM_BYTE(serializeMap, param) param = ((int8_t)(int64_t)serializeMap.at(#param))
-// Unpack specified map param into int16_t.
-#define UNPACK_MAP_PARAM_SHORT(serializeMap, param) param = ((int16_t)(int64_t)serializeMap.at(#param))
-// Unpack specified map param into int32_t.
-#define UNPACK_MAP_PARAM_INT(serializeMap, param) param = ((int32_t)(int64_t)serializeMap.at(#param))
-// Unpack specified map param into int64_t.
-#define UNPACK_MAP_PARAM_LONG(serializeMap, param) param = (int64_t)serializeMap.at(#param)
-// Unpack specified map param into int16_t.
-#define UNPACK_MAP_PARAM_UBYTE(serializeMap, param) param = ((uint8_t)(int64_t)serializeMap.at(#param))
-// Unpack specified map param into int16_t.
-#define UNPACK_MAP_PARAM_USHORT(serializeMap, param) param = ((uint16_t)(int64_t)serializeMap.at(#param))
-// Unpack specified map param into int32_t.
-#define UNPACK_MAP_PARAM_UINT(serializeMap, param) param = ((uint32_t)(int64_t)serializeMap.at(#param))
-// Unpack specified map param into int64_t.
-#define UNPACK_MAP_PARAM_ULONG(serializeMap, param) param = (uint64_t)serializeMap.at(#param)
-// Unpack specified map param into float.
-#define UNPACK_MAP_PARAM_FLOAT(serializeMap, param) param = ((float)(double)serializeMap.at(#param))
-// Unpack specified map param into double.
-#define UNPACK_MAP_PARAM_DOUBLE(serializeMap, param) param = (double)serializeMap.at(#param)
-// Unpack specified map param into bool.
-#define UNPACK_MAP_PARAM_BOOL(serializeMap, param) param = (bool)serializeMap.at(#param)
-#define UNPACK_MAP_PARAM_STRING(serializeMap, param) param = ((std::string)serializeMap.at(#param))
-
-#define DECLARE_SERIALIZE_VALUE(ClassName, Type, OverridingMethod) \
-class ClassName##SerializeValue final : public SerializeValue \
-{ \
-public: \
-	ClassName##SerializeValue(const Type& value) : m_value(value) {} \
-	ClassName##SerializeValue(Type&& value) : m_value(move(value)) {} \
-	const Type& OverridingMethod() const override { return m_value; } \
-private: \
-	Type m_value; \
-};
+DECLARE_LOG_EXTERN(Serialize);
 
 NXS_NAMESPACE
 {
-	// Forward declaration needed for Serializable::Map and Serializable::Array
-	class Serializable;
-	class SerializeValue;
+	// Forward declaration to allow recursive types
+    class Serializable;
 
-	class Serializable final
-	{
-	public:
-		typedef std::vector<Serializable> Array;
-		typedef std::map<std::string, Serializable> Map;
+    // Define the types that a Serializable object can hold
+    // Using std::string for map keys and std::vector<Serializable> for arrays
+    // Using std::map<std::string, Serializable> for objects
+    using SerializableValue = std::variant<
+        std::monostate, // Represents null
+        bool,
+        int64_t,        // Use int64_t for a general integer type
+        double,
+        std::string,
+        std::vector<Serializable>,  // Array type
+        std::map<std::string, Serializable, std::less<>> // Map/Object type with transparent comparator
+    >;
 
-		Serializable();
+    class Serializable
+    {
+    public:
+        using Map = std::map<std::string, Serializable, std::less<>>;
+        using Array = std::vector<Serializable>;
 
-		Serializable(const Serializable& rhs);
+        // --- Constructors ---
+        Serializable() : m_value(std::monostate{}) {} // Default to Null
+        Serializable(std::nullptr_t) : m_value(std::monostate{}) {} // For null
+        Serializable(bool value) : m_value(value) {}
+        Serializable(const int value) : m_value(static_cast<int64_t>(value)) {}
+        Serializable(int64_t value) : m_value(value) {}
+        Serializable(double value) : m_value(value) {}
+        Serializable(const char* value) : m_value(std::string(value)) {}
+        Serializable(const std::string_view value) : m_value(std::string(value)) {}
+        Serializable(const std::string& value) : m_value(value) {}
+        Serializable(std::string&& value) : m_value(std::move(value)) {}
 
-		// Move constructor
-		Serializable(Serializable&& rhs) noexcept;
+        // For Array type (initializer list)
+        Serializable(const std::vector<Serializable>& values)
+            : m_value(values) {}
+        Serializable(const std::initializer_list<Serializable> list)
+            : m_value(std::vector(list)) {}
 
-		explicit Serializable(const char* strValue);
-		explicit Serializable(uint8_t uintValue);
-		explicit Serializable(uint16_t uintValue);
-		explicit Serializable(uint32_t uintValue);
-		explicit Serializable(uint64_t uintValue);
-		explicit Serializable(int16_t intValue);
-		explicit Serializable(int32_t intValue);
-		explicit Serializable(int64_t intValue);
-		explicit Serializable(int8_t uintValue);
-		explicit Serializable(double floatValue);
-		explicit Serializable(bool boolValue);
-		explicit Serializable(const std::string& stringValue);
-		explicit Serializable(const Array& arrayValue);
-		explicit Serializable(const Map& mapValue);
-		explicit Serializable(std::string&& stringValue);
-		explicit Serializable(Array&& arrayValue);
-		explicit Serializable(Map&& mapValue);
+        // For Map type (initializer list of pairs)
+        Serializable(const Map& list)
+            : m_value(list) {}
+        // Serializable(const std::initializer_list<std::pair<const std::string, Serializable>> list)
+        //     : m_value(Map(list)) {}
 
-		virtual ~Serializable() {}
+        // Copy and Move Constructors/Assignment Operators (handled by std::variant implicitly)
+        Serializable(const Serializable&) = default;
+        Serializable(Serializable&&) = default;
+        Serializable& operator=(const Serializable&) = default;
+        Serializable& operator=(Serializable&&) = default;
 
-		operator int64_t() const;
-		operator uint64_t() const;
-		operator double() const;
-		operator bool() const;
-		operator std::string() const;
-		operator Array() const;
-		operator Map() const;
+        // --- Type Information ---
+        NODISCARD DataType GetType() const;
 
-		Serializable& operator = (Serializable&& rhs) noexcept;
+        NODISCARD bool IsNull() const { return std::holds_alternative<std::monostate>(m_value); }
+        NODISCARD bool IsBool() const { return std::holds_alternative<bool>(m_value); }
+        NODISCARD bool IsInt() const { return std::holds_alternative<int64_t>(m_value); }
+        NODISCARD bool IsDouble() const { return std::holds_alternative<double>(m_value); }
+        NODISCARD bool IsString() const { return std::holds_alternative<std::string>(m_value); }
+        NODISCARD bool IsArray() const { return std::holds_alternative<std::vector<Serializable>>(m_value); }
+        NODISCARD bool IsMap() const { return std::holds_alternative<Map>(m_value); }
 
-		bool operator == (const Serializable& rhs) const;
-		bool operator != (const Serializable& rhs) const;
+        // --- Getters (with error handling) ---
+        NODISCARD bool GetBool() const {
+            if (!IsBool())
+            {
+                LOG_ERROR(LogSerialize, std::format("Not a bool type. Type={}", NxsGetTypeString(GetType())));
+                return false;
+            };
+            return std::get<bool>(m_value);
+        }
+        NODISCARD int64_t GetInt() const noexcept {
+            if (!IsInt())
+            {
+                LOG_ERROR(LogSerialize, std::format("Not an integer type. Type={}", NxsGetTypeString(GetType())));
+                return 0;
+            };
+            return std::get<int64_t>(m_value);
+        }
+        NODISCARD double GetDouble() const {
+            if (!IsDouble())
+            {
+                LOG_ERROR(LogSerialize, std::format("Not a double type. Type={}", NxsGetTypeString(GetType())));
+                return 0;
+            }
+            return std::get<double>(m_value);
+        }
+        NODISCARD const std::string& GetString() const noexcept {
+            if (!IsString())
+            {
+                LOG_ERROR(LogSerialize, std::format("Not a string type. Type={}", NxsGetTypeString(GetType())));
+                return s_emptyStr;
+            }
+            return std::get<std::string>(m_value);
+        }
+        NODISCARD const std::vector<Serializable>& GetArray() const noexcept {
+            if (!IsArray())
+            {
+                LOG_ERROR(LogSerialize, std::format("Not an array type. Type={}", NxsGetTypeString(GetType())));
+                return s_emptyArray;
+            }
+            return std::get<std::vector<Serializable>>(m_value);
+        }
+        NODISCARD const Map& GetMap() const noexcept {
+            if (!IsMap())
+            {
+                LOG_ERROR(LogSerialize, std::format("Not a map type. Type={}", NxsGetTypeString(GetType())));
+                return s_emptyMap;
+            }
+            return std::get<Map>(m_value);
+        }
 
-		int64_t GetInt() const;
-		uint64_t GetUint() const;
-		double GetFloat() const;
-		bool GetBoolean() const;
-		const std::string& GetString() const;
-		const Array& GetArray() const;
-		const Map& GetMap() const;
+        // Non-const versions for modification
+        std::string& GetString()
+        {
+            NXS_ASSERT_MSG(IsString(), std::format("Serializable: Not a string type. Type={}", NxsGetTypeString(GetType())));
+            return std::get<std::string>(m_value);
+        }
+        std::vector<Serializable>& GetArray() {
+            if (!IsArray()) {
+                // Option: auto-create if not array, or throw
+                m_value.emplace<std::vector<Serializable>>(); // Auto-create empty array
+            }
+            return std::get<std::vector<Serializable>>(m_value);
+        }
+        Map& GetMap() {
+            if (!IsMap()) {
+                // Option: auto-create if not map, or throw
+                m_value.emplace<Map>(); // Auto-create empty map
+            }
+            return std::get<Map>(m_value);
+        }
 
-		/// Convenient accessor for Map type.
-		const Serializable& operator [] (const std::string& key) const;
-		/// Convenient accessor for Map type.
-		const Serializable& At(const std::string& key) const;
-		/// Convenient accessor for Array type.
-		const Serializable& operator [] (size_t index) const;
-		/// Convenient accessor for Array type.
-		const Serializable& At(size_t index) const;
-		/**
-		 * Check whether the specified @c key exist.
-		 * @note This function will always return @c false for non Map type object.
-		 */
-		bool HasKey(const std::string& key) const;
-		/**
-		 * Try to retrieve a @c Serializable object with the given @c key.
-		 * @note If the object is a non-Map type, this function will always return @c false and @c outValue will be left unchanged.
-		 */
-		bool TryGet(const std::string& key, Serializable& outValue) const;
+        // --- Convenient Accessors for Map type ---
+        const Serializable& operator [] (const std::string_view key) const noexcept {
+            if (!IsMap()) {
+                LOG_ERROR(LogSerialize, std::format("Attempted map access on non-map type. Type={}", NxsGetTypeString(GetType())));
+                return None;
+            }
+            const auto& map = GetMap(); // Already ensures it's a map
+            if (const auto it = map.find(key); it != map.end()) {
+                return it->second;
+            }
+            return None; // Return a default "null" or "undefined" Serializable
+        }
 
-		DataType GetType() const noexcept { return m_type; };
+        Serializable& operator [] (const std::string_view key) noexcept {
+            // This will create a Map if it's not already one, or if it's Null
+            // If it's another type (e.g., Array, Bool), it will replace it with a Map.
 
-		/// Returns a string definition of the given type. This is mainly for debugging purpose.
-		static std::string GetTypeString(DataType type);
+            // GetMap handles type change/creation
+            // std::map operator[] always inserts if key not found
+            return GetMap()[std::string(key)];
+        }
 
-		//! A constant @c Serializable object representing a null, invalid, or uninitialized state.
-		static const Serializable None;
+        NODISCARD const Serializable& At(std::string_view key) const noexcept {
+            // Similar to operator[], but often expected to throw if key not found
+            if (!IsMap()) {
+                LOG_ERROR(LogSerialize, std::format("Attempted map access on non-map type. Type={}", NxsGetTypeString(GetType())));
+                return None;
+            }
+            const auto& map = GetMap();
+            const auto it = map.find(key);
+            if (it == map.end()) {
+                LOG_ERROR(LogSerialize, std::format("Key not found. Key={}", key));
+                return None;
+            }
+            return it->second;
+        }
 
-	private:
-		void CopyValue(DataType type, const SerializeValue& value);
-		DataType m_type = DataType::None;
-		Ptr<SerializeValue> m_pValue = nullptr;
-	};
+        // --- Convenient Accessors for an Array type ---
+        NODISCARD const Serializable& operator [] (size_t index) const noexcept {
+            if (!IsArray()) {
+                LOG_ERROR(LogSerialize, std::format("Attempted array access on non-array type. Type={}", NxsGetTypeString(GetType())));
+                return None;
+            }
+            const auto& arr = GetArray(); // Already ensures it's an array
+            if (index >= arr.size()) {
+                LOG_ERROR(LogSerialize, std::format("Array index out of bound {}/{}", index, arr.size()));
+                return None;
+            }
+            return arr[index];
+        }
 
-	class SerializeValue
-	{
-	public:
-		virtual ~SerializeValue() {}
-		virtual int64_t GetInt() const
-		{
-			return 0;
-		}
-		virtual uint64_t GetUint() const
-		{
-			return 0;
-		}
-		virtual double GetFloat() const
-		{
-			return 0;
-		}
-		virtual bool GetBoolean() const
-		{
-			return false;
-		}
-		virtual const std::string& GetString() const
-		{
-			static std::string dummyString;
-			return dummyString;
-		}
-		virtual const Serializable::Array& GetArray() const
-		{
-			static Serializable::Array dummyArray;
-			return dummyArray;
-		}
-		virtual const Serializable::Map& GetMap() const
-		{
-			static Serializable::Map dummyMap;
-			return dummyMap;
-		}
-	};
+        Serializable& operator [] (const size_t index) noexcept {
+            // This will create an Array if it's not already one, or if it's Null
+            // If it's another type (e.g., Map, Bool), it will replace it with an Array.
+            std::vector<Serializable>& arr = GetArray(); // GetArray handles type change/creation
+            if (index >= arr.size()) {
+                // Extend the array with default-constructed (Null) elements
+                arr.resize(index + 1);
+            }
+            return arr[index];
+        }
 
-	template <class _DataType, class _SerializeType>
-	Serializable::Array CreateSerializeArray(const std::vector<_DataType>& source)
-	{
-		Serializable::Array result;
-		for (const _DataType& elem : source) {
-			result.emplace_back(Serializable((_SerializeType)elem));
-		}
-		return result;
-	}
+        NODISCARD const Serializable& At(const size_t index) const noexcept {
+            // Similar to operator[], but often expected to throw if index out of bounds
+            if (!IsArray()) {
+                LOG_ERROR(LogSerialize, std::format("Attempted array access on non-array type. Type={}", NxsGetTypeString(GetType())));
+                return None;
+            }
+            const auto& arr = GetArray();
+            return arr.at(index); // std::vector::at() throws std::out_of_range
+        }
 
-	template <class _DataType, class _SerializeType>
-	std::vector<_DataType> CreateArrayFromSerialize(const Serializable::Array& source)
-	{
-		std::vector<_DataType> result;
-		// The original loop for createArrayFromSerialize seems to have a typo,
-		// it was iterating over `source` (a Serializable::Array) but casting `elem` (a Serializable)
-		// to _DataType. Assuming the intent was to convert Serializable elements to _DataType.
-		for (const Serializable& elem : source) { // Corrected iteration type
-			result.emplace_back((_DataType)elem); // Assuming Serializable can be cast to _DataType
-		}
-		return result;
-	}
+
+        // --- Comparison Operators ---
+        bool operator == (const Serializable& rhs) const
+        {
+            // Use std::visit to compare the underlying variant values
+            return m_value == rhs.m_value;
+        }
+
+        // --- Utility Methods ---
+        NODISCARD size_t Size() const {
+            if (IsArray()) {
+                return GetArray().size();
+            }
+            if (IsMap()) {
+                return GetMap().size();
+            }
+            return 0; // Or throw an exception for non-container types
+        }
+
+        void Clear() {
+            m_value = std::monostate{}; // Reset to null
+        }
+
+        // Template getter to reduce boilerplate and allow direct access if type is known
+        template<typename T>
+        const T& Get() const {
+            return std::get<T>(m_value);
+        }
+
+        template<typename T>
+        T& Get() {
+            return std::get<T>(m_value);
+        }
+
+        // Explicit conversions (optional, but convenient)
+        explicit operator bool() const { return GetBool(); }
+        explicit operator int64_t() const { return GetInt(); }
+        explicit operator double() const { return GetDouble(); }
+        explicit operator const std::string&() const { return GetString(); }
+
+        // Example of a visitor pattern for type-safe processing
+        template<typename Visitor>
+        decltype(auto) Visit(Visitor&& visitor) const {
+            return std::visit(std::forward<Visitor>(visitor), m_value);
+        }
+
+        static const Serializable None;
+
+    private:
+        SerializableValue m_value;
+
+        static const std::string s_emptyStr;
+        static const std::vector<Serializable> s_emptyArray;
+        static const Map s_emptyMap;
+    };
 
 	class Serializer
 	{
 	public:
-		virtual ~Serializer() {}
+		virtual ~Serializer() = default;
 		virtual std::ostream& Pack(const Serializable& source, std::ostream& outStream) const = 0;
 		virtual Serializable Unpack(std::istream& inStream) const = 0;
-	};
-
-	DECLARE_SERIALIZE_VALUE(String, std::string, GetString)
-	DECLARE_SERIALIZE_VALUE(Array, Serializable::Array, GetArray)
-	DECLARE_SERIALIZE_VALUE(Map, Serializable::Map, GetMap)
-
-	class IntSerializeValue final : public SerializeValue
-	{
-	public:
-		IntSerializeValue(int64_t value) : m_value(value) {}
-
-		int64_t GetInt() const override { return m_value; }
-		uint64_t GetUint() const override { return (uint64_t)m_value; }
-		double GetFloat() const override { return (double)m_value; }
-		bool GetBoolean() const override { return (bool)m_value; }
-	private:
-		int64_t m_value;
-	};
-
-	class UintSerializeValue final : public SerializeValue
-	{
-	public:
-		UintSerializeValue(uint64_t value) : m_value(value) {}
-
-		int64_t GetInt() const override { return (int64_t)m_value; }
-		uint64_t GetUint() const override { return m_value; }
-		double GetFloat() const override { return (double)m_value; }
-		bool GetBoolean() const override { return (bool)m_value; }
-	private:
-		uint64_t m_value;
-	};
-
-	class FloatSerializeValue final : public SerializeValue
-	{
-	public:
-		FloatSerializeValue(double value) : m_value(value) {}
-
-		int64_t GetInt() const override { return (int64_t)m_value; }
-		uint64_t GetUint() const override { return (uint64_t)m_value; }
-		double GetFloat() const override { return m_value; }
-		bool GetBoolean() const override { return (bool)m_value; }
-	private:
-		double m_value;
-	};
-
-	class BoolSerializeValue final : public SerializeValue
-	{
-	public:
-		BoolSerializeValue(bool value) : m_value(value) {}
-
-		int64_t GetInt() const override { return (int64_t)m_value; }
-		uint64_t GetUint() const override { return (uint64_t)m_value; }
-		double GetFloat() const override { return (double)m_value; }
-		bool GetBoolean() const override { return m_value; }
-	private:
-		bool m_value;
 	};
 }

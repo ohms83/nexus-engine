@@ -84,6 +84,7 @@ target_include_directories(nexus-engine
     # 3rd parties
     PUBLIC ${ENGINE_3RD_PARTY_DIR}/SDL/include
     PUBLIC ${ENGINE_3RD_PARTY_DIR}/glad/include
+    PUBLIC ${ENGINE_3RD_PARTY_DIR}/rapidjson/include
     # Dear-Imgui
     PUBLIC "${IMGUI_SOURCE_DIR}"
     PUBLIC "${IMGUI_SOURCE_DIR}/backends"

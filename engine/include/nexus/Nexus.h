@@ -45,6 +45,7 @@
 #include "graphics/opengl/GLVertexBuffer.h"
 #include "graphics/opengl/NxsGL.h"
 #include "io/InputManager.h"
+#include "io/JsonSerializer.h"
 #include "io/KeyInputMap.h"
 #include "io/Serialize.h"
 #include "math/Math.h"

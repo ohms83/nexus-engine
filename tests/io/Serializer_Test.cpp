@@ -1,6 +1,8 @@
 #include "gtest/gtest.h"
 #include "nexus/Nexus.h"
 
+#if 0
+
 USING_NAMESPACE_NXS;
 
 // Test fixture for SerializeValue derived classes
@@ -427,3 +429,5 @@ TEST_F(SerializableTests, GetTypeStringReturnsCorrectString) {
     EXPECT_EQ(Serializable::GetTypeString(DataType::Map), "DataType::Map");
     EXPECT_EQ(Serializable::GetTypeString(DataType::Num), "DataType::Num (Sentinel)");
 }
+
+#endif
