@@ -16,29 +16,29 @@ namespace
     VariantData FromJson(const rapidjson::Value& value)
     {
         if(value.IsNull()) {
-            return VariantData(nullptr);
+            return nullptr;
         }
         if(value.IsBool()) {
-            return VariantData(value.GetBool());
+            return value.GetBool();
         }
         if(value.IsInt() || value.IsInt64()) { // Prefer Int64
-            return VariantData(value.GetInt64());
+            return value.GetInt64();
         }
         if(value.IsUint() || value.IsUint64()) { // Handle unsigned if needed, but JSON numbers are usually signed
             // Note: JSON numbers can't distinguish signed/unsigned beyond magnitude.
             // RapidJSON prefers signed for smaller numbers.
             // For large uints, this might get read as double if it exceeds int64_t max
             // or as uint64_t if it fits. We'll stick to int64_t and double for numbers.
-            return VariantData(INT64_CAST(value.GetUint64())); // Still provide if GetUint64 is common
+            return INT64_CAST(value.GetUint64()); // Still provide if GetUint64 is common
         }
         if(value.IsFloat() || value.IsDouble()) {
-            return VariantData(value.GetDouble());
+            return value.GetDouble();
         }
         if (value.IsString()) {
-            return VariantData(value.GetString());
+            return value.GetString();
         }
         if(value.IsArray()) {
-            std::vector<VariantData> serializeArray;
+            VariantData::Array serializeArray;
             serializeArray.reserve(value.GetArray().Size());
             for( const auto& elem : value.GetArray() ) {
                 serializeArray.emplace_back(FromJson(elem));
@@ -46,14 +46,14 @@ namespace
             return serializeArray; // Use std::vector<VariantData> constructor
         }
         if(value.IsObject()) {
-            std::map<std::string, VariantData, std::less<>> serializeMap;
+            VariantData::Map serializeMap;
             for(const auto& elem : value.GetObject()) {
                 serializeMap.emplace(elem.name.GetString(), FromJson(elem.value));
             }
-            return VariantData(serializeMap); // Use std::map<std::string, VariantData> constructor
+            return serializeMap; // Use std::map<std::string, VariantData> constructor
         }
         LOG_WARNING(LogJsonSerializer, "Unknown JSON value type encountered in FromJson.");
-        return VariantData(nullptr); // Fallback to Null
+        return VariantData::None; // Fallback to None
     }
 
     void WriteJson(const VariantData& source, rapidjson::Writer<rapidjson::StringBuffer>& writer)
@@ -131,14 +131,14 @@ namespace
     }
 }
 
-std::ostream& JsonSerializer::Pack(const VariantData& source, std::ostream& outStream) const // Renamed to Pack
+std::ostream& JsonSerializer::Pack(const VariantData& source, std::ostream& outStream) const
 {
     const std::string jsonString = ToString(source);
     outStream << jsonString;
     return outStream;
 }
 
-VariantData JsonSerializer::Unpack(std::istream& inStream) const // Renamed to Unpack
+VariantData JsonSerializer::Unpack(std::istream& inStream) const
 {
     std::string contents;
     inStream.seekg(0, std::ios::end);
@@ -149,7 +149,7 @@ VariantData JsonSerializer::Unpack(std::istream& inStream) const // Renamed to U
     return FromString(contents);
 }
 
-std::string JsonSerializer::ToString(const VariantData& source) const // Renamed to ToString
+std::string JsonSerializer::ToString(const VariantData& source) const
 {
     rapidjson::StringBuffer s;
     rapidjson::Writer writer(s);
@@ -157,7 +157,7 @@ std::string JsonSerializer::ToString(const VariantData& source) const // Renamed
     return s.GetString();
 }
 
-VariantData JsonSerializer::FromString(const std::string& inString) const // Renamed to FromString
+VariantData JsonSerializer::FromString(const std::string& inString) const
 {
     rapidjson::Document document;
     document.Parse(inString.c_str());
@@ -168,5 +168,5 @@ VariantData JsonSerializer::FromString(const std::string& inString) const // Ren
     }
 
     LOG_ERROR(LogJsonSerializer, std::format("Invalid JSON -- {}", inString));
-    return VariantData();
+    return VariantData::None;
 }
