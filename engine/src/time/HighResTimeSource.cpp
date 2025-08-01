@@ -13,5 +13,5 @@ double HighResTimeSource::Now()
 
 double HighResTimeSource::NowMs()
 {
-    return Now() * 1000;
+    return CAST<double>(SDL_GetPerformanceCounter()) / CAST<double>(SDL_GetPerformanceFrequency()) * 1000;
 }
