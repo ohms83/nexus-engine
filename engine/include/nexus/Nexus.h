@@ -6,6 +6,7 @@
 
 #include "Application.h"
 #include "Nexus.h"
+#include "NxsDataType.h"
 #include "core/Hasher.h"
 #include "core/Logger.h"
 #include "core/Reflection.h"

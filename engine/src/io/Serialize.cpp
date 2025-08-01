@@ -11,14 +11,14 @@ USING_NAMESPACE_NXS;
 
 DEFINE_LOG(Serialize);
 
-const Serializable Serializable::None;
-const std::string Serializable::s_emptyStr;
-const std::vector<Serializable> Serializable::s_emptyArray;
-const std::map<std::string, Serializable, std::less<>> Serializable::s_emptyMap;
+const VariantData VariantData::None;
+const std::string VariantData::s_emptyStr;
+const std::vector<VariantData> VariantData::s_emptyArray;
+const std::map<std::string, VariantData, std::less<>> VariantData::s_emptyMap;
 
-DataType Serializable::GetType() const
+DataType VariantData::GetType() const
 {
-    std::vector<DataType> typeMap = {
+    const std::vector typeMap = {
         // std::monostate
         DataType::None,
         // bool
@@ -29,14 +29,14 @@ DataType Serializable::GetType() const
         DataType::Double,
         // std::string
         DataType::String,
-        // std::vector<Serializable>
+        // std::vector<VariantData>
         DataType::Array,
-        // std::map<std::string, Serializable, std::less<>>
+        // std::map<std::string, VariantData, std::less<>>
         DataType::Map,
     };
 
     const auto index = m_value.index();
-    // This shouldn't have happened so it's better to use assert to catch it during the development.
+    // This shouldn't have happened, so it's better to use assertion to catch it during the development.
     NXS_ASSERT_MSG(index < typeMap.size(), std::format("Invalid index {}", index));
     return typeMap[index];
 }
