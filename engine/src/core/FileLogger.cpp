@@ -22,7 +22,7 @@ FileLogger::~FileLogger()
     m_logFile.close();
 }
 
-void FileLogger::Log(const std::string& message)
+void FileLogger::Log(LogLevel level, const std::string& message)
 {
     m_logFile << message;
 }

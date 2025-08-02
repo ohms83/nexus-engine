@@ -11,7 +11,7 @@ NXS_NAMESPACE
     class StdOutLogger final : public ILogger
     {
     public:
-        void Log(const std::string& message) override;
+        void Log(LogLevel level, const std::string& message) override;
         void Flush() override;
     };
 }

@@ -73,10 +73,9 @@ void LogDispatcher::Log(LogLevel level, const std::string& category, const std::
         break;
     }
 
-    for (const auto& logger : m_loggers) logger->Log(formatted);
+    for (const auto& logger : m_loggers) logger->Log(level, formatted);
 
     m_message += formatted;
-    logCallback(level, formatted);
 }
 
 void LogDispatcher::Debug(const std::string& category, const std::string& message)
@@ -102,7 +101,6 @@ void LogDispatcher::Error(const std::string& category, const std::string& messag
 void LogDispatcher::Fatal(const std::string& category, const std::string& message)
 {
     Log(LogLevel::Fatal, category, message);
-    Disconnect();
     m_loggers.clear();
     assert(false);
 }
@@ -116,10 +114,4 @@ void LogDispatcher::EnableCategory(const std::string& category, bool enable)
 {
     if (!enable) m_disableLogs.insert(category);
     else m_disableLogs.erase(category);
-}
-
-void LogDispatcher::Disconnect()
-{
-    Info(LogLogDispatcher, "Disconnect all delegates");
-    logCallback.disconnect_all();
 }

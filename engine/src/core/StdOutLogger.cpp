@@ -6,7 +6,7 @@
 
 USING_NAMESPACE_NXS;
 
-void StdOutLogger::Log(const std::string& message)
+void StdOutLogger::Log(LogLevel level, const std::string& message)
 {
     std::cout << message << std::endl;
 }

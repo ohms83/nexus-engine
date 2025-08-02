@@ -10,7 +10,6 @@
 #include <format>
 #include <string>
 #include <set>
-#include <sigslot/signal.hpp>
 
 #include "Logger.h"
 #include "Task.h"
@@ -61,8 +60,6 @@ NXS_NAMESPACE
     class LogDispatcher final
     {
     public:
-        using LogCallback = sigslot::signal<LogLevel, const std::string&>;
-
         LogDispatcher() = default;
         ~LogDispatcher() = default;
 
@@ -99,11 +96,6 @@ NXS_NAMESPACE
         {
             return m_message;
         }
-
-        //! Disconnect all registered delegates.
-        void Disconnect();
-
-        LogCallback logCallback;
     private:
         std::vector<Ref<ILogger>> m_loggers;
         std::string m_message;

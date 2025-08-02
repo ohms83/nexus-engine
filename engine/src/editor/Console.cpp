@@ -40,19 +40,11 @@ Console::Console()
             AddMessage(message);
         }
     });
-
-    auto& logger = LogDispatcher::Instance();
-    m_logConnection = logger.logCallback.connect([this](LogLevel level, const std::string& message)
-    {
-        // TODO: Coloring messages based on log level.
-        AddMessage(message);
-    });
-    AddMessage(logger.Message());
+    AddMessage(LogDispatcher::Instance().Message());
 }
 
 Console::~Console()
 {
-    m_logConnection.disconnect();
 }
 
 void Console::Draw_Internal(RenderSystem& renderSystem)
@@ -107,10 +99,10 @@ void Console::Draw_Internal(RenderSystem& renderSystem)
     }
 }
 
-void Console::AddMessage(const std::string& message)
+void Console::Log(LogLevel level, const std::string& message)
 {
-    m_messages.push_back(message);
-    m_scrollToBottom = true;
+    // TODO: Coloring messages based on log level.
+    AddMessage(message);
 }
 
 void Console::RegisterCommand(const std::string& commandName, const CommandHandler& handler)
@@ -132,7 +124,7 @@ std::vector<std::string> Console::ParseCommand(const std::string& input)
 void Console::HandleCommand()
 {
     const std::string input = m_inputBuffer;
-    AddMessage("> " + input); // Echo the command
+    m_messages.emplace_back("> " + input); // Echo the command
 
     if (const std::vector<std::string> args = ParseCommand(input); !args.empty())
     {
@@ -146,11 +138,11 @@ void Console::HandleCommand()
         }
         else
         {
-            AddMessage("Unknown command: " + args[0]);
-            AddMessage("Available commands: ");
+            m_messages.emplace_back("Unknown command: " + args[0]);
+            m_messages.emplace_back("Available commands: ");
             for (const auto command : m_commands | std::views::keys)
             {
-                AddMessage("  " + command);
+                m_messages.emplace_back("  " + command);
             }
         }
     }
@@ -163,4 +155,10 @@ void Console::HandleCommand()
 int Console::InputCallback(ImGuiInputTextCallbackData* data)
 {
     return 0;
+}
+
+void Console::AddMessage(const std::string& message)
+{
+    m_messages.push_back(message);
+    m_scrollToBottom = true;
 }

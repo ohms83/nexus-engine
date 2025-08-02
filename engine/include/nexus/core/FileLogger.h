@@ -14,7 +14,7 @@ NXS_NAMESPACE
         explicit FileLogger(const std::string& fileName);
         ~FileLogger() override;
 
-        void Log(const std::string& message) override;
+        void Log(LogLevel level, const std::string& message) override;
         void Flush() override;
     private:
         std::string m_logName = "debug.log";

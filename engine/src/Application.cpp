@@ -28,7 +28,6 @@ Application::~Application()
 {
     auto& logger = LogDispatcher::Instance();
     // Shouldn't send out any callback at this point.
-    logger.Disconnect();
     logger.Info(LogApplication, "Shutting down...");
 
     DestroyImGui();

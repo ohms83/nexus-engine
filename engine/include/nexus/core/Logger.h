@@ -41,7 +41,7 @@ NXS_NAMESPACE
         ILogger() = default;
         virtual ~ILogger() = default;
 
-        virtual void Log(const std::string& message) = 0;
+        virtual void Log(LogLevel level, const std::string& message) = 0;
         virtual void Flush() = 0;
     };
 }

@@ -11,6 +11,7 @@
 
 #include "EditorWidget.h"
 #include "imgui.h"
+#include "core/Logger.h"
 #include "sigslot/signal.hpp"
 
 #define CONSOLE_INPUT_BUFFER_SIZE 1024
@@ -20,17 +21,18 @@ NXS_NAMESPACE
     /**
      * A debug console.
      */
-    class Console final : public EditorWidget
+    class Console final : public EditorWidget, public ILogger
     {
     public:
         // A command handler function type
         using CommandHandler = std::function<void(const std::vector<std::string>&)>;
 
         Console();
-        virtual ~Console();
+        ~Console() override;
 
         //! Add a message to the console
-        void AddMessage(const std::string& message);
+        void Log(LogLevel level, const std::string& message) override;
+        void Flush() override {}
         //! Register a command with a handler function
         void RegisterCommand(const std::string& commandName, const CommandHandler& handler);
 
@@ -43,6 +45,8 @@ NXS_NAMESPACE
         //! Command handling logic
         void HandleCommand();
         int InputCallback(ImGuiInputTextCallbackData* data);
+
+        void AddMessage(const std::string& message);
 
     private:
         char m_inputBuffer[CONSOLE_INPUT_BUFFER_SIZE] = {};

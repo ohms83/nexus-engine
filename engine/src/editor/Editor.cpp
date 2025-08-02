@@ -7,13 +7,8 @@
 
 // ImGui headers
 #include <imgui.h>
-#include <imgui_impl_sdl3.h>
-#include <imgui_impl_opengl3.h>
-
-#include <implot.h>
 #include <iostream>
 
-#include "core/Logger.h"
 #include "nexus/editor/Console.h"
 #include "nexus/editor/Profiler.h"
 
@@ -72,7 +67,10 @@ void Editor::AddMenuItem(const std::string& menu, const MenuItem& menuItem)
         itr->items.push_back(menuItem);
     }
 
-    if (menuItem.widget) m_widgets.push_back(menuItem.widget);
+    if (menuItem.widget)
+    {
+        m_widgets.push_back(menuItem.widget);
+    }
 }
 
 void Editor::InitMenu()
@@ -186,14 +184,19 @@ void Editor::InitMenu()
             }
         }
     };
+
+    // Console needs another initialization step, so it can't be put in the list.
+    MenuItem console = {
+        DEVELOPER_TOOLS,
+        "Console",
+        "Open a debug console",
+        "",
+        std::make_shared<Console>(),
+        {}
+    };
+    LogDispatcher::Instance().AddLogger(PTR_CAST<ILogger>(console.widget));
+
     std::vector<MenuItem> toolsMenuItems = {
-        {
-            DEVELOPER_TOOLS,
-            "Console",
-            "Open a debug console",
-            "",
-            std::make_shared<Console>()
-        },
         {
             DEVELOPER_TOOLS,
             "Profiler",
@@ -202,6 +205,7 @@ void Editor::InitMenu()
             std::make_shared<Profiler>()
         }
     };
+    toolsMenuItems.insert(toolsMenuItems.begin(), console);
 
     for (const auto& menuItem : fileMenuItems)
     {
