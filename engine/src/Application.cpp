@@ -5,7 +5,6 @@
 
 #include <format>
 #include <iostream>
-#include <ostream>
 
 #include "imgui.h"
 #include "imgui_impl_opengl3.h"
@@ -13,7 +12,7 @@
 #include "implot.h"
 #include "core/Logger.h"
 #include "core/TaskManager.h"
-#include "../include/nexus/time/TimerManager.h"
+#include "nexus/time/TimerManager.h"
 #include "core/FileLogger.h"
 #include "core/StdOutLogger.h"
 #include "graphics/debug/Gizmos.h"
@@ -68,10 +67,10 @@ bool Application::Init(const ApplicationConfig& info)
     LogDispatcher::Init();
     auto& logger = LogDispatcher::Instance();
     logger.AddLoggers({
-        std::shared_ptr<FileLogger>(),
-        std::shared_ptr<StdOutLogger>()
+        std::make_shared<FileLogger>("debug.log"),
+        std::make_shared<StdOutLogger>()
     });
-    
+
     // TODO: Move to another class
     // Flush the logs every second.
     taskManager.CreateTask(

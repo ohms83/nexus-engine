@@ -35,11 +35,11 @@ void LogDispatcher::AddLogger(const Ref<ILogger>& logger)
     m_loggers.push_back(logger);
 }
 
-void LogDispatcher::AddLoggers(const std::initializer_list<Ref<ILogger>> loggerList)
+void LogDispatcher::AddLoggers(const std::initializer_list<Ref<ILogger>> loggers)
 {
-    for (auto& logger : loggerList)
+    for (auto& logger : loggers)
     {
-        m_loggers.push_back(logger);
+        m_loggers.push_back(std::move(logger));
     }
 }
 

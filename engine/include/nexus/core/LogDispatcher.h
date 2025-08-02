@@ -71,7 +71,7 @@ NXS_NAMESPACE
         static LogDispatcher& Instance();
 
         void AddLogger(const Ref<ILogger>& logger);
-        void AddLoggers(std::initializer_list<Ref<ILogger>> loggerList);
+        void AddLoggers(std::initializer_list<Ref<ILogger>> loggers);
         void Flush() const;
 
         void Log(LogLevel level, const std::string& category, const std::string& message);
