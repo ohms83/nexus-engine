@@ -4,7 +4,7 @@
 //  Created by nuttachai on 23/10/19.
 //
 
-#include "nexus/io/Serialize.h"
+#include "nexus/io/VariantData.h"
 #include "nexus/core/Logger.h"
 
 USING_NAMESPACE_NXS;

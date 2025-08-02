@@ -1,6 +1,15 @@
 file(GLOB_RECURSE TEST_SOURCES *.cpp)
 file(GLOB_RECURSE TEST_HEADERS *.h)
 
+# Google Test
+FetchContent_Declare(
+  googletest
+  GIT_REPOSITORY https://github.com/google/googletest.git
+  GIT_TAG        v1.17.0
+)
+# Make googletest's targets available (e.g., googletest::gtest_main)
+FetchContent_MakeAvailable(googletest)
+
 add_executable(nexus-test
     ${TEST_HEADERS}
     ${TEST_SOURCES}

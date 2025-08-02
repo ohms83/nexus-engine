@@ -48,7 +48,7 @@
 #include "io/InputManager.h"
 #include "io/JsonSerializer.h"
 #include "io/KeyInputMap.h"
-#include "io/Serialize.h"
+#include "io/Serializer.h"
 #include "math/Math.h"
 #include "math/Matrix.h"
 #include "memory/Buffer.h"

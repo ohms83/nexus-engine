@@ -64,6 +64,17 @@ include(include/CMakeLists.txt)
 find_package(Python3 COMPONENTS Interpreter REQUIRED)
 find_package(OpenGL REQUIRED)
 
+# MessagePack
+FetchContent_Declare(
+  msgpackcxx
+  GIT_REPOSITORY https://github.com/msgpack/msgpack-c.git
+  GIT_TAG      cpp-7.0.0 # Or the latest stable release tag you want
+)
+
+# Fetch the content (downloads if not already downloaded)
+set(MSGPACK_USE_BOOST OFF CACHE BOOL "Turn off boost dependency. Note: the test projects won't be able to compile" FORCE)
+FetchContent_MakeAvailable(msgpackcxx)
+
 add_library(nexus-engine
     ${ENGINE_SOURCES}
     ${ENGINE_HEADERS}
@@ -102,6 +113,7 @@ target_link_libraries(nexus-engine
     PRIVATE glad
     PUBLIC  EnTT
     PRIVATE RapidJSON
+    PRIVATE msgpack-cxx
 )
 
 # Define IMGUI_IMPL_OPENGL_LOADER_GLAD for OpenGL3 backend to use glad

@@ -1,9 +1,6 @@
 //
-//  Serialize.hpp
+// Created by nutta on 8/2/2025.
 //
-//  Created by nuttachai on 23/10/19.
-//
-
 #pragma once
 
 #include "nexus/NxsDefine.h"
@@ -19,7 +16,62 @@ DECLARE_LOG_EXTERN(Serialize);
 
 NXS_NAMESPACE
 {
-	// Forward declaratio
+    /**
+     * This is the core @c VariantData class, designed to be a flexible, dynamically typed
+     * container, inspired by data structures found in formats like JSON (objects, arrays,
+     * and primitive types). Its primary purpose is to hold one of several distinct data
+     * types at any given time, allowing for runtime flexibility without sacrificing
+     * type safety during access.
+     *
+     * Internally, @c VariantData leverages @c std::variant<...> (from C++17) to
+     * achieve its dynamic typing. @c std::variant is a type-safe union that can
+     * hold a value of any one of its specified alternative types. This approach
+     * provides:
+     *
+     * 1.  **Type Safety: ** Only the currently active type can be accessed directly.
+     *     Attempting to access a value as the wrong type (e.g., calling @c GetInt() on a
+     *     @c VariantData holding a string) will result in a @c std::bad_variant_access
+     *     exception at runtime.
+     *
+     * 2.  **Memory Efficiency: ** @c VariantData instances are relatively small
+     *     and efficient, as @c std::variant only allocates enough memory for the
+     *     largest alternative type.
+     *
+     * 3.  **Compile-Time Type Enumeration: ** The @c DataType enum directly maps to
+     *     the @c std::variant's internal index, providing a clear and readable way
+     *     to query the current type.
+     *
+     * 4.  **Recursive Structure: ** @c VariantData is designed to contain itself
+     *     (i.e., @c std::vector<VariantData> for arrays and @c std::map<std::string, VariantData>
+     *     for maps). This enables the creation of complex, nested data hierarchies.
+     *
+     * 5.  **Convenient Accessors: ** Overloaded @c operator[] for both string keys (for maps)
+     *     and integer indices (for arrays) provides an intuitive syntax for data access
+     *     and modification. The non-const @c operator[] has "auto-creation" behavior,
+     *     meaning it can automatically transform a @c Null @c VariantData into an array
+     *     or map if accessed in a container-like way.
+     *
+     * 6.  **Gentle Error Handling with Logging: ** Accessors like @c At() and getters
+     *     (e.g., @c GetInt()) are designed not to throw exceptions for invalid operations
+     *     (such as accessing a non-existent key or requesting a value with the wrong type).
+     *     Instead, they will:
+     *     * Log a warning message to the designated logging system (e.g., @c LOG_WARNING).
+     *     * Return a default-constructed @c VariantData (which is @c Null) for @c operator[]
+     *         and @c At() when an element or key is not found or the type is incorrect.
+     *     * Return a sensible default value for primitive getters (e.g., @c 0 for @c GetInt(),
+     *         @c false for @c GetBool(), @c "" for @c GetString()) when the type is incorrect.
+     *     This design choice prioritizes non-disruptive operation flow, requiring
+     *     client code to explicitly check for @c Null or returned default values to
+     *     detect and handle errors.
+     *
+     * 7.  **Serialization Ready: ** The design naturally lends itself to serialization
+     *     (e.g., to JSON or MessagePack) by using @c std::visit to dispatch
+     *     serialization logic based on the @c VariantData's currently held type.
+     *
+     * In essence, @c VariantData acts as a flexible bridge between strongly typed C++
+     * structures and dynamic data representations, facilitating data exchange and
+     * configuration loading.
+     */
     class VariantData
     {
     public:
@@ -279,12 +331,4 @@ NXS_NAMESPACE
         static const std::vector<VariantData> s_emptyArray;
         static const Map s_emptyMap;
     };
-
-	class Serializer
-	{
-	public:
-		virtual ~Serializer() = default;
-		virtual std::ostream& Pack(const VariantData& source, std::ostream& outStream) const = 0;
-		virtual VariantData Unpack(std::istream& inStream) const = 0;
-	};
 }

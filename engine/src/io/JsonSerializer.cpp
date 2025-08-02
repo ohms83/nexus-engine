@@ -60,73 +60,65 @@ namespace
     {
         switch (source.GetType()) // Changed from getType() to GetType()
         {
-            case DataType::Int64: // Changed from VariantData::Type::INTEGER
-                writer.Int64(source.GetInt());
-                break;
-
-            case DataType::UInt64: // Changed from VariantData::Type::UNSIGNED
-                writer.Uint64(source.GetInt());
-                break;
-
-            case DataType::Double: // Changed from VariantData::Type::FLOAT
-                writer.Double(source.GetDouble());
-                break;
-
-            case DataType::Bool: // Changed from VariantData::Type::BOOLEAN
-                writer.Bool(source.GetBool());
-                break;
-
-            case DataType::String: // Changed from VariantData::Type::STRING
-                writer.String(source.GetString().c_str());
-                break;
-
-            case DataType::Array: // Changed from VariantData::Type::ARRAY
+        case DataType::None: // Explicitly handle None
+            writer.Null();
+            break;
+        case DataType::Int64: // Changed from VariantData::Type::INTEGER
+            writer.Int64(source.GetInt());
+            break;
+        case DataType::UInt64: // Changed from VariantData::Type::UNSIGNED
+            writer.Uint64(source.GetInt());
+            break;
+        case DataType::Double: // Changed from VariantData::Type::FLOAT
+            writer.Double(source.GetDouble());
+            break;
+        case DataType::Bool: // Changed from VariantData::Type::BOOLEAN
+            writer.Bool(source.GetBool());
+            break;
+        case DataType::String: // Changed from VariantData::Type::STRING
+            writer.String(source.GetString().c_str());
+            break;
+        case DataType::Array: // Changed from VariantData::Type::ARRAY
+        {
+            const auto& array = source.GetArray();
+            writer.StartArray();
+            for( const auto& elem : array )
             {
-                const auto& array = source.GetArray();
-
-                writer.StartArray();
-                for( const auto& elem : array )
-                {
-                    WriteJson(elem, writer); // Recursive call to WriteJson
-                }
-                writer.EndArray();
+                WriteJson(elem, writer); // Recursive call to WriteJson
             }
-                break;
-
-            case DataType::Map: // Changed from VariantData::Type::MAP
+            writer.EndArray();
+        }
+            break;
+        case DataType::Map: // Changed from VariantData::Type::MAP
+        {
+            const auto& map = source.GetMap();
+            writer.StartObject();
+            for( const auto& [fst, snd] : map )
             {
-                const auto& map = source.GetMap();
-
-                writer.StartObject();
-                for( const auto& [fst, snd] : map )
-                {
-                    writer.Key(fst.c_str());
-                    WriteJson(snd, writer); // Recursive call to WriteJson
-                }
-                writer.EndObject();
+                writer.Key(fst.c_str());
+                WriteJson(snd, writer); // Recursive call to WriteJson
             }
-                break;
-
-            case DataType::Byte:
-            case DataType::Short:
-            case DataType::Int32:
-                writer.Int64(source.GetInt()); // Or the appropriate smaller integer writer if available/needed
-                break;
-            case DataType::UByte:
-            case DataType::UShort:
-            case DataType::UInt32:
-                writer.Uint64(source.GetInt()); // Or appropriate smaller unsigned integer writer
-                break;
-            case DataType::Float: // This would typically map to Double for JSON output
-                writer.Double(source.GetDouble());
-                break;
-
-            case DataType::None: // Explicitly handle None or other unexpected types
-            case DataType::Num:  // Num is usually a count, not a type to serialize
-            default:
-                LOG_WARNING(LogJsonSerializer, std::format("Unknown or unhandled DataType ({})", NxsGetTypeString(source.GetType())));
-                writer.Null();
-                break;
+            writer.EndObject();
+        }
+            break;
+        case DataType::Byte:
+        case DataType::Short:
+        case DataType::Int32:
+            writer.Int64(source.GetInt()); // Or the appropriate smaller integer writer if available/needed
+            break;
+        case DataType::UByte:
+        case DataType::UShort:
+        case DataType::UInt32:
+            writer.Uint64(source.GetInt()); // Or appropriate smaller unsigned integer writer
+            break;
+        case DataType::Float: // This would typically map to Double for JSON output
+            writer.Double(source.GetDouble());
+            break;
+        case DataType::Num:  // Num is usually a count, not a type to serialize
+        default:
+            LOG_WARNING(LogJsonSerializer, std::format("Unknown or unhandled DataType ({})", NxsGetTypeString(source.GetType())));
+            writer.Null();
+            break;
         }
     }
 }
