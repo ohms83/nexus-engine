@@ -3,7 +3,7 @@
 //
 
 #include "nexus/time/TimerManager.h"
-#include "nexus/core/Logger.h"
+#include "nexus/core/LogDispatcher.h"
 #include "nexus/time/StandardTimeSource.h"
 
 #include <algorithm>

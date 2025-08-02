@@ -8,7 +8,7 @@
 #include "nexus/NxsDefine.h"
 #include "nexus/memory/Buffer.h"
 
-#include "nexus/core/Logger.h"
+#include "nexus/core/LogDispatcher.h"
 
 DECLARE_LOG_EXTERN(Resource);
 

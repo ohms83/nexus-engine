@@ -3,7 +3,7 @@
 #include "ecs/component/scene/LightComponent.h"
 #include "ecs/system/scene/SceneNodeTransformSystem.h"
 #include "nexus/graphics/RenderSystem.h"
-#include "nexus/core/Logger.h"
+#include "nexus/core/LogDispatcher.h"
 
 USING_NAMESPACE_NXS;
 

@@ -14,6 +14,8 @@
 #include "core/Logger.h"
 #include "core/TaskManager.h"
 #include "../include/nexus/time/TimerManager.h"
+#include "core/FileLogger.h"
+#include "core/StdOutLogger.h"
 #include "graphics/debug/Gizmos.h"
 #include "io/InputManager.h"
 #include "resource/Mesh.h"
@@ -25,7 +27,7 @@ DEFINE_LOG(Application);
 
 Application::~Application()
 {
-    auto& logger = Logger::Instance();
+    auto& logger = LogDispatcher::Instance();
     // Shouldn't send out any callback at this point.
     logger.Disconnect();
     logger.Info(LogApplication, "Shutting down...");
@@ -63,14 +65,18 @@ bool Application::Init(const ApplicationConfig& info)
     TaskManager::Init();
     auto& taskManager = TaskManager::Instance();
 
-    Logger::Init(Logger::LogToFile | Logger::LogToStdOut);
-    auto& logger = Logger::Instance();
+    LogDispatcher::Init();
+    auto& logger = LogDispatcher::Instance();
+    logger.AddLoggers({
+        std::shared_ptr<FileLogger>(),
+        std::shared_ptr<StdOutLogger>()
+    });
     
     // TODO: Move to another class
     // Flush the logs every second.
     taskManager.CreateTask(
         // Flush action
-        [] { Logger::Instance().Flush(); },
+        [] { LogDispatcher::Instance().Flush(); },
         // Repeat counts
         -1,
         // Delay

@@ -4,7 +4,7 @@
 #include "rapidjson/stringbuffer.h"
 #include <sstream>
 
-#include "nexus/core/Logger.h"
+#include "nexus/core/LogDispatcher.h"
 
 USING_NAMESPACE_NXS;
 using namespace std;

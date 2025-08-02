@@ -7,6 +7,7 @@
 #include <sstream>
 #include <nexus/editor/Console.h>
 
+#include "core/LogDispatcher.h"
 #include "core/Logger.h"
 
 USING_NAMESPACE_NXS;
@@ -40,8 +41,8 @@ Console::Console()
         }
     });
 
-    auto& logger = Logger::Instance();
-    m_logConnection = logger.logCallback.connect([this](Logger::LogLevel level, const std::string& message)
+    auto& logger = LogDispatcher::Instance();
+    m_logConnection = logger.logCallback.connect([this](LogLevel level, const std::string& message)
     {
         // TODO: Coloring messages based on log level.
         AddMessage(message);

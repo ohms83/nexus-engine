@@ -10,12 +10,10 @@ class TaskTest : public ::testing::Test {
 protected:
     // SetUp is called before each test in this fixture
     void SetUp() override {
-        nxs::Logger::Init(nxs::Logger::LogToFile | nxs::Logger::LogToStdOut);
     }
 
     // TearDown is called after each test in this fixture
     void TearDown() override {
-        nxs::Logger::Destroy();
     }
 };
 

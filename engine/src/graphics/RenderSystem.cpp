@@ -3,7 +3,7 @@
 #include "nexus/graphics/RenderSystem.h"
 #include "nexus/graphics/Shader.h"
 
-#include "nexus/core/Logger.h"
+#include "nexus/core/LogDispatcher.h"
 #include "nexus/time/HighResTimeSource.h"
 #include "time/StandardTimeSource.h"
 

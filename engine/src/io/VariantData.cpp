@@ -5,7 +5,7 @@
 //
 
 #include "nexus/io/VariantData.h"
-#include "nexus/core/Logger.h"
+#include "nexus/core/LogDispatcher.h"
 
 USING_NAMESPACE_NXS;
 

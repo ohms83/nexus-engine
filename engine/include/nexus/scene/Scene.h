@@ -5,7 +5,7 @@
 #include "SceneRenderer.h"
 #include "nexus/ecs/Ecs.h"
 #include "nexus/graphics/Color.h"
-#include "nexus/core/Logger.h"
+#include "nexus/core/LogDispatcher.h"
 
 DECLARE_LOG_EXTERN(Scene);
 

@@ -2,7 +2,7 @@
 // Created by nutta on 7/10/2025.
 //
 #include "nexus/graphics/TextureProxy.h"
-#include "nexus/core/Logger.h"
+#include "nexus/core/LogDispatcher.h"
 
 USING_NAMESPACE_NXS;
 

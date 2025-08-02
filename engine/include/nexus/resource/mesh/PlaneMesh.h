@@ -6,7 +6,7 @@
 
 #include <nexus/NxsDefine.h>
 
-#include "nexus/core/Logger.h"
+#include "nexus/core/LogDispatcher.h"
 #include "nexus/resource/Mesh.h"
 
 NXS_NAMESPACE

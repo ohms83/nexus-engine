@@ -16,14 +16,12 @@ protected:
     // Optional: Setup method if common setup is needed before each test
     void SetUp() override {
         serializer_to_test = GetParam();
-        nxs::Logger::Init(nxs::Logger::LogToFile | nxs::Logger::LogToStdOut);
     }
 
     // Optional: Teardown method if common cleanup is needed after each test
     void TearDown() override {
         // If serializers were dynamically allocated within the fixture,
         // they would be deleted here. Since they are static/stack, no deletion needed.
-        nxs::Logger::Destroy();
     }
 
     // Helper function to serialize and deserialize VariantData

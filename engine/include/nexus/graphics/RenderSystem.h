@@ -1,11 +1,10 @@
 #pragma once
 
-#include <nexus/NxsDefine.h>
+#include "nexus/NxsDefine.h"
+#include "nexus/time/Timer.h"
+#include "nexus/core/LogDispatcher.h"
 #include "Color.h"
 #include "RenderingInterface.h"
-#include <nexus/time/Timer.h>
-
-#include "core/Logger.h"
 
 NXS_NAMESPACE
 {

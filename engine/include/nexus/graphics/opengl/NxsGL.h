@@ -6,8 +6,7 @@
 #include <format>
 
 #include "nexus/NxsDefine.h"
-#include "nexus/core/Logger.h"
-
+#include "nexus/core/LogDispatcher.h"
 #include "nexus/graphics/GraphicsConst.h"
 
 #define GL_STRICT_CHECK
@@ -23,7 +22,7 @@ DECLARE_LOG_EXTERN(OpenGL);
     #define CHECK_GL_ERROR(func_name) {\
         GLenum error = glGetError();\
         if (error != GL_NO_ERROR) {\
-            Logger::Instance().Log(Logger::LogLevel::Fatal, LogOpenGL, std::format("Error calling function {0}. Error Code={1}", func_name, error);\
+            Logger::Instance().Log(LogLevel::Fatal, LogOpenGL, std::format("Error calling function {0}. Error Code={1}", func_name, error);\
         }\
     }
 #endif

@@ -3,7 +3,7 @@
 //
 #include <nexus/graphics/IndexBuffer.h>
 
-#include "core/Logger.h"
+#include "nexus/core/LogDispatcher.h"
 
 USING_NAMESPACE_NXS;
 

@@ -2,7 +2,7 @@
 // Created by nutta on 7/28/2025.
 //
 
-#include "nexus/core/Logger.h"
+#include "nexus/core/LogDispatcher.h"
 #include "nexus/io/InputManager.h"
 
 #define ENABLE_LOGGING 0
