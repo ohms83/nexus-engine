@@ -10,3 +10,7 @@ set(RAPIDJSON_BUILD_CXX20 ON CACHE BOOL "Build rapidjson with C++20" FORCE)
 set(RAPIDJSON_BUILD_TESTS OFF CACHE BOOL "Do not build rapidjson perftests and unittests" FORCE)
 set(RAPIDJSON_BUILD_DOC OFF CACHE BOOL "Do not build rapidjson documentation." FORCE)
 add_subdirectory(rapidjson)
+
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build static library" FORCE)
+set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "Disable building tests" FORCE)
+add_subdirectory(assimp)

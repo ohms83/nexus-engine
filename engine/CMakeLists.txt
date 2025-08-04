@@ -95,7 +95,8 @@ target_include_directories(nexus-engine
     # 3rd parties
     PUBLIC ${ENGINE_3RD_PARTY_DIR}/SDL/include
     PUBLIC ${ENGINE_3RD_PARTY_DIR}/glad/include
-    PUBLIC ${ENGINE_3RD_PARTY_DIR}/rapidjson/include
+    PRIVATE ${ENGINE_3RD_PARTY_DIR}/rapidjson/include
+    PRIVATE ${ENGINE_3RD_PARTY_DIR}/assimp/include
     # Dear-Imgui
     PUBLIC "${IMGUI_SOURCE_DIR}"
     PUBLIC "${IMGUI_SOURCE_DIR}/backends"
@@ -114,6 +115,7 @@ target_link_libraries(nexus-engine
     PUBLIC  EnTT
     PRIVATE RapidJSON
     PRIVATE msgpack-cxx
+    PRIVATE assimp
 )
 
 # Define IMGUI_IMPL_OPENGL_LOADER_GLAD for OpenGL3 backend to use glad
