@@ -128,6 +128,17 @@ NXS_NAMESPACE
             this->a = CAST<float>(color       & 0xFF)  / 255.0f;
             return *this;
         }
+
+        static const Color4F White;
+        static const Color4F Black;
+        static const Color4F Red;
+        static const Color4F Green;
+        static const Color4F Blue;
+        static const Color4F Yellow;
+        static const Color4F Magenta;
+        static const Color4F Orange;
+        static const Color4F Gray;
+        static const Color4F Grey;
     };
     /**
      * Color data in 3 floating points RGB format.
@@ -173,9 +184,20 @@ NXS_NAMESPACE
             this->b = CAST<float>(color >>  8 & 0xFF)  / 255.0f;
             return *this;
         }
+
+        static const Color3F White;
+        static const Color3F Black;
+        static const Color3F Red;
+        static const Color3F Green;
+        static const Color3F Blue;
+        static const Color3F Yellow;
+        static const Color3F Magenta;
+        static const Color3F Orange;
+        static const Color3F Gray;
+        static const Color3F Grey;
     };
     /**
-     * Color data in 4 unsigned byte RGBA format.
+     * Color data in 4 unsigned byte RGBA formats.
      * Each component can have a value between [0x00, 0xFF] for the standard dynamic range.
      */
     class  Color4B : public Color4<uint8>
@@ -220,6 +242,17 @@ NXS_NAMESPACE
             this->a = CAST<uint8>(color       & 0xFF);
             return *this;
         }
+
+        static const Color4B White;
+        static const Color4B Black;
+        static const Color4B Red;
+        static const Color4B Green;
+        static const Color4B Blue;
+        static const Color4B Yellow;
+        static const Color4B Magenta;
+        static const Color4B Orange;
+        static const Color4B Gray;
+        static const Color4B Grey;
     };
     /**
      * Color data in 3 unsigned byte RGB formats.
@@ -262,49 +295,16 @@ NXS_NAMESPACE
             this->b = CAST<uint8>(color       & 0xFF);
             return *this;
         }
+
+        static const Color3B White;
+        static const Color3B Black;
+        static const Color3B Red;
+        static const Color3B Green;
+        static const Color3B Blue;
+        static const Color3B Yellow;
+        static const Color3B Magenta;
+        static const Color3B Orange;
+        static const Color3B Gray;
+        static const Color3B Grey;
     };
-    
-    static const Color4F COLOR4F_WHITE  (1.00f, 1.00f, 1.00f, 1.00f);
-    static const Color4F COLOR4F_BLACK  (0.00f, 0.00f, 0.00f, 1.00f);
-    static const Color4F COLOR4F_RED    (1.00f, 0.00f, 0.00f, 1.00f);
-    static const Color4F COLOR4F_GREEN  (0.00f, 1.00f, 0.00f, 1.00f);
-    static const Color4F COLOR4F_BLUE   (0.00f, 0.00f, 1.00f, 1.00f);
-    static const Color4F COLOR4F_YELLOW (1.00f, 1.00f, 0.00f, 1.00f);
-    static const Color4F COLOR4F_MAGENTA(1.00f, 0.00f, 1.00f, 1.00f);
-    static const Color4F COLOR4F_ORANGE (1.00f, 0.50f, 0.00f, 1.00f);
-    static const Color4F COLOR4F_GRAY   (0.65f, 0.65f, 0.65f, 1.00f);
-    static const Color4F COLOR4F_GREY   (0.65f, 0.65f, 0.65f, 1.00f);
-    
-    static const Color3F COLOR3F_WHITE  (1.00f, 1.00f, 1.00f);
-    static const Color3F COLOR3F_BLACK  (0.00f, 0.00f, 0.00f);
-    static const Color3F COLOR3F_RED    (1.00f, 0.00f, 0.00f);
-    static const Color3F COLOR3F_GREEN  (0.00f, 1.00f, 0.00f);
-    static const Color3F COLOR3F_BLUE   (0.00f, 0.00f, 1.00f);
-    static const Color3F COLOR3F_YELLOW (1.00f, 1.00f, 0.00f);
-    static const Color3F COLOR3F_MAGENTA(1.00f, 0.00f, 1.00f);
-    static const Color3F COLOR3F_ORANGE (1.00f, 0.50f, 0.00f);
-    static const Color3F COLOR3F_GRAY   (0.65f, 0.65f, 0.65f);
-    static const Color3F COLOR3F_GREY   (0.65f, 0.65f, 0.65f);
-    
-    static const Color4B COLOR4B_WHITE  (0xFF, 0xFF, 0xFF, 0xFF);
-    static const Color4B COLOR4B_BLACK  (0x00, 0x00, 0x00, 0xFF);
-    static const Color4B COLOR4B_RED    (0xFF, 0x00, 0x00, 0xFF);
-    static const Color4B COLOR4B_GREEN  (0x00, 0xFF, 0x00, 0xFF);
-    static const Color4B COLOR4B_BLUE   (0x00, 0x00, 0xFF, 0xFF);
-    static const Color4B COLOR4B_YELLOW (0xFF, 0xFF, 0x00, 0xFF);
-    static const Color4B COLOR4B_MAGENTA(0xFF, 0x00, 0xFF, 0xFF);
-    static const Color4B COLOR4B_ORANGE (0xFF, 0x9B, 0x00, 0xFF);
-    static const Color4B COLOR4B_GRAY   (0xA6, 0xA6, 0xA6, 0xFF);
-    static const Color4B COLOR4B_GREY   (0xA6, 0xA6, 0xA6, 0xFF);
-    
-    static const Color3B COLOR3B_WHITE  (0xFF, 0xFF, 0xFF);
-    static const Color3B COLOR3B_BLACK  (0x00, 0x00, 0x00);
-    static const Color3B COLOR3B_RED    (0xFF, 0x00, 0x00);
-    static const Color3B COLOR3B_GREEN  (0x00, 0xFF, 0x00);
-    static const Color3B COLOR3B_BLUE   (0x00, 0x00, 0xFF);
-    static const Color3B COLOR3B_YELLOW (0xFF, 0xFF, 0x00);
-    static const Color3B COLOR3B_MAGENTA(0xFF, 0x00, 0xFF);
-    static const Color3B COLOR3B_ORANGE (0xFF, 0x9B, 0x00);
-    static const Color3B COLOR3B_GRAY   (0xA6, 0xA6, 0xA6);
-    static const Color3B COLOR3B_GREY   (0xA6, 0xA6, 0xA6);
 }
