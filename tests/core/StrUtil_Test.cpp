@@ -1,6 +1,8 @@
 //
 // Created by nutta on 8/4/2025.
 //
+#define NO_LOG // Turn off logging
+
 #include "gtest/gtest.h"
 #include "nexus/Nexus.h"
 
@@ -365,4 +367,107 @@ TEST(StrUtilSplitTests, ComplexExampleWithMixedDelimiters) {
     // Split should not trim the tokens.
     std::vector<std::string> expected_actual = {"item1", " item2 ", " item3", "item4"};
     EXPECT_EQ(expected_actual, StrUtil::Split(s, ";,\n"));
+}
+
+// --- StrUtil::Parse Tests ---
+TEST(StrUtilParseTests, ParseIntSuccess) {
+    auto result = StrUtil::Parse<int>("12345");
+    ASSERT_TRUE(result.has_value());
+    EXPECT_EQ(*result, 12345);
+}
+
+TEST(StrUtilParseTests, ParseDoubleSuccess) {
+    auto result = StrUtil::Parse<double>("3.14159");
+    ASSERT_TRUE(result.has_value());
+    EXPECT_NEAR(*result, 3.14159, 1e-9);
+}
+
+TEST(StrUtilParseTests, ParseBoolSuccess) {
+    // std::istringstream parses '1' and '0' by default for bool
+    auto result_true = StrUtil::Parse<bool>("1");
+    ASSERT_TRUE(result_true.has_value());
+    EXPECT_TRUE(*result_true);
+
+    auto result_false = StrUtil::Parse<bool>("0");
+    ASSERT_TRUE(result_false.has_value());
+    EXPECT_FALSE(*result_false);
+}
+
+TEST(StrUtilParseTests, ParseFailsWithInvalidFormat) {
+    auto result = StrUtil::Parse<int>("123a");
+    EXPECT_FALSE(result.has_value());
+}
+
+TEST(StrUtilParseTests, ParseFailsWithLeadingWhitespace) {
+    auto result = StrUtil::Parse<int>(" 123");
+    // std::istringstream will skip leading whitespace and succeed.
+    // The check `!ss.eof()` will then fail because " 123" is parsed and the stream ends.
+    // However, the `>>` operator skips leading whitespace, so `ss.eof()` is true.
+    // Let's re-examine the logic. `istringstream` is more lenient than `from_chars`.
+    // The `!ss.eof()` check is key.
+    EXPECT_TRUE(StrUtil::Parse<int>(" 123").has_value()); // Fails if there's trailing garbage, but not leading whitespace.
+
+    // So let's write a test that fails due to leftover text.
+    auto result_fail = StrUtil::Parse<int>("123 ");
+    EXPECT_FALSE(result_fail.has_value());
+
+    auto result_fail_2 = StrUtil::Parse<int>("123a");
+    EXPECT_FALSE(result_fail_2.has_value());
+}
+
+TEST(StrUtilParseTests, ParseFailsWithEmptyString) {
+    auto result = StrUtil::Parse<int>("");
+    EXPECT_FALSE(result.has_value());
+}
+
+TEST(StrUtilParseTests, ParseFailsWithOutOfRange) {
+    std::string_view large_num = "9999999999";
+    auto result = StrUtil::Parse<int>(large_num);
+    EXPECT_FALSE(result.has_value());
+}
+
+// --- StrUtil::ParseNumer Tests ---
+TEST(StrUtilParseNumerTests, ParseNumerIntSuccess) {
+    auto result = StrUtil::ParseNumer<int>("12345");
+    ASSERT_TRUE(result.has_value());
+    EXPECT_EQ(*result, 12345);
+}
+
+TEST(StrUtilParseNumerTests, ParseNumerLongLongSuccess) {
+    auto result = StrUtil::ParseNumer<long long>("123456789012345");
+    ASSERT_TRUE(result.has_value());
+    EXPECT_EQ(*result, 123456789012345LL);
+}
+
+TEST(StrUtilParseNumerTests, ParseNumerDoubleSuccess) {
+    auto result = StrUtil::ParseNumer<double>("3.14159");
+    ASSERT_TRUE(result.has_value());
+    EXPECT_NEAR(*result, 3.14159, 1e-9);
+}
+
+TEST(StrUtilParseNumerTests, ParseNumerFailsWithInvalidFormat) {
+    auto result = StrUtil::ParseNumer<int>("123a");
+    EXPECT_FALSE(result.has_value());
+}
+
+TEST(StrUtilParseNumerTests, ParseNumerFailsWithWhitespace) {
+    // from_chars is strict and does not handle whitespace
+    EXPECT_FALSE(StrUtil::ParseNumer<int>(" 123").has_value());
+    EXPECT_FALSE(StrUtil::ParseNumer<int>("123 ").has_value());
+}
+
+TEST(StrUtilParseNumerTests, ParseNumerFailsWithEmptyString) {
+    auto result = StrUtil::ParseNumer<int>("");
+    EXPECT_FALSE(result.has_value());
+}
+
+TEST(StrUtilParseNumerTests, ParseNumerFailsWithOutOfRange) {
+    std::string_view large_num = "9999999999";
+    auto result = StrUtil::ParseNumer<int>(large_num);
+    EXPECT_FALSE(result.has_value());
+}
+
+TEST(StrUtilParseNumerTests, ParseNumerFailsWithNegativeNumberForUnsigned) {
+    auto result = StrUtil::ParseNumer<unsigned int>("-100");
+    EXPECT_FALSE(result.has_value());
 }

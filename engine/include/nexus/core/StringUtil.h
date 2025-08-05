@@ -6,6 +6,11 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <optional>
+
+#include "nexus/core/LogDispatcher.h"
+
+DECLARE_LOG_EXTERN(IniParser);
 
 NXS_NAMESPACE
 {
@@ -231,6 +236,97 @@ NXS_NAMESPACE
          * @endcode
          */
         static std::vector<std::string> Split(std::string_view str, char delimiter);
+
+        /**
+         * @brief Parses a string into a specified type using @c std::istringstream.
+         *
+         * @details This is a general-purpose parsing function that works for any type
+         * that has an @c operator>> defined for @c std::istream. It performs robust error
+         * checking, returning @c std::nullopt if the parsing fails or if the entire
+         * string is not consumed (e.g., parsing "123abc" as an int).
+         *
+         * @tparam T The target type to parse into. Must support stream extraction (`operator>>`).
+         * @param str The input `std::string_view` to parse.
+         * @return An `std::optional<T>` containing the parsed value on success, or
+         * `std::nullopt` on any failure.
+         *
+         * @code
+         * // Success case
+         * auto maybe_int = StrUtil::Parse<int>("12345");
+         * if (maybe_int.has_value()) {
+         * int val = *maybe_int; // val is 12345
+         * }
+         *
+         * // Failure case (invalid format)
+         * auto maybe_double = StrUtil::Parse<double>("123.45xyz");
+         * if (!maybe_double) {
+         * // maybe_double is std::nullopt
+         * }
+         * @endcode
+         */
+        template<typename T>
+        static std::optional<T> Parse(const std::string_view str)
+        {
+            std::istringstream ss(str.data());
+            T value;
+            ss >> value;
+
+            if (ss.fail() || ss.bad() || !ss.eof()) {
+                // Failed to parse, or there's a leftover text in the stream
+                return std::nullopt;
+            }
+            return value;
+        }
+        /**
+         * @brief Parses a string into a numeric type using `std::from_chars`.
+         *
+         * @details This function is optimized for performance and is locale-independent,
+         * making it ideal for parsing numerical data. It returns @c std::nullopt if the
+         * string contains non-numeric characters, is out of range for the target type,
+         * or is empty. Unlike @c Parse, it is very strict and does not handle leading
+         * or trailing whitespace.
+         *
+         * @tparam T The target numeric type. Must be an @c std::integral or @c std::floating_point type.
+         * @param str The input @c std::string_view to parse.
+         * @return An @c std::optional<T> containing the parsed number on success, or
+         * @c std::nullopt on any failure.
+         *
+         * @code
+         * // Success case
+         * auto maybe_long = StrUtil::ParseNumer<long long>("1234567890123");
+         * if (maybe_long) {
+         * long long val = maybe_long.value();
+         * }
+         *
+         * // Failure case (out of range)
+         * auto maybe_int = StrUtil::ParseNumer<int>("9999999999");
+         * if (!maybe_int) {
+         * // maybe_int is std::nullopt and an error is logged.
+         * }
+         * @endcode
+         */
+        template<typename T>
+        requires std::integral<T> || std::floating_point<T>
+        static std::optional<T> ParseNumer(const std::string_view str)
+        {
+            T value;
+            const auto end = str.data() + str.size();
+            auto [ptr, ec] = std::from_chars(str.data(), end, value);
+            // Successfully parsed.
+            if (ec == std::errc())
+            {
+                if (ptr == end) return value; // The string was fully parsed.
+                LOG_WARNING(LogIniParser, std::format("'{}' partially contains non-numeric characters.", str));
+                return std::nullopt;
+            }
+
+            if (ec == std::errc::invalid_argument) {
+                LOG_ERROR(LogIniParser, std::format("'{}' is not a valid number.", str));
+            } else if (ec == std::errc::result_out_of_range) {
+                LOG_ERROR(LogIniParser, std::format("'{}' is too large for the designated number type.", str));
+            }
+            return std::nullopt;
+        }
 
     private:
         // Internal helper for locale-independent char to lower conversion
