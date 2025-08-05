@@ -13,6 +13,7 @@
 #include "core/Logger.h"
 #include "core/Reflection.h"
 #include "core/StdOutLogger.h"
+#include "core/StringUtil.h"
 #include "core/Task.h"
 #include "core/TaskManager.h"
 #include "core/UniqueID.h"

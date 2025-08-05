@@ -24,7 +24,7 @@ static void SetLightParams(RenderCommand& command, const entt::registry& registr
 {
     // Lights
     const auto ambientLightEnt = registry.view<AmbientLightComponent>().front();
-    const auto ambient = ambientLightEnt == entt::null ? COLOR3F_GREY : registry.get<AmbientLightComponent>(ambientLightEnt).color;
+    const auto ambient = ambientLightEnt == entt::null ? Color3F::Grey : registry.get<AmbientLightComponent>(ambientLightEnt).color;
     const auto directionalLights = ECS::FindAllComponents<DirectLightComponent>(registry);
     const auto pointLights = ECS::FindAllComponents<PointLightComponent>(registry);
     // There should be only one directional light in the scene.

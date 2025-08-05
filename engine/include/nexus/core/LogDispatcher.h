@@ -17,6 +17,7 @@
 #define DECLARE_LOG_EXTERN(LogCategory) extern const std::string Log##LogCategory
 #define DEFINE_LOG(LogCategory) const std::string Log##LogCategory = #LogCategory
 
+#if !defined(NO_LOG)
 #define ENABLE_LOG(LogCategory) nxs::LogDispatcher::Instance().EnableCategory(LogCategory, true)
 #define DISABLE_LOG(LogCategory) nxs::LogDispatcher::Instance().EnableCategory(LogCategory, false)
 
@@ -54,6 +55,18 @@
         } \
         assert(Condition); \
     } while(0);
+#else
+#define ENABLE_LOG(LogCategory)
+#define DISABLE_LOG(LogCategory)
+
+#define LOG_DEBUG(Category, Message)
+#define LOG_INFO(Category, Message)
+#define LOG_WARNING(Category, Message)
+#define LOG_ERROR(Category, Message)
+#define LOG_FATAL(Category, Message)
+#define NXS_ASSERT(Condition)
+#define NXS_ASSERT_MSG(Condition, Message)
+#endif // !defined(NO_LOG)
 
 NXS_NAMESPACE
 {

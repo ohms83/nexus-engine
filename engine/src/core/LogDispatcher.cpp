@@ -26,7 +26,7 @@ void LogDispatcher::Destroy()
 
 LogDispatcher& LogDispatcher::Instance()
 {
-    assert(s_instance);
+    if (!s_instance) Init();
     return *s_instance;
 }
 

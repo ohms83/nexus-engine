@@ -22,6 +22,10 @@ target_link_libraries(nexus-test PRIVATE
     GTest::gtest_main # Provides main() for Google Test
 )
 
+target_compile_definitions(nexus-test
+    PRIVATE TEST_DATA_FOLDER="${CMAKE_CURRENT_SOURCE_DIR}/test_data"
+)
+
 # Runs the test suites with Google Test's --gtest_list_tests flag
 # during CMake configure time. This creates individual CTest tests
 # for each TEST() or TEST_F() defined in the source files.

@@ -109,7 +109,7 @@ NXS_NAMESPACE
 
         GraphicsConfig m_config;
         RenderingInterface* m_renderingInterface = nullptr;
-        Color4F m_clearColor = COLOR4F_GREY;
+        Color4F m_clearColor = Color4F::White;
         float m_clearDepth = 1.0f;
         std::array<CommandBuffer, INT_CAST(RenderPass::Num)> m_renderCommands;
 
