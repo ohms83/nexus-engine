@@ -24,6 +24,23 @@ USING_NAMESPACE_NXS;
 
 DEFINE_LOG(Application);
 
+bool ApplicationConfig::LoadConfig(const std::string& filePath)
+{
+    IniParser parser;
+    if (!parser.Load(filePath)) return false;
+
+    constexpr auto sectionName = "application";
+
+    if (const auto value = parser.GetValue(sectionName, "title"); value.has_value()) title = *value;
+    if (const auto value = parser.GetBoolValue(sectionName, "fullscreen"); value.has_value()) fullscreen = *value;
+    if (const auto value = parser.GetBoolValue(sectionName, "resizable"); value.has_value()) resizable = *value;
+    if (const auto value = parser.GetBoolValue(sectionName, "editMode"); value.has_value()) editMode = *value;
+    if (const auto value = parser.GetBoolValue(sectionName, "maximize"); value.has_value()) maximize = *value;
+
+    graphicsConfig.LoadConfig(filePath);
+    return true;
+}
+
 Application::~Application()
 {
     auto& logger = LogDispatcher::Instance();

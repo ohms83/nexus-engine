@@ -67,24 +67,11 @@ static void InitLight(nxs::Scene& scene)
 
 int main()
 {
-    constexpr auto vsync = true;
-    constexpr auto fullscreen = false;
-    constexpr auto resizeable = true;;
-    constexpr auto editMode = true;
-    constexpr auto maximize = true;
-    constexpr nxs::GraphicsConfig graphicsConfig {
-        nxs::GraphicsAPI::OpenGL,
-        1280, 960,
-        vsync,
-    };
-    return nxs::RunApplication<NexusEditor>({
-        "Nexus Engine",
-        graphicsConfig,
-        fullscreen,
-        resizeable,
-        editMode,
-        maximize,
-    });
+    const std::filesystem::path configFile = std::filesystem::path(NXS_ASSETS_DIR) / "config/editorConfig.ini";
+
+    nxs::ApplicationConfig config;
+    config.LoadConfig(configFile.string());
+    return nxs::RunApplication<NexusEditor>(config);
 }
 
 NexusEditor::~NexusEditor() = default;

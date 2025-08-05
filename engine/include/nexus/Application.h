@@ -12,7 +12,6 @@
 #include <cassert>
 #include <filesystem>
 
-#include <nexus/graphics/RenderSystem.h>
 #include <glm/glm.hpp>
 
 #include "time/Timer.h"
@@ -20,6 +19,7 @@
 #include "resource/Mesh.h"
 #include "resource/Texture.h"
 #include "scene/Scene.h"
+#include "graphics/RenderSystem.h"
 
 #define PURGE_UNUSED_RESOURCES(Manager) do { \
     LOG_INFO(LogResource, "Purge unused resources. Class="#Manager); \
@@ -37,8 +37,10 @@ NXS_NAMESPACE
         bool editMode = true;
         bool maximize = true;
         int32 quitKey = SDLK_ESCAPE;
+
+        bool LoadConfig(const std::string& filePath);
     };
-    
+
     class Application
     {
     public:
