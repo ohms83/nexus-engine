@@ -245,10 +245,16 @@ NXS_NAMESPACE
          * checking, returning @c std::nullopt if the parsing fails or if the entire
          * string is not consumed (e.g., parsing "123abc" as an int).
          *
-         * @tparam T The target type to parse into. Must support stream extraction (`operator>>`).
-         * @param str The input `std::string_view` to parse.
-         * @return An `std::optional<T>` containing the parsed value on success, or
-         * `std::nullopt` on any failure.
+         * @tparam T The target type to parse into. Must support stream extraction (@c operator>> ).
+         * @param str The input @c std::string_view to parse.
+         * @return An @c std::optional<T> containing the parsed value on success, or
+         * @c std::nullopt on any failure.
+         *
+         * @note When parsing a boolean type, this function relies on @c std::istringstream's
+         * default behavior, which only recognizes the integer values "1" and "0" for @c true
+         * and @c false respectively. For a more robust and human-readable parsing that
+         * handles strings like "true", "false", "on", or "off", the dedicated
+         * @c StrUtil::ParseBool function is a more preferable option.
          *
          * @code
          * // Success case
@@ -273,10 +279,35 @@ NXS_NAMESPACE
 
             if (ss.fail() || ss.bad() || !ss.eof()) {
                 // Failed to parse, or there's a leftover text in the stream
+                LOG_WARNING(LogIniParser, std::format("Failed to parse the string '{}'", str));
                 return std::nullopt;
             }
             return value;
         }
+        /**
+         * @brief Parses a string into a boolean value, supporting various string representations.
+         *
+         * @details This function performs a case-insensitive check against common boolean
+         * string representations such as "true", "false", "on", "off", "yes", "no", "1", and "0".
+         * It is a more robust alternative to `StrUtil::Parse<bool>` for parsing booleans
+         * from a human-readable text.
+         *
+         * @param str The input @c std::string_view to parse.
+         * @return An @c std::optional<bool> containing the parsed boolean value on success,
+         * or @c std::nullopt if the string does not match any recognized boolean
+         * representation.
+         *
+         * @code
+         * // Success cases
+         * auto maybe_true = StrUtil::ParseBool("on");     // returns std::optional<true>
+         * auto maybe_false = StrUtil::ParseBool("False"); // returns std::optional<false>
+         *
+         * // Failure case
+         * auto maybe_invalid = StrUtil::ParseBool("maybe"); // returns std::nullopt
+         * @endcode
+         */
+        static std::optional<bool> ParseBool(std::string_view str);
+
         /**
          * @brief Parses a string into a numeric type using `std::from_chars`.
          *

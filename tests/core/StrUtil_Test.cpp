@@ -471,3 +471,81 @@ TEST(StrUtilParseNumerTests, ParseNumerFailsWithNegativeNumberForUnsigned) {
     auto result = StrUtil::ParseNumer<unsigned int>("-100");
     EXPECT_FALSE(result.has_value());
 }
+
+// --- StrUtil::ParseBool Tests ---
+TEST(StrUtilParseBoolTests, ParseBoolTrueSuccess) {
+    auto result = StrUtil::ParseBool("true");
+    ASSERT_TRUE(result.has_value());
+    EXPECT_TRUE(*result);
+}
+
+TEST(StrUtilParseBoolTests, ParseBoolTrueCaseInsensitive) {
+    auto result = StrUtil::ParseBool("True");
+    ASSERT_TRUE(result.has_value());
+    EXPECT_TRUE(*result);
+
+    result = StrUtil::ParseBool("TRUE");
+    ASSERT_TRUE(result.has_value());
+    EXPECT_TRUE(*result);
+}
+
+TEST(StrUtilParseBoolTests, ParseBoolTrueAlternatives) {
+    auto result = StrUtil::ParseBool("on");
+    ASSERT_TRUE(result.has_value());
+    EXPECT_TRUE(*result);
+
+    result = StrUtil::ParseBool("1");
+    ASSERT_TRUE(result.has_value());
+    EXPECT_TRUE(*result);
+
+    result = StrUtil::ParseBool("yes");
+    ASSERT_TRUE(result.has_value());
+    EXPECT_TRUE(*result);
+}
+
+TEST(StrUtilParseBoolTests, ParseBoolFalseSuccess) {
+    auto result = StrUtil::ParseBool("false");
+    ASSERT_TRUE(result.has_value());
+    EXPECT_FALSE(*result);
+}
+
+TEST(StrUtilParseBoolTests, ParseBoolFalseCaseInsensitive) {
+    auto result = StrUtil::ParseBool("False");
+    ASSERT_TRUE(result.has_value());
+    EXPECT_FALSE(*result);
+
+    result = StrUtil::ParseBool("FALSE");
+    ASSERT_TRUE(result.has_value());
+    EXPECT_FALSE(*result);
+}
+
+TEST(StrUtilParseBoolTests, ParseBoolFalseAlternatives) {
+    auto result = StrUtil::ParseBool("off");
+    ASSERT_TRUE(result.has_value());
+    EXPECT_FALSE(*result);
+
+    result = StrUtil::ParseBool("0");
+    ASSERT_TRUE(result.has_value());
+    EXPECT_FALSE(*result);
+
+    result = StrUtil::ParseBool("no");
+    ASSERT_TRUE(result.has_value());
+    EXPECT_FALSE(*result);
+}
+
+TEST(StrUtilParseBoolTests, ParseBoolFailsWithInvalidStrings) {
+    // Should return std::nullopt for any string not in the defined lists
+    EXPECT_FALSE(StrUtil::ParseBool("maybe").has_value());
+    EXPECT_FALSE(StrUtil::ParseBool("2").has_value());
+    EXPECT_FALSE(StrUtil::ParseBool("-1").has_value());
+}
+
+TEST(StrUtilParseBoolTests, ParseBoolFailsWithEmptyString) {
+    EXPECT_FALSE(StrUtil::ParseBool("").has_value());
+}
+
+TEST(StrUtilParseBoolTests, ParseBoolFailsWithWhitespace) {
+    // Whitespace should cause a failure as the normalized string will not match
+    EXPECT_FALSE(StrUtil::ParseBool(" true ").has_value());
+    EXPECT_FALSE(StrUtil::ParseBool("\ton").has_value());
+}

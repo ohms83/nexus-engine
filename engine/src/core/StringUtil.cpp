@@ -196,3 +196,18 @@ std::vector<std::string> StrUtil::Split(std::string_view str, char delimiter)
     }
     return tokens;
 }
+
+std::optional<bool> StrUtil::ParseBool(const std::string_view str)
+{
+    const std::vector<std::string> trueStrings = {
+        "true", "on", "yes", "1"
+    };
+    const std::vector<std::string> falseStrings = {
+        "false", "off", "no", "0"
+    };
+    const std::string normalizedStr = ToLower(str);
+    if (std::ranges::find(trueStrings, normalizedStr) != trueStrings.end()) return true;
+    if (std::ranges::find(falseStrings, normalizedStr) != falseStrings.end()) return false;
+    LOG_WARNING(LogStrUtil, std::format("Failed to parse the string '{}' as a boolean", str));
+    return std::nullopt;
+}
