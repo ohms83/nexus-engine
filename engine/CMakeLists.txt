@@ -64,17 +64,6 @@ include(include/CMakeLists.txt)
 find_package(Python3 COMPONENTS Interpreter REQUIRED)
 find_package(OpenGL REQUIRED)
 
-# MessagePack
-FetchContent_Declare(
-  msgpackcxx
-  GIT_REPOSITORY https://github.com/msgpack/msgpack-c.git
-  GIT_TAG      cpp-7.0.0 # Or the latest stable release tag you want
-)
-
-# Fetch the content (downloads if not already downloaded)
-set(MSGPACK_USE_BOOST OFF CACHE BOOL "Turn off boost dependency. Note: the test projects won't be able to compile" FORCE)
-FetchContent_MakeAvailable(msgpackcxx)
-
 add_library(nexus-engine
     ${ENGINE_SOURCES}
     ${ENGINE_HEADERS}
@@ -96,7 +85,6 @@ target_include_directories(nexus-engine
     PUBLIC ${ENGINE_3RD_PARTY_DIR}/SDL/include
     PUBLIC ${ENGINE_3RD_PARTY_DIR}/glad/include
     PRIVATE ${ENGINE_3RD_PARTY_DIR}/rapidjson/include
-    PRIVATE ${ENGINE_3RD_PARTY_DIR}/assimp/include
     # Dear-Imgui
     PUBLIC "${IMGUI_SOURCE_DIR}"
     PUBLIC "${IMGUI_SOURCE_DIR}/backends"

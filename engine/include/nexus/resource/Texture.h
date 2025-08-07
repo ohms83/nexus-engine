@@ -6,7 +6,7 @@
 
 #include <nexus/NxsDefine.h>
 #include "Resource.h"
-#include "ResourceManager.h"
+#include "ResourceLoader.h"
 #include <nexus/graphics/RenderingInterface.h>
 #include <nexus/graphics/TextureProxy.h>
 
@@ -15,8 +15,8 @@ NXS_NAMESPACE
     class Texture final : public Resource
     {
     public:
-        explicit Texture(const uint32 resourceId)
-            : Resource(resourceId)
+        explicit Texture(std::string path, const uint32 resourceId)
+            : Resource(std::move(path), resourceId)
         {
         }
 
@@ -43,9 +43,6 @@ NXS_NAMESPACE
         }
 
     protected:
-        uint8* Load_Impl(const std::string& path, size_t& out_size) override;
-
-    protected:
         int32 m_width = 0;
         int32 m_height = 0;
         int32 m_channels = 0;
@@ -59,6 +56,18 @@ NXS_NAMESPACE
         Ref<TextureProxy> m_textureProxy;
     };
 
-    class TextureManager final : public ResourceManager<Texture>
-    {};
+    /**
+     * @brief Implements IResourceLoader to load Texture resources.
+     * Encapsulates file reading and GPU texture creation.
+     */
+    class TextureLoader final : public IResourceLoader
+    {
+    public:
+        Ref<IResource> Load(const std::string& path) override;
+
+        std::type_index GetResourceType() const override
+        {
+            return typeid(Texture);
+        }
+    };
 }
