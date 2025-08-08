@@ -2,13 +2,16 @@
 // Created by nutta on 6/21/2025.
 //
 
-#include <nexus/graphics/Shader.h>
+#include "nexus/graphics/Shader.h"
+#include "nexus/core/LogDispatcher.h"
 
 USING_NAMESPACE_NXS;
 
+DEFINE_LOG(Shader);
+
 Shader& Shader::BeginCompile()
 {
-    assert(m_handle == 0 && !m_compiling);
+    NXS_ASSERT_MSG(m_handle == 0 && !m_compiling, std::format("Shader::BeginCompile() was already called once."));
     m_compiling = true;
     m_handle = Alloc();
     return *this;

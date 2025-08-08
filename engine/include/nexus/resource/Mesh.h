@@ -10,53 +10,42 @@
 
 NXS_NAMESPACE
 {
-    class Mesh : public Resource
+    class Mesh
     {
     public:
-        explicit Mesh(uint32 resourceId);
-        ~Mesh() override = default;
+        Mesh();
+        explicit Mesh(std::string name);
+        virtual ~Mesh() = default;
 
-        NODISCARD VertexBuffer* GetVertexBuffer() const
+        NODISCARD Ref<VertexBuffer> GetVertexBuffer() const
         {
-            return m_vertexBuffer.get();
+            return m_vertexBuffer;
         }
 
-        NODISCARD IndexBuffer* GetIndexBuffer() const
+        NODISCARD Ref<IndexBuffer> GetIndexBuffer() const
         {
-            return m_indexBuffer.get();
-        }
-
-        void SetShader(Shader* shader)
-        {
-            m_shader = shader;
-        }
-        NODISCARD Shader* GetShader() const
-        {
-            return m_shader;
+            return m_indexBuffer;
         }
 
         static const std::string CubeMesh;
         static const std::string PlaneMesh;
-
-    protected:
-        uint8* Load_Impl(const std::string& path, size_t& out_size) override;
         
     protected:
-        Ptr<VertexBuffer> m_vertexBuffer;
-        Ptr<IndexBuffer> m_indexBuffer;
-        Shader* m_shader = nullptr;
+        std::string m_name;
+        Ref<VertexBuffer> m_vertexBuffer;
+        Ref<IndexBuffer> m_indexBuffer;
     };
 
-    class MeshManager final : public ResourceManager<Mesh>
-    {
-    public:
-        MeshManager();
-        ~MeshManager() override;
+    // class MeshManager final : public ResourceManager<Mesh>
+    // {
+    // public:
+    //     MeshManager();
+    //     ~MeshManager() override;
 
-        Ref<Mesh> GetStaticMesh(const std::string& meshName);
+    //     Ref<Mesh> GetStaticMesh(const std::string& meshName);
 
-    private:
-        Ref<Mesh> m_cubeMesh;
-        Ref<Mesh> m_planeMesh;
-    };
+    // private:
+    //     Ref<Mesh> m_cubeMesh;
+    //     Ref<Mesh> m_planeMesh;
+    // };
 }

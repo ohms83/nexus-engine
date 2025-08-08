@@ -2,8 +2,7 @@
 // Created by nutta on 7/22/2025.
 //
 
-#include <nexus/resource/mesh/PlaneMesh.h>
-
+#include "nexus/resource/mesh/PlaneMesh.h"
 #include "nexus/graphics/RenderingInterface.h"
 
 USING_NAMESPACE_NXS;
@@ -31,8 +30,8 @@ namespace
     };
 }
 
-PlaneMesh::PlaneMesh(const uint32 resourceId)
-    : Mesh(resourceId)
+PlaneMesh::PlaneMesh()
+    : Mesh("PlaneMesh")
 {
     const auto& renderInterface = RenderingInterface::Instance();
 

@@ -8,9 +8,9 @@
 
 USING_NAMESPACE_NXS;
 
-static Ptr<VertexBuffer> pointVertex;
-static Ptr<IndexBuffer> pointIndex;
-static Ptr<Shader> shader;
+static Ref<VertexBuffer> pointVertex;
+static Ref<IndexBuffer> pointIndex;
+static Ref<Shader> shader;
 
 // Shader sources
 static auto vertexShaderSource = R"(
@@ -84,9 +84,9 @@ void Gizmos::DrawPoint(
 {
     glm::mat4 translationMtx = glm::translate(glm::mat4(1), position);
     RenderCommand command = {
-        shader.get(),
-        pointVertex.get(),
-        pointIndex.get(),
+        shader,
+        pointVertex,
+        pointIndex,
         // Matrices
         {
             {"u_Model", translationMtx},

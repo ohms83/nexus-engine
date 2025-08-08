@@ -94,11 +94,11 @@ NXS_NAMESPACE
             return m_deltaTime;
         }
 
-        NODISCARD MeshManager& GetMeshManager() const
-        {
-            NXS_ASSERT(m_meshManager);
-            return *m_meshManager.get();
-        }
+        // NODISCARD MeshManager& GetMeshManager() const
+        // {
+        //     NXS_ASSERT(m_meshManager);
+        //     return *m_meshManager.get();
+        // }
 
         NODISCARD TextureManager& GetTextureManager() const
         {
@@ -155,7 +155,7 @@ NXS_NAMESPACE
         Ref<Timer> m_timer;
         float m_deltaTime = 0.0f;
 
-        Ptr<MeshManager> m_meshManager;
+        // Ptr<MeshManager> m_meshManager;
         Ptr<TextureManager> m_textureManager;
         Ref<Scene> m_currentScene;
     };

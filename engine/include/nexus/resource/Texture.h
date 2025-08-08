@@ -7,8 +7,8 @@
 #include <nexus/NxsDefine.h>
 #include "Resource.h"
 #include "ResourceLoader.h"
-#include <nexus/graphics/RenderingInterface.h>
-#include <nexus/graphics/TextureProxy.h>
+#include "ResourceManager.h"
+#include "nexus/graphics/TextureProxy.h"
 
 NXS_NAMESPACE
 {
@@ -22,20 +22,14 @@ NXS_NAMESPACE
 
         ~Texture() override;
 
+        void SetSize(int32 width, int32 height);
+        void SetNumChannels(int32 channels);
         void SetWrapMode(TextureWrapMode wrapS, TextureWrapMode wrapT);
         void SetFiltering(TextureFilterMode minFilter, TextureFilterMode magFilter);
         void SetNumMips(int32 numMips);
-
-        /**
-         * Create a TextureProxy object representing this texture on GPU.
-         * @param renderingInterface
-         * @param keepCopy Whether to keep the local copy on RAM. The default behavior is to discard
-         * the local copy as soon as the GPU resource is allocated.
-         * @return
-         */
-        Ref<TextureProxy> AllocateGpuResource(
-            const RenderingInterface& renderingInterface,
-            bool keepCopy = false);
+        void DescribeTexture(const TextureDescription& desc);
+        
+        MAYBE_UNUSED Ref<TextureProxy> AllocateGpuResource(const uint8* pixels, size_t size);
 
         NODISCARD Ref<TextureProxy> GetProxy() const
         {
@@ -43,16 +37,7 @@ NXS_NAMESPACE
         }
 
     protected:
-        int32 m_width = 0;
-        int32 m_height = 0;
-        int32 m_channels = 0;
-        PixelFormat m_format = PixelFormat::None;
-        DataType m_componentType = DataType::None;
-        TextureWrapMode m_wrapModeS = TextureWrapMode::Clamp;
-        TextureWrapMode m_wrapModeT = TextureWrapMode::Clamp;
-        TextureFilterMode m_filterMin = TextureFilterMode::Linear;
-        TextureFilterMode m_filterMag = TextureFilterMode::Linear;
-        uint32 m_numMips = 0;
+        TextureDescription m_desc{};
         Ref<TextureProxy> m_textureProxy;
     };
 
@@ -63,11 +48,17 @@ NXS_NAMESPACE
     class TextureLoader final : public IResourceLoader
     {
     public:
-        Ref<IResource> Load(const std::string& path) override;
+        Ref<Resource> Load(const std::string& path, uint32 id) override;
 
         std::type_index GetResourceType() const override
         {
             return typeid(Texture);
         }
+    };
+
+    class TextureManager : public ResourceManager<Texture>
+    {
+    public:
+        TextureManager();
     };
 }

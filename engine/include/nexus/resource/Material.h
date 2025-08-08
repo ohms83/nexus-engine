@@ -3,17 +3,18 @@
 //
 #pragma once
 
-#include <nexus/NxsDefine.h>
+#include "nexus/NxsDefine.h"
 
 #include "Resource.h"
 #include "Texture.h"
+#include "nexus/graphics/Color.h"
 
 NXS_NAMESPACE
 {
     class Material final : public Resource
     {
     public:
-        explicit Material(uint32 resourceId);
+        explicit Material(std::string path, uint32 resourceId);
 
         Color3F diffuse;
         Color3F specular;
@@ -23,8 +24,5 @@ NXS_NAMESPACE
         Ref<Texture> diffuseMap;
         Ref<Texture> specularMap;
         Ref<Texture> normalMap;
-
-    protected:
-        uint8* Load_Impl(const std::string& path, size_t& out_size) override;
     };
 }

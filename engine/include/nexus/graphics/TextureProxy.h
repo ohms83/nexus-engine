@@ -34,7 +34,7 @@ NXS_NAMESPACE
         Num
     };
 
-    struct TextureCreationInfo
+    struct TextureDescription
     {
         int32 width = 0;
         int32 height = 0;
@@ -46,6 +46,8 @@ NXS_NAMESPACE
         TextureFilterMode filterMin = TextureFilterMode::Linear;
         TextureFilterMode filterMag = TextureFilterMode::Linear;
         uint32 numMips = 0;
+
+        size_t GetBufferSize() const;
     };
 
     /**
@@ -58,7 +60,7 @@ NXS_NAMESPACE
         ~TextureProxy() override;
 
         //! Begin building this texture
-        virtual TextureProxy& Begin(const TextureCreationInfo& info);
+        virtual TextureProxy& Begin(const TextureDescription& info);
         virtual TextureProxy& LoadData(const uint8* data, uint32 size);
         virtual TextureProxy& LoadMipData(const uint8* data, uint32 size, uint32 mip);
         virtual void End();

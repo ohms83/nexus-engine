@@ -1,5 +1,5 @@
-#include <nexus/resource/mesh/CubeMesh.h>
-#include <nexus/graphics/RenderingInterface.h>
+#include "nexus/resource/mesh/CubeMesh.h"
+#include "nexus/graphics/RenderingInterface.h"
 
 USING_NAMESPACE_NXS;
 
@@ -79,8 +79,8 @@ static const std::vector<uint32_t> cubeIndices = {
     21, 23, 20  // Triangle 2: Bottom-Left, Top-Right, Bottom-Right (CCW)
 };
 
-CubeMesh::CubeMesh(const uint32 resourceId)
-    : Mesh(resourceId)
+CubeMesh::CubeMesh()
+    : Mesh("CubeMesh")
 {
     const auto& renderInterface = RenderingInterface::Instance();
 

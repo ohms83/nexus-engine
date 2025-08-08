@@ -54,13 +54,6 @@ void main()
 class Example_01 final : public nxs::Application
 {
 public:
-    ~Example_01() override
-    {
-        delete m_vertexBuffer;
-        delete m_indexBuffer;
-        delete m_shader;
-    }
-
     void Render(nxs::RenderSystem& renderSystem) override
     {
         // Calculate matrices (simple orthographic for 2D, or perspective for 3D)
@@ -94,7 +87,7 @@ protected:
 
         constexpr auto vertexSize = sizeof(Vertex);
         const auto bufferSize = squareVertices.size() * vertexSize;
-        m_vertexBuffer = renderInterface.CreateVertexBuffer();
+        m_vertexBuffer.reset(renderInterface.CreateVertexBuffer());
         m_vertexBuffer->Begin()
             .SetVertices(R_CAST<const uint8_t*>(squareVertices.data()), bufferSize)
             .SetUsage(nxs::BufferUsage::StaticDraw)
@@ -102,14 +95,14 @@ protected:
             .AddAttribute(nxs::VertexAttribute {nxs::VertexAttribute::Type::Color0, nxs::DataType::Float, 3})
         .Build();
 
-        m_indexBuffer = renderInterface.CreateIndexBuffer();
+        m_indexBuffer.reset(renderInterface.CreateIndexBuffer());
         m_indexBuffer->Begin()
             .SetIndices(C_CAST<uint32_t*>(squareIndices.data()), squareIndices.size(), nxs::FrontFace::ClockWise)
             .SetUsage(nxs::BufferUsage::StaticDraw)
             .SetDrawMode(nxs::DrawMode::Triangle)
         .Build();
 
-        m_shader = renderInterface.CreateShader();
+        m_shader.reset(renderInterface.CreateShader());
         m_shader->BeginCompile()
             .AddSource(vertexShaderSource, nxs::Shader::Type::Vertex)
             .AddSource(fragmentShaderSource, nxs::Shader::Type::Fragment)
@@ -117,9 +110,9 @@ protected:
         return true;
     }
 
-    nxs::VertexBuffer* m_vertexBuffer = nullptr;
-    nxs::IndexBuffer* m_indexBuffer = nullptr;
-    nxs::Shader* m_shader = nullptr;
+    nxs::Ref<nxs::VertexBuffer> m_vertexBuffer;
+    nxs::Ref<nxs::IndexBuffer> m_indexBuffer;
+    nxs::Ref<nxs::Shader> m_shader;
 };
 
 int main()

@@ -57,10 +57,8 @@ Application::~Application()
 
     Gizmos::Cleanup();
 
-    PURGE_UNUSED_RESOURCES(TextureManager);
-    PURGE_UNUSED_RESOURCES(MeshManager);
     m_textureManager.reset();
-    m_meshManager.reset();
+    // m_meshManager.reset();
 
     m_editor.reset();
     m_renderSystem.reset();
@@ -150,7 +148,7 @@ bool Application::Init(const ApplicationConfig& info)
         m_editor = std::make_unique<Editor>();
     }
 
-    m_meshManager = std::make_unique<MeshManager>();
+    // m_meshManager = std::make_unique<MeshManager>();
     m_textureManager = std::make_unique<TextureManager>();
 
     Gizmos::Init(*m_renderSystem);

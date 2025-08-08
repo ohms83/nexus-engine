@@ -17,7 +17,7 @@ NXS_NAMESPACE
         void Bind() const override;
         void Unbind() const override;
 
-        TextureProxy& Begin(const TextureCreationInfo& info) override;
+        TextureProxy& Begin(const TextureDescription& info) override;
         TextureProxy& LoadData(const uint8* data, uint32 size) override;
         TextureProxy& LoadMipData(const uint8* data, uint32 size, uint32 mip) override;
 

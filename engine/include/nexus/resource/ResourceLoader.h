@@ -22,9 +22,10 @@ NXS_NAMESPACE
          * This method encapsulates the entire loading process for a specific resource type,
          * including file I/O, parsing, and initialization (e.g., GPU upload for textures).
          * @param path The path to the resource file.
+         * @param id The unique resource ID.
          * @return A Ref to the loaded IResource on success, or nullptr on failure.
          */
-        virtual Ref<IResource> Load(const std::string& path) = 0;
+        virtual Ref<Resource> Load(const std::string& path, uint32 id) = 0;
 
         /**
          * @brief Returns the std::type_index of the specific IResource type this loader handles.

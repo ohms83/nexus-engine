@@ -66,7 +66,7 @@ void GLTexture::Unbind() const
     CALL_GL_FUNC(glBindTexture(GL_TEXTURE_2D, 0));
 }
 
-TextureProxy& GLTexture::Begin(const TextureCreationInfo& info)
+TextureProxy& GLTexture::Begin(const TextureDescription& info)
 {
     TextureProxy::Begin(info);
 

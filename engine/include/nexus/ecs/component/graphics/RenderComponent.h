@@ -14,9 +14,9 @@ NXS_NAMESPACE
 {
     struct RenderComponent
     {
-        VertexBuffer* vertexBuffer;
-        IndexBuffer* indexBuffer;
-        Shader* shader;
+        Ref<VertexBuffer> vertexBuffer;
+        Ref<IndexBuffer> indexBuffer;
+        Ref<Shader> shader;
     };
     struct DiffuseMapComponent
     {

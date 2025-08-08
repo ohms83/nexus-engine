@@ -6,10 +6,12 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <typeindex>
 #include <nexus/NxsDefine.h>
 #include <nexus/core/Hasher.h>
 
 #include "Resource.h"
+#include "ResourceLoader.h"
 
 NXS_NAMESPACE
 {
@@ -54,8 +56,7 @@ NXS_NAMESPACE
          * @param path The unique path (identifier) of the resource.
          * @return A std::shared_ptr to the loaded resource, or nullptr if loading fails or type mismatches.
          */
-        template<typename T>
-        std::shared_ptr<T> Get(const std::string& path)
+        NODISCARD Ref<ResourceType> Get(const std::string& path)
         {
             std::lock_guard<std::mutex> lock(m_mutex); // For thread-safety
             const auto hash = m_hasher.Hash32(path);
@@ -64,7 +65,7 @@ NXS_NAMESPACE
             if (auto it = m_resourceCache.find(hash); it != m_resourceCache.end())
             {
                 // Found in cache, try to cast to the requested type
-                Ref<T> cached_resource = PTR_CAST<T>(it->second);
+                Ref<ResourceType> cached_resource = PTR_CAST<ResourceType>(it->second);
                 if (cached_resource)
                 {
                     return cached_resource;
@@ -75,14 +76,14 @@ NXS_NAMESPACE
                     // or misuse. Handle as an error.
                     LOG_ERROR(LogResource, std::format(
                         "Resource '{}' exists in cache but is of type {} (requested {}). Type mismatch.",
-                        path, typeid(*it->second).name(), typeid(T).name()
+                        path, typeid(*it->second).name(), typeid(ResourceType).name()
                     ));
                     return nullptr; // Or throw std::bad_cast
                 }
             }
 
             // Resource not in cache, find the appropriate loader
-            std::type_index resourceType = typeid(T);
+            std::type_index resourceType = typeid(ResourceType);
             auto loader_it = m_loaders.find(resourceType);
             if (loader_it == m_loaders.end())
             {
@@ -90,7 +91,7 @@ NXS_NAMESPACE
                 return nullptr;
             }
 
-            Ref<IResource> base_resource = loader_it->second->Load(path);
+            Ref<Resource> base_resource = loader_it->second->Load(path, hash);
             if (!base_resource)
             {
                 LOG_ERROR(LogResource, std::format("Loader for type '{}' failed to load resource '{}'.", resourceType.name(), path));
@@ -98,24 +99,24 @@ NXS_NAMESPACE
             }
 
             // Ensure the loader returned the correct type (it should, by design of GetResourceType)
-            Ref<T> new_resource = PTR_CAST<T>(base_resource);
+            Ref<ResourceType> new_resource = PTR_CAST<ResourceType>(base_resource);
             if (!new_resource)
             {
-                NXS_LOG_ERROR(LogResource, std::format(
+                LOG_ERROR(LogResource, std::format(
                     "Loader for type '{}' returned an unexpected resource type for '{}'. Expected {}, Got {}.",
-                    resourceType.name(), path, typeid(T).name(), typeid(*base_resource).name()
+                    resourceType.name(), path, typeid(ResourceType).name(), typeid(*base_resource).name()
                 ));
                 return nullptr;
             }
 
             // Store the newly loaded resource in the cache
-            m_resourceCache[path] = new_resource;
+            m_resourceCache[hash] = new_resource;
             return new_resource;
         }
 
-        NODISCARD virtual Ref<ResourceType> Get(uint32 hash) const
+        NODISCARD Ref<ResourceType> Get(uint32 hash)
         {
-            if (const auto itr = m_resources.find(hash); itr != m_resources.end()) {
+            if (const auto itr = m_resourceCache.find(hash); itr != m_resourceCache.end()) {
                 return itr->second;
             }
             return nullptr;
@@ -145,15 +146,18 @@ NXS_NAMESPACE
         //! Release all the resources that no one else but the manager is holding (ref count = 1).
         void PurgeUnused()
         {
-            for (auto itr = m_resources.begin(); itr != m_resources.end();)
+            uint32 count = 0;
+            for (auto itr = m_resourceCache.begin(); itr != m_resourceCache.end();)
             {
                 if (auto& resource = itr->second; resource.use_count() <= 1) {
-                    itr = m_resources.erase(itr);
+                    itr = m_resourceCache.erase(itr);
+                    ++count;
                 }
                 else {
                     ++itr;
                 }
             }
+            LOG_INFO(LogResource, std::format("Purged all unused resources. Count={}", count));
         }
         /**
          * @brief Clears all resources from the cache.
@@ -169,9 +173,9 @@ NXS_NAMESPACE
     protected:
         Hasher m_hasher;
         //! The central cache mapping resource paths to shared pointers of base IResource type
-        std::unordered_map<uint32, std::shared_ptr<IResource>> m_resourceCache;
+        std::unordered_map<uint32, Ref<Resource>> m_resourceCache;
         //! Registry of resource loaders, keyed by the type_index of the resource they load
-        std::unordered_map<std::type_index, std::shared_ptr<IResourceLoader>> m_loaders;
+        std::unordered_map<std::type_index, Ref<IResourceLoader>> m_loaders;
         //! Mutex for thread-safe access to m_resourceCache and m_loaders
         mutable std::mutex m_mutex;
     };

@@ -15,9 +15,9 @@ NXS_NAMESPACE
 {
     struct RenderCommand
     {
-        Shader* shader;
-        VertexBuffer* vertexBuffer = nullptr;
-        IndexBuffer* indexBuffer = nullptr;
+        Ref<Shader> shader;
+        Ref<VertexBuffer> vertexBuffer = nullptr;
+        Ref<IndexBuffer> indexBuffer = nullptr;
         std::map<std::string, glm::mat4> uniformMatrices;
         std::vector<std::tuple<std::string, int32, Ref<TextureProxy>>> uniform2DTextures;
         std::vector<std::tuple<std::string, glm::vec3>> uniformVec3;

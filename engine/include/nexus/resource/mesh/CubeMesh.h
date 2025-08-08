@@ -7,20 +7,6 @@ NXS_NAMESPACE
     class CubeMesh final : public Mesh
     {
     public:
-        explicit CubeMesh(uint32 resourceId);
-        ~CubeMesh() override = default;
-
-        bool Load(const std::string& path) override
-        {
-            NXS_ASSERT(false);
-            return true;
-        }
-
-    protected:
-        uint8* Load_Impl(const std::string& path, size_t& out_size) override
-        {
-            NXS_ASSERT(false);
-            return nullptr;
-        }
+        CubeMesh();
     };
 }

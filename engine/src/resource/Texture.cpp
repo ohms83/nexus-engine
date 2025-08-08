@@ -2,8 +2,9 @@
 // Created by nutta on 7/9/2025.
 //
 
-#include <nexus/resource/Texture.h>
-// TODO: Might consider replacing this with a more robust loader.
+#include "nexus/resource/Texture.h"
+#include "nexus/graphics/RenderingInterface.h"
+
 #include <iostream>
 #include <ostream>
 #include <stb_image.h>
@@ -14,24 +15,40 @@ DEFINE_LOG(Texture);
 
 Texture::~Texture() = default;
 
+void Texture::SetSize(int32 width, int32 height)
+{
+    m_desc.width = width;
+    m_desc.height = height;
+}
+
+void Texture::SetNumChannels(int32 channels)
+{
+    m_desc.channels = channels;
+}
+
 void Texture::SetWrapMode(const TextureWrapMode wrapS, const TextureWrapMode wrapT)
 {
-    m_wrapModeS = wrapS;
-    m_wrapModeT = wrapT;
+    m_desc.wrapModeS = wrapS;
+    m_desc.wrapModeT = wrapT;
 }
 
 void Texture::SetFiltering(const TextureFilterMode minFilter, const TextureFilterMode magFilter)
 {
-    m_filterMin = minFilter;
-    m_filterMag = magFilter;
+    m_desc.filterMin = minFilter;
+    m_desc.filterMag = magFilter;
 }
 
 void Texture::SetNumMips(const int32 numMips)
 {
-    m_numMips = numMips;
+    m_desc.numMips = numMips;
 }
 
-Ref<TextureProxy> Texture::AllocateGpuResource(const RenderingInterface& renderingInterface, const bool keepCopy)
+void Texture::DescribeTexture(const TextureDescription& desc)
+{
+    m_desc = desc;
+}
+
+Ref<TextureProxy> Texture::AllocateGpuResource(const uint8* pixels, size_t size)
 {
     if (m_textureProxy != nullptr)
     {
@@ -39,42 +56,30 @@ Ref<TextureProxy> Texture::AllocateGpuResource(const RenderingInterface& renderi
         return m_textureProxy;
     }
 
-    m_textureProxy.reset(renderingInterface.CreateTexture());
-    const TextureCreationInfo info = {
-        m_width, m_height, m_channels,
-        m_format, m_componentType,
-        m_wrapModeS, m_wrapModeT,
-        m_filterMin, m_filterMag,
-        m_numMips,
-    };
-    m_textureProxy->Begin(info)
-        .LoadData(m_data.Data(), m_data.Size())
+    m_textureProxy.reset(RenderingInterface::Instance().CreateTexture());
+    m_textureProxy->Begin(m_desc)
+        .LoadData(pixels, size)
     .End();
-
-    if (!keepCopy) m_data.Release();
     return m_textureProxy;
 }
 
-uint8* Texture::Load_Impl(const std::string& path, size_t& out_size)
+Ref<Resource> TextureLoader::Load(const std::string& path, uint32 id)
 {
+    TextureDescription desc{};
+    Ref<Texture> texture = std::make_shared<Texture>(path, id);
     stbi_set_flip_vertically_on_load(0);
-    const auto pixels = stbi_load(path.c_str(), &m_width, &m_height, &m_channels, 0);
-    if (!pixels)
-    {
-        std::cout << "Failed to load " << path << std::endl;
-        return nullptr;
-    }
-
-    out_size = m_width * m_height * m_channels;
+    Ptr<stbi_uc> pixels; 
+    pixels.reset(stbi_load(path.c_str(), &desc.width, &desc.height, &desc.channels, 0));
+    if (!pixels) return nullptr;
 
     // TODO: Supports more pixel format (SRGB and other compressed textures).
-    switch (m_channels)
+    switch (desc.channels)
     {
     case 3:
-        m_format = PixelFormat::RGB;
+        desc.format = PixelFormat::RGB;
         break;
     case 4:
-        m_format = PixelFormat::RGBA;
+        desc.format = PixelFormat::RGBA;
         break;
     default:
         // TODO: Handle gray scale images.
@@ -82,6 +87,14 @@ uint8* Texture::Load_Impl(const std::string& path, size_t& out_size)
         break;
     }
     // TODO: Supporting other component types.
-    m_componentType = DataType::UByte;
-    return pixels;
+    desc.componentType = DataType::UByte;
+
+    texture->DescribeTexture(desc);
+    texture->AllocateGpuResource(CAST<uint8*>(pixels.get()), desc.GetBufferSize());
+    return PTR_CAST<Resource>(texture);
+}
+
+TextureManager::TextureManager()
+{
+    RegisterLoader(std::make_shared<TextureLoader>());
 }

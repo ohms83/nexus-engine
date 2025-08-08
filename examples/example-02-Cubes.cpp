@@ -133,9 +133,9 @@ public:
 
         const nxs::RenderCommand renderCommand
         {
-            m_shader.get(),
-            m_vertexBuffer.get(),
-            m_indexBuffer.get(),
+            m_shader,
+            m_vertexBuffer,
+            m_indexBuffer,
             {
                 {"model", m_cubeTransform.GetMatrix()},
                 {"view", view},
@@ -185,9 +185,9 @@ protected:
         m_camera.height = CAST<float>(screenSize.y);
     }
 
-    nxs::Ptr<nxs::VertexBuffer> m_vertexBuffer;
-    nxs::Ptr<nxs::IndexBuffer> m_indexBuffer;
-    nxs::Ptr<nxs::Shader> m_shader;
+    nxs::Ref<nxs::VertexBuffer> m_vertexBuffer;
+    nxs::Ref<nxs::IndexBuffer> m_indexBuffer;
+    nxs::Ref<nxs::Shader> m_shader;
     nxs::Transform m_cubeTransform;
     nxs::CameraComponent m_camera;
 };

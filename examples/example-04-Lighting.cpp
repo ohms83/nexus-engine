@@ -187,7 +187,7 @@ public:
         glm::mat4 projection = glm::perspective(glm::radians(m_camera.fov), m_camera.width / m_camera.height, m_camera.nearZ, m_camera.farZ);
         const nxs::RenderCommand renderCommand
         {
-            m_shader.get(),
+            m_shader,
             m_cubeMesh->GetVertexBuffer(),
             m_cubeMesh->GetIndexBuffer(),
             {
@@ -262,10 +262,9 @@ protected:
         m_texture = GetTextureManager().Get(assetsPath);
         m_texture->SetWrapMode(nxs::TextureWrapMode::Clamp, nxs::TextureWrapMode::Clamp);
         m_texture->SetFiltering(nxs::TextureFilterMode::Linear, nxs::TextureFilterMode::Linear);
-        m_texture->AllocateGpuResource(renderInterface);
 
-        m_cubeMesh = GetMeshManager().GetStaticMesh(nxs::Mesh::CubeMesh);
-        m_cubeTransform.SetPosition({0, 0, 0});
+        // m_cubeMesh = GetMeshManager().GetStaticMesh(nxs::Mesh::CubeMesh);
+        // m_cubeTransform.SetPosition({0, 0, 0});
 
         InitLights();
         return true;
@@ -294,7 +293,7 @@ private:
     }
 
 protected:
-    nxs::Ptr<nxs::Shader> m_shader;
+    nxs::Ref<nxs::Shader> m_shader;
     nxs::Ref<nxs::Texture> m_texture;
     nxs::Ref<nxs::Mesh> m_cubeMesh;
     nxs::Transform m_cubeTransform;

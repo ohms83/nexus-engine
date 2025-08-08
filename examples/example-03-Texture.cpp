@@ -135,9 +135,9 @@ public:
 
         const nxs::RenderCommand renderCommand
         {
-            m_shader.get(),
-            m_vertexBuffer.get(),
-            m_indexBuffer.get(),
+            m_shader,
+            m_vertexBuffer,
+            m_indexBuffer,
             {
                 {"model", m_cubeTransform.GetMatrix()},
                 {"view", view},
@@ -184,7 +184,6 @@ protected:
         m_texture = GetTextureManager().Get(assetsPath);
         m_texture->SetWrapMode(nxs::TextureWrapMode::Clamp, nxs::TextureWrapMode::Clamp);
         m_texture->SetFiltering(nxs::TextureFilterMode::Linear, nxs::TextureFilterMode::Linear);
-        m_textureProxy = m_texture->AllocateGpuResource(renderInterface);
 
         return true;
     }
@@ -196,9 +195,9 @@ protected:
         m_camera.height = CAST<float>(screenSize.y);
     }
 
-    nxs::Ptr<nxs::VertexBuffer> m_vertexBuffer;
-    nxs::Ptr<nxs::IndexBuffer> m_indexBuffer;
-    nxs::Ptr<nxs::Shader> m_shader;
+    nxs::Ref<nxs::VertexBuffer> m_vertexBuffer;
+    nxs::Ref<nxs::IndexBuffer> m_indexBuffer;
+    nxs::Ref<nxs::Shader> m_shader;
     nxs::Ref<nxs::TextureProxy> m_textureProxy;
     nxs::Ref<nxs::Texture> m_texture;
     nxs::Transform m_cubeTransform;

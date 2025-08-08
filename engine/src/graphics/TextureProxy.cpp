@@ -8,9 +8,23 @@ USING_NAMESPACE_NXS;
 
 DEFINE_LOG(Textureproxy);
 
+size_t TextureDescription::GetBufferSize() const
+{
+    switch (componentType)
+    {
+    case DataType::UByte:
+        return width * height * channels;
+    default:
+        // No implementation yet.
+        assert(false);
+        break;
+    }
+    return 0;
+}
+
 TextureProxy::~TextureProxy() = default;
 
-TextureProxy& TextureProxy::Begin(const TextureCreationInfo& info)
+TextureProxy& TextureProxy::Begin(const TextureDescription& info)
 {
     assert(m_handle == 0);
     m_handle = Alloc();

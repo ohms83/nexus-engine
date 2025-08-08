@@ -6,12 +6,7 @@
 
 USING_NAMESPACE_NXS;
 
-Material::Material(const uint32 resourceId)
-    : Resource(resourceId)
+Material::Material(std::string path, const uint32 resourceId)
+    : Resource(path, resourceId)
 {
-}
-
-uint8* Material::Load_Impl(const std::string& path, size_t& out_size)
-{
-    return nullptr;
 }

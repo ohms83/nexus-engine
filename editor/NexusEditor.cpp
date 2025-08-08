@@ -115,6 +115,7 @@ bool NexusEditor::Init_Internal()
         .AddSource(fragmentShaderStream.str(), nxs::Shader::Type::Fragment)
     .Compile();
 
+#if 0
     {
         const auto texturePath = GetAssetPath(texturePaths[0]);
         auto texture = GetTextureManager().Get(texturePath);
@@ -145,7 +146,6 @@ bool NexusEditor::Init_Internal()
         auto texture = GetTextureManager().Get(texturePath);
         texture->SetWrapMode(nxs::TextureWrapMode::Clamp, nxs::TextureWrapMode::Clamp);
         texture->SetFiltering(nxs::TextureFilterMode::Linear, nxs::TextureFilterMode::Linear);
-        texture->AllocateGpuResource(renderInterface);
 
         auto mesh = GetMeshManager().GetStaticMesh(nxs::Mesh::CubeMesh);
         auto node = scene->CreateNode<nxs::SceneNode>("Cube Node");
@@ -168,7 +168,7 @@ bool NexusEditor::Init_Internal()
             90.f
         });
     }
-
+#endif
     InitLight(*scene);
 
     auto& inputManager = nxs::InputManager::Instance();
@@ -237,6 +237,7 @@ void NexusEditor::Update()
 
 void NexusEditor::InitCube(nxs::Scene& scene, const nxs::int32 row, const nxs::int32 col)
 {
+#if 0
     const auto& renderInterface = GetRenderSystem().GetRenderInterface();
     constexpr float gridWidth  = 5;
     constexpr float gridHeight = 5;
@@ -248,7 +249,6 @@ void NexusEditor::InitCube(nxs::Scene& scene, const nxs::int32 row, const nxs::i
     auto texture = GetTextureManager().Get(texturePath);
     texture->SetWrapMode(nxs::TextureWrapMode::Clamp, nxs::TextureWrapMode::Clamp);
     texture->SetFiltering(nxs::TextureFilterMode::Linear, nxs::TextureFilterMode::Linear);
-    texture->AllocateGpuResource(renderInterface);
 
     const auto mesh = GetMeshManager().GetStaticMesh(nxs::Mesh::CubeMesh);
     auto node = scene.CreateNode<nxs::SceneNode>("Cube Node");
@@ -270,4 +270,5 @@ void NexusEditor::InitCube(nxs::Scene& scene, const nxs::int32 row, const nxs::i
         glm::normalize(glm::sphericalRand<float>(1)),
         90.f
     });
+#endif
 }
