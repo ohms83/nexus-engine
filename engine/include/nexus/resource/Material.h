@@ -8,6 +8,7 @@
 #include "Resource.h"
 #include "Texture.h"
 #include "nexus/graphics/Color.h"
+#include "nexus/graphics/Shader.h"
 
 NXS_NAMESPACE
 {
@@ -21,8 +22,27 @@ NXS_NAMESPACE
         Color3F emissive;
         float shininess = 0;
 
-        Ref<Texture> diffuseMap;
-        Ref<Texture> specularMap;
-        Ref<Texture> normalMap;
+        void SetDiffuseMap(Ref<Texture> texture);
+        void SetNormalMap(Ref<Texture> texture);
+        void SetSpecularMap(Ref<Texture> texture);
+
+        void SetShader(Ref<Shader> shader);
+
+        //! Use this material as for the next drawing operation.
+        void Use();
+
+    private:
+        struct TextureUniformMap
+        {
+            Ref<Texture> texture;
+            std::string uniformName;
+        };
+
+        Ref<Texture> m_diffuseMap;
+        Ref<Texture> m_specularMap;
+        Ref<Texture> m_normalMap;
+        Ref<Shader> m_shader;
+
+        std::vector<TextureUniformMap> m_textureUniforms;
     };
 }
