@@ -41,6 +41,7 @@ header_list = []
 ignored_headers = [
     'NxsDefine.h',
     'NxsCommon.h',
+    generated_header,
 ]
 
 print(f"Checking header-guard...")
@@ -52,6 +53,9 @@ for root, _, files in os.walk(engine_header_dir):
         if file_name not in ignored_headers:
             header_full_path = os.path.join(root, file_name)[engine_header_path_len+1:]
             header_list.append(header_full_path)
+
+if any(header in ignored_headers for header in header_list):
+    raise ValueError("One or more ignored headers were found.")
 
 print(f"Generating Nexus.h header...")
 with open(os.path.join(engine_header_dir, 'Nexus.h'), 'w') as outFile:
