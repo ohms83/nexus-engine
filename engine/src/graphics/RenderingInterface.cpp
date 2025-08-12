@@ -60,7 +60,7 @@ void RenderingInterface::Draw(const RenderCommand& command)
 
     for (const auto& [name, textureUnit, texture] : command.uniform2DTextures)
     {
-        shader->SetUniformTexture2D(name, texture.get(), textureUnit);
+        shader->SetUniformTexture2D(name, texture, textureUnit);
     }
 
     for (const auto& [name, uVec3] : command.uniformVec3)

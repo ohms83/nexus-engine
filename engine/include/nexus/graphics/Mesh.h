@@ -1,12 +1,13 @@
 #pragma once
 
-#include <nexus/NxsDefine.h>
-#include <nexus/graphics/VertexBuffer.h>
-#include <nexus/graphics/IndexBuffer.h>
-#include <nexus/graphics/Shader.h>
+#include "nexus/NxsDefine.h"
 
-#include "Resource.h"
-#include "ResourceManager.h"
+#include "VertexBuffer.h"
+#include "IndexBuffer.h"
+#include "Shader.h"
+
+#include "nexus/core/Resource.h"
+#include "nexus/core/ResourceManager.h"
 
 NXS_NAMESPACE
 {

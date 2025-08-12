@@ -2,8 +2,8 @@
 // Created by nutta on 7/9/2025.
 //
 
-#include "nexus/resource/Texture.h"
-#include "nexus/graphics/RenderingInterface.h"
+#include "graphics/Texture.h"
+#include "graphics/RenderingInterface.h"
 
 #include <iostream>
 #include <ostream>

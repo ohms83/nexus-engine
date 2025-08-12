@@ -2,8 +2,8 @@
 // Created by nutta on 7/22/2025.
 //
 
-#include "nexus/resource/mesh/PlaneMesh.h"
-#include "nexus/graphics/RenderingInterface.h"
+#include "graphics/mesh/PlaneMesh.h"
+#include "graphics/RenderingInterface.h"
 
 USING_NAMESPACE_NXS;
 

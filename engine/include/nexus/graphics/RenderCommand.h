@@ -10,6 +10,7 @@
 #include "IndexBuffer.h"
 #include "Shader.h"
 #include "VertexBuffer.h"
+#include "Material.h"
 
 NXS_NAMESPACE
 {
@@ -25,6 +26,7 @@ NXS_NAMESPACE
         std::vector<std::tuple<std::string, float>> uniformFloats;
         std::vector<std::tuple<std::string, int32>> uniformInts;
         DepthFunction depthFunction = DepthFunction::Lesser;
+        Ref<Material> material;
 
         NODISCARD uint32 GetPolygonCount() const
         {

@@ -6,7 +6,7 @@
 #include "nexus/scene/Transform.h"
 #include <glm/gtc/type_ptr.hpp>
 
-#include "nexus/resource/Texture.h"
+#include "nexus/graphics/Texture.h"
 
 struct Vertex
 {

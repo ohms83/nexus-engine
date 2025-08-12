@@ -30,7 +30,7 @@ NXS_NAMESPACE
         void SetUniformMatrix(const std::string& name, const glm::mat3& matrix, bool tranpose) override;
         void SetUniformMatrix(const std::string& name, const glm::mat4& matrix, bool tranpose) override;
 
-        void SetUniformTexture2D(const std::string& name, const TextureProxy* texture, int32 textureUnit) override;
+        void SetUniformTexture2D(const std::string& name, Ref<const TextureProxy> texture, int32 textureUnit) override;
 
         void Bind() const override;
         void Unbind() const override;

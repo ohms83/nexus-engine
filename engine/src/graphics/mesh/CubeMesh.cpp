@@ -1,5 +1,5 @@
-#include "nexus/resource/mesh/CubeMesh.h"
-#include "nexus/graphics/RenderingInterface.h"
+#include "graphics/mesh/CubeMesh.h"
+#include "graphics/RenderingInterface.h"
 
 USING_NAMESPACE_NXS;
 

@@ -12,13 +12,13 @@
 #include "implot.h"
 #include "core/Logger.h"
 #include "core/TaskManager.h"
-#include "nexus/time/TimerManager.h"
 #include "core/FileLogger.h"
 #include "core/StdOutLogger.h"
+#include "graphics/Mesh.h"
+#include "graphics/Texture.h"
 #include "graphics/debug/Gizmos.h"
 #include "io/InputManager.h"
-#include "resource/Mesh.h"
-#include "resource/Texture.h"
+#include "time/TimerManager.h"
 
 USING_NAMESPACE_NXS;
 

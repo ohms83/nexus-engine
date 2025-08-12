@@ -9,7 +9,7 @@
 #include "imgui.h"
 #include "nexus/ecs/component/scene/CameraComponent.h"
 #include "nexus/ecs/component/scene/LightComponent.h"
-#include "nexus/resource/Texture.h"
+#include "nexus/graphics/Texture.h"
 
 struct Vertex
 {

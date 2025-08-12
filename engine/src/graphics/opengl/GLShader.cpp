@@ -143,7 +143,7 @@ void GLShader::SetUniformMatrix(const std::string& name, const glm::mat4& matrix
     CALL_GL_FUNC(glUniformMatrix4fv(location, 1, tranpose ? GL_TRUE : GL_FALSE, glm::value_ptr(matrix)));
 }
 
-void GLShader::SetUniformTexture2D(const std::string& name, const TextureProxy* texture, const int32 textureUnit)
+void GLShader::SetUniformTexture2D(const std::string& name, Ref<const TextureProxy> texture, const int32 textureUnit)
 {
     const auto location = FindUniform(name);
     const GLint gl_textureUnit = GL_TEXTURE0 + textureUnit;

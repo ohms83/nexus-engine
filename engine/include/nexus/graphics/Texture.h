@@ -4,11 +4,11 @@
 
 #pragma once
 
-#include <nexus/NxsDefine.h>
-#include "Resource.h"
-#include "ResourceLoader.h"
-#include "ResourceManager.h"
-#include "nexus/graphics/TextureProxy.h"
+#include "nexus/NxsDefine.h"
+#include "core/Resource.h"
+#include "core/ResourceLoader.h"
+#include "core/ResourceManager.h"
+#include "TextureProxy.h"
 
 NXS_NAMESPACE
 {
@@ -28,7 +28,7 @@ NXS_NAMESPACE
         void SetFiltering(TextureFilterMode minFilter, TextureFilterMode magFilter);
         void SetNumMips(int32 numMips);
         void DescribeTexture(const TextureDescription& desc);
-        
+
         MAYBE_UNUSED Ref<TextureProxy> AllocateGpuResource(const uint8* pixels, size_t size);
 
         NODISCARD Ref<TextureProxy> GetProxy() const

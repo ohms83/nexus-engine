@@ -47,7 +47,7 @@ NXS_NAMESPACE
         virtual void SetUniformMatrix(const std::string& name, const glm::mat3& matrix, bool tranpose) = 0;
         virtual void SetUniformMatrix(const std::string& name, const glm::mat4& matrix, bool tranpose) = 0;
 
-        virtual void SetUniformTexture2D(const std::string& name, const TextureProxy* texture, int32 textureUnit) = 0;
+        virtual void SetUniformTexture2D(const std::string& name, Ref<const TextureProxy> texture, int32 textureUnit) = 0;
 
     protected:
         bool m_compiling = false;

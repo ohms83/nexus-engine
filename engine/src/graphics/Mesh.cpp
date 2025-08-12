@@ -1,7 +1,7 @@
-#include <nexus/resource/Mesh.h>
+#include "graphics/Mesh.h"
 
-#include "resource/mesh/CubeMesh.h"
-#include "resource/mesh/PlaneMesh.h"
+#include "graphics/mesh/CubeMesh.h"
+#include "graphics/mesh/PlaneMesh.h"
 
 USING_NAMESPACE_NXS;
 

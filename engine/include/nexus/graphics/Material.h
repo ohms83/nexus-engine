@@ -5,10 +5,12 @@
 
 #include "nexus/NxsDefine.h"
 
-#include "Resource.h"
 #include "Texture.h"
-#include "nexus/graphics/Color.h"
-#include "nexus/graphics/Shader.h"
+#include "GraphicsConst.h"
+#include "Color.h"
+#include "Shader.h"
+
+#include "core/Resource.h"
 
 NXS_NAMESPACE
 {
@@ -17,32 +19,27 @@ NXS_NAMESPACE
     public:
         explicit Material(std::string path, uint32 resourceId);
 
-        Color3F diffuse;
-        Color3F specular;
-        Color3F emissive;
+        Color3F diffuse{};
+        Color3F specular{};
+        Color3F emissive{};
         float shininess = 0;
 
-        void SetDiffuseMap(Ref<Texture> texture);
-        void SetNormalMap(Ref<Texture> texture);
-        void SetSpecularMap(Ref<Texture> texture);
-
-        void SetShader(Ref<Shader> shader);
+        void SetTexture(Ref<Texture> texture, std::string uniform);
+        void SetShader(const Ref<Shader>& shader);
 
         //! Use this material as for the next drawing operation.
         void Use();
 
     private:
+        Ref<Shader> m_shader;
+
         struct TextureUniformMap
         {
             Ref<Texture> texture;
             std::string uniformName;
+            uint32 textureUnit;
         };
-
-        Ref<Texture> m_diffuseMap;
-        Ref<Texture> m_specularMap;
-        Ref<Texture> m_normalMap;
-        Ref<Shader> m_shader;
-
         std::vector<TextureUniformMap> m_textureUniforms;
+        DepthFunction depthFunction = DepthFunction::Lesser;
     };
 }

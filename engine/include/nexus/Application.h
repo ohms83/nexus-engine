@@ -16,8 +16,8 @@
 
 #include "time/Timer.h"
 #include "editor/Editor.h"
-#include "resource/Mesh.h"
-#include "resource/Texture.h"
+#include "graphics/Mesh.h"
+#include "graphics/Texture.h"
 #include "scene/Scene.h"
 #include "graphics/RenderSystem.h"
 
