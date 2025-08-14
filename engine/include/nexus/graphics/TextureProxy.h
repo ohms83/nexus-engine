@@ -64,7 +64,7 @@ NXS_NAMESPACE
         virtual TextureProxy& LoadData(const uint8* data, uint32 size);
         virtual TextureProxy& LoadMipData(const uint8* data, uint32 size, uint32 mip);
         virtual void End();
-        
+
     protected:
         int32 m_width = 0;
         int32 m_height = 0;

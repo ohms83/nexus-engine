@@ -25,6 +25,11 @@ void Material::Use()
 {
     m_shader->Bind();
 
+    m_shader->SetUniformVector("uMatDiffuse", diffuse);
+    m_shader->SetUniformVector("uMatSpecular", specular);
+    m_shader->SetUniformVector("uMatEmissive", emissive);
+    m_shader->SetUniformFloat("uMatShininess", shininess);
+
     for (auto& [texture, uniformName, textureUnit] : m_textureUniforms)
     {
         m_shader->SetUniformTexture2D(uniformName, texture->GetProxy(), textureUnit);

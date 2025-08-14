@@ -13,7 +13,6 @@
 
 NXS_NAMESPACE
 {
-    
     class Shader : public GpuResrouce
     {
     public:
