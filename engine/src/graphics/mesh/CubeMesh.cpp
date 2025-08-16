@@ -79,14 +79,14 @@ static const std::vector<uint32_t> cubeIndices = {
     21, 23, 20  // Triangle 2: Bottom-Left, Top-Right, Bottom-Right (CCW)
 };
 
-CubeMesh::CubeMesh()
-    : Mesh("CubeMesh")
+CubeMesh::CubeMesh(const Ref<RenderingInterface>& renderingInterface)
 {
-    const auto& renderInterface = RenderingInterface::Instance();
+    static uint64 count = 0;
+    m_name = std::format("CubeMesh_{}", count++);
 
     constexpr auto vertexSize = sizeof(Vertex);
     const auto bufferSize = cubeVertices.size() * vertexSize;
-    m_vertexBuffer.reset(renderInterface.CreateVertexBuffer());
+    m_vertexBuffer.reset(renderingInterface->CreateVertexBuffer());
     m_vertexBuffer->Begin()
         .SetVertices(R_CAST<const uint8_t*>(cubeVertices.data()), bufferSize)
         .SetUsage(BufferUsage::StaticDraw)
@@ -95,7 +95,7 @@ CubeMesh::CubeMesh()
         .AddAttribute(VertexAttribute {VertexAttribute::Type::TexCoord0, DataType::Float, 2})
     .Build();
 
-    m_indexBuffer.reset(renderInterface.CreateIndexBuffer());
+    m_indexBuffer.reset(renderingInterface->CreateIndexBuffer());
     m_indexBuffer->Begin()
         .SetIndices(C_CAST<uint32_t*>(cubeIndices.data()), cubeIndices.size(), FrontFace::ClockWise)
         .SetUsage(BufferUsage::StaticDraw)

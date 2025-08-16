@@ -30,14 +30,15 @@ namespace
     };
 }
 
-PlaneMesh::PlaneMesh()
+PlaneMesh::PlaneMesh(const Ref<RenderingInterface>& renderingInterface)
     : Mesh("PlaneMesh")
 {
-    const auto& renderInterface = RenderingInterface::Instance();
+    static uint64 count = 0;
+    m_name = std::format("PlaneMesh_{}", count++);
 
     constexpr auto vertexSize = sizeof(Vertex);
     const auto bufferSize = vertices.size() * vertexSize;
-    m_vertexBuffer.reset(renderInterface.CreateVertexBuffer());
+    m_vertexBuffer.reset(renderingInterface->CreateVertexBuffer());
     m_vertexBuffer->Begin()
         .SetVertices(R_CAST<const uint8_t*>(vertices.data()), bufferSize)
         .SetUsage(BufferUsage::StaticDraw)
@@ -46,7 +47,7 @@ PlaneMesh::PlaneMesh()
         .AddAttribute(VertexAttribute {VertexAttribute::Type::TexCoord0, DataType::Float, 2})
     .Build();
 
-    m_indexBuffer.reset(renderInterface.CreateIndexBuffer());
+    m_indexBuffer.reset(renderingInterface->CreateIndexBuffer());
     m_indexBuffer->Begin()
         .SetIndices(indices.data(), indices.size(), FrontFace::CounterClockWise)
         .SetUsage(BufferUsage::StaticDraw)

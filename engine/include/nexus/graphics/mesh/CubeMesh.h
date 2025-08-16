@@ -7,6 +7,6 @@ NXS_NAMESPACE
     class CubeMesh final : public Mesh
     {
     public:
-        CubeMesh();
+        explicit CubeMesh(const Ref<RenderingInterface>& renderingInterface);
     };
 }

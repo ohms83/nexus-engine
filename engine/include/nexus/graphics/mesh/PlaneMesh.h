@@ -11,6 +11,6 @@ NXS_NAMESPACE
     class PlaneMesh final : public Mesh
     {
     public:
-        PlaneMesh();
+        PlaneMesh(const Ref<RenderingInterface>& renderingInterface);
     };
 }
