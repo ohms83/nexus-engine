@@ -13,10 +13,15 @@
 
 NXS_NAMESPACE
 {
-    class IndexBuffer : public GpuResrouce
+    class IndexBuffer : public IGpuResrouce
     {
     public:
         IndexBuffer() = default;
+
+        uint32 GetHandle() const override
+        {
+            return m_handle;
+        }
 
         virtual IndexBuffer& Begin();
         virtual IndexBuffer& SetIndices(uint32* indices, size_t num, FrontFace frontFace);
@@ -51,6 +56,7 @@ NXS_NAMESPACE
         virtual void Build_Impl() = 0;
 
     protected:
+        uint32 m_handle;
         bool m_hasBuilt = false;
         BufferUsage m_usage = BufferUsage::StaticDraw;
         FrontFace m_frontFace = FrontFace::CounterClockWise;

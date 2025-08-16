@@ -11,9 +11,9 @@ DEFINE_LOG(Shader);
 
 Shader& Shader::BeginCompile()
 {
-    NXS_ASSERT_MSG(m_handle == 0 && !m_compiling, std::format("Shader::BeginCompile() was already called once."));
+    NXS_ASSERT_MSG(m_shaderID == 0 && !m_compiling, std::format("Shader::BeginCompile() was already called once."));
     m_compiling = true;
-    m_handle = Alloc();
+    m_shaderID = Alloc();
     return *this;
 }
 

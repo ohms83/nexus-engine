@@ -26,8 +26,8 @@ TextureProxy::~TextureProxy() = default;
 
 TextureProxy& TextureProxy::Begin(const TextureDescription& info)
 {
-    assert(m_handle == 0);
-    m_handle = Alloc();
+    NXS_ASSERT_MSG(m_textureID == 0, std::format("Texture is already created."));
+    m_textureID = Alloc();
 
     m_width = info.width;
     m_height = info.height;
@@ -46,18 +46,18 @@ TextureProxy& TextureProxy::Begin(const TextureDescription& info)
 
 TextureProxy& TextureProxy::LoadData(const uint8* data, uint32 size)
 {
-    assert(m_handle != 0);
+    assert(m_textureID != 0);
     return *this;
 }
 
 TextureProxy& TextureProxy::LoadMipData(const uint8* data, uint32 size, uint32 mip)
 {
-    assert(m_handle != 0);
+    assert(m_textureID != 0);
     return *this;
 }
 
 void TextureProxy::End()
 {
-    assert(m_handle != 0);
+    assert(m_textureID != 0);
     Unbind();
 }

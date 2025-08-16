@@ -53,11 +53,16 @@ NXS_NAMESPACE
     /**
      * A class represents a texture object residing on the GPU.
      */
-    class TextureProxy : public GpuResrouce
+    class TextureProxy : public IGpuResrouce
     {
     public:
         TextureProxy() = default;
         ~TextureProxy() override;
+
+        NODISCARD uint32 GetHandle() const override
+        {
+            return m_textureID;
+        }
 
         //! Begin building this texture
         virtual TextureProxy& Begin(const TextureDescription& info);
@@ -66,6 +71,7 @@ NXS_NAMESPACE
         virtual void End();
 
     protected:
+        uint32 m_textureID = 0;
         int32 m_width = 0;
         int32 m_height = 0;
         int32 m_channels = 0;

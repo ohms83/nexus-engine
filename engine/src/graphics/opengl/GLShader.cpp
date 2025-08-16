@@ -54,13 +54,13 @@ static GLuint CompileShader(const std::string& source, Shader::Type type)
 
 GLShader::~GLShader()
 {
-    CALL_GL_FUNC(glDeleteProgram(m_handle));
+    CALL_GL_FUNC(glDeleteProgram(m_shaderID));
 }
 
 Shader& GLShader::BeginCompile()
 {
     Shader::BeginCompile();
-    m_handle = Alloc();
+    m_shaderID = Alloc();
     return *this;
 }
 
@@ -76,14 +76,14 @@ void GLShader::Compile()
     Shader::Compile();
 
     for (const auto shaderId : m_shaderHandles) {
-        CALL_GL_FUNC(glAttachShader(m_handle, shaderId));
+        CALL_GL_FUNC(glAttachShader(m_shaderID, shaderId));
     }
-    CALL_GL_FUNC(glLinkProgram(m_handle));
+    CALL_GL_FUNC(glLinkProgram(m_shaderID));
     int success;
     char infoLog[512];
-    CALL_GL_FUNC(glGetProgramiv(m_handle, GL_LINK_STATUS, &success));
+    CALL_GL_FUNC(glGetProgramiv(m_shaderID, GL_LINK_STATUS, &success));
     if (!success) {
-        CALL_GL_FUNC(glGetProgramInfoLog(m_handle, 512, nullptr, infoLog));
+        CALL_GL_FUNC(glGetProgramInfoLog(m_shaderID, 512, nullptr, infoLog));
         LOG_ERROR(LogOpenGL, std::format("ERROR LINKING SHADER PROGRAM\nErrorLogs={}", infoLog));
     }
 
@@ -96,7 +96,7 @@ void GLShader::Compile()
 
 int32 GLShader::FindUniform(const std::string& name) const
 {
-    const auto location = glGetUniformLocation(m_handle, name.c_str());
+    const auto location = glGetUniformLocation(m_shaderID, name.c_str());
     CHECK_GL_ERROR(glGetUniformLocation);
     return location;
 }
@@ -154,7 +154,7 @@ void GLShader::SetUniformTexture2D(const std::string& name, Ref<const TexturePro
 
 void GLShader::Bind() const
 {
-    CALL_GL_FUNC(glUseProgram(m_handle));
+    CALL_GL_FUNC(glUseProgram(m_shaderID));
 }
 
 void GLShader::Unbind() const
@@ -171,5 +171,5 @@ uint32 GLShader::Alloc()
 
 void GLShader::Release()
 {
-    CALL_GL_FUNC(glDeleteProgram(m_handle));
+    CALL_GL_FUNC(glDeleteProgram(m_shaderID));
 }

@@ -58,7 +58,7 @@ static GLuint NxsTextureFilterModeToGL(const TextureFilterMode mode)
 
 void GLTexture::Bind() const
 {
-    CALL_GL_FUNC(glBindTexture(GL_TEXTURE_2D, m_handle));
+    CALL_GL_FUNC(glBindTexture(GL_TEXTURE_2D, m_textureID));
 }
 
 void GLTexture::Unbind() const
@@ -137,16 +137,16 @@ TextureProxy& GLTexture::LoadMipData(const uint8* data, uint32 size, uint32 mip)
 
 uint32 GLTexture::Alloc()
 {
-    CALL_GL_FUNC(glGenTextures(1, &m_handle));
-    return m_handle;
+    CALL_GL_FUNC(glGenTextures(1, &m_textureID));
+    return m_textureID;
 }
 
 void GLTexture::Release()
 {
-    CALL_GL_FUNC(glDeleteTextures(1, &m_handle));
+    CALL_GL_FUNC(glDeleteTextures(1, &m_textureID));
 }
 
 GLTexture::~GLTexture()
 {
-    CALL_GL_FUNC(glDeleteTextures(1, &m_handle));
+    CALL_GL_FUNC(glDeleteTextures(1, &m_textureID));
 }

@@ -52,10 +52,15 @@ NXS_NAMESPACE
         static const VertexAttribute VertexTexCoord7;
     };
 
-    class VertexBuffer : public GpuResrouce
+    class VertexBuffer : public IGpuResrouce
     {
     public:
         VertexBuffer() = default;
+
+        uint32 GetHandle() const override
+        {
+            return m_handle;
+        }
 
         /**
          * Start building this vertex buffer.
@@ -88,6 +93,7 @@ NXS_NAMESPACE
         virtual void Build_Impl() = 0;
 
     protected:
+        uint32 m_handle = 0;
         bool m_hasBuilt = false;
         uint32 m_stride = 0;
         uint32 m_vertexCount = 0;

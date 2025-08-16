@@ -8,16 +8,13 @@
 
 NXS_NAMESPACE
 {
-    class GpuResrouce
+    class IGpuResrouce
     {
     public:
-        GpuResrouce() = default;
-        virtual ~GpuResrouce() = default;
+        IGpuResrouce() = default;
+        virtual ~IGpuResrouce() = default;
 
-        NODISCARD uint32 GetHandle() const
-        {
-            return m_handle;
-        }
+        virtual uint32 GetHandle() const = 0;
 
         virtual void Bind() const = 0;
         virtual void Unbind() const = 0;
@@ -32,8 +29,5 @@ NXS_NAMESPACE
 
         //! Release the allocated GPU resource.
         virtual void Release() = 0;
-
-    protected:
-        uint32 m_handle = 0;
     };
 }

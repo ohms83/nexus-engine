@@ -13,7 +13,7 @@
 
 NXS_NAMESPACE
 {
-    class Shader : public GpuResrouce
+    class Shader : public IGpuResrouce
     {
     public:
         enum class Type
@@ -26,6 +26,11 @@ NXS_NAMESPACE
         };
 
         Shader() = default;
+
+        NODISCARD uint32 GetHandle() const override
+        {
+            return m_shaderID;
+        }
 
         virtual Shader& BeginCompile();
         virtual Shader& AddSource(const std::string& source, Type shaderType);
@@ -49,6 +54,7 @@ NXS_NAMESPACE
         virtual void SetUniformTexture2D(const std::string& name, Ref<const TextureProxy> texture, int32 textureUnit) = 0;
 
     protected:
+        uint32 m_shaderID = 0;
         bool m_compiling = false;
     };
 }
