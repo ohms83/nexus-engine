@@ -12,24 +12,24 @@ USING_NAMESPACE_NXS;
 
 DEFINE_LOG(RenderingInterface);
 
-RenderingInterface* RenderingInterface::m_singleton = nullptr;
+Ref<RenderingInterface> RenderingInterface::m_singleton;
 
-RenderingInterface* RenderingInterface::Create(WindowContext window, const GraphicsConfig& config)
+Ref<RenderingInterface> RenderingInterface::Create(WindowContext window, const GraphicsConfig& config)
 {
     // The previously created singleton must be destroyed first.
     NXS_ASSERT_MSG(m_singleton == nullptr, "RenderingInterface already created");
     switch (config.api)
     {
     case GraphicsAPI::OpenGL:
-        m_singleton = CAST<RenderingInterface*>(new GLRenderingInterface(window, config));
+        m_singleton.reset(new GLRenderingInterface(window, config));
         break;
     case GraphicsAPI::Undefined:
         // Automatically choose the most suitable API based on the current platform.
 #ifdef NXS_PLATFORM_WINDOWS
         // TODO: Return D3D11 or D3D12 graphics API's instance.
-        m_singleton = CAST<RenderingInterface*>(new GLRenderingInterface(window, config));
+        m_singleton.reset(new GLRenderingInterface(window, config));
 #else
-        m_singleton = CAST<RenderingInterface*>(new GLRenderingInterface(window, config));
+        m_singleton.reset(new GLRenderingInterface(window, config));
 #endif
         break;
     default:
@@ -42,7 +42,7 @@ RenderingInterface* RenderingInterface::Create(WindowContext window, const Graph
 void RenderingInterface::Destroy()
 {
     LOG_INFO(LogRenderingInterface, "Destroy()");
-    delete m_singleton;
+    m_singleton.reset();
 }
 
 void RenderingInterface::Draw(const RenderCommand& command)

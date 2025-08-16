@@ -51,7 +51,7 @@ NXS_NAMESPACE
         {
             return m_clearDepth;
         }
-        
+
         void BeginDraw();
         void Draw();
         void EndDraw();
@@ -61,18 +61,15 @@ NXS_NAMESPACE
 
         void RegisterDrawCommand(const RenderCommand& command, RenderPass pass = RenderPass::Opaque);
 
-        NODISCARD RenderingInterface& GetRenderInterface() const
+        NODISCARD Ref<RenderingInterface> GetRenderInterface() const
         {
             NXS_ASSERT_MSG(m_renderingInterface, "Rendering interface is not initialized");
-            assert(m_renderingInterface);
-            // ReSharper disable once CppDFANullDereference
-            return *m_renderingInterface;
+            return m_renderingInterface;
         }
 
         NODISCARD RenderContext GetRenderContext() const
         {
             NXS_ASSERT_MSG(m_renderingInterface, "Rendering interface is not initialized");
-            // ReSharper disable once CppDFANullDereference
             return m_renderingInterface->GetRenderContext();
         }
 
@@ -108,7 +105,7 @@ NXS_NAMESPACE
         using CommandBuffer = std::vector<RenderCommand>;
 
         GraphicsConfig m_config;
-        RenderingInterface* m_renderingInterface = nullptr;
+        Ref<RenderingInterface> m_renderingInterface;
         Color4F m_clearColor = Color4F::White;
         float m_clearDepth = 1.0f;
         std::array<CommandBuffer, INT_CAST(RenderPass::Num)> m_renderCommands;

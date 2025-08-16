@@ -96,7 +96,7 @@ bool NexusEditor::Init_Internal()
         10
     });
 
-    auto& renderInterface = renderSystem.GetRenderInterface();
+    auto renderInterface = renderSystem.GetRenderInterface();
 
     std::fstream vertexShader(GetAssetPath(vertexShaderPath), std::ios::in);
     std::fstream fragmentShader(GetAssetPath(fragmentShaderPath), std::ios::in);
@@ -111,7 +111,7 @@ bool NexusEditor::Init_Internal()
     vertexShaderStream << vertexShader.rdbuf();
     fragmentShaderStream << fragmentShader.rdbuf();
 
-    m_shader.reset(renderInterface.CreateShader());
+    m_shader.reset(renderInterface->CreateShader());
     m_shader->BeginCompile()
         .AddSource(vertexShaderStream.str(), nxs::Shader::Type::Vertex)
         .AddSource(fragmentShaderStream.str(), nxs::Shader::Type::Fragment)

@@ -1,0 +1,34 @@
+//
+// Created by nutta on 8/16/2025.
+//
+#include "nexus/Engine.h"
+#include "nexus/graphics/Model.h"
+
+USING_NAMESPACE_NXS;
+
+//! Singleton instance.
+static Ptr<Engine> s_engine;
+
+Engine& Engine::Initialize(WindowContext window, const GraphicsConfig& graphicsConfig)
+{
+    s_engine = std::make_unique<Engine>();
+    s_engine->m_renderSystem = std::make_shared<RenderSystem>(window, graphicsConfig);
+    s_engine->m_textureManager = std::make_shared<TextureManager>();
+    s_engine->m_materialManager = std::make_shared<MaterialManager>();
+    s_engine->m_modelManager = std::make_shared<ModelManager>(
+        s_engine->m_renderSystem->GetRenderInterface(),
+        s_engine->m_textureManager,
+        s_engine->m_materialManager);
+    return *s_engine;
+}
+
+void Engine::Destroy()
+{
+    s_engine.reset();
+}
+
+Engine& Engine::Instance()
+{
+    NXS_ASSERT(s_engine != nullptr);
+    return *s_engine;
+}

@@ -23,7 +23,7 @@ NXS_NAMESPACE
         RenderingInterface(const RenderingInterface&) = delete;
         RenderingInterface(RenderingInterface&&) = delete;
 
-        static RenderingInterface* Create(WindowContext window, const GraphicsConfig& config);
+        static Ref<RenderingInterface> Create(WindowContext window, const GraphicsConfig& config);
         static void Destroy();
 
         static RenderingInterface& Instance()
@@ -69,7 +69,7 @@ NXS_NAMESPACE
         virtual void Draw_Internal(const RenderCommand& command) = 0;
 
     private:
-        static RenderingInterface* m_singleton;
+        static Ref<RenderingInterface> m_singleton;
 
     protected:
         RenderContext m_renderContext{};

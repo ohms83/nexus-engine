@@ -43,9 +43,9 @@ void main()
 
 void Gizmos::Init(const RenderSystem& renderSystem)
 {
-    const auto& renderInterface = renderSystem.GetRenderInterface();
+    const auto renderInterface = renderSystem.GetRenderInterface();
     static glm::vec3 point{};
-    pointVertex.reset(renderInterface.CreateVertexBuffer());
+    pointVertex.reset(renderInterface->CreateVertexBuffer());
     pointVertex->Begin()
         .SetVertices(R_CAST<const uint8_t*>(&point), sizeof(point))
         .SetUsage(BufferUsage::StaticDraw)
@@ -53,14 +53,14 @@ void Gizmos::Init(const RenderSystem& renderSystem)
     .Build();
 
     static uint32_t index = 0;
-    pointIndex.reset(renderInterface.CreateIndexBuffer());
+    pointIndex.reset(renderInterface->CreateIndexBuffer());
     pointIndex->Begin()
         .SetIndices(&index, 1, FrontFace::ClockWise)
         .SetUsage(BufferUsage::StaticDraw)
         .SetDrawMode(DrawMode::Point)
     .Build();
 
-    shader.reset(renderInterface.CreateShader());
+    shader.reset(renderInterface->CreateShader());
     shader->BeginCompile()
         .AddSource(vertexShaderSource, Shader::Type::Vertex)
         .AddSource(fragmentShaderSource, Shader::Type::Fragment)
