@@ -48,7 +48,7 @@ void Texture::DescribeTexture(const TextureDescription& desc)
     m_desc = desc;
 }
 
-Ref<TextureProxy> Texture::AllocateGpuResource(const uint8* pixels, size_t size)
+Ref<TextureProxy> Texture::AllocateGpuResource(const uint8* pixels, const size_t size, Ref<RenderingInterface> renderingInterface)
 {
     if (m_textureProxy != nullptr)
     {
@@ -56,19 +56,24 @@ Ref<TextureProxy> Texture::AllocateGpuResource(const uint8* pixels, size_t size)
         return m_textureProxy;
     }
 
-    m_textureProxy.reset(RenderingInterface::Instance().CreateTexture());
+    m_textureProxy.reset(renderingInterface->CreateTexture());
     m_textureProxy->Begin(m_desc)
         .LoadData(pixels, size)
     .End();
     return m_textureProxy;
 }
 
+TextureLoader::TextureLoader(Ref<RenderingInterface> renderingInterface)
+    : m_renderingInterface(renderingInterface)
+{
+}
+
 Ref<Resource> TextureLoader::Load(const std::string& path, uint32 id)
 {
     TextureDescription desc{};
-    Ref<Texture> texture = std::make_shared<Texture>(path, id);
+    const auto texture = std::make_shared<Texture>(path, id);
     stbi_set_flip_vertically_on_load(0);
-    Ptr<stbi_uc> pixels; 
+    Ptr<stbi_uc> pixels;
     pixels.reset(stbi_load(path.c_str(), &desc.width, &desc.height, &desc.channels, 0));
     if (!pixels) return nullptr;
 
@@ -90,11 +95,11 @@ Ref<Resource> TextureLoader::Load(const std::string& path, uint32 id)
     desc.componentType = DataType::UByte;
 
     texture->DescribeTexture(desc);
-    texture->AllocateGpuResource(CAST<uint8*>(pixels.get()), desc.GetBufferSize());
+    texture->AllocateGpuResource(pixels.get(), desc.GetBufferSize(), m_renderingInterface);
     return PTR_CAST<Resource>(texture);
 }
 
-TextureManager::TextureManager()
+TextureManager::TextureManager(Ref<RenderingInterface> renderingInterface)
 {
-    RegisterLoader(std::make_unique<TextureLoader>());
+    RegisterLoader(std::make_unique<TextureLoader>(renderingInterface));
 }

@@ -9,6 +9,7 @@
 #include "core/ResourceLoader.h"
 #include "core/ResourceManager.h"
 #include "TextureProxy.h"
+#include "RenderingInterface.h"
 
 NXS_NAMESPACE
 {
@@ -29,7 +30,7 @@ NXS_NAMESPACE
         void SetNumMips(int32 numMips);
         void DescribeTexture(const TextureDescription& desc);
 
-        MAYBE_UNUSED Ref<TextureProxy> AllocateGpuResource(const uint8* pixels, size_t size);
+        MAYBE_UNUSED Ref<TextureProxy> AllocateGpuResource(const uint8* pixels, size_t size, Ref<RenderingInterface> renderingInterface);
 
         NODISCARD Ref<TextureProxy> GetProxy() const
         {
@@ -48,17 +49,22 @@ NXS_NAMESPACE
     class TextureLoader final : public IResourceLoader
     {
     public:
+        explicit TextureLoader(Ref<RenderingInterface> renderingInterface);
+
         Ref<Resource> Load(const std::string& path, uint32 id) override;
 
         std::type_index GetResourceType() const override
         {
             return typeid(Texture);
         }
+
+    private:
+        Ref<RenderingInterface> m_renderingInterface;
     };
 
-    class TextureManager : public ResourceManager<Texture>
+    class TextureManager final : public ResourceManager<Texture>
     {
     public:
-        TextureManager();
+        explicit TextureManager(Ref<RenderingInterface> renderingInterface);
     };
 }
