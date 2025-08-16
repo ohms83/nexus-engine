@@ -5,6 +5,7 @@
 #include "NxsCommon.h"
 
 #include "Application.h"
+#include "Engine.h"
 #include "NxsDataType.h"
 #include "core/FileLogger.h"
 #include "core/Hasher.h"
@@ -39,6 +40,7 @@
 #include "graphics/IndexBuffer.h"
 #include "graphics/Material.h"
 #include "graphics/Mesh.h"
+#include "graphics/Model.h"
 #include "graphics/RenderCommand.h"
 #include "graphics/RenderingInterface.h"
 #include "graphics/RenderSystem.h"
