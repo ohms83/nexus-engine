@@ -7,6 +7,52 @@
 
 USING_NAMESPACE_NXS;
 
+const VertexAttribute VertexAttribute::VertexPosition3D {
+    Type::Position, DataType::Float, 3
+};
+const VertexAttribute VertexAttribute::VertexPosition2D {
+    Type::Position, DataType::Float, 2
+};
+const VertexAttribute VertexAttribute::VertexNormal {
+    Type::Normal, DataType::Float, 3
+};
+const VertexAttribute VertexAttribute::VertexColor0 {
+    Type::Color0, DataType::Float, 3
+};
+const VertexAttribute VertexAttribute::VertexColor1 {
+    Type::Color1, DataType::Float, 3
+};
+const VertexAttribute VertexAttribute::VertexTangent {
+    Type::Tangent, DataType::Float, 3
+};
+const VertexAttribute VertexAttribute::VertexBinormal {
+    Type::Binormal, DataType::Float, 3
+};
+const VertexAttribute VertexAttribute::VertexTexCoord0 {
+    Type::TexCoord0, DataType::Float, 2
+};
+const VertexAttribute VertexAttribute::VertexTexCoord1 {
+    Type::TexCoord1, DataType::Float, 2
+};
+const VertexAttribute VertexAttribute::VertexTexCoord2 {
+    Type::TexCoord2, DataType::Float, 2
+};
+const VertexAttribute VertexAttribute::VertexTexCoord3 {
+    Type::TexCoord3, DataType::Float, 2
+};
+const VertexAttribute VertexAttribute::VertexTexCoord4 {
+    Type::TexCoord4, DataType::Float, 2
+};
+const VertexAttribute VertexAttribute::VertexTexCoord5 {
+    Type::TexCoord5, DataType::Float, 2
+};
+const VertexAttribute VertexAttribute::VertexTexCoord6 {
+    Type::TexCoord6, DataType::Float, 2
+};
+const VertexAttribute VertexAttribute::VertexTexCoord7 {
+    Type::TexCoord7, DataType::Float, 2
+};
+
 VertexBuffer& VertexBuffer::Begin()
 {
     // Cannot rebuild the buffer.

@@ -6,6 +6,8 @@
 
 #include <sstream>
 
+#include "nexus/graphics/Model.h"
+
 DEFINE_LOG(NexusEditor);
 
 static float cameraSpeed = 2.0f;
@@ -114,6 +116,9 @@ bool NexusEditor::Init_Internal()
         .AddSource(vertexShaderStream.str(), nxs::Shader::Type::Vertex)
         .AddSource(fragmentShaderStream.str(), nxs::Shader::Type::Fragment)
     .Compile();
+
+    const auto modelPath = std::filesystem::path(NXS_ASSETS_DIR) / "assets/meshes/apple/3DApple001_SQ-1K-PNG.obj";
+    // auto model = nxs::ModelManager::Instance().Get(modelPath.string());
 
 #if 0
     {

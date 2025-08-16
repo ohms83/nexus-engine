@@ -1,15 +1,19 @@
 #pragma once
 
 #include "nexus/NxsDefine.h"
-#include "core/Resource.h"
-#include "core/ResourceLoader.h"
-#include "core/ResourceManager.h"
-
-#include "VertexBuffer.h"
-#include "IndexBuffer.h"
+#include "nexus/core/Resource.h"
+#include "nexus/core/ResourceLoader.h"
+#include "nexus/core/ResourceManager.h"
+#include "nexus/graphics/RenderingInterface.h"
 #include "Material.h"
+#include "Mesh.h"
 
 #include <vector>
+
+struct aiMaterial;
+struct aiMesh;
+struct aiScene;
+struct aiNode;
 
 NXS_NAMESPACE
 {
@@ -23,24 +27,21 @@ NXS_NAMESPACE
 
         ~Model() override = default;
 
-        void AddMaterial(Ref<Material> material);
-        void RemoveMaterial(Ref<Material> material);
-        Ref<Material> GetMaterial(uint32 index) const;
-
-        const std::vector<Ref<Material>>& GetMaterialList() const
-        {
-            return m_materials;
-        }
+        void AddMesh(const Ref<Mesh>& mesh);
 
     private:
-        Ref<VertexBuffer> m_vertices;
-        Ref<IndexBuffer> m_indices;
-        std::vector<Ref<Material>> m_materials;
+        std::vector<Ref<Mesh>> m_meshes;
     };
 
-    class ModelLoader : public IResourceLoader
+    class ModelLoader final : public IResourceLoader
     {
-    public:/**
+    public:
+        explicit ModelLoader(
+            const Ref<RenderingInterface>& renderingInterface,
+            const Ref<TextureManager>& textureManager,
+            const Ref<MaterialManager>& materialManager);
+
+        /**
          * @brief Attempts to load a resource from the given path.
          * This method encapsulates the entire loading process for a specific resource type,
          * including file I/O, parsing, and initialization (e.g., GPU upload for textures).
@@ -59,8 +60,28 @@ NXS_NAMESPACE
         {
             return typeid(Model);
         }
+
+    private:
+        void ProcessNode(const aiNode* node, const aiScene* scene);
+        void ProcessMesh(const aiMesh* mesh, const aiScene* scene);
+        void ProcessMaterial(const Ref<Mesh>& newMesh, const aiMesh* mesh, const aiScene* scene);
+        void ProcessTextures(const Ref<Material>& newMat, const aiMaterial* material);
+        void ProcessTextureType(const aiMaterial* material, int32 type,
+            const std::function<void(const Ref<Texture>&, uint32)>& setMethod);
+
+        //! A reference to the model being loaded.
+        Ref<Model> m_model;
+        Ref<RenderingInterface> m_renderingInterface;
+        Ref<TextureManager> m_textureManager;
+        Ref<MaterialManager> m_materialManager;
     };
 
-    class ModelManager : public ResourceManager<Model>
-    {};
+    class ModelManager final : public ResourceManager<Model>
+    {
+    public:
+        ModelManager(
+            const Ref<RenderingInterface>& renderingInterface,
+            const Ref<TextureManager>& textureManager,
+            const Ref<MaterialManager>& materialManager);
+    };
 }

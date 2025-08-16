@@ -4,10 +4,8 @@
 
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
-#include "Shader.h"
-
-#include "nexus/core/Resource.h"
-#include "nexus/core/ResourceManager.h"
+#include "Material.h"
+#include "RenderingInterface.h"
 
 NXS_NAMESPACE
 {
@@ -18,9 +16,19 @@ NXS_NAMESPACE
         explicit Mesh(std::string name);
         virtual ~Mesh() = default;
 
+        void SetVertexBuffer(const Ref<VertexBuffer>& vertexBuffer)
+        {
+            m_vertexBuffer = vertexBuffer;
+        }
+
         NODISCARD Ref<VertexBuffer> GetVertexBuffer() const
         {
             return m_vertexBuffer;
+        }
+
+        void SetIndexBuffer(const Ref<IndexBuffer>& indexBuffer)
+        {
+            m_indexBuffer = indexBuffer;
         }
 
         NODISCARD Ref<IndexBuffer> GetIndexBuffer() const
@@ -28,25 +36,23 @@ NXS_NAMESPACE
             return m_indexBuffer;
         }
 
+        void SetMaterial(const Ref<Material>& material)
+        {
+            m_material = material;
+        }
+
+        NODISCARD Ref<Material> GetMaterial() const
+        {
+            return m_material;
+        }
+
         static const std::string CubeMesh;
         static const std::string PlaneMesh;
-        
+
     protected:
         std::string m_name;
         Ref<VertexBuffer> m_vertexBuffer;
         Ref<IndexBuffer> m_indexBuffer;
+        Ref<Material> m_material;
     };
-
-    // class MeshManager final : public ResourceManager<Mesh>
-    // {
-    // public:
-    //     MeshManager();
-    //     ~MeshManager() override;
-
-    //     Ref<Mesh> GetStaticMesh(const std::string& meshName);
-
-    // private:
-    //     Ref<Mesh> m_cubeMesh;
-    //     Ref<Mesh> m_planeMesh;
-    // };
 }

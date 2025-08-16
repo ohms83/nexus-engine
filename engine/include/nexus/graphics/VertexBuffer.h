@@ -34,6 +34,22 @@ NXS_NAMESPACE
         Type type;
         DataType dataType;
         int32 numElements;
+
+        static const VertexAttribute VertexPosition3D;
+        static const VertexAttribute VertexPosition2D;
+        static const VertexAttribute VertexNormal;
+        static const VertexAttribute VertexColor0;
+        static const VertexAttribute VertexColor1;
+        static const VertexAttribute VertexTangent;
+        static const VertexAttribute VertexBinormal;
+        static const VertexAttribute VertexTexCoord0;
+        static const VertexAttribute VertexTexCoord1;
+        static const VertexAttribute VertexTexCoord2;
+        static const VertexAttribute VertexTexCoord3;
+        static const VertexAttribute VertexTexCoord4;
+        static const VertexAttribute VertexTexCoord5;
+        static const VertexAttribute VertexTexCoord6;
+        static const VertexAttribute VertexTexCoord7;
     };
 
     class VertexBuffer : public GpuResrouce

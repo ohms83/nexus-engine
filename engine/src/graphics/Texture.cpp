@@ -96,5 +96,5 @@ Ref<Resource> TextureLoader::Load(const std::string& path, uint32 id)
 
 TextureManager::TextureManager()
 {
-    RegisterLoader(std::make_shared<TextureLoader>());
+    RegisterLoader(std::make_unique<TextureLoader>());
 }

@@ -103,7 +103,7 @@ target_link_libraries(nexus-engine
     PUBLIC  EnTT
     PRIVATE RapidJSON
     PRIVATE msgpack-cxx
-    PRIVATE assimp
+    PRIVATE assimp::assimp
 )
 
 # Define IMGUI_IMPL_OPENGL_LOADER_GLAD for OpenGL3 backend to use glad
