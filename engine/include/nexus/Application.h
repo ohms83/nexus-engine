@@ -94,18 +94,6 @@ NXS_NAMESPACE
             return m_deltaTime;
         }
 
-        // NODISCARD MeshManager& GetMeshManager() const
-        // {
-        //     NXS_ASSERT(m_meshManager);
-        //     return *m_meshManager.get();
-        // }
-
-        NODISCARD TextureManager& GetTextureManager() const
-        {
-            NXS_ASSERT(m_textureManager);
-            return *m_textureManager.get();
-        }
-
         MAYBE_UNUSED Ref<Scene> ChangeScene(const Ref<Scene>& scene);
         NODISCARD Ref<Scene> GetCurrentScene() const;
 
@@ -149,14 +137,12 @@ NXS_NAMESPACE
 
     private:
         bool m_quit = false;
-        Ptr<RenderSystem> m_renderSystem;
+        Ref<RenderSystem> m_renderSystem;
         Ptr<Editor> m_editor;
 
         Ref<Timer> m_timer;
         float m_deltaTime = 0.0f;
 
-        // Ptr<MeshManager> m_meshManager;
-        Ptr<TextureManager> m_textureManager;
         Ref<Scene> m_currentScene;
     };
 

@@ -6,6 +6,7 @@
 #include <format>
 #include <iostream>
 
+#include "Engine.h"
 #include "imgui.h"
 #include "imgui_impl_opengl3.h"
 #include "imgui_impl_sdl3.h"
@@ -57,11 +58,10 @@ Application::~Application()
 
     Gizmos::Cleanup();
 
-    m_textureManager.reset();
-    // m_meshManager.reset();
-
     m_editor.reset();
     m_renderSystem.reset();
+
+    Engine::Destroy();
 
     //Destroy the window
     SDL_DestroyWindow(m_window);
@@ -140,16 +140,13 @@ bool Application::Init(const ApplicationConfig& info)
     const auto log = std::format("Actual window size width: {} height: {}", m_actualSize.x, m_actualSize.y);
     logger.Info(LogApplication, log);
 
-    m_renderSystem = std::make_unique<RenderSystem>(m_window, graphicsConfig);
-    NXS_ASSERT(m_renderSystem);
+    const auto& engine = Engine::Initialize(m_window, graphicsConfig);
+    m_renderSystem = engine.GetRenderSystem();
 
     if (info.editMode)
     {
         m_editor = std::make_unique<Editor>();
     }
-
-    // m_meshManager = std::make_unique<MeshManager>();
-    m_textureManager = std::make_unique<TextureManager>();
 
     Gizmos::Init(*m_renderSystem);
     InputManager::Init();
