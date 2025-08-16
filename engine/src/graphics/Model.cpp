@@ -4,6 +4,8 @@
 #include <ranges>
 
 // Assimp headers
+#include <filesystem>
+
 #include "assimp/Importer.hpp"
 #include "assimp/scene.h"
 #include "assimp/postprocess.h"
@@ -51,35 +53,31 @@ Ref<Resource> ModelLoader::Load(const std::string &path, uint32 id)
     }
 
     // Store the directory path of the model file for texture loading
-    // directory = path.substr(0, path.find_last_of('/'));
-    // if (directory.empty() && path.find_last_of('\\') != std::string::npos) {
-    //     directory = path.substr(0, path.find_last_of('\\')); // Handle Windows paths
-    // }
-
-    m_model = std::make_shared<Model>(path, id);
+    const auto directory = std::filesystem::path(path).parent_path();
+    auto model = std::make_shared<Model>(path, id);
 
     // Process Assimp's root node recursively
-    ProcessNode(scene->mRootNode, scene);
+    ProcessNode(model, scene->mRootNode, scene, directory);
 
     LOG_INFO(LogModel, std::format("Model loaded successfully: {}", path));
     LOG_INFO(LogModel, std::format("Processed meshes: {}", scene->mNumMeshes));
-    return Ref<Resource>();
+    return model;
 }
 
-void ModelLoader::ProcessNode(const aiNode* node, const aiScene* scene)
+void ModelLoader::ProcessNode(const Ref<Model>& model, const aiNode* node, const aiScene* scene, std::filesystem::path directory)
 {
     // Process all the node's meshes (if any)
     for (unsigned int i = 0; i < node->mNumMeshes; i++) {
         const aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-        ProcessMesh(mesh, scene);
+        ProcessMesh(model, mesh, scene, directory);
     }
     // Then do the same for its children
     for (unsigned int i = 0; i < node->mNumChildren; i++) {
-        ProcessNode(node->mChildren[i], scene);
+        ProcessNode(model, node->mChildren[i], scene, directory);
     }
 }
 
-void ModelLoader::ProcessMesh(const aiMesh* mesh, const aiScene* scene)
+void ModelLoader::ProcessMesh(const Ref<Model>& model, const aiMesh* mesh, const aiScene* scene, const std::filesystem::path& directory) const
 {
     struct Vertex
     {
@@ -145,13 +143,13 @@ void ModelLoader::ProcessMesh(const aiMesh* mesh, const aiScene* scene)
         .SetDrawMode(DrawMode::Triangle)
     .Build();
 
-    ProcessMaterial(newMesh, mesh, scene);
+    ProcessMaterial(newMesh, mesh, scene, directory);
 
-    m_model->AddMesh(newMesh);
+    model->AddMesh(newMesh);
 }
 
 // ReSharper disable once CppMemberFunctionMayBeStatic
-void ModelLoader::ProcessMaterial(const Ref<Mesh>& newMesh, const aiMesh* mesh, const aiScene* scene)
+void ModelLoader::ProcessMaterial(const Ref<Mesh>& newMesh, const aiMesh* mesh, const aiScene* scene, const std::filesystem::path& directory) const
 {
     // A mesh has only one material. If an imported model uses multiple materials,
     // the importer splits up the mesh.
@@ -196,45 +194,45 @@ void ModelLoader::ProcessMaterial(const Ref<Mesh>& newMesh, const aiMesh* mesh, 
 #undef READ_COLOR_PROPERTY
 #undef READ_ENUM_PROPERTY
 
-    ProcessTextures(newMat, material);
+    ProcessTextures(newMat, material, directory);
 }
 
 // ReSharper disable once CppMemberFunctionMayBeStatic
-void ModelLoader::ProcessTextures(const Ref<Material>& newMat, const aiMaterial* material)
+void ModelLoader::ProcessTextures(const Ref<Material>& newMat, const aiMaterial* material, const std::filesystem::path& directory) const
 {
-    ProcessTextureType(material, aiTextureType_DIFFUSE,
+    ProcessTextureType(material, aiTextureType_DIFFUSE, directory,
         [&](const Ref<Texture>& texture, int32 index) {
             newMat->SetDiffuseTexture(texture, index);
         }
     );
 
-    ProcessTextureType(material, aiTextureType_SPECULAR,
+    ProcessTextureType(material, aiTextureType_SPECULAR, directory,
         [&](const Ref<Texture>& texture, int32 index) {
             newMat->SetSpecularTexture(texture, index);
         }
     );
 
-    ProcessTextureType(material, aiTextureType_NORMALS,
+    ProcessTextureType(material, aiTextureType_NORMALS, directory,
         [&](const Ref<Texture>& texture, int32 index) {
             newMat->SetNormalTexture(texture, index);
         }
     );
 
-    ProcessTextureType(material, aiTextureType_EMISSIVE,
+    ProcessTextureType(material, aiTextureType_EMISSIVE, directory,
         [&](const Ref<Texture>& texture, int32 index) {
             newMat->SetEmissiveTexture(texture, index);
         }
     );
 
-    ProcessTextureType(material, aiTextureType_HEIGHT,
+    ProcessTextureType(material, aiTextureType_HEIGHT, directory,
         [&](const Ref<Texture>& texture, int32 index) {
             newMat->SetHeightTexture(texture, index);
         }
     );
 }
 
-void ModelLoader::ProcessTextureType(const aiMaterial* material, const int32 type,
-    const std::function<void(const Ref<Texture>&, uint32)>& setMethod)
+void ModelLoader::ProcessTextureType(const aiMaterial* material, const int32 type, const std::filesystem::path& directory,
+    const std::function<void(const Ref<Texture>&, uint32)>& setMethod) const
 {
     const auto textureType = CAST<aiTextureType>(type);
     const int32 count = material->GetTextureCount(textureType);
@@ -244,7 +242,8 @@ void ModelLoader::ProcessTextureType(const aiMaterial* material, const int32 typ
         aiString path;
         material->GetTexture(textureType, i, &path);
 
-        if (auto texture = m_textureManager->Get(path.C_Str())) {
+        const std::string texturePath = (directory / path.C_Str()).string();
+        if (auto texture = m_textureManager->Get(texturePath)) {
             setMethod(texture, i);
         }
     }

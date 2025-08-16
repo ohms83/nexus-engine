@@ -62,15 +62,13 @@ NXS_NAMESPACE
         }
 
     private:
-        void ProcessNode(const aiNode* node, const aiScene* scene);
-        void ProcessMesh(const aiMesh* mesh, const aiScene* scene);
-        void ProcessMaterial(const Ref<Mesh>& newMesh, const aiMesh* mesh, const aiScene* scene);
-        void ProcessTextures(const Ref<Material>& newMat, const aiMaterial* material);
-        void ProcessTextureType(const aiMaterial* material, int32 type,
-            const std::function<void(const Ref<Texture>&, uint32)>& setMethod);
+        void ProcessNode(const Ref<Model>& model, const aiNode* node, const aiScene* scene, std::filesystem::path directory);
+        void ProcessMesh(const Ref<Model>& model, const aiMesh* mesh, const aiScene* scene, const std::filesystem::path&) const;
+        void ProcessMaterial(const Ref<Mesh>& newMesh, const aiMesh* mesh, const aiScene* scene, const std::filesystem::path&) const;
+        void ProcessTextures(const Ref<Material>& newMat, const aiMaterial* material, const std::filesystem::path&) const;
+        void ProcessTextureType(const aiMaterial* material, int32 type, const std::filesystem::path&,
+            const std::function<void(const Ref<Texture>&, uint32)>& setMethod) const;
 
-        //! A reference to the model being loaded.
-        Ref<Model> m_model;
         Ref<RenderingInterface> m_renderingInterface;
         Ref<TextureManager> m_textureManager;
         Ref<MaterialManager> m_materialManager;

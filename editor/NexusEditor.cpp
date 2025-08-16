@@ -6,6 +6,7 @@
 
 #include <sstream>
 
+#include "nexus/Engine.h"
 #include "nexus/graphics/Model.h"
 
 DEFINE_LOG(NexusEditor);
@@ -117,8 +118,9 @@ bool NexusEditor::Init_Internal()
         .AddSource(fragmentShaderStream.str(), nxs::Shader::Type::Fragment)
     .Compile();
 
-    const auto modelPath = std::filesystem::path(NXS_ASSETS_DIR) / "assets/meshes/apple/3DApple001_SQ-1K-PNG.obj";
-    // auto model = nxs::ModelManager::Instance().Get(modelPath.string());
+    const auto modelPath = std::filesystem::path(NXS_ASSETS_DIR) / "meshes/apple/3DApple001_SQ-1K-PNG.obj";
+    const auto modelManager = nxs::Engine::Instance().GetModelManager();
+    auto model = modelManager->Get(modelPath.string());
 
 #if 0
     {
