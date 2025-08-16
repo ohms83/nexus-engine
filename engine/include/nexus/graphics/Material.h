@@ -26,7 +26,7 @@ NXS_NAMESPACE
         Color3F specular{1, 1, 1};
         Color3F emissive{};
         float shininess = 0;
-        BlendMode blendMode = BlendMode::Alpha;
+        BlendMode blendMode = BlendMode::None;
         bool wireframe = false;
         bool cull = false;
         bool depthTest = false;

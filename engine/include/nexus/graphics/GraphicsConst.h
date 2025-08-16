@@ -89,19 +89,26 @@ NXS_NAMESPACE
      */
     enum class BlendMode
     {
-        /** Alpha blending. This is the most commonly used mode.
-         *  Formula:
-         *  @code
-         *  SourceColor*SourceAlpha + DestColor*(1-SourceAlpha)
-         *  @endcode
+        /**
+         * No blending.
+         */
+        None,
+        /**
+         * Alpha blending. This is the most commonly used mode.
+         *
+         * Formula:
+         * @code
+         * SourceColor*SourceAlpha + DestColor*(1-SourceAlpha)
+         * @endcode
          */
         Alpha,
-        /** Additive blending
+        /**
+         * Additive blending
          *
-         *  Formula:
-         *  @code
-         *  SourceColor*1 + DestColor*1
-         *  @endcode
+         * Formula:
+         * @code
+         * SourceColor*1 + DestColor*1
+         * @endcode
          */
         Additive,
     };
