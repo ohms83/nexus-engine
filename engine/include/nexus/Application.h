@@ -125,8 +125,8 @@ NXS_NAMESPACE
 
     private:
         void InitImGui() const;
-        void BeginDrawUI();
-        void EndDrawUI();
+        void BeginDrawUI() const;
+        void EndDrawUI() const;
         void DestroyImGui();
 
     protected:
@@ -138,6 +138,7 @@ NXS_NAMESPACE
     private:
         bool m_quit = false;
         Ref<RenderSystem> m_renderSystem;
+        Ref<RenderingInterface> m_renderInterface;
         Ptr<Editor> m_editor;
 
         Ref<Timer> m_timer;

@@ -24,14 +24,6 @@ NXS_NAMESPACE
         RenderingInterface(RenderingInterface&&) = delete;
 
         static Ref<RenderingInterface> Create(WindowContext window, const GraphicsConfig& config);
-        static void Destroy();
-
-        static RenderingInterface& Instance()
-        {
-            assert(m_singleton);
-            // ReSharper disable once CppDFANullDereference
-            return *m_singleton;
-        }
 
         NODISCARD RenderContext GetRenderContext() const
         {
@@ -64,12 +56,9 @@ NXS_NAMESPACE
 
     protected:
         RenderingInterface() = default;
-        virtual ~RenderingInterface() = default;
+        virtual ~RenderingInterface();
 
         virtual void Draw_Internal(const RenderCommand& command) = 0;
-
-    private:
-        static Ref<RenderingInterface> m_singleton;
 
     protected:
         RenderContext m_renderContext{};

@@ -60,6 +60,7 @@ Application::~Application()
 
     m_editor.reset();
     m_renderSystem.reset();
+    m_renderInterface.reset();
 
     Engine::Destroy();
 
@@ -142,6 +143,7 @@ bool Application::Init(const ApplicationConfig& info)
 
     const auto& engine = Engine::Initialize(m_window, graphicsConfig);
     m_renderSystem = engine.GetRenderSystem();
+    m_renderInterface = engine.GetRenderingInterface();
 
     if (info.editMode)
     {
@@ -377,7 +379,7 @@ void Application::InitImGui() const
     style.Colors[ImGuiCol_TitleBgActive].w = 0.85f; // Active title bar
     style.Colors[ImGuiCol_TitleBgCollapsed].w =.7f; // Collapsed title bar
 
-    if (const auto api = RenderingInterface::Instance().GetAPI(); api == GraphicsAPI::OpenGL)
+    if (const auto api = m_renderInterface->GetAPI(); api == GraphicsAPI::OpenGL)
     {
         // Setup Platform/Renderer backends
         ImGui_ImplSDL3_InitForOpenGL(m_window, m_renderSystem->GetRenderContext().gl_context);
@@ -393,10 +395,9 @@ void Application::InitImGui() const
     ImPlot::CreateContext();
 }
 
-// ReSharper disable once CppMemberFunctionMayBeStatic
-void Application::BeginDrawUI()
+void Application::BeginDrawUI() const
 {
-    if (const auto api = RenderingInterface::Instance().GetAPI(); api == GraphicsAPI::OpenGL)
+    if (const auto api = m_renderInterface->GetAPI(); api == GraphicsAPI::OpenGL)
     {
         ImGui_ImplOpenGL3_NewFrame();
     }
@@ -411,11 +412,11 @@ void Application::BeginDrawUI()
     ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
 }
 
-void Application::EndDrawUI()
+void Application::EndDrawUI() const
 {
     ImGui::Render();
 
-    if (const auto api = RenderingInterface::Instance().GetAPI(); api == GraphicsAPI::OpenGL)
+    if (const auto api = m_renderInterface->GetAPI(); api == GraphicsAPI::OpenGL)
     {
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     }
@@ -440,7 +441,7 @@ void Application::DestroyImGui()
 {
     ImPlot::DestroyContext();
 
-    if (const auto api = RenderingInterface::Instance().GetAPI(); api == GraphicsAPI::OpenGL)
+    if (const auto api = m_renderInterface->GetAPI(); api == GraphicsAPI::OpenGL)
     {
         ImGui_ImplOpenGL3_Shutdown();
     }

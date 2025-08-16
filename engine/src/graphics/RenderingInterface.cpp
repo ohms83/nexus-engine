@@ -3,46 +3,38 @@
 //
 #include <array>
 #include <functional>
-#include <nexus/graphics/RenderingInterface.h>
-#include <nexus/graphics/opengl/GLRenderingInterface.h>
 
+#include "graphics/RenderingInterface.h"
+#include "graphics/opengl/GLRenderingInterface.h"
 #include "core/Logger.h"
 
 USING_NAMESPACE_NXS;
 
 DEFINE_LOG(RenderingInterface);
 
-Ref<RenderingInterface> RenderingInterface::m_singleton;
-
 Ref<RenderingInterface> RenderingInterface::Create(WindowContext window, const GraphicsConfig& config)
 {
-    // The previously created singleton must be destroyed first.
-    NXS_ASSERT_MSG(m_singleton == nullptr, "RenderingInterface already created");
+    LOG_INFO(LogRenderingInterface, std::format("Creating Rendering Interface API: {}", GraphicsAPIToString(config.api)));
+    Ref<RenderingInterface> result;
     switch (config.api)
     {
     case GraphicsAPI::OpenGL:
-        m_singleton.reset(new GLRenderingInterface(window, config));
+        result.reset(new GLRenderingInterface(window, config));
         break;
     case GraphicsAPI::Undefined:
         // Automatically choose the most suitable API based on the current platform.
 #ifdef NXS_PLATFORM_WINDOWS
         // TODO: Return D3D11 or D3D12 graphics API's instance.
-        m_singleton.reset(new GLRenderingInterface(window, config));
+        result.reset(new GLRenderingInterface(window, config));
 #else
-        m_singleton.reset(new GLRenderingInterface(window, config));
+        result.reset(new GLRenderingInterface(window, config));
 #endif
         break;
     default:
         NXS_ASSERT_MSG(false, "Unknown API type");
         break;
     }
-    return m_singleton;
-}
-
-void RenderingInterface::Destroy()
-{
-    LOG_INFO(LogRenderingInterface, "Destroy()");
-    m_singleton.reset();
+    return result;
 }
 
 void RenderingInterface::Draw(const RenderCommand& command)
@@ -95,4 +87,9 @@ void RenderingInterface::Draw(const RenderCommand& command)
     command.shader->Unbind();
     command.vertexBuffer->Unbind();
     command.indexBuffer->Unbind();
+}
+
+RenderingInterface::~RenderingInterface()
+{
+    LOG_INFO(LogRenderingInterface, "~RenderingInterface()");
 }

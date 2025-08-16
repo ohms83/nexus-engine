@@ -23,8 +23,7 @@ RenderSystem::~RenderSystem()
 {
     for (auto& commandBuffer : m_renderCommands) commandBuffer.clear();
 
-    RenderingInterface::Destroy();
-    m_renderingInterface = nullptr;
+    m_renderingInterface.reset();
 }
 
 void RenderSystem::ClearScreen() const
