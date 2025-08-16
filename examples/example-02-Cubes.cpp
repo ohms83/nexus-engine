@@ -150,12 +150,12 @@ protected:
     bool Init_Internal() override
     {
         auto& renderSystem = GetRenderSystem();
-        const auto& renderInterface = renderSystem.GetRenderInterface();
+        const auto renderInterface = renderSystem.GetRenderInterface();
         renderSystem.SetClearColor(0x303030ff);
 
         constexpr auto vertexSize = sizeof(Vertex);
         const auto bufferSize = cubeVertices.size() * vertexSize;
-        m_vertexBuffer.reset(renderInterface.CreateVertexBuffer());
+        m_vertexBuffer.reset(renderInterface->CreateVertexBuffer());
         m_vertexBuffer->Begin()
             .SetVertices(R_CAST<const uint8_t*>(cubeVertices.data()), bufferSize)
             .SetUsage(nxs::BufferUsage::StaticDraw)
@@ -163,14 +163,14 @@ protected:
             .AddAttribute(nxs::VertexAttribute {nxs::VertexAttribute::Type::Color0, nxs::DataType::Float, 3})
         .Build();
 
-        m_indexBuffer.reset(renderInterface.CreateIndexBuffer());
+        m_indexBuffer.reset(renderInterface->CreateIndexBuffer());
         m_indexBuffer->Begin()
             .SetIndices(C_CAST<uint32_t*>(cubeIndices .data()), cubeIndices .size(), nxs::FrontFace::ClockWise)
             .SetUsage(nxs::BufferUsage::StaticDraw)
             .SetDrawMode(nxs::DrawMode::Triangle)
         .Build();
 
-        m_shader.reset(renderInterface.CreateShader());
+        m_shader.reset(renderInterface->CreateShader());
         m_shader->BeginCompile()
             .AddSource(vertexShaderSource, nxs::Shader::Type::Vertex)
             .AddSource(fragmentShaderSource, nxs::Shader::Type::Fragment)

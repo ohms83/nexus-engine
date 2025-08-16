@@ -120,7 +120,7 @@ bool NexusEditor::Init_Internal()
 
     const auto modelPath = std::filesystem::path(NXS_ASSETS_DIR) / "meshes/apple/3DApple001_SQ-1K-PNG.obj";
     const auto modelManager = nxs::Engine::Instance().GetModelManager();
-    auto model = modelManager->Get(modelPath.string());
+    m_model = modelManager->Get(modelPath.string());
 
 #if 0
     {

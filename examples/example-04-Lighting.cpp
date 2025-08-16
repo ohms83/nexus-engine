@@ -250,16 +250,16 @@ protected:
     bool Init_Internal() override
     {
         auto& renderSystem = GetRenderSystem();
-        const auto& renderInterface = renderSystem.GetRenderInterface();
+        const auto renderInterface = renderSystem.GetRenderInterface();
         renderSystem.SetClearColor(0x303030ff);
 
-        m_shader.reset(renderInterface.CreateShader());
+        m_shader.reset(renderInterface->CreateShader());
         m_shader->BeginCompile()
             .AddSource(vertexShaderSource, nxs::Shader::Type::Vertex)
             .AddSource(fragmentShaderSource, nxs::Shader::Type::Fragment)
         .Compile();
 
-        m_texture = GetTextureManager().Get(assetsPath);
+        m_texture = nxs::Engine::Instance().GetTextureManager()->Get(assetsPath);
         m_texture->SetWrapMode(nxs::TextureWrapMode::Clamp, nxs::TextureWrapMode::Clamp);
         m_texture->SetFiltering(nxs::TextureFilterMode::Linear, nxs::TextureFilterMode::Linear);
 
