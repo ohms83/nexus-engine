@@ -53,6 +53,16 @@ void Material::SetTexture(Ref<Texture> texture, std::string uniform, uint32 slot
     m_textureUniforms.emplace_back(texture, std::move(uniform), slot);
 }
 
+Ref<Texture> Material::GetDiffuseTexture(uint32 slot)
+{
+    const auto uniformName = std::format("{}[{}]", DiffuseMapUniform, slot);
+    const auto itr = std::ranges::find_if(m_textureUniforms, [&uniformName](const auto& texture)
+    {
+        return texture.uniformName == uniformName;
+    });
+    return itr != m_textureUniforms.end() ? itr->texture : nullptr;
+}
+
 void Material::SetShader(const Ref<Shader>& shader)
 {
     m_shader = shader;

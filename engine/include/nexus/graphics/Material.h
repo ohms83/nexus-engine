@@ -40,6 +40,8 @@ NXS_NAMESPACE
         void SetHeightTexture(const Ref<Texture>& texture, uint32 slot);
         void SetTexture(Ref<Texture> texture, std::string uniform, uint32 slot);
 
+        NODISCARD Ref<Texture> GetDiffuseTexture(uint32 slot);
+
         // TODO: Temporary function
         NODISCARD Ref<Texture> GetTexture(const uint32 slot) const
         {
