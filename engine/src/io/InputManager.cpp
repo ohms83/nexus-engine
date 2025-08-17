@@ -113,6 +113,7 @@ void InputManager::OnKeyDown(const SDL_Keycode key)
     }
 
     keyDownEventCallback(key);
+    LOG_DEBUG(LogInputManager, std::format("OnKeyDown Key={}", key));
 }
 
 void InputManager::OnKeyUp(const SDL_Keycode key)
@@ -125,6 +126,7 @@ void InputManager::OnKeyUp(const SDL_Keycode key)
     }
 
     keyUpEventCallback(key);
+    LOG_DEBUG(LogInputManager, std::format("OnKeyUp Key={}", key));
 }
 
 void InputManager::OnMouseDown(const int32 buttonId, const float x, const float y)
