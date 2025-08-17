@@ -62,9 +62,9 @@ GLRenderingInterface::GLRenderingInterface(WindowContext window, const GraphicsC
     // Enable depth test
     SetDepthFunction(DepthFunction::Lesser);
 
-    // CALL_GL_FUNC(glEnable(GL_CULL_FACE));
-    // CALL_GL_FUNC(glCullFace(GL_BACK));
-    // CALL_GL_FUNC(glFrontFace(GL_CCW));
+    CALL_GL_FUNC(glEnable(GL_CULL_FACE));
+    CALL_GL_FUNC(glCullFace(GL_BACK));
+    CALL_GL_FUNC(glFrontFace(GL_CCW));
 
     CALL_GL_FUNC(glEnable(GL_PROGRAM_POINT_SIZE));
 }
