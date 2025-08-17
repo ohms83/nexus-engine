@@ -1,0 +1,6 @@
+# Material file for the unit cube.
+
+newmtl Cube_Material
+Ka 1.000 1.000 1.000
+Kd 1.000 1.000 1.000
+map_Kd ../../textures/Crate/Wood_Crate_001_basecolor.jpg

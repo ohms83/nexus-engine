@@ -1,0 +1,50 @@
+# This is a model of a unit cube with texture coordinates.
+# It references a single material defined in 'cube_textured.mtl'.
+
+mtllib cube_textured.mtl
+
+# Vertices
+v -0.5 -0.5 0.5
+v 0.5 -0.5 0.5
+v 0.5 0.5 0.5
+v -0.5 0.5 0.5
+v -0.5 -0.5 -0.5
+v 0.5 -0.5 -0.5
+v 0.5 0.5 -0.5
+v -0.5 0.5 -0.5
+
+# Vertex Normals
+# Front (+Z)
+vn 0.0 0.0 1.0
+# Back (-Z)
+vn 0.0 0.0 -1.0
+# Top (+Y)
+vn 0.0 1.0 0.0
+# Bottom (-Y)
+vn 0.0 -1.0 0.0
+# Right (+X)
+vn 1.0 0.0 0.0
+# Left (-X)
+vn -1.0 0.0 0.0
+
+# Texture Coordinates (for a standard 0-1 UV map)
+vt 0.0 0.0
+vt 1.0 0.0
+vt 1.0 1.0
+vt 0.0 1.0
+
+# Faces (v/vt/vn)
+usemtl Cube_Material
+
+# Front face (+Z)
+f 1/1/1 2/2/1 3/3/1 4/4/1
+# Back face (-Z)
+f 8/4/2 7/3/2 6/2/2 5/1/2
+# Top face (+Y)
+f 4/4/3 3/3/3 7/2/3 8/1/3
+# Bottom face (-Y)
+f 5/1/4 6/2/4 2/3/4 1/4/4
+# Right face (+X)
+f 2/1/5 6/2/5 7/3/5 3/4/5
+# Left face (-X)
+f 5/4/6 1/1/6 4/2/6 8/3/6
