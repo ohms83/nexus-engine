@@ -142,6 +142,7 @@ void ModelLoader::ProcessMesh(const Ref<Model>& model, const aiMesh* mesh, const
         .SetUsage(BufferUsage::StaticDraw)
         .SetDrawMode(DrawMode::Triangle)
     .Build();
+    newMesh->SetIndexBuffer(indexBuffer);
 
     ProcessMaterial(newMesh, mesh, scene, directory);
 

@@ -58,8 +58,6 @@ public:
     {
         // Calculate matrices (simple orthographic for 2D, or perspective for 3D)
         glm::mat4 model = glm::mat4(1.0f);
-        // glm::mat4 view = glm::lookAt(glm::vec3(0, 0, 3), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0)); // For 3D
-        // glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)pixel_w / (float)pixel_h, 0.1f, 100.0f); // For 3D
         glm::mat4 view = glm::mat4(1.0f); // Identity for 2D
         glm::mat4 projection = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f); // Ortho for 2D
 

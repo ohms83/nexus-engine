@@ -117,9 +117,8 @@ static const std::string assetsPath = "assets/textures/Crate/Wood_Crate_001_base
 class Example_03 final : public nxs::Application
 {
 public:
-    ~Example_03() override
-    {
-    }
+    ~Example_03() override = default;
+
     void Render(nxs::RenderSystem& renderSystem) override
     {
         // Calculate matrices for a rotating cube
@@ -144,7 +143,7 @@ public:
                 {"projection", projection},
             },
             {
-                { "ourTexture", 0, m_textureProxy }
+                { "ourTexture", 0, m_texture->GetProxy() }
             }
         };
 
@@ -184,7 +183,6 @@ protected:
         m_texture = nxs::Engine::Instance().GetTextureManager()->Get(assetsPath);
         m_texture->SetWrapMode(nxs::TextureWrapMode::Clamp, nxs::TextureWrapMode::Clamp);
         m_texture->SetFiltering(nxs::TextureFilterMode::Linear, nxs::TextureFilterMode::Linear);
-
         return true;
     }
 
@@ -198,7 +196,6 @@ protected:
     nxs::Ref<nxs::VertexBuffer> m_vertexBuffer;
     nxs::Ref<nxs::IndexBuffer> m_indexBuffer;
     nxs::Ref<nxs::Shader> m_shader;
-    nxs::Ref<nxs::TextureProxy> m_textureProxy;
     nxs::Ref<nxs::Texture> m_texture;
     nxs::Transform m_cubeTransform;
     nxs::CameraComponent m_camera;

@@ -11,6 +11,88 @@
 
 DEFINE_LOG(NexusEditor);
 
+// Shader sources
+const char* vertexShaderSource = R"(
+#version 330 core
+layout (location = 0) in vec3 aPos;
+layout (location = 1) in vec3 aNormal;
+layout (location = 6) in vec2 aTexCoord0;
+
+out vec3 FragPos;
+out vec3 Normal;
+out vec2 texCoord0;
+
+uniform mat4 model;
+uniform mat4 view;
+uniform mat4 projection;
+
+void main()
+{
+    vec4 worldPos = model * vec4(aPos, 1.0);
+    gl_Position = projection * view * worldPos;
+    FragPos = vec3(worldPos);
+    texCoord0 = aTexCoord0;
+    Normal = vec3(model * vec4(aNormal, 1.0));
+}
+)";
+
+const char* fragmentShaderSource = R"(
+#version 330 core
+out vec4 FragColor;
+
+in vec3 FragPos;
+in vec3 Normal;
+in vec2 texCoord0;
+
+uniform sampler2D ourTexture;
+
+uniform vec3 u_Ambient;
+
+struct Light {
+    // Set w component to 0 for the directional light
+    vec3 position;
+    // Diffuse color
+    vec3 diffuse;
+    // Specular color
+    vec3 specular;
+    float cutoff;
+
+    float constantAtt;
+    float linearAtt;
+    float quadraticAtt;
+};
+uniform Light u_Light;
+uniform Light u_PointLights[2];
+
+vec3 CalcDirLight(Light light, vec3 normal)
+{
+    vec3 lightDir = normalize(light.position);
+    float diff = max(dot(normal, lightDir), 0.0);
+    return light.diffuse * diff;
+}
+
+vec3 CalcPointLight(Light light, vec3 fragPos, vec3 normal)
+{
+    vec3 lightDir = light.position - fragPos;
+    float dist = length(lightDir);
+    if (dist >= light.cutoff) return vec3(0);
+
+    lightDir = normalize(lightDir);
+    float diff = max(dot(normal, lightDir), 0.0);
+    float attenuation = 1 / (light.constantAtt + (light.linearAtt * diff) + (light.quadraticAtt * diff * diff));
+    return light.diffuse * diff * attenuation;
+}
+
+void main()
+{
+    vec3 N = normalize(Normal);
+    vec4 albedo = texture(ourTexture, texCoord0);
+    vec4 ambient = albedo * vec4(u_Ambient, 1);
+    vec4 diffuse = albedo * vec4(CalcDirLight(u_Light, N), 1);
+    //FragColor = ambient + diffuse;
+}
+)";
+
 static float cameraSpeed = 2.0f;
 
 static const std::string texturePaths[] = {
@@ -90,8 +172,9 @@ bool NexusEditor::Init_Internal()
     scene->SetRenderer(std::make_unique<nxs::BasicSceneRenderer>());
 
     m_camera = scene->CreateNode<nxs::Camera>("Camera Node");
-    m_camera->SetPosition({0, 5, 5});
-    m_camera->LookAt({0, 0, 0}, {0, 1, 0});
+    // m_camera->SetPosition({0, 5, 5});
+    m_camera->SetPosition({0, 0, 0});
+    // m_camera->LookAt({0, 0, 0}, {0, 1, 0});
     m_camera->AddComponent<nxs::MoveComponent>(nxs::MoveComponent {
         glm::vec3(0, 0, 0),
         10
@@ -114,8 +197,10 @@ bool NexusEditor::Init_Internal()
 
     m_shader.reset(renderInterface->CreateShader());
     m_shader->BeginCompile()
-        .AddSource(vertexShaderStream.str(), nxs::Shader::Type::Vertex)
-        .AddSource(fragmentShaderStream.str(), nxs::Shader::Type::Fragment)
+        // .AddSource(vertexShaderStream.str(), nxs::Shader::Type::Vertex)
+        // .AddSource(fragmentShaderStream.str(), nxs::Shader::Type::Fragment)
+        .AddSource(vertexShaderSource, nxs::Shader::Type::Vertex)
+        .AddSource(fragmentShaderSource, nxs::Shader::Type::Fragment)
     .Compile();
 
     const auto modelPath = std::filesystem::path(NXS_ASSETS_DIR) / "meshes/apple/3DApple001_SQ-1K-PNG.obj";
@@ -207,6 +292,34 @@ void NexusEditor::OnEvent(const SDL_Event& e)
 void NexusEditor::Render(nxs::RenderSystem& renderSystem)
 {
     Application::Render(renderSystem);
+
+    glm::mat4 view = glm::lookAt(glm::vec3(0.0f, 0.0f, 5.0f), // Camera position
+                                 glm::vec3(0.0f, 0.0f, 0.0f), // Look at origin
+                                 glm::vec3(0.0f, 1.0f, 0.0f)  // Up direction
+                                );
+
+    auto screenSize = GetScreenSize();
+    glm::mat4 projection = glm::perspective(glm::radians(45.f), (float)screenSize.x / (float)screenSize.y, 0.01f, 1000.f);
+
+    for (const auto& mesh : m_model->GetMeshes())
+    {
+        const auto material = mesh->GetMaterial();
+        const nxs::RenderCommand command
+        {
+            m_shader,
+            mesh->GetVertexBuffer(),
+            mesh->GetIndexBuffer(),
+            {
+                {"model", glm::mat4(1.0f)},
+                {"view", view},
+                {"projection", projection},
+            },
+            {
+                { "ourTexture", 0, material->GetTexture(0)->GetProxy() }
+            }
+        };
+        renderSystem.RegisterDrawCommand(command);
+    }
 }
 
 void NexusEditor::OnKeyDown(const SDL_Keycode key)
@@ -222,7 +335,8 @@ void NexusEditor::OnKeyUp(const SDL_Keycode key)
 void NexusEditor::OnResize(const glm::ivec2& screenSize, const glm::ivec2& actualSize)
 {
     Application::OnResize(screenSize, actualSize);
-    m_camera->SetProjection(45.f, CAST<float>(actualSize.x), CAST<float>(actualSize.y), 0.1f, 100.f);
+    // m_camera->SetProjection(45.f, CAST<float>(actualSize.x), CAST<float>(actualSize.y), 0.1f, 100.f);
+    m_camera->SetOrthographic(FLOAT_CAST(actualSize.x), FLOAT_CAST(actualSize.y), -1.0f, 100.0f);
 }
 
 void NexusEditor::Update()

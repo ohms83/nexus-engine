@@ -29,6 +29,11 @@ NXS_NAMESPACE
 
         void AddMesh(const Ref<Mesh>& mesh);
 
+        const std::vector<Ref<Mesh>>& GetMeshes() const
+        {
+            return m_meshes;
+        }
+
     private:
         std::vector<Ref<Mesh>> m_meshes;
     };

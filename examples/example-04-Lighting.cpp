@@ -134,26 +134,27 @@ struct Light {
     float linearAtt;
     float quadraticAtt;
 };
-uniform Light u_Light;
+
+uniform Light u_DirectLight;
 uniform Light u_PointLights[2];
 
 vec3 CalcDirLight(Light light, vec3 normal)
 {
-    vec3 lightDir = normalize(light.position);
+    vec3 lightDir = normalize(-light.position);
     float diff = max(dot(normal, lightDir), 0.0);
-    return light.diffuse * diff;
+    return clamp(light.diffuse * diff, 0, 1);
 }
 
 vec3 CalcPointLight(Light light, vec3 fragPos, vec3 normal)
 {
     vec3 lightDir = light.position - fragPos;
     float dist = length(lightDir);
-    if (dist >= light.cutoff) return vec3(0);
+    if (dist >= light.cutoff) return vec3(1, 0, 0);
 
     lightDir = normalize(lightDir);
     float diff = max(dot(normal, lightDir), 0.0);
     float attenuation = 1 / (light.constantAtt + (light.linearAtt * diff) + (light.quadraticAtt * diff * diff));
-    return light.diffuse * diff * attenuation;
+    return clamp(light.diffuse * diff * attenuation, 0, 1);
 }
 
 void main()
@@ -161,8 +162,12 @@ void main()
     vec3 N = normalize(Normal);
     vec4 albedo = texture(ourTexture, texCoord0);
     vec4 ambient = albedo * vec4(u_Ambient, 1);
-    vec4 diffuse = albedo * vec4(CalcDirLight(u_Light, N), 1);
-    FragColor = ambient + diffuse;
+    vec4 diffuse = vec4(CalcDirLight(u_DirectLight, N), 1);
+
+    for (int i = 0; i < 2; ++i) {
+        diffuse += vec4(CalcPointLight(u_PointLights[i], FragPos, N), 1);
+    }
+    FragColor = albedo * (ambient + diffuse);
 }
 )";
 
@@ -185,7 +190,7 @@ public:
                                     );
 
         glm::mat4 projection = glm::perspective(glm::radians(m_camera.fov), m_camera.width / m_camera.height, m_camera.nearZ, m_camera.farZ);
-        const nxs::RenderCommand renderCommand
+        nxs::RenderCommand renderCommand
         {
             m_shader,
             m_cubeMesh->GetVertexBuffer(),
@@ -200,10 +205,16 @@ public:
             },
             {
                 { "u_Ambient", m_ambient },
-                { "u_DirectLight.direction", glm::vec3(1, 1, 0) },
-                { "u_DirectLight.diffuse", m_directionalLight.light.diffuseColor    },
+                { "u_DirectLight.position", m_directionalLight.direction },
+                { "u_DirectLight.diffuse", m_directionalLight.light.diffuseColor },
+                { "u_PointLights[0].position", m_pointLights[0].position },
+                { "u_PointLights[0].diffuse", m_pointLights[0].light.diffuseColor },
+                { "u_PointLights[1].position", m_pointLights[1].position },
+                { "u_PointLights[1].diffuse", m_pointLights[1].light.diffuseColor },
             }
         };
+        renderCommand.uniformFloats.emplace_back("u_PointLights[0].cutoff", m_pointLights[0].light.cutoffRange);
+        renderCommand.uniformFloats.emplace_back("u_PointLights[1].cutoff", m_pointLights[1].light.cutoffRange);
 
         renderSystem.RegisterDrawCommand(renderCommand);
     }
@@ -263,8 +274,8 @@ protected:
         m_texture->SetWrapMode(nxs::TextureWrapMode::Clamp, nxs::TextureWrapMode::Clamp);
         m_texture->SetFiltering(nxs::TextureFilterMode::Linear, nxs::TextureFilterMode::Linear);
 
-        // m_cubeMesh = GetMeshManager().GetStaticMesh(nxs::Mesh::CubeMesh);
-        // m_cubeTransform.SetPosition({0, 0, 0});
+        m_cubeMesh = std::make_shared<nxs::CubeMesh>(renderInterface);
+        m_cubeTransform.SetPosition({0, 0, 0});
 
         InitLights();
         return true;
@@ -273,8 +284,8 @@ protected:
     void OnResize(const glm::ivec2& screenSize, const glm::ivec2& actualSize) override
     {
         Application::OnResize(screenSize, actualSize);
-        m_camera.width = screenSize.x;
-        m_camera.height = screenSize.y;
+        m_camera.width = FLOAT_CAST(screenSize.x);
+        m_camera.height = FLOAT_CAST(screenSize.y);
     }
 
 private:
@@ -283,13 +294,15 @@ private:
         m_ambient = {0.5, 0.5, 0.5};
 
         m_directionalLight.light.diffuseColor = {1, 1, 1};
-        m_directionalLight.direction = {10, 10, 0};
+        m_directionalLight.direction = {10, -10, 0};
 
         m_pointLights[0].light.diffuseColor = {0.5, 0, 0};
         m_pointLights[0].position = {10, 10, 0};
+        m_pointLights[0].light.cutoffRange = 100.f;
 
         m_pointLights[1].light.diffuseColor = {0, 0.5, 0};
         m_pointLights[1].position = {-10, 10, 0};
+        m_pointLights[1].light.cutoffRange = 100.f;
     }
 
 protected:

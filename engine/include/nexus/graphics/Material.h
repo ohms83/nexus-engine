@@ -26,11 +26,12 @@ NXS_NAMESPACE
         Color3F specular{1, 1, 1};
         Color3F emissive{};
         float shininess = 0;
-        BlendMode blendMode = BlendMode::None;
         bool wireframe = false;
         bool cull = false;
         bool depthTest = false;
         bool depthWrite = false;
+        BlendMode blendMode = BlendMode::None;
+        DepthFunction depthFunction = DepthFunction::Lesser;
 
         void SetDiffuseTexture(const Ref<Texture>& texture, uint32 slot);
         void SetSpecularTexture(const Ref<Texture>& texture, uint32 slot);
@@ -38,6 +39,13 @@ NXS_NAMESPACE
         void SetNormalTexture(const Ref<Texture>& texture, uint32 slot);
         void SetHeightTexture(const Ref<Texture>& texture, uint32 slot);
         void SetTexture(Ref<Texture> texture, std::string uniform, uint32 slot);
+
+        // TODO: Temporary function
+        NODISCARD Ref<Texture> GetTexture(const uint32 slot) const
+        {
+            return m_textureUniforms[slot].texture;
+        }
+
         void SetShader(const Ref<Shader>& shader);
 
         //! Use this material as for the next drawing operation.
@@ -66,7 +74,6 @@ NXS_NAMESPACE
             uint32 slot;
         };
         std::vector<TextureUniformMap> m_textureUniforms;
-        DepthFunction depthFunction = DepthFunction::Lesser;
     };
 
     class MaterialLoader final : public IResourceLoader

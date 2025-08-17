@@ -46,9 +46,6 @@ NXS_NAMESPACE
             return m_material;
         }
 
-        static const std::string CubeMesh;
-        static const std::string PlaneMesh;
-
     protected:
         std::string m_name;
         Ref<VertexBuffer> m_vertexBuffer;

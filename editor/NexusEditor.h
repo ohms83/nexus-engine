@@ -27,7 +27,7 @@ private:
     nxs::Ref<nxs::Camera> m_camera;
     nxs::Ref<nxs::Mesh> m_planeMesh;
     nxs::Ref<nxs::Texture> m_texture;
-    nxs::Ptr<nxs::Shader> m_shader;
+    nxs::Ref<nxs::Shader> m_shader;
     nxs::Ref<nxs::Model> m_model;
     glm::vec3 m_cameraMoveDir{};
 };
