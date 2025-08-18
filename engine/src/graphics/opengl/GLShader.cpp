@@ -2,9 +2,13 @@
 // Created by nutta on 7/6/2025.
 //
 
-#include <nexus/graphics/opengl/GLShader.h>
-
+#include "graphics/opengl/GLShader.h"
 #include "glm/gtc/type_ptr.inl"
+
+#define CHECK_IF_BINDING() if (!IsBinding()) { \
+    LOG_FATAL(LogOpenGL, "Invalid operation. Cannot set a uniform parameter without binding."); \
+    return; \
+}
 
 NXS_NAMESPACE
 {
@@ -29,6 +33,10 @@ NXS_NAMESPACE
 }
 
 USING_NAMESPACE_NXS;
+
+uint32 GLShader::s_bindingShader = 0;
+//! For thread safety.
+std::mutex GLShader::s_mutex;
 
 // Function to compile a shader
 static GLuint CompileShader(const std::string& source, Shader::Type type)
@@ -94,6 +102,11 @@ void GLShader::Compile()
     m_shaderHandles.clear();
 }
 
+bool GLShader::IsBinding() const
+{
+    return GetHandle() == s_bindingShader;
+}
+
 int32 GLShader::FindUniform(const std::string& name) const
 {
     const auto location = glGetUniformLocation(m_shaderID, name.c_str());
@@ -103,48 +116,56 @@ int32 GLShader::FindUniform(const std::string& name) const
 
 void GLShader::SetUniformInt(const std::string& name, const int32 value)
 {
+    CHECK_IF_BINDING();
     const auto location = FindUniform(name);
     CALL_GL_FUNC(glUniform1i(location, value));
 }
 
 void GLShader::SetUniformFloat(const std::string& name, const float value)
 {
+    CHECK_IF_BINDING();
     const auto location = FindUniform(name);
     CALL_GL_FUNC(glUniform1f(location, value));
 }
 
 void GLShader::SetUniformVector(const std::string& name, const glm::vec2& vec)
 {
+    CHECK_IF_BINDING();
     const auto location = FindUniform(name);
     CALL_GL_FUNC(glUniform2fv(location, 1, glm::value_ptr(vec)));
 }
 
 void GLShader::SetUniformVector(const std::string& name, const glm::vec3& vec)
 {
+    CHECK_IF_BINDING();
     const auto location = FindUniform(name);
     CALL_GL_FUNC(glUniform3fv(location, 1, glm::value_ptr(vec)));
 }
 
 void GLShader::SetUniformVector(const std::string& name, const glm::vec4& vec)
 {
+    CHECK_IF_BINDING();
     const auto location = FindUniform(name);
     CALL_GL_FUNC(glUniform4fv(location, 1, glm::value_ptr(vec)));
 }
 
 void GLShader::SetUniformMatrix(const std::string& name, const glm::mat3& matrix, const bool tranpose)
 {
+    CHECK_IF_BINDING();
     const auto location = FindUniform(name);
     CALL_GL_FUNC(glUniformMatrix3fv(location, 1, tranpose ? GL_TRUE : GL_FALSE, glm::value_ptr(matrix)));
 }
 
 void GLShader::SetUniformMatrix(const std::string& name, const glm::mat4& matrix, const bool tranpose)
 {
+    CHECK_IF_BINDING();
     const auto location = FindUniform(name);
     CALL_GL_FUNC(glUniformMatrix4fv(location, 1, tranpose ? GL_TRUE : GL_FALSE, glm::value_ptr(matrix)));
 }
 
 void GLShader::SetUniformTexture2D(const std::string& name, Ref<const TextureProxy> texture, const int32 textureUnit)
 {
+    CHECK_IF_BINDING();
     const auto location = FindUniform(name);
     const GLint gl_textureUnit = GL_TEXTURE0 + textureUnit;
     CALL_GL_FUNC(glActiveTexture(gl_textureUnit));
@@ -154,7 +175,9 @@ void GLShader::SetUniformTexture2D(const std::string& name, Ref<const TexturePro
 
 void GLShader::Bind() const
 {
+    std::lock_guard<std::mutex> lock(s_mutex);
     CALL_GL_FUNC(glUseProgram(m_shaderID));
+    s_bindingShader = GetHandle();
 }
 
 void GLShader::Unbind() const

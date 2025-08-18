@@ -21,6 +21,8 @@ NXS_NAMESPACE
         Shader& AddSource(const std::string& source, Type shaderType) override;
         void Compile() override;
 
+        bool IsBinding() const override;
+
         NODISCARD int32 FindUniform(const std::string& name) const override;
         void SetUniformInt(const std::string& name, int32 value) override;
         void SetUniformFloat(const std::string& name, float value) override;
@@ -41,5 +43,10 @@ NXS_NAMESPACE
 
     private:
         std::vector<GLuint> m_shaderHandles;
+
+        //! The ID of the currently binding shader.
+        static uint32 s_bindingShader;
+        //! For thread safety.
+        static std::mutex s_mutex;
     };
 }

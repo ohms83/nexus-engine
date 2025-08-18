@@ -16,7 +16,7 @@ DECLARE_LOG_EXTERN(OpenGL);
 #ifdef GL_STRICT_CHECK
     #define CHECK_GL_ERROR(func_name) {\
         GLenum error = glGetError();\
-        NXS_ASSERT_MSG(error == GL_NO_ERROR, std::format("Error calling function {0}. Error Code={1}", #func_name, error));\
+        NXS_ASSERT_MSG(error == GL_NO_ERROR, std::format("Error calling function {0}. Error Code={1:X}", #func_name, error));\
     }
 #else
     #define CHECK_GL_ERROR(func_name) {\
