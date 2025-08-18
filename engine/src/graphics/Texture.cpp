@@ -80,6 +80,10 @@ Ref<Resource> TextureLoader::Load(const std::string& path, uint32 id)
     // TODO: Supports more pixel format (SRGB and other compressed textures).
     switch (desc.channels)
     {
+    case 1:
+        // Assume it's a depth texture.
+        desc.format = PixelFormat::Depth;
+        break;
     case 3:
         desc.format = PixelFormat::RGB;
         break;
@@ -87,8 +91,7 @@ Ref<Resource> TextureLoader::Load(const std::string& path, uint32 id)
         desc.format = PixelFormat::RGBA;
         break;
     default:
-        // TODO: Handle gray scale images.
-        assert(false);
+        NXS_ASSERT_MSG(false, std::format("Texture loading failed! Unsupported pixel format. Texture={} NumChannel={}", path, desc.channels));
         break;
     }
     // TODO: Supporting other component types.
