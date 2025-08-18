@@ -68,6 +68,9 @@
 #define NXS_ASSERT_MSG(Condition, Message)
 #endif // !defined(NO_LOG)
 
+//! Uncategorized logs.
+DECLARE_LOG_EXTERN(Temp);
+
 NXS_NAMESPACE
 {
     class LogDispatcher final

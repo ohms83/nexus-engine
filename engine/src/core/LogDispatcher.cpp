@@ -9,6 +9,7 @@
 USING_NAMESPACE_NXS;
 
 DEFINE_LOG(LogDispatcher);
+DEFINE_LOG(Temp);
 
 #define LOG_FORMAT(Level, Category, Message) std::format("[{}][{}] {}\n", #Level, Category, Message);
 
