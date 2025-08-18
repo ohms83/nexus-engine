@@ -48,11 +48,31 @@ NXS_NAMESPACE
         {
             m_registry->emplace<Type>(m_entity, std::forward<Args>(args)...);
         }
-
+        /**
+         * @brief Returns references to the registered component owned by this scene node.
+         *
+         * @warning
+         * Attempting to get an element from an entity that doesn't own, it results
+         * in undefined behavior.
+         *
+         * @tparam Type Types of elements to get.
+         * @return References to the elements owned by the scene node.
+         */
         template<typename... Type>
         NODISCARD decltype(auto) GetComponent() const
         {
             return m_registry->get<Type...>(m_entity);
+        }
+        /**
+        * @brief Returns pointers to the specified component type own by this scene node.
+        *
+        * @tparam Type Types of elements to get.
+        * @return Pointers to the elements owned by scene node or nullptr, if not found.
+        */
+        template<typename... Type>
+        NODISCARD auto TryGetComponent() const
+        {
+            return m_registry->try_get<Type...>(m_entity);
         }
 
         virtual void Translate(const glm::vec3& translation);

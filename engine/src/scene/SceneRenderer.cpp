@@ -32,7 +32,7 @@ static void SetLightParams(RenderCommand& command, const entt::registry& registr
 
     command.uniformVec3.emplace_back("u_Ambient", ambient);
     command.uniformVec3.emplace_back("u_DirectLight.direction", directLight ? directLight->direction : glm::vec3(0.0f));
-    command.uniformVec3.emplace_back("u_DirectLight.diffuse", directLight ? directLight->light.diffuseColor : glm::vec3(0.0f));
+    command.uniformVec3.emplace_back("u_DirectLight.diffuse", directLight ? CAST<glm::vec3>(directLight->light.diffuseColor) : glm::vec3(0.0f));
 
     // Point lights
     const auto numPointLights = CAST<int32>(pointLights.size());
@@ -49,10 +49,10 @@ static void SetLightParams(RenderCommand& command, const entt::registry& registr
         const auto unitformConstantAtten = std::format("{}.costant", uniformLocation);
         const auto unitformLinearAtten = std::format("{}.linear", uniformLocation);
         const auto unitformQuadraticAtten = std::format("{}.quadratic", uniformLocation);
-        
-        command.uniformVec3.emplace_back(unitformDiffuseColor, pointLights[i]->light.diffuseColor);
-        command.uniformVec3.emplace_back(unitformSpecularColor, pointLights[i]->light.specularColor);
-        command.uniformVec3.emplace_back(unitformEmissiveColor, pointLights[i]->light.emissiveColor);
+
+        command.uniformVec3.emplace_back(unitformDiffuseColor, CAST<glm::vec3>(pointLights[i]->light.diffuseColor));
+        command.uniformVec3.emplace_back(unitformSpecularColor, CAST<glm::vec3>(pointLights[i]->light.specularColor));
+        command.uniformVec3.emplace_back(unitformEmissiveColor, CAST<glm::vec3>(pointLights[i]->light.emissiveColor));
         command.uniformVec3.emplace_back(unitformPosition, pointLights[i]->position);
 
         command.uniformFloats.emplace_back(unitformCutoff, pointLights[i]->light.cutoffRange);

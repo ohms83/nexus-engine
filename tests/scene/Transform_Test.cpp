@@ -12,14 +12,14 @@ std::string FormatVector(const glm::vec3& vec)
 
 TEST(TransformTest, ForwardVector) {
     constexpr int iteration = 10; // Try testing with the 10 random data.
-    
+
     for (int i = 0; i < iteration; ++i)
     {
         constexpr float epsilon = 0.00001f;
         const glm::vec3 randPos = glm::ballRand(100.f);
         const glm::vec3 randTarget = glm::ballRand(100.f);
         constexpr glm::vec3 up {0, 1, 0};
-        
+
         nxs::Transform transform;
         transform.SetPosition(randPos);
         transform.LookAt(randTarget, up);
@@ -37,7 +37,7 @@ TEST(TransformTest, ForwardVector) {
 
 TEST(TransformTest, RightVector) {
     constexpr int iteration = 10; // Try testing with the 10 random data.
-    
+
     for (int i = 0; i < iteration; ++i)
     {
         constexpr float epsilon = 0.00001f;

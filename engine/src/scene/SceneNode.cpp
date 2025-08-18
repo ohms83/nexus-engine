@@ -109,7 +109,7 @@ const glm::quat& SceneNode::GetRotation() const
 
 void SceneNode::SetScale(const glm::vec3& scale)
 {
-    if (const auto& component = m_registry->try_get<ScaleComponent>(m_entity)) {
+    if (const auto component = m_registry->try_get<ScaleComponent>(m_entity)) {
         component->value = scale;
     }
     // TODO: Warning

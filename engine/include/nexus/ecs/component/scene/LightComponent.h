@@ -11,13 +11,13 @@ NXS_NAMESPACE
 {
     struct AmbientLightComponent
     {
-        Color3F color;
+        Color3F color {};
     };
     struct LightComponent
     {
-        glm::vec3 diffuseColor;
-        glm::vec3 specularColor;
-        glm::vec3 emissiveColor;
+        Color3F diffuseColor {};
+        Color3F specularColor {};
+        Color3F emissiveColor {};
         float cutoffRange = FLT_MAX;
     };
 
