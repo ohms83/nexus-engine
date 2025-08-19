@@ -167,11 +167,14 @@ protected:
         const auto renderInterface = renderSystem.GetRenderInterface();
         renderSystem.SetClearColor(0x303030ff);
 
+        nxs::HighResTimeSource timeSource;
+        auto now = timeSource.Now();
         for (int i = 0; i < modelPaths.size(); i++)
         {
             // Preload models
             LoadModel(i);
         }
+        LOG_INFO(LogTemp, std::format("Total loading time: {:.3f} seconds", timeSource.Now() - now));
         LoadModel(0);
 
         InitLights();
