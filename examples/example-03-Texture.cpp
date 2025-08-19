@@ -58,7 +58,7 @@ public:
 
         const nxs::RenderCommand renderCommand
         {
-            m_shader,
+            m_gpuProgram,
             m_mesh->GetVertexBuffer(),
             m_mesh->GetIndexBuffer(),
             {
@@ -81,10 +81,10 @@ protected:
         const auto renderInterface = renderSystem.GetRenderInterface();
         renderSystem.SetClearColor(0x303030ff);
 
-        m_shader.reset(renderInterface->CreateShader());
-        m_shader->BeginCompile()
-            .AddSource(vertexShaderSource, nxs::Shader::Type::Vertex)
-            .AddSource(fragmentShaderSource, nxs::Shader::Type::Fragment)
+        m_gpuProgram.reset(renderInterface->CreateGpuProgram());
+        m_gpuProgram->BeginCompile()
+            .AddSource(vertexShaderSource, nxs::GpuProgram::Type::Vertex)
+            .AddSource(fragmentShaderSource, nxs::GpuProgram::Type::Fragment)
         .Compile();
 
         m_texture = nxs::Engine::Instance().GetTextureManager()->Get(assetsPath);
@@ -102,7 +102,7 @@ protected:
         m_camera.height = CAST<float>(screenSize.y);
     }
 
-    nxs::Ref<nxs::Shader> m_shader;
+    nxs::Ref<nxs::GpuProgram> m_gpuProgram;
     nxs::Ref<nxs::Texture> m_texture;
     nxs::Ptr<nxs::Mesh> m_mesh;
     nxs::Transform m_cubeTransform;

@@ -5,7 +5,7 @@
 #pragma once
 
 #include "NxsGL.h"
-#include <nexus/graphics/RenderingInterface.h>
+#include "nexus/graphics/RenderingInterface.h"
 #include "SDL3/SDL_video.h"
 
 NXS_NAMESPACE
@@ -25,7 +25,7 @@ NXS_NAMESPACE
 
         NODISCARD VertexBuffer* CreateVertexBuffer() const override;
         NODISCARD IndexBuffer* CreateIndexBuffer() const override;
-        NODISCARD Shader* CreateShader() const override;
+        NODISCARD GpuProgram* CreateGpuProgram() const override;
         NODISCARD TextureProxy* CreateTexture() const override;
 
         void OnResize(uint32_t pixel_w, uint32_t pixel_h) override;

@@ -6,7 +6,7 @@
 #include "GPUBuffer.h"
 #include <nexus/memory/Buffer.h>
 
-#include "GpuResrouce.h"
+#include "GpuResource.h"
 
 NXS_NAMESPACE
 {
@@ -52,7 +52,7 @@ NXS_NAMESPACE
         static const VertexAttribute VertexTexCoord7;
     };
 
-    class VertexBuffer : public IGpuResrouce
+    class VertexBuffer : public IGpuResource
     {
     public:
         VertexBuffer() = default;

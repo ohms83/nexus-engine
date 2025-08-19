@@ -4,11 +4,10 @@
 
 #pragma once
 
-#include <string>
 #include "nexus/NxsDefine.h"
-#include "nexus/memory/Buffer.h"
-
 #include "nexus/core/LogDispatcher.h"
+
+#include <string>
 
 DECLARE_LOG_EXTERN(Resource);
 

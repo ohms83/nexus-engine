@@ -11,7 +11,7 @@
 #include "GraphicsConfig.h"
 #include "IndexBuffer.h"
 #include "RenderCommand.h"
-#include "Shader.h"
+#include "GpuProgram.h"
 #include "TextureProxy.h"
 #include "VertexBuffer.h"
 
@@ -40,7 +40,7 @@ NXS_NAMESPACE
 
         NODISCARD virtual VertexBuffer* CreateVertexBuffer() const = 0;
         NODISCARD virtual IndexBuffer* CreateIndexBuffer() const = 0;
-        NODISCARD virtual Shader* CreateShader() const = 0;
+        NODISCARD virtual GpuProgram* CreateGpuProgram() const = 0;
         NODISCARD virtual TextureProxy* CreateTexture() const = 0;
 
         virtual void OnResize(uint32_t pixel_w, uint32_t pixel_h) = 0;

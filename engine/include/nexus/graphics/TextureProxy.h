@@ -6,7 +6,7 @@
 
 #include <nexus/NxsDefine.h>
 
-#include "GpuResrouce.h"
+#include "GpuResource.h"
 
 NXS_NAMESPACE
 {
@@ -53,7 +53,7 @@ NXS_NAMESPACE
     /**
      * A class represents a texture object residing on the GPU.
      */
-    class TextureProxy : public IGpuResrouce
+    class TextureProxy : public IGpuResource
     {
     public:
         TextureProxy() = default;

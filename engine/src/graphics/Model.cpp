@@ -17,7 +17,7 @@ std::vector<RenderCommand> Model::CreateDrawCommand() const
     {
         const auto material = mesh->GetMaterial();
         RenderCommand command = {
-            material->GetShader(),
+            material->GetShader()->GetGpuProgram(),
             mesh->GetVertexBuffer(),
             mesh->GetIndexBuffer(),
         };

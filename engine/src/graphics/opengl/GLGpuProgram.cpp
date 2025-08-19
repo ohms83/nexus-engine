@@ -2,10 +2,10 @@
 // Created by nutta on 7/6/2025.
 //
 
-#include "graphics/opengl/GLShader.h"
+#include "graphics/opengl/GLGpuProgram.h"
 #include "glm/gtc/type_ptr.inl"
 
-// Shader sources
+// GpuProgram sources
 const char* error_vertexShaderSource = R"(
 #version 330 core
 layout (location = 0) in vec3 aPos;
@@ -40,15 +40,15 @@ NXS_NAMESPACE
 {
     namespace GL
     {
-        static GLenum NxsShaderTypeToGLShader(Shader::Type type)
+        static GLenum NxsShaderTypeToGLShader(GpuProgram::Type type)
         {
             switch (type)
             {
-            case Shader::Type::Vertex:
+            case GpuProgram::Type::Vertex:
                 return GL_VERTEX_SHADER;
-            case Shader::Type::Fragment:
+            case GpuProgram::Type::Fragment:
                 return GL_FRAGMENT_SHADER;
-            case Shader::Type::Geometry:
+            case GpuProgram::Type::Geometry:
                 return GL_GEOMETRY_SHADER;
             default:
                 assert(false);
@@ -60,12 +60,12 @@ NXS_NAMESPACE
 
 USING_NAMESPACE_NXS;
 
-uint32 GLShader::s_bindingShader = 0;
+uint32 GLGpuProgram::s_bindingShader = 0;
 //! For thread safety.
-std::mutex GLShader::s_mutex;
+std::mutex GLGpuProgram::s_mutex;
 
 // Function to compile a shader
-static GLuint CompileShader(const std::string& source, Shader::Type type)
+static GLuint CompileShader(const std::string& source, GpuProgram::Type type)
 {
     const auto gl_shaderType = GL::NxsShaderTypeToGLShader(type);
     const GLuint shader = glCreateShader(gl_shaderType);
@@ -86,64 +86,64 @@ static GLuint CompileShader(const std::string& source, Shader::Type type)
     return shader;
 }
 
-GLShader::~GLShader()
+GLGpuProgram::~GLGpuProgram()
 {
-    CALL_GL_FUNC(glDeleteProgram(m_shaderID));
+    CALL_GL_FUNC(glDeleteProgram(m_id));
 }
 
-Shader& GLShader::BeginCompile()
+GpuProgram& GLGpuProgram::BeginCompile()
 {
-    Shader::BeginCompile();
-    m_shaderID = Alloc();
+    GpuProgram::BeginCompile();
+    m_id = Alloc();
     return *this;
 }
 
-Shader& GLShader::AddSource(const std::string& source, Type shaderType)
+GpuProgram& GLGpuProgram::AddSource(const std::string& source, Type shaderType)
 {
-    Shader::AddSource(source, shaderType);
+    GpuProgram::AddSource(source, shaderType);
     if (const auto shaderId = CompileShader(source, shaderType); shaderId != 0) m_shaderHandles.push_back(shaderId);
     return *this;
 }
 
-void GLShader::Compile()
+void GLGpuProgram::Compile()
 {
-    Shader::Compile();
+    GpuProgram::Compile();
 
     for (const auto shaderId : m_shaderHandles) {
-        CALL_GL_FUNC(glAttachShader(m_shaderID, shaderId));
+        CALL_GL_FUNC(glAttachShader(m_id, shaderId));
     }
-    CALL_GL_FUNC(glLinkProgram(m_shaderID));
+    CALL_GL_FUNC(glLinkProgram(m_id));
     int success;
     char infoLog[512];
-    CALL_GL_FUNC(glGetProgramiv(m_shaderID, GL_LINK_STATUS, &success));
+    CALL_GL_FUNC(glGetProgramiv(m_id, GL_LINK_STATUS, &success));
     if (!success)
     {
-        CALL_GL_FUNC(glGetProgramInfoLog(m_shaderID, 512, nullptr, infoLog));
+        CALL_GL_FUNC(glGetProgramInfoLog(m_id, 512, nullptr, infoLog));
         LOG_ERROR(LogOpenGL, std::format("ERROR LINKING SHADER PROGRAM\nErrorLogs={}", infoLog));
 
         // Recreate shaders using the error shader source.
-        CALL_GL_FUNC(glDeleteProgram(m_shaderID));
+        CALL_GL_FUNC(glDeleteProgram(m_id));
         ClearHandles();
-        CreateErrorShader();
+        CreateErrorGpuProgram();
     }
 
     // We don't need to keep the handles anymore.
     ClearHandles();
 }
 
-bool GLShader::IsBinding() const
+bool GLGpuProgram::IsBinding() const
 {
     return GetHandle() == s_bindingShader;
 }
 
-int32 GLShader::FindUniform(const std::string& name) const
+int32 GLGpuProgram::FindUniform(const std::string& name) const
 {
-    const auto location = glGetUniformLocation(m_shaderID, name.c_str());
+    const auto location = glGetUniformLocation(m_id, name.c_str());
     CHECK_GL_ERROR(glGetUniformLocation);
     return location;
 }
 
-bool GLShader::SetUniformInt(const std::string& name, const int32 value)
+bool GLGpuProgram::SetUniformInt(const std::string& name, const int32 value)
 {
     CHECK_IF_BINDING(false);
     const auto location = FindUniform(name);
@@ -152,7 +152,7 @@ bool GLShader::SetUniformInt(const std::string& name, const int32 value)
     return true;
 }
 
-bool GLShader::SetUniformFloat(const std::string& name, const float value)
+bool GLGpuProgram::SetUniformFloat(const std::string& name, const float value)
 {
     CHECK_IF_BINDING(false);
     const auto location = FindUniform(name);
@@ -161,7 +161,7 @@ bool GLShader::SetUniformFloat(const std::string& name, const float value)
     return true;
 }
 
-bool GLShader::SetUniformVector(const std::string& name, const glm::vec2& vec)
+bool GLGpuProgram::SetUniformVector(const std::string& name, const glm::vec2& vec)
 {
     CHECK_IF_BINDING(false);
     const auto location = FindUniform(name);
@@ -170,7 +170,7 @@ bool GLShader::SetUniformVector(const std::string& name, const glm::vec2& vec)
     return true;
 }
 
-bool GLShader::SetUniformVector(const std::string& name, const glm::vec3& vec)
+bool GLGpuProgram::SetUniformVector(const std::string& name, const glm::vec3& vec)
 {
     CHECK_IF_BINDING(false);
     const auto location = FindUniform(name);
@@ -179,7 +179,7 @@ bool GLShader::SetUniformVector(const std::string& name, const glm::vec3& vec)
     return true;
 }
 
-bool GLShader::SetUniformVector(const std::string& name, const glm::vec4& vec)
+bool GLGpuProgram::SetUniformVector(const std::string& name, const glm::vec4& vec)
 {
     CHECK_IF_BINDING(false);
     const auto location = FindUniform(name);
@@ -188,7 +188,7 @@ bool GLShader::SetUniformVector(const std::string& name, const glm::vec4& vec)
     return true;
 }
 
-bool GLShader::SetUniformMatrix(const std::string& name, const glm::mat3& matrix, const bool tranpose)
+bool GLGpuProgram::SetUniformMatrix(const std::string& name, const glm::mat3& matrix, const bool tranpose)
 {
     CHECK_IF_BINDING(false);
     const auto location = FindUniform(name);
@@ -197,7 +197,7 @@ bool GLShader::SetUniformMatrix(const std::string& name, const glm::mat3& matrix
     return true;
 }
 
-bool GLShader::SetUniformMatrix(const std::string& name, const glm::mat4& matrix, const bool tranpose)
+bool GLGpuProgram::SetUniformMatrix(const std::string& name, const glm::mat4& matrix, const bool tranpose)
 {
     CHECK_IF_BINDING(false);
     const auto location = FindUniform(name);
@@ -206,7 +206,7 @@ bool GLShader::SetUniformMatrix(const std::string& name, const glm::mat4& matrix
     return true;
 }
 
-bool GLShader::SetUniformTexture2D(const std::string& name, Ref<const TextureProxy> texture, const int32 textureUnit)
+bool GLGpuProgram::SetUniformTexture2D(const std::string& name, Ref<const TextureProxy> texture, const int32 textureUnit)
 {
     CHECK_IF_BINDING(false);
     const auto location = FindUniform(name);
@@ -218,31 +218,31 @@ bool GLShader::SetUniformTexture2D(const std::string& name, Ref<const TexturePro
     return true;
 }
 
-void GLShader::Bind() const
+void GLGpuProgram::Bind() const
 {
     std::lock_guard<std::mutex> lock(s_mutex);
-    CALL_GL_FUNC(glUseProgram(m_shaderID));
+    CALL_GL_FUNC(glUseProgram(m_id));
     s_bindingShader = GetHandle();
 }
 
-void GLShader::Unbind() const
+void GLGpuProgram::Unbind() const
 {
     CALL_GL_FUNC(glUseProgram(0));
 }
 
-uint32 GLShader::Alloc()
+uint32 GLGpuProgram::Alloc()
 {
     const auto programHandle = glCreateProgram();
     CHECK_GL_ERROR(glCreateProgram);
     return programHandle;
 }
 
-void GLShader::Release()
+void GLGpuProgram::Release()
 {
-    CALL_GL_FUNC(glDeleteProgram(m_shaderID));
+    CALL_GL_FUNC(glDeleteProgram(m_id));
 }
 
-void GLShader::ClearHandles()
+void GLGpuProgram::ClearHandles()
 {
     for (const auto shaderId : m_shaderHandles) {
         CALL_GL_FUNC(glDeleteShader(shaderId));
@@ -250,19 +250,19 @@ void GLShader::ClearHandles()
     m_shaderHandles.clear();
 }
 
-void GLShader::CreateErrorShader()
+void GLGpuProgram::CreateErrorGpuProgram()
 {
     GLint success = 1;
 
-    m_shaderID = Alloc();
+    m_id = Alloc();
     m_shaderHandles.push_back(CompileShader(error_vertexShaderSource, Type::Vertex));
     m_shaderHandles.push_back(CompileShader(error_fragmentShaderSource, Type::Fragment));
 
     for (const auto shaderId : m_shaderHandles) {
-        CALL_GL_FUNC(glAttachShader(m_shaderID, shaderId));
+        CALL_GL_FUNC(glAttachShader(m_id, shaderId));
     }
-    CALL_GL_FUNC(glLinkProgram(m_shaderID));
-    CALL_GL_FUNC(glGetProgramiv(m_shaderID, GL_LINK_STATUS, &success));
+    CALL_GL_FUNC(glLinkProgram(m_id));
+    CALL_GL_FUNC(glGetProgramiv(m_id, GL_LINK_STATUS, &success));
     if (!success) {
         // Something went horribly wrong
         LOG_FATAL(LogOpenGL, std::format("Failed to create the error shader!"));

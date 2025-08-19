@@ -6,7 +6,7 @@
 
 #include "nexus/NxsDefine.h"
 #include "nexus/graphics/IndexBuffer.h"
-#include "nexus/graphics/Shader.h"
+#include "nexus/graphics/GpuProgram.h"
 #include "nexus/graphics/VertexBuffer.h"
 #include "nexus/graphics/TextureProxy.h"
 
@@ -16,7 +16,7 @@ NXS_NAMESPACE
     {
         Ref<VertexBuffer> vertexBuffer;
         Ref<IndexBuffer> indexBuffer;
-        Ref<Shader> shader;
+        Ref<GpuProgram> shader;
     };
     struct DiffuseMapComponent
     {

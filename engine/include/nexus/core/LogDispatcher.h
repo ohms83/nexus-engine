@@ -40,7 +40,7 @@
     do { \
         if (!(Condition)) { \
             const auto formatted = std::format("Assertion Failed! ({}:{}) {}", __FILE__, __LINE__, #Condition); \
-            nxs::LogDispatcher::Instance().Log(LogLevel::Fatal, "Assert", formatted); \
+            nxs::LogDispatcher::Instance().Log(nxs::LogLevel::Fatal, "Assert", formatted); \
             nxs::LogDispatcher::Destroy(); \
         } \
         assert(Condition); \

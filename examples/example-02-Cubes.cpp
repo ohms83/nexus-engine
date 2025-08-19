@@ -133,7 +133,7 @@ public:
 
         const nxs::RenderCommand renderCommand
         {
-            m_shader,
+            m_gpuProgram,
             m_vertexBuffer,
             m_indexBuffer,
             {
@@ -170,10 +170,10 @@ protected:
             .SetDrawMode(nxs::DrawMode::Triangle)
         .Build();
 
-        m_shader.reset(renderInterface->CreateShader());
-        m_shader->BeginCompile()
-            .AddSource(vertexShaderSource, nxs::Shader::Type::Vertex)
-            .AddSource(fragmentShaderSource, nxs::Shader::Type::Fragment)
+        m_gpuProgram.reset(renderInterface->CreateGpuProgram());
+        m_gpuProgram->BeginCompile()
+            .AddSource(vertexShaderSource, nxs::GpuProgram::Type::Vertex)
+            .AddSource(fragmentShaderSource, nxs::GpuProgram::Type::Fragment)
         .Compile();
         return true;
     }
@@ -187,7 +187,7 @@ protected:
 
     nxs::Ref<nxs::VertexBuffer> m_vertexBuffer;
     nxs::Ref<nxs::IndexBuffer> m_indexBuffer;
-    nxs::Ref<nxs::Shader> m_shader;
+    nxs::Ref<nxs::GpuProgram> m_gpuProgram;
     nxs::Transform m_cubeTransform;
     nxs::CameraComponent m_camera;
 };

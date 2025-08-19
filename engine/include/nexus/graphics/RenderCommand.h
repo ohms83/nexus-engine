@@ -8,15 +8,14 @@
 #include <nexus/NxsDefine.h>
 
 #include "IndexBuffer.h"
-#include "Shader.h"
+#include "GpuProgram.h"
 #include "VertexBuffer.h"
-// #include "Material.h"
 
 NXS_NAMESPACE
 {
     struct RenderCommand
     {
-        Ref<Shader> shader;
+        Ref<GpuProgram> shader;
         Ref<VertexBuffer> vertexBuffer = nullptr;
         Ref<IndexBuffer> indexBuffer = nullptr;
         std::map<std::string, glm::mat4> uniformMatrices;

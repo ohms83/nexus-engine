@@ -8,7 +8,7 @@
 
 #include "core/Logger.h"
 #include "graphics/opengl/GLIndexBuffer.h"
-#include "graphics/opengl/GLShader.h"
+#include "graphics/opengl/GLGpuProgram.h"
 #include "graphics/opengl/GLTexture.h"
 #include "graphics/opengl/GLVertexBuffer.h"
 #include "SDL3/SDL_error.h"
@@ -113,9 +113,9 @@ IndexBuffer* GLRenderingInterface::CreateIndexBuffer() const
     return new GLIndexBuffer();
 }
 
-Shader* GLRenderingInterface::CreateShader() const
+GpuProgram* GLRenderingInterface::CreateGpuProgram() const
 {
-    return new GLShader();
+    return new GLGpuProgram();
 }
 
 TextureProxy* GLRenderingInterface::CreateTexture() const

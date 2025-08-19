@@ -10,7 +10,7 @@ USING_NAMESPACE_NXS;
 
 static Ref<VertexBuffer> pointVertex;
 static Ref<IndexBuffer> pointIndex;
-static Ref<Shader> shader;
+static Ref<GpuProgram> gpuProgram;
 
 // Shader sources
 static auto vertexShaderSource = R"(
@@ -60,10 +60,10 @@ void Gizmos::Init(const RenderSystem& renderSystem)
         .SetDrawMode(DrawMode::Point)
     .Build();
 
-    shader.reset(renderInterface->CreateShader());
-    shader->BeginCompile()
-        .AddSource(vertexShaderSource, Shader::Type::Vertex)
-        .AddSource(fragmentShaderSource, Shader::Type::Fragment)
+    gpuProgram.reset(renderInterface->CreateGpuProgram());
+    gpuProgram->BeginCompile()
+        .AddSource(vertexShaderSource, GpuProgram::Type::Vertex)
+        .AddSource(fragmentShaderSource, GpuProgram::Type::Fragment)
     .Compile();
 }
 
@@ -71,7 +71,7 @@ void Gizmos::Cleanup()
 {
     pointVertex.reset();
     pointIndex.reset();
-    shader.reset();
+    gpuProgram.reset();
 }
 
 void Gizmos::DrawPoint(
@@ -84,7 +84,7 @@ void Gizmos::DrawPoint(
 {
     glm::mat4 translationMtx = glm::translate(glm::mat4(1), position);
     RenderCommand command = {
-        shader,
+        gpuProgram,
         pointVertex,
         pointIndex,
         // Matrices

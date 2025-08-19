@@ -122,10 +122,10 @@ bool NexusEditor::Init_Internal()
     vertexShaderStream << vertexShader.rdbuf();
     fragmentShaderStream << fragmentShader.rdbuf();
 
-    m_shader.reset(renderInterface->CreateShader());
-    m_shader->BeginCompile()
-        .AddSource(vertexShaderStream.str(), nxs::Shader::Type::Vertex)
-        .AddSource(fragmentShaderStream.str(), nxs::Shader::Type::Fragment)
+    m_gpuProgram.reset(renderInterface->CreateGpuProgram());
+    m_gpuProgram->BeginCompile()
+        .AddSource(vertexShaderStream.str(), nxs::GpuProgram::Type::Vertex)
+        .AddSource(fragmentShaderStream.str(), nxs::GpuProgram::Type::Fragment)
     .Compile();
 
     const auto modelPath = std::filesystem::path(NXS_ASSETS_DIR) / "meshes/apple/3DApple001_SQ-1K-PNG.obj";
@@ -145,7 +145,7 @@ bool NexusEditor::Init_Internal()
         nxs::RenderComponent renderComponent = {
             g_planeMesh->GetVertexBuffer(),
             g_planeMesh->GetIndexBuffer(),
-            m_shader
+            m_gpuProgram
         };
         node->AddComponent<nxs::DiffuseMapComponent>(nxs::DiffuseMapComponent {
             {texture->GetProxy()}
@@ -171,7 +171,7 @@ bool NexusEditor::Init_Internal()
         nxs::RenderComponent renderComponent = {
             mesh->GetVertexBuffer(),
             mesh->GetIndexBuffer(),
-            m_shader
+            m_gpuProgram
         };
         node->AddComponent<nxs::DiffuseMapComponent>(nxs::DiffuseMapComponent {
             // {texture->GetProxy()}
@@ -287,7 +287,7 @@ void NexusEditor::InitCube(nxs::Scene& scene, const nxs::int32 row, const nxs::i
     nxs::RenderComponent renderComponent = {
         g_cubeMesh->GetVertexBuffer(),
         g_cubeMesh->GetIndexBuffer(),
-        m_shader
+        m_gpuProgram
     };
     node->AddComponent<nxs::DiffuseMapComponent>(nxs::DiffuseMapComponent {
         {texture->GetProxy()}

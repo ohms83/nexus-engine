@@ -8,12 +8,12 @@
 #include <vector>
 
 #include "GPUBuffer.h"
-#include "GpuResrouce.h"
+#include "GpuResource.h"
 #include "GraphicsConst.h"
 
 NXS_NAMESPACE
 {
-    class IndexBuffer : public IGpuResrouce
+    class IndexBuffer : public IGpuResource
     {
     public:
         IndexBuffer() = default;

@@ -224,7 +224,7 @@ private:
     }
 
 protected:
-    nxs::Ref<nxs::Shader> m_shader;
+    nxs::Ref<nxs::GpuProgram> m_gpuProgram;
     //! Currently showing model
     nxs::Ref<nxs::Model> m_model;
     nxs::Transform m_cubeTransform;

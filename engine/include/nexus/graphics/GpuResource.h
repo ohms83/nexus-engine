@@ -8,11 +8,11 @@
 
 NXS_NAMESPACE
 {
-    class IGpuResrouce
+    class IGpuResource
     {
     public:
-        IGpuResrouce() = default;
-        virtual ~IGpuResrouce() = default;
+        IGpuResource() = default;
+        virtual ~IGpuResource() = default;
 
         virtual uint32 GetHandle() const = 0;
 

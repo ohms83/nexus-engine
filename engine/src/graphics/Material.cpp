@@ -142,11 +142,13 @@ void Material::CreateDefaultShader(const Ref<RenderingInterface>& renderingInter
     fragmentShaderStream << fragmentShader.rdbuf();
 
     // TODO: Use shader resource manager
-    m_shader.reset(renderingInterface->CreateShader());
-    m_shader->BeginCompile()
-        .AddSource(vertexShaderStream.str(), Shader::Type::Vertex)
-        .AddSource(fragmentShaderStream.str(), Shader::Type::Fragment)
-    .Compile();
+    // m_shader.reset(renderingInterface->CreateShader());
+    // m_shader->BeginCompile()
+    //     .AddSource(vertexShaderStream.str(), Shader::Type::Vertex)
+    //     .AddSource(fragmentShaderStream.str(), Shader::Type::Fragment)
+    // .Compile();
+    m_shader.reset(new Shader("Default", 0));
+    m_shader->Compile(*renderingInterface, vertexShaderStream.str(), fragmentShaderStream.str());
 }
 
 Ref<Resource> MaterialLoader::Load(const std::string& path, uint32 id)
