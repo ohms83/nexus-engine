@@ -26,8 +26,7 @@ uniform mat4 _Projection;
 void main()
 {
     vec4 worldPos = _Model * vec4(aPos, 1.0);
-    mat4 modelView = _View * _Model;
-    mat4 normalMatrix = transpose(inverse(modelView));
+    mat4 normalMatrix = transpose(inverse(_Model));
     FragPos = vec3(worldPos);
     TexCoord0 = aTexCoord0;
     Normal = normalize(vec3(normalMatrix * vec4(aNormal, 1.0)));
