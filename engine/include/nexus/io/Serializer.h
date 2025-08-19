@@ -7,7 +7,7 @@
 #pragma once
 
 #include "nexus/NxsDefine.h"
-#include "VariantData.h"
+#include "nexus/core/VariantData.h"
 
 NXS_NAMESPACE
 {

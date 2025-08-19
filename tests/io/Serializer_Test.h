@@ -1,10 +1,7 @@
 #pragma once
 
 #include "gtest/gtest.h"
-#include "nexus/io/VariantData.h" // Your VariantData header
-#include "nexus/io/Serializer.h"  // Your base Serializer interface
-#include "nexus/io/JsonSerializer.h" // Your JsonSerializer implementation
-#include "nexus/io/MsgPackSerializer.h" // Your MsgPackSerializer implementation
+#include "nexus/Nexus.h"
 
 // A test fixture that can be parameterized by the Serializer type
 class SerializerTestFixture : public testing::TestWithParam<nxs::Serializer*> {
