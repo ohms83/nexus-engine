@@ -5,6 +5,9 @@
 #include "graphics/Material.h"
 #include "core/LogDispatcher.h"
 #include "core/Path.h"
+#include "graphics/Material.h"
+
+#include <ranges>
 
 USING_NAMESPACE_NXS;
 
@@ -12,6 +15,10 @@ DEFINE_LOG(Material);
 
 static constexpr auto default_vertex_shader = "shaders/default_forward_lighting.vert";
 static constexpr auto default_fragment_shader = "shaders/default_forward_lighting.frag";
+static constexpr auto textured_vertex_shader = "shaders/textured_forward_lighting.vert";
+static constexpr auto textured_fragment_shader = "shaders/textured_forward_lighting.frag";
+static constexpr auto normalmap_vertex_shader = "shaders/normalmap_forward_lighting.vert";
+static constexpr auto normalmap_fragment_shader = "shaders/normalmap_forward_lighting.frag";
 
 static const std::map<TextureType, std::string> s_textureTypeUniformNames = {
     {TextureType::Diffuse, "_DiffuseMap"},
@@ -41,14 +48,14 @@ int32 Material::AddTexture(Ref<Texture> texture, TextureType type)
     }
 
     const int32 slot = INT_CAST(m_textures.size());
-    m_textures.emplace_back(texture, itr->second);
+    m_textures.emplace_back(texture, type, itr->second);
     return slot;
 }
 
 int32 Material::AddTexture(Ref<Texture> texture, std::string uniform)
 {
     const int32 slot = INT_CAST(m_textures.size());
-    m_textures.emplace_back(texture, uniform);
+    m_textures.emplace_back(texture, TextureType::Undefined, uniform);
     return slot;
 }
 
@@ -59,9 +66,17 @@ Ref<Texture> Material::GetTexture(uint32 slot)
     return nullptr;
 }
 
-void Material::SetShader(const Ref<Shader>& shader)
+void Material::SetShader(const Ref<Shader> &shader)
 {
     m_shader = shader;
+}
+
+bool Material::HasTextureType(TextureType type) const
+{
+    const auto itr = std::ranges::find_if(m_textures, [type](const TextureInfo& texture) {
+        return texture.type == type;
+    });
+    return itr != m_textures.end();
 }
 
 void Material::WriteRenderCommand(RenderCommand& command)
@@ -79,20 +94,40 @@ void Material::WriteRenderCommand(RenderCommand& command)
     command.uniformFloats.emplace_back("_Material.shininess", shininess);
 
     uint32 slot = 0;
-    for (const auto& textureUniformMap : m_textures)
+    for (const auto& textureInfo : m_textures)
     {
         command.uniform2DTextures.emplace_back(
-            textureUniformMap.uniformName,
+            textureInfo.uniformName,
             slot++,
-            textureUniformMap.texture->GetProxy());
+            textureInfo.texture->GetProxy());
+    }
+}
+
+void Material::DetermineShaderPaths(std::string& vertexShader, std::string& fragmentShader)
+{
+    if (HasTextureType(TextureType::Normal))
+    {
+        vertexShader = Path::GetEngineAssetPath(normalmap_vertex_shader);
+        fragmentShader = Path::GetEngineAssetPath(normalmap_fragment_shader);
+    }
+    else if (HasTextureType(TextureType::Diffuse))
+    {
+        vertexShader = Path::GetEngineAssetPath(textured_vertex_shader);
+        fragmentShader = Path::GetEngineAssetPath(textured_fragment_shader);
+    }
+    else
+    {
+        vertexShader = Path::GetEngineAssetPath(default_vertex_shader);
+        fragmentShader = Path::GetEngineAssetPath(default_fragment_shader);
     }
 }
 
 void Material::CreateDefaultShader(const Ref<RenderingInterface>& renderingInterface)
 {
     // TODO: Use resource manager.
-    const auto vertexShaderPath = Path::GetEngineAssetPath(default_vertex_shader);
-    const auto fragmentShaderPath = Path::GetEngineAssetPath(default_fragment_shader);
+    std::string vertexShaderPath, fragmentShaderPath;
+    DetermineShaderPaths(vertexShaderPath, fragmentShaderPath);
+
     std::fstream vertexShader(vertexShaderPath, std::ios::in);
     std::fstream fragmentShader(fragmentShaderPath, std::ios::in);
     if (!vertexShader.is_open() || !fragmentShader.is_open())

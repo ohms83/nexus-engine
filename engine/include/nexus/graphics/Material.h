@@ -19,6 +19,8 @@ NXS_NAMESPACE
     //! A list of enumerations representing commonly used texture types.
     enum class TextureType
     {
+        //! @brief Undefined texture type.
+        Undefined,
         //! @brief Diffuse color map (albedo).
         Diffuse,
         //! @brief Normal map, used for surface detail.
@@ -78,11 +80,17 @@ NXS_NAMESPACE
         MAYBE_UNUSED int32 AddTexture(Ref<Texture> texture, std::string uniform);
         Ref<Texture> GetTexture(uint32 slot);
 
+        //! Check whether a texture of the specified type is used in this material.
+        bool HasTextureType(TextureType type) const;
+
         void SetShader(const Ref<Shader>& shader);
         Ref<Shader> GetShader() const
         {
             return m_shader;
         }
+
+        //! Create a default shader based on the material properties.
+        void CreateDefaultShader(const Ref<RenderingInterface>& renderingInterface);
 
         /**
          * Write this material's properties to the given command.
@@ -90,17 +98,18 @@ NXS_NAMESPACE
          */
         void WriteRenderCommand(RenderCommand& command);
 
-        void CreateDefaultShader(const Ref<RenderingInterface>& renderingInterface);
-
     private:
+        void DetermineShaderPaths(std::string& vertexShader, std::string& fragmentShader);
+
         Ref<Shader> m_shader;
 
-        struct TextureUniformMap
+        struct TextureInfo
         {
             Ref<Texture> texture;
+            TextureType type;
             std::string uniformName;
         };
-        std::vector<TextureUniformMap> m_textures;
+        std::vector<TextureInfo> m_textures;
     };
 
     class MaterialLoader final : public IResourceLoader

@@ -3,6 +3,7 @@ out vec4 FragColor;
 
 in vec3 FragPos;
 in vec3 Normal;
+in vec2 TexCoord0;
 
 struct Material {
     vec3 ambient;
@@ -49,9 +50,16 @@ uniform int _NumPointLight;
 // Camera's position in the world space.
 uniform vec3 _CameraPos;
 
+uniform sampler2D _DiffuseMap;
+uniform sampler2D _OcclusionMap;
+uniform sampler2D _NormalMap;
+uniform float _AOFactor;
+
 vec3 CalcAmbientLight()
 {
-    return _AmbientLight * _Material.ambient;
+    float ao = texture(_OcclusionMap, TexCoord0).r;
+    ao = mix(1.0, ao, _AOFactor);
+    return _AmbientLight * _Material.ambient * ao;
 }
 
 vec3 CalcSpecularColor(vec3 specularLight, vec3 lightDir, vec3 normal)
@@ -103,6 +111,7 @@ vec3 CalcPointLight(PointLight light, vec3 fragPos, vec3 normal)
 void main()
 {
     vec3 N = normalize(Normal);
+    vec4 albedo = texture(_DiffuseMap, TexCoord0);
     vec3 ambientColor = CalcAmbientLight();
     vec3 directColor = CalcDirLight(_DirectLight, N);
     vec3 pointColor = vec3(0);
@@ -112,5 +121,5 @@ void main()
         pointColor += CalcPointLight(_PointLights[i], FragPos, N);
     }
 
-    FragColor = vec4((ambientColor + directColor + pointColor), 1);
+    FragColor = albedo * vec4((ambientColor + directColor + pointColor), 1);
 }

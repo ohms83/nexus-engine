@@ -7,15 +7,27 @@
 
 static const std::vector<std::string> modelPaths = {
     "meshes/apple/3DApple001_SQ-1K-PNG.obj",
-    "meshes/barrel/wine_barrel_01_4k.gltf"
+    "meshes/armadillo/armadillo.obj",
+    "meshes/bunny/stanford-bunny.obj",
+    "meshes/cube/cube_textured.obj",
+    "meshes/barrel/wine_barrel_01_4k.gltf",
+    "meshes/mantaray/Manta_Ray.fbx",
 };
 static const std::vector<std::string> modelLabels = {
     "Apple",
-    "Wine Barrel"
+    "Armadillo",
+    "Bunny",
+    "Crate",
+    "Wine Barrel",
+    "Manta Ray",
 };
 static const std::vector<glm::vec3> modelScales = {
-    glm::vec3(5),
+    glm::vec3(3),
+    glm::vec3(0.01),
+    glm::vec3(3),
     glm::vec3(1),
+    glm::vec3(1),
+    glm::vec3(0.01),
 };
 
 static const char* currentLabel = modelLabels[0].c_str();
@@ -46,9 +58,8 @@ public:
         glm::mat4 projection = glm::perspective(glm::radians(m_camera.fov), m_camera.width / m_camera.height, m_camera.nearZ, m_camera.farZ);
 
         auto renderCommands = m_model->CreateDrawCommand();
-        for (size_t i = 0; i < renderCommands.size(); ++i)
+        for (auto & renderCommand : renderCommands)
         {
-            auto& renderCommand = renderCommands[i];
             renderCommand.uniformVec3.emplace_back("_CameraPos", m_cameraPos);
 
             renderCommand.uniformMatrices.emplace("_Model", model);
@@ -191,6 +202,7 @@ private:
     {
         const auto assetPath = GetAssetPath(modelPaths[index]);
         m_model = nxs::Engine::Instance().GetModelManager()->Get(assetPath);
+        NXS_ASSERT_MSG(m_model != nullptr, std::format("Failed to load a model file: {}", assetPath));
     }
 
     void InitLights()

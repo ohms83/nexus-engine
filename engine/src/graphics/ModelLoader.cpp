@@ -78,6 +78,7 @@ void ModelLoader::ProcessMesh(const Ref<Model>& model, const aiMesh* mesh, const
     {
         glm::vec3 position;
         glm::vec3 normal;
+        glm::vec3 tangent;
         // TODO: Multiple texture coordinates
         glm::vec2 texCoords;
     };
@@ -107,6 +108,13 @@ void ModelLoader::ProcessMesh(const Ref<Model>& model, const aiMesh* mesh, const
             vertex.normal.z = mesh->mNormals[i].z;
         }
 
+        if (mesh->HasTangentsAndBitangents())
+        {
+            vertex.tangent.x = mesh->mTangents[i].x;
+            vertex.tangent.y = mesh->mTangents[i].y;
+            vertex.tangent.z = mesh->mTangents[i].z;
+        }
+
         // TODO: Multiple texture coordinates
         if (mesh->mTextureCoords[0])
         {
@@ -119,6 +127,7 @@ void ModelLoader::ProcessMesh(const Ref<Model>& model, const aiMesh* mesh, const
     vertexBuffer->Begin()
         .AddAttribute(VertexAttribute::VertexPosition3D)
         .AddAttribute(VertexAttribute::VertexNormal)
+        .AddAttribute(VertexAttribute::VertexTangent)
         .AddAttribute(VertexAttribute::VertexTexCoord0)
         .SetUsage(BufferUsage::StaticDraw)
         .SetVertices(R_CAST<const uint8*>(vertices.data()), vertices.size() * sizeof(Vertex))
@@ -182,11 +191,6 @@ void ModelLoader::ProcessMaterial(const Ref<Mesh>& newMesh, const aiMesh* mesh, 
     READ_BOOL_PROPERTY(AI_MATKEY_TWOSIDED, cull);
     READ_BOOL_PROPERTY(AI_MATKEY_ENABLE_WIREFRAME, wireframe);
 
-    if (newMat->GetShader() == nullptr) {
-        newMat->CreateDefaultShader(m_renderingInterface);
-    }
-    newMesh->SetMaterial(newMat);
-
 #undef READ_BOOL_PROPERTY
 #undef READ_INT_PROPERTY
 #undef READ_FLOAT_PROPERTY
@@ -194,6 +198,11 @@ void ModelLoader::ProcessMaterial(const Ref<Mesh>& newMesh, const aiMesh* mesh, 
 #undef READ_ENUM_PROPERTY
 
     ProcessTextures(newMat, material, directory);
+
+    if (newMat->GetShader() == nullptr) {
+        newMat->CreateDefaultShader(m_renderingInterface);
+    }
+    newMesh->SetMaterial(newMat);
 }
 
 // ReSharper disable once CppMemberFunctionMayBeStatic
