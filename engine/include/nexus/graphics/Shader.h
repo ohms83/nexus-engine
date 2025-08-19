@@ -36,6 +36,8 @@ NXS_NAMESPACE
         virtual Shader& AddSource(const std::string& source, Type shaderType);
         virtual void Compile();
 
+        virtual bool IsBinding() const = 0;
+
         /**
          * Find the location of a uniform variable with the specified name.
          * A uniform can be considered as shader's global variable where application
@@ -43,15 +45,14 @@ NXS_NAMESPACE
          */
         NODISCARD virtual int32 FindUniform(const std::string& name) const = 0;
 
-        virtual void SetUniformInt(const std::string& name, int32 value) = 0;
-        virtual void SetUniformFloat(const std::string& name, float value) = 0;
-        virtual void SetUniformVector(const std::string& name, const glm::vec2& vec) = 0;
-        virtual void SetUniformVector(const std::string& name, const glm::vec3& vec) = 0;
-        virtual void SetUniformVector(const std::string& name, const glm::vec4& vec) = 0;
-        virtual void SetUniformMatrix(const std::string& name, const glm::mat3& matrix, bool tranpose) = 0;
-        virtual void SetUniformMatrix(const std::string& name, const glm::mat4& matrix, bool tranpose) = 0;
-
-        virtual void SetUniformTexture2D(const std::string& name, Ref<const TextureProxy> texture, int32 textureUnit) = 0;
+        MAYBE_UNUSED virtual bool SetUniformInt(const std::string& name, int32 value) = 0;
+        MAYBE_UNUSED virtual bool SetUniformFloat(const std::string& name, float value) = 0;
+        MAYBE_UNUSED virtual bool SetUniformVector(const std::string& name, const glm::vec2& vec) = 0;
+        MAYBE_UNUSED virtual bool SetUniformVector(const std::string& name, const glm::vec3& vec) = 0;
+        MAYBE_UNUSED virtual bool SetUniformVector(const std::string& name, const glm::vec4& vec) = 0;
+        MAYBE_UNUSED virtual bool SetUniformMatrix(const std::string& name, const glm::mat3& matrix, bool tranpose) = 0;
+        MAYBE_UNUSED virtual bool SetUniformMatrix(const std::string& name, const glm::mat4& matrix, bool tranpose) = 0;
+        MAYBE_UNUSED virtual bool SetUniformTexture2D(const std::string& name, Ref<const TextureProxy> texture, int32 textureUnit) = 0;
 
     protected:
         uint32 m_shaderID = 0;

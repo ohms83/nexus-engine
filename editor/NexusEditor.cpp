@@ -24,6 +24,9 @@ static const std::string texturePaths[] = {
 static constexpr auto vertexShaderPath = "shader/forward_ligthing.vs";
 static constexpr auto fragmentShaderPath = "shader/forward_ligthing.fs";
 
+static constexpr auto appleModel = "meshes/apple/3DApple001_SQ-1K-PNG.obj";
+static constexpr auto barrelModel = "meshes/barrel/wine_barrel_01_4k.gltf";
+
 static void InitLight(nxs::Scene& scene)
 {
     scene.SetAmbient({0.2, 0.2, 0.2});
@@ -161,21 +164,24 @@ bool NexusEditor::Init_Internal()
         texture->SetWrapMode(nxs::TextureWrapMode::Clamp, nxs::TextureWrapMode::Clamp);
         texture->SetFiltering(nxs::TextureFilterMode::Linear, nxs::TextureFilterMode::Linear);
 
+        m_model = engine.GetModelManager()->Get(GetAssetPath(barrelModel));
+        auto mesh = m_model->GetMeshes()[2];
         g_cubeMesh = std::make_unique<nxs::CubeMesh>(renderInterface);
         auto node = scene->CreateNode<nxs::SceneNode>("Cube Node");
         nxs::RenderComponent renderComponent = {
-            g_cubeMesh->GetVertexBuffer(),
-            g_cubeMesh->GetIndexBuffer(),
+            mesh->GetVertexBuffer(),
+            mesh->GetIndexBuffer(),
             m_shader
         };
         node->AddComponent<nxs::DiffuseMapComponent>(nxs::DiffuseMapComponent {
-            {texture->GetProxy()}
+            // {texture->GetProxy()}
+            {mesh->GetMaterial()->GetTexture(0)->GetProxy()},
         });
         node->AddComponent<nxs::RenderComponent>(renderComponent);
         node->AddComponent<nxs::TransformComponent>(nxs::TransformComponent {
             {0, 1, 0},
             glm::quat(1, 0, 0, 0),
-            {1, 1, 1}
+            {2, 2, 2}
         });
         node->AddComponent<nxs::RotationComponent>(nxs::RotationComponent {
             glm::normalize(glm::sphericalRand<float>(1)),
@@ -196,7 +202,7 @@ bool NexusEditor::Init_Internal()
             {SDLK_E, nxs::KeyInputMap::AxisPlusY},
         }
     };
-    nxs::KeyInputMap cameraTrunKeyInput = {
+    nxs::KeyInputMap cameraTurnKeyInput = {
         {
             {SDLK_LEFT, nxs::KeyInputMap::AxisPlusX},
             {SDLK_RIGHT, nxs::KeyInputMap::AxisMinusX},
@@ -210,7 +216,7 @@ bool NexusEditor::Init_Internal()
         {5, 5}
     };
     inputManager.RegisterAxisInputMap("movement", cameraMovementKeyInput);
-    inputManager.RegisterAxisInputMap("camera_turn", cameraTrunKeyInput);
+    inputManager.RegisterAxisInputMap("camera_turn", cameraTurnKeyInput);
     inputManager.RegisterMouseAxisInputMap("camera_turn", cameraTurnMouseInput);
     return true;
 }

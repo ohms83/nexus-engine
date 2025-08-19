@@ -1,0 +1,229 @@
+//
+// Created by nutta on 8/18/2025.
+//
+#include "nexus/graphics/ModelLoader.h"
+#include "nexus/core/LogDispatcher.h"
+
+#include "assimp/Importer.hpp"
+#include "assimp/scene.h"
+#include "assimp/postprocess.h"
+#include "assimp/mesh.h"
+
+#include <filesystem>
+
+USING_NAMESPACE_NXS;
+
+DEFINE_LOG(ModelLoader);
+
+ModelLoader::ModelLoader(
+    const Ref<RenderingInterface>& renderingInterface,
+    const Ref<TextureManager>& textureManager,
+    const Ref<MaterialManager>& materialManager)
+{
+    NXS_ASSERT(renderingInterface && textureManager && materialManager);
+    m_renderingInterface = renderingInterface;
+    m_textureManager = textureManager;
+    m_materialManager = materialManager;
+}
+
+Ref<Resource> ModelLoader::Load(const std::string &path, uint32 id)
+{
+    Assimp::Importer importer;
+    // The ReadFile method returns an aiScene object.
+    // It's crucial to specify post-processing flags for desired data.
+    const aiScene* scene = importer.ReadFile(path,
+        aiProcess_Triangulate             | // Convert all faces to triangles
+        aiProcess_GenSmoothNormals        | // Generate smooth normals if not present
+        aiProcess_FlipUVs                 | // Flip UVs (often needed for OpenGL)
+        aiProcess_CalcTangentSpace        | // Calculate tangent and bitangent vectors
+        aiProcess_JoinIdenticalVertices   | // Join identical vertices for optimization
+        aiProcess_RemoveRedundantMaterials| // Remove redundant materials
+        aiProcess_OptimizeMeshes            // Optimize meshes for better performance
+    );
+
+    // Check for errors
+    if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
+        LOG_ERROR(LogModelLoader, std::format("Failed to load model: {} Error: {}", path, importer.GetErrorString()));
+        return nullptr;
+    }
+
+    // Store the directory path of the model file for texture loading
+    const auto directory = std::filesystem::path(path).parent_path();
+    auto model = std::make_shared<Model>(path, id);
+
+    // Process Assimp's root node recursively
+    ProcessNode(model, scene->mRootNode, scene, directory);
+
+    LOG_INFO(LogModelLoader, std::format("Model loaded successfully: {}", path));
+    LOG_INFO(LogModelLoader, std::format("Processed meshes: {}", scene->mNumMeshes));
+    return model;
+}
+
+void ModelLoader::ProcessNode(const Ref<Model>& model, const aiNode* node, const aiScene* scene, std::filesystem::path directory)
+{
+    // Process all the node's meshes (if any)
+    for (unsigned int i = 0; i < node->mNumMeshes; i++) {
+        const aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
+        ProcessMesh(model, mesh, scene, directory);
+    }
+    // Then do the same for its children
+    for (unsigned int i = 0; i < node->mNumChildren; i++) {
+        ProcessNode(model, node->mChildren[i], scene, directory);
+    }
+}
+
+void ModelLoader::ProcessMesh(const Ref<Model>& model, const aiMesh* mesh, const aiScene* scene, const std::filesystem::path& directory) const
+{
+    struct Vertex
+    {
+        glm::vec3 position;
+        glm::vec3 normal;
+        // TODO: Multiple texture coordinates
+        glm::vec2 texCoords;
+    };
+
+    const auto newMesh = std::make_shared<Mesh>(mesh->mName.C_Str());
+    std::vector<Vertex> vertices;
+    std::vector<uint32> indices;
+    Ref<VertexBuffer> vertexBuffer;
+    Ref<IndexBuffer> indexBuffer;
+    vertexBuffer.reset(m_renderingInterface->CreateVertexBuffer());
+    indexBuffer.reset(m_renderingInterface->CreateIndexBuffer());
+
+    vertices.reserve(mesh->mNumVertices);
+    indices.reserve(mesh->mNumFaces * 3);
+
+    for (unsigned int i = 0; i < mesh->mNumVertices; i++)
+    {
+        Vertex vertex;
+        vertex.position.x = mesh->mVertices[i].x;
+        vertex.position.y = mesh->mVertices[i].y;
+        vertex.position.z = mesh->mVertices[i].z;
+
+        if (mesh->HasNormals())
+        {
+            vertex.normal.x = mesh->mNormals[i].x;
+            vertex.normal.y = mesh->mNormals[i].y;
+            vertex.normal.z = mesh->mNormals[i].z;
+        }
+
+        // TODO: Multiple texture coordinates
+        if (mesh->mTextureCoords[0])
+        {
+            vertex.texCoords.x = mesh->mTextureCoords[0][i].x;
+            vertex.texCoords.y = mesh->mTextureCoords[0][i].y;
+        }
+        vertices.emplace_back(vertex);
+    }
+
+    vertexBuffer->Begin()
+        .AddAttribute(VertexAttribute::VertexPosition3D)
+        .AddAttribute(VertexAttribute::VertexNormal)
+        .AddAttribute(VertexAttribute::VertexTexCoord0)
+        .SetUsage(BufferUsage::StaticDraw)
+        .SetVertices(R_CAST<const uint8*>(vertices.data()), vertices.size() * sizeof(Vertex))
+    .Build();
+    newMesh->SetVertexBuffer(vertexBuffer);
+
+    for (unsigned int i = 0; i < mesh->mNumFaces; i++)
+    {
+        const aiFace face = mesh->mFaces[i];
+        for (unsigned int j = 0; j < face.mNumIndices; j++) {
+            indices.emplace_back(face.mIndices[j]);
+        }
+    }
+    indexBuffer->Begin()
+        .SetIndices(indices.data(), indices.size(), FrontFace::CounterClockWise)
+        .SetUsage(BufferUsage::StaticDraw)
+        .SetDrawMode(DrawMode::Triangle)
+    .Build();
+    newMesh->SetIndexBuffer(indexBuffer);
+
+    ProcessMaterial(newMesh, mesh, scene, directory);
+
+    model->AddMesh(newMesh);
+}
+
+// ReSharper disable once CppMemberFunctionMayBeStatic
+void ModelLoader::ProcessMaterial(const Ref<Mesh>& newMesh, const aiMesh* mesh, const aiScene* scene, const std::filesystem::path& directory) const
+{
+    // A mesh has only one material. If an imported model uses multiple materials,
+    // the importer splits up the mesh.
+    const aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+    const Ref<Material> newMat = m_materialManager->GetOrCreate(material->GetName().C_Str());
+
+#define READ_BOOL_PROPERTY(key, property) \
+    if (int32 value; material->Get(key, value) == AI_SUCCESS) { \
+        newMat->property = value; \
+    }
+#define READ_INT_PROPERTY(key, property) \
+    if (int32 value; material->Get(key, value) == AI_SUCCESS) { \
+        newMat->property = value; \
+    }
+#define READ_FLOAT_PROPERTY(key, property) \
+    if (float value; material->Get(key, value) == AI_SUCCESS) { \
+        newMat->property = value; \
+    }
+#define READ_COLOR_PROPERTY(key, property) \
+    if (aiColor3D color; material->Get(key, color) == AI_SUCCESS) { \
+        newMat->property.r = color.r; newMat->property.g = color.g; newMat->property.b = color.b; \
+    }
+#define READ_ENUM_PROPERTY(key, property, enumType) \
+    if (int32 value; material->Get(key, value) == AI_SUCCESS) { \
+        newMat->property = CAST<enumType>(value); \
+    }
+
+    READ_COLOR_PROPERTY(AI_MATKEY_COLOR_AMBIENT, ambient);
+    READ_COLOR_PROPERTY(AI_MATKEY_COLOR_DIFFUSE, diffuse);
+    READ_COLOR_PROPERTY(AI_MATKEY_COLOR_SPECULAR, specular);
+    READ_COLOR_PROPERTY(AI_MATKEY_COLOR_EMISSIVE, emissive);
+    READ_FLOAT_PROPERTY(AI_MATKEY_SHININESS, shininess);
+    READ_ENUM_PROPERTY(AI_MATKEY_BLEND_FUNC, blendMode, BlendMode);
+    READ_BOOL_PROPERTY(AI_MATKEY_TWOSIDED, cull);
+    READ_BOOL_PROPERTY(AI_MATKEY_ENABLE_WIREFRAME, wireframe);
+
+    if (newMat->GetShader() == nullptr) {
+        newMat->CreateDefaultShader(m_renderingInterface);
+    }
+    newMesh->SetMaterial(newMat);
+
+#undef READ_BOOL_PROPERTY
+#undef READ_INT_PROPERTY
+#undef READ_FLOAT_PROPERTY
+#undef READ_COLOR_PROPERTY
+#undef READ_ENUM_PROPERTY
+
+    ProcessTextures(newMat, material, directory);
+}
+
+// ReSharper disable once CppMemberFunctionMayBeStatic
+void ModelLoader::ProcessTextures(const Ref<Material>& newMat, const aiMaterial* material, const std::filesystem::path& directory) const
+{
+    std::map<aiTextureType, TextureType> textureTypeMap = {
+        {aiTextureType_DIFFUSE, TextureType::Diffuse},
+        {aiTextureType_NORMALS, TextureType::Normal},
+        {aiTextureType_SPECULAR, TextureType::Specular},
+        {aiTextureType_EMISSIVE, TextureType::Emissive},
+        {aiTextureType_HEIGHT, TextureType::Depth},
+        {aiTextureType_AMBIENT, TextureType::Ambient},
+        {aiTextureType_OPACITY, TextureType::Opacity},
+        {aiTextureType_AMBIENT_OCCLUSION, TextureType::Ambient},
+        {aiTextureType_METALNESS, TextureType::Metalness},
+        {aiTextureType_DIFFUSE_ROUGHNESS, TextureType::Roughness},
+        {aiTextureType_LIGHTMAP, TextureType::LightMap},
+    };
+
+    for (const auto& [aiType, textureType] : textureTypeMap)
+    {
+        for (int32 i = 0; i < material->GetTextureCount(aiType); ++i)
+        {
+            aiString path;
+            material->GetTexture(aiType, i, &path);
+
+            const std::string texturePath = (directory / path.C_Str()).string();
+            if (const auto texture = m_textureManager->Get(texturePath)) {
+                newMat->AddTexture(texture, textureType);
+            }
+        }
+    }
+}

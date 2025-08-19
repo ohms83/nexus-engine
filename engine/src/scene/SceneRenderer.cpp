@@ -56,9 +56,9 @@ static void SetLightParams(RenderCommand& command, const entt::registry& registr
         command.uniformVec3.emplace_back(unitformPosition, pointLights[i]->position);
 
         command.uniformFloats.emplace_back(unitformCutoff, pointLights[i]->light.cutoffRange);
-        command.uniformFloats.emplace_back(unitformConstantAtten, pointLights[i]->constantAttenuation);
-        command.uniformFloats.emplace_back(unitformLinearAtten, pointLights[i]->linearAttenuation);
-        command.uniformFloats.emplace_back(unitformQuadraticAtten, pointLights[i]->quadraticAttenuation);
+        command.uniformFloats.emplace_back(unitformConstantAtten, pointLights[i]->constant);
+        command.uniformFloats.emplace_back(unitformLinearAtten, pointLights[i]->linear);
+        command.uniformFloats.emplace_back(unitformQuadraticAtten, pointLights[i]->quadratic);
     }
 }
 

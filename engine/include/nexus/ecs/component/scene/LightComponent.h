@@ -31,8 +31,8 @@ NXS_NAMESPACE
     {
         LightComponent light;
         glm::vec3 position;
-        float constantAttenuation = 1.0f;
-        float linearAttenuation = 0.1f;
-        float quadraticAttenuation = 0.05f;
+        float constant = 0.0f;
+        float linear = 0.1f;
+        float quadratic = 0.05f;
     };
 }

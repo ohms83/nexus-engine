@@ -65,6 +65,8 @@ NXS_NAMESPACE
     enum class PixelFormat
     {
         None,
+        //! Single channel grayscale.
+        Grey,
         //! 8-bit Red channel
         Red,
         //! 8-bit Green channel

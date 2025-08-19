@@ -92,7 +92,10 @@ TextureProxy& GLTexture::LoadData(const uint8* data, const uint32 size)
     {
     case PixelFormat::None:
         break;
+    case PixelFormat::Grey:
     case PixelFormat::Red:
+        // OpenGL has no explicit Greyscale format. The greyscale textures are normally
+        // represented by a single channel red component.
         gl_pixelFormats = GL_RED;
         break;
     case PixelFormat::Green:

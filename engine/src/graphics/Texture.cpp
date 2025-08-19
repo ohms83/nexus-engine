@@ -81,8 +81,7 @@ Ref<Resource> TextureLoader::Load(const std::string& path, uint32 id)
     switch (desc.channels)
     {
     case 1:
-        // Assume it's a depth texture.
-        desc.format = PixelFormat::Depth;
+        desc.format = PixelFormat::Grey;
         break;
     case 3:
         desc.format = PixelFormat::RGB;

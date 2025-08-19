@@ -116,35 +116,35 @@ void PointLight::SetCutoffRange(const float range)
 float PointLight::GetConstantAttenuation() const
 {
     const auto& component = GetComponent<PointLightComponent>();
-    return component.constantAttenuation;
+    return component.constant;
 }
 
 void PointLight::SetConstantAttenuation(const float attenuation)
 {
     auto& component = GetComponent<PointLightComponent>();
-    component.constantAttenuation = attenuation;
+    component.constant = attenuation;
 }
 
 float PointLight::GetLinearAttenuation() const
 {
     const auto& component = GetComponent<PointLightComponent>();
-    return component.linearAttenuation;
+    return component.linear;
 }
 
 void PointLight::SetLinearAttenuation(const float attenuation)
 {
     auto& component = GetComponent<PointLightComponent>();
-    component.linearAttenuation = attenuation;
+    component.linear = attenuation;
 }
 
 float PointLight::GetQuadraticAttenuation() const
 {
     const auto& component = GetComponent<PointLightComponent>();
-    return component.quadraticAttenuation;
+    return component.quadratic;
 }
 
 void PointLight::SetQuadraticAttenuation(const float attenuation)
 {
     auto& component = GetComponent<PointLightComponent>();
-    component.quadraticAttenuation = attenuation;
+    component.quadratic = attenuation;
 }

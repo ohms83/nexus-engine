@@ -41,6 +41,8 @@
 #include "graphics/Material.h"
 #include "graphics/Mesh.h"
 #include "graphics/Model.h"
+#include "graphics/ModelLoader.h"
+#include "graphics/ModelManager.h"
 #include "graphics/RenderCommand.h"
 #include "graphics/RenderingInterface.h"
 #include "graphics/RenderSystem.h"

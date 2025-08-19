@@ -24,15 +24,14 @@ NXS_NAMESPACE
         bool IsBinding() const override;
 
         NODISCARD int32 FindUniform(const std::string& name) const override;
-        void SetUniformInt(const std::string& name, int32 value) override;
-        void SetUniformFloat(const std::string& name, float value) override;
-        void SetUniformVector(const std::string& name, const glm::vec2& vec) override;
-        void SetUniformVector(const std::string& name, const glm::vec3& vec) override;
-        void SetUniformVector(const std::string& name, const glm::vec4& vec) override;
-        void SetUniformMatrix(const std::string& name, const glm::mat3& matrix, bool tranpose) override;
-        void SetUniformMatrix(const std::string& name, const glm::mat4& matrix, bool tranpose) override;
-
-        void SetUniformTexture2D(const std::string& name, Ref<const TextureProxy> texture, int32 textureUnit) override;
+        MAYBE_UNUSED bool SetUniformInt(const std::string& name, int32 value) override;
+        MAYBE_UNUSED bool SetUniformFloat(const std::string& name, float value) override;
+        MAYBE_UNUSED bool SetUniformVector(const std::string& name, const glm::vec2& vec) override;
+        MAYBE_UNUSED bool SetUniformVector(const std::string& name, const glm::vec3& vec) override;
+        MAYBE_UNUSED bool SetUniformVector(const std::string& name, const glm::vec4& vec) override;
+        MAYBE_UNUSED bool SetUniformMatrix(const std::string& name, const glm::mat3& matrix, bool tranpose) override;
+        MAYBE_UNUSED bool SetUniformMatrix(const std::string& name, const glm::mat4& matrix, bool tranpose) override;
+        MAYBE_UNUSED bool SetUniformTexture2D(const std::string& name, Ref<const TextureProxy> texture, int32 textureUnit) override;
 
         void Bind() const override;
         void Unbind() const override;

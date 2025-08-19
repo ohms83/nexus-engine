@@ -9,6 +9,7 @@
 #include "graphics/RenderSystem.h"
 #include "core/LogDispatcher.h"
 #include "graphics/Model.h"
+#include "graphics/ModelManager.h"
 
 NXS_NAMESPACE
 {
