@@ -49,25 +49,32 @@ public:
         for (size_t i = 0; i < renderCommands.size(); ++i)
         {
             auto& renderCommand = renderCommands[i];
-            renderCommand.uniformVec3.emplace_back("_ViewPos", m_cameraPos);
+            renderCommand.uniformVec3.emplace_back("_CameraPos", m_cameraPos);
 
             renderCommand.uniformMatrices.emplace("_Model", model);
             renderCommand.uniformMatrices.emplace("_View", view);
             renderCommand.uniformMatrices.emplace("_Projection", projection);
 
             renderCommand.uniformVec3.emplace_back("_AmbientLight", m_ambient);
-            renderCommand.uniformVec3.emplace_back("_DirectLight.direction", m_directionalLight.direction);
-            renderCommand.uniformVec3.emplace_back("_DirectLight.diffuse", m_directionalLight.light.diffuseColor);
-            renderCommand.uniformVec3.emplace_back("_PointLights[0].position", m_pointLights[0].position);
-            renderCommand.uniformVec3.emplace_back("_PointLights[0].diffuse", m_pointLights[0].light.diffuseColor);
-            renderCommand.uniformVec3.emplace_back("_PointLights[1].position", m_pointLights[1].position);
-            renderCommand.uniformVec3.emplace_back("_PointLights[1].diffuse", m_pointLights[1].light.diffuseColor);
 
+            renderCommand.uniformVec3.emplace_back("_DirectLight.direction", m_directionalLight.direction);
+            renderCommand.uniformVec3.emplace_back("_DirectLight.properties.color", m_directionalLight.light.diffuseColor);
+            renderCommand.uniformFloats.emplace_back("_DirectLight.properties.diffuseIntensity", 1);
+            renderCommand.uniformFloats.emplace_back("_DirectLight.properties.specularIntensity", 1);
+
+            renderCommand.uniformVec3.emplace_back("_PointLights[0].position", m_pointLights[0].position);
+            renderCommand.uniformVec3.emplace_back("_PointLights[0].properties.color", m_pointLights[0].light.diffuseColor);
+            renderCommand.uniformFloats.emplace_back("_PointLights[0].properties.diffuseIntensity", 1);
+            renderCommand.uniformFloats.emplace_back("_PointLights[0].properties.specularIntensity", 1);
             renderCommand.uniformFloats.emplace_back("_PointLights[0].cutoff", m_pointLights[0].light.cutoffRange);
             renderCommand.uniformFloats.emplace_back("_PointLights[0].constant", m_pointLights[0].constant);
             renderCommand.uniformFloats.emplace_back("_PointLights[0].linear", m_pointLights[0].linear);
             renderCommand.uniformFloats.emplace_back("_PointLights[0].quadratic", m_pointLights[0].quadratic);
 
+            renderCommand.uniformVec3.emplace_back("_PointLights[1].position", m_pointLights[1].position);
+            renderCommand.uniformVec3.emplace_back("_PointLights[1].properties.color", m_pointLights[1].light.diffuseColor);
+            renderCommand.uniformFloats.emplace_back("_PointLights[1].properties.diffuseIntensity", 1);
+            renderCommand.uniformFloats.emplace_back("_PointLights[1].properties.specularIntensity", 1);
             renderCommand.uniformFloats.emplace_back("_PointLights[1].cutoff", m_pointLights[1].light.cutoffRange);
             renderCommand.uniformFloats.emplace_back("_PointLights[1].constant", m_pointLights[1].constant);
             renderCommand.uniformFloats.emplace_back("_PointLights[1].linear", m_pointLights[1].linear);
@@ -214,7 +221,7 @@ protected:
     nxs::PointLightComponent m_pointLights[2] {};
     glm::vec3 m_ambient {0.5, 0.5, 0.5};
     glm::vec3 m_euler {};
-    glm::vec3 m_cameraPos {0, 0, 5};
+    glm::vec3 m_cameraPos {0, 5, 5};
     float m_aoFactor = 1;
 };
 
