@@ -11,6 +11,7 @@
 #include "core/Hasher.h"
 #include "core/LogDispatcher.h"
 #include "core/Logger.h"
+#include "core/Path.h"
 #include "core/Reflection.h"
 #include "core/Resource.h"
 #include "core/ResourceLoader.h"

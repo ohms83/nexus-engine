@@ -111,6 +111,7 @@ target_compile_definitions(nexus-engine
     PUBLIC IMGUI_IMPL_OPENGL_LOADER_GLAD
     PUBLIC NXS_PROJECT_PATH="${PROJECT_ROOT}"
     PUBLIC NXS_ASSETS_DIR="${PROJECT_ROOT}/assets"
+    PUBLIC NXS_ENGINE_ASSETS_DIR="${CMAKE_CURRENT_SOURCE_DIR}/assets"
 )
 
 install(TARGETS nexus-engine
