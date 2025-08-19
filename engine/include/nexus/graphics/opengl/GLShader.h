@@ -40,6 +40,10 @@ NXS_NAMESPACE
         uint32 Alloc() override;
         void Release() override;
 
+        void ClearHandles();
+        //! Error shader is used as a fallback mechanism when the shader compilation failed.
+        void CreateErrorShader();
+
     private:
         std::vector<GLuint> m_shaderHandles;
 

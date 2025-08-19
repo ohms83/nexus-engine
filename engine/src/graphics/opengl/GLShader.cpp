@@ -5,6 +5,32 @@
 #include "graphics/opengl/GLShader.h"
 #include "glm/gtc/type_ptr.inl"
 
+// Shader sources
+const char* error_vertexShaderSource = R"(
+#version 330 core
+layout (location = 0) in vec3 aPos;
+
+uniform mat4 _Model;
+uniform mat4 _View;
+uniform mat4 _Projection;
+
+void main()
+{
+    gl_Position = _Projection * _View * _Model * vec4(aPos, 1.0);
+}
+)";
+
+const char* error_fragmentShaderSource = R"(
+#version 330 core
+out vec4 FragColor;
+
+void main()
+{
+    // Showing the magenta color to imply the error.
+    FragColor = vec4(1, 0, 1, 1.0);
+}
+)";
+
 #define CHECK_IF_BINDING(return_value) if (!IsBinding()) { \
     LOG_FATAL(LogOpenGL, "Invalid operation. Cannot set a uniform parameter without binding."); \
     return return_value; \
@@ -90,16 +116,19 @@ void GLShader::Compile()
     int success;
     char infoLog[512];
     CALL_GL_FUNC(glGetProgramiv(m_shaderID, GL_LINK_STATUS, &success));
-    if (!success) {
+    if (!success)
+    {
         CALL_GL_FUNC(glGetProgramInfoLog(m_shaderID, 512, nullptr, infoLog));
         LOG_ERROR(LogOpenGL, std::format("ERROR LINKING SHADER PROGRAM\nErrorLogs={}", infoLog));
+
+        // Recreate shaders using the error shader source.
+        CALL_GL_FUNC(glDeleteProgram(m_shaderID));
+        ClearHandles();
+        CreateErrorShader();
     }
 
     // We don't need to keep the handles anymore.
-    for (const auto shaderId : m_shaderHandles) {
-        CALL_GL_FUNC(glDeleteShader(shaderId));
-    }
-    m_shaderHandles.clear();
+    ClearHandles();
 }
 
 bool GLShader::IsBinding() const
@@ -211,4 +240,31 @@ uint32 GLShader::Alloc()
 void GLShader::Release()
 {
     CALL_GL_FUNC(glDeleteProgram(m_shaderID));
+}
+
+void GLShader::ClearHandles()
+{
+    for (const auto shaderId : m_shaderHandles) {
+        CALL_GL_FUNC(glDeleteShader(shaderId));
+    }
+    m_shaderHandles.clear();
+}
+
+void GLShader::CreateErrorShader()
+{
+    GLint success = 1;
+
+    m_shaderID = Alloc();
+    m_shaderHandles.push_back(CompileShader(error_vertexShaderSource, Type::Vertex));
+    m_shaderHandles.push_back(CompileShader(error_fragmentShaderSource, Type::Fragment));
+
+    for (const auto shaderId : m_shaderHandles) {
+        CALL_GL_FUNC(glAttachShader(m_shaderID, shaderId));
+    }
+    CALL_GL_FUNC(glLinkProgram(m_shaderID));
+    CALL_GL_FUNC(glGetProgramiv(m_shaderID, GL_LINK_STATUS, &success));
+    if (!success) {
+        // Something went horribly wrong
+        LOG_FATAL(LogOpenGL, std::format("Failed to create the error shader!"));
+    }
 }
