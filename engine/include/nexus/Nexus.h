@@ -68,6 +68,7 @@
 #include "io/JsonSerializer.h"
 #include "io/KeyInputMap.h"
 #include "io/MsgPackSerializer.h"
+#include "io/Serializable.h"
 #include "io/Serializer.h"
 #include "math/Math.h"
 #include "math/Matrix.h"

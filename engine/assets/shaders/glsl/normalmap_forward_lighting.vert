@@ -24,7 +24,7 @@ void main()
     vec3 N = normalize(vec3(_Model * vec4(aNormal, 0.0)));
     // Recalculate Bitangent to ensure it's orthonormal
     vec3 B = cross(N, T);
-    
+
     // Create the TBN matrix. Each column is a basis vector.
     TBN = mat3(T, B, N);
 

@@ -52,7 +52,6 @@ uniform vec3 _CameraPos;
 
 uniform sampler2D _DiffuseMap;
 uniform sampler2D _OcclusionMap;
-uniform sampler2D _NormalMap;
 uniform float _AOFactor;
 
 vec3 CalcAmbientLight()

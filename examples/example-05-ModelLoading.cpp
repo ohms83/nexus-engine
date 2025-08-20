@@ -7,27 +7,27 @@
 
 static const std::vector<std::string> modelPaths = {
     "meshes/apple/3DApple001_SQ-1K-PNG.obj",
-    "meshes/armadillo/armadillo.obj",
-    "meshes/bunny/stanford-bunny.obj",
-    "meshes/cube/cube_textured.obj",
-    "meshes/barrel/wine_barrel_01_4k.gltf",
-    "meshes/mantaray/Manta_Ray.fbx",
+    // "meshes/armadillo/armadillo.obj",
+    // "meshes/bunny/stanford-bunny.obj",
+    // "meshes/cube/cube_textured.obj",
+    // "meshes/barrel/wine_barrel_01_4k.gltf",
+    // "meshes/mantaray/Manta_Ray.fbx",
 };
 static const std::vector<std::string> modelLabels = {
     "Apple",
-    "Armadillo",
-    "Bunny",
-    "Crate",
-    "Wine Barrel",
-    "Manta Ray",
+    // "Armadillo",
+    // "Bunny",
+    // "Crate",
+    // "Wine Barrel",
+    // "Manta Ray",
 };
 static const std::vector<glm::vec3> modelScales = {
     glm::vec3(3),
-    glm::vec3(0.01),
-    glm::vec3(3),
-    glm::vec3(1),
-    glm::vec3(1),
-    glm::vec3(0.01),
+    // glm::vec3(0.01),
+    // glm::vec3(3),
+    // glm::vec3(1),
+    // glm::vec3(1),
+    // glm::vec3(0.01),
 };
 
 static const char* currentLabel = modelLabels[0].c_str();

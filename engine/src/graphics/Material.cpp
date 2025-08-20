@@ -13,12 +13,12 @@ USING_NAMESPACE_NXS;
 
 DEFINE_LOG(Material);
 
-static constexpr auto default_vertex_shader = "shaders/default_forward_lighting.vert";
-static constexpr auto default_fragment_shader = "shaders/default_forward_lighting.frag";
-static constexpr auto textured_vertex_shader = "shaders/textured_forward_lighting.vert";
-static constexpr auto textured_fragment_shader = "shaders/textured_forward_lighting.frag";
-static constexpr auto normalmap_vertex_shader = "shaders/normalmap_forward_lighting.vert";
-static constexpr auto normalmap_fragment_shader = "shaders/normalmap_forward_lighting.frag";
+static constexpr auto default_vertex_shader = "shaders/glsl/default_forward_lighting.vert";
+static constexpr auto default_fragment_shader = "shaders/glsl/default_forward_lighting.frag";
+static constexpr auto textured_vertex_shader = "shaders/glsl/textured_forward_lighting.vert";
+static constexpr auto textured_fragment_shader = "shaders/glsl/textured_forward_lighting.frag";
+static constexpr auto normalmap_vertex_shader = "shaders/glsl/normalmap_forward_lighting.vert";
+static constexpr auto normalmap_fragment_shader = "shaders/glsl/normalmap_forward_lighting.frag";
 
 static const std::map<TextureType, std::string> s_textureTypeUniformNames = {
     {TextureType::Diffuse, "_DiffuseMap"},
@@ -141,14 +141,8 @@ void Material::CreateDefaultShader(const Ref<RenderingInterface>& renderingInter
     vertexShaderStream << vertexShader.rdbuf();
     fragmentShaderStream << fragmentShader.rdbuf();
 
-    // TODO: Use shader resource manager
-    // m_shader.reset(renderingInterface->CreateShader());
-    // m_shader->BeginCompile()
-    //     .AddSource(vertexShaderStream.str(), Shader::Type::Vertex)
-    //     .AddSource(fragmentShaderStream.str(), Shader::Type::Fragment)
-    // .Compile();
     m_shader.reset(new Shader("Default", 0));
-    m_shader->Compile(*renderingInterface, vertexShaderStream.str(), fragmentShaderStream.str());
+    m_shader->CompileFromSource(*renderingInterface, vertexShaderStream.str(), fragmentShaderStream.str());
 }
 
 Ref<Resource> MaterialLoader::Load(const std::string& path, uint32 id)

@@ -114,7 +114,7 @@ NXS_NAMESPACE
             : m_value(list) {}
         // The initializer list for the map type is removed since it's ambigious and always crashes with
         // array's initializer. To create a Map, please explicitly call the overloaded Map constructor.
-        // For example, Serializer::Map {{key, value}} works while {{key, value}} will create a nested array instead.
+        // For example, VariantData::Map {{key, value}} works while {{key, value}} will create a nested array instead.
         // VariantData(const std::initializer_list<std::pair<const std::string, VariantData>> list)
         //     : m_value(Map(list)) {}
 
