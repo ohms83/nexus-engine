@@ -7,16 +7,14 @@ USING_NAMESPACE_NXS;
 
 DirectionalLight::DirectionalLight(entt::registry& registry)
     : SceneNode(registry)
+    , m_lightComponent(AddComponent<DirectLightComponent>())
 {
-    AddComponent<DirectLightComponent>();
-    m_lightComponent = &GetComponent<DirectLightComponent>();
 }
 
 DirectionalLight::DirectionalLight(entt::registry& registry, std::string name)
     : SceneNode(registry, name)
+    , m_lightComponent(AddComponent<DirectLightComponent>())
 {
-    AddComponent<DirectLightComponent>();
-    m_lightComponent = &GetComponent<DirectLightComponent>();
 }
 
 const Color3F &DirectionalLight::GetColor() const
@@ -69,14 +67,14 @@ void DirectionalLight::SetSpecularIntensity(float intensity)
 
 PointLight::PointLight(entt::registry& registry)
     : SceneNode(registry)
+    , m_lightComponent(AddComponent<PointLightComponent>())
 {
-    AddComponent<PointLightComponent>();
 }
 
 PointLight::PointLight(entt::registry& registry, std::string name)
     : SceneNode(registry, name)
+    , m_lightComponent(AddComponent<PointLightComponent>())
 {
-    AddComponent<PointLightComponent>();
 }
 
 const Color3F &PointLight::GetColor() const

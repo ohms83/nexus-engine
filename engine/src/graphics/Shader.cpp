@@ -70,6 +70,7 @@ bool Shader::Compile(RenderingInterface& renderingInterface)
 
     ExtractUniform(m_vertexShader);
     ExtractUniform(m_fragmentShader);
+    return true;
 }
 
 VariantData Shader::Serialize() const

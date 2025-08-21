@@ -4,7 +4,9 @@
 
 #pragma once
 
-#include <nexus/NxsDefine.h>
+#include "nexus/NxsDefine.h"
+#include "nexus/ecs/component/scene/CameraComponent.h"
+
 #include "SceneNode.h"
 
 NXS_NAMESPACE
@@ -41,6 +43,7 @@ NXS_NAMESPACE
         void SetScale(const glm::vec3& scale) override {}
 
     protected:
+        CameraComponent& m_camera;
         /**
          * Camera's field-of-view in degree. This will always be 90 in case of the
          * Orthographic projection.

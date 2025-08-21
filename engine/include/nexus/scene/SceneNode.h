@@ -44,9 +44,9 @@ NXS_NAMESPACE
         }
 
         template<typename Type, typename... Args>
-        void AddComponent(Args &&...args)
+        MAYBE_UNUSED decltype(auto) AddComponent(Args &&...args)
         {
-            m_registry->emplace<Type>(m_entity, std::forward<Args>(args)...);
+            return m_registry->emplace<Type>(m_entity, std::forward<Args>(args)...);
         }
         /**
          * @brief Returns references to the registered component owned by this scene node.

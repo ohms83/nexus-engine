@@ -4,23 +4,22 @@
 
 #include "nexus/scene/Camera.h"
 
-#include "ecs/component/scene/CameraComponent.h"
 #include "ecs/component/scene/TransformComponent.h"
 
 USING_NAMESPACE_NXS;
 
 Camera::Camera(entt::registry& registry)
     : SceneNode(registry)
+    , m_camera(AddComponent<CameraComponent>())
 {
-    registry.emplace<CameraComponent>(m_entity);
     registry.emplace<PositionComponent>(m_entity);
     registry.emplace<RotationComponent>(m_entity);
 }
 
 Camera::Camera(entt::registry& registry, const std::string& name)
     : SceneNode(registry, name)
+    , m_camera(AddComponent<CameraComponent>())
 {
-    registry.emplace<CameraComponent>(m_entity);
     registry.emplace<PositionComponent>(m_entity);
     registry.emplace<OrientationComponent>(m_entity);
 }
@@ -28,26 +27,24 @@ Camera::Camera(entt::registry& registry, const std::string& name)
 void Camera::SetProjection(const float fov, const float width, const float height, const float nearZ, const float farZ)
 {
     auto& registry = GetRegistry();
-    auto& camera = registry.get<CameraComponent>(m_entity);
-    camera.fov = fov;
-    camera.width = width;
-    camera.height = height;
-    camera.nearZ = nearZ,
-    camera.farZ = farZ;
-    camera.projectionType = ProjectionType::Perspective;
+    m_camera.fov = fov;
+    m_camera.width = width;
+    m_camera.height = height;
+    m_camera.nearZ = nearZ,
+    m_camera.farZ = farZ;
+    m_camera.projectionType = ProjectionType::Perspective;
     m_projMtx = glm::perspective(glm::radians(fov), float(width) / float(height), nearZ, farZ);
 }
 
 void Camera::SetOrthographic(const float width, const float height, const float nearZ, const float farZ)
 {
     auto& registry = GetRegistry();
-    auto& camera = registry.get<CameraComponent>(m_entity);
-    camera.fov = 90;
-    camera.width = width;
-    camera.height = height;
-    camera.nearZ = nearZ,
-    camera.farZ = farZ;
-    camera.projectionType = ProjectionType::Orthographic;
+    m_camera.fov = 90;
+    m_camera.width = width;
+    m_camera.height = height;
+    m_camera.nearZ = nearZ,
+    m_camera.farZ = farZ;
+    m_camera.projectionType = ProjectionType::Orthographic;
     m_projMtx = glm::ortho(-width/2, width/2, -height/2, height/2, nearZ, farZ);
 }
 

@@ -47,18 +47,16 @@ NXS_NAMESPACE
 
         DirectLightComponent& GetLightComponent()
         {
-            NXS_ASSERT(m_lightComponent);
-            return *m_lightComponent;
+            return m_lightComponent;
         }
 
         const DirectLightComponent& GetLightComponent() const
         {
-            NXS_ASSERT(m_lightComponent);
-            return *m_lightComponent;
+            return m_lightComponent;
         }
 
     private:
-        DirectLightComponent* m_lightComponent = nullptr;
+        DirectLightComponent& m_lightComponent;
     };
 
     class PointLight final : public ILight, public SceneNode
@@ -100,6 +98,6 @@ NXS_NAMESPACE
         void SetQuadraticAttenuation(float attenuation);
 
     private:
-        PointLightComponent m_lightComponent {};
+        PointLightComponent& m_lightComponent;
     };
 }
