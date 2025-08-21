@@ -7,14 +7,14 @@ USING_NAMESPACE_NXS;
 
 DirectionalLight::DirectionalLight(entt::registry& registry)
     : SceneNode(registry)
+    , m_lightComponent(AddComponent<DirectLightComponent>())
 {
-    AddComponent<DirectLightComponent>();
 }
 
 DirectionalLight::DirectionalLight(entt::registry& registry, std::string name)
     : SceneNode(registry, name)
+    , m_lightComponent(AddComponent<DirectLightComponent>())
 {
-    AddComponent<DirectLightComponent>();
 }
 
 const Color3F& DirectionalLight::GetDiffuseColor()
@@ -55,14 +55,14 @@ void DirectionalLight::SetEmissiveColor(const Color3F& color)
 
 PointLight::PointLight(entt::registry& registry)
     : SceneNode(registry)
+    , m_lightComponent(AddComponent<PointLightComponent>())
 {
-    AddComponent<PointLightComponent>();
 }
 
 PointLight::PointLight(entt::registry& registry, std::string name)
     : SceneNode(registry, name)
+    , m_lightComponent(AddComponent<PointLightComponent>())
 {
-    AddComponent<PointLightComponent>();
 }
 
 const Color3F& PointLight::GetDiffuseColor()

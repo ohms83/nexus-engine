@@ -49,7 +49,7 @@ NXS_NAMESPACE
         }
 
     private:
-        DirectLightComponent m_lightComponent {};
+        DirectLightComponent& m_lightComponent;
     };
 
     class PointLight final : public ILight, public SceneNode
@@ -86,6 +86,6 @@ NXS_NAMESPACE
         void SetQuadraticAttenuation(float attenuation);
 
     private:
-        PointLightComponent m_lightComponent {};
+        PointLightComponent& m_lightComponent;
     };
 }
