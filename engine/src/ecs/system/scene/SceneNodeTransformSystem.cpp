@@ -10,19 +10,19 @@ namespace nxs
 {
     void MoveNode(entt::registry& registry, float dt)
     {
-        const auto view = registry.view<const SceneNodeComponent, const MoveComponent>();
-        view.each([dt](const SceneNodeComponent& node, const MoveComponent& move)
+        const auto view = registry.view<PositionComponent, const MoveComponent>();
+        view.each([dt](PositionComponent& postion, const MoveComponent& move)
         {
-            node.ref.Translate(move.direction * move.speed * dt);
+            postion.value += move.direction * move.speed * dt;
         });
     }
 
     void RotateNode(entt::registry& registry, float dt)
     {
-        const auto view = registry.view<const SceneNodeComponent, const RotationComponent>();
-        view.each([dt](const SceneNodeComponent& node, const RotationComponent& rotation)
+        const auto view = registry.view<TransformComponent, const RotationComponent>();
+        view.each([dt](TransformComponent& transform, const RotationComponent& rotation)
         {
-            node.ref.Rotate(rotation.degree * dt, rotation.axis);
+            transform.rotation = glm::rotate(transform.rotation, glm::radians(rotation.degree * dt), rotation.axis);
         });
     }
 }

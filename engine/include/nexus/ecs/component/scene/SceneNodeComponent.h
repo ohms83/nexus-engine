@@ -5,12 +5,12 @@
 #pragma once
 
 #include "nexus/NxsDefine.h"
-#include "nexus/scene/SceneNode.h"
 
 NXS_NAMESPACE
 {
     struct SceneNodeComponent
     {
-        SceneNode& ref;
+        std::string name;
+        bool active = true;
     };
 }
