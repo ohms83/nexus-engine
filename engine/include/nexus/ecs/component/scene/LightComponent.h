@@ -15,21 +15,21 @@ NXS_NAMESPACE
     };
     struct LightComponent
     {
-        Color3F diffuseColor {};
-        Color3F specularColor {};
-        Color3F emissiveColor {};
+        Color3F color {};
+        float diffuseIntensity = 1.f;
+        float specularIntensity = 1.f;
         float cutoffRange = FLT_MAX;
     };
 
     struct DirectLightComponent
     {
-        LightComponent light;
+        LightComponent properties;
         glm::vec3 direction;
     };
 
     struct PointLightComponent
     {
-        LightComponent light;
+        LightComponent properties;
         glm::vec3 position;
         float constant = 0.0f;
         float linear = 0.1f;

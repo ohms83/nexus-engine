@@ -7,27 +7,27 @@
 
 static const std::vector<std::string> modelPaths = {
     "meshes/apple/3DApple001_SQ-1K-PNG.obj",
-    // "meshes/armadillo/armadillo.obj",
-    // "meshes/bunny/stanford-bunny.obj",
-    // "meshes/cube/cube_textured.obj",
-    // "meshes/barrel/wine_barrel_01_4k.gltf",
-    // "meshes/mantaray/Manta_Ray.fbx",
+    "meshes/armadillo/armadillo.obj",
+    "meshes/bunny/stanford-bunny.obj",
+    "meshes/cube/cube_textured.obj",
+    "meshes/barrel/wine_barrel_01_4k.gltf",
+    "meshes/mantaray/Manta_Ray.fbx",
 };
 static const std::vector<std::string> modelLabels = {
     "Apple",
-    // "Armadillo",
-    // "Bunny",
-    // "Crate",
-    // "Wine Barrel",
-    // "Manta Ray",
+    "Armadillo",
+    "Bunny",
+    "Crate",
+    "Wine Barrel",
+    "Manta Ray",
 };
 static const std::vector<glm::vec3> modelScales = {
     glm::vec3(3),
-    // glm::vec3(0.01),
-    // glm::vec3(3),
-    // glm::vec3(1),
-    // glm::vec3(1),
-    // glm::vec3(0.01),
+    glm::vec3(0.01),
+    glm::vec3(3),
+    glm::vec3(1),
+    glm::vec3(1),
+    glm::vec3(0.01),
 };
 
 static const char* currentLabel = modelLabels[0].c_str();
@@ -69,24 +69,24 @@ public:
             renderCommand.uniformVec3.emplace_back("_AmbientLight", m_ambient);
 
             renderCommand.uniformVec3.emplace_back("_DirectLight.direction", m_directionalLight.direction);
-            renderCommand.uniformVec3.emplace_back("_DirectLight.properties.color", m_directionalLight.light.diffuseColor);
+            renderCommand.uniformVec3.emplace_back("_DirectLight.properties.color", m_directionalLight.properties.color);
             renderCommand.uniformFloats.emplace_back("_DirectLight.properties.diffuseIntensity", 1);
             renderCommand.uniformFloats.emplace_back("_DirectLight.properties.specularIntensity", 1);
 
             renderCommand.uniformVec3.emplace_back("_PointLights[0].position", m_pointLights[0].position);
-            renderCommand.uniformVec3.emplace_back("_PointLights[0].properties.color", m_pointLights[0].light.diffuseColor);
+            renderCommand.uniformVec3.emplace_back("_PointLights[0].properties.color", m_pointLights[0].properties.color);
             renderCommand.uniformFloats.emplace_back("_PointLights[0].properties.diffuseIntensity", 1);
             renderCommand.uniformFloats.emplace_back("_PointLights[0].properties.specularIntensity", 1);
-            renderCommand.uniformFloats.emplace_back("_PointLights[0].cutoff", m_pointLights[0].light.cutoffRange);
+            renderCommand.uniformFloats.emplace_back("_PointLights[0].cutoff", m_pointLights[0].properties.cutoffRange);
             renderCommand.uniformFloats.emplace_back("_PointLights[0].constant", m_pointLights[0].constant);
             renderCommand.uniformFloats.emplace_back("_PointLights[0].linear", m_pointLights[0].linear);
             renderCommand.uniformFloats.emplace_back("_PointLights[0].quadratic", m_pointLights[0].quadratic);
 
             renderCommand.uniformVec3.emplace_back("_PointLights[1].position", m_pointLights[1].position);
-            renderCommand.uniformVec3.emplace_back("_PointLights[1].properties.color", m_pointLights[1].light.diffuseColor);
+            renderCommand.uniformVec3.emplace_back("_PointLights[1].properties.color", m_pointLights[1].properties.color);
             renderCommand.uniformFloats.emplace_back("_PointLights[1].properties.diffuseIntensity", 1);
             renderCommand.uniformFloats.emplace_back("_PointLights[1].properties.specularIntensity", 1);
-            renderCommand.uniformFloats.emplace_back("_PointLights[1].cutoff", m_pointLights[1].light.cutoffRange);
+            renderCommand.uniformFloats.emplace_back("_PointLights[1].cutoff", m_pointLights[1].properties.cutoffRange);
             renderCommand.uniformFloats.emplace_back("_PointLights[1].constant", m_pointLights[1].constant);
             renderCommand.uniformFloats.emplace_back("_PointLights[1].linear", m_pointLights[1].linear);
             renderCommand.uniformFloats.emplace_back("_PointLights[1].quadratic", m_pointLights[1].quadratic);
@@ -134,7 +134,7 @@ public:
 
             if (ImGui::TreeNode("Directional"))
             {
-                ImGui::ColorEdit3("Color", R_CAST<float*>(&m_directionalLight.light.diffuseColor));
+                ImGui::ColorEdit3("Color", R_CAST<float*>(&m_directionalLight.properties.color));
                 ImGui::TreePop();
             }
 
@@ -144,7 +144,7 @@ public:
                 static bool enableLight = false;
                 static float position[] = {0, 0, 0};
                 ImGui::Checkbox("Enable", &enableLight);
-                ImGui::ColorEdit3("Color", R_CAST<float*>(&m_pointLights[0].light.diffuseColor));
+                ImGui::ColorEdit3("Color", R_CAST<float*>(&m_pointLights[0].properties.color));
                 ImGui::InputFloat3("Position", position);
                 ImGui::TreePop();
             }
@@ -153,7 +153,7 @@ public:
             {
                 static bool enableLight = false;
                 ImGui::Checkbox("Enable", &enableLight);
-                ImGui::ColorEdit3("Color", R_CAST<float*>(&m_pointLights[1].light.diffuseColor));
+                ImGui::ColorEdit3("Color", R_CAST<float*>(&m_pointLights[1].properties.color));
                 ImGui::TreePop();
             }
         }
@@ -212,17 +212,17 @@ private:
     {
         m_ambient = {0.5, 0.5, 0.5};
 
-        m_directionalLight.light.diffuseColor = {1, 1, 1};
+        m_directionalLight.properties.color = {1, 1, 1};
         m_directionalLight.direction = {10, -10, 0};
 
-        m_pointLights[0].light.diffuseColor = {1, 0, 0};
+        m_pointLights[0].properties.color = {1, 0, 0};
         m_pointLights[0].position = {5, 0, 0};
-        m_pointLights[0].light.cutoffRange = 100.f;
+        m_pointLights[0].properties.cutoffRange = 100.f;
         m_pointLights[0].constant = 0.01f;
 
-        m_pointLights[1].light.diffuseColor = {0, 0, 1};
+        m_pointLights[1].properties.color = {0, 0, 1};
         m_pointLights[1].position = {-5, 0, 0};
-        m_pointLights[1].light.cutoffRange = 100.f;
+        m_pointLights[1].properties.cutoffRange = 100.f;
         m_pointLights[1].constant = 0.01f;
     }
 

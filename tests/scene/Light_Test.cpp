@@ -10,17 +10,43 @@ USING_NAMESPACE_NXS;
 
 TEST(DirectionalLightTest, GetterSetter)
 {
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<> dis(0.0f, 1.0f);
+
     entt::registry registry;
     DirectionalLight light(registry);
 
-    light.SetDiffuseColor(Color3F::Red);
-    EXPECT_TRUE(Color3F::Red == light.GetDiffuseColor());
+    light.SetColor(Color3F::Red);
+    EXPECT_TRUE(Color3F::Red == light.GetColor());
 
-    light.SetEmissiveColor(Color3F::Blue);
-    EXPECT_TRUE(Color3F::Blue == light.GetEmissiveColor());
+    {
+        const float value = dis(gen);
+        light.SetDiffuseIntensity(value);
 
-    light.SetSpecularColor(Color3F::Green);
-    EXPECT_TRUE(Color3F::Green == light.GetSpecularColor());
+        auto equal = glm::epsilonEqual(
+            light.GetDiffuseColor(),
+            light.GetColor() * value,
+            FLT_EPSILON
+        );
+
+        EXPECT_TRUE(glm::all(equal));
+        EXPECT_FLOAT_EQ(light.GetDiffuseIntensity(), value);
+    }
+
+    {
+        const float value = dis(gen);
+        light.SetSpecularIntensity(value);
+
+        auto equal = glm::epsilonEqual(
+            light.GetSpecularColor(),
+            light.GetColor() * value,
+            FLT_EPSILON
+        );
+
+        EXPECT_TRUE(glm::all(equal));
+        EXPECT_FLOAT_EQ(light.GetSpecularIntensity(), value);
+    }
 
     EXPECT_FLOAT_EQ(light.GetCutoffRange(), NXS_INFINITE);
 
@@ -33,19 +59,41 @@ TEST(PointLightTest, GetterSetter)
 {
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_real_distribution<> dis(0.0, 10.0);
+    std::uniform_real_distribution<> dis(0.0, 1.0);
 
     entt::registry registry;
     PointLight light(registry);
 
-    light.SetDiffuseColor(Color3F::Red);
-    EXPECT_TRUE(Color3F::Red == light.GetDiffuseColor());
+    light.SetColor(Color3F::Red);
+    EXPECT_TRUE(Color3F::Red == light.GetColor());
 
-    light.SetEmissiveColor(Color3F::Blue);
-    EXPECT_TRUE(Color3F::Blue == light.GetEmissiveColor());
+    {
+        const float value = dis(gen);
+        light.SetDiffuseIntensity(value);
 
-    light.SetSpecularColor(Color3F::Green);
-    EXPECT_TRUE(Color3F::Green == light.GetSpecularColor());
+        auto equal = glm::epsilonEqual(
+            light.GetDiffuseColor(),
+            light.GetColor() * value,
+            FLT_EPSILON
+        );
+
+        EXPECT_TRUE(glm::all(equal));
+        EXPECT_FLOAT_EQ(light.GetDiffuseIntensity(), value);
+    }
+
+    {
+        const float value = dis(gen);
+        light.SetSpecularIntensity(value);
+
+        auto equal = glm::epsilonEqual(
+            light.GetSpecularColor(),
+            light.GetColor() * value,
+            FLT_EPSILON
+        );
+
+        EXPECT_TRUE(glm::all(equal));
+        EXPECT_FLOAT_EQ(light.GetSpecularIntensity(), value);
+    }
 
     constexpr auto cutoffRange = 500.f;
     light.SetCutoffRange(500.f);

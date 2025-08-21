@@ -100,6 +100,8 @@ struct Light {
     float diffuseIntensity;
     // Control how this light will affect the specular color.
     float specularIntensity;
+    // Cutoff range.
+    float cutoff;
 };
 
 struct DirectLight {
@@ -114,7 +116,6 @@ uinform int _NumDirectLight;
 struct PointLight {
     // Light's common properties
     Light properties;
-    float cutoff;
     // Light position
     vec3 position;
     // Constant attenuation

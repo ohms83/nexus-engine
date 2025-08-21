@@ -61,21 +61,21 @@ uniform Light u_PointLights[2];
 
 vec3 CalcDirLight(Light light, vec3 normal)
 {
-    vec3 lightDir = normalize(-light.position);
+    vec3 lightDir = normalize(-properties.position);
     float diff = max(dot(normal, lightDir), 0.0);
-    return clamp(light.diffuse * diff, 0, 1);
+    return clamp(properties.diffuse * diff, 0, 1);
 }
 
 vec3 CalcPointLight(Light light, vec3 fragPos, vec3 normal)
 {
-    vec3 lightDir = light.position - fragPos;
+    vec3 lightDir = properties.position - fragPos;
     float dist = length(lightDir);
-    if (dist >= light.cutoff) return vec3(1, 0, 0);
+    if (dist >= properties.cutoff) return vec3(1, 0, 0);
 
     lightDir = normalize(lightDir);
     float diff = max(dot(normal, lightDir), 0.0);
-    float attenuation = 1 / (light.constantAtt + (light.linearAtt * diff) + (light.quadraticAtt * diff * diff));
-    return clamp(light.diffuse * diff * attenuation, 0, 1);
+    float attenuation = 1 / (properties.constantAtt + (properties.linearAtt * diff) + (properties.quadraticAtt * diff * diff));
+    return clamp(properties.diffuse * diff * attenuation, 0, 1);
 }
 
 void main()
@@ -127,15 +127,15 @@ public:
             {
                 { "u_Ambient", m_ambient },
                 { "u_DirectLight.position", m_directionalLight.direction },
-                { "u_DirectLight.diffuse", m_directionalLight.light.diffuseColor },
+                { "u_DirectLight.diffuse", m_directionalLight.properties.color },
                 { "u_PointLights[0].position", m_pointLights[0].position },
-                { "u_PointLights[0].diffuse", m_pointLights[0].light.diffuseColor },
+                { "u_PointLights[0].diffuse", m_pointLights[0].properties.color },
                 { "u_PointLights[1].position", m_pointLights[1].position },
-                { "u_PointLights[1].diffuse", m_pointLights[1].light.diffuseColor },
+                { "u_PointLights[1].diffuse", m_pointLights[1].properties.color },
             }
         };
-        renderCommand.uniformFloats.emplace_back("u_PointLights[0].cutoff", m_pointLights[0].light.cutoffRange);
-        renderCommand.uniformFloats.emplace_back("u_PointLights[1].cutoff", m_pointLights[1].light.cutoffRange);
+        renderCommand.uniformFloats.emplace_back("u_PointLights[0].cutoff", m_pointLights[0].properties.cutoffRange);
+        renderCommand.uniformFloats.emplace_back("u_PointLights[1].cutoff", m_pointLights[1].properties.cutoffRange);
 
         renderSystem.RegisterDrawCommand(renderCommand);
     }
@@ -152,7 +152,7 @@ public:
 
             if (ImGui::TreeNode("Directional"))
             {
-                ImGui::ColorEdit3("Color", R_CAST<float*>(&m_directionalLight.light.diffuseColor));
+                ImGui::ColorEdit3("Color", R_CAST<float*>(&m_directionalLight.properties.color));
                 ImGui::TreePop();
             }
 
@@ -162,7 +162,7 @@ public:
                 static bool enableLight = false;
                 static float position[] = {0, 0, 0};
                 ImGui::Checkbox("Enable", &enableLight);
-                ImGui::ColorEdit3("Color", R_CAST<float*>(&m_pointLights[0].light.diffuseColor));
+                ImGui::ColorEdit3("Color", R_CAST<float*>(&m_pointLights[0].properties.color));
                 ImGui::InputFloat3("Position", position);
                 ImGui::TreePop();
             }
@@ -171,7 +171,7 @@ public:
             {
                 static bool enableLight = false;
                 ImGui::Checkbox("Enable", &enableLight);
-                ImGui::ColorEdit3("Color", R_CAST<float*>(&m_pointLights[1].light.diffuseColor));
+                ImGui::ColorEdit3("Color", R_CAST<float*>(&m_pointLights[1].properties.color));
                 ImGui::TreePop();
             }
         }
@@ -214,16 +214,16 @@ private:
     {
         m_ambient = {0.5, 0.5, 0.5};
 
-        m_directionalLight.light.diffuseColor = {1, 1, 1};
+        m_directionalLight.properties.color = {1, 1, 1};
         m_directionalLight.direction = {10, -10, 0};
 
-        m_pointLights[0].light.diffuseColor = {0.5, 0, 0};
+        m_pointLights[0].properties.color = {0.5, 0, 0};
         m_pointLights[0].position = {10, 10, 0};
-        m_pointLights[0].light.cutoffRange = 100.f;
+        m_pointLights[0].properties.cutoffRange = 100.f;
 
-        m_pointLights[1].light.diffuseColor = {0, 0.5, 0};
+        m_pointLights[1].properties.color = {0, 0.5, 0};
         m_pointLights[1].position = {-10, 10, 0};
-        m_pointLights[1].light.cutoffRange = 100.f;
+        m_pointLights[1].properties.cutoffRange = 100.f;
     }
 
 protected:

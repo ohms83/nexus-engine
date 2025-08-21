@@ -45,10 +45,7 @@ static void InitLight(nxs::Scene& scene)
         auto node = scene.CreateNode<nxs::SceneNode>("Point Light 01");
         node->AddComponent<nxs::PointLightComponent>(nxs::PointLightComponent {
             {
-                nxs::Color3F::Yellow,
-                nxs::Color3F::Yellow,
-                nxs::Color3F::Yellow,
-                10.f
+                nxs::Color3F::Yellow, 1, 1, 10.f
             },
             glm::vec3(5, 5, 0),
             2.0f,
@@ -61,10 +58,7 @@ static void InitLight(nxs::Scene& scene)
         auto node = scene.CreateNode<nxs::SceneNode>("Point Light 02");
         node->AddComponent<nxs::PointLightComponent>(nxs::PointLightComponent {
             {
-                nxs::Color3F::Blue,
-                nxs::Color3F::Blue,
-                nxs::Color3F::Blue,
-                10.f
+                nxs::Color3F::Blue, 1, 1, 10.f
             },
             glm::vec3(-5, 5, 0),
             2.0f,

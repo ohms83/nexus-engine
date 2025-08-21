@@ -9,48 +9,62 @@ DirectionalLight::DirectionalLight(entt::registry& registry)
     : SceneNode(registry)
 {
     AddComponent<DirectLightComponent>();
+    m_lightComponent = &GetComponent<DirectLightComponent>();
 }
 
 DirectionalLight::DirectionalLight(entt::registry& registry, std::string name)
     : SceneNode(registry, name)
 {
     AddComponent<DirectLightComponent>();
+    m_lightComponent = &GetComponent<DirectLightComponent>();
 }
 
-const Color3F& DirectionalLight::GetDiffuseColor()
+const Color3F &DirectionalLight::GetColor() const
 {
-    const auto& component = GetComponent<DirectLightComponent>();
-    return CAST<const Color3F&>(component.light.diffuseColor);
+    const auto& [properties, direction] = GetComponent<DirectLightComponent>();
+    return properties.color;
 }
 
-void DirectionalLight::SetDiffuseColor(const Color3F& color)
+void DirectionalLight::SetColor(const Color3F &color)
 {
     auto& component = GetComponent<DirectLightComponent>();
-    component.light.diffuseColor = color;
+    component.properties.color = color;
 }
 
-const Color3F& DirectionalLight::GetSpecularColor()
+Color3F DirectionalLight::GetDiffuseColor() const
 {
-    auto& [light, direction] = GetComponent<DirectLightComponent>();
-    return CAST<Color3F&>(light.specularColor);
+    const auto& [properties, direction] = GetComponent<DirectLightComponent>();
+    return CAST<Color3F>(properties.color * properties.diffuseIntensity);
 }
 
-void DirectionalLight::SetSpecularColor(const Color3F& color)
+Color3F DirectionalLight::GetSpecularColor() const
 {
-    auto& [light, direction] = GetComponent<DirectLightComponent>();
-    light.specularColor = color;
+    const auto& [properties, direction] = GetComponent<DirectLightComponent>();
+    return CAST<Color3F>(properties.color * properties.specularIntensity);
 }
 
-const Color3F& DirectionalLight::GetEmissiveColor()
+float DirectionalLight::GetDiffuseIntensity() const
 {
-    auto& [light, direction] = GetComponent<DirectLightComponent>();
-    return CAST<Color3F&>(light.emissiveColor);
+    const auto& [properties, direction] = GetComponent<DirectLightComponent>();
+    return properties.diffuseIntensity;
 }
 
-void DirectionalLight::SetEmissiveColor(const Color3F& color)
+void DirectionalLight::SetDiffuseIntensity(float intensity)
 {
-    auto& [light, direction] = GetComponent<DirectLightComponent>();
-    light.emissiveColor = color;
+    auto& component = GetComponent<DirectLightComponent>();
+    component.properties.diffuseIntensity = intensity;
+}
+
+float DirectionalLight::GetSpecularIntensity() const
+{
+    const auto& [properties, direction] = GetComponent<DirectLightComponent>();
+    return properties.specularIntensity;
+}
+
+void DirectionalLight::SetSpecularIntensity(float intensity)
+{
+    auto& component = GetComponent<DirectLightComponent>();
+    component.properties.specularIntensity = intensity;
 }
 
 PointLight::PointLight(entt::registry& registry)
@@ -65,52 +79,64 @@ PointLight::PointLight(entt::registry& registry, std::string name)
     AddComponent<PointLightComponent>();
 }
 
-const Color3F& PointLight::GetDiffuseColor()
-{
-    auto& component = GetComponent<PointLightComponent>();
-    return CAST<Color3F&>(component.light.diffuseColor);
-}
-
-void PointLight::SetDiffuseColor(const Color3F& color)
-{
-    auto& component = GetComponent<PointLightComponent>();
-    component.light.diffuseColor = color;
-}
-
-const Color3F& PointLight::GetSpecularColor()
-{
-    auto& component = GetComponent<PointLightComponent>();
-    return CAST<Color3F&>(component.light.specularColor);
-}
-
-void PointLight::SetSpecularColor(const Color3F& color)
-{
-    auto& component = GetComponent<PointLightComponent>();
-    component.light.specularColor = color;
-}
-
-const Color3F& PointLight::GetEmissiveColor()
-{
-    auto& component = GetComponent<PointLightComponent>();
-    return CAST<Color3F&>(component.light.emissiveColor);
-}
-
-void PointLight::SetEmissiveColor(const Color3F& color)
-{
-    auto& component = GetComponent<PointLightComponent>();
-    component.light.emissiveColor = color;
-}
-
-float PointLight::GetCutoffRange()
+const Color3F &PointLight::GetColor() const
 {
     const auto& component = GetComponent<PointLightComponent>();
-    return component.light.cutoffRange;
+    return component.properties.color;
+}
+
+void PointLight::SetColor(const Color3F &color)
+{
+    auto& component = GetComponent<PointLightComponent>();
+    component.properties.color = color;
+}
+
+Color3F PointLight::GetDiffuseColor() const
+{
+    const auto& component = GetComponent<PointLightComponent>();
+    return CAST<Color3F>(component.properties.color * component.properties.diffuseIntensity);
+}
+
+Color3F PointLight::GetSpecularColor() const
+{
+    const auto& component = GetComponent<PointLightComponent>();
+    return CAST<Color3F>(component.properties.color * component.properties.specularIntensity);
+}
+
+float PointLight::GetDiffuseIntensity() const
+{
+    const auto& component = GetComponent<PointLightComponent>();
+    return component.properties.diffuseIntensity;
+}
+
+void PointLight::SetDiffuseIntensity(float intensity)
+{
+    auto& component = GetComponent<PointLightComponent>();
+    component.properties.diffuseIntensity = intensity;
+}
+
+float PointLight::GetSpecularIntensity() const
+{
+    const auto& component = GetComponent<PointLightComponent>();
+    return component.properties.specularIntensity;
+}
+
+void PointLight::SetSpecularIntensity(float intensity)
+{
+    auto& component = GetComponent<PointLightComponent>();
+    component.properties.specularIntensity = intensity;
+}
+
+float PointLight::GetCutoffRange() const
+{
+    const auto& component = GetComponent<PointLightComponent>();
+    return component.properties.cutoffRange;
 }
 
 void PointLight::SetCutoffRange(const float range)
 {
     auto& component = GetComponent<PointLightComponent>();
-    component.light.cutoffRange = range;
+    component.properties.cutoffRange = range;
 }
 
 float PointLight::GetConstantAttenuation() const
