@@ -94,7 +94,7 @@ bool NexusEditor::Init_Internal()
     scene->SetRenderer(std::make_unique<nxs::BasicSceneRenderer>());
 
     m_camera = scene->CreateNode<nxs::Camera>("Camera Node");
-    m_camera->SetPosition({0, 5, 5});
+    m_camera->Position().value = {0, 5, 5};
     m_camera->LookAt({0, 0, 0}, {0, 1, 0});
     m_camera->AddComponent<nxs::MoveComponent>(nxs::MoveComponent {
         glm::vec3(0, 0, 0),
@@ -245,7 +245,7 @@ void NexusEditor::Update()
 {
     Application::Update();
 
-    const auto camera = GetCurrentScene()->GetNode("Camera Node");
+    const auto camera = PTR_CAST<nxs::Camera>(GetCurrentScene()->GetNode("Camera Node"));
     if (!camera) return;
 
     auto& inputManager = nxs::InputManager::Instance();
@@ -253,12 +253,14 @@ void NexusEditor::Update()
     glm::vec3 translation = inputManager.GetAxisValue("movement");
 
     // Transform the translation vector into the camera's local coordinate.
-    translation = camera->GetRotation() * translation;
-    camera->Translate(translation * cameraSpeed * GetDeltaTime());
+    auto& cameraOrient = camera->Orient();
+    auto& cameraPosition = camera->Position();
+    translation = cameraOrient.value * translation;
+    cameraPosition.Translate(translation * cameraSpeed * GetDeltaTime());
 
     glm::vec2 euler = inputManager.GetMouseAxisValue("camera_turn") * GetDeltaTime();
     glm::vec2 keyDeltaEuler = inputManager.GetAxisValue("camera_turn") * 20.f * GetDeltaTime();
-    camera->Rotate(glm::vec3(euler.y + keyDeltaEuler.y, euler.x + keyDeltaEuler.x, 0));
+    cameraOrient.Rotate(glm::vec3(euler.y + keyDeltaEuler.y, euler.x + keyDeltaEuler.x, 0));
 }
 
 void NexusEditor::InitCube(nxs::Scene& scene, const nxs::int32 row, const nxs::int32 col)

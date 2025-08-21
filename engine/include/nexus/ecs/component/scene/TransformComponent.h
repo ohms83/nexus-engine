@@ -19,11 +19,26 @@ NXS_NAMESPACE
     struct PositionComponent
     {
         glm::vec3 value;
+
+        void Translate(const glm::vec3& translation)
+        {
+            value += translation;
+        }
     };
 
     struct OrientationComponent
     {
         glm::quat value;
+
+        void Rotate(const float degree, const glm::vec3& axis)
+        {
+            value = glm::rotate(value, glm::radians(degree), axis);
+        }
+
+        void Rotate(const glm::vec3& eulerAngles)
+        {
+            value *= glm::quat(glm::radians(eulerAngles));
+        }
     };
 
     struct ScaleComponent

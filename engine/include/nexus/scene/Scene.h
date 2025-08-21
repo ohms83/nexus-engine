@@ -21,18 +21,18 @@ NXS_NAMESPACE
 
         template<typename T>
         requires std::derived_from<T, SceneNode>
-        Ref<T> CreateNode(const std::string& name, const Ref<SceneNode>& parent = nullptr)
+        MAYBE_UNUSED Ref<T> CreateNode(const std::string& name, const Ref<SceneNode>& parent = nullptr)
         {
-            auto& node = m_children.emplace_back(std::make_shared<T>(GetRegistry(), name));
+            auto node = m_children.emplace_back(std::make_shared<T>(GetRegistry(), name));
             if (parent) {
-                parent->transform.AddChild(&node->transform);
+                parent->AddChild(node);
             }
             return PTR_CAST<T>(node);
         }
 
         template<typename T>
         requires std::derived_from<T, SceneNode>
-        Ref<T> CreateNode(const std::string& name, const std::string& parentName)
+        MAYBE_UNUSED Ref<T> CreateNode(const std::string& name, const std::string& parentName)
         {
             const auto itr = std::ranges::find_if(m_children, [parentName](const Ref<SceneNode>& node) {
                 return node->GetName() == parentName;
@@ -53,12 +53,12 @@ NXS_NAMESPACE
          * @param name Node name
          * @return A scene node with specified name or a nullptr, if not found
          */
-        Ref<SceneNode> GetNode(const std::string& name);
+        NODISCARD Ref<SceneNode> GetNode(const std::string& name);
 
         virtual void Update(float dt);
         virtual void Render(RenderSystem& renderSystem);
 
-        entt::registry& GetRegistry()
+        NODISCARD entt::registry& GetRegistry()
         {
             return m_registry;
         }

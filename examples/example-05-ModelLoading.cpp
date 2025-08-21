@@ -201,6 +201,10 @@ protected:
     }
 
 private:
+    void InitScene()
+    {
+        m_scene.CreateNode<nxs::Camera>("Camera");
+    }
     void LoadModel(const int index)
     {
         const auto assetPath = GetAssetPath(modelPaths[index]);
@@ -227,6 +231,7 @@ private:
     }
 
 protected:
+    nxs::Scene m_scene;
     nxs::Ref<nxs::GpuProgram> m_gpuProgram;
     //! Currently showing model
     nxs::Ref<nxs::Model> m_model;

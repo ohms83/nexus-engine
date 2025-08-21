@@ -17,6 +17,14 @@ NXS_NAMESPACE
         explicit Camera(entt::registry& registry);
         explicit Camera(entt::registry& registry, const std::string& name);
 
+        PositionComponent& Position() { return m_position; }
+        const PositionComponent& Position() const { return m_position; }
+
+        OrientationComponent& Orient() { return m_orient; }
+        const OrientationComponent& Orient() const { return m_orient; }
+
+        void LookAt(const glm::vec3& center, const glm::vec3& up);
+
         /**
          * Setup camera's projection.
          * @param fov Field-of-view in degree.
@@ -34,29 +42,16 @@ NXS_NAMESPACE
             return m_projMtx;
         }
 
-        float GetFOV() const { return m_fov; }
-        float Getwidth() const { return m_width; }
-        float GetHeight() const { return m_height; }
-        float GetNearZ() const { return m_nearZ; }
-        float GetFarZ() const { return m_farZ; }
-
-        void SetScale(const glm::vec3& scale) override {}
+        float GetFOV() const { return m_camera.fov; }
+        float Getwidth() const { return m_camera.width; }
+        float GetHeight() const { return m_camera.height; }
+        float GetNearZ() const { return m_camera.nearZ; }
+        float GetFarZ() const { return m_camera.farZ; }
 
     protected:
         CameraComponent& m_camera;
-        /**
-         * Camera's field-of-view in degree. This will always be 90 in case of the
-         * Orthographic projection.
-         */
-        float m_fov = 0;
-        //! Fustrum's width.
-        float m_width = 0;
-        //! Fustrum's height.
-        float m_height = 0;
-        //! Fustrum's near clipping plane.
-        float m_nearZ = 0;
-        //! Fustrum's far clipping plane.
-        float m_farZ = 0;
+        PositionComponent& m_position;
+        OrientationComponent& m_orient;
         //! Projection matrix.
         glm::mat4 m_projMtx{1.0f};
     };

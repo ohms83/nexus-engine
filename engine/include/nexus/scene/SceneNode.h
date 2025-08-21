@@ -6,6 +6,7 @@
 #include "Transform.h"
 
 #include "nexus/ecs/component/scene/SceneNodeComponent.h"
+#include "nexus/ecs/component/scene/TransformComponent.h"
 
 #include <string>
 
@@ -18,11 +19,6 @@ NXS_NAMESPACE
         explicit SceneNode(entt::registry& registry);
         explicit SceneNode(entt::registry& registry, std::string  name);
         virtual ~SceneNode() = default;
-
-        NODISCARD glm::mat4 GetMatrix() const
-        {
-            return transform.GetMatrix();
-        }
 
         NODISCARD const std::string& GetName() const
         {
@@ -40,30 +36,46 @@ NXS_NAMESPACE
             return m_node.active;
         }
 
+        void AddChild(Ref<SceneNode> child)
+        {
+            m_children.push_back(child);
+        }
+
         virtual void Update(float dt) {}
-
-        virtual void Translate(const glm::vec3& translation);
-        virtual void SetPosition(const glm::vec3& position);
-        NODISCARD virtual const glm::vec3& GetPosition() const;
-
-        virtual void Rotate(float degree, const glm::vec3& axis);
-        //! Rotating the node
-        virtual void Rotate(const glm::vec3& eulerAngles);
-        virtual void SetRotation(const glm::quat& rotation);
-        NODISCARD virtual const glm::quat& GetRotation() const;
-
-        virtual void Scale(const glm::vec3& scale);
-        virtual void SetScale(const glm::vec3& scale);
-        NODISCARD virtual const glm::vec3& GetScale() const;
-
-        void LookAt(const glm::vec3& center, const glm::vec3& up);
-
-        Transform transform;
 
     protected:
         virtual void OnActivate() {};
         virtual void OnDeactivate() {};
 
         SceneNodeComponent& m_node;
+        std::vector<Ref<SceneNode>> m_children;
+    };
+
+    /**
+     * 
+     */
+    class SceneNode3D : public SceneNode
+    {
+    public:
+        SceneNode3D() = delete;
+        explicit SceneNode3D(entt::registry& registry);
+        explicit SceneNode3D(entt::registry& registry, std::string  name);
+        ~SceneNode3D() override = default;
+
+        PositionComponent& Position() { return m_position; }
+        const PositionComponent& Position() const { return m_position; }
+
+        OrientationComponent& Orient() { return m_orient; }
+        const OrientationComponent& Orient() const { return m_orient; }
+
+        ScaleComponent& Scale() { return m_scale; }
+        const ScaleComponent& Scale() const { return m_scale; }
+
+        void LookAt(const glm::vec3& center, const glm::vec3& up);
+
+    protected:
+        PositionComponent& m_position;
+        OrientationComponent& m_orient;
+        ScaleComponent& m_scale;
     };
 }

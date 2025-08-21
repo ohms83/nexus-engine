@@ -11,17 +11,19 @@ USING_NAMESPACE_NXS;
 Camera::Camera(entt::registry& registry)
     : SceneNode(registry)
     , m_camera(AddComponent<CameraComponent>())
+    , m_position(AddComponent<PositionComponent>())
+    , m_orient(AddComponent<OrientationComponent>())
 {
-    registry.emplace<PositionComponent>(m_entity);
     registry.emplace<RotationComponent>(m_entity);
 }
 
 Camera::Camera(entt::registry& registry, const std::string& name)
     : SceneNode(registry, name)
     , m_camera(AddComponent<CameraComponent>())
+    , m_position(AddComponent<PositionComponent>())
+    , m_orient(AddComponent<OrientationComponent>())
 {
-    registry.emplace<PositionComponent>(m_entity);
-    registry.emplace<OrientationComponent>(m_entity);
+    registry.emplace<RotationComponent>(m_entity);
 }
 
 void Camera::SetProjection(const float fov, const float width, const float height, const float nearZ, const float farZ)
@@ -50,9 +52,14 @@ void Camera::SetOrthographic(const float width, const float height, const float 
 
 glm::mat4 Camera::GetViewMtx() const
 {
-    const auto worldOrientation = transform.GetOrient(Transform::Space::Global);
-    const auto worldPosition = transform.GetPosition(Transform::Space::Global);
+    // TODO: Handle transform heirachy.
+    const auto worldOrientation = m_orient.value;
+    const auto worldPosition = m_position.value;
     auto viewMatrix = glm::mat4(worldOrientation);
     viewMatrix[3] = glm::vec4(worldPosition, 1);
     return glm::inverse(viewMatrix);
+}
+void Camera::LookAt(const glm::vec3 &center, const glm::vec3 &up)
+{
+    m_orient.value = glm::quatLookAt(glm::normalize(center - m_position.value), up);
 }
