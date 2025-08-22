@@ -4,6 +4,7 @@
 #include "SceneNode.h"
 #include "SceneRenderer.h"
 #include "nexus/ecs/Ecs.h"
+#include "nexus/ecs/component/scene/LightComponent.h"
 #include "nexus/graphics/Color.h"
 #include "nexus/core/LogDispatcher.h"
 
@@ -65,14 +66,15 @@ NXS_NAMESPACE
 
         void SetRenderer(Ptr<ISceneRenderer> renderer);
 
-        void SetAmbient(const Color3F& color);
+        Color3F& Ambient();
+        const Color3F& Ambient() const;
 
     protected:
         std::vector<Ref<SceneNode>> m_children;
 
         // --- Rendering ---
         //! Ambient light.
-        entt::entity m_ambient;
+        AmbientLightComponent* m_ambientComponent = nullptr;
         Ptr<ISceneRenderer> m_renderer;
 
         // --- ECS ---

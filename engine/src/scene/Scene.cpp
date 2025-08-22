@@ -11,7 +11,9 @@ DEFINE_LOG(Scene);
 
 Scene::Scene()
 {
-    m_ambient = m_registry.create();
+    auto ambientEntt = m_registry.create();
+    m_ambientComponent = &m_registry.emplace<AmbientLightComponent>(ambientEntt, Color3F::Red);
+
     m_simulations.push_back(MoveNode);
     m_simulations.push_back(RotateNode);
 }
@@ -47,7 +49,14 @@ void Scene::SetRenderer(Ptr<ISceneRenderer> renderer)
     m_renderer = std::move(renderer);
 }
 
-void Scene::SetAmbient(const Color3F& color)
+Color3F& Scene::Ambient()
 {
-    m_registry.emplace<AmbientLightComponent>(m_ambient, color);
+    NXS_ASSERT(m_ambientComponent);
+    return m_ambientComponent->color;
+}
+
+const Color3F& Scene::Ambient() const
+{
+    NXS_ASSERT(m_ambientComponent);
+    return m_ambientComponent->color;
 }

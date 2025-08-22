@@ -10,6 +10,7 @@
 #include "math/Matrix.h"
 #include "nexus/ecs/component/graphics/RenderComponent.h"
 #include "nexus/ecs/component/graphics/ModelComponent.h"
+#include "nexus/ecs/component/scene/SceneNodeComponent.h"
 #include "nexus/ecs/component/scene/CameraComponent.h"
 #include "nexus/ecs/component/scene/TransformComponent.h"
 #include "nexus/ecs/component/scene/LightComponent.h"
@@ -25,7 +26,7 @@ static void SetAmbientLightParams(RenderCommand& command, const entt::registry& 
 {
     const auto ambientLightEnt = registry.view<AmbientLightComponent>().front();
     const auto color = ambientLightEnt == entt::null ? Color3F::Grey : registry.get<AmbientLightComponent>(ambientLightEnt).color;
-    command.uniformVec3.emplace_back("_Ambient", color);
+    command.uniformVec3.emplace_back("_AmbientLight", color);
 }
 
 static void SetDirectLightParams(RenderCommand& command, const entt::registry& registry)
@@ -73,7 +74,7 @@ static void SetPointLightParams(RenderCommand& command, const entt::registry& re
         const auto uniformLocationColor = std::format("{}.properties.color", uniformLocation);
         const auto uniformLocationDiffuse = std::format("{}.properties.diffuseIntensity", uniformLocation);
         const auto uniformLocationSpecular = std::format("{}.properties.specularIntensity", uniformLocation);
-        const auto uniformLocationCutOff = std::format("{}.properties.cutoff", uniformLocation);
+        const auto uniformLocationCutOff = std::format("{}.cutoff", uniformLocation);
         const auto uniformLocationPosition = std::format("{}.position", uniformLocation);
         const auto uniformLocationConst = std::format("{}.constant", uniformLocation);
         const auto uniformLocationLinear = std::format("{}.linear", uniformLocation);
@@ -120,10 +121,10 @@ void BasicSceneRenderer::Render(RenderSystem& renderSystem, const entt::registry
             projection = glm::ortho(-camera.width/2, camera.width/2, -camera.height/2, camera.height/2, camera.nearZ, camera.farZ);
         }
 
-        for (const auto view = registry.view<ModelComponent, TransformComponent>(); const auto& [entity, modelComponent, transform] : view.each())
+        for (const auto view = registry.view<SceneNodeComponent, ModelComponent, PositionComponent, OrientationComponent, ScaleComponent>(); const auto& [entity, sceneNode, model, position, orient, scale] : view.each())
         {
-            glm::mat4 modelMtx = Matrix::CreateModelMatrix(transform.translation, transform.rotation, transform.scale);
-            auto commands = modelComponent.model->CreateDrawCommand();
+            glm::mat4 modelMtx = Matrix::CreateModelMatrix(position.value, orient.value, scale.value);
+            auto commands = model.model->CreateDrawCommand();
             for (auto& command : commands)
             {
                 command.uniformMatrices.emplace("_Model", modelMtx);

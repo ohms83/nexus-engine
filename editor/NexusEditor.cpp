@@ -29,7 +29,7 @@ static constexpr auto barrelModel = "meshes/barrel/wine_barrel_01_4k.gltf";
 
 static void InitLight(nxs::Scene& scene)
 {
-    scene.SetAmbient({0.2, 0.2, 0.2});
+    scene.Ambient() = {0.2, 0.2, 0.2};
 
     {
         auto node = scene.CreateNode<nxs::SceneNode>("Directional Light");

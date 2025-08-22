@@ -43,7 +43,7 @@ NXS_NAMESPACE
 
     struct ScaleComponent
     {
-        glm::vec3 value;
+        glm::vec3 value {1, 1, 1};
     };
 
     struct MoveComponent

@@ -29,7 +29,8 @@ struct DirectLight {
     // Direction
     vec3 direction;
 };
-uniform DirectLight _DirectLight;
+uniform DirectLight _DirectLights[5];
+uniform int _NumDirectLight;
 
 struct PointLight {
     // Light's common properties
@@ -112,9 +113,14 @@ void main()
     vec3 N = normalize(Normal);
     vec4 albedo = texture(_DiffuseMap, TexCoord0);
     vec3 ambientColor = CalcAmbientLight();
-    vec3 directColor = CalcDirLight(_DirectLight, N);
-    vec3 pointColor = vec3(0);
 
+    vec3 directColor = vec3(0);
+    for (int i = 0; i < _NumDirectLight; ++i)
+    {
+        directColor += CalcDirLight(_DirectLights[i], N);
+    }
+
+    vec3 pointColor = vec3(0);
     for (int i = 0; i < _NumPointLight; ++i)
     {
         pointColor += CalcPointLight(_PointLights[i], FragPos, N);

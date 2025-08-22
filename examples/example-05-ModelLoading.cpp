@@ -47,55 +47,12 @@ public:
         const glm::vec2 euler = inputManager.GetAxisValue("model_rotate") * 90.f * GetDeltaTime();
         m_euler.x += euler.x;
         m_euler.y += euler.y;
-        model *= glm::scale(model, modelScales[selectedModel] * scale);
-        model *= glm::mat4_cast(glm::quat(glm::radians(m_euler)));
 
-        glm::mat4 view = glm::lookAt(m_cameraPos, // Camera position
-                                     glm::vec3(0.0f, 0.0f, 0.0f), // Look at origin
-                                     glm::vec3(0.0f, 1.0f, 0.0f)  // Up direction
-                                    );
+        auto modelNode = PTR_CAST<nxs::SceneNode3D>(m_scene.GetNode("Model"));
+        modelNode->Orient().value = glm::mat4_cast(glm::quat(glm::radians(m_euler)));
+        modelNode->Scale().value = modelScales[selectedModel] * scale;
 
-        glm::mat4 projection = glm::perspective(glm::radians(m_camera.fov), m_camera.width / m_camera.height, m_camera.nearZ, m_camera.farZ);
-
-        auto renderCommands = m_model->CreateDrawCommand();
-        for (auto & renderCommand : renderCommands)
-        {
-            renderCommand.uniformVec3.emplace_back("_CameraPos", m_cameraPos);
-
-            renderCommand.uniformMatrices.emplace("_Model", model);
-            renderCommand.uniformMatrices.emplace("_View", view);
-            renderCommand.uniformMatrices.emplace("_Projection", projection);
-
-            renderCommand.uniformVec3.emplace_back("_AmbientLight", m_ambient);
-
-            renderCommand.uniformVec3.emplace_back("_DirectLight.direction", m_directionalLight.direction);
-            renderCommand.uniformVec3.emplace_back("_DirectLight.properties.color", m_directionalLight.properties.color);
-            renderCommand.uniformFloats.emplace_back("_DirectLight.properties.diffuseIntensity", 1);
-            renderCommand.uniformFloats.emplace_back("_DirectLight.properties.specularIntensity", 1);
-
-            renderCommand.uniformVec3.emplace_back("_PointLights[0].position", m_pointLights[0].position);
-            renderCommand.uniformVec3.emplace_back("_PointLights[0].properties.color", m_pointLights[0].properties.color);
-            renderCommand.uniformFloats.emplace_back("_PointLights[0].properties.diffuseIntensity", 1);
-            renderCommand.uniformFloats.emplace_back("_PointLights[0].properties.specularIntensity", 1);
-            renderCommand.uniformFloats.emplace_back("_PointLights[0].cutoff", m_pointLights[0].properties.cutoffRange);
-            renderCommand.uniformFloats.emplace_back("_PointLights[0].constant", m_pointLights[0].constant);
-            renderCommand.uniformFloats.emplace_back("_PointLights[0].linear", m_pointLights[0].linear);
-            renderCommand.uniformFloats.emplace_back("_PointLights[0].quadratic", m_pointLights[0].quadratic);
-
-            renderCommand.uniformVec3.emplace_back("_PointLights[1].position", m_pointLights[1].position);
-            renderCommand.uniformVec3.emplace_back("_PointLights[1].properties.color", m_pointLights[1].properties.color);
-            renderCommand.uniformFloats.emplace_back("_PointLights[1].properties.diffuseIntensity", 1);
-            renderCommand.uniformFloats.emplace_back("_PointLights[1].properties.specularIntensity", 1);
-            renderCommand.uniformFloats.emplace_back("_PointLights[1].cutoff", m_pointLights[1].properties.cutoffRange);
-            renderCommand.uniformFloats.emplace_back("_PointLights[1].constant", m_pointLights[1].constant);
-            renderCommand.uniformFloats.emplace_back("_PointLights[1].linear", m_pointLights[1].linear);
-            renderCommand.uniformFloats.emplace_back("_PointLights[1].quadratic", m_pointLights[1].quadratic);
-
-            renderCommand.uniformFloats.emplace_back("_AOFactor", m_aoFactor);
-            renderCommand.uniformInts.emplace_back("_NumPointLight", 2);
-
-            renderSystem.RegisterDrawCommand(renderCommand);
-        }
+        m_scene.Render(renderSystem);
     }
 
     void DrawUI() override
@@ -112,7 +69,9 @@ public:
                     {
                         currentLabel = modelLabels[n].c_str();
                         selectedModel = n;
-                        LoadModel(selectedModel);
+
+                        auto& modelComp = m_scene.GetNode("Model")->GetComponent<nxs::ModelComponent>();
+                        modelComp.model = LoadModel(selectedModel);
                     }
 
                     // Set the initial focus when the combo box is first opened
@@ -130,11 +89,13 @@ public:
                 ImGui::ColorEdit3("Color", R_CAST<float*>(&m_ambient));
                 ImGui::SliderFloat("AO Factor", &m_aoFactor, 0.0f, 1.0f);
                 ImGui::TreePop();
+
+                m_scene.Ambient() = m_ambient;
             }
 
             if (ImGui::TreeNode("Directional"))
             {
-                ImGui::ColorEdit3("Color", R_CAST<float*>(&m_directionalLight.properties.color));
+                ImGui::ColorEdit3("Color", R_CAST<float*>(&m_directionalLight->properties.color));
                 ImGui::TreePop();
             }
 
@@ -144,7 +105,7 @@ public:
                 static bool enableLight = false;
                 static float position[] = {0, 0, 0};
                 ImGui::Checkbox("Enable", &enableLight);
-                ImGui::ColorEdit3("Color", R_CAST<float*>(&m_pointLights[0].properties.color));
+                ImGui::ColorEdit3("Color", R_CAST<float*>(&m_pointLights[0]->properties.color));
                 ImGui::InputFloat3("Position", position);
                 ImGui::TreePop();
             }
@@ -153,7 +114,7 @@ public:
             {
                 static bool enableLight = false;
                 ImGui::Checkbox("Enable", &enableLight);
-                ImGui::ColorEdit3("Color", R_CAST<float*>(&m_pointLights[1].properties.color));
+                ImGui::ColorEdit3("Color", R_CAST<float*>(&m_pointLights[1]->properties.color));
                 ImGui::TreePop();
             }
         }
@@ -167,16 +128,7 @@ protected:
         const auto renderInterface = renderSystem.GetRenderInterface();
         renderSystem.SetClearColor(0x303030ff);
 
-        nxs::HighResTimeSource timeSource;
-        auto now = timeSource.Now();
-        for (int i = 0; i < modelPaths.size(); i++)
-        {
-            // Preload models
-            LoadModel(i);
-        }
-        LOG_INFO(LogTemp, std::format("Total loading time: {:.3f} seconds", timeSource.Now() - now));
-        LoadModel(0);
-
+        InitScene();
         InitLights();
 
         const nxs::KeyInputMap modelRotationInput = {
@@ -198,36 +150,76 @@ protected:
         Application::OnResize(screenSize, actualSize);
         m_camera.width = FLOAT_CAST(screenSize.x);
         m_camera.height = FLOAT_CAST(screenSize.y);
+
+        auto camera = PTR_CAST<nxs::Camera>(m_scene.GetNode("Camera"));
+        camera->SetProjection(m_camera.fov, m_camera.width, m_camera.height, m_camera.nearZ, m_camera.farZ);
     }
 
 private:
     void InitScene()
     {
-        m_scene.CreateNode<nxs::Camera>("Camera");
+        auto camera = m_scene.CreateNode<nxs::Camera>("Camera");
+        camera->Position().value = {0, 5, 5};
+        camera->LookAt(glm::vec3(0), glm::vec3(0, 1, 0));
+
+        nxs::HighResTimeSource timeSource;
+        auto now = timeSource.Now();
+        for (int i = 0; i < modelPaths.size(); i++)
+        {
+            // Preload models
+            LoadModel(i);
+        }
+        LOG_INFO(LogTemp, std::format("Total loading time: {:.3f} seconds", timeSource.Now() - now));
+        
+        auto node = m_scene.CreateNode<nxs::SceneNode3D>("Model");
+        auto& modelComp = node->AddComponent<nxs::ModelComponent>();
+        modelComp.model = m_model = LoadModel(0);
+        node->Scale().value = modelScales[0];
+
+        m_scene.SetRenderer(std::make_unique<nxs::BasicSceneRenderer>());
     }
-    void LoadModel(const int index)
+
+    MAYBE_UNUSED nxs::Ref<nxs::Model> LoadModel(const int index)
     {
         const auto assetPath = GetAssetPath(modelPaths[index]);
-        m_model = nxs::Engine::Instance().GetModelManager()->Get(assetPath);
-        NXS_ASSERT_MSG(m_model != nullptr, std::format("Failed to load a model file: {}", assetPath));
+        auto model = nxs::Engine::Instance().GetModelManager()->Get(assetPath);
+        NXS_ASSERT_MSG(model != nullptr, std::format("Failed to load a model file: {}", assetPath));
+        return model;
     }
 
     void InitLights()
     {
-        m_ambient = {0.5, 0.5, 0.5};
+        m_scene.Ambient() = {0.5f, 0.5f, 0.5f};
+        
+        {
+            auto light = m_scene.CreateNode<nxs::DirectionalLight>("Direct Light 1");
+            light->SetColor({1, 1, 1});
+            light->GetLightComponent().direction = {10, -10, 0};
 
-        m_directionalLight.properties.color = {1, 1, 1};
-        m_directionalLight.direction = {10, -10, 0};
+            m_directionalLight = &light->GetLightComponent();
+        }
+        {
+            auto light = m_scene.CreateNode<nxs::PointLight>("Point Light 1");
+            light->SetColor({1, 0, 0});
 
-        m_pointLights[0].properties.color = {1, 0, 0};
-        m_pointLights[0].position = {5, 0, 0};
-        m_pointLights[0].properties.cutoffRange = 100.f;
-        m_pointLights[0].constant = 0.01f;
+            auto& component = light->GetLightComponent();
+            component.position = {5, 0, 0};
+            component.properties.cutoffRange = 100.f;
+            component.constant = 0.01f;
 
-        m_pointLights[1].properties.color = {0, 0, 1};
-        m_pointLights[1].position = {-5, 0, 0};
-        m_pointLights[1].properties.cutoffRange = 100.f;
-        m_pointLights[1].constant = 0.01f;
+            m_pointLights[0] = &light->GetLightComponent();
+        }
+        {
+            auto light = m_scene.CreateNode<nxs::PointLight>("Point Light 2");
+            light->SetColor({0, 0, 1});
+
+            auto& component = light->GetLightComponent();
+            component.position = {-5, 0, 0};
+            component.properties.cutoffRange = 100.f;
+            component.constant = 0.01f;
+
+            m_pointLights[1] = &light->GetLightComponent();
+        }
     }
 
 protected:
@@ -237,9 +229,9 @@ protected:
     nxs::Ref<nxs::Model> m_model;
     nxs::Transform m_cubeTransform;
     nxs::CameraComponent m_camera;
-    nxs::DirectLightComponent m_directionalLight {};
-    nxs::PointLightComponent m_pointLights[2] {};
-    glm::vec3 m_ambient {0.5, 0.5, 0.5};
+    nxs::DirectLightComponent* m_directionalLight = nullptr;
+    nxs::PointLightComponent* m_pointLights[2] {};
+    nxs::Color3F m_ambient {0.5, 0.5, 0.5};
     glm::vec3 m_euler {};
     glm::vec3 m_cameraPos {0, 5, 5};
     float m_aoFactor = 1;
