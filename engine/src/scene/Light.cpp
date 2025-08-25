@@ -68,12 +68,14 @@ void DirectionalLight::SetSpecularIntensity(float intensity)
 PointLight::PointLight(entt::registry& registry)
     : SceneNode(registry)
     , m_lightComponent(AddComponent<PointLightComponent>())
+    , m_position(AddComponent<PositionComponent>())
 {
 }
 
 PointLight::PointLight(entt::registry& registry, std::string name)
     : SceneNode(registry, name)
     , m_lightComponent(AddComponent<PointLightComponent>())
+    , m_position(AddComponent<PositionComponent>())
 {
 }
 

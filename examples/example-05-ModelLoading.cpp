@@ -201,9 +201,10 @@ private:
         {
             auto light = m_scene.CreateNode<nxs::PointLight>("Point Light 1");
             light->SetColor({1, 0, 0});
+            light->Position() = {5, 0, 0};
 
             auto& component = light->GetLightComponent();
-            component.position = {5, 0, 0};
+            // component.position = {5, 0, 0};
             component.properties.cutoffRange = 100.f;
             component.constant = 0.01f;
 
@@ -212,9 +213,10 @@ private:
         {
             auto light = m_scene.CreateNode<nxs::PointLight>("Point Light 2");
             light->SetColor({0, 0, 1});
+            light->Position() = {-5, 0, 0};
 
             auto& component = light->GetLightComponent();
-            component.position = {-5, 0, 0};
+            // component.position = {-5, 0, 0};
             component.properties.cutoffRange = 100.f;
             component.constant = 0.01f;
 

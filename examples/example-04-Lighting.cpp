@@ -14,7 +14,7 @@ layout (location = 6) in vec2 aTexCoord0;
 
 out vec3 FragPos;  
 out vec3 Normal;
-out vec2 texCoord0;
+out vec2 TexCoord0;
 
 uniform mat4 model;
 uniform mat4 view;
@@ -25,7 +25,7 @@ void main()
     vec4 worldPos = model * vec4(aPos, 1.0);
     gl_Position = projection * view * worldPos;
     FragPos = vec3(worldPos);
-    texCoord0 = aTexCoord0;
+    TexCoord0 = aTexCoord0;
     Normal = vec3(model * vec4(aNormal, 1.0));
 }
 )";
@@ -36,9 +36,9 @@ out vec4 FragColor;
 
 in vec3 FragPos;
 in vec3 Normal;
-in vec2 texCoord0;
+in vec2 TexCoord0;
 
-uniform sampler2D ourTexture;
+uniform sampler2D u_DiffuseMap;
 
 uniform vec3 u_Ambient;
 
@@ -61,27 +61,27 @@ uniform Light u_PointLights[2];
 
 vec3 CalcDirLight(Light light, vec3 normal)
 {
-    vec3 lightDir = normalize(-properties.position);
+    vec3 lightDir = normalize(-light.position);
     float diff = max(dot(normal, lightDir), 0.0);
-    return clamp(properties.diffuse * diff, 0, 1);
+    return clamp(light.diffuse * diff, 0, 1);
 }
 
 vec3 CalcPointLight(Light light, vec3 fragPos, vec3 normal)
 {
-    vec3 lightDir = properties.position - fragPos;
+    vec3 lightDir = light.position - fragPos;
     float dist = length(lightDir);
-    if (dist >= properties.cutoff) return vec3(1, 0, 0);
+    if (dist >= light.cutoff) return vec3(0, 0, 0);
 
     lightDir = normalize(lightDir);
     float diff = max(dot(normal, lightDir), 0.0);
-    float attenuation = 1 / (properties.constantAtt + (properties.linearAtt * diff) + (properties.quadraticAtt * diff * diff));
-    return clamp(properties.diffuse * diff * attenuation, 0, 1);
+    float attenuation = 1 / (light.constantAtt + (light.linearAtt * diff) + (light.quadraticAtt * diff * diff));
+    return clamp(light.diffuse * diff * attenuation, 0, 1);
 }
 
 void main()
 {
     vec3 N = normalize(Normal);
-    vec4 albedo = texture(ourTexture, texCoord0);
+    vec4 albedo = texture(u_DiffuseMap, TexCoord0);
     vec4 ambient = albedo * vec4(u_Ambient, 1);
     vec4 diffuse = vec4(CalcDirLight(u_DirectLight, N), 1);
 
@@ -128,9 +128,9 @@ public:
                 { "u_Ambient", m_ambient },
                 { "u_DirectLight.position", m_directionalLight.direction },
                 { "u_DirectLight.diffuse", m_directionalLight.properties.color },
-                { "u_PointLights[0].position", m_pointLights[0].position },
+                { "u_PointLights[0].position", m_lightPositions[0] },
                 { "u_PointLights[0].diffuse", m_pointLights[0].properties.color },
-                { "u_PointLights[1].position", m_pointLights[1].position },
+                { "u_PointLights[1].position", m_lightPositions[1] },
                 { "u_PointLights[1].diffuse", m_pointLights[1].properties.color },
             }
         };
@@ -159,19 +159,23 @@ public:
             ImGui::SeparatorText("Point Lights");
             if (ImGui::TreeNode("Light 0"))
             {
-                static bool enableLight = false;
-                static float position[] = {0, 0, 0};
-                ImGui::Checkbox("Enable", &enableLight);
+                static bool enableLight = true;
+                ImGui::Checkbox("Enable", &enableLight);                
+                m_pointLights[0].properties.cutoffRange = enableLight ? m_cutoffRange : 0;
+
                 ImGui::ColorEdit3("Color", R_CAST<float*>(&m_pointLights[0].properties.color));
-                ImGui::InputFloat3("Position", position);
+                ImGui::InputFloat3("Position", R_CAST<float*>(&m_lightPositions[0]));
                 ImGui::TreePop();
             }
 
             if (ImGui::TreeNode("Light 1"))
             {
-                static bool enableLight = false;
+                static bool enableLight = true;
                 ImGui::Checkbox("Enable", &enableLight);
+                m_pointLights[1].properties.cutoffRange = enableLight ? m_cutoffRange : 0;
+
                 ImGui::ColorEdit3("Color", R_CAST<float*>(&m_pointLights[1].properties.color));
+                ImGui::InputFloat3("Position", R_CAST<float*>(&m_lightPositions[1]));
                 ImGui::TreePop();
             }
         }
@@ -218,12 +222,10 @@ private:
         m_directionalLight.direction = {10, -10, 0};
 
         m_pointLights[0].properties.color = {0.5, 0, 0};
-        m_pointLights[0].position = {10, 10, 0};
-        m_pointLights[0].properties.cutoffRange = 100.f;
+        m_lightPositions[0] = {10, 10, 0};
 
         m_pointLights[1].properties.color = {0, 0.5, 0};
-        m_pointLights[1].position = {-10, 10, 0};
-        m_pointLights[1].properties.cutoffRange = 100.f;
+        m_lightPositions[1] = {-10, 10, 0};
     }
 
 protected:
@@ -235,6 +237,8 @@ protected:
     nxs::DirectLightComponent m_directionalLight {};
     nxs::PointLightComponent m_pointLights[2] {};
     glm::vec3 m_ambient {0.5, 0.5, 0.5};
+    glm::vec3 m_lightPositions[2] = {};
+    float m_cutoffRange = 100;
 };
 
 

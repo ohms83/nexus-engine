@@ -60,17 +60,10 @@ static void SetDirectLightParams(RenderCommand& command, const entt::registry& r
 
 static void SetPointLightParams(RenderCommand& command, const entt::registry& registry)
 {
-    const auto lights = ECS::FindAllComponents<PointLightComponent>(registry);
-    const auto numLights = CAST<int32>(lights.size());
-
-    if (lights.empty()) return;
-
-    for (int i = 0; i < lights.size(); ++i)
+    int32 numLight = 0;
+    for (const auto view = registry.view<PointLightComponent, PositionComponent>(); const auto& [entity, light, position] : view.each())
     {
-        const auto light = lights[i];
-        if (!light) continue;
-
-        const auto uniformLocation = std::format("_PointLights[{}]", i);
+        const auto uniformLocation = std::format("_PointLights[{}]", numLight);
         const auto uniformLocationColor = std::format("{}.properties.color", uniformLocation);
         const auto uniformLocationDiffuse = std::format("{}.properties.diffuseIntensity", uniformLocation);
         const auto uniformLocationSpecular = std::format("{}.properties.specularIntensity", uniformLocation);
@@ -80,17 +73,17 @@ static void SetPointLightParams(RenderCommand& command, const entt::registry& re
         const auto uniformLocationLinear = std::format("{}.linear", uniformLocation);
         const auto uniformLocationQuad = std::format("{}.quadratic", uniformLocation);
 
-        command.uniformVec3.emplace_back(uniformLocationPosition, light->position);
-        command.uniformVec3.emplace_back(uniformLocationColor, light->properties.color);
-        command.uniformFloats.emplace_back(uniformLocationDiffuse, light->properties.diffuseIntensity);
-        command.uniformFloats.emplace_back(uniformLocationSpecular, light->properties.specularIntensity);
-        command.uniformFloats.emplace_back(uniformLocationCutOff, light->properties.cutoffRange);
-        command.uniformFloats.emplace_back(uniformLocationConst, light->constant);
-        command.uniformFloats.emplace_back(uniformLocationLinear, light->linear);
-        command.uniformFloats.emplace_back(uniformLocationQuad, light->quadratic);
+        command.uniformVec3.emplace_back(uniformLocationPosition, position.value);
+        command.uniformVec3.emplace_back(uniformLocationColor, light.properties.color);
+        command.uniformFloats.emplace_back(uniformLocationDiffuse, light.properties.diffuseIntensity);
+        command.uniformFloats.emplace_back(uniformLocationSpecular, light.properties.specularIntensity);
+        command.uniformFloats.emplace_back(uniformLocationCutOff, light.properties.cutoffRange);
+        command.uniformFloats.emplace_back(uniformLocationConst, light.constant);
+        command.uniformFloats.emplace_back(uniformLocationLinear, light.linear);
+        command.uniformFloats.emplace_back(uniformLocationQuad, light.quadratic);
+        numLight++;
     }
-
-    command.uniformInts.emplace_back("_NumPointLight", INT_CAST(lights.size()));
+    command.uniformInts.emplace_back("_NumPointLight", numLight);
 }
 
 static void SetTextureParams(RenderCommand& command, const entt::registry& registry, const entt::entity& entity)

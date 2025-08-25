@@ -97,7 +97,18 @@ NXS_NAMESPACE
         float GetQuadraticAttenuation() const;
         void SetQuadraticAttenuation(float attenuation);
 
+        glm::vec3& Position()
+        {
+            return m_position.value;
+        }
+
+        const glm::vec3& Position() const
+        {
+            return m_position.value;
+        }
+
     private:
         PointLightComponent& m_lightComponent;
+        PositionComponent& m_position;
     };
 }

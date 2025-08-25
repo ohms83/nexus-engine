@@ -47,7 +47,6 @@ static void InitLight(nxs::Scene& scene)
             {
                 nxs::Color3F::Yellow, 1, 1, 10.f
             },
-            glm::vec3(5, 5, 0),
             2.0f,
             0.5f,
             0.05f,
@@ -60,7 +59,6 @@ static void InitLight(nxs::Scene& scene)
             {
                 nxs::Color3F::Blue, 1, 1, 10.f
             },
-            glm::vec3(-5, 5, 0),
             2.0f,
             0.5f,
             0.05f,
