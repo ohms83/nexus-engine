@@ -11,8 +11,6 @@
 #include "Shader.h"
 
 #include "nexus/core/Resource.h"
-#include "nexus/core/ResourceLoader.h"
-#include "nexus/core/ResourceManager.h"
 
 NXS_NAMESPACE
 {
@@ -110,25 +108,5 @@ NXS_NAMESPACE
             std::string uniformName;
         };
         std::vector<TextureInfo> m_textures;
-    };
-
-    class MaterialLoader final : public IResourceLoader
-    {
-    public:
-        Ref<Resource> Load(const std::string& path, uint32 id) override;
-
-        std::type_index GetResourceType() const override
-        {
-            return typeid(Material);
-        }
-    };
-
-    class MaterialManager final : public ResourceManager<Material>
-    {
-    public:
-        MaterialManager()
-        {
-            RegisterLoader(std::make_unique<MaterialLoader>());
-        }
     };
 }

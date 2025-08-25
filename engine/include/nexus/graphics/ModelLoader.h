@@ -10,6 +10,8 @@
 #include "Material.h"
 #include "Model.h"
 #include "Mesh.h"
+#include "TextureManager.h"
+#include "MaterialManager.h"
 
 NXS_NAMESPACE
 {

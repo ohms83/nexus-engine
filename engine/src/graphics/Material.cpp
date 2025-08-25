@@ -144,8 +144,3 @@ void Material::CreateDefaultShader(const Ref<RenderingInterface>& renderingInter
     m_shader.reset(new Shader("Default", 0));
     m_shader->CompileFromSource(*renderingInterface, vertexShaderStream.str(), fragmentShaderStream.str());
 }
-
-Ref<Resource> MaterialLoader::Load(const std::string& path, uint32 id)
-{
-    return nullptr;
-}

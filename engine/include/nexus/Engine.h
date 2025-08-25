@@ -8,8 +8,9 @@
 #include "graphics/GraphicsConfig.h"
 #include "graphics/RenderSystem.h"
 #include "core/LogDispatcher.h"
-#include "graphics/Model.h"
+#include "graphics/MaterialManager.h"
 #include "graphics/ModelManager.h"
+#include "graphics/TextureManager.h"
 
 NXS_NAMESPACE
 {

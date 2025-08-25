@@ -5,9 +5,9 @@
 #pragma once
 
 #include "nexus/NxsDefine.h"
-#include "core/Resource.h"
-#include "core/ResourceLoader.h"
-#include "core/ResourceManager.h"
+#include "nexus/core/Resource.h"
+#include "nexus/core/ResourceLoader.h"
+#include "nexus/core/ResourceManager.h"
 #include "TextureProxy.h"
 #include "RenderingInterface.h"
 
@@ -40,31 +40,5 @@ NXS_NAMESPACE
     protected:
         TextureDescription m_desc{};
         Ref<TextureProxy> m_textureProxy;
-    };
-
-    /**
-     * @brief Implements IResourceLoader to load Texture resources.
-     * Encapsulates file reading and GPU texture creation.
-     */
-    class TextureLoader final : public IResourceLoader
-    {
-    public:
-        explicit TextureLoader(Ref<RenderingInterface> renderingInterface);
-
-        Ref<Resource> Load(const std::string& path, uint32 id) override;
-
-        std::type_index GetResourceType() const override
-        {
-            return typeid(Texture);
-        }
-
-    private:
-        Ref<RenderingInterface> m_renderingInterface;
-    };
-
-    class TextureManager final : public ResourceManager<Texture>
-    {
-    public:
-        explicit TextureManager(Ref<RenderingInterface> renderingInterface);
     };
 }

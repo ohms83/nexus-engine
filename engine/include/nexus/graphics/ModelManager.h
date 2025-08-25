@@ -9,6 +9,8 @@
 #include "nexus/graphics/RenderingInterface.h"
 #include "Material.h"
 #include "Model.h"
+#include "TextureManager.h"
+#include "MaterialManager.h"
 
 NXS_NAMESPACE
 {
