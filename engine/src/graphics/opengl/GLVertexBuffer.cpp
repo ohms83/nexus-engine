@@ -9,14 +9,15 @@
 
 USING_NAMESPACE_NXS;
 
+uint32 GLVertexBuffer::s_bindingBuffer = 0;
+//! For thread safety.
+std::mutex GLVertexBuffer::s_mutex;
+
 GLVertexBuffer::~GLVertexBuffer()
 {
-    if (m_handle) {
-        CALL_GL_FUNC(glDeleteVertexArrays(1, &m_handle));
-    }
-    if (m_vbo) {
-        CALL_GL_FUNC(glDeleteBuffers(1, &m_vbo));
-    }
+    if (IsBinding()) Unbind();
+    if (m_handle) CALL_GL_FUNC(glDeleteVertexArrays(1, &m_handle));
+    if (m_vbo) CALL_GL_FUNC(glDeleteBuffers(1, &m_vbo));
 }
 
 VertexBuffer& GLVertexBuffer::Begin()
@@ -28,12 +29,27 @@ VertexBuffer& GLVertexBuffer::Begin()
 
 void GLVertexBuffer::Bind() const
 {
+    std::lock_guard<std::mutex> lock(s_mutex);
     CALL_GL_FUNC(glBindVertexArray(m_handle));
+    s_bindingBuffer = m_handle;
 }
 
 void GLVertexBuffer::Unbind() const
 {
+    std::lock_guard<std::mutex> lock(s_mutex);
     CALL_GL_FUNC(glBindVertexArray(0));
+    if (IsBinding()) s_bindingBuffer = 0;
+}
+
+bool GLVertexBuffer::IsBinding() const
+{
+    return m_handle != 0 && s_bindingBuffer == m_handle;
+}
+
+void GLVertexBuffer::CopyData(const void* data, size_t bytes, size_t offset)
+{
+    NXS_ASSERT_MSG(IsBinding(), std::format("Invalid operation. The buffer is unbound."));
+    CALL_GL_FUNC(glBufferSubData(GL_ARRAY_BUFFER, offset, bytes, data));
 }
 
 void GLVertexBuffer::Build_Impl()

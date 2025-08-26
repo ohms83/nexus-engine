@@ -50,13 +50,17 @@ NXS_NAMESPACE
 
         void ReArrangeIndex(FrontFace frontFace);
 
+        void CopyIndices(const std::vector<uint32>& indices, size_t offset = 0)
+        {
+            CopyData(indices.data(), indices.size() * sizeof(uint32), offset);
+        }
 
     private:
         //! Finalizing the buffer generation based on all the provided data.
         virtual void Build_Impl() = 0;
 
     protected:
-        uint32 m_handle;
+        uint32 m_handle = 0;
         bool m_hasBuilt = false;
         BufferUsage m_usage = BufferUsage::StaticDraw;
         FrontFace m_frontFace = FrontFace::CounterClockWise;

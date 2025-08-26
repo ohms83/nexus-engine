@@ -218,16 +218,18 @@ bool GLGpuProgram::SetUniformTexture2D(const std::string& name, Ref<const Textur
     return true;
 }
 
-void GLGpuProgram::Bind() const
+void GLGpuProgram::Bind()
 {
     std::lock_guard<std::mutex> lock(s_mutex);
     CALL_GL_FUNC(glUseProgram(m_id));
     s_bindingShader = GetHandle();
 }
 
-void GLGpuProgram::Unbind() const
+void GLGpuProgram::Unbind()
 {
+    std::lock_guard<std::mutex> lock(s_mutex);
     CALL_GL_FUNC(glUseProgram(0));
+    if (IsBinding()) s_bindingShader = 0;
 }
 
 uint32 GLGpuProgram::Alloc()

@@ -19,10 +19,18 @@ NXS_NAMESPACE
 
         void Bind() const override;
         void Unbind() const override;
+        bool IsBinding() const override;
+
+        void CopyData(const void* data, size_t bytes, size_t offset = 0) override;
 
     private:
         //! API specific vertex buffer generation function.
         void Build_Impl() override;
+
+        static uint32 s_bindingBuffer;
+        //! For thread safety.
+        static std::mutex s_mutex;
+
     protected:
         NODISCARD uint32 Alloc() override;
         void Release() override;

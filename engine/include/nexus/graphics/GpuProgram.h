@@ -11,7 +11,7 @@
 
 NXS_NAMESPACE
 {
-    class GpuProgram : public IGpuResource
+    class GpuProgram
     {
     public:
         enum class Type
@@ -24,8 +24,9 @@ NXS_NAMESPACE
         };
 
         GpuProgram() = default;
+        virtual ~GpuProgram() = default;
 
-        NODISCARD uint32 GetHandle() const override
+        NODISCARD uint32 GetHandle() const
         {
             return m_id;
         }
@@ -34,6 +35,8 @@ NXS_NAMESPACE
         virtual GpuProgram& AddSource(const std::string& source, Type shaderType);
         virtual void Compile();
 
+        virtual void Bind() = 0;
+        virtual void Unbind() = 0;
         virtual bool IsBinding() const = 0;
 
         /**
@@ -53,6 +56,16 @@ NXS_NAMESPACE
         MAYBE_UNUSED virtual bool SetUniformTexture2D(const std::string& name, Ref<const TextureProxy> texture, int32 textureUnit) = 0;
 
     protected:
+        /**
+         * Allocating the resource object on GPU. The child classes
+         * must provide the implementation of this function.
+         * @return The generated resource handle; otherwise 0, if failed.
+         */
+        NODISCARD virtual uint32 Alloc() = 0;
+
+        //! Release the allocated GPU resource.
+        virtual void Release() = 0;
+
         uint32 m_id = 0;
         bool m_compiling = false;
     };

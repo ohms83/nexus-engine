@@ -18,6 +18,9 @@ NXS_NAMESPACE
 
         virtual void Bind() const = 0;
         virtual void Unbind() const = 0;
+        virtual bool IsBinding() const = 0;
+
+        virtual void CopyData(const void* data, size_t bytes, size_t offset = 0) = 0;
 
     protected:
         /**

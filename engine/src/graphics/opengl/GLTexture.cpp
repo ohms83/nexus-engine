@@ -29,41 +29,85 @@ NXS_NAMESPACE
             }
             return GL_NONE;
         }
+
+        static GLuint NxsTextureFilterModeToGL(const TextureFilterMode mode)
+        {
+            switch (mode)
+            {
+            case TextureFilterMode::Nearest:
+                return GL_NEAREST;
+            case TextureFilterMode::Linear:
+                return GL_LINEAR;
+            case TextureFilterMode::NearestMipmapNearest:
+                return GL_NEAREST_MIPMAP_NEAREST;
+            case TextureFilterMode::LinearMipmapNearest:
+                return GL_LINEAR_MIPMAP_NEAREST;
+            case TextureFilterMode::NearestMipmapLinear:
+                return GL_NEAREST_MIPMAP_LINEAR;
+            case TextureFilterMode::LinearMipmapLinear:
+                return GL_LINEAR_MIPMAP_LINEAR;
+            default:
+                NXS_ASSERT(false);
+            }
+            return GL_NONE;
+        }
+
+        static GLuint NxsPixelFormatToGL(const PixelFormat format)
+        {
+            switch (format)
+            {
+            case PixelFormat::None:
+                break;
+            case PixelFormat::Grey:
+            case PixelFormat::Red:
+                // OpenGL has no explicit Greyscale format. The greyscale textures are normally
+                // represented by a single channel red component.
+                return GL_RED;
+            case PixelFormat::Green:
+                return GL_GREEN;
+            case PixelFormat::Blue:
+                return GL_BLUE;
+            case PixelFormat::Alpha:
+                return GL_RGBA;
+            case PixelFormat::RGB:
+                return GL_RGB;
+            case PixelFormat::RGBA:
+                return GL_RGBA;
+            case PixelFormat::Depth:
+                return GL_DEPTH_COMPONENT;
+            case PixelFormat::Stencil:
+                return GL_STENCIL_INDEX;
+            default:
+                NXS_ASSERT(false);
+            }
+            return GL_NONE;
+        }
     }
 }
 
 USING_NAMESPACE_NXS;
 
-static GLuint NxsTextureFilterModeToGL(const TextureFilterMode mode)
-{
-    switch (mode)
-    {
-    case TextureFilterMode::Nearest:
-        return GL_NEAREST;
-    case TextureFilterMode::Linear:
-        return GL_LINEAR;
-    case TextureFilterMode::NearestMipmapNearest:
-        return GL_NEAREST_MIPMAP_NEAREST;
-    case TextureFilterMode::LinearMipmapNearest:
-        return GL_LINEAR_MIPMAP_NEAREST;
-    case TextureFilterMode::NearestMipmapLinear:
-        return GL_NEAREST_MIPMAP_LINEAR;
-    case TextureFilterMode::LinearMipmapLinear:
-        return GL_LINEAR_MIPMAP_LINEAR;
-    default:
-        NXS_ASSERT(false);
-    }
-    return GL_NONE;
-}
+uint32 GLTexture::s_bindingTexture = 0;
+//! For thread safety.
+std::mutex GLTexture::s_mutex;
 
 void GLTexture::Bind() const
 {
+    std::lock_guard<std::mutex> lock(s_mutex);
     CALL_GL_FUNC(glBindTexture(GL_TEXTURE_2D, m_textureID));
+    s_bindingTexture = m_textureID;
 }
 
 void GLTexture::Unbind() const
 {
+    std::lock_guard<std::mutex> lock(s_mutex);
     CALL_GL_FUNC(glBindTexture(GL_TEXTURE_2D, 0));
+    if (IsBinding()) s_bindingTexture = 0;
+}
+
+bool GLTexture::IsBinding() const
+{
+    return m_textureID != 0 && s_bindingTexture == m_textureID;
 }
 
 TextureProxy& GLTexture::Begin(const TextureDescription& info)
@@ -73,8 +117,8 @@ TextureProxy& GLTexture::Begin(const TextureDescription& info)
     GLuint gl_wrapModeS = GL::NxsTextureWrapModeToGL(info.wrapModeS);
     GLuint gl_wrapModeT = GL::NxsTextureWrapModeToGL(info.wrapModeT);
 
-    GLuint gl_filterMin = NxsTextureFilterModeToGL(info.filterMin);
-    GLuint gl_filterMag = NxsTextureFilterModeToGL(info.filterMag);
+    GLuint gl_filterMin = GL::NxsTextureFilterModeToGL(info.filterMin);
+    GLuint gl_filterMag = GL::NxsTextureFilterModeToGL(info.filterMag);
 
     CALL_GL_FUNC(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, gl_wrapModeS));
     CALL_GL_FUNC(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, gl_wrapModeT));
@@ -87,42 +131,7 @@ TextureProxy& GLTexture::LoadData(const uint8* data, const uint32 size)
 {
     TextureProxy::LoadData(data, size);
 
-    GLint gl_pixelFormats = 0;
-    switch (m_format)
-    {
-    case PixelFormat::None:
-        break;
-    case PixelFormat::Grey:
-    case PixelFormat::Red:
-        // OpenGL has no explicit Greyscale format. The greyscale textures are normally
-        // represented by a single channel red component.
-        gl_pixelFormats = GL_RED;
-        break;
-    case PixelFormat::Green:
-        gl_pixelFormats = GL_GREEN;
-        break;
-    case PixelFormat::Blue:
-        gl_pixelFormats = GL_BLUE;
-        break;
-    case PixelFormat::Alpha:
-        gl_pixelFormats = GL_RGBA;
-        break;
-    case PixelFormat::RGB:
-        gl_pixelFormats = GL_RGB;
-        break;
-    case PixelFormat::RGBA:
-        gl_pixelFormats = GL_RGBA;
-        break;
-    case PixelFormat::Depth:
-        gl_pixelFormats = GL_DEPTH_COMPONENT;
-        break;
-    case PixelFormat::Stencil:
-        gl_pixelFormats = GL_STENCIL_INDEX;
-        break;
-    default:
-        NXS_ASSERT(false);
-    }
-
+    GLint gl_pixelFormats = GL::NxsPixelFormatToGL(m_format);
     const auto gl_dataType = GL::NxsDataToGLenum(m_componentType);
     CALL_GL_FUNC(glTexImage2D(GL_TEXTURE_2D, 0, gl_pixelFormats, m_width, m_height, 0, gl_pixelFormats, gl_dataType, data));
 
@@ -138,6 +147,16 @@ TextureProxy& GLTexture::LoadMipData(const uint8* data, uint32 size, uint32 mip)
     return TextureProxy::LoadMipData(data, size, mip);
 }
 
+void GLTexture::CopyData(const void* data, size_t bytes, size_t offset)
+{
+    NXS_ASSERT_MSG(IsBinding(), std::format("Invalid operation. The texture is unbound."));
+    const GLint gl_pixelFormats = GL::NxsPixelFormatToGL(m_format);
+    const GLint xOffset = offset % m_width;
+    const GLint yOffset = offset / m_width;
+    const auto gl_dataType = GL::NxsDataToGLenum(m_componentType);
+    CALL_GL_FUNC(glTexSubImage2D(GL_TEXTURE_2D, 0, xOffset, yOffset, m_width, m_height, gl_pixelFormats, gl_dataType, data));
+}
+
 uint32 GLTexture::Alloc()
 {
     CALL_GL_FUNC(glGenTextures(1, &m_textureID));
@@ -151,5 +170,6 @@ void GLTexture::Release()
 
 GLTexture::~GLTexture()
 {
+    if (IsBinding()) Unbind();
     CALL_GL_FUNC(glDeleteTextures(1, &m_textureID));
 }

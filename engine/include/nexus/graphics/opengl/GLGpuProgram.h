@@ -24,6 +24,8 @@ NXS_NAMESPACE
         GpuProgram& AddSource(const std::string& source, Type GpuProgramType) override;
         void Compile() override;
 
+        void Bind() override;
+        void Unbind() override;
         bool IsBinding() const override;
 
         NODISCARD int32 FindUniform(const std::string& name) const override;
@@ -35,9 +37,6 @@ NXS_NAMESPACE
         MAYBE_UNUSED bool SetUniformMatrix(const std::string& name, const glm::mat3& matrix, bool tranpose) override;
         MAYBE_UNUSED bool SetUniformMatrix(const std::string& name, const glm::mat4& matrix, bool tranpose) override;
         MAYBE_UNUSED bool SetUniformTexture2D(const std::string& name, Ref<const TextureProxy> texture, int32 textureUnit) override;
-
-        void Bind() const override;
-        void Unbind() const override;
 
     protected:
         uint32 Alloc() override;
