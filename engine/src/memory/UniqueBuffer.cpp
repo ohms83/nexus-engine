@@ -1,24 +1,24 @@
 //
 // Created by nutta on 6/28/2025.
 //
-#include <nexus/memory/Buffer.h>
+#include "nexus/memory/UniqueBuffer.h"
 
 USING_NAMESPACE_NXS;
 
-Buffer::Buffer(Buffer&& rhs) noexcept
+UniqueBuffer::UniqueBuffer(UniqueBuffer&& rhs) noexcept
 {
     m_buffer = std::move(rhs.m_buffer);
     m_size   = rhs.m_size;
 }
 
-Buffer& Buffer::operator = (Buffer&& rhs) noexcept
+UniqueBuffer& UniqueBuffer::operator = (UniqueBuffer&& rhs) noexcept
 {
     m_buffer = std::move(rhs.m_buffer);
     m_size   = rhs.m_size;
     return *this;
 }
 
-void Buffer::Copy(const uint8_t* data, const uint64_t size)
+void UniqueBuffer::Copy(const uint8_t* data, const uint64_t size)
 {
     if (!size || !data) return;
 
@@ -27,7 +27,7 @@ void Buffer::Copy(const uint8_t* data, const uint64_t size)
     m_size   = size;
 }
 
-void Buffer::Take(uint8_t* data, const uint64_t size)
+void UniqueBuffer::Take(uint8_t* data, const uint64_t size)
 {
     if (!size || !data) return;
 
@@ -35,7 +35,7 @@ void Buffer::Take(uint8_t* data, const uint64_t size)
     m_size = size;
 }
 
-uint8_t* Buffer::Give(uint64_t& outSize)
+uint8_t* UniqueBuffer::Give(uint64_t& outSize)
 {
     outSize = m_size;
     uint8_t* data = m_buffer.get();
