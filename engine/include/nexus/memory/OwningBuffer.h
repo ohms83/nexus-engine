@@ -6,22 +6,20 @@
 NXS_NAMESPACE
 {
     /**
-     *  @c UniqueBuffer object is designed to be a low overhead on copy. With this in mind,
-     *  the copy assignment and constructor are marked deleted and the only way to transfer
-     *  data is via move semantic, and there can be no two codes holding the same @c UniqueBuffer's object
-     *  at the same time.
+     * @c OwningBuffer is a buffer type that takes the ownership from the source and
+     * manages it.
      */
-    class UniqueBuffer : public IBuffer
+    class OwningBuffer : public IBuffer
     {
     public:
-        UniqueBuffer() = default;
+        OwningBuffer() = default;
         /// Copy constructor (deleted)
-        UniqueBuffer(const UniqueBuffer& rhs) = delete;
+        OwningBuffer(const OwningBuffer& rhs) = delete;
         /// Move constructor
-        UniqueBuffer(UniqueBuffer&& rhs) noexcept;
+        OwningBuffer(OwningBuffer&& rhs) noexcept;
 
-        UniqueBuffer& operator = (UniqueBuffer&& rhs) noexcept;
-        UniqueBuffer& operator = (const UniqueBuffer& rhs) = delete;
+        OwningBuffer& operator = (OwningBuffer&& rhs) noexcept;
+        OwningBuffer& operator = (const OwningBuffer& rhs) = delete;
 
         NODISCARD bool IsValid() const override
         {
@@ -34,13 +32,19 @@ NXS_NAMESPACE
          * @param size Size of the data in byte.
          */
         void Copy(const uint8* data, uint64 size);
+        
+        template<typename T>
+        void Copy(const std::vector<T>& dataList)
+        {
+            Copy(dataList.data(), sizeof(T) * dataList.size());
+        }
 
         /**
          * Takes over the array of data pointed by @c data and manages it.
          * @warning This object will take over the specified array's ownership.
          *          Please DO NOT delete it.
          * @warning The pointer must be dynamically allocated on heap. Please DO NOT
-         *          pass the stack's pointer to this function because @c UniqueBuffer will try to destroy it
+         *          pass the stack's pointer to this function because @c OwningBuffer will try to destroy it
          *          in its destructor and that will cause memory corruption.
          */
         void Take(uint8* data, uint64 size);
@@ -68,7 +72,7 @@ NXS_NAMESPACE
 
     private:
         std::unique_ptr<uint8[]> m_buffer;
-        /// UniqueBuffer size in bytes.
+        /// OwningBuffer size in bytes.
         uint64 m_size = 0;
     };
 }

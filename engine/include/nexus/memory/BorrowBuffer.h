@@ -13,9 +13,22 @@ NXS_NAMESPACE
     public:
         BorrowBuffer() = default;
         explicit BorrowBuffer(const uint8* data, uint64 size);
+
+        template<typename T>
+        explicit BorrowBuffer(const std::vector<T>& dataList)
+        {
+            Borrow<T>(dataList);
+        }
+
         ~BorrowBuffer() override;
 
         void Borrow(const uint8* data, uint64 size);
+        
+        template<typename T>
+        void Borrow(const std::vector<T>& dataList)
+        {
+            Borrow(R_CAST<const uint8*>(dataList.data()), sizeof(T) * dataList.size());
+        }
 
         NODISCARD virtual bool IsValid() const override
         {

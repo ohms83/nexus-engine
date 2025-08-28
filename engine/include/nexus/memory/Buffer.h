@@ -8,6 +8,10 @@
 
 NXS_NAMESPACE
 {
+    /**
+     * The buffer object is designed to be a light-weight memory management module
+     * that can be easily passed around.
+     */
     class IBuffer
     {
     public:
