@@ -17,11 +17,6 @@ NXS_NAMESPACE
 
         Ref<Resource> Load(const std::string& path, uint32 id) override;
 
-        std::type_index GetResourceType() const override
-        {
-            return typeid(Texture);
-        }
-
     private:
         Ref<RenderingInterface> m_renderingInterface;
     };

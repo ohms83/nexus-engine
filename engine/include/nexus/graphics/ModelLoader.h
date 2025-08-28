@@ -33,16 +33,6 @@ NXS_NAMESPACE
          */
         Ref<Resource> Load(const std::string& path, uint32 id) override;
 
-        /**
-         * @brief Returns the std::type_index of the specific IResource type this loader handles.
-         * Used by the ResourceManager to map resource types to their respective loaders.
-         * @return A std::type_index representing the resource type handled by this loader.
-         */
-        std::type_index GetResourceType() const override
-        {
-            return typeid(Model);
-        }
-
     private:
         void ProcessNode(const Ref<Model>& model, const aiNode* node, const aiScene* scene, std::filesystem::path directory);
         void ProcessMesh(const Ref<Model>& model, const aiMesh* mesh, const aiScene* scene, const std::filesystem::path&) const;

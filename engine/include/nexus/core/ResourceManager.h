@@ -35,7 +35,7 @@ NXS_NAMESPACE
                 LOG_ERROR(LogResource, "Attempted to register a null loader.");
                 return;
             }
-            const std::type_index resourceType = loader->GetResourceType();
+            const std::type_index resourceType = typeid(ResourceType);
             if (m_loader)
             {
                 LOG_WARNING(LogResource, std::format(

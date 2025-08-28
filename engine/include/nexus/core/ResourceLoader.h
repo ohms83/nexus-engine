@@ -26,13 +26,6 @@ NXS_NAMESPACE
          * @return A Ref to the loaded IResource on success, or nullptr on failure.
          */
         virtual Ref<Resource> Load(const std::string& path, uint32 id) = 0;
-
-        /**
-         * @brief Returns the std::type_index of the specific IResource type this loader handles.
-         * Used by the ResourceManager to map resource types to their respective loaders.
-         * @return A std::type_index representing the resource type handled by this loader.
-         */
-        virtual std::type_index GetResourceType() const = 0;
     };
 
 } // NXS_NAMESPACE
