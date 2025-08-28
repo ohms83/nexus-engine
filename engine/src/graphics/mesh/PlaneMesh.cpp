@@ -50,9 +50,10 @@ PlaneMesh::PlaneMesh(const Ref<RenderingInterface>& renderingInterface)
         .AddAttribute(VertexAttribute {VertexAttribute::Type::TexCoord0, DataType::Float, 2})
     .Build();
 
+    Ref<BorrowBuffer> indexData = std::make_shared<BorrowBuffer>(indices);
     m_indexBuffer.reset(renderingInterface->CreateIndexBuffer());
     m_indexBuffer->Begin()
-        .SetIndices(indices.data(), indices.size(), FrontFace::CounterClockWise)
+        .SetIndices(indexData, FrontFace::CounterClockWise)
         .SetUsage(BufferUsage::StaticDraw)
         .SetDrawMode(DrawMode::Triangle)
     .Build();

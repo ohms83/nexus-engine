@@ -145,8 +145,12 @@ void ModelLoader::ProcessMesh(const Ref<Model>& model, const aiMesh* mesh, const
             indices.emplace_back(face.mIndices[j]);
         }
     }
+    
+    auto indexData = std::make_shared<OwningBuffer>();
+    indexData->Copy<uint32>(indices);
+
     indexBuffer->Begin()
-        .SetIndices(indices.data(), indices.size(), FrontFace::CounterClockWise)
+        .SetIndices(indexData, FrontFace::CounterClockWise)
         .SetUsage(BufferUsage::StaticDraw)
         .SetDrawMode(DrawMode::Triangle)
     .Build();

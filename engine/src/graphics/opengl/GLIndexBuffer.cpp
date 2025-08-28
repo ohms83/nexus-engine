@@ -58,6 +58,6 @@ void GLIndexBuffer::Release()
 void GLIndexBuffer::Build_Impl()
 {
     const auto gl_usage = NxsBufferUsageToGLenum(m_usage);
-    const auto bufferSize = CAST<GLsizeiptr>(sizeof(uint32) * m_indices.size());
-    CALL_GL_FUNC(glBufferData(GL_ELEMENT_ARRAY_BUFFER, bufferSize, m_indices.data(), gl_usage));
+    const auto bufferSize = CAST<GLsizeiptr>(m_indexData->Size());
+    CALL_GL_FUNC(glBufferData(GL_ELEMENT_ARRAY_BUFFER, bufferSize, m_indexData->Data(), gl_usage));
 }

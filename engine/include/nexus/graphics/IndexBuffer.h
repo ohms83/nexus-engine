@@ -4,7 +4,9 @@
 
 #pragma once
 
-#include <nexus/NxsDefine.h>
+#include "nexus/NxsDefine.h"
+#include "nexus/memory/Buffer.h"
+
 #include <vector>
 
 #include "GPUBuffer.h"
@@ -24,13 +26,12 @@ NXS_NAMESPACE
         }
 
         virtual IndexBuffer& Begin();
-        virtual IndexBuffer& SetIndices(uint32* indices, size_t num, FrontFace frontFace);
-        virtual IndexBuffer& SetIndices(std::vector<uint32>&& indices, FrontFace frontFace);
+        virtual IndexBuffer& SetIndices(Ref<IBuffer> indexData, FrontFace frontFace);
         virtual IndexBuffer& SetUsage(BufferUsage usage);
         virtual IndexBuffer& SetDrawMode(DrawMode mode);
         virtual void Build();
 
-        NODISCARD uint32 NumIndex() const { return m_indices.size(); }
+        NODISCARD uint32 NumIndex() const;
         NODISCARD uint32 NumPolygons() const;
 
         NODISCARD BufferUsage GetUsage() const
@@ -65,6 +66,6 @@ NXS_NAMESPACE
         BufferUsage m_usage = BufferUsage::StaticDraw;
         FrontFace m_frontFace = FrontFace::CounterClockWise;
         DrawMode m_drawMode = DrawMode::Triangle;
-        std::vector<uint32> m_indices;
+        Ref<IBuffer> m_indexData;
     };
 }

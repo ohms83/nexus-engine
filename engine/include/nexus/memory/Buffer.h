@@ -20,6 +20,7 @@ NXS_NAMESPACE
 
         NODISCARD virtual bool IsValid() const = 0;
         NODISCARD virtual const uint8* Data() const = 0;
+        NODISCARD virtual uint8* Data() = 0;
         NODISCARD virtual uint64 Size() const = 0;
         virtual void Release() = 0;
     };

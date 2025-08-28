@@ -18,19 +18,10 @@ IndexBuffer& IndexBuffer::Begin()
     return *this;
 }
 
-IndexBuffer& IndexBuffer::SetIndices(uint32* indices, const size_t num, FrontFace frontFace)
+IndexBuffer& IndexBuffer::SetIndices(Ref<IBuffer> indexData, FrontFace frontFace)
 {
     NXS_ASSERT_MSG(m_hasBuilt, "Begin function hasn't been called yet.");
-    m_indices.reserve(num);
-    m_indices.assign(indices, indices + num);
-    m_frontFace = frontFace;
-    return *this;
-}
-
-IndexBuffer& IndexBuffer::SetIndices(std::vector<uint32>&& indices, FrontFace frontFace)
-{
-    NXS_ASSERT_MSG(m_hasBuilt, "Begin function hasn't been called yet.");
-    m_indices = std::move(indices);
+    m_indexData = indexData;
     m_frontFace = frontFace;
     return *this;
 }
@@ -56,9 +47,14 @@ void IndexBuffer::Build()
     Unbind();
 }
 
+uint32 IndexBuffer::NumIndex() const
+{
+    return m_indexData->Size() / sizeof(uint32);
+}
+
 uint32 IndexBuffer::NumPolygons() const
 {
-    const uint32 numIndices = m_indices.size();
+    const uint32 numIndices = NumIndex();
     switch (m_drawMode)
     {
     case DrawMode::Line:
@@ -84,7 +80,7 @@ uint32 IndexBuffer::NumPolygons() const
 
 void IndexBuffer::ReArrangeIndex(const FrontFace frontFace)
 {
-    if (m_indices.empty())
+    if (!m_indexData->IsValid())
     {
         LOG_WARNING(LogIndexBuffer, "The index buffer is empty.");
         return;
@@ -100,7 +96,7 @@ void IndexBuffer::ReArrangeIndex(const FrontFace frontFace)
         return;
     }
 
-    auto* indexData = m_indices.data();
+    auto indexData = R_CAST<uint32*>(m_indexData->Data());
     const auto stride = m_drawMode == DrawMode::Triangle ? 3 : 4;
     const auto swapIndex = m_drawMode == DrawMode::Triangle ? 2 : 3;
     for (size_t i = 0; i < NumPolygons(); i++)

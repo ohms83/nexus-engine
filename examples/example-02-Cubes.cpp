@@ -13,7 +13,7 @@ struct Vertex
 };
 
 // Vertices for a standard cube (24 vertices for 6 faces * 4 vertices/face)
-const std::vector<Vertex> cubeVertices = {
+std::vector<Vertex> cubeVertices = {
     // Front face (red)
     {{-0.5f, -0.5f,  0.5f}, {1.0f, 0.0f, 0.0f}}, // 0
     {{ 0.5f, -0.5f,  0.5f}, {1.0f, 0.0f, 0.0f}}, // 1
@@ -51,7 +51,7 @@ const std::vector<Vertex> cubeVertices = {
     {{-0.5f,  0.5f,  0.5f}, {1.0f, 0.0f, 1.0f}}  // 23
 };
 
-static const std::vector<uint32_t> cubeIndices = {
+std::vector<uint32_t> cubeIndices = {
     // Front face (Z+): Vertices 0, 1, 2, 3. View from +Z. (BL, BR, TR, TL)
     0, 3, 2,  // Triangle 1: Bottom-Left, Top-Left, Top-Right (CCW)
     0, 2, 1,  // Triangle 2: Bottom-Left, Top-Right, Bottom-Right (CCW)
@@ -162,9 +162,10 @@ protected:
             .AddAttribute(nxs::VertexAttribute {nxs::VertexAttribute::Type::Color0, nxs::DataType::Float, 3})
         .Build();
 
+        const auto indexData = std::make_shared<nxs::BorrowBuffer>(cubeIndices);
         m_indexBuffer.reset(renderInterface->CreateIndexBuffer());
         m_indexBuffer->Begin()
-            .SetIndices(C_CAST<uint32_t*>(cubeIndices .data()), cubeIndices .size(), nxs::FrontFace::ClockWise)
+            .SetIndices(indexData, nxs::FrontFace::ClockWise)
             .SetUsage(nxs::BufferUsage::StaticDraw)
             .SetDrawMode(nxs::DrawMode::Triangle)
         .Build();

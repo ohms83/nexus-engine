@@ -64,7 +64,6 @@ void Gizmos::Init(const RenderSystem& renderSystem)
     s_pointIndices.emplace_back(0);
 
     auto points = std::make_shared<BorrowBuffer>(s_pointVertices);
-    
     s_pointVertexBuffer.reset(renderInterface->CreateVertexBuffer());
     s_pointVertexBuffer->Begin()
         .SetVertices(points)
@@ -72,10 +71,10 @@ void Gizmos::Init(const RenderSystem& renderSystem)
         .AddAttribute({VertexAttribute::Type::Position, DataType::Float, 3})
     .Build();
 
-    static uint32_t index = 0;
+    auto indices = std::make_shared<BorrowBuffer>(s_pointIndices);
     s_pointIndexBuffer.reset(renderInterface->CreateIndexBuffer());
     s_pointIndexBuffer->Begin()
-        .SetIndices(&index, 1, FrontFace::ClockWise)
+        .SetIndices(indices, FrontFace::ClockWise)
         .SetUsage(BufferUsage::StaticDraw)
         .SetDrawMode(DrawMode::Point)
     .Build();

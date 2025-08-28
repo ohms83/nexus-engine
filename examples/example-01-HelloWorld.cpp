@@ -8,7 +8,7 @@ struct Vertex {
 };
 
 // Vertices for a square
-const std::vector<Vertex> squareVertices = {
+std::vector<Vertex> squareVertices = {
     {{-0.5f,  0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}}, // Top-left       - Index 0
     {{ 0.5f,  0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}}, // Top-right      - Index 1
     {{ 0.5f, -0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}}, // Bottom-right   - Index 2
@@ -16,7 +16,7 @@ const std::vector<Vertex> squareVertices = {
 };
 
 // Indices for the square (two triangles)
-const std::vector<unsigned int> squareIndices = {
+std::vector<unsigned int> squareIndices = {
     0, 1, 2, // First triangle
     2, 3, 0  // Second triangle
 };
@@ -92,9 +92,10 @@ protected:
             .AddAttribute(nxs::VertexAttribute {nxs::VertexAttribute::Type::Color0, nxs::DataType::Float, 3})
         .Build();
 
+        const auto indexData = std::make_shared<nxs::BorrowBuffer>(squareIndices);
         m_indexBuffer.reset(renderInterface->CreateIndexBuffer());
         m_indexBuffer->Begin()
-            .SetIndices(C_CAST<uint32_t*>(squareIndices.data()), squareIndices.size(), nxs::FrontFace::ClockWise)
+            .SetIndices(indexData, nxs::FrontFace::ClockWise)
             .SetUsage(nxs::BufferUsage::StaticDraw)
             .SetDrawMode(nxs::DrawMode::Triangle)
         .Build();

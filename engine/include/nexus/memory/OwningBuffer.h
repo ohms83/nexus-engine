@@ -13,6 +13,7 @@ NXS_NAMESPACE
     {
     public:
         OwningBuffer() = default;
+        explicit OwningBuffer(uint8* data, size_t size);
         /// Copy constructor (deleted)
         OwningBuffer(const OwningBuffer& rhs) = delete;
         /// Move constructor
@@ -31,12 +32,12 @@ NXS_NAMESPACE
          * @param data Pointer to an array where the storing data will be read from.
          * @param size Size of the data in byte.
          */
-        void Copy(const uint8* data, uint64 size);
+        void Copy(uint8* data, uint64 size);
         
         template<typename T>
-        void Copy(const std::vector<T>& dataList)
+        void Copy(std::vector<T>& dataList)
         {
-            Copy(R_CAST<const uint8*>(dataList.data()), sizeof(T) * dataList.size());
+            Copy(R_CAST<uint8*>(dataList.data()), sizeof(T) * dataList.size());
         }
 
         /**
@@ -56,6 +57,11 @@ NXS_NAMESPACE
         NODISCARD uint8* Give(uint64& outSize);
 
         NODISCARD const uint8* Data() const override
+        {
+            return m_buffer.get();
+        }
+
+        NODISCARD uint8* Data() override
         {
             return m_buffer.get();
         }

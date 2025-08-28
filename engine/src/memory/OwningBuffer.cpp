@@ -5,6 +5,12 @@
 
 USING_NAMESPACE_NXS;
 
+OwningBuffer::OwningBuffer(uint8* data, size_t size)
+{
+    m_buffer = std::unique_ptr<uint8_t[]>(data);
+    m_size = size;
+}
+
 OwningBuffer::OwningBuffer(OwningBuffer&& rhs) noexcept
 {
     m_buffer = std::move(rhs.m_buffer);
@@ -18,7 +24,7 @@ OwningBuffer& OwningBuffer::operator = (OwningBuffer&& rhs) noexcept
     return *this;
 }
 
-void OwningBuffer::Copy(const uint8_t* data, const uint64_t size)
+void OwningBuffer::Copy(uint8_t* data, const uint64_t size)
 {
     if (!size || !data) return;
 
