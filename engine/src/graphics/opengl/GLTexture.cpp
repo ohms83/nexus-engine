@@ -87,27 +87,23 @@ NXS_NAMESPACE
 
 USING_NAMESPACE_NXS;
 
-uint32 GLTexture::s_bindingTexture = 0;
-//! For thread safety.
-std::mutex GLTexture::s_mutex;
+std::atomic<uint32> GLTexture::s_bindingTexture(0);
 
 void GLTexture::Bind() const
 {
-    std::lock_guard<std::mutex> lock(s_mutex);
     CALL_GL_FUNC(glBindTexture(GL_TEXTURE_2D, m_textureID));
-    s_bindingTexture = m_textureID;
+    s_bindingTexture.store(m_textureID);
 }
 
 void GLTexture::Unbind() const
 {
-    std::lock_guard<std::mutex> lock(s_mutex);
     CALL_GL_FUNC(glBindTexture(GL_TEXTURE_2D, 0));
-    if (IsBinding()) s_bindingTexture = 0;
+    if (IsBinding()) s_bindingTexture.store(0);
 }
 
 bool GLTexture::IsBinding() const
 {
-    return m_textureID != 0 && s_bindingTexture == m_textureID;
+    return m_textureID != 0 && s_bindingTexture.load() == m_textureID;
 }
 
 TextureProxy& GLTexture::Begin(const TextureDescription& info)

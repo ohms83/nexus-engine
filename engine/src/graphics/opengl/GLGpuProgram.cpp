@@ -60,9 +60,7 @@ NXS_NAMESPACE
 
 USING_NAMESPACE_NXS;
 
-uint32 GLGpuProgram::s_bindingShader = 0;
-//! For thread safety.
-std::mutex GLGpuProgram::s_mutex;
+std::atomic<uint32> GLGpuProgram::s_bindingShader(0);
 
 // Function to compile a shader
 static GLuint CompileShader(const std::string& source, GpuProgram::Type type)
@@ -133,7 +131,7 @@ void GLGpuProgram::Compile()
 
 bool GLGpuProgram::IsBinding() const
 {
-    return GetHandle() == s_bindingShader;
+    return GetHandle() == s_bindingShader.load();
 }
 
 int32 GLGpuProgram::FindUniform(const std::string& name) const
@@ -220,16 +218,14 @@ bool GLGpuProgram::SetUniformTexture2D(const std::string& name, Ref<const Textur
 
 void GLGpuProgram::Bind()
 {
-    std::lock_guard<std::mutex> lock(s_mutex);
     CALL_GL_FUNC(glUseProgram(m_id));
-    s_bindingShader = GetHandle();
+    s_bindingShader.store(GetHandle());
 }
 
 void GLGpuProgram::Unbind()
 {
-    std::lock_guard<std::mutex> lock(s_mutex);
     CALL_GL_FUNC(glUseProgram(0));
-    if (IsBinding()) s_bindingShader = 0;
+    if (IsBinding()) s_bindingShader.store(0);
 }
 
 uint32 GLGpuProgram::Alloc()

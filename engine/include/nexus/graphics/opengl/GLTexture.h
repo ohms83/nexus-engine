@@ -5,7 +5,9 @@
 #pragma once
 
 #include "NxsGL.h"
-#include "nexus/graphics/TextureProxy.h"
+#include "../TextureProxy.h"
+
+#include <atomic>
 
 NXS_NAMESPACE
 {
@@ -29,8 +31,6 @@ NXS_NAMESPACE
         void Release() override;
 
     private:
-        static uint32 s_bindingTexture;
-        //! For thread safety.
-        static std::mutex s_mutex;
+        static std::atomic<uint32> s_bindingTexture;
     };
 }

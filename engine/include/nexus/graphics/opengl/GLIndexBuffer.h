@@ -5,7 +5,9 @@
 #pragma once
 
 #include "NxsGL.h"
-#include <nexus/graphics/IndexBuffer.h>
+#include "../IndexBuffer.h"
+
+#include <atomic>
 
 NXS_NAMESPACE
 {
@@ -24,9 +26,7 @@ NXS_NAMESPACE
     private:
         void Build_Impl() override;
 
-        static uint32 s_bindingBuffer;
-        //! For thread safety.
-        static std::mutex s_mutex;
+        static std::atomic<uint32> s_bindingBuffer;
 
     protected:
         uint32 Alloc() override;

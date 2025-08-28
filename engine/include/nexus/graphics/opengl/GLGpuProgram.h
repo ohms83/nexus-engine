@@ -7,7 +7,7 @@
 #include <vector>
 
 #include "NxsGL.h"
-#include "nexus/graphics/GpuProgram.h"
+#include "../GpuProgram.h"
 
 NXS_NAMESPACE
 {
@@ -52,8 +52,6 @@ NXS_NAMESPACE
         std::vector<GLuint> m_shaderHandles;
 
         //! The ID of the currently binding gpu program.
-        static uint32 s_bindingShader;
-        //! For thread safety.
-        static std::mutex s_mutex;
+        static std::atomic<uint32> s_bindingShader;
     };
 }

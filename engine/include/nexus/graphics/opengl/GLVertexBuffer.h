@@ -7,6 +7,8 @@
 #include "NxsGL.h"
 #include "../VertexBuffer.h"
 
+#include <atomic>
+
 NXS_NAMESPACE
 {
     class GLVertexBuffer final : public VertexBuffer
@@ -27,9 +29,7 @@ NXS_NAMESPACE
         //! API specific vertex buffer generation function.
         void Build_Impl() override;
 
-        static uint32 s_bindingBuffer;
-        //! For thread safety.
-        static std::mutex s_mutex;
+        static std::atomic<uint32> s_bindingBuffer;
 
     protected:
         NODISCARD uint32 Alloc() override;

@@ -9,9 +9,7 @@
 
 USING_NAMESPACE_NXS;
 
-uint32 GLVertexBuffer::s_bindingBuffer = 0;
-//! For thread safety.
-std::mutex GLVertexBuffer::s_mutex;
+std::atomic<uint32> GLVertexBuffer::s_bindingBuffer(0);
 
 GLVertexBuffer::~GLVertexBuffer()
 {
@@ -29,21 +27,19 @@ VertexBuffer& GLVertexBuffer::Begin()
 
 void GLVertexBuffer::Bind() const
 {
-    std::lock_guard<std::mutex> lock(s_mutex);
     CALL_GL_FUNC(glBindVertexArray(m_handle));
-    s_bindingBuffer = m_handle;
+    s_bindingBuffer.store(m_handle);
 }
 
 void GLVertexBuffer::Unbind() const
 {
-    std::lock_guard<std::mutex> lock(s_mutex);
     CALL_GL_FUNC(glBindVertexArray(0));
-    if (IsBinding()) s_bindingBuffer = 0;
+    if (IsBinding()) s_bindingBuffer.store(0);
 }
 
 bool GLVertexBuffer::IsBinding() const
 {
-    return m_handle != 0 && s_bindingBuffer == m_handle;
+    return m_handle != 0 && s_bindingBuffer.load() == m_handle;
 }
 
 void GLVertexBuffer::CopyData(const void* data, size_t bytes, size_t offset)
