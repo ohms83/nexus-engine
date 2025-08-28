@@ -153,11 +153,10 @@ protected:
         const auto renderInterface = renderSystem.GetRenderInterface();
         renderSystem.SetClearColor(0x303030ff);
 
-        constexpr auto vertexSize = sizeof(Vertex);
-        const auto bufferSize = cubeVertices.size() * vertexSize;
+        const auto vertexData = std::make_shared<nxs::BorrowBuffer>(cubeVertices);
         m_vertexBuffer.reset(renderInterface->CreateVertexBuffer());
         m_vertexBuffer->Begin()
-            .SetVertices(R_CAST<const uint8_t*>(cubeVertices.data()), bufferSize)
+            .SetVertices(vertexData)
             .SetUsage(nxs::BufferUsage::StaticDraw)
             .AddAttribute(nxs::VertexAttribute {nxs::VertexAttribute::Type::Position, nxs::DataType::Float, 3})
             .AddAttribute(nxs::VertexAttribute {nxs::VertexAttribute::Type::Color0, nxs::DataType::Float, 3})

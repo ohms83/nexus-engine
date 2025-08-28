@@ -5,7 +5,7 @@
 #pragma once
 
 #include "NxsGL.h"
-#include <nexus/graphics/VertexBuffer.h>
+#include "../VertexBuffer.h"
 
 NXS_NAMESPACE
 {

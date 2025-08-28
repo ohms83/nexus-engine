@@ -62,13 +62,10 @@ VertexBuffer& VertexBuffer::Begin()
     return *this;
 }
 
-VertexBuffer& VertexBuffer::SetVertices(const uint8* vertexData, const size_t size)
+VertexBuffer& VertexBuffer::SetVertices(Ref<IBuffer> vertexData)
 {
     assert(m_hasBuilt);
-    m_vertices.release();
-    m_vertices = std::make_unique<uint8[]>(size);
-    m_bufferSize = size;
-    std::memcpy(m_vertices.get(), vertexData, size);
+    m_vertices = vertexData;
     return *this;
 }
 
@@ -90,6 +87,6 @@ VertexBuffer& VertexBuffer::AddAttribute(const VertexAttribute& attribute)
 void VertexBuffer::Build()
 {
     assert(m_hasBuilt);
-    m_vertexCount = m_bufferSize / m_stride;
+    m_vertexCount = m_vertices->Size() / m_stride;
     Build_Impl();
 }

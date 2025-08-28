@@ -36,7 +36,7 @@ NXS_NAMESPACE
         template<typename T>
         void Copy(const std::vector<T>& dataList)
         {
-            Copy(dataList.data(), sizeof(T) * dataList.size());
+            Copy(R_CAST<const uint8*>(dataList.data()), sizeof(T) * dataList.size());
         }
 
         /**

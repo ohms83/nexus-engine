@@ -63,7 +63,7 @@ void GLVertexBuffer::Build_Impl()
     CALL_GL_FUNC(glBindBuffer(GL_ARRAY_BUFFER, m_vbo));
 
     const GLenum glUsage = NxsBufferUsageToGLenum(m_usage);
-    CALL_GL_FUNC(glBufferData(GL_ARRAY_BUFFER, m_bufferSize, m_vertices.get(), glUsage));
+    CALL_GL_FUNC(glBufferData(GL_ARRAY_BUFFER, m_vertices->Size(), m_vertices->Data(), glUsage));
 
     GLint offset = 0;
     for (const auto& [type, dataType, numElements] : m_attributes)

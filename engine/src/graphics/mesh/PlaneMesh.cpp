@@ -4,6 +4,7 @@
 
 #include "graphics/mesh/PlaneMesh.h"
 #include "graphics/RenderingInterface.h"
+#include "memory/BorrowBuffer.h"
 
 USING_NAMESPACE_NXS;
 
@@ -36,11 +37,13 @@ PlaneMesh::PlaneMesh(const Ref<RenderingInterface>& renderingInterface)
     static uint64 count = 0;
     m_name = std::format("PlaneMesh_{}", count++);
 
-    constexpr auto vertexSize = sizeof(Vertex);
-    const auto bufferSize = vertices.size() * vertexSize;
+    // constexpr auto vertexSize = sizeof(Vertex);
+    // const auto bufferSize = vertices.size() * vertexSize;
+    Ref<BorrowBuffer> vertexData = std::make_shared<BorrowBuffer>(vertices);
+
     m_vertexBuffer.reset(renderingInterface->CreateVertexBuffer());
     m_vertexBuffer->Begin()
-        .SetVertices(R_CAST<const uint8_t*>(vertices.data()), bufferSize)
+        .SetVertices(vertexData)
         .SetUsage(BufferUsage::StaticDraw)
         .AddAttribute(VertexAttribute {VertexAttribute::Type::Position, DataType::Float, 3})
         .AddAttribute(VertexAttribute {VertexAttribute::Type::Normal, DataType::Float, 3})

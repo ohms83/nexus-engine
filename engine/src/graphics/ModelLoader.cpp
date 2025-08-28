@@ -1,8 +1,9 @@
 //
 // Created by nutta on 8/18/2025.
 //
-#include "nexus/graphics/ModelLoader.h"
-#include "nexus/core/LogDispatcher.h"
+#include "graphics/ModelLoader.h"
+#include "core/LogDispatcher.h"
+#include "memory/OwningBuffer.h"
 
 #include "assimp/Importer.hpp"
 #include "assimp/scene.h"
@@ -124,13 +125,16 @@ void ModelLoader::ProcessMesh(const Ref<Model>& model, const aiMesh* mesh, const
         vertices.emplace_back(vertex);
     }
 
+    auto vertexData = std::make_shared<OwningBuffer>();
+    vertexData->Copy<Vertex>(vertices);
+
     vertexBuffer->Begin()
         .AddAttribute(VertexAttribute::VertexPosition3D)
         .AddAttribute(VertexAttribute::VertexNormal)
         .AddAttribute(VertexAttribute::VertexTangent)
         .AddAttribute(VertexAttribute::VertexTexCoord0)
         .SetUsage(BufferUsage::StaticDraw)
-        .SetVertices(R_CAST<const uint8*>(vertices.data()), vertices.size() * sizeof(Vertex))
+        .SetVertices(vertexData)
     .Build();
     newMesh->SetVertexBuffer(vertexBuffer);
 

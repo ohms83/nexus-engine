@@ -1,5 +1,6 @@
 #include "graphics/mesh/CubeMesh.h"
 #include "graphics/RenderingInterface.h"
+#include "memory/BorrowBuffer.h"
 
 USING_NAMESPACE_NXS;
 
@@ -14,7 +15,7 @@ namespace
 }
 
 // Vertices for a standard cube (24 vertices for 6 faces * 4 vertices/face)
-const std::vector<Vertex> cubeVertices = {
+const std::vector<Vertex> vertices = {
     // Front face (Z+)
     // Position             Normal                 TexCoord
     {{-0.5f, -0.5f,  0.5f}, { 0.0f,  0.0f,  1.0f}, {0.0f, 0.0f}}, // 0
@@ -48,7 +49,7 @@ const std::vector<Vertex> cubeVertices = {
     {{-0.5f,  0.5f,  0.5f}, {-1.0f,  0.0f,  0.0f}, {1.0f, 1.0f}}
 };
 
-static const std::vector<uint32_t> cubeIndices = {
+static const std::vector<uint32_t> indices = {
     // Front face (Z+): Vertices 0, 1, 2, 3. View from +Z. (BL, BR, TR, TL)
     0, 3, 2,  // Triangle 1: Bottom-Left, Top-Left, Top-Right (CCW)
     0, 2, 1,  // Triangle 2: Bottom-Left, Top-Right, Bottom-Right (CCW)
@@ -84,11 +85,13 @@ CubeMesh::CubeMesh(const Ref<RenderingInterface>& renderingInterface)
     static uint64 count = 0;
     m_name = std::format("CubeMesh_{}", count++);
 
-    constexpr auto vertexSize = sizeof(Vertex);
-    const auto bufferSize = cubeVertices.size() * vertexSize;
+    // constexpr auto vertexSize = sizeof(Vertex);
+    // const auto bufferSize = vertices.size() * vertexSize;
+    Ref<BorrowBuffer> vertexData = std::make_shared<BorrowBuffer>(vertices);
+
     m_vertexBuffer.reset(renderingInterface->CreateVertexBuffer());
     m_vertexBuffer->Begin()
-        .SetVertices(R_CAST<const uint8_t*>(cubeVertices.data()), bufferSize)
+        .SetVertices(vertexData)
         .SetUsage(BufferUsage::StaticDraw)
         .AddAttribute(VertexAttribute {VertexAttribute::Type::Position, DataType::Float, 3})
         .AddAttribute(VertexAttribute {VertexAttribute::Type::Normal, DataType::Float, 3})
@@ -97,7 +100,7 @@ CubeMesh::CubeMesh(const Ref<RenderingInterface>& renderingInterface)
 
     m_indexBuffer.reset(renderingInterface->CreateIndexBuffer());
     m_indexBuffer->Begin()
-        .SetIndices(C_CAST<uint32_t*>(cubeIndices.data()), cubeIndices.size(), FrontFace::ClockWise)
+        .SetIndices(C_CAST<uint32_t*>(indices.data()), indices.size(), FrontFace::ClockWise)
         .SetUsage(BufferUsage::StaticDraw)
         .SetDrawMode(DrawMode::Triangle)
     .Build();

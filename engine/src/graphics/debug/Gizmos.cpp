@@ -2,9 +2,10 @@
 // Created by nutta on 7/26/2025.
 //
 
-#include "nexus/graphics/debug/Gizmos.h"
-#include "nexus/graphics/RenderSystem.h"
-#include "nexus/scene/Camera.h"
+#include "graphics/debug/Gizmos.h"
+#include "graphics/RenderSystem.h"
+#include "memory/BorrowBuffer.h"
+#include "scene/Camera.h"
 
 USING_NAMESPACE_NXS;
 
@@ -59,10 +60,14 @@ void main()
 void Gizmos::Init(const RenderSystem& renderSystem)
 {
     const auto renderInterface = renderSystem.GetRenderInterface();
-    static glm::vec3 point{};
+    s_pointVertices.emplace_back(glm::vec3 {});
+    s_pointIndices.emplace_back(0);
+
+    auto points = std::make_shared<BorrowBuffer>(s_pointVertices);
+    
     s_pointVertexBuffer.reset(renderInterface->CreateVertexBuffer());
     s_pointVertexBuffer->Begin()
-        .SetVertices(R_CAST<const uint8_t*>(&point), sizeof(point))
+        .SetVertices(points)
         .SetUsage(BufferUsage::StaticDraw)
         .AddAttribute({VertexAttribute::Type::Position, DataType::Float, 3})
     .Build();

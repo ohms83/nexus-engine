@@ -1,11 +1,9 @@
 #pragma once
 
-#include <nexus/NxsDefine.h>
-#include <vector>
+#include "nexus/NxsDefine.h"
+#include "nexus/memory/Buffer.h"
 
 #include "GPUBuffer.h"
-#include <nexus/memory/Buffer.h>
-
 #include "GpuResource.h"
 
 NXS_NAMESPACE
@@ -66,7 +64,7 @@ NXS_NAMESPACE
          * Start building this vertex buffer.
          */
         virtual VertexBuffer& Begin();
-        virtual VertexBuffer& SetVertices(const uint8* vertexData, size_t size);
+        virtual VertexBuffer& SetVertices(Ref<IBuffer> vertexData);
         virtual VertexBuffer& SetUsage(BufferUsage usage);
         virtual VertexBuffer& AddAttribute(const VertexAttribute& attribute);
         void Build();
@@ -80,7 +78,7 @@ NXS_NAMESPACE
         std::vector<T> GetVertices() const
         {
             std::vector<T> result;
-            T* vertex = reinterpret_cast<T*>(m_vertices.get());
+            T* vertex = reinterpret_cast<T*>(m_vertices->Data());
             for (uint32 index = 0; index < m_vertexCount; index++)
             {
                 result.push_back(vertex[index]);
@@ -97,8 +95,7 @@ NXS_NAMESPACE
         bool m_hasBuilt = false;
         uint32 m_stride = 0;
         uint32 m_vertexCount = 0;
-        std::unique_ptr<uint8[]> m_vertices;
-        size_t m_bufferSize = 0;
+        Ref<IBuffer> m_vertices;
         BufferUsage m_usage = BufferUsage::StaticDraw;
         std::vector<VertexAttribute> m_attributes;
     };
