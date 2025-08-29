@@ -9,7 +9,7 @@ NXS_NAMESPACE
      * @c OwningBuffer is a buffer type that takes the ownership from the source and
      * manages it.
      */
-    class OwningBuffer : public IBuffer
+    class OwningBuffer final : public IBuffer
     {
     public:
         OwningBuffer() = default;
@@ -32,8 +32,8 @@ NXS_NAMESPACE
          * @param data Pointer to an array where the storing data will be read from.
          * @param size Size of the data in byte.
          */
-        void Copy(uint8* data, uint64 size);
-        
+        void Copy(const uint8* data, uint64 size);
+
         template<typename T>
         void Copy(std::vector<T>& dataList)
         {
@@ -41,14 +41,15 @@ NXS_NAMESPACE
         }
 
         /**
-         * Takes over the array of data pointed by @c data and manages it.
-         * @warning This object will take over the specified array's ownership.
-         *          Please DO NOT delete it.
+         * Takes over the onwership of the given data.
+         * @param data A pointer to the data that this buffer will manage. This parameter will be
+         * reset to @c nullptr after the function call.
+         * @param size The data size in bytes.
          * @warning The pointer must be dynamically allocated on heap. Please DO NOT
-         *          pass the stack's pointer to this function because @c OwningBuffer will try to destroy it
-         *          in its destructor and that will cause memory corruption.
+         * pass the stack's pointer to this function because @c OwningBuffer will try to destroy it
+         *  in its destructor and that will cause memory corruption.
          */
-        void Take(uint8* data, uint64 size);
+        void Take(uint8*& data, uint64 size);
 
         /**
          * Returns the ownership of currently managed buffer to the caller.
