@@ -92,8 +92,6 @@ void main()
 }
 )";
 
-static const std::string assetsPath = "assets/textures/Crate/Wood_Crate_001_basecolor.jpg";
-
 class Example_04 final : public nxs::Application
 {
 public:
@@ -160,7 +158,7 @@ public:
             if (ImGui::TreeNode("Light 0"))
             {
                 static bool enableLight = true;
-                ImGui::Checkbox("Enable", &enableLight);                
+                ImGui::Checkbox("Enable", &enableLight);
                 m_pointLights[0].properties.cutoffRange = enableLight ? m_cutoffRange : 0;
 
                 ImGui::ColorEdit3("Color", R_CAST<float*>(&m_pointLights[0].properties.color));
@@ -195,6 +193,7 @@ protected:
             .AddSource(fragmentShaderSource, nxs::GpuProgram::Type::Fragment)
         .Compile();
 
+        const std::string assetsPath = GetAssetPath("textures/Crate/Wood_Crate_001_basecolor.jpg");
         m_texture = nxs::Engine::Instance().GetTextureManager()->Get(assetsPath);
         m_texture->SetWrapMode(nxs::TextureWrapMode::Clamp, nxs::TextureWrapMode::Clamp);
         m_texture->SetFiltering(nxs::TextureFilterMode::Linear, nxs::TextureFilterMode::Linear);
