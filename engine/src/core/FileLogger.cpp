@@ -14,7 +14,7 @@ FileLogger::FileLogger(const std::string& fileName)
     m_logPath = std::format("{}/logs/{}", NXS_PROJECT_PATH, m_logName);
 
     std::cout << "Opening log file: " << m_logPath << std::endl;
-    m_logFile.open(m_logPath, std::ios::out | std::ios::app);
+    m_logFile.open(m_logPath, std::ios::out);
 }
 
 FileLogger::~FileLogger()
