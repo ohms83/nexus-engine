@@ -25,7 +25,12 @@ NXS_NAMESPACE
          * @param runImmediate If @c true, the task will start running immediately; otherwise, it must be manually started
          * by calling @c Run funciton.
          */
-        MAYBE_UNUSED TaskHandle CreateTask(const Action& action, int32 repeatCount, float delay, float interval, bool runImmediate = true);
+        MAYBE_UNUSED TaskHandle CreateTask(
+            const Action& action,
+            int32 repeatCount = 0,
+            float delay = 0,
+            float interval = 0,
+            bool runImmediate = true);
         //! Stop the given task. If the @c taskHandle is invalid, nothing will happen.
         void StopTask(TaskHandle taskHandle);
 
