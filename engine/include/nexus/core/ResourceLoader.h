@@ -1,9 +1,11 @@
 #pragma once
 
-#include <string>
-#include <typeindex> // For std::type_index (used in ResourceManager for mapping loaders)
+#include "Resource.h"
 
-#include "Resource.h" // Needed for IResource in virtual function
+#include "sigslot/signal.hpp"
+
+#include <string>
+#include <thread>
 
 NXS_NAMESPACE
 {
@@ -15,6 +17,8 @@ NXS_NAMESPACE
     class IResourceLoader
     {
     public:
+        using LoaderCallback = std::function<void(Ref<Resource>)>;
+
         virtual ~IResourceLoader() = default;
 
         /**
@@ -25,7 +29,8 @@ NXS_NAMESPACE
          * @param id The unique resource ID.
          * @return A Ref to the loaded IResource on success, or nullptr on failure.
          */
-        virtual Ref<Resource> Load(const std::string& path, uint32 id) = 0;
-    };
+        NODISCARD virtual Ref<Resource> Load(const std::string& path, uint32 id) = 0;
 
+        virtual void LoadAsync(const std::string& path, uint32 id, const LoaderCallback& onFinishCallback) = 0;
+    };
 } // NXS_NAMESPACE

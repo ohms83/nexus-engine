@@ -16,8 +16,10 @@ NXS_NAMESPACE
         explicit TextureLoader(Ref<RenderingInterface> renderingInterface);
 
         Ref<Resource> Load(const std::string& path, uint32 id) override;
+        void LoadAsync(const std::string& path, uint32 id, const LoaderCallback& onFinishCallback) override;
 
     private:
+        static Ptr<IBuffer> ProcessLoadFile(const std::string& path, TextureDescription& outDesc);
         Ref<RenderingInterface> m_renderingInterface;
     };
 }

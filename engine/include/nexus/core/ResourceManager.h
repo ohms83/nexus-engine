@@ -3,12 +3,13 @@
 //
 #pragma once
 
+#include "nexus/NxsDefine.h"
+#include "nexus/core/Hasher.h"
+
 #include <memory>
 #include <string>
 #include <unordered_map>
 #include <typeindex>
-#include <nexus/NxsDefine.h>
-#include <nexus/core/Hasher.h>
 
 #include "Resource.h"
 #include "ResourceLoader.h"
@@ -20,6 +21,7 @@ NXS_NAMESPACE
     class ResourceManager
     {
     public:
+        using LoaderCallback = std::function<void(Ref<ResourceType>)>;
         virtual ~ResourceManager() = default;
 
         /**
@@ -48,11 +50,44 @@ NXS_NAMESPACE
         }
 
         /**
-         * @brief Retrieves a resource of type T from the manager.
+         * @brief Request to load the resource from the given path.
+         * @param path The unique path (identifier) of the resource.
+         * @param callback
+         */
+        MAYBE_UNUSED void RequestResource(const std::string& path, const LoaderCallback& callback)
+        {
+            std::lock_guard<std::mutex> lock(m_mutex); // For thread-safety
+            const auto id = m_hasher.Hash32(path);
+
+            if (const auto it = m_resourceCache.find(id); it != m_resourceCache.end())
+            {
+                // The resource is already cached.
+                callback(PTR_CAST<ResourceType>(it->second));
+                return;
+            }
+
+            // Resource is not cached, try to load.
+            const std::type_index resourceType = typeid(ResourceType);
+            if (!m_loader)
+            {
+                LOG_ERROR(LogResource, std::format("No loader registered for type '{}' to load resource '{}'.", resourceType.name(), path));
+                callback(nullptr);
+                return;
+            }
+
+            m_loader->LoadAsync(path, id, [this, id, callback](Ref<Resource> resource)
+            {
+                m_resourceCache[id] = resource;
+                callback(PTR_CAST<ResourceType>(resource));
+            });
+        }
+
+        /**
+         * @brief Retrieves a resource of type @c ResourceType from the manager.
          * If the resource is already cached, it's returned immediately.
          * Otherwise, the appropriate loader is invoked to load it.
          *
-         * @tparam T The type of resource to retrieve (must derive from IResource).
+         * @tparam ResourceType The type of resource to retrieve (must derive from IResource).
          * @param path The unique path (identifier) of the resource.
          * @return A std::shared_ptr to the loaded resource, or nullptr if loading fails or type mismatches.
          */

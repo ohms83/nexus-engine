@@ -92,8 +92,6 @@ void main()
 }
 )";
 
-static const std::string assetsPath = "assets/textures/Crate/Wood_Crate_001_basecolor.jpg";
-
 class Example_04 final : public nxs::Application
 {
 public:
@@ -160,7 +158,7 @@ public:
             if (ImGui::TreeNode("Light 0"))
             {
                 static bool enableLight = true;
-                ImGui::Checkbox("Enable", &enableLight);                
+                ImGui::Checkbox("Enable", &enableLight);
                 m_pointLights[0].properties.cutoffRange = enableLight ? m_cutoffRange : 0;
 
                 ImGui::ColorEdit3("Color", R_CAST<float*>(&m_pointLights[0].properties.color));
@@ -195,7 +193,8 @@ protected:
             .AddSource(fragmentShaderSource, nxs::GpuProgram::Type::Fragment)
         .Compile();
 
-        m_texture = nxs::Engine::Instance().GetTextureManager()->Get(assetsPath);
+        const std::string crateTexture = GetAssetPath("textures/Crate/Wood_Crate_001_basecolor.jpg");
+        m_texture = nxs::Engine::Instance().GetTextureManager()->Get(crateTexture);
         m_texture->SetWrapMode(nxs::TextureWrapMode::Clamp, nxs::TextureWrapMode::Clamp);
         m_texture->SetFiltering(nxs::TextureFilterMode::Linear, nxs::TextureFilterMode::Linear);
 
@@ -203,6 +202,14 @@ protected:
         m_cubeTransform.SetPosition({0, 0, 0});
 
         InitLights();
+
+        const std::string woodTexture = GetAssetPath("textures/Wood/Wood052.png");
+        m_textureLoader = std::make_unique<nxs::TextureLoader>(renderInterface);
+        m_textureLoader->LoadAsync(woodTexture, 0, [woodTexture](nxs::Ref<nxs::Resource> resource)
+        {
+            NXS_ASSERT(resource != nullptr);
+            LOG_INFO(LogTemp, std::format("Load complete: {}", woodTexture));
+        });
         return true;
     }
 
@@ -239,6 +246,7 @@ protected:
     glm::vec3 m_ambient {0.5, 0.5, 0.5};
     glm::vec3 m_lightPositions[2] = {};
     float m_cutoffRange = 100;
+    nxs::Ptr<nxs::TextureLoader> m_textureLoader;
 };
 
 

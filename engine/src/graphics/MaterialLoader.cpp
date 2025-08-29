@@ -9,3 +9,7 @@ Ref<Resource> MaterialLoader::Load(const std::string& path, uint32 id)
 {
     return nullptr;
 }
+
+void MaterialLoader::LoadAsync(const std::string& path, uint32 id, const LoaderCallback& onFinishCallback)
+{
+}

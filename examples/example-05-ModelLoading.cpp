@@ -41,14 +41,12 @@ public:
 
     void Render(nxs::RenderSystem& renderSystem) override
     {
-        auto model = glm::mat4(1.0f);
-
         const auto& inputManager = nxs::InputManager::Instance();
         const glm::vec2 euler = inputManager.GetAxisValue("model_rotate") * 90.f * GetDeltaTime();
         m_euler.x += euler.x;
         m_euler.y += euler.y;
 
-        auto modelNode = PTR_CAST<nxs::SceneNode3D>(m_scene.GetNode("Model"));
+        const auto modelNode = PTR_CAST<nxs::SceneNode3D>(m_scene.GetNode("Model"));
         modelNode->Orient().value = glm::mat4_cast(glm::quat(glm::radians(m_euler)));
         modelNode->Scale().value = modelScales[selectedModel] * scale;
 
@@ -59,10 +57,11 @@ public:
     {
         ImGui::Begin("Menu");
         {
+            const auto numModels = modelPaths.size();
             ImGui::SeparatorText("Model");
-            if (ImGui::BeginCombo("Select Model", currentLabel))
+            if (ImGui::BeginCombo("Select Model", currentLabel) && m_numLoaded == numModels)
             {
-                for (size_t n = 0; n < modelLabels.size(); n++)
+                for (size_t n = 0; n < numModels; n++)
                 {
                     const bool isSelected = (selectedModel == n);
                     if (ImGui::Selectable(modelLabels[n].c_str(), isSelected) && !isSelected)
@@ -70,8 +69,8 @@ public:
                         currentLabel = modelLabels[n].c_str();
                         selectedModel = n;
 
-                        auto& modelComp = m_scene.GetNode("Model")->GetComponent<nxs::ModelComponent>();
-                        modelComp.model = LoadModel(selectedModel);
+                        auto& [model] = m_scene.GetNode("Model")->GetComponent<nxs::ModelComponent>();
+                        model = m_models[selectedModel];
                     }
 
                     // Set the initial focus when the combo box is first opened
@@ -162,21 +161,45 @@ private:
         camera->Position().value = {0, 5, 5};
         camera->LookAt(glm::vec3(0), glm::vec3(0, 1, 0));
 
-        nxs::HighResTimeSource timeSource;
-        auto now = timeSource.Now();
-        for (int i = 0; i < modelPaths.size(); i++)
-        {
-            // Preload models
-            LoadModel(i);
-        }
-        LOG_INFO(LogTemp, std::format("Total loading time: {:.3f} seconds", timeSource.Now() - now));
-        
-        auto node = m_scene.CreateNode<nxs::SceneNode3D>("Model");
-        auto& modelComp = node->AddComponent<nxs::ModelComponent>();
-        modelComp.model = m_model = LoadModel(0);
-        node->Scale().value = modelScales[0];
+        const auto node = m_scene.CreateNode<nxs::SceneNode3D>("Model");
+        node->AddComponent<nxs::ModelComponent>();
+
+        LoadAllModels();
 
         m_scene.SetRenderer(std::make_unique<nxs::BasicSceneRenderer>());
+    }
+
+    void LoadAllModels()
+    {
+        nxs::HighResTimeSource timeSource;
+        const auto now = timeSource.Now();
+        const auto numModel = modelPaths.size();
+        m_numLoaded = 0;
+
+        for (int i = 0; i < numModel; i++)
+        {
+            m_models.emplace_back(nullptr);
+        }
+
+        auto modelManager = nxs::Engine::Instance().GetModelManager();
+        for (int i = 0; i < numModel; i++)
+        {
+            // Preload models
+            const auto assetPath = GetAssetPath(modelPaths[i]);
+            modelManager->RequestResource(assetPath, [this, assetPath, &timeSource, now, i, numModel](nxs::Ref<nxs::Model> loadedModel)
+            {
+                NXS_ASSERT_MSG(loadedModel != nullptr, std::format("Failed to load a model file: {}", assetPath));
+                std::lock_guard<std::mutex> lock(m_mutex);
+                m_models[i] = loadedModel;
+
+                if (++m_numLoaded == numModel)
+                {
+                    auto& [model] = m_scene.GetNode("Model")->GetComponent<nxs::ModelComponent>();
+                    model = loadedModel;
+                    LOG_INFO(LogTemp, std::format("Total loading time: {:.3f} seconds", timeSource.Now() - now));
+                }
+            });
+        }
     }
 
     MAYBE_UNUSED nxs::Ref<nxs::Model> LoadModel(const int index)
@@ -190,7 +213,7 @@ private:
     void InitLights()
     {
         m_scene.Ambient() = {0.5f, 0.5f, 0.5f};
-        
+
         {
             auto light = m_scene.CreateNode<nxs::DirectionalLight>("Direct Light 1");
             light->SetColor({1, 1, 1});
@@ -237,6 +260,10 @@ protected:
     glm::vec3 m_euler {};
     glm::vec3 m_cameraPos {0, 5, 5};
     float m_aoFactor = 1;
+    std::vector<nxs::Ref<nxs::Model>> m_models;
+    size_t m_numLoaded = 0;
+    //! Mutex for thread-safe access to m_models
+    mutable std::mutex m_mutex;
 };
 
 

@@ -60,6 +60,10 @@ Ref<Resource> ModelLoader::Load(const std::string &path, uint32 id)
     return model;
 }
 
+void ModelLoader::LoadAsync(const std::string& path, uint32 id, const LoaderCallback& onFinishCallback)
+{
+}
+
 void ModelLoader::ProcessNode(const Ref<Model>& model, const aiNode* node, const aiScene* scene, std::filesystem::path directory)
 {
     // Process all the node's meshes (if any)

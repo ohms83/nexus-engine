@@ -3,6 +3,8 @@
 //
 #include "nexus/memory/OwningBuffer.h"
 
+#include <format>
+
 USING_NAMESPACE_NXS;
 
 OwningBuffer::OwningBuffer(uint8* data, size_t size)
@@ -24,7 +26,7 @@ OwningBuffer& OwningBuffer::operator = (OwningBuffer&& rhs) noexcept
     return *this;
 }
 
-void OwningBuffer::Copy(uint8_t* data, const uint64_t size)
+void OwningBuffer::Copy(const uint8_t* data, const uint64_t size)
 {
     if (!size || !data) return;
 
@@ -33,19 +35,20 @@ void OwningBuffer::Copy(uint8_t* data, const uint64_t size)
     m_size   = size;
 }
 
-void OwningBuffer::Take(uint8_t* data, const uint64_t size)
+void OwningBuffer::Take(uint8_t*& data, const uint64_t size)
 {
     if (!size || !data) return;
 
     m_buffer = std::unique_ptr<uint8_t[]>(data);
     m_size = size;
+    data = nullptr;
 }
 
 uint8_t* OwningBuffer::Give(uint64_t& outSize)
 {
     outSize = m_size;
     uint8_t* data = m_buffer.get();
-    
+
     m_size = 0;
     m_buffer.release();
     return data;
