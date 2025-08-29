@@ -62,14 +62,14 @@ void Task::Trigger()
     if (m_repeatCount > 0)
     {
         --m_numRepeats;
-        if (m_numRepeats == 0)
-        {
-            m_isRunning = false;
-        }
     }
+    m_isRunning = m_numRepeats != 0;
 
-    m_timer.ScheduleAction([&]
+    if (m_isRunning)
     {
-        Trigger();
-    }, m_interval);
+        m_timer.ScheduleAction([&]
+        {
+            Trigger();
+        }, m_interval);
+    }
 }

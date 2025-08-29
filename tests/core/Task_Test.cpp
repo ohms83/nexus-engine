@@ -43,18 +43,44 @@ TEST_F(TaskTest, RunTask)
     task->Update();
     // The task shouldn't have been repeated yet.
     EXPECT_EQ(numExecution, 1);
-    
+
     timeSource->Advance(0.101);
     task->Update();
     // The task should be executed for the second time.
     EXPECT_EQ(numExecution, 2);
-    
+
     timeSource->Advance(10.01);
     task->Update();
     // The task should be executed for the second time.
     EXPECT_EQ(numExecution, 3);
 }
 
+// Test whether the one-shot task correctly runs once.
+TEST_F(TaskTest, OneShotTask)
+{
+    auto timeSource = std::make_shared<FakeTimeSource>();
+    // According to the specs, both 0 and 1 should be considered one-shot.
+    for (constexpr std::array repeatCounts = {0, 1}; const auto repeatCount : repeatCounts)
+    {
+        int numExecution = 0;
+        auto task = std::make_unique<nxs::Task> (
+            [&]() { ++numExecution; },
+            repeatCount,
+            // Delay
+            0,
+            // Interval
+            0,
+            // Run immediately
+            true,
+            // Time source
+            timeSource
+        );
+        task->Update();
+        task->Update();
+        // The task should run only once.
+        EXPECT_EQ(numExecution, 1);
+    }
+}
 
 // Test whether the task runs at every Update when the interval is set to 0.
 TEST_F(TaskTest, RunEveryFrame)
@@ -141,7 +167,7 @@ TEST_F(TaskTest, RepeatedTask)
         const int expectedResult = i + 1;
         EXPECT_EQ(numExecution, expectedResult);
     }
-    
+
     // The task shouldn't be triggered anymore.
     task->Update();
     EXPECT_EQ(numExecution, numRepeat);
@@ -172,7 +198,7 @@ TEST_F(TaskTest, StartTask)
     task->Update();
     // Still shouldn't have started.
     EXPECT_EQ(numExecution, 0);
-    
+
     task->Run();
     task->Update();
     task->Update();
@@ -197,7 +223,7 @@ TEST_F(TaskTest, StopTask)
     );
     task->Update();
     EXPECT_EQ(numExecution, 1);
-    
+
     task->Stop();
     task->Update();
     task->Update();
