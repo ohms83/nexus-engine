@@ -36,6 +36,7 @@ bool GLIndexBuffer::IsBinding() const
 
 void GLIndexBuffer::CopyData(const void* data, size_t bytes, size_t offset)
 {
+    IndexBuffer::CopyData(data, bytes, offset);
     NXS_ASSERT_MSG(IsBinding(), std::format("Invalid operation. The buffer is unbound."));
     CALL_GL_FUNC(glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, offset, bytes, data));
 }

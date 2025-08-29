@@ -24,28 +24,37 @@ OwningBuffer& OwningBuffer::operator = (OwningBuffer&& rhs) noexcept
     return *this;
 }
 
-void OwningBuffer::Copy(uint8_t* data, const uint64_t size)
+uint64_t OwningBuffer::CopyData(uint8_t* data, const uint64_t bytes, const uint64_t offset)
 {
-    if (!size || !data) return;
+    if (!bytes || !data) return 0;
 
-    m_buffer = std::make_unique<uint8_t[]>(size);
-    memcpy(m_buffer.get(), data, size);
-    m_size   = size;
+    if (const auto newSize = offset + bytes; newSize > m_size)
+    {
+        // Resize the buffer.
+        auto newBuffer = std::unique_ptr<uint8_t[]>(new uint8_t[newSize]);
+        // Copy the old data (if exists).
+        if (m_buffer) std::memcpy(newBuffer.get(), m_buffer.get(), m_size);
+        m_buffer = std::move(newBuffer);
+        m_size = newSize;
+    }
+    std::memcpy(m_buffer.get() + offset, data, bytes);
+    return bytes;
 }
 
-void OwningBuffer::Take(uint8_t* data, const uint64_t size)
+void OwningBuffer::Take(uint8_t*& data, const uint64_t size)
 {
     if (!size || !data) return;
 
     m_buffer = std::unique_ptr<uint8_t[]>(data);
     m_size = size;
+    data = nullptr;
 }
 
 uint8_t* OwningBuffer::Give(uint64_t& outSize)
 {
     outSize = m_size;
     uint8_t* data = m_buffer.get();
-    
+
     m_size = 0;
     m_buffer.release();
     return data;
