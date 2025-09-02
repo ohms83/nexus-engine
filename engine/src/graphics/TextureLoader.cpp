@@ -45,7 +45,7 @@ void TextureLoader::LoadAsync(const std::string& path, uint32 id, const LoaderCa
 
         {
             std::lock_guard<std::mutex> lock(s_sharedMutex);
-            s_sharedBuffer.Copy(pixels->Data(), pixels->Size());
+            s_sharedBuffer.CopyData(pixels->Data(), pixels->Size(), 0);
         }
 
         auto mainThreadTask = [this, onFinishCallback, texture]()

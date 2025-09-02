@@ -193,8 +193,8 @@ protected:
             .AddSource(fragmentShaderSource, nxs::GpuProgram::Type::Fragment)
         .Compile();
 
-        const std::string crateTexture = GetAssetPath("textures/Crate/Wood_Crate_001_basecolor.jpg");
-        m_texture = nxs::Engine::Instance().GetTextureManager()->Get(crateTexture);
+        const std::string assetsPath = GetAssetPath("textures/Crate/Wood_Crate_001_basecolor.jpg");
+        m_texture = nxs::Engine::Instance().GetTextureManager()->Get(assetsPath);
         m_texture->SetWrapMode(nxs::TextureWrapMode::Clamp, nxs::TextureWrapMode::Clamp);
         m_texture->SetFiltering(nxs::TextureFilterMode::Linear, nxs::TextureFilterMode::Linear);
 

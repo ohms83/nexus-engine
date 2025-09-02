@@ -105,3 +105,14 @@ void IndexBuffer::ReArrangeIndex(const FrontFace frontFace)
         std::swap(indexData[faceIndex + 1], indexData[faceIndex + swapIndex]);
     }
 }
+
+void IndexBuffer::CopyIndices(const std::vector<uint32>& indices, const size_t offset)
+{
+    CopyData(indices.data(), indices.size() * sizeof(uint32), offset);
+}
+
+void IndexBuffer::CopyData(const void* data, const size_t bytes, const size_t offset)
+{
+    const auto indexData = CAST<uint8*>(C_CAST<void*>(data));
+    m_indexData->CopyData(indexData, bytes, offset);
+}

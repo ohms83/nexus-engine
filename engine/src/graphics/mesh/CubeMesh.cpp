@@ -85,7 +85,7 @@ CubeMesh::CubeMesh(const Ref<RenderingInterface>& renderingInterface)
     static uint64 count = 0;
     m_name = std::format("CubeMesh_{}", count++);
 
-    Ref<BorrowBuffer> vertexData = std::make_shared<BorrowBuffer>(vertices);
+    const auto vertexData = std::make_shared<BorrowBuffer>(vertices);
     m_vertexBuffer.reset(renderingInterface->CreateVertexBuffer());
     m_vertexBuffer->Begin()
         .SetVertices(vertexData)

@@ -51,10 +51,8 @@ NXS_NAMESPACE
 
         void ReArrangeIndex(FrontFace frontFace);
 
-        void CopyIndices(const std::vector<uint32>& indices, size_t offset = 0)
-        {
-            CopyData(indices.data(), indices.size() * sizeof(uint32), offset);
-        }
+        void CopyIndices(const std::vector<uint32>& indices, size_t offset = 0);
+        void CopyData(const void* data, size_t bytes, size_t offset = 0) override;
 
     private:
         //! Finalizing the buffer generation based on all the provided data.
