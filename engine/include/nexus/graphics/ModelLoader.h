@@ -33,6 +33,9 @@ NXS_NAMESPACE
          */
         Ref<Resource> Load(const std::string& path, uint32 id) override;
 
+    protected:
+        Ref<IBuffer> PerformLoadFile(const std::string& path) override;
+
     private:
         void ProcessNode(const Ref<Model>& model, const aiNode* node, const aiScene* scene, std::filesystem::path directory);
         void ProcessMesh(const Ref<Model>& model, const aiMesh* mesh, const aiScene* scene, const std::filesystem::path&) const;

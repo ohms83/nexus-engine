@@ -1,4 +1,5 @@
 #include "graphics/TextureLoader.h"
+#include "memory/OwningBuffer.h"
 
 #include <iostream>
 #include <ostream>
@@ -13,11 +14,19 @@ TextureLoader::TextureLoader(Ref<RenderingInterface> renderingInterface)
 
 Ref<Resource> TextureLoader::Load(const std::string& path, uint32 id)
 {
-    TextureDescription desc{};
+    Ref<TextureBuffer> buffer = PTR_CAST<TextureBuffer>(PerformLoadFile(path));
+
     const auto texture = std::make_shared<Texture>(path, id);
+    texture->DescribeTexture(buffer->desc);
+    texture->AllocateGpuResource(buffer->pixels.get(), buffer->desc.GetBufferSize(), m_renderingInterface);
+    return PTR_CAST<Resource>(texture);
+}
+
+Ref<IBuffer> TextureLoader::PerformLoadFile(const std::string& path)
+{
+    TextureDescription desc{};
     stbi_set_flip_vertically_on_load(0);
-    Ptr<stbi_uc> pixels;
-    pixels.reset(stbi_load(path.c_str(), &desc.width, &desc.height, &desc.channels, 0));
+    auto pixels = stbi_load(path.c_str(), &desc.width, &desc.height, &desc.channels, 0);
     if (!pixels) return nullptr;
 
     // TODO: Supports more pixel format (SRGB and other compressed textures).
@@ -39,7 +48,9 @@ Ref<Resource> TextureLoader::Load(const std::string& path, uint32 id)
     // TODO: Supporting other component types.
     desc.componentType = DataType::UByte;
 
-    texture->DescribeTexture(desc);
-    texture->AllocateGpuResource(pixels.get(), desc.GetBufferSize(), m_renderingInterface);
-    return PTR_CAST<Resource>(texture);
+    auto buffer = std::make_shared<TextureBuffer>();
+    buffer->pixels.reset(pixels);
+    buffer->desc = desc;
+    buffer->size = desc.GetBufferSize();
+    return buffer;
 }

@@ -14,5 +14,8 @@ NXS_NAMESPACE
     {
     public:
         Ref<Resource> Load(const std::string& path, uint32 id) override;
+
+    protected:
+        Ref<IBuffer> PerformLoadFile(const std::string& path) override;
     };
 }

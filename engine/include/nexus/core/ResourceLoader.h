@@ -1,9 +1,8 @@
 #pragma once
 
+#include "Resource.h"
+#include "nexus/memory/Buffer.h"
 #include <string>
-#include <typeindex> // For std::type_index (used in ResourceManager for mapping loaders)
-
-#include "Resource.h" // Needed for IResource in virtual function
 
 NXS_NAMESPACE
 {
@@ -26,6 +25,9 @@ NXS_NAMESPACE
          * @return A Ref to the loaded IResource on success, or nullptr on failure.
          */
         virtual Ref<Resource> Load(const std::string& path, uint32 id) = 0;
+
+    protected:
+        virtual Ref<IBuffer> PerformLoadFile(const std::string& path) = 0;
     };
 
 } // NXS_NAMESPACE
