@@ -35,9 +35,6 @@ NXS_NAMESPACE
 
         void LoadAsync(const std::string& path, uint32 id, TaskScheduler& scheduler, Callback onFinishCallback) override {}
 
-    protected:
-        Ref<IBuffer> PerformLoadFile(const std::string& path) override;
-
     private:
         void ProcessNode(const Ref<Model>& model, const aiNode* node, const aiScene* scene, std::filesystem::path directory);
         void ProcessMesh(const Ref<Model>& model, const aiMesh* mesh, const aiScene* scene, const std::filesystem::path&) const;

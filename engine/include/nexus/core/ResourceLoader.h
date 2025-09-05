@@ -30,9 +30,6 @@ NXS_NAMESPACE
         virtual Ref<Resource> Load(const std::string& path, uint32 id) = 0;
 
         virtual void LoadAsync(const std::string& path, uint32 id, TaskScheduler& scheduler, Callback onFinishCallback) = 0;
-
-    protected:
-        virtual Ref<IBuffer> PerformLoadFile(const std::string& path) = 0;
     };
 
 } // NXS_NAMESPACE

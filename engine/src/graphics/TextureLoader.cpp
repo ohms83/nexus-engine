@@ -9,22 +9,7 @@
 
 USING_NAMESPACE_NXS;
 
-TextureLoader::TextureLoader(const Ref<RenderingInterface>& renderingInterface)
-    : m_renderingInterface(renderingInterface)
-{
-}
-
-Ref<Resource> TextureLoader::Load(const std::string& path, uint32 id)
-{
-    Ref<TextureBuffer> buffer = PTR_CAST<TextureBuffer>(PerformLoadFile(path));
-
-    const auto texture = std::make_shared<Texture>(path, id);
-    texture->DescribeTexture(buffer->desc);
-    texture->AllocateGpuResource(buffer->pixels.get(), buffer->desc.GetBufferSize(), m_renderingInterface);
-    return PTR_CAST<Resource>(texture);
-}
-
-void TextureLoader::LoadAsync(const std::string& path, uint32 id, TaskScheduler& scheduler, Callback onFinishCallback)
+namespace
 {
     struct TextureLoadedData
     {
@@ -32,7 +17,7 @@ void TextureLoader::LoadAsync(const std::string& path, uint32 id, TaskScheduler&
         TextureDescription desc;
     };
 
-    std::future<TextureLoadedData> future = std::async(std::launch::async, [path]
+    TextureLoadedData ProcessLoadFile(const std::string& path)
     {
         TextureLoadedData result {};
         TextureDescription& desc = result.desc;
@@ -62,6 +47,29 @@ void TextureLoader::LoadAsync(const std::string& path, uint32 id, TaskScheduler&
         // TODO: Supporting other component types.
         desc.componentType = DataType::UByte;
         return result;
+    }
+}
+
+TextureLoader::TextureLoader(const Ref<RenderingInterface>& renderingInterface)
+    : m_renderingInterface(renderingInterface)
+{
+}
+
+Ref<Resource> TextureLoader::Load(const std::string& path, uint32 id)
+{
+    auto [pixels, desc] = ProcessLoadFile(path);
+
+    const auto texture = std::make_shared<Texture>(path, id);
+    texture->DescribeTexture(desc);
+    texture->AllocateGpuResource(pixels.get(), desc.GetBufferSize(), m_renderingInterface);
+    return PTR_CAST<Resource>(texture);
+}
+
+void TextureLoader::LoadAsync(const std::string& path, uint32 id, TaskScheduler& scheduler, Callback onFinishCallback)
+{
+    std::future<TextureLoadedData> future = std::async(std::launch::async, [path]
+    {
+        return ProcessLoadFile(path);
     });
 
     const auto waitingTask = std::make_shared<FutureWaitingTask<TextureLoadedData>>(std::move(future), [onFinishCallback, path, id, renderInterface = m_renderingInterface](const TextureLoadedData& loadedData)
@@ -73,37 +81,4 @@ void TextureLoader::LoadAsync(const std::string& path, uint32 id, TaskScheduler&
     });
 
     scheduler.ScheduleTask(waitingTask);
-}
-
-Ref<IBuffer> TextureLoader::PerformLoadFile(const std::string& path)
-{
-    TextureDescription desc{};
-    stbi_set_flip_vertically_on_load(0);
-    auto pixels = stbi_load(path.c_str(), &desc.width, &desc.height, &desc.channels, 0);
-    if (!pixels) return nullptr;
-
-    // TODO: Supports more pixel format (SRGB and other compressed textures).
-    switch (desc.channels)
-    {
-    case 1:
-        desc.format = PixelFormat::Grey;
-        break;
-    case 3:
-        desc.format = PixelFormat::RGB;
-        break;
-    case 4:
-        desc.format = PixelFormat::RGBA;
-        break;
-    default:
-        NXS_ASSERT_MSG(false, std::format("Texture loading failed! Unsupported pixel format. Texture={} NumChannel={}", path, desc.channels));
-        break;
-    }
-    // TODO: Supporting other component types.
-    desc.componentType = DataType::UByte;
-
-    auto buffer = std::make_shared<TextureBuffer>();
-    buffer->pixels.reset(pixels);
-    buffer->desc = desc;
-    buffer->size = desc.GetBufferSize();
-    return buffer;
 }
