@@ -5,9 +5,10 @@
 #pragma once
 
 #include "NxsDefine.h"
+#include "core/LogDispatcher.h"
+#include "core/task/TaskScheduler.h"
 #include "graphics/GraphicsConfig.h"
 #include "graphics/RenderSystem.h"
-#include "core/LogDispatcher.h"
 #include "graphics/MaterialManager.h"
 #include "graphics/ModelManager.h"
 #include "graphics/TextureManager.h"
@@ -51,8 +52,13 @@ NXS_NAMESPACE
         }
         NODISCARD Ref<MaterialManager> GetMaterialManager() const
         {
-            NXS_ASSERT_MSG(m_materialManager != nullptr, "MaterialManager has been initialized");
+            NXS_ASSERT_MSG(m_materialManager != nullptr, "MaterialManager hasn't been initialized");
             return m_materialManager;
+        }
+        NODISCARD Ref<TaskScheduler> GetTaskScheduler() const
+        {
+            NXS_ASSERT_MSG(m_taskScheduler != nullptr, "TaskScheduler hasn't been initialized");
+            return m_taskScheduler;
         }
 
     private:
@@ -60,5 +66,6 @@ NXS_NAMESPACE
         Ref<TextureManager> m_textureManager;
         Ref<ModelManager> m_modelManager;
         Ref<MaterialManager> m_materialManager;
+        Ref<TaskScheduler> m_taskScheduler;
     };
 }

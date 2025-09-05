@@ -13,9 +13,10 @@ NXS_NAMESPACE
     class TextureLoader final : public IResourceLoader
     {
     public:
-        explicit TextureLoader(Ref<RenderingInterface> renderingInterface);
+        explicit TextureLoader(const Ref<RenderingInterface>& renderingInterface);
 
         Ref<Resource> Load(const std::string& path, uint32 id) override;
+        void LoadAsync(const std::string& path, uint32 id, TaskScheduler& scheduler, Callback onFinishCallback) override;
 
     protected:
         class TextureBuffer : public IBuffer

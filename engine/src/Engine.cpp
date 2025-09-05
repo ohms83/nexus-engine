@@ -3,6 +3,7 @@
 //
 #include "nexus/Engine.h"
 #include "nexus/graphics/Model.h"
+#include "time/StandardTimeSource.h"
 
 USING_NAMESPACE_NXS;
 
@@ -19,6 +20,7 @@ Engine& Engine::Initialize(WindowContext window, const GraphicsConfig& graphicsC
         s_engine->m_renderSystem->GetRenderInterface(),
         s_engine->m_textureManager,
         s_engine->m_materialManager);
+    s_engine->m_taskScheduler = std::make_shared<TaskScheduler>(std::make_shared<StandardTimeSource>());
     return *s_engine;
 }
 

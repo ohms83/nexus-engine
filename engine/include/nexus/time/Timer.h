@@ -36,7 +36,7 @@ NXS_NAMESPACE
         void ScheduleAction(const Action& action, float delay);
 
         //! Check whether the scheduled action was already executed.
-        bool IsExecuted() const
+        NODISCARD bool IsExecuted() const
         {
             return m_isExecuted;
         }

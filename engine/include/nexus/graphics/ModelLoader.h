@@ -33,6 +33,8 @@ NXS_NAMESPACE
          */
         Ref<Resource> Load(const std::string& path, uint32 id) override;
 
+        void LoadAsync(const std::string& path, uint32 id, TaskScheduler& scheduler, Callback onFinishCallback) override {}
+
     protected:
         Ref<IBuffer> PerformLoadFile(const std::string& path) override;
 

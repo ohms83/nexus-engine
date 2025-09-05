@@ -12,7 +12,7 @@
 #include <set>
 
 #include "Logger.h"
-#include "Task.h"
+#include "task/TaskScheduler.h"
 
 #define DECLARE_LOG_EXTERN(LogCategory) extern const std::string Log##LogCategory
 #define DEFINE_LOG(LogCategory) const std::string Log##LogCategory = #LogCategory
@@ -86,6 +86,7 @@ NXS_NAMESPACE
         void AddLogger(const Ref<ILogger>& logger);
         void AddLoggers(std::initializer_list<Ref<ILogger>> loggers);
         void Flush() const;
+        void ScheduleAutoFlush(TaskScheduler& scheduler, double interval = 1.0);
 
         void Log(LogLevel level, const std::string& category, const std::string& message);
 
@@ -94,7 +95,7 @@ NXS_NAMESPACE
         void Warning(const std::string& category, const std::string& message);
         void Error(const std::string& category, const std::string& message);
         /**
-         * A fatal erro has occurred and the application cannot continue.
+         * A fatal error has occurred and the application cannot continue.
          * This will forcefully terminate the app.
          */
         void Fatal(const std::string& category, const std::string& message);
@@ -108,7 +109,7 @@ NXS_NAMESPACE
         //! Enable/disable logs from a specific category.
         void EnableCategory(const std::string& category, bool enable);
 
-        const std::string& Message() const
+        NODISCARD const std::string& Message() const
         {
             return m_message;
         }
@@ -120,6 +121,6 @@ NXS_NAMESPACE
         //! A set of disabled log categories.
         std::set<std::string> m_disableLogs;
 
-        TaskHandle m_flushTask{};
+        TaskID m_flushTask{};
     };
 }

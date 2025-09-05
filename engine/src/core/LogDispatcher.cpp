@@ -6,6 +6,8 @@
 #include <format>
 #include <memory>
 
+#include "core/task/LambdaTask.h"
+
 USING_NAMESPACE_NXS;
 
 DEFINE_LOG(LogDispatcher);
@@ -40,7 +42,7 @@ void LogDispatcher::AddLoggers(const std::initializer_list<Ref<ILogger>> loggers
 {
     for (auto& logger : loggers)
     {
-        m_loggers.push_back(std::move(logger));
+        m_loggers.push_back(logger);
     }
 }
 
@@ -49,7 +51,16 @@ void LogDispatcher::Flush() const
     for (const auto& logger : m_loggers) logger->Flush();
 }
 
-void LogDispatcher::Log(LogLevel level, const std::string& category, const std::string& message)
+void LogDispatcher::ScheduleAutoFlush(TaskScheduler& scheduler, const double interval)
+{
+    const auto task = std::make_shared<LambdaTask>([&] {
+        Flush();
+        return true;
+    });
+    m_flushTask = scheduler.ScheduleTask(task, -1, 0, interval);
+}
+
+void LogDispatcher::Log(const LogLevel level, const std::string& category, const std::string& message)
 {
     if (m_loggers.empty()) return;
     if (level < m_minimumLogLevel || m_disableLogs.contains(category)) return;

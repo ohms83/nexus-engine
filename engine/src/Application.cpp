@@ -12,11 +12,9 @@
 #include "imgui_impl_sdl3.h"
 #include "implot.h"
 #include "core/Logger.h"
-#include "core/TaskManager.h"
 #include "core/FileLogger.h"
 #include "core/StdOutLogger.h"
 #include "graphics/Mesh.h"
-#include "graphics/Texture.h"
 #include "graphics/debug/Gizmos.h"
 #include "io/InputManager.h"
 #include "time/TimerManager.h"
@@ -52,7 +50,6 @@ Application::~Application()
 
     InputManager::Destroy();
     TimerManager::Destroy();
-    TaskManager::Destroy();
 
     m_currentScene.reset();
 
@@ -76,29 +73,12 @@ Application::~Application()
 bool Application::Init(const ApplicationConfig& info)
 {
     // TaskManager should be initialized before anything.
-    TaskManager::Init();
-    auto& taskManager = TaskManager::Instance();
-
     LogDispatcher::Init();
     auto& logger = LogDispatcher::Instance();
     logger.AddLoggers({
         std::make_shared<FileLogger>("debug.log"),
         std::make_shared<StdOutLogger>()
     });
-
-    // TODO: Move to another class
-    // Flush the logs every second.
-    taskManager.CreateTask(
-        // Flush action
-        [] { LogDispatcher::Instance().Flush(); },
-        // Repeat counts
-        -1,
-        // Delay
-        0,
-        // Task repeat interval
-        1,
-        // Run immediately
-        true);
 
     //Initialize SDL
     if( SDL_Init( SDL_INIT_VIDEO ) == false )
@@ -167,9 +147,13 @@ int Application::BeginMainLoop()
     SDL_Event e;
     SDL_zero(e);
 
+    const auto& engine = Engine::Instance();
+
     auto& inputManager = InputManager::Instance();
     auto& timerManager = TimerManager::Instance();
-    auto& taskManager = TaskManager::Instance();
+    const auto taskScheduler = engine.GetTaskScheduler();
+
+    LogDispatcher::Instance().ScheduleAutoFlush(*taskScheduler);
 
     while(!m_quit)
     {
@@ -179,7 +163,7 @@ int Application::BeginMainLoop()
         PollEvents(e);
 
         Update();
-        taskManager.Update();
+        taskScheduler->Update();
 
         // Update input
         inputManager.Update();

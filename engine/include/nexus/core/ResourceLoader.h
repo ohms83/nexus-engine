@@ -4,6 +4,8 @@
 #include "nexus/memory/Buffer.h"
 #include <string>
 
+#include "task/TaskScheduler.h"
+
 NXS_NAMESPACE
 {
     /**
@@ -14,6 +16,7 @@ NXS_NAMESPACE
     class IResourceLoader
     {
     public:
+        using Callback = std::function<void(Ref<Resource>)>;
         virtual ~IResourceLoader() = default;
 
         /**
@@ -25,6 +28,8 @@ NXS_NAMESPACE
          * @return A Ref to the loaded IResource on success, or nullptr on failure.
          */
         virtual Ref<Resource> Load(const std::string& path, uint32 id) = 0;
+
+        virtual void LoadAsync(const std::string& path, uint32 id, TaskScheduler& scheduler, Callback onFinishCallback) = 0;
 
     protected:
         virtual Ref<IBuffer> PerformLoadFile(const std::string& path) = 0;
