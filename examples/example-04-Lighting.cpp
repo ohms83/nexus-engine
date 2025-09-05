@@ -201,13 +201,6 @@ protected:
         m_cubeMesh = std::make_shared<nxs::CubeMesh>(renderInterface);
         m_cubeTransform.SetPosition({0, 0, 0});
 
-        auto& scheduler = *nxs::Engine::Instance().GetTaskScheduler();
-        nxs::TextureLoader loader(renderInterface);
-        loader.LoadAsync(assetsPath, 10, scheduler, [assetsPath](nxs::Ref<nxs::Resource> texture) {
-            if (texture) LOG_INFO(LogTemp, std::format("{} finished loading successfully!", assetsPath));
-            else LOG_ERROR(LogTemp, std::format("{} loading failed!", assetsPath));
-        });
-
         InitLights();
         return true;
     }
