@@ -45,7 +45,6 @@ public:
             if (m_loadedModels[i]->status != nxs::IResourceLoader::LoadResult::Status::Ready) return;
         }
 
-
         auto& modelComp = m_scene.GetNode("Model")->GetComponent<nxs::ModelComponent>();
         modelComp.model = PTR_CAST<nxs::Model>(m_loadedModels[selectedModel]->resource);
         m_finishLoading = true;
@@ -201,11 +200,8 @@ private:
 
     MAYBE_UNUSED nxs::Ref<nxs::IResourceLoader::LoadResult> LoadModel(const int index)
     {
-        auto taskScheduler = nxs::Engine::Instance().GetTaskScheduler();
+        const auto taskScheduler = nxs::Engine::Instance().GetTaskScheduler();
         const auto assetPath = GetAssetPath(modelPaths[index]);
-        // auto model = nxs::Engine::Instance().GetModelManager()->Get(assetPath);
-        // NXS_ASSERT_MSG(model != nullptr, std::format("Failed to load a model file: {}", assetPath));
-        // return model;
         return m_modelLoader->LoadAsync(assetPath, index, *taskScheduler, [this](nxs::Ref<nxs::Resource> model) {});
     }
 
