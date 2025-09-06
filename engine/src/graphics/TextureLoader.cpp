@@ -90,6 +90,7 @@ Ref<IResourceLoader::LoadResult> TextureLoader::LoadAsync(const std::string& pat
         texture->AllocateGpuResource(loadedData.pixels.get(), loadedData.desc.GetBufferSize(), renderInterface);
 
         result->status = LoadResult::Status::Ready;
+        result->resource = texture;
         onFinishCallback(texture);
     });
 

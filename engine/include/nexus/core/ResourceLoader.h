@@ -31,6 +31,7 @@ NXS_NAMESPACE
             //! Resource path
             std::string path;
             Status status = Status::Invalid;
+            Ref<Resource> resource;
         };
 
         virtual ~IResourceLoader() = default;

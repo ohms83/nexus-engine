@@ -53,8 +53,6 @@ ModelLoader::ModelLoader(
 Ref<Resource> ModelLoader::Load(const std::string &path, uint32 id)
 {
     Assimp::Importer importer;
-    Timer timer(std::make_shared<HighResTimeSource>());
-    timer.Start();
     // The ReadFile method returns an aiScene object.
     // It's crucial to specify post-processing flags for desired data.
     const aiScene* scene = importer.ReadFile(path,
@@ -66,7 +64,6 @@ Ref<Resource> ModelLoader::Load(const std::string &path, uint32 id)
         aiProcess_RemoveRedundantMaterials| // Remove redundant materials
         aiProcess_OptimizeMeshes            // Optimize meshes for better performance
     );
-    LOG_DEBUG(LogModelLoader, std::format("Model importing time: {} seconds", timer.GetElapsedTime()));
 
     // Check for errors
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
@@ -83,7 +80,6 @@ Ref<Resource> ModelLoader::Load(const std::string &path, uint32 id)
 
     LOG_INFO(LogModelLoader, std::format("Model loaded successfully: {}", path));
     LOG_INFO(LogModelLoader, std::format("Processed meshes: {}", scene->mNumMeshes));
-    LOG_DEBUG(LogModelLoader, std::format("Model loading time: {}", timer.GetElapsedTime()));
     return model;
 }
 
@@ -129,6 +125,7 @@ Ref<IResourceLoader::LoadResult> ModelLoader::LoadAsync(const std::string& path,
         ProcessNode(model, scene->mRootNode, scene.get(), directory);
 
         result->status = LoadResult::Status::Ready;
+        result->resource = model;
         onFinishCallback(model);
     });
 
@@ -151,8 +148,6 @@ void ModelLoader::ProcessNode(const Ref<Model>& model, const aiNode* node, const
 
 void ModelLoader::ProcessMesh(const Ref<Model>& model, const aiMesh* mesh, const aiScene* scene, const std::filesystem::path& directory) const
 {
-    Timer timer(std::make_shared<HighResTimeSource>());
-    timer.Start();
     const auto newMesh = std::make_shared<Mesh>(mesh->mName.C_Str());
     std::vector<Vertex> vertices;
     std::vector<uint32> indices;
@@ -228,14 +223,11 @@ void ModelLoader::ProcessMesh(const Ref<Model>& model, const aiMesh* mesh, const
     ProcessMaterial(newMesh, mesh, scene, directory);
 
     model->AddMesh(newMesh);
-    LOG_DEBUG(LogModelLoader, std::format("ProcessMesh time: {}", timer.GetElapsedTime()));
 }
 
 // ReSharper disable once CppMemberFunctionMayBeStatic
 void ModelLoader::ProcessMaterial(const Ref<Mesh>& newMesh, const aiMesh* mesh, const aiScene* scene, const std::filesystem::path& directory) const
 {
-    Timer timer(std::make_shared<HighResTimeSource>());
-    timer.Start();
     // A mesh has only one material. If an imported model uses multiple materials,
     // the importer splits up the mesh.
     const aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
@@ -283,14 +275,11 @@ void ModelLoader::ProcessMaterial(const Ref<Mesh>& newMesh, const aiMesh* mesh, 
         newMat->CreateDefaultShader(m_renderingInterface);
     }
     newMesh->SetMaterial(newMat);
-    LOG_DEBUG(LogModelLoader, std::format("ProcessMaterial time: {}", timer.GetElapsedTime()));
 }
 
 // ReSharper disable once CppMemberFunctionMayBeStatic
 void ModelLoader::ProcessTextures(const Ref<Material>& newMat, const aiMaterial* material, const std::filesystem::path& directory) const
 {
-    Timer timer(std::make_shared<HighResTimeSource>());
-    timer.Start();
     std::map<aiTextureType, TextureType> textureTypeMap = {
         {aiTextureType_DIFFUSE, TextureType::Diffuse},
         {aiTextureType_NORMALS, TextureType::Normal},
@@ -318,5 +307,4 @@ void ModelLoader::ProcessTextures(const Ref<Material>& newMat, const aiMaterial*
             }
         }
     }
-    LOG_DEBUG(LogModelLoader, std::format("ProcessTextures time: {}", timer.GetElapsedTime()));
 }

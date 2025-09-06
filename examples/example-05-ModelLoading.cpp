@@ -11,7 +11,6 @@ static const std::vector<std::string> modelPaths = {
     "meshes/bunny/stanford-bunny.obj",
     "meshes/cube/cube_textured.obj",
     "meshes/barrel/wine_barrel_01_4k.gltf",
-    "meshes/mantaray/Manta_Ray.fbx",
 };
 static const std::vector<std::string> modelLabels = {
     "Apple",
@@ -19,7 +18,6 @@ static const std::vector<std::string> modelLabels = {
     "Bunny",
     "Crate",
     "Wine Barrel",
-    "Manta Ray",
 };
 static const std::vector<glm::vec3> modelScales = {
     glm::vec3(3),
@@ -27,7 +25,6 @@ static const std::vector<glm::vec3> modelScales = {
     glm::vec3(3),
     glm::vec3(1),
     glm::vec3(1),
-    glm::vec3(0.01),
 };
 
 static const char* currentLabel = modelLabels[0].c_str();
@@ -38,6 +35,21 @@ class Example_05 final : public nxs::Application
 {
 public:
     ~Example_05() override = default;
+
+    void Update() override
+    {
+        if (m_finishLoading) return;
+
+        for (int i = 0; i < m_loadedModels.size(); ++i)
+        {
+            if (m_loadedModels[i]->status != nxs::IResourceLoader::LoadResult::Status::Ready) return;
+        }
+
+
+        auto& modelComp = m_scene.GetNode("Model")->GetComponent<nxs::ModelComponent>();
+        modelComp.model = PTR_CAST<nxs::Model>(m_loadedModels[selectedModel]->resource);
+        m_finishLoading = true;
+    }
 
     void Render(nxs::RenderSystem& renderSystem) override
     {
@@ -68,8 +80,11 @@ public:
                         currentLabel = modelLabels[n].c_str();
                         selectedModel = n;
 
-                        auto& modelComp = m_scene.GetNode("Model")->GetComponent<nxs::ModelComponent>();
-                        modelComp.model = LoadModel(selectedModel);
+                        if (m_loadedModels[n]->status == nxs::IResourceLoader::LoadResult::Status::Ready)
+                        {
+                            auto& modelComp = m_scene.GetNode("Model")->GetComponent<nxs::ModelComponent>();
+                            modelComp.model = PTR_CAST<nxs::Model>(m_loadedModels[n]->resource);
+                        }
                     }
 
                     // Set the initial focus when the combo box is first opened
@@ -126,6 +141,13 @@ protected:
         const auto renderInterface = renderSystem.GetRenderInterface();
         renderSystem.SetClearColor(0x303030ff);
 
+        const auto engine = nxs::Engine::Instance();
+        m_modelLoader = std::make_unique<nxs::ModelLoader>(
+            renderInterface,
+            engine.GetTextureManager(),
+            engine.GetMaterialManager()
+        );
+
         InitScene();
         InitLights();
 
@@ -165,24 +187,26 @@ private:
         for (int i = 0; i < modelPaths.size(); i++)
         {
             // Preload models
-            LoadModel(i);
+            m_loadedModels.emplace_back(LoadModel(i));
         }
         LOG_INFO(LogTemp, std::format("Total loading time: {:.3f} seconds", timeSource.Now() - now));
 
         auto node = m_scene.CreateNode<nxs::SceneNode3D>("Model");
         auto& modelComp = node->AddComponent<nxs::ModelComponent>();
-        modelComp.model = m_model = LoadModel(0);
+        // modelComp.model = m_model = LoadModel(0);
         node->Scale().value = modelScales[0];
 
         m_scene.SetRenderer(std::make_unique<nxs::BasicSceneRenderer>());
     }
 
-    MAYBE_UNUSED nxs::Ref<nxs::Model> LoadModel(const int index)
+    MAYBE_UNUSED nxs::Ref<nxs::IResourceLoader::LoadResult> LoadModel(const int index)
     {
+        auto taskScheduler = nxs::Engine::Instance().GetTaskScheduler();
         const auto assetPath = GetAssetPath(modelPaths[index]);
-        auto model = nxs::Engine::Instance().GetModelManager()->Get(assetPath);
-        NXS_ASSERT_MSG(model != nullptr, std::format("Failed to load a model file: {}", assetPath));
-        return model;
+        // auto model = nxs::Engine::Instance().GetModelManager()->Get(assetPath);
+        // NXS_ASSERT_MSG(model != nullptr, std::format("Failed to load a model file: {}", assetPath));
+        // return model;
+        return m_modelLoader->LoadAsync(assetPath, index, *taskScheduler, [this](nxs::Ref<nxs::Resource> model) {});
     }
 
     void InitLights()
@@ -234,7 +258,10 @@ protected:
     nxs::Color3F m_ambient {0.5, 0.5, 0.5};
     glm::vec3 m_euler {};
     glm::vec3 m_cameraPos {0, 5, 5};
+    nxs::Ptr<nxs::ModelLoader> m_modelLoader;
+    std::vector<nxs::Ref<nxs::IResourceLoader::LoadResult>> m_loadedModels;
     float m_aoFactor = 1;
+    bool m_finishLoading = false;
 };
 
 
