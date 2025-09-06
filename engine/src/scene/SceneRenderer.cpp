@@ -116,7 +116,10 @@ void BasicSceneRenderer::Render(RenderSystem& renderSystem, const entt::registry
 
         for (const auto view = registry.view<SceneNodeComponent, ModelComponent, PositionComponent, OrientationComponent, ScaleComponent>(); const auto& [entity, sceneNode, model, position, orient, scale] : view.each())
         {
+            if (!model.model) continue;
+
             glm::mat4 modelMtx = Matrix::CreateModelMatrix(position.value, orient.value, scale.value);
+
             auto commands = model.model->CreateDrawCommand();
             for (auto& command : commands)
             {
