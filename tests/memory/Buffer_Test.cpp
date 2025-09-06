@@ -62,6 +62,23 @@ TEST(OwningBufferTest, CopyDataWithResize) {
     }
 }
 
+TEST(OwningBufferTest, CopyFromVector) {
+    std::vector<int> myVector = {100, 200, 300};
+    OwningBuffer buffer;
+
+    buffer.Copy(myVector);
+    EXPECT_TRUE(buffer.IsValid());
+    EXPECT_EQ(buffer.Size(), sizeof(int) * 3);
+    EXPECT_NE(buffer.Data(), nullptr);
+
+    // The vector still manages the data
+    EXPECT_EQ(myVector[0], 100);
+    // Check data validity
+    for (uint64_t i = 0; i < myVector.size(); ++i) {
+        EXPECT_EQ(reinterpret_cast<int*>(buffer.Data())[i], myVector[i]);
+    }
+}
+
 TEST(BorrowBufferTest, ConstructorAndRelease) {
     uint8_t stackData[5] = {10, 20, 30, 40, 50};
     BorrowBuffer buffer(stackData, 5);
