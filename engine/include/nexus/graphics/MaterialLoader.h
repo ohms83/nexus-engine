@@ -13,7 +13,7 @@ NXS_NAMESPACE
     class MaterialLoader final : public IResourceLoader
     {
     public:
-        Ref<Resource> Load(const std::string& path, uint32 id) override;
-        void LoadAsync(const std::string& path, uint32 id, TaskScheduler& scheduler, Callback onFinishCallback) override {}
+        MAYBE_UNUSED Ref<Resource> Load(const std::string& path, uint32 id) override;
+        MAYBE_UNUSED Ref<LoadResult> LoadAsync(const std::string& path, uint32 id, TaskScheduler& scheduler, Callback onFinishCallback) override { return nullptr;}
     };
 }

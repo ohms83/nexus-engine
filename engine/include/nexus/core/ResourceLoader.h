@@ -17,6 +17,22 @@ NXS_NAMESPACE
     {
     public:
         using Callback = std::function<void(Ref<Resource>)>;
+
+        struct LoadResult
+        {
+            enum class Status
+            {
+                Invalid,
+                Ready,
+                Failed,
+                Loading,
+            };
+
+            //! Resource path
+            std::string path;
+            Status status = Status::Invalid;
+        };
+
         virtual ~IResourceLoader() = default;
 
         /**
@@ -27,9 +43,9 @@ NXS_NAMESPACE
          * @param id The unique resource ID.
          * @return A Ref to the loaded IResource on success, or nullptr on failure.
          */
-        virtual Ref<Resource> Load(const std::string& path, uint32 id) = 0;
+        MAYBE_UNUSED virtual Ref<Resource> Load(const std::string& path, uint32 id) = 0;
 
-        virtual void LoadAsync(const std::string& path, uint32 id, TaskScheduler& scheduler, Callback onFinishCallback) = 0;
+        MAYBE_UNUSED virtual Ref<LoadResult> LoadAsync(const std::string& path, uint32 id, TaskScheduler& scheduler, Callback onFinishCallback) = 0;
     };
 
 } // NXS_NAMESPACE

@@ -11,10 +11,33 @@
 #include "assimp/mesh.h"
 
 #include <filesystem>
+#include <future>
+
+#include "core/task/FutureWaitingTask.h"
+#include "time/HighResTimeSource.h"
 
 USING_NAMESPACE_NXS;
 
 DEFINE_LOG(ModelLoader);
+
+namespace
+{
+    struct Vertex
+    {
+        glm::vec3 position;
+        glm::vec3 normal;
+        glm::vec3 tangent;
+        // TODO: Multiple texture coordinates
+        glm::vec2 texCoords;
+    };
+
+    struct ModelLoadedData
+    {
+        std::vector<Vertex> vertices;
+        std::vector<unsigned int> indices;
+        Ref<Material> material;
+    };
+}
 
 ModelLoader::ModelLoader(
     const Ref<RenderingInterface>& renderingInterface,
@@ -30,6 +53,8 @@ ModelLoader::ModelLoader(
 Ref<Resource> ModelLoader::Load(const std::string &path, uint32 id)
 {
     Assimp::Importer importer;
+    Timer timer(std::make_shared<HighResTimeSource>());
+    timer.Start();
     // The ReadFile method returns an aiScene object.
     // It's crucial to specify post-processing flags for desired data.
     const aiScene* scene = importer.ReadFile(path,
@@ -41,6 +66,7 @@ Ref<Resource> ModelLoader::Load(const std::string &path, uint32 id)
         aiProcess_RemoveRedundantMaterials| // Remove redundant materials
         aiProcess_OptimizeMeshes            // Optimize meshes for better performance
     );
+    LOG_DEBUG(LogModelLoader, std::format("Model importing time: {} seconds", timer.GetElapsedTime()));
 
     // Check for errors
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
@@ -57,7 +83,57 @@ Ref<Resource> ModelLoader::Load(const std::string &path, uint32 id)
 
     LOG_INFO(LogModelLoader, std::format("Model loaded successfully: {}", path));
     LOG_INFO(LogModelLoader, std::format("Processed meshes: {}", scene->mNumMeshes));
+    LOG_DEBUG(LogModelLoader, std::format("Model loading time: {}", timer.GetElapsedTime()));
     return model;
+}
+
+Ref<IResourceLoader::LoadResult> ModelLoader::LoadAsync(const std::string& path, uint32 id, TaskScheduler& scheduler, Callback onFinishCallback)
+{
+    const auto result = std::make_shared<LoadResult>();
+    result->path = path;
+    result->status = LoadResult::Status::Loading;
+
+    std::future<Ref<aiScene>> future = std::async(std::launch::async, [path]
+    {
+        Assimp::Importer importer;
+        // The ReadFile method returns an aiScene object.
+        // It's crucial to specify post-processing flags for desired data.
+        importer.ReadFile(path,
+            aiProcess_Triangulate             | // Convert all faces to triangles
+            aiProcess_GenSmoothNormals        | // Generate smooth normals if not present
+            aiProcess_FlipUVs                 | // Flip UVs (often needed for OpenGL)
+            aiProcess_CalcTangentSpace        | // Calculate tangent and bitangent vectors
+            aiProcess_JoinIdenticalVertices   | // Join identical vertices for optimization
+            aiProcess_RemoveRedundantMaterials| // Remove redundant materials
+            aiProcess_OptimizeMeshes            // Optimize meshes for better performance
+        );
+        auto scene = std::make_shared<aiScene>();
+        scene.reset(importer.GetOrphanedScene());
+        return scene;
+    });
+
+    const auto waitingTask = std::make_shared<FutureWaitingTask<Ref<aiScene>>>(std::move(future), [this, onFinishCallback, path, id, result](Ref<aiScene> scene)
+    {
+        if (!scene)
+        {
+            result->status = LoadResult::Status::Failed;
+            onFinishCallback(nullptr);
+            return;
+        }
+
+        // Store the directory path of the model file for texture loading
+        const auto directory = std::filesystem::path(path).parent_path();
+        const auto model = std::make_shared<Model>(path, id);
+
+        // Process Assimp's root node recursively
+        ProcessNode(model, scene->mRootNode, scene.get(), directory);
+
+        result->status = LoadResult::Status::Ready;
+        onFinishCallback(model);
+    });
+
+    scheduler.ScheduleTask(waitingTask);
+    return result;
 }
 
 void ModelLoader::ProcessNode(const Ref<Model>& model, const aiNode* node, const aiScene* scene, std::filesystem::path directory)
@@ -75,15 +151,8 @@ void ModelLoader::ProcessNode(const Ref<Model>& model, const aiNode* node, const
 
 void ModelLoader::ProcessMesh(const Ref<Model>& model, const aiMesh* mesh, const aiScene* scene, const std::filesystem::path& directory) const
 {
-    struct Vertex
-    {
-        glm::vec3 position;
-        glm::vec3 normal;
-        glm::vec3 tangent;
-        // TODO: Multiple texture coordinates
-        glm::vec2 texCoords;
-    };
-
+    Timer timer(std::make_shared<HighResTimeSource>());
+    timer.Start();
     const auto newMesh = std::make_shared<Mesh>(mesh->mName.C_Str());
     std::vector<Vertex> vertices;
     std::vector<uint32> indices;
@@ -145,7 +214,7 @@ void ModelLoader::ProcessMesh(const Ref<Model>& model, const aiMesh* mesh, const
             indices.emplace_back(face.mIndices[j]);
         }
     }
-    
+
     auto indexData = std::make_shared<OwningBuffer>();
     indexData->Copy<uint32>(indices);
 
@@ -159,11 +228,14 @@ void ModelLoader::ProcessMesh(const Ref<Model>& model, const aiMesh* mesh, const
     ProcessMaterial(newMesh, mesh, scene, directory);
 
     model->AddMesh(newMesh);
+    LOG_DEBUG(LogModelLoader, std::format("ProcessMesh time: {}", timer.GetElapsedTime()));
 }
 
 // ReSharper disable once CppMemberFunctionMayBeStatic
 void ModelLoader::ProcessMaterial(const Ref<Mesh>& newMesh, const aiMesh* mesh, const aiScene* scene, const std::filesystem::path& directory) const
 {
+    Timer timer(std::make_shared<HighResTimeSource>());
+    timer.Start();
     // A mesh has only one material. If an imported model uses multiple materials,
     // the importer splits up the mesh.
     const aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
@@ -211,11 +283,14 @@ void ModelLoader::ProcessMaterial(const Ref<Mesh>& newMesh, const aiMesh* mesh, 
         newMat->CreateDefaultShader(m_renderingInterface);
     }
     newMesh->SetMaterial(newMat);
+    LOG_DEBUG(LogModelLoader, std::format("ProcessMaterial time: {}", timer.GetElapsedTime()));
 }
 
 // ReSharper disable once CppMemberFunctionMayBeStatic
 void ModelLoader::ProcessTextures(const Ref<Material>& newMat, const aiMaterial* material, const std::filesystem::path& directory) const
 {
+    Timer timer(std::make_shared<HighResTimeSource>());
+    timer.Start();
     std::map<aiTextureType, TextureType> textureTypeMap = {
         {aiTextureType_DIFFUSE, TextureType::Diffuse},
         {aiTextureType_NORMALS, TextureType::Normal},
@@ -243,4 +318,5 @@ void ModelLoader::ProcessTextures(const Ref<Material>& newMat, const aiMaterial*
             }
         }
     }
+    LOG_DEBUG(LogModelLoader, std::format("ProcessTextures time: {}", timer.GetElapsedTime()));
 }

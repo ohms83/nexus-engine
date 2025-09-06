@@ -65,20 +65,34 @@ Ref<Resource> TextureLoader::Load(const std::string& path, uint32 id)
     return PTR_CAST<Resource>(texture);
 }
 
-void TextureLoader::LoadAsync(const std::string& path, uint32 id, TaskScheduler& scheduler, Callback onFinishCallback)
+Ref<IResourceLoader::LoadResult> TextureLoader::LoadAsync(const std::string& path, uint32 id, TaskScheduler& scheduler, Callback onFinishCallback)
 {
+    const auto result = std::make_shared<LoadResult>();
+    result->path = path;
+    result->status = LoadResult::Status::Loading;
+
     std::future<TextureLoadedData> future = std::async(std::launch::async, [path]
     {
         return ProcessLoadFile(path);
     });
 
-    const auto waitingTask = std::make_shared<FutureWaitingTask<TextureLoadedData>>(std::move(future), [onFinishCallback, path, id, renderInterface = m_renderingInterface](const TextureLoadedData& loadedData)
+    const auto waitingTask = std::make_shared<FutureWaitingTask<TextureLoadedData>>(std::move(future), [onFinishCallback, path, id, result, renderInterface = m_renderingInterface](const TextureLoadedData& loadedData)
     {
+        if (!loadedData.pixels)
+        {
+            result->status = LoadResult::Status::Failed;
+            onFinishCallback(nullptr);
+            return;
+        }
+
         const auto texture = std::make_shared<Texture>(path, id);
         texture->DescribeTexture(loadedData.desc);
         texture->AllocateGpuResource(loadedData.pixels.get(), loadedData.desc.GetBufferSize(), renderInterface);
+
+        result->status = LoadResult::Status::Ready;
         onFinishCallback(texture);
     });
 
     scheduler.ScheduleTask(waitingTask);
+    return result;
 }

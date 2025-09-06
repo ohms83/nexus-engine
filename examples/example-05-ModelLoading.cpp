@@ -41,8 +41,6 @@ public:
 
     void Render(nxs::RenderSystem& renderSystem) override
     {
-        auto model = glm::mat4(1.0f);
-
         const auto& inputManager = nxs::InputManager::Instance();
         const glm::vec2 euler = inputManager.GetAxisValue("model_rotate") * 90.f * GetDeltaTime();
         m_euler.x += euler.x;
@@ -170,7 +168,7 @@ private:
             LoadModel(i);
         }
         LOG_INFO(LogTemp, std::format("Total loading time: {:.3f} seconds", timeSource.Now() - now));
-        
+
         auto node = m_scene.CreateNode<nxs::SceneNode3D>("Model");
         auto& modelComp = node->AddComponent<nxs::ModelComponent>();
         modelComp.model = m_model = LoadModel(0);
@@ -190,7 +188,7 @@ private:
     void InitLights()
     {
         m_scene.Ambient() = {0.5f, 0.5f, 0.5f};
-        
+
         {
             auto light = m_scene.CreateNode<nxs::DirectionalLight>("Direct Light 1");
             light->SetColor({1, 1, 1});
