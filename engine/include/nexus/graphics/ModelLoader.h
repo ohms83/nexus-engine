@@ -33,7 +33,11 @@ NXS_NAMESPACE
          */
         MAYBE_UNUSED Ref<Resource> Load(const std::string& path, uint32 id) override;
 
-        MAYBE_UNUSED Ref<LoadResult> LoadAsync(const std::string& path, uint32 id, TaskScheduler& scheduler, Callback onFinishCallback) override;
+        MAYBE_UNUSED Ref<LoadResult> LoadAsync(
+            const std::string& path,
+            uint32 id,
+            TaskScheduler& scheduler,
+            Callback onFinishCallback) override;
 
     private:
         void ProcessNode(const Ref<Model>& model, const aiNode* node, const aiScene* scene, std::filesystem::path directory);

@@ -9,7 +9,10 @@ USING_NAMESPACE_NXS;
 
 DEFINE_LOG(Texture);
 
-Texture::~Texture() = default;
+Texture::~Texture()
+{
+    LOG_DEBUG(LogResource, std::format("Unloaded texture: '{}'.", m_path));
+}
 
 void Texture::SetSize(int32 width, int32 height)
 {

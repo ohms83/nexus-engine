@@ -40,9 +40,9 @@ public:
     {
         if (m_finishLoading) return;
 
-        for (int i = 0; i < m_loadedModels.size(); ++i)
+        for (const auto & m_loadedModel : m_loadedModels)
         {
-            if (m_loadedModels[i]->status != nxs::IResourceLoader::LoadResult::Status::Ready) return;
+            if (m_loadedModel->status != nxs::IResourceLoader::LoadResult::Status::Ready) return;
         }
 
         auto& modelComp = m_scene.GetNode("Model")->GetComponent<nxs::ModelComponent>();
@@ -181,14 +181,11 @@ private:
         camera->Position().value = {0, 5, 5};
         camera->LookAt(glm::vec3(0), glm::vec3(0, 1, 0));
 
-        nxs::HighResTimeSource timeSource;
-        auto now = timeSource.Now();
         for (int i = 0; i < modelPaths.size(); i++)
         {
             // Preload models
             m_loadedModels.emplace_back(LoadModel(i));
         }
-        LOG_INFO(LogTemp, std::format("Total loading time: {:.3f} seconds", timeSource.Now() - now));
 
         auto node = m_scene.CreateNode<nxs::SceneNode3D>("Model");
         auto& modelComp = node->AddComponent<nxs::ModelComponent>();
@@ -202,7 +199,18 @@ private:
     {
         const auto taskScheduler = nxs::Engine::Instance().GetTaskScheduler();
         const auto assetPath = GetAssetPath(modelPaths[index]);
-        return m_modelLoader->LoadAsync(assetPath, index, *taskScheduler, [this](nxs::Ref<nxs::Resource> model) {});
+        auto result = m_modelLoader->LoadAsync(assetPath, index, *taskScheduler, [this](nxs::Ref<nxs::Resource> model) {});
+
+        taskScheduler->ScheduleTask(std::make_shared<nxs::LambdaTask>([result]() -> bool
+        {
+            if (result->status == nxs::IResourceLoader::LoadResult::Status::Ready)
+            {
+                LOG_INFO(LogTemp, std::format("Finished loading {}", result->path));
+                return false;
+            }
+            return true;
+        }));
+        return result;
     }
 
     void InitLights()

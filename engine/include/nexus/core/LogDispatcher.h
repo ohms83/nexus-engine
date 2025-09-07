@@ -14,9 +14,6 @@
 #include "Logger.h"
 #include "task/TaskScheduler.h"
 
-#define DECLARE_LOG_EXTERN(LogCategory) extern const std::string Log##LogCategory
-#define DEFINE_LOG(LogCategory) const std::string Log##LogCategory = #LogCategory
-
 #if !defined(NO_LOG)
 #define ENABLE_LOG(LogCategory) nxs::LogDispatcher::Instance().EnableCategory(LogCategory, true)
 #define DISABLE_LOG(LogCategory) nxs::LogDispatcher::Instance().EnableCategory(LogCategory, false)

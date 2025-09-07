@@ -12,9 +12,9 @@
 
 #include <filesystem>
 #include <future>
+#include <queue>
 
 #include "core/task/FutureWaitingTask.h"
-#include "time/HighResTimeSource.h"
 
 USING_NAMESPACE_NXS;
 
@@ -31,12 +31,59 @@ namespace
         glm::vec2 texCoords;
     };
 
-    struct ModelLoadedData
-    {
-        std::vector<Vertex> vertices;
-        std::vector<unsigned int> indices;
-        Ref<Material> material;
+    const std::map<aiTextureType, TextureType> s_textureTypeMap = {
+        {aiTextureType_DIFFUSE, TextureType::Diffuse},
+        {aiTextureType_NORMALS, TextureType::Normal},
+        {aiTextureType_SPECULAR, TextureType::Specular},
+        {aiTextureType_EMISSIVE, TextureType::Emissive},
+        {aiTextureType_HEIGHT, TextureType::Depth},
+        {aiTextureType_AMBIENT, TextureType::Ambient},
+        {aiTextureType_OPACITY, TextureType::Opacity},
+        {aiTextureType_AMBIENT_OCCLUSION, TextureType::Ambient},
+        {aiTextureType_METALNESS, TextureType::Metalness},
+        {aiTextureType_DIFFUSE_ROUGHNESS, TextureType::Roughness},
+        {aiTextureType_LIGHTMAP, TextureType::LightMap},
     };
+}
+
+/**
+ * Asynchronously preload all the textures.
+ * @param scene
+ * @param manager
+ * @param taskScheduler
+ * @return A list of asynchronous resource loading results.
+ */
+static std::queue<Ref<IResourceLoader::LoadResult>> PreloadTextures(const aiScene& scene, const std::filesystem::path directory, TextureManager& manager, TaskScheduler& taskScheduler)
+{
+    std::queue<Ref<IResourceLoader::LoadResult>> result;
+    for (int i = 0; i < scene.mNumTextures; i++)
+    {
+        const aiTexture* texture = scene.mTextures[i];
+        auto texturePath = directory / texture->mFilename.C_Str();
+        result.push(manager.RequestResourceAsync(texturePath.string(), taskScheduler));
+    }
+
+    std::vector<aiTextureType> aiTextures = {};
+    for (const auto& aitTexture : s_textureTypeMap | std::views::keys)
+    {
+        aiTextures.push_back(aitTexture);
+    }
+
+    for (unsigned int i = 0; i < scene.mNumMaterials; i++)
+    {
+        const aiMaterial* material = scene.mMaterials[i];
+        for (const auto aiTexture : aiTextures)
+        {
+            for (unsigned int j = 0; j < material->GetTextureCount(aiTexture); j++)
+            {
+                aiString path;
+                material->GetTexture(aiTexture, i, &path);
+                auto texturePath = directory / path.C_Str();
+                result.push(manager.RequestResourceAsync(texturePath.string(), taskScheduler));
+            }
+        }
+    }
+    return result;
 }
 
 ModelLoader::ModelLoader(
@@ -85,12 +132,21 @@ Ref<Resource> ModelLoader::Load(const std::string &path, uint32 id)
 
 Ref<IResourceLoader::LoadResult> ModelLoader::LoadAsync(const std::string& path, uint32 id, TaskScheduler& scheduler, Callback onFinishCallback)
 {
+    const auto directory = std::filesystem::path(path).parent_path();
+
     const auto result = std::make_shared<LoadResult>();
     result->path = path;
     result->status = LoadResult::Status::Loading;
 
-    std::future<Ref<aiScene>> future = std::async(std::launch::async, [path]
+    std::future<Ref<aiScene>> future = std::async(std::launch::async, [path, directory, result, &scheduler, textureManager = m_textureManager]
     {
+        if (!textureManager)
+        {
+            result->error = std::format("Failed to load model from file: {}. Reason: Invalid texture manager", path);
+            result->status = LoadResult::Status::Failed;
+            throw std::runtime_error(result->error);
+        }
+
         Assimp::Importer importer;
         // The ReadFile method returns an aiScene object.
         // It's crucial to specify post-processing flags for desired data.
@@ -105,10 +161,36 @@ Ref<IResourceLoader::LoadResult> ModelLoader::LoadAsync(const std::string& path,
         );
         auto scene = std::make_shared<aiScene>();
         scene.reset(importer.GetOrphanedScene());
+
+        if (!scene)
+        {
+            result->error = std::format("Failed to load model from file: {}.", path);
+            result->status = LoadResult::Status::Failed;
+            throw std::runtime_error(result->error);
+        }
+
+        auto preloadedTextures = PreloadTextures(*scene, directory, *textureManager, scheduler);
+        while (!preloadedTextures.empty())
+        {
+            switch (const auto loadResult = preloadedTextures.front(); loadResult->status)
+            {
+            case LoadResult::Status::Loading:
+                std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                break;
+            case LoadResult::Status::Invalid:
+            case LoadResult::Status::Failed:
+                result->error = std::format("Failed to load model from file: {}. Reason: Texture loading error {}", path, loadResult->path);
+                result->status = LoadResult::Status::Failed;
+                throw std::runtime_error(result->error);
+            case LoadResult::Status::Ready:
+                preloadedTextures.pop();
+                break;
+            }
+        }
         return scene;
     });
 
-    const auto waitingTask = std::make_shared<FutureWaitingTask<Ref<aiScene>>>(std::move(future), [this, onFinishCallback, path, id, result](Ref<aiScene> scene)
+    const auto waitingTask = std::make_shared<FutureWaitingTask<Ref<aiScene>>>(std::move(future), [this, onFinishCallback, path, directory, id, result](Ref<aiScene> scene)
     {
         if (!scene)
         {
@@ -118,7 +200,6 @@ Ref<IResourceLoader::LoadResult> ModelLoader::LoadAsync(const std::string& path,
         }
 
         // Store the directory path of the model file for texture loading
-        const auto directory = std::filesystem::path(path).parent_path();
         const auto model = std::make_shared<Model>(path, id);
 
         // Process Assimp's root node recursively
@@ -127,6 +208,9 @@ Ref<IResourceLoader::LoadResult> ModelLoader::LoadAsync(const std::string& path,
         result->status = LoadResult::Status::Ready;
         result->resource = model;
         onFinishCallback(model);
+    }, [](const std::string& error)
+    {
+        LOG_ERROR(LogModelLoader, error);
     });
 
     scheduler.ScheduleTask(waitingTask);
@@ -161,7 +245,7 @@ void ModelLoader::ProcessMesh(const Ref<Model>& model, const aiMesh* mesh, const
 
     for (unsigned int i = 0; i < mesh->mNumVertices; i++)
     {
-        Vertex vertex;
+        Vertex vertex{};
         vertex.position.x = mesh->mVertices[i].x;
         vertex.position.y = mesh->mVertices[i].y;
         vertex.position.z = mesh->mVertices[i].z;
@@ -280,21 +364,7 @@ void ModelLoader::ProcessMaterial(const Ref<Mesh>& newMesh, const aiMesh* mesh, 
 // ReSharper disable once CppMemberFunctionMayBeStatic
 void ModelLoader::ProcessTextures(const Ref<Material>& newMat, const aiMaterial* material, const std::filesystem::path& directory) const
 {
-    std::map<aiTextureType, TextureType> textureTypeMap = {
-        {aiTextureType_DIFFUSE, TextureType::Diffuse},
-        {aiTextureType_NORMALS, TextureType::Normal},
-        {aiTextureType_SPECULAR, TextureType::Specular},
-        {aiTextureType_EMISSIVE, TextureType::Emissive},
-        {aiTextureType_HEIGHT, TextureType::Depth},
-        {aiTextureType_AMBIENT, TextureType::Ambient},
-        {aiTextureType_OPACITY, TextureType::Opacity},
-        {aiTextureType_AMBIENT_OCCLUSION, TextureType::Ambient},
-        {aiTextureType_METALNESS, TextureType::Metalness},
-        {aiTextureType_DIFFUSE_ROUGHNESS, TextureType::Roughness},
-        {aiTextureType_LIGHTMAP, TextureType::LightMap},
-    };
-
-    for (const auto& [aiType, textureType] : textureTypeMap)
+    for (const auto& [aiType, textureType] : s_textureTypeMap)
     {
         for (int32 i = 0; i < material->GetTextureCount(aiType); ++i)
         {

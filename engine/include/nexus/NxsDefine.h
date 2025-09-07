@@ -41,6 +41,9 @@
 
 #define SINGLETON(Type) static Type& Instance() { static Type instance; return instance; }
 
+#define DECLARE_LOG_EXTERN(LogCategory) extern const std::string Log##LogCategory
+#define DEFINE_LOG(LogCategory) const std::string Log##LogCategory = #LogCategory
+
 NXS_NAMESPACE
 {
     using WindowContext = SDL_Window*;

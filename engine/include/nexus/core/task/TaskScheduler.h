@@ -52,8 +52,9 @@ NXS_NAMESPACE
             double nextUpdate = 0.0;
             Ref<IRunnable> action;
         };
-        std::vector<TaskData> m_tasks;
 
+        std::vector<TaskData> m_tasks;
         Ptr<Timer> m_timer;
+        std::mutex m_mutex;
     };
 }

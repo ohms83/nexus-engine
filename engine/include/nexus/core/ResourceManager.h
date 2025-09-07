@@ -12,6 +12,7 @@
 
 #include "Resource.h"
 #include "ResourceLoader.h"
+#include "task/LambdaTask.h"
 
 NXS_NAMESPACE
 {
@@ -47,16 +48,7 @@ NXS_NAMESPACE
             LOG_INFO(LogResource, std::format("Registered loader for type '{}'.", resourceType.name()));
         }
 
-        /**
-         * @brief Retrieves a resource of type T from the manager.
-         * If the resource is already cached, it's returned immediately.
-         * Otherwise, the appropriate loader is invoked to load it.
-         *
-         * @tparam T The type of resource to retrieve (must derive from IResource).
-         * @param path The unique path (identifier) of the resource.
-         * @return A std::shared_ptr to the loaded resource, or nullptr if loading fails or type mismatches.
-         */
-        NODISCARD Ref<ResourceType> Get(const std::string& path)
+        NODISCARD Ref<ResourceType> FindCachedResource(const std::string& path)
         {
             std::lock_guard<std::mutex> lock(m_mutex); // For thread-safety
             const auto id = m_hasher.Hash32(path);
@@ -76,10 +68,26 @@ NXS_NAMESPACE
                     "Resource '{}' exists in cache but is of type {} (requested {}). Type mismatch.",
                     path, typeid(*it->second).name(), typeid(ResourceType).name()
                 ));
-                return nullptr; // Or throw std::bad_cast
             }
+            return nullptr;
+        }
 
-            // Resource is not in the cache, find the appropriate loader
+        /**
+         * @brief Retrieves a resource of type T from the manager.
+         * If the resource is already cached, it's returned immediately.
+         * Otherwise, the appropriate loader is invoked to load it.
+         *
+         * @tparam T The type of resource to retrieve (must derive from IResource).
+         * @param path The unique path (identifier) of the resource.
+         * @return A std::shared_ptr to the loaded resource, or nullptr if loading fails or type mismatches.
+         */
+        NODISCARD Ref<ResourceType> Get(const std::string& path)
+        {
+            if (auto cached_resource = FindCachedResource(path)) return cached_resource;
+
+            std::lock_guard<std::mutex> lock(m_mutex); // For thread-safety
+            const auto id = m_hasher.Hash32(path);
+
             const std::type_index resourceType = typeid(ResourceType);
             if (!m_loader)
             {
@@ -87,27 +95,15 @@ NXS_NAMESPACE
                 return nullptr;
             }
 
-            const Ref<Resource> base_resource = m_loader->Load(path, id);
-            if (!base_resource)
-            {
-                LOG_ERROR(LogResource, std::format("Loader for type '{}' failed to load resource '{}'.", resourceType.name(), path));
-                return nullptr;
-            }
-
-            // Ensure the loader returned the correct type (it should, by design of GetResourceType)
-            Ref<ResourceType> new_resource = PTR_CAST<ResourceType>(base_resource);
+            const auto new_resource = m_loader->Load(path, id);
             if (!new_resource)
             {
-                LOG_ERROR(LogResource, std::format(
-                    "Loader for type '{}' returned an unexpected resource type for '{}'. Expected {}, Got {}.",
-                    resourceType.name(), path, typeid(ResourceType).name(), typeid(*base_resource).name()
-                ));
+                LOG_ERROR(LogResource, std::format("Failed to load resource '{}'. Resource Type: {}", path, resourceType.name()));
                 return nullptr;
             }
-
             // Store the newly loaded resource in the cache
             m_resourceCache[id] = new_resource;
-            return new_resource;
+            return PTR_CAST<ResourceType>(new_resource);
         }
 
         NODISCARD Ref<ResourceType> Get(const uint32 id)
@@ -130,6 +126,80 @@ NXS_NAMESPACE
             auto new_resource = std::make_shared<ResourceType>(path, id);
             m_resourceCache[id] = new_resource;
             return new_resource;
+        }
+
+        /**
+         * @brief Requests a resource to be loaded asynchronously.
+         *
+         * This function initiates an asynchronous loading process for a resource from the specified path.
+         * It first checks for a cached version of the resource. If it's already in the cache, it
+         * returns a ready-to-use resource immediately. If not, it checks if the resource is
+         * currently loading. If so, it returns the existing loading task's `LoadResult`.
+         * Otherwise, it starts a new asynchronous loading operation via a registered resource loader
+         * and schedules a periodic task to monitor its status.
+         *
+         * @tparam ResourceType The type of the resource to be loaded.
+         * @param path The file path to the resource.
+         * @param scheduler A reference to the TaskScheduler to manage the asynchronous task.
+         * @return A Ref to an `IResourceLoader::LoadResult` object that can be used to monitor the
+         * loading status of the requested resource. Returns `nullptr` if no loader is
+         * registered for the specified resource type.
+         * @note This function is thread-safe as it uses a mutex to protect access to the list of
+         * currently loading resources.
+         */
+        MAYBE_UNUSED Ref<IResourceLoader::LoadResult> RequestResourceAsync(const std::string& path, TaskScheduler& scheduler)
+        {
+            if (auto cached_resource = FindCachedResource(path))
+            {
+                const auto result = std::make_shared<IResourceLoader::LoadResult>();
+                result->path = path;
+                result->resource = cached_resource;
+                result->status = IResourceLoader::LoadResult::Status::Ready;
+                return result;
+            }
+
+            std::lock_guard<std::mutex> lock(m_mutex); // For thread-safety
+            if (auto loadResult = std::ranges::find_if(m_loadingResources, [path](Ref<IResourceLoader::LoadResult> loading_resource)
+            {
+                return loading_resource->path == path;
+            }); loadResult != m_loadingResources.end())
+            {
+                // The requested resource is currently loading.
+                return *loadResult;
+            }
+
+            const auto id = m_hasher.Hash32(path);
+
+            const std::type_index resourceType = typeid(ResourceType);
+            if (!m_loader)
+            {
+                LOG_ERROR(LogResource, std::format("No loader registered for type '{}' to load resource '{}'.", resourceType.name(), path));
+                return nullptr;
+            }
+
+            auto result = m_loader->LoadAsync(path, id, scheduler, [&resourceCache = m_resourceCache, id, path,resourceType](Ref<Resource> new_resource) {
+                if (!new_resource)
+                {
+                    LOG_ERROR(LogResource, std::format("Failed to load resource '{}'. Resource Type: {}", path, resourceType.name()));
+                    return;
+                }
+                resourceCache[id] = new_resource;
+                // LOG_DEBUG(LogResource, std::format("Loaded resource success: '{}'.", path));
+            });
+            m_loadingResources.push_back(result);
+
+            // Periodically checking for resource loading status.
+            scheduler.ScheduleTask(std::make_shared<LambdaTask>([result, &mutex = m_mutex, &loadingResources = m_loadingResources]()
+            {
+                if (result->status == IResourceLoader::LoadResult::Status::Ready)
+                {
+                    std::lock_guard<std::mutex> lock1(mutex);
+                    loadingResources.erase(std::ranges::find(loadingResources, result));
+                    return false;
+                }
+                return true;
+            }));
+            return result;
         }
 
         /**
@@ -183,6 +253,8 @@ NXS_NAMESPACE
         Hasher m_hasher;
         //! The central cache mapping resource paths to shared pointers of a base IResource type
         std::unordered_map<uint32, Ref<Resource>> m_resourceCache;
+        //! A list of resources that are currently loading.
+        std::vector<Ref<IResourceLoader::LoadResult>> m_loadingResources;
         //! A uniqued_ptr to the concrete loader class.
         Ptr<IResourceLoader> m_loader;
         //! Mutex for thread-safe access to m_resourceCache
