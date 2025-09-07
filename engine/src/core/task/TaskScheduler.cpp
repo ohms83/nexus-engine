@@ -19,6 +19,7 @@ TaskScheduler::TaskScheduler(const Ref<ITimeSource>& timeSource)
 TaskID TaskScheduler::ScheduleTask(Ref<IRunnable> task, const int32_t repeat, const double delay,
     const double interval, TaskQueue queue)
 {
+    std::lock_guard<std::mutex> lock(m_mutex);
     const TaskID id = s_runningId++;
     m_tasks.emplace_back(TaskData {
         id,
@@ -35,6 +36,7 @@ TaskID TaskScheduler::ScheduleTask(Ref<IRunnable> task, const int32_t repeat, co
 
 void TaskScheduler::StopTask(TaskID id)
 {
+    std::lock_guard<std::mutex> lock(m_mutex);
     const auto taskItr = std::ranges::find_if(m_tasks, [id](const TaskData& task)
     {
         return task.id == id;
@@ -46,32 +48,35 @@ void TaskScheduler::StopTask(TaskID id)
 void TaskScheduler::Update()
 {
     std::vector<TaskID> terminatedTasks;
-
     m_timer->Tick();
-    const auto dt = m_timer->GetDeltaTime();
 
-    std::ranges::for_each(m_tasks, [dt, &terminatedTasks](TaskData& task)
     {
-        if (task.delay > 0.0)
-        {
-            task.delay -= dt;
-            task.running = task.delay <= 0.0;
-        }
+        std::lock_guard<std::mutex> lock(m_mutex);
+        const auto dt = m_timer->GetDeltaTime();
 
-        if (!task.running) return;
-
-        task.nextUpdate -= dt;
-        if (task.nextUpdate <= 0.0)
+        std::ranges::for_each(m_tasks, [dt, &terminatedTasks](TaskData& task)
         {
-            if (!task.action->Update())
+            if (task.delay > 0.0)
             {
-                terminatedTasks.emplace_back(task.id);
-                return;
+                task.delay -= dt;
+                task.running = task.delay <= 0.0;
             }
 
-            task.nextUpdate = task.interval;
-        }
-    });
+            if (!task.running) return;
+
+            task.nextUpdate -= dt;
+            if (task.nextUpdate <= 0.0)
+            {
+                if (!task.action->Update())
+                {
+                    terminatedTasks.emplace_back(task.id);
+                    return;
+                }
+
+                task.nextUpdate = task.interval;
+            }
+        });
+    }
 
     while (!terminatedTasks.empty())
     {
