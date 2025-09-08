@@ -134,15 +134,15 @@ NXS_NAMESPACE
          * This function initiates an asynchronous loading process for a resource from the specified path.
          * It first checks for a cached version of the resource. If it's already in the cache, it
          * returns a ready-to-use resource immediately. If not, it checks if the resource is
-         * currently loading. If so, it returns the existing loading task's `LoadResult`.
+         * currently loading. If so, it returns the existing loading task's @c LoadResult.
          * Otherwise, it starts a new asynchronous loading operation via a registered resource loader
          * and schedules a periodic task to monitor its status.
          *
          * @tparam ResourceType The type of the resource to be loaded.
          * @param path The file path to the resource.
          * @param scheduler A reference to the TaskScheduler to manage the asynchronous task.
-         * @return A Ref to an `IResourceLoader::LoadResult` object that can be used to monitor the
-         * loading status of the requested resource. Returns `nullptr` if no loader is
+         * @return A Ref to an @c IResourceLoader::LoadResult object that can be used to monitor the
+         * loading status of the requested resource. Returns @c nullptr if no loader is
          * registered for the specified resource type.
          * @note This function is thread-safe as it uses a mutex to protect access to the list of
          * currently loading resources.
@@ -186,7 +186,10 @@ NXS_NAMESPACE
                 resourceCache[id] = new_resource;
                 // LOG_DEBUG(LogResource, std::format("Loaded resource success: '{}'.", path));
             });
-            m_loadingResources.push_back(result);
+
+            if (result->status == IResourceLoader::LoadResult::Status::Loading) {
+                m_loadingResources.push_back(result);
+            }
 
             // Periodically checking for resource loading status.
             scheduler.ScheduleTask(std::make_shared<LambdaTask>([result, &mutex = m_mutex, &loadingResources = m_loadingResources]()
