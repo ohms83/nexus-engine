@@ -11,10 +11,10 @@
 
 NXS_NAMESPACE
 {
-    class Profiler final : public EditorWidget
+    class ProfilerWidget final : public EditorWidget
     {
     public:
-        Profiler();
+        ProfilerWidget();
 
     protected:
         void Draw_Internal(RenderSystem& renderSystem) override;

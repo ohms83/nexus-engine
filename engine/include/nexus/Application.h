@@ -36,6 +36,7 @@ NXS_NAMESPACE
         bool resizable = false;
         bool editMode = true;
         bool maximize = true;
+        bool allowProfile = true;
         int32 quitKey = SDLK_ESCAPE;
 
         bool LoadConfig(const std::string& filePath);
@@ -136,6 +137,7 @@ NXS_NAMESPACE
         SDL_Keycode m_escapeKey = SDLK_ESCAPE;
 
     private:
+        ApplicationConfig m_config {};
         bool m_quit = false;
         Ref<RenderSystem> m_renderSystem;
         Ref<RenderingInterface> m_renderInterface;

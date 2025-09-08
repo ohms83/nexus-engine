@@ -13,6 +13,8 @@
 #include "graphics/opengl/GLVertexBuffer.h"
 #include "SDL3/SDL_error.h"
 
+#include "Remotery.h"
+
 USING_NAMESPACE_NXS;
 
 GLRenderingInterface::GLRenderingInterface(WindowContext window, const GraphicsConfig& config)
@@ -67,6 +69,9 @@ GLRenderingInterface::GLRenderingInterface(WindowContext window, const GraphicsC
     CALL_GL_FUNC(glFrontFace(GL_CCW));
 
     CALL_GL_FUNC(glEnable(GL_PROGRAM_POINT_SIZE));
+
+    // Initialize Remotery
+    rmt_BindOpenGL();
 }
 
 GLRenderingInterface::~GLRenderingInterface()
@@ -88,9 +93,18 @@ void GLRenderingInterface::ClearDepth(float depth)
 
 void GLRenderingInterface::ClearBuffer(const Color4F& color, float depth)
 {
-    CALL_GL_FUNC(glClearColor(color.r, color.g, color.b, color.a));
-    CALL_GL_FUNC(glClearDepth(depth));
-    CALL_GL_FUNC(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
+    {
+        rmt_ScopedOpenGLSample(glClearColor);
+        CALL_GL_FUNC(glClearColor(color.r, color.g, color.b, color.a));
+    }
+    {
+        rmt_ScopedOpenGLSample(glClearDepth);
+        CALL_GL_FUNC(glClearDepth(depth));
+    }
+    {
+        rmt_ScopedOpenGLSample(glClearBuffer);
+        CALL_GL_FUNC(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
+    }
 }
 
 void GLRenderingInterface::SwapBuffer()
@@ -133,12 +147,16 @@ void GLRenderingInterface::Draw_Internal(const RenderCommand& command)
     // ReSharper disable once CppDFANullDereference
     const GLuint gl_drawMode = GL::NxsDrawModeToGL(indexBuffer->GetDrawMode());
     NXS_ASSERT_MSG(gl_drawMode != GL_QUADS, "GL_QUADS is not a valid primitive type.")
-    CALL_GL_FUNC(glDrawElements(
-         gl_drawMode,      // mode
-         CAST<GLsizei>(command.indexBuffer->NumIndex()),    // count
-         GL_UNSIGNED_INT,   // type
-         R_CAST<void*>(0)           // element array buffer offset
-     ));
+    
+    {
+        rmt_ScopedOpenGLSample(glDrawElements);
+        CALL_GL_FUNC(glDrawElements(
+            gl_drawMode,      // mode
+            CAST<GLsizei>(command.indexBuffer->NumIndex()),    // count
+            GL_UNSIGNED_INT,   // type
+            R_CAST<void*>(0)           // element array buffer offset
+        ));
+    }
 }
 
 void GLRenderingInterface::OnResize(const uint32_t pixel_w, const uint32_t pixel_h)

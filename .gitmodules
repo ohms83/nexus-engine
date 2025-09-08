@@ -19,3 +19,6 @@
 [submodule "engine/3rdparty/assimp"]
 	path = engine/3rdparty/assimp
 	url = https://github.com/assimp/assimp.git
+[submodule "engine/3rdparty/Remotery"]
+	path = engine/3rdparty/Remotery
+	url = https://github.com/Celtoys/Remotery.git

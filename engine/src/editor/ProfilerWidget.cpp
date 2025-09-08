@@ -2,7 +2,7 @@
 // Created by nutta on 7/17/2025.
 //
 
-#include <nexus/editor/Profiler.h>
+#include "editor/ProfilerWidget.h"
 
 #include "imgui.h"
 #include "implot.h"
@@ -14,14 +14,14 @@
 
 USING_NAMESPACE_NXS;
 
-Profiler::Profiler()
-    : EditorWidget("Profiler")
+ProfilerWidget::ProfilerWidget()
+    : EditorWidget("ProfilerWidget")
 {
     m_frameTimes.reserve(MAX_PROFILED_FRAMES);
     m_frameCounters.reserve(MAX_PROFILED_FRAMES);
 }
 
-void Profiler::Draw_Internal(RenderSystem& renderSystem)
+void ProfilerWidget::Draw_Internal(RenderSystem& renderSystem)
 {
     const ImGuiIO& io = ImGui::GetIO(); (void)io;
 

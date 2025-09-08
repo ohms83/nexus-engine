@@ -8,6 +8,8 @@
 #include "graphics/opengl/GLRenderingInterface.h"
 #include "core/Logger.h"
 
+#include "Remotery.h"
+
 USING_NAMESPACE_NXS;
 
 DEFINE_LOG(RenderingInterface);
@@ -39,6 +41,7 @@ Ref<RenderingInterface> RenderingInterface::Create(WindowContext window, const G
 
 void RenderingInterface::Draw(const RenderCommand& command)
 {
+    rmt_ScopedCPUSample(RenderInterface_Draw, 0);
     NXS_ASSERT(command.shader);
     NXS_ASSERT(command.vertexBuffer);
     NXS_ASSERT(command.indexBuffer);

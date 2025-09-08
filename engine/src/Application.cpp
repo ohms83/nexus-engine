@@ -18,10 +18,13 @@
 #include "graphics/debug/Gizmos.h"
 #include "io/InputManager.h"
 #include "time/TimerManager.h"
+#include "Remotery.h"
 
 USING_NAMESPACE_NXS;
 
 DEFINE_LOG(Application);
+
+static Remotery* s_rmt = nullptr;
 
 bool ApplicationConfig::LoadConfig(const std::string& filePath)
 {
@@ -35,6 +38,7 @@ bool ApplicationConfig::LoadConfig(const std::string& filePath)
     if (const auto value = parser.GetBoolValue(sectionName, "resizable"); value.has_value()) resizable = *value;
     if (const auto value = parser.GetBoolValue(sectionName, "editMode"); value.has_value()) editMode = *value;
     if (const auto value = parser.GetBoolValue(sectionName, "maximize"); value.has_value()) maximize = *value;
+    if (const auto value = parser.GetBoolValue(sectionName, "allowProfile"); value.has_value()) allowProfile = *value;
 
     graphicsConfig.LoadConfig(filePath);
     return true;
@@ -72,6 +76,13 @@ Application::~Application()
 
 bool Application::Init(const ApplicationConfig& info)
 {
+    m_config = info;
+    if (m_config.allowProfile)
+    {
+        rmt_CreateGlobalInstance(&s_rmt);
+        rmt_SetCurrentThreadName("MainThread");
+    }
+
     // TaskManager should be initialized before anything.
     LogDispatcher::Init();
     auto& logger = LogDispatcher::Instance();
@@ -157,32 +168,40 @@ int Application::BeginMainLoop()
 
     while(!m_quit)
     {
+        rmt_ScopedCPUSample(MainLoop, 0);
         timerManager.Tick();
         m_deltaTime = m_timer->GetDeltaTime();
 
         PollEvents(e);
 
-        Update();
-        taskScheduler->Update();
+        
+        {
+            rmt_ScopedCPUSample(Update, 0);
+            Update();
+            taskScheduler->Update();
 
-        // Update input
-        inputManager.Update();
+            // Update input
+            inputManager.Update();
 
-        if (m_editor) m_editor->Update();
+            if (m_editor) m_editor->Update();
+        }
+    
+        rmt_ScopedCPUSample(Render, 0);
+        {
+            m_renderSystem->BeginDraw();
+            BeginDrawUI();
 
-        m_renderSystem->BeginDraw();
-        BeginDrawUI();
+            // Render UIs
+            DrawUI();
+            if (m_editor) m_editor->Draw(*m_renderSystem);
 
-        // Render UIs
-        DrawUI();
-        if (m_editor) m_editor->Draw(*m_renderSystem);
+            // Render the scene
+            Render(*m_renderSystem);
+            m_renderSystem->Draw();
 
-        // Render the scene
-        Render(*m_renderSystem);
-        m_renderSystem->Draw();
-
-        EndDrawUI();
-        m_renderSystem->EndDraw();
+            EndDrawUI();
+            m_renderSystem->EndDraw();
+        }
     }
     return 0;
 }
@@ -218,6 +237,7 @@ Ref<Scene> Application::GetCurrentScene() const
 
 void Application::Update()
 {
+    rmt_ScopedCPUSample(Application_Update, 0);
     if (m_currentScene)
     {
         m_currentScene->Update(GetDeltaTime());
@@ -226,6 +246,7 @@ void Application::Update()
 
 void Application::Render(RenderSystem& renderSystem)
 {
+    rmt_ScopedCPUSample(Application_Render, 0);
     if (m_currentScene)
     {
         m_currentScene->Render(renderSystem);
@@ -381,6 +402,7 @@ void Application::InitImGui() const
 
 void Application::BeginDrawUI() const
 {
+    rmt_ScopedCPUSample(BeginDrawUI, 0);
     if (const auto api = m_renderInterface->GetAPI(); api == GraphicsAPI::OpenGL)
     {
         ImGui_ImplOpenGL3_NewFrame();
@@ -398,6 +420,7 @@ void Application::BeginDrawUI() const
 
 void Application::EndDrawUI() const
 {
+    rmt_ScopedCPUSample(EndDrawUI, 0);
     ImGui::Render();
 
     if (const auto api = m_renderInterface->GetAPI(); api == GraphicsAPI::OpenGL)

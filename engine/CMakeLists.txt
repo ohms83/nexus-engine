@@ -58,6 +58,15 @@ list(APPEND ENGINE_SOURCES
     "${STB_SOURCE_DIR}/stb_image.cpp"
 )
 
+# Remotery
+set(REMOTERY_SOURCE_DIR ${ENGINE_3RD_PARTY_DIR}/Remotery/lib)
+list(APPEND ENGINE_HEADERS
+    "${REMOTERY_SOURCE_DIR}/Remotery.h"
+)
+list(APPEND ENGINE_SOURCES
+    "${REMOTERY_SOURCE_DIR}/Remotery.c"
+)
+
 include(src/CMakeLists.txt)
 include(include/CMakeLists.txt)
 
@@ -94,6 +103,8 @@ target_include_directories(nexus-engine
     PRIVATE "${XXHASH_SOURCE_DIR}"
     # stb_image
     PRIVATE "${STB_SOURCE_DIR}"
+    # Remotery
+    PRIVATE "${REMOTERY_SOURCE_DIR}"
 )
 
 target_link_libraries(nexus-engine
@@ -106,12 +117,12 @@ target_link_libraries(nexus-engine
     PRIVATE assimp::assimp
 )
 
-# Define IMGUI_IMPL_OPENGL_LOADER_GLAD for OpenGL3 backend to use glad
 target_compile_definitions(nexus-engine
     PUBLIC IMGUI_IMPL_OPENGL_LOADER_GLAD
     PUBLIC NXS_PROJECT_PATH="${PROJECT_ROOT}"
     PUBLIC NXS_ASSETS_DIR="${PROJECT_ROOT}/assets"
     PUBLIC NXS_ENGINE_ASSETS_DIR="${CMAKE_CURRENT_SOURCE_DIR}/assets"
+    PRIVATE RMT_USE_OPENGL=1
 )
 
 install(TARGETS nexus-engine

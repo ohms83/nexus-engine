@@ -1,11 +1,12 @@
 //
 // Created by nutta on 9/5/2025.
 //
-#include "../../../include/nexus/core/task/TaskScheduler.h"
+#include "nexus/core/task/TaskScheduler.h"
 
 #include <algorithm>
 
 #include "time/TimerManager.h"
+#include "Remotery.h"
 
 static uint32_t s_runningId = 1;
 
@@ -47,6 +48,7 @@ void TaskScheduler::StopTask(TaskID id)
 
 void TaskScheduler::Update()
 {
+    rmt_ScopedCPUSample(TaskScheduler_Update, 0);
     std::vector<TaskID> terminatedTasks;
     m_timer->Tick();
 

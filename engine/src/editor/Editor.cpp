@@ -10,7 +10,9 @@
 #include <iostream>
 
 #include "nexus/editor/Console.h"
-#include "nexus/editor/Profiler.h"
+#include "nexus/editor/ProfilerWidget.h"
+
+#include "Remotery.h"
 
 USING_NAMESPACE_NXS;
 
@@ -40,6 +42,7 @@ void Editor::Update() const
 
 void Editor::Draw(RenderSystem& renderSystem)
 {
+    rmt_ScopedCPUSample(Editor_Draw, 0);
     DrawMainMenu();
 
     for (const auto& widget : m_widgets)
@@ -202,7 +205,7 @@ void Editor::InitMenu()
             "Profiler",
             "Open a profiler",
             "",
-            std::make_shared<Profiler>()
+            std::make_shared<ProfilerWidget>()
         }
     };
     toolsMenuItems.insert(toolsMenuItems.begin(), console);
