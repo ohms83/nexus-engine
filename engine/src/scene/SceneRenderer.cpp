@@ -1,22 +1,23 @@
 //
 // Created by nutta on 7/25/2025.
 //
-#include "nexus/scene/SceneRenderer.h"
+#include "scene/SceneRenderer.h"
 
 #include <format>
 
 #include "core/Logger.h"
+#include "graphics/debug/Gizmos.h"
 #include "graphics/RenderSystem.h"
+#include "graphics/RenderCommand.h"
+#include "ecs/component/graphics/RenderComponent.h"
+#include "ecs/component/graphics/ModelComponent.h"
+#include "ecs/component/scene/SceneNodeComponent.h"
+#include "ecs/component/scene/CameraComponent.h"
+#include "ecs/component/scene/TransformComponent.h"
+#include "ecs/component/scene/LightComponent.h"
+#include "ecs/Ecs.h"
+#include "math/Math.h"
 #include "math/Matrix.h"
-#include "nexus/ecs/component/graphics/RenderComponent.h"
-#include "nexus/ecs/component/graphics/ModelComponent.h"
-#include "nexus/ecs/component/scene/SceneNodeComponent.h"
-#include "nexus/ecs/component/scene/CameraComponent.h"
-#include "nexus/ecs/component/scene/TransformComponent.h"
-#include "nexus/ecs/component/scene/LightComponent.h"
-#include "nexus/graphics/RenderCommand.h"
-#include "nexus/math/Math.h"
-#include "nexus/ecs/Ecs.h"
 
 USING_NAMESPACE_NXS;
 
@@ -102,9 +103,11 @@ static void SetTextureParams(RenderCommand& command, const entt::registry& regis
 void BasicSceneRenderer::Render(RenderSystem& renderSystem, const entt::registry& registry)
 {
     // ReSharper disable once CppTooWideScopeInitStatement
-    const auto cameraView = registry.view<CameraComponent, PositionComponent, OrientationComponent>();
-    for (const auto& [cameraEntity, camera, cameraPos, cameraOrient] : cameraView.each())
+    const auto cameraView = registry.view<SceneNodeComponent, CameraComponent, PositionComponent, OrientationComponent>();
+    for (const auto& [cameraEntity, sceneNode, camera, cameraPos, cameraOrient] : cameraView.each())
     {
+        if (!sceneNode.active) continue;
+
         glm::mat4 viewMtx = Matrix::CreateViewMatrix(cameraPos.value, cameraOrient.value);
         glm::mat4 projection;
         if (camera.projectionType == ProjectionType::Perspective) {
@@ -135,5 +138,9 @@ void BasicSceneRenderer::Render(RenderSystem& renderSystem, const entt::registry
                 renderSystem.RegisterDrawCommand(command);
             }
         }
+
+        Gizmos::GenerateDrawCommands(renderSystem, projection * viewMtx);
+        // Only render from the first active camera POV.
+        break;
     }
 }

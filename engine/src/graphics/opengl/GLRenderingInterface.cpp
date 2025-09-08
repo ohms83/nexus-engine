@@ -152,7 +152,7 @@ void GLRenderingInterface::Draw_Internal(const RenderCommand& command)
         rmt_ScopedOpenGLSample(glDrawElements);
         CALL_GL_FUNC(glDrawElements(
             gl_drawMode,      // mode
-            CAST<GLsizei>(command.indexBuffer->NumIndex()),    // count
+            CAST<GLsizei>(command.indexBuffer->GetDrawCount()),    // count
             GL_UNSIGNED_INT,   // type
             R_CAST<void*>(0)           // element array buffer offset
         ));

@@ -57,7 +57,7 @@ Application::~Application()
 
     m_currentScene.reset();
 
-    Gizmos::Cleanup();
+    Gizmos::Destroy();
 
     m_editor.reset();
     m_renderSystem.reset();
@@ -190,6 +190,7 @@ int Application::BeginMainLoop()
         {
             m_renderSystem->BeginDraw();
             BeginDrawUI();
+            Gizmos::Clear();
 
             // Render UIs
             DrawUI();

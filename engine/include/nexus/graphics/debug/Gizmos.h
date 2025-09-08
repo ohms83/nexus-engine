@@ -15,12 +15,13 @@ NXS_NAMESPACE
     {
     public:
         static void Init(const  RenderSystem& renderSystem);
-        static void Cleanup();
+        static void Destroy();
+        //! Clear gizmos data from the last frame.
+        static void Clear();
+        static void GenerateDrawCommands(RenderSystem& renderSystem, const glm::mat4& cameraMtx);
         static void DrawPoint(RenderSystem& renderSystem,
             const glm::vec3& position,
             const Color3F& color,
-            const glm::mat4& view,
-            const glm::mat4& projection,
             float size = 10);
     };
 }

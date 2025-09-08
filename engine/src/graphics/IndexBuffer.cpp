@@ -23,6 +23,7 @@ IndexBuffer& IndexBuffer::SetIndices(Ref<IBuffer> indexData, FrontFace frontFace
     NXS_ASSERT_MSG(m_hasBuilt, "Begin function hasn't been called yet.");
     m_indexData = indexData;
     m_frontFace = frontFace;
+    m_numIndex = m_drawCount = m_indexData->Size() / sizeof(uint32_t);
     return *this;
 }
 
@@ -49,12 +50,22 @@ void IndexBuffer::Build()
 
 uint32 IndexBuffer::NumIndex() const
 {
-    return m_indexData->Size() / sizeof(uint32);
+    return m_numIndex;
+}
+
+void IndexBuffer::SetDrawCount(uint32_t count)
+{
+    m_drawCount = count;
+}
+
+uint32_t IndexBuffer::GetDrawCount() const
+{
+    return m_drawCount;
 }
 
 uint32 IndexBuffer::NumPolygons() const
 {
-    const uint32 numIndices = NumIndex();
+    const uint32 numIndices = GetDrawCount();
     switch (m_drawMode)
     {
     case DrawMode::Line:
