@@ -53,6 +53,7 @@ NXS_NAMESPACE
         }
 
         virtual void SetDepthFunction(DepthFunction depthFunction) = 0;
+        virtual void SetLineWidth(float width) = 0;
 
     protected:
         RenderingInterface() = default;

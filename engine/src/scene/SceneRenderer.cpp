@@ -139,7 +139,7 @@ void BasicSceneRenderer::Render(RenderSystem& renderSystem, const entt::registry
             }
         }
 
-        Gizmos::GenerateDrawCommands(renderSystem, projection * viewMtx);
+        Gizmos::ProcessDraw(renderSystem, projection * viewMtx);
         // Only render from the first active camera POV.
         break;
     }

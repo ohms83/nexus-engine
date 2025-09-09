@@ -197,3 +197,8 @@ void GLRenderingInterface::SetDepthFunction(const DepthFunction depthFunction)
     }
     m_depthFunction = depthFunction;
 }
+
+void GLRenderingInterface::SetLineWidth(float width)
+{
+    CALL_GL_FUNC(glLineWidth(width));
+}

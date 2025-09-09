@@ -72,7 +72,7 @@ NXS_NAMESPACE
             case DrawMode::Point:
                 return GL_POINTS;
             case DrawMode::Line:
-                return GL_LINE;
+                return GL_LINES;
             case DrawMode::LineStrip:
                 return GL_LINE_STRIP;
             case DrawMode::LineLoop:

@@ -31,6 +31,7 @@ NXS_NAMESPACE
         void OnResize(uint32_t pixel_w, uint32_t pixel_h) override;
 
         void SetDepthFunction(DepthFunction depthFunction) override;
+        void SetLineWidth(float width) override;
 
     protected:
         void Draw_Internal(const RenderCommand& command) override;

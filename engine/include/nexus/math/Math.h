@@ -10,6 +10,8 @@ NXS_NAMESPACE
 {
     namespace Math
     {
+        extern const float PI;
+
         template <typename T>
         constexpr bool is_vector = false;
         template <>

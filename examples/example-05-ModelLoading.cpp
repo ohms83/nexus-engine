@@ -178,8 +178,8 @@ private:
     void InitScene()
     {
         auto camera = m_scene.CreateNode<nxs::Camera>("Camera");
-        camera->Position().value = {0, 5, 5};
-        camera->LookAt(glm::vec3(0), glm::vec3(0, 1, 0));
+        camera->Position().value = {0, 0, 5};
+        camera->LookAt(glm::vec3(0), glm::vec3(0, 0, 0));
 
         for (int i = 0; i < modelPaths.size(); i++)
         {
