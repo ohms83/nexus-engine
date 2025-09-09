@@ -29,11 +29,19 @@ NXS_NAMESPACE
             const glm::vec3& start,
             const glm::vec3& end,
             const Color3F& color);
+        static void DrawOutlineBox(
+            RenderSystem& renderSystem,
+            const glm::vec3& position,
+            const glm::vec3& extent,
+            const glm::quat& rotation,
+            const Color3F& color = Color3F::Red
+        );
         static void DrawOutlineSphere(
             RenderSystem& renderSystem,
             const glm::vec3& position,
             float radius,
-            uint32_t = 36,
+            const glm::quat& rotation = glm::quat(1, 0, 0, 0),
+            uint32_t numSegments = 36,
             //! Thye color of Latitude-line along x-y plane
             const Color3F& xyLatColor = Color3F::Red,
             //! Thye color of Latitude-line along y-z plane

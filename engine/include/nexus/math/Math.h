@@ -70,5 +70,15 @@ NXS_NAMESPACE
             else if (a > b) return 1;
             return -1;
         }
+
+        inline float Radians(float degrees)
+        {
+            return glm::radians<float>(degrees);
+        }
+
+        inline float Degrees(float radians)
+        {
+            return glm::degrees<float>(radians);
+        }
     }
 }

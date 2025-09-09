@@ -35,6 +35,11 @@ namespace
         Ref<VertexBuffer>   lineVertexBuffer;
         Ref<IndexBuffer>    lineIndexBuffer;
 
+        std::vector<Vertex> boxVertices;
+        std::vector<uint32> boxIndices;
+        Ref<VertexBuffer>   boxVertexBuffer;
+        Ref<IndexBuffer>    boxIndexBuffer;
+
         std::vector<Vertex> sphereVertices;
         std::vector<uint32> sphereIndices;
         Ref<VertexBuffer>   sphereVertexBuffer;
@@ -50,6 +55,9 @@ namespace
             lineVertices.reserve(100);
             lineIndices.reserve(100);
 
+            boxVertices.reserve(200);
+            boxIndices.reserve(200);
+
             sphereVertices.reserve(500);
             sphereIndices.reserve(500);
         }
@@ -60,6 +68,8 @@ namespace
             pointIndices.clear();
             lineVertices.clear();
             lineIndices.clear();
+            boxVertices.clear();
+            boxIndices.clear();
             sphereVertices.clear();
             sphereIndices.clear();
         }
@@ -167,6 +177,8 @@ void Gizmos::Init(const RenderSystem& renderSystem)
     CREATE_BUFFER(point, DrawMode::Point);
     CREATE_BUFFER(line, DrawMode::Line);
     // TODO: Use DrawMode::LineStrip
+    CREATE_BUFFER(box, DrawMode::Line);
+    // TODO: Use DrawMode::LineStrip
     CREATE_BUFFER(sphere, DrawMode::Line);
 #undef CREATE_BUFFER
 
@@ -192,10 +204,10 @@ void Gizmos::Clear()
 void Gizmos::ProcessDraw(RenderSystem& renderSystem, const glm::mat4& cameraMtx)
 {
     rmt_ScopedCPUSample(DrawGizmos, 0);
-    // Draw points
 #define DRAW_GIZMOS(gizmo) GenerateDrawCommands(renderSystem, cameraMtx, s_va->##gizmo##Vertices, s_va->##gizmo##Indices, s_va->##gizmo##VertexBuffer, s_va->##gizmo##IndexBuffer)
     DRAW_GIZMOS(point);
     DRAW_GIZMOS(line);
+    DRAW_GIZMOS(box);
     DRAW_GIZMOS(sphere);
 #undef DRAW_GIZMOS
 }
@@ -222,10 +234,63 @@ void Gizmos::DrawLine(
     s_va->lineIndices.emplace_back(s_va->lineIndices.size());
 }
 
+void Gizmos::DrawOutlineBox(
+    RenderSystem& renderSystem,
+    const glm::vec3& position,
+    const glm::vec3& extent,
+    const glm::quat& rotation,
+    const Color3F& color
+)
+{
+    const std::array<glm::vec3, 8> boxVertices = {
+        glm::vec3 {-0.5f,  0.5f,  0.5f},
+        glm::vec3 {-0.5f, -0.5f,  0.5f},
+        glm::vec3 { 0.5f, -0.5f,  0.5f},
+        glm::vec3 { 0.5f,  0.5f,  0.5f},
+
+        glm::vec3 {-0.5f,  0.5f, -0.5f},
+        glm::vec3 {-0.5f, -0.5f, -0.5f},
+        glm::vec3 { 0.5f, -0.5f, -0.5f},
+        glm::vec3 { 0.5f,  0.5f, -0.5f},
+    };
+    const std::array<uint32_t, 24> boxIndices = {
+        0, 1,
+        1, 2,
+        2, 3,
+        3, 0,
+
+        4, 5,
+        5, 6,
+        6, 7,
+        7, 4,
+
+        0, 4,
+        1, 5,
+        2, 6,
+        3, 7,
+    };
+
+    auto& vertices = s_va->boxVertices;
+    auto& indices  = s_va->boxIndices;
+    const auto startIndex = vertices.size();
+
+    for (auto& vertex : boxVertices)
+    {
+        auto pos = (position + (rotation * vertex * extent));
+        vertices.emplace_back(pos, color, 0);
+    }
+
+    for (const auto index : boxIndices)
+    {
+        indices.push_back(startIndex + index);
+    }
+}
+
 void Gizmos::DrawOutlineSphere(
     RenderSystem& renderSystem,
     const glm::vec3& position,
     float radius,
+    const glm::quat& rotation,
     uint32_t numSegments,
     const Color3F& xyLatColor,
     const Color3F& yzLatColor,
@@ -249,7 +314,7 @@ void Gizmos::DrawOutlineSphere(
             const float x = radius * cos(rad);
             const float y = 0;
             const float z = radius * sin(rad);
-            vertices.emplace_back(position + glm::vec3(x, y, z), longColor, 0);
+            vertices.emplace_back(position + (rotation * glm::vec3(x, y, z)), longColor, 0);
 
             const auto i0 = startIndex + i;
             const auto i1 = (i + 1) >= numSegments ? startIndex : i0 + 1;
@@ -266,7 +331,7 @@ void Gizmos::DrawOutlineSphere(
             const float x = radius * cos(rad);
             const float y = radius * sin(rad);
             const float z = 0;
-            vertices.emplace_back(position + glm::vec3(x, y, z), xyLatColor, 0);
+            vertices.emplace_back(position + (rotation * glm::vec3(x, y, z)), xyLatColor, 0);
 
             const auto i0 = startIndex + i;
             const auto i1 = (i + 1) >= numSegments ? startIndex : i0 + 1;
@@ -283,7 +348,7 @@ void Gizmos::DrawOutlineSphere(
             const float x = 0;
             const float y = radius * sin(rad);
             const float z = radius * cos(rad);
-            vertices.emplace_back(position + glm::vec3(x, y, z), yzLatColor, 0);
+            vertices.emplace_back(position + (rotation * glm::vec3(x, y, z)), yzLatColor, 0);
 
             const auto i0 = startIndex + i;
             const auto i1 = (i + 1) >= numSegments ? startIndex : i0 + 1;
