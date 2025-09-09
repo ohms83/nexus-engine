@@ -234,6 +234,25 @@ void Gizmos::DrawLine(
     s_va->lineIndices.emplace_back(s_va->lineIndices.size());
 }
 
+void Gizmos::DrawLocalAxes(
+    RenderSystem& renderSystem,
+    const glm::vec3& position,
+    const glm::quat& rotation,
+    float axisLength,
+    const std::array<Color3F, 3>& axisColors)
+{
+    std::array<glm::vec3, 3> axes = {
+        glm::vec3 {axisLength, 0, 0},
+        glm::vec3 {0, axisLength, 0},
+        glm::vec3 {0, 0, axisLength},
+    };
+
+    for (int i = 0; i < 3; ++i)
+    {
+        DrawLine(renderSystem, position, position + (rotation * axes[i]), axisColors[i]);
+    }
+}
+
 void Gizmos::DrawOutlineBox(
     RenderSystem& renderSystem,
     const glm::vec3& position,
