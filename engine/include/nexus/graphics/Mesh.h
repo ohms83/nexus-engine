@@ -46,10 +46,34 @@ NXS_NAMESPACE
             return m_material;
         }
 
+        void SetSpehreRadius(float r)
+        {
+            m_sphereRadius = r;
+        }
+
+        NODISCARD float GetSphereRadius() const
+        {
+            return m_sphereRadius;
+        }
+
+        void SetBoxExt(const glm::vec3& ext)
+        {
+            m_boxExtent = ext;
+        }
+
+        NODISCARD const glm::vec3& GetBoxExt() const
+        {
+            return m_boxExtent;
+        }
+
     protected:
         std::string m_name;
         Ref<VertexBuffer> m_vertexBuffer;
         Ref<IndexBuffer> m_indexBuffer;
         Ref<Material> m_material;
+        //! A radius of the smallest bounding sphere that can cover the entire mesh.
+        float m_sphereRadius = 0;
+        //! The smallest value of the bounding-box's dimention in x/y/z coordinate that can cover the entire mesh.
+        glm::vec3 m_boxExtent{};
     };
 }

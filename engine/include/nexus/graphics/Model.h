@@ -36,5 +36,9 @@ NXS_NAMESPACE
 
     private:
         std::vector<Ref<Mesh>> m_meshes;
+        //! A radius of the smallest bounding sphere that can cover the entire model.
+        float m_sphereRadius = 0;
+        //! The smallest value of the bounding-box's dimention in x/y/z coordinate that can cover the entire model.
+        glm::vec3 m_boxExtent{};
     };
 }

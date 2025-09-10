@@ -55,7 +55,7 @@ NXS_NAMESPACE
     public:
         VertexBuffer() = default;
 
-        uint32 GetHandle() const override
+        uint32_t GetHandle() const override
         {
             return m_handle;
         }
@@ -69,7 +69,7 @@ NXS_NAMESPACE
         virtual VertexBuffer& AddAttribute(const VertexAttribute& attribute);
         void Build();
 
-        NODISCARD uint32 GetStride() const
+        NODISCARD uint32_t GetStride() const
         {
             return m_stride;
         }
@@ -77,13 +77,20 @@ NXS_NAMESPACE
         template<typename T>
         std::vector<T> GetVertices() const
         {
+            static_assert(sizeof(T) == m_stride);
+
             std::vector<T> result;
             T* vertex = reinterpret_cast<T*>(m_vertices->Data());
-            for (uint32 index = 0; index < m_vertexCount; index++)
+            for (uint32_t index = 0; index < m_vertexCount; index++)
             {
                 result.push_back(vertex[index]);
             }
             return result;
+        }
+
+        uint32_t GetNumVertex() const
+        {
+            return m_vertexCount;
         }
 
     private:
@@ -91,10 +98,10 @@ NXS_NAMESPACE
         virtual void Build_Impl() = 0;
 
     protected:
-        uint32 m_handle = 0;
+        uint32_t m_handle = 0;
         bool m_hasBuilt = false;
-        uint32 m_stride = 0;
-        uint32 m_vertexCount = 0;
+        uint32_t m_stride = 0;
+        uint32_t m_vertexCount = 0;
         Ref<IBuffer> m_vertices;
         BufferUsage m_usage = BufferUsage::StaticDraw;
         std::vector<VertexAttribute> m_attributes;
