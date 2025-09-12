@@ -262,15 +262,15 @@ void Gizmos::DrawOutlineBox(
 )
 {
     const std::array<glm::vec3, 8> boxVertices = {
-        glm::vec3 {-0.5f,  0.5f,  0.5f},
-        glm::vec3 {-0.5f, -0.5f,  0.5f},
-        glm::vec3 { 0.5f, -0.5f,  0.5f},
-        glm::vec3 { 0.5f,  0.5f,  0.5f},
+        glm::vec3 {-1.0f,  1.0f,  1.0f},
+        glm::vec3 {-1.0f, -1.0f,  1.0f},
+        glm::vec3 { 1.0f, -1.0f,  1.0f},
+        glm::vec3 { 1.0f,  1.0f,  1.0f},
 
-        glm::vec3 {-0.5f,  0.5f, -0.5f},
-        glm::vec3 {-0.5f, -0.5f, -0.5f},
-        glm::vec3 { 0.5f, -0.5f, -0.5f},
-        glm::vec3 { 0.5f,  0.5f, -0.5f},
+        glm::vec3 {-1.0f,  1.0f, -1.0f},
+        glm::vec3 {-1.0f, -1.0f, -1.0f},
+        glm::vec3 { 1.0f, -1.0f, -1.0f},
+        glm::vec3 { 1.0f,  1.0f, -1.0f},
     };
     const std::array<uint32_t, 24> boxIndices = {
         0, 1,
@@ -295,7 +295,7 @@ void Gizmos::DrawOutlineBox(
 
     for (auto& vertex : boxVertices)
     {
-        auto pos = (position + (rotation * vertex * extent));
+        auto pos = (position + (rotation * (vertex * extent)));
         vertices.emplace_back(pos, color, 0);
     }
 

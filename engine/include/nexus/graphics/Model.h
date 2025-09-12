@@ -1,7 +1,9 @@
 #pragma once
 
-#include "nexus/NxsDefine.h"
+#include "nexus/NxsCommon.h"
 #include "nexus/core/Resource.h"
+#include "nexus/geom/Box.h"
+#include "nexus/geom/Sphere.h"
 #include "Mesh.h"
 
 #include <vector>
@@ -32,13 +34,27 @@ NXS_NAMESPACE
             return m_meshes;
         }
 
+        void SetBoundingBox(const glm::vec3& position, const glm::vec3& boxExt);
+
+        const Box& GetBoundingBox() const
+        {
+            return m_box;
+        }
+
+        void SetBoundingSphere(const glm::vec3& center, float radius);
+
+        const Sphere& GetBoundingSphere() const
+        {
+            return m_sphere;
+        }
+
         std::vector<RenderCommand> CreateDrawCommand() const;
 
     private:
         std::vector<Ref<Mesh>> m_meshes;
-        //! A radius of the smallest bounding sphere that can cover the entire model.
-        float m_sphereRadius = 0;
-        //! The smallest value of the bounding-box's dimention in x/y/z coordinate that can cover the entire model.
-        glm::vec3 m_boxExtent{};
+        //! The smallest bounding sphere that can cover the entire model.
+        Sphere m_sphere {};
+        //! The smallest bounding-box's that can cover the entire model.
+        Box m_box;
     };
 }

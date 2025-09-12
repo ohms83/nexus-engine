@@ -44,6 +44,7 @@ NXS_NAMESPACE
         void ProcessMesh(const Ref<Model>& model, const aiMesh* mesh, const aiScene* scene, const std::filesystem::path&) const;
         void ProcessMaterial(const Ref<Mesh>& newMesh, const aiMesh* mesh, const aiScene* scene, const std::filesystem::path&) const;
         void ProcessTextures(const Ref<Material>& newMat, const aiMaterial* material, const std::filesystem::path&) const;
+        void ComputeBoundingVolume(const Ref<Model>& model);
 
         Ref<RenderingInterface> m_renderingInterface;
         Ref<TextureManager> m_textureManager;

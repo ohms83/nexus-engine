@@ -10,6 +10,16 @@ void Model::AddMesh(const Ref<Mesh>& mesh)
     m_meshes.push_back(mesh);
 }
 
+void Model::SetBoundingBox(const glm::vec3& position, const glm::vec3& boxExt)
+{
+    m_box = Box {position, boxExt};
+}
+
+void Model::SetBoundingSphere(const glm::vec3& center, float radius)
+{
+    m_sphere = Sphere {center, radius};
+}
+
 std::vector<RenderCommand> Model::CreateDrawCommand() const
 {
     std::vector<RenderCommand> commands;

@@ -32,14 +32,14 @@ NXS_NAMESPACE
         static void DrawLocalAxes(
             RenderSystem& renderSystem,
             const glm::vec3& position,
-            const glm::quat& rotation,
+            const glm::quat& rotation = glm::quat(1, 0, 0, 0),
             float axisLength = 1,
             const std::array<Color3F, 3>& axisColors = {Color3F::Red, Color3F::Green, Color3F::Blue});
         static void DrawOutlineBox(
             RenderSystem& renderSystem,
             const glm::vec3& position,
             const glm::vec3& extent,
-            const glm::quat& rotation,
+            const glm::quat& rotation = glm::quat(1, 0, 0, 0),
             const Color3F& color = Color3F::Red);
         static void DrawOutlineSphere(
             RenderSystem& renderSystem,

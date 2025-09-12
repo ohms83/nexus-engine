@@ -53,6 +53,51 @@ NXS_NAMESPACE
     class VertexBuffer : public IGpuResource
     {
     public:
+        /**
+         * @brief And iterator used for iterating over the list of vertices
+         * 
+         * @tparam T Type of vertex. This must have the same memory layout as the data described by
+         * the vertex attributes. 
+         */
+        template<class T>
+        class Iterator : public std::iterator<std::forward_iterator_tag, T>
+        {
+        public:
+            explicit Iterator(const VertexBuffer& vertexBuffer)
+            {
+                m_current = R_CAST<T*>(vertexBuffer.m_vertices->Data());
+            }
+
+            explicit Iterator(const VertexBuffer& vertexBuffer, size_t offset)
+            {
+                m_current = R_CAST<T*>(vertexBuffer.m_vertices->Data() + offset);
+            }
+
+            Iterator(const Iterator& rhs) : m_current(rhs.m_current) {}
+
+            /**
+             * @brief Pre-increment operator.
+             * @return This vertex iterator.
+             */
+            Iterator& operator++()
+            {
+                ++m_current;
+                return *this;
+            }
+            /**
+             * @brief Post-increment operator.
+             * @return This vertex iterator.
+             */
+            Iterator operator++(int) { Iterator orig(*this); operator++(); return orig; }
+
+            bool operator==(const Iterator& rhs) const { return m_current == rhs.m_current; }
+            bool operator!=(const Iterator& rhs) const { return m_current != rhs.m_current; }
+            NODISCARD T& operator*() { return *m_current; }
+            NODISCARD const T& operator*() const { return *m_current; }
+        private:
+            T* m_current = nullptr;
+        };
+
         VertexBuffer() = default;
 
         uint32_t GetHandle() const override
@@ -91,6 +136,18 @@ NXS_NAMESPACE
         uint32_t GetNumVertex() const
         {
             return m_vertexCount;
+        }
+
+        template<class T>
+        Iterator<T> Begin() const
+        {
+            return Iterator<T>(*this);
+        }
+
+        template<class T>
+        Iterator<T> End() const
+        {
+            return Iterator<T>(*this, m_stride * m_vertexCount);
         }
 
     private:

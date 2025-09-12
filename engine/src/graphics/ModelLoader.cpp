@@ -124,6 +124,7 @@ Ref<Resource> ModelLoader::Load(const std::string &path, uint32 id)
 
     // Process Assimp's root node recursively
     ProcessNode(model, scene->mRootNode, scene, directory);
+    ComputeBoundingVolume(model);
 
     LOG_INFO(LogModelLoader, std::format("Model loaded successfully: {}", path));
     LOG_INFO(LogModelLoader, std::format("Processed meshes: {}", scene->mNumMeshes));
@@ -204,6 +205,7 @@ Ref<IResourceLoader::LoadResult> ModelLoader::LoadAsync(const std::string& path,
 
         // Process Assimp's root node recursively
         ProcessNode(model, scene->mRootNode, scene.get(), directory);
+        ComputeBoundingVolume(model);
 
         result->status = LoadResult::Status::Ready;
         result->resource = model;
@@ -377,4 +379,47 @@ void ModelLoader::ProcessTextures(const Ref<Material>& newMat, const aiMaterial*
             }
         }
     }
+}
+
+void ModelLoader::ComputeBoundingVolume(const Ref<Model>& model)
+{
+    glm::vec3 min{FLT_MAX}, max{FLT_MIN}, center{};
+    for (const auto& mesh : model->GetMeshes())
+    {
+        const auto vertexBuffer = mesh->GetVertexBuffer();
+        const auto numVertex = vertexBuffer->GetNumVertex();
+
+        for (auto vertexItr = vertexBuffer->Begin<Vertex>(); vertexItr != vertexBuffer->End<Vertex>(); ++vertexItr)
+        {
+            const auto& vertex = *vertexItr;
+            min.x = std::min(min.x, vertex.position.x);
+            min.y = std::min(min.y, vertex.position.y);
+            min.z = std::min(min.z, vertex.position.z);
+
+            max.x = std::max(max.x, vertex.position.x);
+            max.y = std::max(max.y, vertex.position.y);
+            max.z = std::max(max.z, vertex.position.z);
+
+            center += vertex.position / (float)numVertex;
+        }
+    }
+
+    LOG_DEBUG(LogModelLoader, std::format("center({}, {}, {}) max({}, {}, {}) min({}, {}, {})",
+        center.x, center.y, center.z,
+        max.x, max.y, max.z,
+        min.x, min.y, min.z
+    ));
+    model->SetBoundingBox(center, max - center);
+
+    float radius = 0;
+    for (const auto& mesh : model->GetMeshes())
+    {
+        const auto vertexBuffer = mesh->GetVertexBuffer();
+        for (auto vertexItr = vertexBuffer->Begin<Vertex>(); vertexItr != vertexBuffer->End<Vertex>(); ++vertexItr)
+        {
+            const auto& vertex = *vertexItr;
+            radius = std::max(radius, glm::length(center - vertex.position));
+        }
+    }
+    model->SetBoundingSphere(center, radius);
 }

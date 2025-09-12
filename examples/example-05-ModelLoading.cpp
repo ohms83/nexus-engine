@@ -7,29 +7,31 @@
 
 static const std::vector<std::string> modelPaths = {
     "meshes/apple/3DApple001_SQ-1K-PNG.obj",
-    "meshes/armadillo/armadillo.obj",
-    "meshes/bunny/stanford-bunny.obj",
-    "meshes/cube/cube_textured.obj",
-    "meshes/barrel/wine_barrel_01_4k.gltf",
+    // "meshes/armadillo/armadillo.obj",
+    // "meshes/bunny/stanford-bunny.obj",
+    // "meshes/cube/cube_textured.obj",
+    // "meshes/barrel/wine_barrel_01_4k.gltf",
 };
 static const std::vector<std::string> modelLabels = {
     "Apple",
-    "Armadillo",
-    "Bunny",
-    "Crate",
-    "Wine Barrel",
+    // "Armadillo",
+    // "Bunny",
+    // "Crate",
+    // "Wine Barrel",
 };
 static const std::vector<glm::vec3> modelScales = {
     glm::vec3(3),
-    glm::vec3(0.01),
-    glm::vec3(3),
-    glm::vec3(1),
-    glm::vec3(1),
+    // glm::vec3(0.01),
+    // glm::vec3(3),
+    // glm::vec3(1),
+    // glm::vec3(1),
 };
 
 static const char* currentLabel = modelLabels[0].c_str();
 static int selectedModel = 0;
 static float scale = 1.0f;
+static bool drawBox = false;
+static bool drawSphere = false;
 
 class Example_05 final : public nxs::Application
 {
@@ -60,6 +62,25 @@ public:
         auto modelNode = PTR_CAST<nxs::SceneNode3D>(m_scene.GetNode("Model"));
         modelNode->Orient().value = glm::mat4_cast(glm::quat(glm::radians(m_euler)));
         modelNode->Scale().value = modelScales[selectedModel] * scale;
+
+        auto modelComp = modelNode->TryGetComponent<nxs::ModelComponent>();
+        if (modelComp)
+        {
+            const auto model = modelComp->model;
+            const auto position = modelNode->Position().value;
+            const auto orient = modelNode->Orient().value;
+            const float scale = modelNode->Scale().value.x;
+            if (drawSphere)
+            {
+                auto sphere = model->GetBoundingSphere();
+                nxs::Gizmos::DrawOutlineSphere(renderSystem, (position + sphere.center) * scale, sphere.radius * scale);
+            }
+            if (drawBox)
+            {
+                auto box = model->GetBoundingBox();
+                nxs::Gizmos::DrawOutlineBox(renderSystem, (position + box.position) * scale, box.extent * scale);
+            }
+        }
 
         m_scene.Render(renderSystem);
     }
@@ -94,6 +115,8 @@ public:
                 ImGui::EndCombo();
             }
             ImGui::SliderFloat("Scale", &scale, 1.0f, 5.0f);
+            ImGui::Checkbox("Draw Sphere", &drawSphere);
+            ImGui::Checkbox("Draw Box", &drawBox);
 
             ImGui::SeparatorText("Lights");
             if (ImGui::TreeNode("Ambient"))
@@ -189,7 +212,6 @@ private:
 
         auto node = m_scene.CreateNode<nxs::SceneNode3D>("Model");
         auto& modelComp = node->AddComponent<nxs::ModelComponent>();
-        // modelComp.model = m_model = LoadModel(0);
         node->Scale().value = modelScales[0];
 
         m_scene.SetRenderer(std::make_unique<nxs::BasicSceneRenderer>());
@@ -253,8 +275,6 @@ private:
 protected:
     nxs::Scene m_scene;
     nxs::Ref<nxs::GpuProgram> m_gpuProgram;
-    //! Currently showing model
-    nxs::Ref<nxs::Model> m_model;
     nxs::Transform m_cubeTransform;
     nxs::CameraComponent m_camera;
     nxs::DirectLightComponent* m_directionalLight = nullptr;
