@@ -5,6 +5,7 @@
 #pragma once
 
 #include "nexus/NxsDefine.h"
+#include "nexus/geom/Frustum.h"
 #include "nexus/ecs/component/scene/CameraComponent.h"
 
 #include "SceneNode.h"
@@ -17,10 +18,10 @@ NXS_NAMESPACE
         explicit Camera(entt::registry& registry);
         explicit Camera(entt::registry& registry, const std::string& name);
 
-        PositionComponent& Position() { return m_position; }
+        NODISCARD PositionComponent& Position() { return m_position; }
         const PositionComponent& Position() const { return m_position; }
 
-        OrientationComponent& Orient() { return m_orient; }
+        NODISCARD OrientationComponent& Orient() { return m_orient; }
         const OrientationComponent& Orient() const { return m_orient; }
 
         void LookAt(const glm::vec3& center, const glm::vec3& up);
@@ -42,11 +43,11 @@ NXS_NAMESPACE
             return m_projMtx;
         }
 
-        float GetFOV() const { return m_camera.fov; }
-        float Getwidth() const { return m_camera.width; }
-        float GetHeight() const { return m_camera.height; }
-        float GetNearZ() const { return m_camera.nearZ; }
-        float GetFarZ() const { return m_camera.farZ; }
+        NODISCARD float GetFOV() const { return m_camera.fov; }
+        NODISCARD float Getwidth() const { return m_camera.width; }
+        NODISCARD float GetHeight() const { return m_camera.height; }
+        NODISCARD float GetNearZ() const { return m_camera.nearZ; }
+        NODISCARD float GetFarZ() const { return m_camera.farZ; }
 
     protected:
         CameraComponent& m_camera;

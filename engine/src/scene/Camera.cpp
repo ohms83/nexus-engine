@@ -2,8 +2,7 @@
 // Created by nutta on 7/8/2025.
 //
 
-#include "nexus/scene/Camera.h"
-
+#include "scene/Camera.h"
 #include "ecs/component/scene/TransformComponent.h"
 
 USING_NAMESPACE_NXS;
@@ -59,6 +58,7 @@ glm::mat4 Camera::GetViewMtx() const
     viewMatrix[3] = glm::vec4(worldPosition, 1);
     return glm::inverse(viewMatrix);
 }
+
 void Camera::LookAt(const glm::vec3 &center, const glm::vec3 &up)
 {
     m_orient.value = glm::quatLookAt(glm::normalize(center - m_position.value), up);

@@ -18,6 +18,7 @@
 #include "ecs/Ecs.h"
 #include "math/Math.h"
 #include "math/Matrix.h"
+#include "geom/Frustum.h"
 
 USING_NAMESPACE_NXS;
 
@@ -117,11 +118,19 @@ void BasicSceneRenderer::Render(RenderSystem& renderSystem, const entt::registry
             projection = glm::ortho(-camera.width/2, camera.width/2, -camera.height/2, camera.height/2, camera.nearZ, camera.farZ);
         }
 
+        const auto viewProjMtx = projection * viewMtx;
+        const auto viewFrustum = Frustum::CreateViewFrustum(viewProjMtx);
         for (const auto view = registry.view<SceneNodeComponent, ModelComponent, PositionComponent, OrientationComponent, ScaleComponent>(); const auto& [entity, sceneNode, model, position, orient, scale] : view.each())
         {
             if (!model.model) continue;
 
             glm::mat4 modelMtx = Matrix::CreateModelMatrix(position.value, orient.value, scale.value);
+            const auto& sphere = model.model->GetBoundingSphere();
+            const glm::vec3 transformedCenter = modelMtx * glm::vec4(sphere.center, 1);
+            // TODO: Handle non-uniform scaling.
+            const float scaledRadius = sphere.radius * scale.value.x;
+
+            if (!viewFrustum.IsSphereInside(transformedCenter, scaledRadius)) continue;
 
             auto commands = model.model->CreateDrawCommand();
             for (auto& command : commands)

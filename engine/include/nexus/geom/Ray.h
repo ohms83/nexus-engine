@@ -30,12 +30,12 @@ NXS_NAMESPACE
         bool Intersect(const Plane& plane)
         {
             float tmpOut;
-            return glm::intersectRayPlane(origin, direction, plane.position, plane.normal, tmpOut);
+            return glm::intersectRayPlane(origin, direction, plane.distance * plane.normal, plane.normal, tmpOut);
         }
 
         bool Intersect(const Plane& plane, float& outDistance)
         {
-            return glm::intersectRayPlane(origin, direction, plane.position, plane.normal, outDistance);
+            return glm::intersectRayPlane(origin, direction, plane.distance * plane.normal, plane.normal, outDistance);
         }
 
         glm::vec3 origin;

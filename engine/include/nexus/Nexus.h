@@ -38,6 +38,7 @@
 #include "editor/MenuItem.h"
 #include "editor/ProfilerWidget.h"
 #include "geom/Box.h"
+#include "geom/Frustum.h"
 #include "geom/Plane.h"
 #include "geom/Ray.h"
 #include "geom/Sphere.h"

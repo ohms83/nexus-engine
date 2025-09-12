@@ -8,12 +8,12 @@ NXS_NAMESPACE
     struct Plane
     {
         Plane() = default;
-        explicit Plane(const glm::vec3& pos, const glm::vec3& n)
-            : position(pos)
-            , normal(n)
+        explicit Plane(const glm::vec3& n, float d)
+            : normal(n)
+            , distance(d)
         {}
 
-        glm::vec3 position;
-        glm::vec3 normal;
+        glm::vec3 normal {};
+        float distance = 0;
     };
 }

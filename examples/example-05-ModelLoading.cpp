@@ -274,7 +274,6 @@ private:
 
 protected:
     nxs::Scene m_scene;
-    nxs::Ref<nxs::GpuProgram> m_gpuProgram;
     nxs::Transform m_cubeTransform;
     nxs::CameraComponent m_camera;
     nxs::DirectLightComponent* m_directionalLight = nullptr;
