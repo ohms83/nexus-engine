@@ -65,8 +65,8 @@ GLRenderingInterface::GLRenderingInterface(WindowContext window, const GraphicsC
     SetDepthFunction(DepthFunction::Lesser);
 
     CALL_GL_FUNC(glEnable(GL_CULL_FACE));
-    CALL_GL_FUNC(glCullFace(GL_BACK));
-    CALL_GL_FUNC(glFrontFace(GL_CCW));
+    SetCullMode(PolygonFacing::Back);
+    SetFrontFace(FrontFace::CounterClockWise);
 
     CALL_GL_FUNC(glEnable(GL_PROGRAM_POINT_SIZE));
 
@@ -109,6 +109,7 @@ void GLRenderingInterface::ClearBuffer(const Color4F& color, float depth)
 
 void GLRenderingInterface::SwapBuffer()
 {
+    rmt_ScopedCPUSample(SDL_GL_SwapWindow, 0);
     SDL_GL_SwapWindow(m_window);
 }
 
@@ -201,4 +202,45 @@ void GLRenderingInterface::SetDepthFunction(const DepthFunction depthFunction)
 void GLRenderingInterface::SetLineWidth(float width)
 {
     CALL_GL_FUNC(glLineWidth(width));
+}
+
+void GLRenderingInterface::SetPolygonMode(PolygonMode mode)
+{
+    Super::SetPolygonMode(mode);
+
+    const auto gl_mode = GL::NxsPolygonModeToGL(mode);
+    // Get the polygon mode enum.
+    GLenum gl_face = GL_NONE;
+    // The polygon faces that the setting will be applied to are the ones that are not affected by culling.
+    switch (GetCullMode())
+    {
+    case PolygonFacing::Front:
+        gl_face = GL_BACK;
+        break;
+    case PolygonFacing::Back:
+        gl_face = GL_FRONT;
+        break;
+    case PolygonFacing::None:
+        gl_face = GL_FRONT_AND_BACK;
+        break;
+    case PolygonFacing::Both:
+        gl_face = GL_NONE;
+        break;
+    }
+    CALL_GL_FUNC(glPolygonMode(gl_face, gl_mode));
+}
+
+void GLRenderingInterface::SetCullMode(PolygonFacing mode)
+{    
+    Super::SetCullMode(mode);
+
+    const auto gl_mode = GL::NxsFacingToGL(mode);
+    CALL_GL_FUNC(glCullFace(gl_mode));
+}
+
+void GLRenderingInterface::SetFrontFace(FrontFace face)
+{
+    Super::SetFrontFace(face);
+    const auto gl_face = GL::NxsFrontFaceToGL(face);
+    CALL_GL_FUNC(glFrontFace(gl_face));
 }

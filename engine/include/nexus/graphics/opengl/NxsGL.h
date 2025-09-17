@@ -104,5 +104,37 @@ NXS_NAMESPACE
             NXS_ASSERT(false);
             return GL_NONE;
         }
+
+        inline GLenum NxsFacingToGL(const PolygonFacing face)
+        {
+            switch (face)
+            {
+            case PolygonFacing::None:
+                return GL_NONE;
+            case PolygonFacing::Front:
+                return GL_FRONT;
+            case PolygonFacing::Back:
+                return GL_BACK;
+            case PolygonFacing::Both:
+                return GL_FRONT_AND_BACK;
+            }
+            NXS_ASSERT(false);
+            return GL_NONE;
+        }
+
+        inline GLenum NxsPolygonModeToGL(const PolygonMode mode)
+        {
+            switch (mode)
+            {
+            case PolygonMode::Fill:
+                return GL_FILL;
+            case PolygonMode::Wireframe:
+                return GL_LINE;
+            case PolygonMode::Point:
+                return GL_POINT;
+            }
+            NXS_ASSERT(false);
+            return GL_NONE;
+        }
     }
 }

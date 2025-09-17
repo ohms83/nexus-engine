@@ -18,13 +18,13 @@ NXS_NAMESPACE
 
         void Bind() const override;
         void Unbind() const override;
-        bool IsBinding() const override;
+        NODISCARD bool IsBinding() const override;
 
         TextureProxy& Begin(const TextureDescription& info) override;
         TextureProxy& LoadData(const uint8* data, uint32 size) override;
         TextureProxy& LoadMipData(const uint8* data, uint32 size, uint32 mip) override;
 
-        void CopyData(const void* data, size_t bytes, size_t offset = 0) override;
+        void CopyData(const void* data, size_t bytes, size_t) override;
 
     protected:
         NODISCARD uint32 Alloc() override;

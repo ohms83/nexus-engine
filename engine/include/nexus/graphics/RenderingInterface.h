@@ -55,6 +55,15 @@ NXS_NAMESPACE
         virtual void SetDepthFunction(DepthFunction depthFunction) = 0;
         virtual void SetLineWidth(float width) = 0;
 
+        virtual void SetPolygonMode(PolygonMode mode) { m_polygonMode = mode; }
+        NODISCARD virtual PolygonMode GetPolygonMode() const { return m_polygonMode; }
+
+        virtual void SetCullMode(PolygonFacing face) { m_cullMode = face; }
+        NODISCARD PolygonFacing GetCullMode() const { return m_cullMode; }
+
+        virtual void SetFrontFace(FrontFace face) { m_frontFace = face; }
+        NODISCARD FrontFace GetFrontFace() const { return m_frontFace; }
+
     protected:
         RenderingInterface() = default;
         virtual ~RenderingInterface();
@@ -65,5 +74,8 @@ NXS_NAMESPACE
         RenderContext m_renderContext{};
         GraphicsAPI m_graphicsAPI = GraphicsAPI::Undefined;
         DepthFunction m_depthFunction = DepthFunction::None;
+        PolygonMode m_polygonMode = PolygonMode::Fill;
+        PolygonFacing m_cullMode = PolygonFacing::Back;
+        FrontFace m_frontFace = FrontFace::CounterClockWise;
     };
 }

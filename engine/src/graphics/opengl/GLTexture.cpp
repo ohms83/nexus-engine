@@ -52,7 +52,7 @@ NXS_NAMESPACE
             return GL_NONE;
         }
 
-        static GLuint NxsPixelFormatToGL(const PixelFormat format)
+        static GLint NxsPixelFormatToGL(const PixelFormat format)
         {
             switch (format)
             {
@@ -145,7 +145,7 @@ TextureProxy& GLTexture::LoadMipData(const uint8* data, uint32 size, uint32 mip)
     return TextureProxy::LoadMipData(data, size, mip);
 }
 
-void GLTexture::CopyData(const void* data, size_t bytes, size_t offset)
+void GLTexture::CopyData(const void* data, size_t bytes, const size_t offset)
 {
     NXS_ASSERT_MSG(IsBinding(), std::format("Invalid operation. The texture is unbound."));
     const GLint gl_pixelFormats = GL::NxsPixelFormatToGL(m_format);
@@ -164,10 +164,12 @@ uint32 GLTexture::Alloc()
 void GLTexture::Release()
 {
     CALL_GL_FUNC(glDeleteTextures(1, &m_textureID));
+    m_textureID = 0;
 }
 
 GLTexture::~GLTexture()
 {
     if (IsBinding()) Unbind();
     CALL_GL_FUNC(glDeleteTextures(1, &m_textureID));
+    m_textureID = 0;
 }

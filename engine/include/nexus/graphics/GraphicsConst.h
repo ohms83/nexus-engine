@@ -50,6 +50,14 @@ NXS_NAMESPACE
         Num
     };
 
+    enum class PolygonFacing
+    {
+        None,
+        Front,
+        Back,
+        Both,
+    };
+
     enum class FrontFace
     {
         ClockWise,
@@ -111,5 +119,12 @@ NXS_NAMESPACE
          * @endcode
          */
         Additive,
+    };
+
+    enum class PolygonMode
+    {
+        Fill,
+        Wireframe,
+        Point,
     };
 }

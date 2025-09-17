@@ -14,13 +14,13 @@ NXS_NAMESPACE
         IGpuResource() = default;
         virtual ~IGpuResource() = default;
 
-        virtual uint32 GetHandle() const = 0;
+        NODISCARD virtual uint32 GetHandle() const = 0;
 
         virtual void Bind() const = 0;
         virtual void Unbind() const = 0;
-        virtual bool IsBinding() const = 0;
+        NODISCARD virtual bool IsBinding() const = 0;
 
-        virtual void CopyData(const void* data, size_t bytes, size_t offset = 0) = 0;
+        virtual void CopyData(const void* data, size_t bytes, size_t offset) = 0;
 
     protected:
         /**

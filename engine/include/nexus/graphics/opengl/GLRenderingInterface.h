@@ -12,6 +12,7 @@ NXS_NAMESPACE
 {
     class GLRenderingInterface final : public RenderingInterface
     {
+        NXS_INHERIT(RenderingInterface)
     public:
         GLRenderingInterface(WindowContext window, const GraphicsConfig& config);
         ~GLRenderingInterface() override;
@@ -32,6 +33,11 @@ NXS_NAMESPACE
 
         void SetDepthFunction(DepthFunction depthFunction) override;
         void SetLineWidth(float width) override;
+
+        void SetPolygonMode(PolygonMode mode) override;
+
+        void SetCullMode(PolygonFacing face) override;
+        void SetFrontFace(FrontFace face) override;
 
     protected:
         void Draw_Internal(const RenderCommand& command) override;

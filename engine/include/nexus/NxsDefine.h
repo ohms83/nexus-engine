@@ -19,6 +19,8 @@
 #define NXS_NAMESPACE namespace nxs
 #define USING_NAMESPACE_NXS using namespace nxs
 
+#define NXS_INHERIT(Parent) private: using Super = Parent;
+
 //! A shorthand definition for static_cast<>
 #define CAST static_cast
 //! A shorthand definition for dynamic_cast<>
