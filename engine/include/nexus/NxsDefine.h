@@ -78,6 +78,8 @@ NXS_NAMESPACE
         Blue,
         //! 8-bit Alpha channel
         Alpha,
+        //! 16-bit greyscale. Normally used for the alpha or dissolvemap.
+        RedGreen,
         //! 24-bit RGB color without alpha
         RGB,
         //! 32-bit RGBA color.

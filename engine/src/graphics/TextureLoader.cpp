@@ -34,6 +34,9 @@ namespace
         case 1:
             desc.format = PixelFormat::Grey;
             break;
+        case 2:
+            desc.format = PixelFormat::RedGreen;
+            break;
         case 3:
             desc.format = PixelFormat::RGB;
             break;

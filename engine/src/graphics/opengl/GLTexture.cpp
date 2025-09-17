@@ -69,6 +69,8 @@ NXS_NAMESPACE
                 return GL_BLUE;
             case PixelFormat::Alpha:
                 return GL_RGBA;
+            case PixelFormat::RedGreen:
+                return GL_RG;
             case PixelFormat::RGB:
                 return GL_RGB;
             case PixelFormat::RGBA:
