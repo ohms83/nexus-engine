@@ -163,13 +163,17 @@ uint32 GLTexture::Alloc()
 
 void GLTexture::Release()
 {
+    if (m_textureID == 0) return;
+
     CALL_GL_FUNC(glDeleteTextures(1, &m_textureID));
     m_textureID = 0;
 }
 
 GLTexture::~GLTexture()
 {
+    if (m_textureID == 0) return;
     if (IsBinding()) Unbind();
+
     CALL_GL_FUNC(glDeleteTextures(1, &m_textureID));
     m_textureID = 0;
 }
