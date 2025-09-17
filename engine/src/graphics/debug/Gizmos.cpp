@@ -308,7 +308,7 @@ void Gizmos::DrawOutlineBox(
 void Gizmos::DrawOutlineSphere(
     RenderSystem& renderSystem,
     const glm::vec3& position,
-    float radius,
+    const float radius,
     const glm::quat& rotation,
     uint32_t numSegments,
     const Color3F& xyLatColor,

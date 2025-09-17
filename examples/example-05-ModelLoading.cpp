@@ -211,7 +211,7 @@ private:
         }
 
         auto node = m_scene.CreateNode<nxs::SceneNode3D>("Model");
-        auto& modelComp = node->AddComponent<nxs::ModelComponent>();
+        node->AddComponent<nxs::ModelComponent>();
         node->Scale().value = modelScales[0];
 
         m_scene.SetRenderer(std::make_unique<nxs::BasicSceneRenderer>());

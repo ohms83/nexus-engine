@@ -231,7 +231,7 @@ WindowContext Application::GetWindowContext() const
 
 Ref<Scene> Application::ChangeScene(const Ref<Scene>& scene)
 {
-    return m_nextScene = scene;
+    return m_currentScene = scene;
 }
 
 Ref<Scene> Application::GetCurrentScene() const

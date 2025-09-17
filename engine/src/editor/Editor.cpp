@@ -7,10 +7,10 @@
 
 // ImGui headers
 #include <imgui.h>
-#include <iostream>
 
-#include "nexus/editor/Console.h"
-#include "nexus/editor/ProfilerWidget.h"
+#include "editor/Console.h"
+#include "editor/ProfilerWidget.h"
+#include "editor/DebugMenuItem.h"
 
 #include "Remotery.h"
 
@@ -221,6 +221,10 @@ void Editor::InitMenu()
     for (const auto& menuItem : toolsMenuItems)
     {
         AddMenuItem("Tools", menuItem);
+    }
+    for (const auto& menuItem : s_debugMenuItems)
+    {
+        AddMenuItem("Debug", menuItem);
     }
 }
 

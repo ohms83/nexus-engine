@@ -50,6 +50,9 @@ int main()
 
     nxs::ApplicationConfig config;
     config.LoadConfig(configFile.string());
+#if 1
+    config.allowProfile = false;
+#endif
     return nxs::RunApplication<NexusEditor>(config);
 }
 
@@ -146,16 +149,13 @@ void NexusEditor::Update()
 {
     Application::Update();
 
-    const auto camera = PTR_CAST<nxs::Camera>(GetCurrentScene()->GetNode("Camera Node"));
-    if (!camera) return;
-
     auto& inputManager = nxs::InputManager::Instance();
 
     glm::vec3 translation = inputManager.GetAxisValue("movement");
 
     // Transform the translation vector into the camera's local coordinate.
-    auto& cameraOrient = camera->Orient();
-    auto& cameraPosition = camera->Position();
+    auto& cameraOrient = m_camera->Orient();
+    auto& cameraPosition = m_camera->Position();
     translation = cameraOrient.value * translation;
     cameraPosition.Translate(translation * cameraSpeed * GetDeltaTime());
 

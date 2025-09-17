@@ -64,7 +64,6 @@ GLRenderingInterface::GLRenderingInterface(WindowContext window, const GraphicsC
     // Enable depth test
     SetDepthFunction(DepthFunction::Lesser);
 
-    CALL_GL_FUNC(glEnable(GL_CULL_FACE));
     SetCullMode(PolygonFacing::Back);
     SetFrontFace(FrontFace::CounterClockWise);
 
@@ -209,30 +208,20 @@ void GLRenderingInterface::SetPolygonMode(PolygonMode mode)
     Super::SetPolygonMode(mode);
 
     const auto gl_mode = GL::NxsPolygonModeToGL(mode);
-    // Get the polygon mode enum.
-    GLenum gl_face = GL_NONE;
-    // The polygon faces that the setting will be applied to are the ones that are not affected by culling.
-    switch (GetCullMode())
-    {
-    case PolygonFacing::Front:
-        gl_face = GL_BACK;
-        break;
-    case PolygonFacing::Back:
-        gl_face = GL_FRONT;
-        break;
-    case PolygonFacing::None:
-        gl_face = GL_FRONT_AND_BACK;
-        break;
-    case PolygonFacing::Both:
-        gl_face = GL_NONE;
-        break;
-    }
-    CALL_GL_FUNC(glPolygonMode(gl_face, gl_mode));
+    CALL_GL_FUNC(glPolygonMode(GL_FRONT_AND_BACK, gl_mode));
 }
 
 void GLRenderingInterface::SetCullMode(PolygonFacing mode)
-{    
+{
     Super::SetCullMode(mode);
+
+    if (mode == PolygonFacing::None)
+    {
+        CALL_GL_FUNC(glDisable(GL_CULL_FACE));
+        return;
+    }
+
+    CALL_GL_FUNC(glEnable(GL_CULL_FACE));
 
     const auto gl_mode = GL::NxsFacingToGL(mode);
     CALL_GL_FUNC(glCullFace(gl_mode));
