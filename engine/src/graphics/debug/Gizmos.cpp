@@ -114,9 +114,9 @@ static void CreateDrawBuffers(const RenderSystem& renderSystem, std::vector<Vert
     const auto renderInterface = renderSystem.GetRenderInterface();
 
     {
-        uint8_t* data = R_CAST<uint8_t*>(vertices.data());
+        auto* data = R_CAST<uint8_t*>(vertices.data());
         uint64_t bufferSize = sizeof(Vertex) * vertices.capacity();
-        auto buffer = std::make_shared<BorrowBuffer>(data, bufferSize);
+        const auto buffer = std::make_shared<BorrowBuffer>(data, bufferSize);
         vertexBuffer.reset(renderInterface->CreateVertexBuffer());
         vertexBuffer->Begin()
             .SetVertices(buffer)
@@ -128,12 +128,12 @@ static void CreateDrawBuffers(const RenderSystem& renderSystem, std::vector<Vert
     }
 
     {
-        uint8_t* data = R_CAST<uint8_t*>(indices.data());
+        auto* data = R_CAST<uint8_t*>(indices.data());
         const uint64_t bufferSize = sizeof(uint32_t) * indices.capacity();
-        auto indices = std::make_shared<BorrowBuffer>(data, bufferSize);
+        const auto buffer = std::make_shared<BorrowBuffer>(data, bufferSize);
         indexBuffer.reset(renderInterface->CreateIndexBuffer());
         indexBuffer->Begin()
-            .SetIndices(indices, FrontFace::ClockWise)
+            .SetIndices(buffer, FrontFace::ClockWise)
             .SetUsage(BufferUsage::DynamicDraw)
             .SetDrawMode(drawMode)
         .Build();
@@ -148,13 +148,13 @@ static void GenerateDrawCommands(
     Ref<VertexBuffer> vertexBuffer,
     Ref<IndexBuffer> indexBuffer)
 {
-    if (indices.size() > 0)
+    if (!indices.empty())
     {
         vertexBuffer->Bind();
-        vertexBuffer->CopyData(vertices.data(), sizeof(Vertex) * vertices.size());
+        vertexBuffer->CopyData(vertices.data(), sizeof(Vertex) * vertices.size(), 0);
 
         indexBuffer->Bind();
-        indexBuffer->CopyData(indices.data(), sizeof(uint32_t) * indices.size());
+        indexBuffer->CopyData(indices.data(), sizeof(uint32_t) * indices.size(), 0);
         indexBuffer->SetDrawCount(indices.size());
         RenderCommand command = {
             s_va->gpuProgram,
@@ -321,7 +321,7 @@ void Gizmos::DrawOutlineSphere(
         return;
     }
 
-    const float thetha = 2 * Math::PI / numSegments;
+    const float thetha = 2 * Math::PI / FLOAT_CAST(numSegments);
     auto& vertices = s_va->sphereVertices;
     auto& indices  = s_va->sphereIndices;
     // Create longtitude lines
@@ -329,7 +329,7 @@ void Gizmos::DrawOutlineSphere(
         const auto startIndex = vertices.size();
         for (int i = 0; i < numSegments; ++i)
         {
-            const float rad = thetha * i;
+            const float rad = thetha * FLOAT_CAST(i);
             const float x = radius * cos(rad);
             const float y = 0;
             const float z = radius * sin(rad);
@@ -346,7 +346,7 @@ void Gizmos::DrawOutlineSphere(
         const auto startIndex = vertices.size();
         for (int i = 0; i < numSegments; ++i)
         {
-            const float rad = thetha * i;
+            const float rad = thetha * FLOAT_CAST(i);
             const float x = radius * cos(rad);
             const float y = radius * sin(rad);
             const float z = 0;
@@ -363,7 +363,7 @@ void Gizmos::DrawOutlineSphere(
         const auto startIndex = vertices.size();
         for (int i = 0; i < numSegments; ++i)
         {
-            const float rad = thetha * i;
+            const float rad = thetha * FLOAT_CAST(i);
             const float x = 0;
             const float y = radius * sin(rad);
             const float z = radius * cos(rad);
