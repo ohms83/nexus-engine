@@ -50,6 +50,9 @@ Application::~Application()
     // Shouldn't send out any callback at this point.
     logger.Info(LogApplication, "Shutting down...");
 
+    m_currentScene.reset();
+    m_nextScene.reset();
+
     DestroyImGui();
 
     InputManager::Destroy();
@@ -174,7 +177,7 @@ int Application::BeginMainLoop()
 
         PollEvents(e);
 
-        
+
         {
             rmt_ScopedCPUSample(Update, 0);
             Update();
@@ -185,9 +188,9 @@ int Application::BeginMainLoop()
 
             if (m_editor) m_editor->Update();
         }
-    
-        rmt_ScopedCPUSample(Render, 0);
+
         {
+            rmt_ScopedCPUSample(Render, 0);
             m_renderSystem->BeginDraw();
             BeginDrawUI();
             Gizmos::Clear();
@@ -228,7 +231,7 @@ WindowContext Application::GetWindowContext() const
 
 Ref<Scene> Application::ChangeScene(const Ref<Scene>& scene)
 {
-    return m_currentScene = scene;
+    return m_nextScene = scene;
 }
 
 Ref<Scene> Application::GetCurrentScene() const

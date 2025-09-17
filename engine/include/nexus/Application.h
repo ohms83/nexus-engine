@@ -97,6 +97,8 @@ NXS_NAMESPACE
 
         MAYBE_UNUSED Ref<Scene> ChangeScene(const Ref<Scene>& scene);
         NODISCARD Ref<Scene> GetCurrentScene() const;
+        NODISCARD Ref<Scene> GetNextScene() const;
+        NODISCARD bool IsNextScene(Ref<Scene>) const;
 
         NODISCARD std::string GetAssetPath(const std::string& path) const
         {
@@ -146,6 +148,7 @@ NXS_NAMESPACE
         Ref<Timer> m_timer;
         float m_deltaTime = 0.0f;
 
+        Ref<Scene> m_nextScene;
         Ref<Scene> m_currentScene;
     };
 
