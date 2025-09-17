@@ -97,6 +97,4 @@ NXS_NAMESPACE
     {
         return D_CAST<T>(obj) != nullptr;
     }
-
-    using Action = std::function<void()>;
 }

@@ -18,7 +18,11 @@ NXS_NAMESPACE
     {
     public:
         Scene();
+        explicit Scene(const std::string& name);
         virtual ~Scene() = default;
+
+        NODISCARD const std::string& GetName() const { return m_name; }
+        void ChangeName(const std::string& name) { m_name = name; }
 
         template<typename T>
         requires std::derived_from<T, SceneNode>
@@ -56,6 +60,8 @@ NXS_NAMESPACE
          */
         NODISCARD Ref<SceneNode> GetNode(const std::string& name);
 
+        virtual void OnEnter() {}
+        virtual void OnExit() {}
         virtual void Update(float dt);
         virtual void Render(RenderSystem& renderSystem);
 
@@ -67,9 +73,13 @@ NXS_NAMESPACE
         void SetRenderer(Ptr<ISceneRenderer> renderer);
 
         Color3F& Ambient();
-        const Color3F& Ambient() const;
+        NODISCARD const Color3F& Ambient() const;
+
+    private:
+        void Init();
 
     protected:
+        std::string m_name;
         std::vector<Ref<SceneNode>> m_children;
 
         // --- Rendering ---

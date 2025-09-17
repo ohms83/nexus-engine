@@ -11,6 +11,17 @@ DEFINE_LOG(Scene);
 
 Scene::Scene()
 {
+    Init();
+}
+
+Scene::Scene(const std::string& name)
+    : m_name(name)
+{
+    Init();
+}
+
+void Scene::Init()
+{
     auto ambientEntt = m_registry.create();
     m_ambientComponent = &m_registry.emplace<AmbientLightComponent>(ambientEntt, Color3F::Red);
 

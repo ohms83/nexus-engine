@@ -22,6 +22,13 @@ NXS_NAMESPACE
             WorkerThread,
         };
 
+        enum class UpdatePhase
+        {
+            PreUpdate,
+            Update,
+            PostUpdate
+        };
+
         explicit TaskScheduler(const Ref<ITimeSource>& timeSource);
         ~TaskScheduler() = default;
 
@@ -39,7 +46,9 @@ NXS_NAMESPACE
         MAYBE_UNUSED TaskID ScheduleTask(Ref<IRunnable> task, int32_t repeat = -1, double delay = 0, double interval = 0, TaskQueue queue = TaskQueue::MainThread);
         void StopTask(TaskID id);
 
+        void PreUpdate();
         void Update();
+        void PostUpdate();
 
     protected:
         struct TaskData
@@ -54,6 +63,8 @@ NXS_NAMESPACE
         };
 
         std::vector<TaskData> m_tasks;
+        std::vector<TaskData> m_preUpdateTasks;
+        std::vector<TaskData> m_postUpdateTasks;
         Ptr<Timer> m_timer;
         std::mutex m_mutex;
     };
