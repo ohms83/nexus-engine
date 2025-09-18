@@ -6,7 +6,7 @@
 #include <format>
 #include <memory>
 
-#include "core/task/LambdaTask.h"
+#include "core/task/IntervalTask.h"
 
 USING_NAMESPACE_NXS;
 
@@ -53,11 +53,11 @@ void LogDispatcher::Flush() const
 
 void LogDispatcher::ScheduleAutoFlush(TaskScheduler& scheduler, const double interval)
 {
-    const auto task = std::make_shared<LambdaTask>([&] {
+    const auto task = std::make_shared<IntervalTask>(interval, [&] {
         Flush();
         return true;
     });
-    m_flushTask = scheduler.ScheduleTask(task, -1, 0, interval);
+    m_flushTask = scheduler.ScheduleTask(task);
 }
 
 void LogDispatcher::Log(const LogLevel level, const std::string& category, const std::string& message)

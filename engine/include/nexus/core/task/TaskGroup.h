@@ -17,8 +17,9 @@ NXS_NAMESPACE
         }
         void Remove(Ref<IRunnable> task);
 
-        bool Update() override;
+        MAYBE_UNUSED bool Update() override;
 
+        TaskCallback taskFinishedCallback;
     private:
         std::vector<Ref<IRunnable>> m_tasks;
     };

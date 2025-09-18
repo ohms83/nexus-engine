@@ -13,9 +13,9 @@ NXS_NAMESPACE
 
         void Push(Ref<IRunnable> task) { m_tasks.push(task); }
 
-        Ref<IRunnable> Pop();
+        MAYBE_UNUSED Ref<IRunnable> Pop();
 
-        bool Update() override;
+        MAYBE_UNUSED bool Update() override;
     private:
         Ref<IRunnable> m_runningTask;
         std::queue<Ref<IRunnable>> m_tasks;

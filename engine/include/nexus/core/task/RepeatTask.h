@@ -7,14 +7,15 @@ NXS_NAMESPACE
     class RepeatTask final : public IRunnable
     {
     public:
-        using Func = std::function<bool()>;
-
-        explicit RepeatTask(uint32_t numRepeat, Func task);
+        explicit RepeatTask(int32_t numRepeat, TaskFunc task)
+            : m_numRepeat(numRepeat)
+            , m_task(task)
+        {}
         virtual ~RepeatTask() = default;
-        bool Update() override;
+        MAYBE_UNUSED bool Update() override;
 
     private:
-        uint32_t m_numRepeat = 0;
-        Func m_task;
+        int32_t m_numRepeat = 0;
+        TaskFunc m_task;
     };
 }

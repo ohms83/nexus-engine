@@ -29,7 +29,7 @@ NXS_NAMESPACE
             , m_error(error)
         {}
 
-        bool Update() override
+        MAYBE_UNUSED bool Update() override
         {
             if (!m_future.valid() || m_future.wait_for(std::chrono::seconds(0)) != std::future_status::ready) return true;
             try {

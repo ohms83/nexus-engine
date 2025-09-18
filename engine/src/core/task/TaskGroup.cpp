@@ -17,13 +17,18 @@ bool TaskGroup::Update()
     std::vector<Ref<IRunnable>> terminatedTasks;
     for (auto task : m_tasks)
     {
-        if (!task->Update()) terminatedTasks.push_back(task);
+        if (!task->Update())
+        {
+            terminatedTasks.push_back(task);
+            taskFinishedCallback(task);
+        }
     }
 
     while (!terminatedTasks.empty())
     {
-        Remove(*terminatedTasks.begin());
-        terminatedTasks.erase(terminatedTasks.begin());
+        auto top = terminatedTasks.begin();
+        Remove(*top);
+        terminatedTasks.erase(top);
     }
 
     return !m_tasks.empty();

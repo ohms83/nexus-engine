@@ -12,7 +12,7 @@
 
 #include "Resource.h"
 #include "ResourceLoader.h"
-#include "task/LambdaTask.h"
+#include "task/OneshotTask.h"
 
 NXS_NAMESPACE
 {
@@ -192,7 +192,7 @@ NXS_NAMESPACE
             }
 
             // Periodically checking for resource loading status.
-            scheduler.ScheduleTask(std::make_shared<LambdaTask>([result, &mutex = m_mutex, &loadingResources = m_loadingResources]()
+            scheduler.ScheduleTask(std::make_shared<OneshotTask>([result, &mutex = m_mutex, &loadingResources = m_loadingResources]()
             {
                 if (result->status == IResourceLoader::LoadResult::Status::Ready)
                 {

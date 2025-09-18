@@ -14,24 +14,20 @@ USING_NAMESPACE_NXS;
 
 TaskScheduler::TaskScheduler(const Ref<ITimeSource>& timeSource)
 {
-    m_timer = std::make_unique<Timer>(timeSource);
+    for (auto& keyValue : m_taskGroups)
+    {
+        keyValue.second.taskFinishedCallback.connect([this](Ref<IRunnable> task) {
+            OnTaskTerminated(task);
+        });
+    }
 }
 
-TaskID TaskScheduler::ScheduleTask(Ref<IRunnable> task, const int32_t repeat, const double delay,
-    const double interval, TaskQueue queue)
+TaskID TaskScheduler::ScheduleTask(Ref<IRunnable> task, UpdatePhase phase, TaskQueue queue)
 {
     std::lock_guard<std::mutex> lock(m_mutex);
     const TaskID id = s_runningId++;
-    m_tasks.emplace_back(TaskData {
-        id,
-        delay >= 0,
-        repeat,
-        delay,
-        interval,
-        // nextUpdate
-        interval,
-        std::move(task)
-    });
+    m_tasks.emplace_back(id, task);
+    m_taskGroups[phase].Add(task);
     return id;
 }
 
@@ -44,45 +40,42 @@ void TaskScheduler::StopTask(TaskID id)
     });
     if (taskItr == m_tasks.end()) return;
     m_tasks.erase(taskItr);
+
+    for (auto& keyValue : m_taskGroups)
+    {
+        keyValue.second.Remove(taskItr->action);
+    }
+}
+
+void TaskScheduler::PreUpdate()
+{
+    rmt_ScopedCPUSample(TaskScheduler_PreUpdate, 0);
+    UpdateTaskGroup(UpdatePhase::PreUpdate);
 }
 
 void TaskScheduler::Update()
 {
     rmt_ScopedCPUSample(TaskScheduler_Update, 0);
-    std::vector<TaskID> terminatedTasks;
-    m_timer->Tick();
+    UpdateTaskGroup(UpdatePhase::Update);
+}
 
-    {
-        std::lock_guard<std::mutex> lock(m_mutex);
-        const auto dt = m_timer->GetDeltaTime();
+void TaskScheduler::PostUpdate()
+{
+    rmt_ScopedCPUSample(TaskScheduler_PostUpdate, 0);
+    UpdateTaskGroup(UpdatePhase::PostUpdate);
+}
 
-        std::ranges::for_each(m_tasks, [dt, &terminatedTasks](TaskData& task)
-        {
-            if (task.delay > 0.0)
-            {
-                task.delay -= dt;
-                task.running = task.delay <= 0.0;
-            }
+void TaskScheduler::UpdateTaskGroup(UpdatePhase phase)
+{
+    m_taskGroups[phase].Update();
+}
 
-            if (!task.running) return;
-
-            task.nextUpdate -= dt;
-            if (task.nextUpdate <= 0.0)
-            {
-                if (!task.action->Update())
-                {
-                    terminatedTasks.emplace_back(task.id);
-                    return;
-                }
-
-                task.nextUpdate = task.interval;
-            }
-        });
-    }
-
-    while (!terminatedTasks.empty())
-    {
-        StopTask(*terminatedTasks.begin());
-        terminatedTasks.erase(terminatedTasks.begin());
-    }
+void TaskScheduler::OnTaskTerminated(Ref<IRunnable> task)
+{
+    // const auto taskItr = std::ranges::find_if(m_tasks, [task](const TaskData& task)
+    // {
+    //     return task.action == task;
+    // });
+    // if (taskItr == m_tasks.end()) return;
+    // m_tasks.erase(taskItr);
 }

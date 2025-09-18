@@ -5,6 +5,7 @@
 #pragma once
 
 #include "nexus/NxsDefine.h"
+#include "sigslot/signal.hpp"
 
 DECLARE_LOG_EXTERN(Runnable);
 
@@ -14,6 +15,9 @@ NXS_NAMESPACE
     {
     public:
         virtual ~IRunnable() = default;
-        virtual bool Update() = 0;
+        MAYBE_UNUSED virtual bool Update() = 0;
     };
+    
+    using TaskFunc = std::function<bool()>;
+    using TaskCallback = sigslot::signal<Ref<IRunnable>>;
 }
