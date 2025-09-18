@@ -1,10 +1,21 @@
 #pragma once
 
 #include "nexus/Nexus.h"
+#include <random>
+#include <chrono>
 
 class FakeTimeSource final : public nxs::ITimeSource
 {
 public:
+    FakeTimeSource()
+    {
+        // Randomize the starting value to simulate the real-world use case.
+        std::mt19937 rng(std::chrono::high_resolution_clock::now().time_since_epoch().count());
+        // Create a uniform real distribution for the desired range.
+        std::uniform_real_distribution<double> distribution(0.0, 100.0);
+        seconds_ = distribution(rng);
+    }
+
     double Now() override
     {
         return seconds_;

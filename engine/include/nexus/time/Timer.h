@@ -42,15 +42,23 @@ NXS_NAMESPACE
             return m_isExecuted;
         }
 
+        void SetFaultTolerance(double value)
+        {
+            m_faultTolerance = value;
+        }
+
+        double GetFaultTolerance() const { return m_faultTolerance; }
+
     protected:
         Ref<ITimeSource> m_timeSource;
         double m_startTime = 0;;
         double m_currentTick = 0;
         double m_lastTick = 0;
+        double m_faultTolerance = 0.00005;
+        double m_countDown = 0;
         bool m_isRunning = false;
 
         Action m_scheduledAction = nullptr;
         bool m_isExecuted = false;
-        float m_countDown = 0;
     };
 }

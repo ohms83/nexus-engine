@@ -2,7 +2,8 @@
 // Created by nutta on 7/8/2025.
 //
 
-#include "nexus/time/Timer.h"
+#include "time/Timer.h"
+#include "math/Math.h"
 
 USING_NAMESPACE_NXS;
 
@@ -13,7 +14,7 @@ Timer::Timer(const Ref<ITimeSource>& timeSource)
 
 void Timer::Start()
 {
-    m_startTime = m_lastTick = m_timeSource->Now();
+    m_startTime = m_currentTick = m_lastTick = m_timeSource->Now();
     m_isRunning = true;
 }
 
@@ -35,7 +36,7 @@ void Timer::Tick()
     if (m_scheduledAction && !m_isExecuted)
     {
         m_countDown -= GetDeltaTime();
-        if (m_countDown <= 0)
+        if (Math::Compare(m_countDown, 0, m_faultTolerance) <= 0)
         {
             m_isExecuted = true;
             m_countDown = 0;
