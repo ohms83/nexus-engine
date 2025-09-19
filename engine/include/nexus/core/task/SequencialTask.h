@@ -9,6 +9,7 @@ NXS_NAMESPACE
     {
     public:
         SequencialTask() = default;
+        SequencialTask(std::initializer_list<Ref<IRunnable>> taskList);
         virtual ~SequencialTask() = default;
 
         void Push(Ref<IRunnable> task) { m_tasks.push(task); }

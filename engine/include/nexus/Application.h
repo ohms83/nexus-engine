@@ -18,8 +18,8 @@
 #include "editor/Editor.h"
 #include "graphics/Mesh.h"
 #include "graphics/Texture.h"
-#include "scene/Scene.h"
 #include "graphics/RenderSystem.h"
+#include "scene/SceneManager.h"
 
 #define PURGE_UNUSED_RESOURCES(Manager) do { \
     LOG_INFO(LogResource, "Purge unused resources. Class="#Manager); \
@@ -95,11 +95,6 @@ NXS_NAMESPACE
             return m_deltaTime;
         }
 
-        MAYBE_UNUSED Ref<Scene> ChangeScene(const Ref<Scene>& scene);
-        NODISCARD Ref<Scene> GetCurrentScene() const;
-        NODISCARD Ref<Scene> GetNextScene() const;
-        NODISCARD bool IsNextScene(Ref<Scene>) const;
-
         NODISCARD std::string GetAssetPath(const std::string& path) const
         {
             return (std::filesystem::path(GetBaseAssetPath()) / path).string();
@@ -148,8 +143,7 @@ NXS_NAMESPACE
         Ref<Timer> m_timer;
         float m_deltaTime = 0.0f;
 
-        Ref<Scene> m_nextScene;
-        Ref<Scene> m_currentScene;
+        Ref<SceneManager> m_sceneManager;
     };
 
     template<typename T>

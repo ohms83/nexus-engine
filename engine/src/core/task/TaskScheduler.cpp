@@ -34,9 +34,9 @@ TaskID TaskScheduler::ScheduleTask(Ref<IRunnable> task, UpdatePhase phase, TaskQ
 void TaskScheduler::StopTask(TaskID id)
 {
     std::lock_guard<std::mutex> lock(m_mutex);
-    const auto taskItr = std::ranges::find_if(m_tasks, [id](const TaskData& task)
+    const auto taskItr = std::ranges::find_if(m_tasks, [id](const TaskData& taskData)
     {
-        return task.id == id;
+        return taskData.id == id;
     });
     if (taskItr == m_tasks.end()) return;
     m_tasks.erase(taskItr);
@@ -67,15 +67,16 @@ void TaskScheduler::PostUpdate()
 
 void TaskScheduler::UpdateTaskGroup(UpdatePhase phase)
 {
+    std::lock_guard<std::mutex> lock(m_mutex);
     m_taskGroups[phase].Update();
 }
 
 void TaskScheduler::OnTaskTerminated(Ref<IRunnable> task)
 {
-    // const auto taskItr = std::ranges::find_if(m_tasks, [task](const TaskData& task)
-    // {
-    //     return task.action == task;
-    // });
-    // if (taskItr == m_tasks.end()) return;
-    // m_tasks.erase(taskItr);
+    const auto taskItr = std::ranges::find_if(m_tasks, [task](const TaskData& taskData)
+    {
+        return taskData.action == task;
+    });
+    if (taskItr == m_tasks.end()) return;
+    m_tasks.erase(taskItr);
 }

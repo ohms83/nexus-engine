@@ -12,6 +12,7 @@
 #include "graphics/MaterialManager.h"
 #include "graphics/ModelManager.h"
 #include "graphics/TextureManager.h"
+#include "scene/SceneManager.h"
 
 NXS_NAMESPACE
 {
@@ -60,6 +61,11 @@ NXS_NAMESPACE
             NXS_ASSERT_MSG(m_taskScheduler != nullptr, "TaskScheduler hasn't been initialized");
             return m_taskScheduler;
         }
+        NODISCARD Ref<SceneManager> GetSceneManager() const
+        {
+            NXS_ASSERT_MSG(m_sceneManager != nullptr, "SceneManager hasn't been initialized");
+            return m_sceneManager;
+        }
 
     private:
         Ref<RenderSystem> m_renderSystem;
@@ -67,5 +73,6 @@ NXS_NAMESPACE
         Ref<ModelManager> m_modelManager;
         Ref<MaterialManager> m_materialManager;
         Ref<TaskScheduler> m_taskScheduler;
+        Ref<SceneManager> m_sceneManager;
     };
 }

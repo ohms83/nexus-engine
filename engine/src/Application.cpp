@@ -50,21 +50,17 @@ Application::~Application()
     // Shouldn't send out any callback at this point.
     logger.Info(LogApplication, "Shutting down...");
 
-    m_currentScene.reset();
-    m_nextScene.reset();
-
     DestroyImGui();
 
     InputManager::Destroy();
     TimerManager::Destroy();
-
-    m_currentScene.reset();
 
     Gizmos::Destroy();
 
     m_editor.reset();
     m_renderSystem.reset();
     m_renderInterface.reset();
+    m_sceneManager.reset();
 
     Engine::Destroy();
 
@@ -138,6 +134,7 @@ bool Application::Init(const ApplicationConfig& info)
     const auto& engine = Engine::Initialize(m_window, graphicsConfig);
     m_renderSystem = engine.GetRenderSystem();
     m_renderInterface = engine.GetRenderingInterface();
+    m_sceneManager = engine.GetSceneManager();
 
     if (info.editMode)
     {
@@ -180,13 +177,16 @@ int Application::BeginMainLoop()
 
         {
             rmt_ScopedCPUSample(Update, 0);
-            Update();
-            taskScheduler->Update();
+            taskScheduler->PreUpdate();
 
             // Update input
             inputManager.Update();
 
+            Update();
+            taskScheduler->Update();
+
             if (m_editor) m_editor->Update();
+            taskScheduler->PostUpdate();
         }
 
         {
@@ -229,31 +229,21 @@ WindowContext Application::GetWindowContext() const
     return m_window;
 }
 
-Ref<Scene> Application::ChangeScene(const Ref<Scene>& scene)
-{
-    return m_currentScene = scene;
-}
-
-Ref<Scene> Application::GetCurrentScene() const
-{
-    return m_currentScene;
-}
-
 void Application::Update()
 {
     rmt_ScopedCPUSample(Application_Update, 0);
-    if (m_currentScene)
+    if (m_sceneManager)
     {
-        m_currentScene->Update(GetDeltaTime());
+        m_sceneManager->Update(GetDeltaTime());
     }
 }
 
 void Application::Render(RenderSystem& renderSystem)
 {
     rmt_ScopedCPUSample(Application_Render, 0);
-    if (m_currentScene)
+    if (m_sceneManager)
     {
-        m_currentScene->Render(renderSystem);
+        m_sceneManager->Render(renderSystem);
     }
 }
 

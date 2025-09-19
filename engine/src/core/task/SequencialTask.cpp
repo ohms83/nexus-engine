@@ -2,6 +2,11 @@
 
 USING_NAMESPACE_NXS;
 
+SequencialTask::SequencialTask(std::initializer_list<Ref<IRunnable>> taskList)
+{
+    m_tasks.push_range(taskList);
+}
+
 Ref<IRunnable> SequencialTask::Pop()
 {
     if (m_tasks.empty()) return nullptr;

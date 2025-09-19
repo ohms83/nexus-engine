@@ -69,7 +69,8 @@ bool NexusEditor::Init_Internal()
     auto& renderSystem = GetRenderSystem();
     renderSystem.SetClearColor(0x303030ff);
 
-    auto scene = ChangeScene(std::make_shared<nxs::Scene>());
+    auto sceneManager = engine.GetSceneManager();
+    auto scene = sceneManager->EmplaceAndChange<nxs::Scene>("Editor Scene");
     scene->SetRenderer(std::make_unique<nxs::BasicSceneRenderer>());
 
     m_camera = scene->CreateNode<nxs::Camera>("Camera Node");
