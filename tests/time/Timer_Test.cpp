@@ -13,16 +13,11 @@ protected:
     // Shared pointers to manage lifetime and allow injection
     nxs::Ref<FakeTimeSource> time_source_;
     nxs::Ptr<nxs::Timer> timer_;
-    nxs::Ref<nxs::StandardTimeSource> standard_time_source_;
-    nxs::Ptr<nxs::Timer> standardTimer_;
 
     // SetUp is called before each test
     void SetUp() override {
         time_source_ = std::make_shared<FakeTimeSource>();
         timer_ = std::make_unique<nxs::Timer>(time_source_);
-        
-        standard_time_source_ = std::make_shared<nxs::StandardTimeSource>();
-        standardTimer_ = std::make_unique<nxs::Timer>(standard_time_source_);
     }
 
     // TearDown is called after each test (optional, for cleanup)
