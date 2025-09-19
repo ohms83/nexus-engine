@@ -91,6 +91,7 @@
 #include "io/Serializer.h"
 #include "math/Math.h"
 #include "math/Matrix.h"
+#include "math/Random.h"
 #include "memory/BorrowBuffer.h"
 #include "memory/Buffer.h"
 #include "memory/OwningBuffer.h"
