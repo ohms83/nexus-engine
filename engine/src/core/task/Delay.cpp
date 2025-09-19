@@ -9,7 +9,6 @@ Delay::Delay(double delay, Ref<ITimeSource> timeSource)
     m_timer = std::make_unique<Timer>(timeSource);
     m_timer->Start();
     m_timer->ScheduleAction([this]() {
-        LOG_DEBUG(LogTemp, std::format("Delay ended at {}", m_timer->GetElapsedTime()));
         m_timeout = true;
     }, delay);
 }
