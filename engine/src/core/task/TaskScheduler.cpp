@@ -39,12 +39,14 @@ void TaskScheduler::StopTask(TaskID id)
         return taskData.id == id;
     });
     if (taskItr == m_tasks.end()) return;
-    m_tasks.erase(taskItr);
 
+    auto task = taskItr->action;
     for (auto& keyValue : m_taskGroups)
     {
         keyValue.second.Remove(taskItr->action);
     }
+
+    m_tasks.erase(taskItr);
 }
 
 void TaskScheduler::PreUpdate()
