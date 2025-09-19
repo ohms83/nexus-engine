@@ -27,7 +27,7 @@
 #include "core/task/OneshotTask.h"
 #include "core/task/RepeatTask.h"
 #include "core/task/Runnable.h"
-#include "core/task/SequencialTask.h"
+#include "core/task/SequentialTask.h"
 #include "core/task/TaskGroup.h"
 #include "core/task/TaskScheduler.h"
 #include "ecs/Ecs.h"

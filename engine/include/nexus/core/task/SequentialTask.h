@@ -6,7 +6,7 @@
 NXS_NAMESPACE
 {
     /**
-     * @class SequencialTask
+     * @class SequentialTask
      * @brief A task that executes a sequence of other tasks one after another.
      *
      * This task acts as a container for a series of `IRunnable` tasks, which it
@@ -15,25 +15,25 @@ NXS_NAMESPACE
      * starts the next task in the queue. The entire sequence is complete when all
      * tasks in the queue have been executed.
      */
-    class SequencialTask final : public IRunnable
+    class SequentialTask final : public IRunnable
     {
     public:
         /**
          * @brief Constructs a new, empty SequentialTask.
          */
-        SequencialTask() = default;
+        SequentialTask() = default;
 
         /**
          * @brief Constructs a SequentialTask from an initializer list of tasks.
          * @param taskList An initializer list containing the tasks to be added
          * to the sequence.
          */
-        SequencialTask(std::initializer_list<Ref<IRunnable>> taskList);
+        SequentialTask(std::initializer_list<Ref<IRunnable>> taskList);
 
         /**
          * @brief Virtual destructor to ensure proper cleanup.
          */
-        virtual ~SequencialTask() = default;
+        virtual ~SequentialTask() = default;
 
         /**
          * @brief Adds a task to the end of the sequence.
