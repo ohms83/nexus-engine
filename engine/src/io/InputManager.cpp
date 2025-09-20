@@ -4,6 +4,7 @@
 
 #include "nexus/core/LogDispatcher.h"
 #include "nexus/io/InputManager.h"
+#include "nexus/math/MathUtil.h"
 
 #define ENABLE_LOGGING 0
 
@@ -36,11 +37,6 @@ InputManager& InputManager::Instance()
 
 void InputManager::Update()
 {
-    for (auto& mouseAxisMap : m_mouseAxisMappings | std::views::values)
-    {
-        auto& [mapping, pos, prevPos] = mouseAxisMap;
-        prevPos = pos;
-    }
 }
 
 void InputManager::Cleanup()
@@ -98,6 +94,11 @@ glm::vec2 InputManager::GetMouseAxisValue(const std::string& actionName) const
     if (const auto& itr = m_mouseAxisMappings.find(actionName); itr != m_mouseAxisMappings.end())
     {
         const auto& [mapping, pos, prevPos] = itr->second;
+        LOG_DEBUG(LogInputManager, std::format("actionName={} pos={} prevPos={} diff={}",
+            actionName,
+            math::ToString(pos),
+            math::ToString(prevPos),
+            math::ToString(prevPos - pos)));
         return mapping.scale * (prevPos - pos);
     }
     return glm::vec3{0, 0, 0};
@@ -163,14 +164,15 @@ void InputManager::OnMouseUp(const int32 buttonId, const float x, const float y)
 
 void InputManager::OnMouseMove(const float x, const float y)
 {
+    LOG_DEBUG(LogInputManager, std::format("OnMouseMove x={} y={}", x, y));
     for (auto& mouseAxisMap : m_mouseAxisMappings | std::views::values)
     {
         auto& [mapping, pos, prevPos] = mouseAxisMap;
         if (mapping.down && !IsMouseDown(mapping.buttonIndex)) continue;
 
-        pos.x = x;
-        pos.y = y;
-        LOG_DEBUG(LogInputManager, std::format("OnMouseMove x={} y={}", x, y));
+        prevPos = pos;
+        pos = {x, y};
+        LOG_DEBUG(LogInputManager, std::format("OnMouseMove pos={} prevPos={}", math::ToString(pos), math::ToString(prevPos)));
     }
     mouseMotionEventCallback(x, y);
 }
