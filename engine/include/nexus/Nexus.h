@@ -90,6 +90,7 @@
 #include "io/Serializable.h"
 #include "io/Serializer.h"
 #include "math/Math.h"
+#include "math/MathUtil.h"
 #include "math/Matrix.h"
 #include "math/Random.h"
 #include "memory/BorrowBuffer.h"
