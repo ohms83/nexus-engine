@@ -18,13 +18,14 @@ NXS_NAMESPACE
     class TimerManager
     {
     public:
+        TimerManager();
+
         static void Init();
         static void Destroy();
-
         static TimerManager& Instance();
 
         //! Get a new timer object.
-        Ref<Timer> GetTimer(Ref<ITimeSource> timeSource = std::make_shared<StandardTimeSource>());
+        Ref<Timer> CreateTimer(Ref<ITimeSource> timeSource = std::make_shared<StandardTimeSource>());
         //! Remove the given timer.
         void RemoveTimer(const Ref<Timer>& timer);
 
@@ -41,9 +42,16 @@ NXS_NAMESPACE
 
         void Tick();
 
+        Ref<const Timer> GetGlobalTimer() const { return m_globalTimer; }
+        //! Get elapsed time in seconds since the application started.
+        double GetElapsedTime() const { return m_globalTimer->GetElapsedTime(); }
+        //! Get elapsed time in seconds since the previous frame.
+        double GetDeltaTime() const { return m_globalTimer->GetDeltaTime(); }
+
     private:
         std::vector<Ref<Timer>> m_timers;
         //! A list of one-shot timers.
         std::vector<Ref<Timer>> m_oneShotTimers;
+        Ref<Timer> m_globalTimer;
     };
 }

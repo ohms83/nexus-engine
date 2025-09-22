@@ -72,6 +72,9 @@ NXS_NAMESPACE
 
         void SetRenderer(Ptr<ISceneRenderer> renderer);
 
+        uint32_t AddSimulation(ECS::SimulationSystem system);
+        void RemoveSimulation(uint32_t id);
+
         Color3F& Ambient();
         NODISCARD const Color3F& Ambient() const;
 
@@ -88,7 +91,13 @@ NXS_NAMESPACE
         Ptr<ISceneRenderer> m_renderer;
 
         // --- ECS ---
+        struct Simulation
+        {
+            uint32_t id;
+            ECS::SimulationSystem system;
+        };
+
         entt::registry m_registry;
-        std::vector<ECS::SimulationSystem> m_simulations;
+        std::vector<Simulation> m_simulations;
     };
 }

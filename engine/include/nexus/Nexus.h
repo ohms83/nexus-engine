@@ -104,6 +104,7 @@
 #include "scene/SceneNode.h"
 #include "scene/SceneNode3D.h"
 #include "scene/SceneRenderer.h"
+#include "scene/Script.h"
 #include "scene/Transform.h"
 #include "time/HighResTimeSource.h"
 #include "time/StandardTimeSource.h"

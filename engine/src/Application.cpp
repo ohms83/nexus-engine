@@ -152,7 +152,7 @@ bool Application::Init(const ApplicationConfig& info)
 
 int Application::BeginMainLoop()
 {
-    m_timer = TimerManager::Instance().GetTimer();
+    m_timer = TimerManager::Instance().CreateTimer();
 
     //The event data
     SDL_Event e;

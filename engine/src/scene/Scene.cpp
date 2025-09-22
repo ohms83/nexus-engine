@@ -25,8 +25,8 @@ void Scene::Init()
     auto ambientEntt = m_registry.create();
     m_ambientComponent = &m_registry.emplace<AmbientLightComponent>(ambientEntt, Color3F::Red);
 
-    m_simulations.push_back(MoveNode);
-    m_simulations.push_back(RotateNode);
+    AddSimulation(MoveNode);
+    AddSimulation(RotateNode);
 }
 
 Ref<SceneNode> Scene::GetNode(const std::string& name)
@@ -40,9 +40,9 @@ Ref<SceneNode> Scene::GetNode(const std::string& name)
 
 void Scene::Update(float dt)
 {
-    for (const auto& system : m_simulations)
+    for (const auto& sim : m_simulations)
     {
-        system(GetRegistry(), dt);
+        sim.system(GetRegistry(), dt);
     }
     for (auto& node : m_children)
     {
@@ -58,6 +58,21 @@ void Scene::Render(RenderSystem &renderSystem)
 void Scene::SetRenderer(Ptr<ISceneRenderer> renderer)
 {
     m_renderer = std::move(renderer);
+}
+
+uint32_t Scene::AddSimulation(ECS::SimulationSystem system)
+{
+    static uint32_t runningNumber = 0;
+    m_simulations.push_back({ runningNumber, system });
+    return runningNumber++;
+}
+
+void Scene::RemoveSimulation(uint32_t id)
+{
+    auto [begin, end] = std::ranges::remove_if(m_simulations, [id](const Simulation& simulation) {
+        return simulation.id == id;
+    });
+    m_simulations.erase(begin, end);
 }
 
 Color3F& Scene::Ambient()

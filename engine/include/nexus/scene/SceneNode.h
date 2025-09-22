@@ -4,6 +4,7 @@
 
 #include "Entity.h"
 #include "Transform.h"
+#include "Script.h"
 
 #include "nexus/ecs/component/scene/SceneNodeComponent.h"
 #include "nexus/ecs/component/scene/TransformComponent.h"
@@ -41,13 +42,19 @@ NXS_NAMESPACE
             m_children.push_back(child);
         }
 
-        virtual void Update(float dt) {}
+        void AddScript(Ref<Script> script);
+        void RemoveScript(Ref<Script> script);
+
+        void Update(float dt);
 
     protected:
         virtual void OnActivate() {};
         virtual void OnDeactivate() {};
+        
+        virtual void Update_Internal(float dt) {}
 
         SceneNodeComponent& m_node;
         std::vector<Ref<SceneNode>> m_children;
+        std::vector<Ref<Script>> m_scripts;
     };
 }

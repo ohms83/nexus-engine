@@ -12,6 +12,12 @@ USING_NAMESPACE_NXS;
 
 static Ptr<TimerManager> s_instance;
 
+TimerManager::TimerManager()
+{
+    m_globalTimer = std::make_shared<Timer>(std::make_shared<StandardTimeSource>());
+    m_globalTimer->Start();
+}
+
 void TimerManager::Init()
 {
     s_instance.reset(new TimerManager());
@@ -28,7 +34,7 @@ TimerManager& TimerManager::Instance()
     return *s_instance;
 }
 
-Ref<Timer> TimerManager::GetTimer(Ref<ITimeSource> timeSource)
+Ref<Timer> TimerManager::CreateTimer(Ref<ITimeSource> timeSource)
 {
     const auto timer = std::make_shared<Timer>(timeSource);
     timer->Start();
@@ -50,6 +56,8 @@ void TimerManager::ScheduleAction(const Action& action, const float delay, Ref<I
 
 void TimerManager::Tick()
 {
+    m_globalTimer->Tick();
+
     std::ranges::for_each(m_timers, [&](const Ref<Timer>& timer)
     {
         timer->Tick();

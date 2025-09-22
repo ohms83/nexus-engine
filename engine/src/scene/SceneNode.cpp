@@ -20,7 +20,31 @@ SceneNode::SceneNode(entt::registry& registry, std::string name)
 
 void SceneNode::Activate(const bool activate)
 {
-    m_node.active = activate;
-    if (activate) OnActivate();
-    else OnDeactivate();
+    if (m_node.active != activate)
+    {
+        m_node.active = activate;
+        if (activate) OnActivate();
+        else OnDeactivate();
+    }
+}
+
+void SceneNode::AddScript(Ref<Script> script)
+{
+    m_scripts.push_back(script);
+
+    std::ranges::sort(m_scripts, std::ranges::greater{}, &Script::GetPriority);
+}
+
+void SceneNode::RemoveScript(Ref<Script> script)
+{
+    std::erase(m_scripts, script);
+}
+
+void SceneNode::Update(float dt)
+{
+    std::ranges::for_each(m_scripts, [dt](Ref<Script> script) {
+        script->Update(dt);
+    });
+
+    Update_Internal(dt);
 }
