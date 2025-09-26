@@ -10,17 +10,22 @@ NXS_NAMESPACE
     class SceneGraphWidget : public EditorWidget
     {
     public:
-        SceneGraphWidget(Ref<const Scene> scene)
+        SceneGraphWidget(Ref<Scene> scene)
             : EditorWidget("Scene Graph")
             , m_scene(scene)
         {}
 
+        ~SceneGraphWidget();
+
     protected:
         void Draw_Internal(RenderSystem& renderSystem) override;
-        void DrawSceneNode(Ref<const SceneNode> node);
+        void DrawSceneNode(Ref<SceneNode> node);
 
     private:
-        Ref<const Scene> m_scene;
-        Ref<const SceneNode> m_selectedNode;
+        void DeleteNode(Ref<SceneNode> node);
+
+        Ref<Scene> m_scene;
+        Ref<SceneNode> m_highlightNode;
+        Ref<SceneNode> m_selectedNode;
     };
 }

@@ -67,6 +67,8 @@ NXS_NAMESPACE
 
         void GetAllRootNodes(SceneNode::ChildList& nodeList) const;
 
+        void RemoveNode(Ref<SceneNode> node) {}
+
         virtual void OnEnter() {}
         virtual void OnExit() {}
         virtual void Update(float dt);
