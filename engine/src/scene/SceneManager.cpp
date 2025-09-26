@@ -1,13 +1,13 @@
 #include "scene/SceneManager.h"
 #include "core/task/TaskScheduler.h"
 #include "core/task/OneshotTask.h"
+#include "Engine.h"
 
 USING_NAMESPACE_NXS;
 
 DEFINE_LOG(SceneManager);
 
-SceneManager::SceneManager(Ref<TaskScheduler> taskScheduler)
-    : m_taskScheduler(taskScheduler)
+SceneManager::SceneManager()
 {
 }
 
@@ -51,7 +51,9 @@ void SceneManager::Render(RenderSystem &renderSystem)
 }
 
 bool SceneManager::ChangeScene_Internal(Ref<Scene> scene)
-{
+{    
+    if (IsShuttingDown()) return false;
+
     if (m_next)
     {
         LOG_WARNING(LogSceneManager,
@@ -61,9 +63,12 @@ bool SceneManager::ChangeScene_Internal(Ref<Scene> scene)
     }
     m_next = scene;
 
+    auto taskScheduler = Engine::Instance().GetTaskScheduler();
     // Schedule the scene transitioning task at the begining of the next frame.
-    m_taskScheduler->ScheduleTask(std::make_shared<OneshotTask>([this]() {
-        if (m_current) m_current->OnExit();
+    taskScheduler->ScheduleTask(std::make_shared<OneshotTask>([this]() {
+        if (m_current) {
+            m_current->OnExit();
+        }
         m_current = m_next;
         m_current->OnEnter();
         m_next.reset();

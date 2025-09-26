@@ -12,6 +12,8 @@
 
 NXS_NAMESPACE
 {
+    class Scene;
+
     class SceneNode : public Entity
     {
     public:
@@ -21,6 +23,8 @@ NXS_NAMESPACE
         explicit SceneNode(entt::registry& registry);
         explicit SceneNode(entt::registry& registry, std::string  name);
         virtual ~SceneNode() = default;
+
+        void Destroy();
 
         NODISCARD const std::string& GetName() const
         {
@@ -41,19 +45,23 @@ NXS_NAMESPACE
         void AddChild(Ref<SceneNode> child);
         void RemoveChild(Ref<SceneNode> child);
         void GetAllChildren(ChildList& childrenList) const;
+        void GetAllDescendants(ChildList& childrenList, bool parentFirst) const;
+
         SceneNode* GetParent() const { return m_parent; }
+        void RemoveFromParent();
 
         void AddScript(Ref<Script> script);
         void RemoveScript(Ref<Script> script);
 
         void Update(float dt);
 
-    protected:
         virtual void OnActivate() {};
         virtual void OnDeactivate() {};
-        
-        virtual void Update_Internal(float dt) {}
+        virtual void OnDestroy() {};
+        virtual void OnUpdate(float dt) {}
 
+    protected:
+        Scene* m_owner;
         SceneNodeComponent& m_node;
         SceneNode* m_parent = nullptr;
         ChildList m_children;

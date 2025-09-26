@@ -48,6 +48,27 @@ void SceneNode::GetAllChildren(ChildList& childrenList) const
     for (auto child : m_children) childrenList.push_back(child);
 }
 
+void SceneNode::GetAllDescendants(ChildList& childrenList, bool parentFirst) const
+{
+    for (auto child : m_children)
+    {
+        if (parentFirst) childrenList.push_back(child);
+        else childrenList.insert(childrenList.begin(), child);
+
+        child->GetAllDescendants(childrenList, parentFirst);
+    }
+}
+
+void SceneNode::RemoveFromParent()
+{
+    if (!m_parent) return;
+
+    std::erase_if(m_parent->m_children, [&](Ref<SceneNode> child) {
+        return child.get() == this;
+    });
+    m_parent = nullptr;
+}
+
 void SceneNode::AddScript(Ref<Script> script)
 {
     m_scripts.push_back(script);
@@ -66,5 +87,5 @@ void SceneNode::Update(float dt)
         script->Update(dt);
     });
 
-    Update_Internal(dt);
+    OnUpdate(dt);
 }

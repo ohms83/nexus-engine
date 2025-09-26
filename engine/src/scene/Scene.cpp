@@ -1,11 +1,14 @@
-#include "nexus/scene/Scene.h"
+#include "scene/Scene.h"
 
+#include "core/LogDispatcher.h"
 #include "ecs/component/scene/LightComponent.h"
 #include "ecs/system/scene/SceneNodeTransformSystem.h"
-#include "nexus/graphics/RenderSystem.h"
-#include "nexus/core/LogDispatcher.h"
+#include "graphics/RenderSystem.h"
+#include "core/task/OneshotTask.h"
+#include "Engine.h"
 
 #include <ranges>
+#include <algorithm>
 
 USING_NAMESPACE_NXS;
 
@@ -48,6 +51,29 @@ void Scene::GetAllRootNodes(SceneNode::ChildList& nodeList) const
     std::ranges::for_each(m_children | std::views::filter(isRoot), [&nodeList](auto node) {
         nodeList.push_back(node);
     });
+}
+
+void Scene::RemoveNode(Ref<SceneNode> node)
+{
+    if (IsShuttingDown()) return;
+
+    auto taskScheduler = Engine::Instance().GetTaskScheduler();
+    taskScheduler->ScheduleTask(std::make_shared<OneshotTask>([this, node]() {
+        SceneNode::ChildList nodeList;
+        // Sort the list in descendants to parents order.
+        node->GetAllDescendants(nodeList, false);
+
+        for (auto node : nodeList)
+        {
+            node->OnDestroy();
+            node->RemoveFromParent();
+        }
+
+        nodeList.push_back(node);
+        std::erase_if(m_children, [&](Ref<SceneNode> node) {
+            return std::ranges::find(nodeList, node) != nodeList.end();
+        });
+    }), TaskScheduler::UpdatePhase::PostUpdate);
 }
 
 void Scene::Update(float dt)
