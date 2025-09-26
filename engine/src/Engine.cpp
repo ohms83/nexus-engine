@@ -9,6 +9,15 @@ USING_NAMESPACE_NXS;
 
 //! Singleton instance.
 static Ptr<Engine> s_engine;
+static bool s_shuttingDown = false;
+
+NXS_NAMESPACE
+{
+    bool IsShuttingDown()
+    {
+        return s_shuttingDown;
+    }
+}
 
 Engine& Engine::Initialize(WindowContext window, const GraphicsConfig& graphicsConfig)
 {
@@ -28,6 +37,11 @@ Engine& Engine::Initialize(WindowContext window, const GraphicsConfig& graphicsC
 void Engine::Destroy()
 {
     s_engine.reset();
+}
+
+void Engine::BeginShutdown()
+{
+    s_shuttingDown = true;
 }
 
 Engine& Engine::Instance()

@@ -20,11 +20,19 @@ NXS_NAMESPACE
     {
     public:
         Editor();
+        ~Editor();
 
         void Update() const;
         void Draw(RenderSystem& renderSystem);
 
         void AddMenuItem(const std::string& menu, const MenuItem& menuItem);
+        
+        void AddWidget(Ref<EditorWidget> widget)
+        {
+            m_widgets.push_back(widget);
+        }
+
+        void Clear();
 
     protected:
         void InitMenu();

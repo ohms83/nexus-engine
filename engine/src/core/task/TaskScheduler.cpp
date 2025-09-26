@@ -24,6 +24,8 @@ TaskScheduler::TaskScheduler(const Ref<ITimeSource>& timeSource)
 
 TaskID TaskScheduler::ScheduleTask(Ref<IRunnable> task, UpdatePhase phase, TaskQueue queue)
 {
+    if (IsShuttingDown()) return 0;
+
     std::lock_guard<std::mutex> lock(m_mutex);
     const TaskID id = s_runningId++;
     m_tasks.emplace_back(id, task);

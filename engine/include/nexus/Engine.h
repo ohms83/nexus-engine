@@ -29,6 +29,8 @@ NXS_NAMESPACE
         //! Get engine's singleton instance.
         NODISCARD static Engine& Instance();
 
+        static void BeginShutdown();
+
         NODISCARD Ref<RenderSystem> GetRenderSystem() const
         {
             NXS_ASSERT_MSG(m_renderSystem != nullptr, "Render System hasn't been initialized");

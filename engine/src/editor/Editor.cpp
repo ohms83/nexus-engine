@@ -31,6 +31,11 @@ Editor::Editor()
     InitMenu();
 }
 
+Editor::~Editor()
+{
+    Clear();
+}
+
 // ReSharper disable once CppMemberFunctionMayBeStatic
 void Editor::Update() const
 {
@@ -74,6 +79,12 @@ void Editor::AddMenuItem(const std::string& menu, const MenuItem& menuItem)
     {
         m_widgets.push_back(menuItem.widget);
     }
+}
+
+void Editor::Clear()
+{
+    m_menuItems.clear();
+    m_widgets.clear();
 }
 
 void Editor::InitMenu()

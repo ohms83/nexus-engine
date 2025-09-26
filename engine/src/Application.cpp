@@ -174,7 +174,6 @@ int Application::BeginMainLoop()
 
         PollEvents(e);
 
-
         {
             rmt_ScopedCPUSample(Update, 0);
             taskScheduler->PreUpdate();
@@ -217,6 +216,7 @@ void Application::RequestQuit()
 
     LOG_INFO(LogApplication, "RequestQuit");
     m_quit = true;
+    Engine::BeginShutdown();
 }
 
 bool Application::IsQuitRequested() const

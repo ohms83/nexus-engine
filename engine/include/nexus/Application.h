@@ -132,13 +132,13 @@ NXS_NAMESPACE
         glm::ivec2 m_screenSize = glm::ivec2(1280, 960);
         glm::ivec2 m_actualSize = glm::ivec2(1280, 960);
         SDL_Keycode m_escapeKey = SDLK_ESCAPE;
+        Ptr<Editor> m_editor;
 
     private:
         ApplicationConfig m_config {};
         bool m_quit = false;
         Ref<RenderSystem> m_renderSystem;
         Ref<RenderingInterface> m_renderInterface;
-        Ptr<Editor> m_editor;
 
         Ref<Timer> m_timer;
         float m_deltaTime = 0.0f;

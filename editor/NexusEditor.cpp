@@ -117,6 +117,8 @@ bool NexusEditor::Init_Internal()
     inputManager.RegisterAxisInputMap("movement", cameraMovementKeyInput);
     inputManager.RegisterAxisInputMap("camera_turn", cameraTurnKeyInput);
     inputManager.RegisterMouseAxisInputMap("camera_turn", cameraTurnMouseInput);
+
+    m_editor->AddWidget(std::make_shared<nxs::SceneGraphWidget>(scene));
     return true;
 }
 

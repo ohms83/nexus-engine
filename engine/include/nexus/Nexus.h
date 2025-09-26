@@ -44,6 +44,7 @@
 #include "editor/EditorWidget.h"
 #include "editor/MenuItem.h"
 #include "editor/ProfilerWidget.h"
+#include "editor/SceneGraphWidget.h"
 #include "geom/Box.h"
 #include "geom/Frustum.h"
 #include "geom/Plane.h"

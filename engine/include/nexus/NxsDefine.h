@@ -97,4 +97,6 @@ NXS_NAMESPACE
     {
         return D_CAST<T>(obj) != nullptr;
     }
+
+    bool IsShuttingDown();
 }
