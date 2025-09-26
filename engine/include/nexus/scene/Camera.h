@@ -6,6 +6,7 @@
 
 #include "nexus/NxsDefine.h"
 #include "nexus/geom/Frustum.h"
+#include "nexus/ecs/component/scene/TransformComponent.h"
 #include "nexus/ecs/component/scene/CameraComponent.h"
 
 #include "SceneNode.h"

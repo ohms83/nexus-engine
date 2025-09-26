@@ -28,6 +28,26 @@ void SceneNode::Activate(const bool activate)
     }
 }
 
+void SceneNode::AddChild(Ref<SceneNode> child)
+{
+    child->m_parent = this;
+    m_children.push_back(child);
+}
+
+void SceneNode::RemoveChild(Ref<SceneNode> child)
+{
+    if (auto itr = std::ranges::find(m_children, child); itr != m_children.end())
+    {
+        child->m_parent = nullptr;
+        m_children.erase(itr);
+    }
+}
+
+void SceneNode::GetAllChildren(ChildList& childrenList) const
+{
+    for (auto child : m_children) childrenList.push_back(child);
+}
+
 void SceneNode::AddScript(Ref<Script> script)
 {
     m_scripts.push_back(script);

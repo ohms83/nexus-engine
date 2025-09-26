@@ -4,6 +4,7 @@
 #include "nexus/graphics/Color.h"
 #include "nexus/math/Math.h"
 #include "nexus/core/LogDispatcher.h"
+#include "nexus/ecs/component/scene/TransformComponent.h"
 #include "nexus/ecs/component/scene/LightComponent.h"
 
 #include "SceneNode.h"

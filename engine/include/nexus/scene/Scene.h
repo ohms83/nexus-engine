@@ -60,6 +60,13 @@ NXS_NAMESPACE
          */
         NODISCARD Ref<SceneNode> GetNode(const std::string& name);
 
+        const SceneNode::ChildList& GetAllChildren() const
+        {
+            return m_children;
+        }
+
+        void GetAllRootNodes(SceneNode::ChildList& nodeList) const;
+
         virtual void OnEnter() {}
         virtual void OnExit() {}
         virtual void Update(float dt);

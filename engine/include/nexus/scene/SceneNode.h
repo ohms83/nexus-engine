@@ -7,7 +7,6 @@
 #include "Script.h"
 
 #include "nexus/ecs/component/scene/SceneNodeComponent.h"
-#include "nexus/ecs/component/scene/TransformComponent.h"
 
 #include <string>
 
@@ -16,6 +15,8 @@ NXS_NAMESPACE
     class SceneNode : public Entity
     {
     public:
+        using ChildList = std::vector<Ref<SceneNode>>;
+
         SceneNode() = delete;
         explicit SceneNode(entt::registry& registry);
         explicit SceneNode(entt::registry& registry, std::string  name);
@@ -37,10 +38,10 @@ NXS_NAMESPACE
             return m_node.active;
         }
 
-        void AddChild(Ref<SceneNode> child)
-        {
-            m_children.push_back(child);
-        }
+        void AddChild(Ref<SceneNode> child);
+        void RemoveChild(Ref<SceneNode> child);
+        void GetAllChildren(ChildList& childrenList) const;
+        SceneNode* GetParent() const { return m_parent; }
 
         void AddScript(Ref<Script> script);
         void RemoveScript(Ref<Script> script);
@@ -54,7 +55,8 @@ NXS_NAMESPACE
         virtual void Update_Internal(float dt) {}
 
         SceneNodeComponent& m_node;
-        std::vector<Ref<SceneNode>> m_children;
+        SceneNode* m_parent = nullptr;
+        ChildList m_children;
         std::vector<Ref<Script>> m_scripts;
     };
 }

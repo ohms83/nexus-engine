@@ -5,6 +5,8 @@
 #include "nexus/graphics/RenderSystem.h"
 #include "nexus/core/LogDispatcher.h"
 
+#include <ranges>
+
 USING_NAMESPACE_NXS;
 
 DEFINE_LOG(Scene);
@@ -38,6 +40,16 @@ Ref<SceneNode> Scene::GetNode(const std::string& name)
     return node == m_children.end() ? nullptr : *node;
 }
 
+void Scene::GetAllRootNodes(SceneNode::ChildList& nodeList) const
+{
+    auto isRoot = [](Ref<const SceneNode> child) {
+        return child->GetParent() == nullptr;
+    };
+    std::ranges::for_each(m_children | std::views::filter(isRoot), [&nodeList](auto node) {
+        nodeList.push_back(node);
+    });
+}
+
 void Scene::Update(float dt)
 {
     for (const auto& sim : m_simulations)
@@ -69,10 +81,9 @@ uint32_t Scene::AddSimulation(ECS::SimulationSystem system)
 
 void Scene::RemoveSimulation(uint32_t id)
 {
-    auto [begin, end] = std::ranges::remove_if(m_simulations, [id](const Simulation& simulation) {
-        return simulation.id == id;
-    });
-    m_simulations.erase(begin, end);
+    if (auto itr = std::ranges::find(m_simulations, id, &Simulation::id); itr != m_simulations.end()) {
+        m_simulations.erase(itr);
+    }
 }
 
 Color3F& Scene::Ambient()
