@@ -15,7 +15,10 @@ NXS_NAMESPACE
             m_entity = registry.create();
         }
 
-        virtual ~Entity() = default;
+        virtual ~Entity()
+        {
+            m_registry.destroy(m_entity);
+        }
 
         entt::registry& GetRegistry() const
         {

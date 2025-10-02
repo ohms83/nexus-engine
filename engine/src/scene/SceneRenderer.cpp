@@ -36,8 +36,6 @@ static void SetDirectLightParams(RenderCommand& command, const entt::registry& r
     const auto lights = ECS::FindAllComponents<DirectLightComponent>(registry);
     const auto numLights = CAST<int32>(lights.size());
 
-    if (lights.empty()) return;
-
     for (int i = 0; i < lights.size(); ++i)
     {
         const auto light = lights[i];
@@ -56,7 +54,6 @@ static void SetDirectLightParams(RenderCommand& command, const entt::registry& r
         command.uniformFloats.emplace_back(uniformLocationSpecular, light->properties.specularIntensity);
         command.uniformFloats.emplace_back(uniformLocationCutoff, light->properties.cutoffRange);
     }
-
     command.uniformInts.emplace_back("_NumDirectLight", INT_CAST(lights.size()));
 }
 

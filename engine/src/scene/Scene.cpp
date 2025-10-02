@@ -25,6 +25,12 @@ Scene::Scene(const std::string& name)
     Init();
 }
 
+Scene::~Scene()
+{
+    m_children.clear();
+    m_simulations.clear();
+}
+
 void Scene::Init()
 {
     auto ambientEntt = m_registry.create();

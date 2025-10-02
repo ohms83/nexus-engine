@@ -19,7 +19,7 @@ NXS_NAMESPACE
     public:
         Scene();
         explicit Scene(const std::string& name);
-        virtual ~Scene() = default;
+        virtual ~Scene();
 
         NODISCARD const std::string& GetName() const { return m_name; }
         void ChangeName(const std::string& name) { m_name = name; }
