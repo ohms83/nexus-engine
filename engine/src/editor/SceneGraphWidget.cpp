@@ -16,7 +16,6 @@ void SceneGraphWidget::Draw_Internal(RenderSystem& renderSystem)
     m_highlightNode.reset();
 
     SceneNode::ChildList rootNodes;
-    rootNodes.clear();
     m_scene->GetAllRootNodes(rootNodes);
     for (const auto node : rootNodes)
     {
