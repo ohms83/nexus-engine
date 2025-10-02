@@ -55,12 +55,19 @@ NXS_NAMESPACE
         MAYBE_UNUSED bool Update() override;
 
         /**
+         * @brief Gets a list of tasks managed by this group.
+         */
+        const TaskList& GetTasks() const { return m_tasks; }
+
+        size_t GetNumTask() const { return m_tasks.size(); }
+
+        /**
          * @brief A signal emitted when a task within the group has finished.
          */
         TaskCallback taskFinishedCallback;
 
     private:
         /// @brief The collection of tasks managed by this group.
-        std::vector<Ref<IRunnable>> m_tasks;
+        TaskList m_tasks;
     };
 }

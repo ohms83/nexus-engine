@@ -84,3 +84,16 @@ void TaskScheduler::OnTaskTerminated(Ref<IRunnable> task)
     if (taskItr == m_tasks.end()) return;
     m_tasks.erase(taskItr);
 }
+
+TaskList TaskScheduler::GetAllTasks() const
+{
+    TaskList tasks;
+    for (auto& taskData : m_tasks) tasks.push_back(taskData.action);
+    return tasks;
+}
+
+const TaskList& TaskScheduler::GetAllTasksFromGroup(UpdatePhase phase) const
+{
+    const auto& itr = m_taskGroups.find(phase);
+    return (*itr).second.GetTasks();
+}

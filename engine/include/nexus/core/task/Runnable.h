@@ -60,4 +60,6 @@ NXS_NAMESPACE
      * when it is finished. The signal carries a reference to the IRunnable object.
      */
     using TaskCallback = sigslot::signal<Ref<IRunnable>>;
+
+    using TaskList = std::vector<Ref<IRunnable>>;
 }

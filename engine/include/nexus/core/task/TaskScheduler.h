@@ -104,6 +104,12 @@ NXS_NAMESPACE
          */
         void PostUpdate();
 
+        TaskList GetAllTasks() const;
+        const TaskList& GetAllTasksFromGroup(UpdatePhase phase) const;
+
+        size_t GetNumTask() const { return m_tasks.size(); }
+        size_t GetNumTaskInGroup(UpdatePhase phase) const { return GetAllTasksFromGroup(phase).size(); }
+
     protected:
         /**
          * @brief A struct to store task information.
