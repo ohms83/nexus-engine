@@ -57,6 +57,12 @@ NXS_NAMESPACE
             return m_registry.try_get<Type...>(m_entity);
         }
 
+        template<typename Type>
+        MAYBE_UNUSED size_t RemoveComponent()
+        {
+            return m_registry.remove<Type>(m_entity);
+        }
+
     protected:
         entt::entity m_entity{};
 

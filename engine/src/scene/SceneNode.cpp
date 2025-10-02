@@ -2,20 +2,37 @@
 
 #include "scene/SceneNode.h"
 #include "ecs/component/scene/SceneNodeComponent.h"
+#include "core/LogDispatcher.h"
 
 USING_NAMESPACE_NXS;
 
+DEFINE_LOG(SceneNode);
+
+static uint64_t s_runningId = 0;
+const uint64_t SceneNode::InvalidID = 0;
+
 SceneNode::SceneNode(entt::registry& registry)
     : Entity(registry)
+    , m_id(++s_runningId)
     , m_node(AddComponent<SceneNodeComponent>())
 {
 }
 
 SceneNode::SceneNode(entt::registry& registry, std::string name)
     : Entity(registry)
+    , m_id(++s_runningId)
     , m_node(AddComponent<SceneNodeComponent>())
 {
     m_node.name = name;
+}
+
+SceneNode::~SceneNode()
+{
+    LOG_DEBUG(LogSceneNode, std::format("~SceneNode() id={} name={}", m_id, m_node.name));
+    m_id = InvalidID;
+    m_node.active = false;
+    m_node.name.clear();
+    RemoveComponent<SceneNodeComponent>();
 }
 
 void SceneNode::Activate(const bool activate)

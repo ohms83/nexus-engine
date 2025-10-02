@@ -22,7 +22,7 @@ NXS_NAMESPACE
         SceneNode() = delete;
         explicit SceneNode(entt::registry& registry);
         explicit SceneNode(entt::registry& registry, std::string  name);
-        virtual ~SceneNode() = default;
+        virtual ~SceneNode();
 
         void Destroy();
 
@@ -60,8 +60,11 @@ NXS_NAMESPACE
         virtual void OnDestroy() {};
         virtual void OnUpdate(float dt) {}
 
+        static const uint64_t InvalidID;
+
     protected:
-        Scene* m_owner;
+        uint64_t m_id = 0;
+        Scene* m_owner = nullptr;
         SceneNodeComponent& m_node;
         SceneNode* m_parent = nullptr;
         ChildList m_children;
