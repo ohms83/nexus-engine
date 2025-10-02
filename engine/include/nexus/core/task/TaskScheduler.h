@@ -44,6 +44,7 @@ NXS_NAMESPACE
         {
             MainThread,   ///< The task is scheduled to run on the main thread.
             WorkerThread, ///< The task is scheduled to run on a worker thread.
+            Num
         };
 
         /**
@@ -54,7 +55,8 @@ NXS_NAMESPACE
         {
             PreUpdate,  ///< The task is executed at the beginning of the update loop.
             Update,     ///< The task is executed during the main update phase.
-            PostUpdate  ///< The task is executed at the end of the update loop.
+            PostUpdate,  ///< The task is executed at the end of the update loop.
+            Num
         };
 
         /**

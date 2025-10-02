@@ -8,7 +8,7 @@ void TaskGroup::Remove(Ref<IRunnable> task)
 {
     auto itr = std::ranges::find(m_tasks, task);
     if (itr == m_tasks.end()) return;
-    
+
     m_tasks.erase(itr);
 }
 

@@ -31,8 +31,27 @@ protected:
         mockTimeSource = std::make_shared<MockTimeSource>();
         scheduler = std::make_unique<TaskScheduler>(mockTimeSource);
     }
+
+    void ScheduleTasks(nxs::TaskScheduler::UpdatePhase phase, size_t num)
+    {
+        std::vector<TaskID>& ids = taskIds[phase];
+        for (size_t i = 0; i < num; ++i) {
+            ids.push_back(scheduler->ScheduleTask(std::make_shared<OneshotTask>([&]() {}), phase));
+        }
+    }
+
+    void StopTasks(nxs::TaskScheduler::UpdatePhase phase)
+    {
+        std::vector<TaskID>& ids = taskIds[phase];
+        for (const auto id : ids) {
+            scheduler->StopTask(id);
+        }
+        ids.clear();
+    }
+
     Ref<MockTimeSource> mockTimeSource;
     std::unique_ptr<TaskScheduler> scheduler;
+    std::map<nxs::TaskScheduler::UpdatePhase, std::vector<TaskID>> taskIds;
 };
 
 // ============================================================================
@@ -209,6 +228,75 @@ TEST_F(TaskSchedulerTest, ScheduleToCorrectPhases) {
     ASSERT_TRUE(preUpdateRan);
     ASSERT_TRUE(updateRan);
     ASSERT_TRUE(postUpdateRan);
+}
+
+// Test whether the scheduled tasks are added and removed up correctly.
+TEST_F(TaskSchedulerTest, HandleTaskTermination) {
+    ASSERT_EQ(scheduler->GetNumTask(), 0);
+
+    // PreUpdate
+    {
+        const TaskScheduler::UpdatePhase phase = TaskScheduler::UpdatePhase::PreUpdate;
+        const size_t numTask = 1;
+
+        ScheduleTasks(phase, numTask);
+        ASSERT_EQ(scheduler->GetNumTaskInGroup(phase), numTask);
+        ASSERT_EQ(scheduler->GetNumTask(), numTask);
+
+        StopTasks(phase);
+        ASSERT_EQ(scheduler->GetNumTaskInGroup(phase), 0);
+        ASSERT_EQ(scheduler->GetNumTask(), 0);
+        
+        // Schedules the tasks again and lets it stop by its own to check whether the scheduler
+        // will handle task termination gracefully.
+        ScheduleTasks(phase, numTask);
+        scheduler->PreUpdate();
+
+        ASSERT_EQ(scheduler->GetNumTaskInGroup(phase), 0);
+        ASSERT_EQ(scheduler->GetNumTask(), 0);
+    }
+    // Update
+    {
+        const TaskScheduler::UpdatePhase phase = TaskScheduler::UpdatePhase::Update;
+        const size_t numTask = 2;
+
+        ScheduleTasks(phase, numTask);
+        ASSERT_EQ(scheduler->GetNumTaskInGroup(phase), numTask);
+        ASSERT_EQ(scheduler->GetNumTask(), numTask);
+
+        StopTasks(phase);
+        ASSERT_EQ(scheduler->GetNumTaskInGroup(phase), 0);
+        ASSERT_EQ(scheduler->GetNumTask(), 0);
+        
+        // Schedules the tasks again and lets it stop by its own to check whether the scheduler
+        // will handle task termination gracefully.
+        ScheduleTasks(phase, numTask);
+        scheduler->Update();
+
+        ASSERT_EQ(scheduler->GetNumTaskInGroup(phase), 0);
+        ASSERT_EQ(scheduler->GetNumTask(), 0);
+    }
+    // PostUpdate
+    {
+        const TaskScheduler::UpdatePhase phase = TaskScheduler::UpdatePhase::PostUpdate;
+        const size_t numTask = 3;
+
+        ScheduleTasks(phase, numTask);
+        ASSERT_EQ(scheduler->GetNumTaskInGroup(phase), numTask);
+        ASSERT_EQ(scheduler->GetNumTask(), numTask);
+
+        StopTasks(phase);
+        ASSERT_EQ(scheduler->GetNumTaskInGroup(phase), 0);
+        ASSERT_EQ(scheduler->GetNumTask(), 0);
+        
+        // Schedules the tasks again and lets it stop by its own to check whether the scheduler
+        // will handle task termination gracefully.
+        ScheduleTasks(phase, numTask);
+        scheduler->PostUpdate();
+
+        ASSERT_EQ(scheduler->GetNumTaskInGroup(phase), 0);
+        ASSERT_EQ(scheduler->GetNumTask(), 0);
+    }
 }
 
 // Simple runnable task for testing

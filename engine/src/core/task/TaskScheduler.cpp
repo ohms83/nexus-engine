@@ -14,9 +14,10 @@ USING_NAMESPACE_NXS;
 
 TaskScheduler::TaskScheduler(const Ref<ITimeSource>& timeSource)
 {
-    for (auto& keyValue : m_taskGroups)
+    for (int i = 0; i < INT_CAST(UpdatePhase::Num); ++i)
     {
-        keyValue.second.taskFinishedCallback.connect([this](Ref<IRunnable> task) {
+        auto& taskGroup = m_taskGroups[CAST<UpdatePhase>(i)];
+        taskGroup.taskFinishedCallback.connect([this](Ref<IRunnable> task) {
             OnTaskTerminated(task);
         });
     }
