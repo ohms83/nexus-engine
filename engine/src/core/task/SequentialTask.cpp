@@ -4,7 +4,9 @@ USING_NAMESPACE_NXS;
 
 SequentialTask::SequentialTask(std::initializer_list<Ref<IRunnable>> taskList)
 {
-    m_tasks.push_range(taskList);
+    for (auto task : taskList) {
+        m_tasks.push(task);
+    }
 }
 
 Ref<IRunnable> SequentialTask::Pop()

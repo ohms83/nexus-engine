@@ -129,6 +129,26 @@ TEST(SequentialTaskTest, ExecutesTasksInOrder) {
     ASSERT_EQ(counter, 2);
 }
 
+TEST(SequentialTaskTest, InitializerList) {
+    int counter = 0;
+    auto task1 = std::make_shared<OneshotTask>([&]() { counter = 1; });
+    auto task2 = std::make_shared<OneshotTask>([&]() { counter = 2; });
+
+    SequentialTask sequentialTask = { task1, task2 };
+
+    // Initial state: first task should run and finish
+    ASSERT_TRUE(sequentialTask.Update());
+    ASSERT_EQ(counter, 1);
+
+    // Next update: second task should run and finish
+    ASSERT_TRUE(sequentialTask.Update());
+    ASSERT_EQ(counter, 2);
+
+    // Third update: no more tasks, so the sequential task finishes
+    ASSERT_FALSE(sequentialTask.Update());
+    ASSERT_EQ(counter, 2);
+}
+
 // ============================================================================
 // Task Scheduler
 // ============================================================================
