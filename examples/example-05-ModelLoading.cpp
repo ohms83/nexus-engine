@@ -47,7 +47,7 @@ public:
             if (m_loadedModel->status != nxs::IResourceLoader::LoadResult::Status::Ready) return;
         }
 
-        auto& modelComp = m_scene.GetNode("Model")->GetComponent<nxs::ModelComponent>();
+        auto& modelComp = m_scene.FindNode("Model")->GetComponent<nxs::ModelComponent>();
         modelComp.model = PTR_CAST<nxs::Model>(m_loadedModels[selectedModel]->resource);
         m_finishLoading = true;
     }
@@ -59,7 +59,7 @@ public:
         m_euler.x += euler.x;
         m_euler.y += euler.y;
 
-        auto modelNode = PTR_CAST<nxs::SceneNode3D>(m_scene.GetNode("Model"));
+        auto modelNode = PTR_CAST<nxs::SceneNode3D>(m_scene.FindNode("Model"));
         modelNode->Orient().value = glm::mat4_cast(glm::quat(glm::radians(m_euler)));
         modelNode->Scale().value = modelScales[selectedModel] * scale;
 
@@ -102,7 +102,7 @@ public:
 
                         if (m_loadedModels[n]->status == nxs::IResourceLoader::LoadResult::Status::Ready)
                         {
-                            auto& modelComp = m_scene.GetNode("Model")->GetComponent<nxs::ModelComponent>();
+                            auto& modelComp = m_scene.FindNode("Model")->GetComponent<nxs::ModelComponent>();
                             modelComp.model = PTR_CAST<nxs::Model>(m_loadedModels[n]->resource);
                         }
                     }
@@ -193,7 +193,7 @@ protected:
         m_camera.width = FLOAT_CAST(screenSize.x);
         m_camera.height = FLOAT_CAST(screenSize.y);
 
-        auto camera = PTR_CAST<nxs::Camera>(m_scene.GetNode("Camera"));
+        auto camera = PTR_CAST<nxs::Camera>(m_scene.FindNode("Camera"));
         camera->SetProjection(m_camera.fov, m_camera.width, m_camera.height, m_camera.nearZ, m_camera.farZ);
     }
 

@@ -4,7 +4,6 @@
 
 USING_NAMESPACE_NXS;
 
-// Define a test fixture for HighResTimeSource
 class SceneNodeTest : public ::testing::Test {
 protected:
     Ptr<Scene> scene;
@@ -26,11 +25,32 @@ protected:
 
 TEST_F(SceneNodeTest, AddNode)
 {
+    auto emptyNode = scene->FindNode("Test");
+    EXPECT_EQ(emptyNode, nullptr);
+
+    nxs::Random rand;
     auto node = scene->CreateNode<SceneNode3D>("Test");
-    const auto pos = glm::vec3(dis(gen), dis(gen), dis(gen));
+    const auto pos = rand.RangeVec<float>(0, 1);
     node->Position().value = pos;
 
-    const auto anotherNode = PTR_CAST<SceneNode3D>(scene->GetNode("Test"));
-    EXPECT_TRUE(anotherNode->GetName() == "Test");
-    EXPECT_TRUE(anotherNode->Position().value == pos);
+    const auto anotherNode = PTR_CAST<SceneNode3D>(scene->FindNode("Test"));
+    EXPECT_EQ(node, anotherNode);
+    EXPECT_EQ(node->GetName(),  anotherNode->GetName());
+    EXPECT_EQ(node->Position().value, anotherNode->Position().value);
+}
+
+TEST_F(SceneNodeTest, RemoveNode)
+{
+    const auto name1 = "Node 1";
+    const auto name2 = "Node 2";
+    auto node1 = scene->CreateNode<SceneNode>(name1);
+    auto node2 = scene->CreateNode<SceneNode>(name2);
+    
+    EXPECT_NE(node1, node2);
+    EXPECT_NE(node1->GetName(), node2->GetName());
+
+    scene->RemoveNodeByName(name2);
+    node2 = scene->FindNode(name2);
+    EXPECT_EQ(node2, nullptr);
+    EXPECT_EQ(node1->GetName(), name1);
 }

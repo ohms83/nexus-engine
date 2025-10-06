@@ -58,7 +58,7 @@ NXS_NAMESPACE
          * @param name Node name
          * @return A scene node with specified name or a nullptr, if not found
          */
-        NODISCARD Ref<SceneNode> GetNode(const std::string& name);
+        NODISCARD Ref<SceneNode> FindNode(const std::string& name);
 
         const SceneNode::ChildList& GetAllChildren() const
         {
@@ -68,6 +68,7 @@ NXS_NAMESPACE
         void GetAllRootNodes(SceneNode::ChildList& nodeList) const;
 
         void RemoveNode(Ref<SceneNode> node);
+        void RemoveNodeByName(const std::string& name);
 
         virtual void OnEnter() {}
         virtual void OnExit() {}

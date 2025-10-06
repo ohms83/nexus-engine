@@ -40,13 +40,19 @@ void Scene::Init()
     AddSimulation(RotateNode);
 }
 
-Ref<SceneNode> Scene::GetNode(const std::string& name)
+Ref<SceneNode> Scene::FindNode(const std::string& name)
 {
     const auto node = std::ranges::find_if(m_children, [&name](const Ref<SceneNode>& n)
     {
         return n->GetName() == name;
     });
-    return node == m_children.end() ? nullptr : *node;
+
+    if (node == m_children.end())
+    {
+        LOG_WARNING(LogScene, std::format("Can't find a scene node with name: {}", name));
+        return nullptr;
+    }
+    return *node;
 }
 
 void Scene::GetAllRootNodes(SceneNode::ChildList& nodeList) const
@@ -61,7 +67,7 @@ void Scene::GetAllRootNodes(SceneNode::ChildList& nodeList) const
 
 void Scene::RemoveNode(Ref<SceneNode> node)
 {
-    if (IsShuttingDown()) return;
+    if (IsShuttingDown() || !node) return;
 
     auto taskScheduler = Engine::Instance().GetTaskScheduler();
     taskScheduler->ScheduleTask(std::make_shared<OneshotTask>([this, node]() {
@@ -80,6 +86,11 @@ void Scene::RemoveNode(Ref<SceneNode> node)
             return std::ranges::find(nodeList, node) != nodeList.end();
         });
     }), TaskScheduler::UpdatePhase::PostUpdate);
+}
+
+void Scene::RemoveNodeByName(const std::string& name)
+{
+    RemoveNode(FindNode(name));
 }
 
 void Scene::Update(float dt)

@@ -24,6 +24,7 @@ SceneNode::SceneNode(entt::registry& registry, std::string name)
     , m_node(AddComponent<SceneNodeComponent>())
 {
     m_node.name = name;
+    LOG_DEBUG(LogSceneNode, std::format("SceneNode() id={} name={} c_str={}", m_id, m_node.name, (void*)m_node.name.c_str()));
 }
 
 SceneNode::~SceneNode()

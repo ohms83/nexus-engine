@@ -13,6 +13,27 @@ DEFINE_LOG(NexusEditor);
 
 static float cameraSpeed = 2.0f;
 
+static nxs::Ref<nxs::Camera> InitCamera(nxs::Scene& scene)
+{
+    auto camera = scene.CreateNode<nxs::Camera>("Camera Node");
+    camera->Position().value = {0, 5, 5};
+    camera->LookAt({0, 0, 0}, {0, 1, 0});
+    camera->AddComponent<nxs::MoveComponent>(nxs::MoveComponent {
+        glm::vec3(0, 0, 0),
+        10
+    });
+    return camera;
+}
+
+static void InitModel(nxs::Scene& scene, nxs::Ref<nxs::ModelManager> modelManager)
+{
+    auto node = scene.CreateNode<nxs::SceneNode3D>("Model");
+    node->Scale().value = glm::vec3 {3, 3, 3};
+
+    const auto modelPath = std::filesystem::path(NXS_ASSETS_DIR) / "meshes/apple/3DApple001_SQ-1K-PNG.obj";
+    node->AddComponent<nxs::ModelComponent>().model = modelManager->Get(modelPath.string());
+}
+
 static void InitLight(nxs::Scene& scene)
 {
     scene.Ambient() = {0.5, 0.2, 0.2};
@@ -73,21 +94,8 @@ bool NexusEditor::Init_Internal()
     auto scene = sceneManager->EmplaceAndChange<nxs::Scene>("Editor Scene");
     scene->SetRenderer(std::make_unique<nxs::BasicSceneRenderer>());
 
-    m_camera = scene->CreateNode<nxs::Camera>("Camera Node");
-    m_camera->Position().value = {0, 5, 5};
-    m_camera->LookAt({0, 0, 0}, {0, 1, 0});
-    m_camera->AddComponent<nxs::MoveComponent>(nxs::MoveComponent {
-        glm::vec3(0, 0, 0),
-        10
-    });
-
-    auto node = scene->CreateNode<nxs::SceneNode3D>("Model");
-    node->Scale().value = glm::vec3 {3, 3, 3};
-
-    const auto modelPath = std::filesystem::path(NXS_ASSETS_DIR) / "meshes/apple/3DApple001_SQ-1K-PNG.obj";
-    const auto modelManager = engine.GetModelManager();
-    node->AddComponent<nxs::ModelComponent>().model = modelManager->Get(modelPath.string());
-
+    m_camera = InitCamera(*scene);
+    InitModel(*scene, engine.GetModelManager());
     InitLight(*scene);
 
     auto& inputManager = nxs::InputManager::Instance();
