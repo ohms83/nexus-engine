@@ -13,6 +13,7 @@ DECLARE_LOG_EXTERN(Scene);
 NXS_NAMESPACE
 {
     class RenderSystem;
+    class TaskScheduler;
 
     class Scene
     {
@@ -23,6 +24,8 @@ NXS_NAMESPACE
 
         NODISCARD const std::string& GetName() const { return m_name; }
         void ChangeName(const std::string& name) { m_name = name; }
+
+        void SetTaskScheduler(Ref<TaskScheduler> taskScheduler) { m_scheduler = taskScheduler; }
 
         template<typename T>
         requires std::derived_from<T, SceneNode>
@@ -94,6 +97,7 @@ NXS_NAMESPACE
     protected:
         std::string m_name;
         std::vector<Ref<SceneNode>> m_children;
+        Ref<TaskScheduler> m_scheduler;
 
         // --- Rendering ---
         //! Ambient light.

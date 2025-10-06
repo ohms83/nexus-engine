@@ -5,7 +5,6 @@
 #include "ecs/system/scene/SceneNodeTransformSystem.h"
 #include "graphics/RenderSystem.h"
 #include "core/task/OneshotTask.h"
-#include "Engine.h"
 
 #include <ranges>
 #include <algorithm>
@@ -47,12 +46,7 @@ Ref<SceneNode> Scene::FindNode(const std::string& name)
         return n->GetName() == name;
     });
 
-    if (node == m_children.end())
-    {
-        LOG_WARNING(LogScene, std::format("Can't find a scene node with name: {}", name));
-        return nullptr;
-    }
-    return *node;
+    return node != m_children.end() ? *node : nullptr;
 }
 
 void Scene::GetAllRootNodes(SceneNode::ChildList& nodeList) const
@@ -69,8 +63,19 @@ void Scene::RemoveNode(Ref<SceneNode> node)
 {
     if (IsShuttingDown() || !node) return;
 
-    auto taskScheduler = Engine::Instance().GetTaskScheduler();
-    taskScheduler->ScheduleTask(std::make_shared<OneshotTask>([this, node]() {
+    if (!node)
+    {
+        LOG_WARNING(LogScene, std::format("Invalid scene node."));
+        return;
+    }
+ 
+    if (!m_scheduler)
+    {
+        LOG_WARNING(LogScene, std::format("Unable to remove the node={}. Reason=The task scheduler is invalid.", node->GetName()));
+        return;
+    }
+
+    m_scheduler->ScheduleTask(std::make_shared<OneshotTask>([this, node]() {
         SceneNode::ChildList nodeList;
         // Sort the list in descendants to parents order.
         node->GetAllDescendants(nodeList, false);
@@ -90,7 +95,13 @@ void Scene::RemoveNode(Ref<SceneNode> node)
 
 void Scene::RemoveNodeByName(const std::string& name)
 {
-    RemoveNode(FindNode(name));
+    auto node = FindNode(name); 
+    if (node == nullptr)
+    {
+        LOG_WARNING(LogScene, std::format("Can't find a node with name={}", name));
+        return;
+    }
+    RemoveNode(node);
 }
 
 void Scene::Update(float dt)
