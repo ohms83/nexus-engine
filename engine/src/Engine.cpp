@@ -30,7 +30,7 @@ Engine& Engine::Initialize(WindowContext window, const GraphicsConfig& graphicsC
         s_engine->m_textureManager,
         s_engine->m_materialManager);
     s_engine->m_taskScheduler = std::make_shared<TaskScheduler>(std::make_shared<StandardTimeSource>());
-    s_engine->m_sceneManager =  std::make_shared<SceneManager>();
+    s_engine->m_sceneManager =  std::make_shared<SceneManager>(s_engine->GetTaskScheduler());
     return *s_engine;
 }
 

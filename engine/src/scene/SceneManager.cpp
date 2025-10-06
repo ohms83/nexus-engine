@@ -7,7 +7,8 @@ USING_NAMESPACE_NXS;
 
 DEFINE_LOG(SceneManager);
 
-SceneManager::SceneManager()
+SceneManager::SceneManager(Ref<TaskScheduler> taskScheduler)
+    : m_taskScheduler(taskScheduler)
 {
 }
 
@@ -63,9 +64,8 @@ bool SceneManager::ChangeScene_Internal(Ref<Scene> scene)
     }
     m_next = scene;
 
-    auto taskScheduler = Engine::Instance().GetTaskScheduler();
     // Schedule the scene transitioning task at the begining of the next frame.
-    taskScheduler->ScheduleTask(std::make_shared<OneshotTask>([this]() {
+    m_taskScheduler->ScheduleTask(std::make_shared<OneshotTask>([this]() {
         if (m_current) {
             m_current->OnExit();
         }

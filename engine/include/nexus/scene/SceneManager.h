@@ -2,6 +2,7 @@
 
 #include "nexus/NxsDefine.h"
 #include "nexus/graphics/RenderSystem.h"
+#include "nexus/core/task/TaskScheduler.h"
 #include "Scene.h"
 
 #include <vector>
@@ -12,7 +13,7 @@ NXS_NAMESPACE
     class SceneManager
     {
     public:
-        SceneManager();
+        SceneManager(Ref<TaskScheduler> taskScheduler);
 
         template<typename SceneType, typename... Args>
         requires std::derived_from<SceneType, SceneType>
@@ -60,5 +61,6 @@ NXS_NAMESPACE
         std::vector<Ref<Scene>> m_sceneList;
         Ref<Scene> m_next;
         Ref<Scene> m_current;
+        Ref<TaskScheduler> m_taskScheduler;
     };
 }
