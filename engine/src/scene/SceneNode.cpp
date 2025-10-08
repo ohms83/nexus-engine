@@ -14,33 +14,27 @@ const uint64_t SceneNode::InvalidID = 0;
 SceneNode::SceneNode(entt::registry& registry)
     : Entity(registry)
     , m_id(++s_runningId)
-    , m_node(AddComponent<SceneNodeComponent>())
 {
+    AddComponent<SceneNodeComponent>();
 }
 
 SceneNode::SceneNode(entt::registry& registry, std::string name)
     : Entity(registry)
     , m_id(++s_runningId)
-    , m_node(AddComponent<SceneNodeComponent>())
 {
-    m_node.name = name;
-    LOG_DEBUG(LogSceneNode, std::format("SceneNode() id={} name={} c_str={}", m_id, m_node.name, (void*)m_node.name.c_str()));
+    AddComponent<SceneNodeComponent>(name, true);
 }
 
 SceneNode::~SceneNode()
 {
-    LOG_DEBUG(LogSceneNode, std::format("~SceneNode() id={} name={}", m_id, m_node.name));
     m_id = InvalidID;
-    m_node.active = false;
-    m_node.name.clear();
-    RemoveComponent<SceneNodeComponent>();
 }
 
 void SceneNode::Activate(const bool activate)
 {
-    if (m_node.active != activate)
+    if (IsActive() != activate)
     {
-        m_node.active = activate;
+        GetComponent<SceneNodeComponent>().active = activate;
         if (activate) OnActivate();
         else OnDeactivate();
     }

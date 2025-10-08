@@ -28,18 +28,18 @@ NXS_NAMESPACE
 
         NODISCARD const std::string& GetName() const
         {
-            return m_node.name;
+            return GetComponent<SceneNodeComponent>().name;
         }
 
         void SetName(const std::string& name)
         {
-            m_node.name = name;
+            GetComponent<SceneNodeComponent>().name = name;
         }
 
         void Activate(bool activate);
         NODISCARD bool IsActive() const
         {
-            return m_node.active;
+            return GetComponent<SceneNodeComponent>().active;
         }
 
         void AddChild(Ref<SceneNode> child);
@@ -65,7 +65,6 @@ NXS_NAMESPACE
     protected:
         uint64_t m_id = 0;
         Scene* m_owner = nullptr;
-        SceneNodeComponent& m_node;
         SceneNode* m_parent = nullptr;
         ChildList m_children;
         std::vector<Ref<Script>> m_scripts;

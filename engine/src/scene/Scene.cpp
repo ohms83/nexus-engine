@@ -41,6 +41,8 @@ void Scene::Init()
 
 Ref<SceneNode> Scene::FindNode(const std::string& name)
 {
+    if (IsShuttingDown()) return nullptr;
+
     const auto node = std::ranges::find_if(m_children, [&name](const Ref<SceneNode>& n)
     {
         return n->GetName() == name;
