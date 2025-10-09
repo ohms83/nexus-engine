@@ -2,25 +2,26 @@
 
 USING_NAMESPACE_NXS;
 
+#define INIT_COMPONENTS() \
+    AddComponent<PositionComponent>(); \
+    AddComponent<OrientationComponent>(); \
+    AddComponent<ScaleComponent>();
+
 SceneNode3D::SceneNode3D(entt::registry &registry)
     : SceneNode(registry)
-    , m_position(AddComponent<PositionComponent>())
-    , m_orient(AddComponent<OrientationComponent>())
-    , m_scale(AddComponent<ScaleComponent>())
 {
+    INIT_COMPONENTS();
 }
 
 SceneNode3D::SceneNode3D(entt::registry &registry, std::string name)
     : SceneNode(registry, name)
-    , m_position(AddComponent<PositionComponent>())
-    , m_orient(AddComponent<OrientationComponent>())
-    , m_scale(AddComponent<ScaleComponent>())
 {
+    INIT_COMPONENTS();
 }
 
 void SceneNode3D::LookAt(const glm::vec3& center, const glm::vec3& up)
 {
-    m_orient.value = glm::quatLookAt(glm::normalize(center - m_position.value), up);
+    Orient().value = glm::quatLookAt(glm::normalize(center - Position().value), up);
 }
 
 glm::vec3 SceneNode3D::Right() const

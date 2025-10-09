@@ -46,18 +46,25 @@ NXS_NAMESPACE
             return NXS_INFINITE;
         }
 
-        DirectLightComponent& GetLightComponent()
+        LightProperties& Properties()
         {
-            return m_lightComponent;
+            return GetComponent<DirectLightComponent>().properties;
         }
 
-        const DirectLightComponent& GetLightComponent() const
+        const LightProperties& Properties() const
         {
-            return m_lightComponent;
+            return GetComponent<DirectLightComponent>().properties;
         }
 
-    private:
-        DirectLightComponent& m_lightComponent;
+        glm::vec3& Direction()
+        {
+            return GetComponent<DirectLightComponent>().direction;
+        }
+
+        const glm::vec3& Direction() const
+        {
+            return GetComponent<DirectLightComponent>().direction;
+        }
     };
 
     class PointLight final : public ILight, public SceneNode
@@ -81,14 +88,14 @@ NXS_NAMESPACE
         float GetCutoffRange() const override;
         void SetCutoffRange(float range);
 
-        PointLightComponent& GetLightComponent()
+        LightProperties& Properties()
         {
-            return m_lightComponent;
+            return GetComponent<PointLightComponent>().properties;
         }
 
-        const PointLightComponent& GetLightComponent() const
+        const LightProperties& Properties() const
         {
-            return m_lightComponent;
+            return GetComponent<PointLightComponent>().properties;
         }
 
         float GetConstantAttenuation() const;
@@ -100,16 +107,12 @@ NXS_NAMESPACE
 
         glm::vec3& Position()
         {
-            return m_position.value;
+            return GetComponent<PositionComponent>().value;
         }
 
         const glm::vec3& Position() const
         {
-            return m_position.value;
+            return GetComponent<PositionComponent>().value;
         }
-
-    private:
-        PointLightComponent& m_lightComponent;
-        PositionComponent& m_position;
     };
 }

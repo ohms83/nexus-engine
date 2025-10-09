@@ -30,6 +30,12 @@ NXS_NAMESPACE
         {
             return m_registry.emplace<Type>(m_entity, std::forward<Args>(args)...);
         }
+
+        template<typename... Types, typename... Args>
+        MAYBE_UNUSED decltype(auto) AddComponents(Args &&...args)
+        {
+            return std::forward_as_tuple((AddComponent<Types>(std::forward<Args>(args)...), ...));
+        }
         /**
          * @brief Returns references to the registered component owned by this scene node.
          *

@@ -16,7 +16,7 @@ NXS_NAMESPACE
 {
     class RenderSystem;
     class Scene;
-    struct LightComponent;
+    struct LightProperties;
     struct PointLightComponent;
 
     class ISceneRenderer
