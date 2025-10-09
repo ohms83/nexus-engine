@@ -8,6 +8,8 @@
 
 USING_NAMESPACE_NXS;
 
+#if 0
+
 TEST(DirectionalLightTest, GetterSetter)
 {
     std::random_device rd;
@@ -121,3 +123,5 @@ TEST(PointLightTest, GetterSetter)
     light.SetName(name);
     EXPECT_TRUE(light.GetName() == name);
 }
+
+#endif

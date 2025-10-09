@@ -6,10 +6,10 @@
 
 #include "nexus/NxsDefine.h"
 #include "nexus/geom/Frustum.h"
-#include "nexus/ecs/component/scene/TransformComponent.h"
 
 #include "SceneNode.h"
 #include "component/CameraProperties.h"
+#include "component/TransformComponent.h"
 
 NXS_NAMESPACE
 {

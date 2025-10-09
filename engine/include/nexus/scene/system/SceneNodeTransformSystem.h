@@ -4,9 +4,8 @@
 
 #pragma once
 
-#include "entt/entity/registry.hpp"
 #include "nexus/NxsDefine.h"
-#include "nexus/scene/SceneNode.h"
+#include "entt/entt.hpp"
 
 NXS_NAMESPACE
 {

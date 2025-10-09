@@ -3,20 +3,19 @@
 //
 
 #include "scene/Camera.h"
-#include "ecs/component/scene/TransformComponent.h"
 
 USING_NAMESPACE_NXS;
 
 Camera::Camera(entt::registry& registry)
     : SceneNode(registry)
 {
-    AddComponent<CameraProperties, PositionComponent, OrientationComponent, RotationComponent>();
+    AddComponents<CameraProperties, PositionComponent, OrientationComponent, RotationComponent>();
 }
 
 Camera::Camera(entt::registry& registry, const std::string& name)
     : SceneNode(registry, name)
 {
-    AddComponent<CameraProperties, PositionComponent, OrientationComponent, RotationComponent>();
+    AddComponents<CameraProperties, PositionComponent, OrientationComponent, RotationComponent>();
 }
 
 void Camera::SetProjection(const float fov, const float width, const float height, const float nearZ, const float farZ)

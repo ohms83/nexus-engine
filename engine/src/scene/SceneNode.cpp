@@ -1,7 +1,6 @@
 #include <utility>
 
 #include "scene/SceneNode.h"
-#include "ecs/component/scene/SceneNodeComponent.h"
 #include "core/LogDispatcher.h"
 
 USING_NAMESPACE_NXS;

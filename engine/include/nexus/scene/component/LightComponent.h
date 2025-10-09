@@ -20,6 +20,16 @@ NXS_NAMESPACE
         float diffuseIntensity = 1.f;
         float specularIntensity = 1.f;
         float cutoffRange = FLT_MAX;
+
+        Color3F DiffuseColor()
+        {
+            return CAST<Color3F>(color * diffuseIntensity);
+        }
+
+        Color3F SpecularColor()
+        {
+            return CAST<Color3F>(color * specularIntensity);
+        }
     };
 
     struct DirectLightComponent

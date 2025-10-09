@@ -5,13 +5,13 @@ USING_NAMESPACE_NXS;
 SceneNode3D::SceneNode3D(entt::registry &registry)
     : SceneNode(registry)
 {
-    AddComponent<PositionComponent, OrientationComponent, ScaleComponent>();
+    AddComponents<PositionComponent, OrientationComponent, ScaleComponent>();
 }
 
 SceneNode3D::SceneNode3D(entt::registry &registry, std::string name)
     : SceneNode(registry, name)
 {
-    AddComponent<PositionComponent, OrientationComponent, ScaleComponent>();
+    AddComponents<PositionComponent, OrientationComponent, ScaleComponent>();
 }
 
 void SceneNode3D::LookAt(const glm::vec3& center, const glm::vec3& up)

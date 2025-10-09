@@ -1,10 +1,10 @@
 #pragma once
 
 #include "nexus/NxsDefine.h"
-#include "nexus/ecs/component/scene/TransformComponent.h"
 
 #include "Entity.h"
 #include "SceneNode.h"
+#include "component/TransformComponent.h"
 
 #include <string>
 

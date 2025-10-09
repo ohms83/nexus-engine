@@ -1,10 +1,10 @@
 #include "scene/Scene.h"
+#include "scene/component/LightComponent.h"
+#include "scene/system/SceneNodeTransformSystem.h"
 
 #include "core/LogDispatcher.h"
-#include "ecs/component/scene/LightComponent.h"
-#include "ecs/system/scene/SceneNodeTransformSystem.h"
-#include "graphics/RenderSystem.h"
 #include "core/task/OneshotTask.h"
+#include "graphics/RenderSystem.h"
 
 #include <ranges>
 #include <algorithm>

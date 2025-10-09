@@ -6,7 +6,7 @@
 #include "Transform.h"
 #include "Script.h"
 
-#include "nexus/ecs/component/scene/SceneNodeComponent.h"
+#include "component/SceneNodeComponent.h"
 
 #include <string>
 

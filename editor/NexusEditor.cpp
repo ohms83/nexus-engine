@@ -40,26 +40,26 @@ static void InitLight(nxs::Scene& scene)
 
     {
         auto light = scene.CreateNode<nxs::DirectionalLight>("Direct Light 1");
-        light->SetColor({1, 1, 1});
+        light->Properties().color =  {1, 1, 1};
         light->Direction() = {10, -10, 0};
     }
     {
         auto light = scene.CreateNode<nxs::PointLight>("Point Light 1");
-        light->SetColor({1, 0, 0});
         light->Position() = {5, 0, 0};
-
+        light->PointLightProperties().constant = 0.01f;
+        
         auto& properties = light->Properties();
+        properties.color = {1, 0, 0};
         properties.cutoffRange = 100.f;
-        light->SetConstantAttenuation(0.01f);
     }
     {
         auto light = scene.CreateNode<nxs::PointLight>("Point Light 2");
-        light->SetColor({0, 0, 1});
         light->Position() = {-5, 0, 0};
-
+        light->PointLightProperties().constant = 0.01f;
+        
         auto& properties = light->Properties();
+        properties.color = {0, 1, 0};
         properties.cutoffRange = 100.f;
-        light->SetConstantAttenuation(0.01f);
     }
 }
 

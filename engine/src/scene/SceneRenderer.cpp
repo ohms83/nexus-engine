@@ -12,13 +12,13 @@
 #include "geom/Frustum.h"
 #include "ecs/component/graphics/RenderComponent.h"
 #include "ecs/component/graphics/ModelComponent.h"
-#include "ecs/component/scene/SceneNodeComponent.h"
-#include "ecs/component/scene/TransformComponent.h"
-#include "ecs/component/scene/LightComponent.h"
 #include "ecs/Ecs.h"
 #include "math/Math.h"
 #include "math/Matrix.h"
 #include "scene/component/CameraProperties.h"
+#include "scene/component/LightComponent.h"
+#include "scene/component/SceneNodeComponent.h"
+#include "scene/component/TransformComponent.h"
 
 USING_NAMESPACE_NXS;
 
