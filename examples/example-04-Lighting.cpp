@@ -232,7 +232,7 @@ protected:
     nxs::Ref<nxs::Texture> m_texture;
     nxs::Ref<nxs::Mesh> m_cubeMesh;
     nxs::Transform m_cubeTransform;
-    nxs::CameraComponent m_camera;
+    nxs::CameraProperties m_camera;
     nxs::DirectLightComponent m_directionalLight {};
     nxs::PointLightComponent m_pointLights[2] {};
     glm::vec3 m_ambient {0.5, 0.5, 0.5};

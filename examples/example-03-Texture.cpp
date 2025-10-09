@@ -106,7 +106,7 @@ protected:
     nxs::Ref<nxs::Texture> m_texture;
     nxs::Ptr<nxs::Mesh> m_mesh;
     nxs::Transform m_cubeTransform;
-    nxs::CameraComponent m_camera;
+    nxs::CameraProperties m_camera;
 };
 
 

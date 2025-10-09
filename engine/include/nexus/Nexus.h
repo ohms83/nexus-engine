@@ -33,7 +33,6 @@
 #include "ecs/Ecs.h"
 #include "ecs/component/graphics/ModelComponent.h"
 #include "ecs/component/graphics/RenderComponent.h"
-#include "ecs/component/scene/CameraComponent.h"
 #include "ecs/component/scene/LightComponent.h"
 #include "ecs/component/scene/SceneNodeComponent.h"
 #include "ecs/component/scene/TransformComponent.h"

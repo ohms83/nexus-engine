@@ -7,9 +7,9 @@
 #include "nexus/NxsDefine.h"
 #include "nexus/geom/Frustum.h"
 #include "nexus/ecs/component/scene/TransformComponent.h"
-#include "nexus/ecs/component/scene/CameraComponent.h"
 
 #include "SceneNode.h"
+#include "component/CameraProperties.h"
 
 NXS_NAMESPACE
 {
@@ -19,11 +19,14 @@ NXS_NAMESPACE
         explicit Camera(entt::registry& registry);
         explicit Camera(entt::registry& registry, const std::string& name);
 
-        NODISCARD PositionComponent& Position() { return m_position; }
-        const PositionComponent& Position() const { return m_position; }
+        CameraProperties& Properties() { return GetComponent<CameraProperties>(); }
+        const CameraProperties& Properties() const { return GetComponent<CameraProperties>(); }
 
-        NODISCARD OrientationComponent& Orient() { return m_orient; }
-        const OrientationComponent& Orient() const { return m_orient; }
+        NODISCARD PositionComponent& Position() { return GetComponent<PositionComponent>(); }
+        NODISCARD const PositionComponent& Position() const { return GetComponent<PositionComponent>(); }
+
+        NODISCARD OrientationComponent& Orient() { return GetComponent<OrientationComponent>(); }
+        NODISCARD const OrientationComponent& Orient() const { return GetComponent<OrientationComponent>(); }
 
         void LookAt(const glm::vec3& center, const glm::vec3& up);
 
@@ -44,16 +47,7 @@ NXS_NAMESPACE
             return m_projMtx;
         }
 
-        NODISCARD float GetFOV() const { return m_camera.fov; }
-        NODISCARD float Getwidth() const { return m_camera.width; }
-        NODISCARD float GetHeight() const { return m_camera.height; }
-        NODISCARD float GetNearZ() const { return m_camera.nearZ; }
-        NODISCARD float GetFarZ() const { return m_camera.farZ; }
-
     protected:
-        CameraComponent& m_camera;
-        PositionComponent& m_position;
-        OrientationComponent& m_orient;
         //! Projection matrix.
         glm::mat4 m_projMtx{1.0f};
     };

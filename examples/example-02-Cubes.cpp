@@ -189,7 +189,7 @@ protected:
     nxs::Ref<nxs::IndexBuffer> m_indexBuffer;
     nxs::Ref<nxs::GpuProgram> m_gpuProgram;
     nxs::Transform m_cubeTransform;
-    nxs::CameraComponent m_camera;
+    nxs::CameraProperties m_camera;
 };
 
 int main()

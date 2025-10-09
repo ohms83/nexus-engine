@@ -25,16 +25,24 @@ NXS_NAMESPACE
             return m_registry;
         }
 
-        template<typename Type, typename... Args>
+        /**
+         * @brief Registered one or more commponent to this entity.
+         *
+         * @tparam Types Types of commponents to register.
+         * @return A reference to the newly added component,
+         * or a tuple of references of the registered component.
+         */
+        template<typename... Types, typename... Args>
         MAYBE_UNUSED decltype(auto) AddComponent(Args &&...args)
         {
-            return m_registry.emplace<Type>(m_entity, std::forward<Args>(args)...);
-        }
-
-        template<typename... Types, typename... Args>
-        MAYBE_UNUSED decltype(auto) AddComponents(Args &&...args)
-        {
-            return std::forward_as_tuple((AddComponent<Types>(std::forward<Args>(args)...), ...));
+            #define EMPLACE() (m_registry.emplace<Types>(m_entity, std::forward<Args>(args)...), ...)
+            if constexpr(sizeof...(Types) == 1u) {
+                return EMPLACE();
+            }
+            else {
+                return std::forward_as_tuple(EMPLACE());
+            }
+            #undef EMPLACE
         }
         /**
          * @brief Returns references to the registered component owned by this scene node.
@@ -43,13 +51,13 @@ NXS_NAMESPACE
          * Attempting to get an element from an entity that doesn't own, it results
          * in undefined behavior.
          *
-         * @tparam Type Types of elements to get.
+         * @tparam Types Types of elements to get.
          * @return References to the elements owned by the scene node.
          */
-        template<typename... Type>
+        template<typename... Types>
         NODISCARD decltype(auto) GetComponent() const
         {
-            return m_registry.get<Type...>(m_entity);
+            return m_registry.get<Types...>(m_entity);
         }
         /**
         * @brief Returns pointers to the specified component type own by this scene node.

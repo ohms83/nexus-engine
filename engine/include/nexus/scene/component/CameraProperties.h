@@ -1,7 +1,3 @@
-//
-// Created by nutta on 7/25/2025.
-//
-
 #pragma once
 
 #include "nexus/NxsDefine.h"
@@ -9,7 +5,7 @@
 
 NXS_NAMESPACE
 {
-    struct CameraComponent
+    struct CameraProperties
     {
         ProjectionType projectionType = ProjectionType::Perspective;
         /**
