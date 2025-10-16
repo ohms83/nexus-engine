@@ -30,7 +30,8 @@ static void InitModel(nxs::Scene& scene, nxs::Ref<nxs::ModelManager> modelManage
     auto node = scene.CreateNode<nxs::SceneNode3D>("Model");
     node->Scale().value = glm::vec3 {3, 3, 3};
 
-    const auto modelPath = std::filesystem::path(NXS_ASSETS_DIR) / "meshes/apple/3DApple001_SQ-1K-PNG.obj";
+    // const auto modelPath = std::filesystem::path(NXS_ASSETS_DIR) / "meshes/apple/3DApple001_SQ-1K-PNG.obj";
+    const auto modelPath = std::filesystem::path(NXS_ASSETS_DIR) / "meshes/sponza/sponza.obj";
     node->AddComponent<nxs::ModelComponent>().model = modelManager->Get(modelPath.string());
 }
 

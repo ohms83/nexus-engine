@@ -96,6 +96,8 @@ NXS_NAMESPACE
          */
         void WriteRenderCommand(RenderCommand& command);
 
+        size_t TextureCount() const { return m_textures.size(); }
+
     private:
         void DetermineShaderPaths(std::string& vertexShader, std::string& fragmentShader);
 

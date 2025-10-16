@@ -50,6 +50,8 @@ NXS_NAMESPACE
 
         std::vector<RenderCommand> CreateDrawCommand() const;
 
+        std::string DumpStats() const;
+
     private:
         std::vector<Ref<Mesh>> m_meshes;
         //! The smallest bounding sphere that can cover the entire model.

@@ -126,8 +126,8 @@ Ref<Resource> ModelLoader::Load(const std::string &path, uint32 id)
     ProcessNode(model, scene->mRootNode, scene, directory);
     ComputeBoundingVolume(model);
 
-    LOG_INFO(LogModelLoader, std::format("Model loaded successfully: {}", path));
-    LOG_INFO(LogModelLoader, std::format("Processed meshes: {}", scene->mNumMeshes));
+    LOG_INFO(LogModelLoader, "Model loaded successfully!!");
+    LOG_INFO(LogModelLoader, model->DumpStats());
     return model;
 }
 
@@ -317,7 +317,15 @@ void ModelLoader::ProcessMaterial(const Ref<Mesh>& newMesh, const aiMesh* mesh, 
     // A mesh has only one material. If an imported model uses multiple materials,
     // the importer splits up the mesh.
     const aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-    const Ref<Material> newMat = m_materialManager->GetOrCreate(material->GetName().C_Str());
+    const std::string materialName = material->GetName().C_Str();
+
+    if (m_materialManager->IsExist(materialName))
+    {
+        newMesh->SetMaterial(m_materialManager->Get(materialName));
+        return;
+    }
+
+    const Ref<Material> newMat = m_materialManager->Create(materialName);
 
 #define READ_BOOL_PROPERTY(key, property) \
     if (int32 value; material->Get(key, value) == AI_SUCCESS) { \
@@ -368,7 +376,8 @@ void ModelLoader::ProcessTextures(const Ref<Material>& newMat, const aiMaterial*
 {
     for (const auto& [aiType, textureType] : s_textureTypeMap)
     {
-        for (int32 i = 0; i < material->GetTextureCount(aiType); ++i)
+        const auto numTexture = material->GetTextureCount(aiType);
+        for (int32 i = 0; i < numTexture; ++i)
         {
             aiString path;
             material->GetTexture(aiType, i, &path);
@@ -387,7 +396,7 @@ void ModelLoader::ComputeBoundingVolume(const Ref<Model>& model)
     for (const auto& mesh : model->GetMeshes())
     {
         const auto vertexBuffer = mesh->GetVertexBuffer();
-        const auto numVertex = vertexBuffer->GetNumVertex();
+        const auto numVertex = vertexBuffer->VertexCount();
 
         for (auto vertexItr = vertexBuffer->Begin<Vertex>(); vertexItr != vertexBuffer->End<Vertex>(); ++vertexItr)
         {

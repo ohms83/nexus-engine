@@ -16,6 +16,8 @@ NXS_NAMESPACE
         explicit Mesh(std::string name);
         virtual ~Mesh() = default;
 
+        const std::string& GetName() const { return m_name; }
+
         void SetVertexBuffer(const Ref<VertexBuffer>& vertexBuffer)
         {
             m_vertexBuffer = vertexBuffer;

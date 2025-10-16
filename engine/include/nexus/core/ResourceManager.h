@@ -48,30 +48,6 @@ NXS_NAMESPACE
             LOG_INFO(LogResource, std::format("Registered loader for type '{}'.", resourceType.name()));
         }
 
-        NODISCARD Ref<ResourceType> FindCachedResource(const std::string& path)
-        {
-            std::lock_guard<std::mutex> lock(m_mutex); // For thread-safety
-            const auto id = m_hasher.Hash32(path);
-
-            // Check if resource is already in the cache
-            if (const auto it = m_resourceCache.find(id); it != m_resourceCache.end())
-            {
-                // Found in cache, try to cast to the requested type
-                if (Ref<ResourceType> cached_resource = PTR_CAST<ResourceType>(it->second))
-                {
-                    return cached_resource;
-                }
-
-                // Resource found, but it's of a different type. This indicates a potential path collision
-                // or misuse. Handle as an error.
-                LOG_ERROR(LogResource, std::format(
-                    "Resource '{}' exists in cache but is of type {} (requested {}). Type mismatch.",
-                    path, typeid(*it->second).name(), typeid(ResourceType).name()
-                ));
-            }
-            return nullptr;
-        }
-
         /**
          * @brief Retrieves a resource of type T from the manager.
          * If the resource is already cached, it's returned immediately.
@@ -83,10 +59,10 @@ NXS_NAMESPACE
          */
         NODISCARD Ref<ResourceType> Get(const std::string& path)
         {
-            if (auto cached_resource = FindCachedResource(path)) return cached_resource;
+            const auto id = m_hasher.Hash32(path);
+            if (auto cached_resource = Get(id)) return cached_resource;
 
             std::lock_guard<std::mutex> lock(m_mutex); // For thread-safety
-            const auto id = m_hasher.Hash32(path);
 
             const std::type_index resourceType = typeid(ResourceType);
             if (!m_loader)
@@ -106,8 +82,9 @@ NXS_NAMESPACE
             return PTR_CAST<ResourceType>(new_resource);
         }
 
-        NODISCARD Ref<ResourceType> Get(const uint32 id)
+        NODISCARD Ref<ResourceType> Get(const uint32 id) const
         {
+            std::lock_guard<std::mutex> lock(m_mutex); // For thread-safety
             if (const auto itr = m_resourceCache.find(id); itr != m_resourceCache.end())
             {
                 return PTR_CAST<ResourceType>(itr->second);
@@ -115,14 +92,22 @@ NXS_NAMESPACE
             return nullptr;
         }
 
-        NODISCARD Ref<ResourceType> GetOrCreate(const std::string& path)
+        NODISCARD bool IsExist(const std::string& path) const
+        {
+            const auto id = m_hasher.Hash32(path);
+            return Get(id) != nullptr;
+        }
+
+        //! Create an empty resource.
+        NODISCARD Ref<ResourceType> Create(const std::string& path)
         {
             const auto id = m_hasher.Hash32(path);
             if (auto cached_resource = Get(id); cached_resource != nullptr)
             {
-                return cached_resource;
+                return nullptr;
             }
 
+            std::lock_guard<std::mutex> lock(m_mutex); // For thread-safety
             auto new_resource = std::make_shared<ResourceType>(path, id);
             m_resourceCache[id] = new_resource;
             return new_resource;
@@ -149,7 +134,8 @@ NXS_NAMESPACE
          */
         MAYBE_UNUSED Ref<IResourceLoader::LoadResult> RequestResourceAsync(const std::string& path, TaskScheduler& scheduler)
         {
-            if (auto cached_resource = FindCachedResource(path))
+            const auto id = m_hasher.Hash32(path);
+            if (auto cached_resource = Get(id))
             {
                 const auto result = std::make_shared<IResourceLoader::LoadResult>();
                 result->path = path;
@@ -167,8 +153,6 @@ NXS_NAMESPACE
                 // The requested resource is currently loading.
                 return *loadResult;
             }
-
-            const auto id = m_hasher.Hash32(path);
 
             const std::type_index resourceType = typeid(ResourceType);
             if (!m_loader)

@@ -1,6 +1,8 @@
 #include "nexus/graphics/Model.h"
 #include "nexus/core/LogDispatcher.h"
 
+#include <sstream>
+
 USING_NAMESPACE_NXS;
 
 DEFINE_LOG(Model);
@@ -36,4 +38,21 @@ std::vector<RenderCommand> Model::CreateDrawCommand() const
         commands.emplace_back(std::move(command));
     }
     return commands;
+}
+
+std::string Model::DumpStats() const
+{
+    std::stringstream output;
+    output << std::format("Model: Path={} Num Mesh={}\n", GetPath(), m_meshes.size());
+
+    for (const auto mesh : m_meshes)
+    {
+        output << std::format("  Mesh: Name={} Vertex={} Polygons={} Texture Count={}\n",
+            mesh->GetName(),
+            mesh->GetVertexBuffer()->VertexCount(),
+            mesh->GetIndexBuffer()->NumPolygons(),
+            mesh->GetMaterial()->TextureCount());
+    }
+
+    return output.str();
 }

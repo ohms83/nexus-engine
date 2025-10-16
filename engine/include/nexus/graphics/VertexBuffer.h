@@ -133,7 +133,7 @@ NXS_NAMESPACE
             return result;
         }
 
-        uint32_t GetNumVertex() const
+        uint32_t VertexCount() const
         {
             return m_vertexCount;
         }
