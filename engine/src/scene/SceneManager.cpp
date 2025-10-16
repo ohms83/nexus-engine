@@ -1,7 +1,8 @@
 #include "scene/SceneManager.h"
 #include "core/task/TaskScheduler.h"
 #include "core/task/OneshotTask.h"
-#include "Engine.h"
+
+#include "Remotery.h"
 
 USING_NAMESPACE_NXS;
 
@@ -48,6 +49,7 @@ void SceneManager::Update(float dt)
 
 void SceneManager::Render(RenderSystem &renderSystem)
 {
+    rmt_ScopedCPUSample(SceneManager_Render, 0)
     if (m_current) m_current->Render(renderSystem);
 }
 

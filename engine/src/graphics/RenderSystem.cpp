@@ -80,6 +80,7 @@ void RenderSystem::OnResize(const uint32 pixel_w, const uint32 pixel_h)
 
 void RenderSystem::RegisterDrawCommand(const RenderCommand& command, RenderPass pass)
 {
+    rmt_ScopedCPUSample(RenderSystem_RegisterDrawCommand, 0)
     auto& commands = m_renderCommands[INT_CAST(pass)];
     commands.emplace_back(command);
 }

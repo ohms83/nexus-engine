@@ -20,12 +20,15 @@
 #include "math/Matrix.h"
 #include "geom/Frustum.h"
 
+#include "Remotery.h"
+
 USING_NAMESPACE_NXS;
 
 DEFINE_LOG(BasicSceneRenderer);
 
 static void SetAmbientLightParams(RenderCommand& command, const entt::registry& registry)
 {
+    rmt_ScopedCPUSample(SceneRenderer_SetAmbientLightParams, 0);
     const auto ambientLightEnt = registry.view<AmbientLightComponent>().front();
     const auto color = ambientLightEnt == entt::null ? Color3F::Grey : registry.get<AmbientLightComponent>(ambientLightEnt).color;
     command.uniformVec3.emplace_back("_AmbientLight", color);
@@ -33,6 +36,7 @@ static void SetAmbientLightParams(RenderCommand& command, const entt::registry& 
 
 static void SetDirectLightParams(RenderCommand& command, const entt::registry& registry)
 {
+    rmt_ScopedCPUSample(SceneRenderer_SetDirectLightParams, 0);
     const auto lights = ECS::FindAllComponents<DirectLightComponent>(registry);
     const auto numLights = CAST<int32>(lights.size());
 
@@ -59,9 +63,11 @@ static void SetDirectLightParams(RenderCommand& command, const entt::registry& r
 
 static void SetPointLightParams(RenderCommand& command, const entt::registry& registry)
 {
+    rmt_ScopedCPUSample(SceneRenderer_SetPointLightParams, 0);
     int32 numLight = 0;
     for (const auto view = registry.view<PointLightComponent, PositionComponent>(); const auto& [entity, light, position] : view.each())
     {
+        rmt_BeginCPUSample(CreateUniformNames, 0);
         const auto uniformLocation = std::format("_PointLights[{}]", numLight);
         const auto uniformLocationColor = std::format("{}.properties.color", uniformLocation);
         const auto uniformLocationDiffuse = std::format("{}.properties.diffuseIntensity", uniformLocation);
@@ -71,7 +77,9 @@ static void SetPointLightParams(RenderCommand& command, const entt::registry& re
         const auto uniformLocationConst = std::format("{}.constant", uniformLocation);
         const auto uniformLocationLinear = std::format("{}.linear", uniformLocation);
         const auto uniformLocationQuad = std::format("{}.quadratic", uniformLocation);
+        rmt_EndCPUSample();
 
+        rmt_BeginCPUSample(EmplaceUniformValues, 0);
         command.uniformVec3.emplace_back(uniformLocationPosition, position.value);
         command.uniformVec3.emplace_back(uniformLocationColor, light.properties.color);
         command.uniformFloats.emplace_back(uniformLocationDiffuse, light.properties.diffuseIntensity);
@@ -80,6 +88,8 @@ static void SetPointLightParams(RenderCommand& command, const entt::registry& re
         command.uniformFloats.emplace_back(uniformLocationConst, light.constant);
         command.uniformFloats.emplace_back(uniformLocationLinear, light.linear);
         command.uniformFloats.emplace_back(uniformLocationQuad, light.quadratic);
+        rmt_EndCPUSample();
+
         numLight++;
     }
     command.uniformInts.emplace_back("_NumPointLight", numLight);
@@ -87,6 +97,7 @@ static void SetPointLightParams(RenderCommand& command, const entt::registry& re
 
 static void SetTextureParams(RenderCommand& command, const entt::registry& registry, const entt::entity& entity)
 {
+    rmt_ScopedCPUSample(SceneRenderer_SetTextureParams, 0);
     if (const auto textureComponent = registry.try_get<DiffuseMapComponent>(entity))
     {
         auto& textures = textureComponent->textures;
@@ -129,20 +140,25 @@ void BasicSceneRenderer::Render(RenderSystem& renderSystem, const entt::registry
 
             if (!viewFrustum.IsSphereInside(transformedCenter, scaledRadius)) continue;
 
-            auto commands = model.model->CreateDrawCommand();
-            for (auto& command : commands)
+            rmt_BeginCPUSample(SceneRenderer_CreateDrawCommand, 0)
             {
-                command.uniformMatrices.emplace("_Model", modelMtx);
-                command.uniformMatrices.emplace("_View", viewMtx);
-                command.uniformMatrices.emplace("_Projection", projection);
+                auto commands = model.model->CreateDrawCommand();
+                for (auto& command : commands)
+                {
+                    rmt_ScopedCPUSample(SceneRenderer_SetCommandParams, 0);
+                    command.uniformMatrices.emplace("_Model", modelMtx);
+                    command.uniformMatrices.emplace("_View", viewMtx);
+                    command.uniformMatrices.emplace("_Projection", projection);
 
-                SetAmbientLightParams(command, registry);
-                SetDirectLightParams(command, registry);
-                SetPointLightParams(command, registry);
-                SetTextureParams(command, registry, entity);
+                    SetAmbientLightParams(command, registry);
+                    SetDirectLightParams(command, registry);
+                    SetPointLightParams(command, registry);
+                    SetTextureParams(command, registry, entity);
 
-                renderSystem.RegisterDrawCommand(command);
+                    renderSystem.RegisterDrawCommand(command);
+                }
             }
+            rmt_EndCPUSample();
         }
 
         Gizmos::ProcessDraw(renderSystem, projection * viewMtx);

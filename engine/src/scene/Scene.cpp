@@ -1,10 +1,12 @@
 #include "scene/Scene.h"
 
 #include "core/LogDispatcher.h"
+#include "core/task/OneshotTask.h"
 #include "ecs/component/scene/LightComponent.h"
 #include "ecs/system/scene/SceneNodeTransformSystem.h"
 #include "graphics/RenderSystem.h"
-#include "core/task/OneshotTask.h"
+
+#include "Remotery.h"
 
 #include <ranges>
 #include <algorithm>
@@ -118,6 +120,7 @@ void Scene::Update(float dt)
 
 void Scene::Render(RenderSystem &renderSystem)
 {
+    rmt_ScopedCPUSample(Scene_Render, 0)
     if (m_renderer) m_renderer->Render(renderSystem, GetRegistry());
 }
 

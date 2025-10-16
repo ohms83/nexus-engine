@@ -1,6 +1,8 @@
 #include "nexus/graphics/Model.h"
 #include "nexus/core/LogDispatcher.h"
 
+#include "Remotery.h"
+
 #include <sstream>
 
 USING_NAMESPACE_NXS;
@@ -24,9 +26,12 @@ void Model::SetBoundingSphere(const glm::vec3& center, float radius)
 
 std::vector<RenderCommand> Model::CreateDrawCommand() const
 {
+    rmt_ScopedCPUSample(Model_CreateDrawCommand, 0);
     std::vector<RenderCommand> commands;
+
     for (const auto mesh : m_meshes)
     {
+        rmt_ScopedCPUSample(Mesh_DrawCommand, 0);
         const auto material = mesh->GetMaterial();
         RenderCommand command = {
             material->GetShader()->GetGpuProgram(),
@@ -35,7 +40,10 @@ std::vector<RenderCommand> Model::CreateDrawCommand() const
         };
         material->WriteRenderCommand(command);
 
-        commands.emplace_back(std::move(command));
+        {
+            rmt_ScopedCPUSample(CommandList_Emplace, 0);
+            commands.emplace_back(std::move(command));
+        }
     }
     return commands;
 }

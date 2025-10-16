@@ -7,6 +7,8 @@
 #include "core/Path.h"
 #include "graphics/Material.h"
 
+#include "Remotery.h"
+
 #include <ranges>
 
 USING_NAMESPACE_NXS;
@@ -81,6 +83,7 @@ bool Material::HasTextureType(TextureType type) const
 
 void Material::WriteRenderCommand(RenderCommand& command)
 {
+    rmt_ScopedCPUSample(Material_WriteRenderCommand, 0);
     if (!m_shader)
     {
         LOG_WARNING(LogMaterial, std::format("Material does not have a shader"));
