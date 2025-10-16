@@ -21,18 +21,18 @@ void SceneNode3D::LookAt(const glm::vec3& center, const glm::vec3& up)
 
 glm::vec3 SceneNode3D::Right() const
 {
-    glm::vec3 right = {1, 0, 0};
+    static const glm::vec3 right = {1, 0, 0};
     return Orient().value * right;
 }
 
 glm::vec3 SceneNode3D::Up() const
 {
-    glm::vec3 up = {0, 1, 0};
+    static const glm::vec3 up = {0, 1, 0};
     return Orient().value * up;
 }
 
 glm::vec3 SceneNode3D::Forward() const
 {
-    glm::vec3 forward = {0, 0, -1};
+    static const glm::vec3 forward = {0, 0, -1};
     return Orient().value * forward;
 }
