@@ -7,17 +7,13 @@
 #include "entt/entity/registry.hpp"
 #include "nexus/NxsDefine.h"
 
-namespace nxs
-{
-    struct DirectLightComponent;
-}
-
 NXS_NAMESPACE
 {
     class RenderSystem;
     class Scene;
     struct LightComponent;
     struct PointLightComponent;
+    struct DirectLightComponent;
 
     class ISceneRenderer
     {
