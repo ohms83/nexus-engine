@@ -64,6 +64,9 @@ NXS_NAMESPACE
         virtual void SetFrontFace(FrontFace face) { m_frontFace = face; }
         NODISCARD FrontFace GetFrontFace() const { return m_frontFace; }
 
+        NODISCARD Ref<GpuProgram> GetGlobalShader() const { return m_globalShader; }
+        void SetGlobalShader(Ref<GpuProgram> shader) { m_globalShader = shader; }
+
     protected:
         RenderingInterface() = default;
         virtual ~RenderingInterface();
@@ -77,5 +80,6 @@ NXS_NAMESPACE
         PolygonMode m_polygonMode = PolygonMode::Fill;
         PolygonFacing m_cullMode = PolygonFacing::Back;
         FrontFace m_frontFace = FrontFace::CounterClockWise;
+        Ref<GpuProgram> m_globalShader;
     };
 }

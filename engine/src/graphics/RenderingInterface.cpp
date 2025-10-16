@@ -46,7 +46,7 @@ void RenderingInterface::Draw(const RenderCommand& command)
     NXS_ASSERT(command.vertexBuffer);
     NXS_ASSERT(command.indexBuffer);
 
-    auto shader = command.shader;
+    auto shader = m_globalShader ? m_globalShader : command.shader;
     shader->Bind();
     for (const auto& [name, mtx] : command.uniformMatrices)
     {
