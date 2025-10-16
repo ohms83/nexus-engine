@@ -4,8 +4,6 @@
 
 #include "core/LogDispatcher.h"
 #include "core/task/OneshotTask.h"
-#include "ecs/component/scene/LightComponent.h"
-#include "ecs/system/scene/SceneNodeTransformSystem.h"
 #include "graphics/RenderSystem.h"
 
 #include "Remotery.h"
