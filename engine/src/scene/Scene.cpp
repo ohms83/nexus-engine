@@ -1,4 +1,6 @@
 #include "scene/Scene.h"
+#include "scene/component/LightComponent.h"
+#include "scene/system/SceneNodeTransformSystem.h"
 
 #include "core/LogDispatcher.h"
 #include "core/task/OneshotTask.h"
@@ -43,6 +45,8 @@ void Scene::Init()
 
 Ref<SceneNode> Scene::FindNode(const std::string& name)
 {
+    if (IsShuttingDown()) return nullptr;
+
     const auto node = std::ranges::find_if(m_children, [&name](const Ref<SceneNode>& n)
     {
         return n->GetName() == name;

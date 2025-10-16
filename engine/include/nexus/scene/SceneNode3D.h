@@ -1,10 +1,10 @@
 #pragma once
 
 #include "nexus/NxsDefine.h"
-#include "nexus/ecs/component/scene/TransformComponent.h"
 
 #include "Entity.h"
 #include "SceneNode.h"
+#include "component/TransformComponent.h"
 
 #include <string>
 
@@ -21,24 +21,19 @@ NXS_NAMESPACE
         explicit SceneNode3D(entt::registry& registry, std::string  name);
         ~SceneNode3D() override = default;
 
-        PositionComponent& Position() { return m_position; }
-        const PositionComponent& Position() const { return m_position; }
+        PositionComponent& Position() { return GetComponent<PositionComponent>(); }
+        const PositionComponent& Position() const { return GetComponent<PositionComponent>(); }
 
-        OrientationComponent& Orient() { return m_orient; }
-        const OrientationComponent& Orient() const { return m_orient; }
+        OrientationComponent& Orient() { return GetComponent<OrientationComponent>(); }
+        const OrientationComponent& Orient() const { return GetComponent<OrientationComponent>(); }
 
-        ScaleComponent& Scale() { return m_scale; }
-        const ScaleComponent& Scale() const { return m_scale; }
+        ScaleComponent& Scale() { return GetComponent<ScaleComponent>(); }
+        const ScaleComponent& Scale() const { return GetComponent<ScaleComponent>(); }
 
         void LookAt(const glm::vec3& center, const glm::vec3& up);
 
         glm::vec3 Right() const;
         glm::vec3 Up() const;
         glm::vec3 Forward() const;
-
-    protected:
-        PositionComponent& m_position;
-        OrientationComponent& m_orient;
-        ScaleComponent& m_scale;
     };
 }

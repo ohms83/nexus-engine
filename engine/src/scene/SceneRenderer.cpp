@@ -9,16 +9,16 @@
 #include "graphics/debug/Gizmos.h"
 #include "graphics/RenderSystem.h"
 #include "graphics/RenderCommand.h"
+#include "geom/Frustum.h"
 #include "ecs/component/graphics/RenderComponent.h"
 #include "ecs/component/graphics/ModelComponent.h"
-#include "ecs/component/scene/SceneNodeComponent.h"
-#include "ecs/component/scene/CameraComponent.h"
-#include "ecs/component/scene/TransformComponent.h"
-#include "ecs/component/scene/LightComponent.h"
 #include "ecs/Ecs.h"
 #include "math/Math.h"
 #include "math/Matrix.h"
-#include "geom/Frustum.h"
+#include "scene/component/CameraProperties.h"
+#include "scene/component/LightComponent.h"
+#include "scene/component/SceneNodeComponent.h"
+#include "scene/component/TransformComponent.h"
 
 #include "Remotery.h"
 
@@ -112,7 +112,7 @@ static void SetTextureParams(RenderCommand& command, const entt::registry& regis
 void BasicSceneRenderer::Render(RenderSystem& renderSystem, const entt::registry& registry)
 {
     // ReSharper disable once CppTooWideScopeInitStatement
-    const auto cameraView = registry.view<SceneNodeComponent, CameraComponent, PositionComponent, OrientationComponent>();
+    const auto cameraView = registry.view<SceneNodeComponent, CameraProperties, PositionComponent, OrientationComponent>();
     for (const auto& [cameraEntity, sceneNode, camera, cameraPos, cameraOrient] : cameraView.each())
     {
         if (!sceneNode.active) continue;

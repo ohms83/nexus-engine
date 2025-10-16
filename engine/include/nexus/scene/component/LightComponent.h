@@ -13,23 +13,34 @@ NXS_NAMESPACE
     {
         Color3F color {};
     };
-    struct LightComponent
+
+    struct LightProperties
     {
         Color3F color {};
         float diffuseIntensity = 1.f;
         float specularIntensity = 1.f;
         float cutoffRange = FLT_MAX;
+
+        Color3F DiffuseColor()
+        {
+            return CAST<Color3F>(color * diffuseIntensity);
+        }
+
+        Color3F SpecularColor()
+        {
+            return CAST<Color3F>(color * specularIntensity);
+        }
     };
 
     struct DirectLightComponent
     {
-        LightComponent properties;
+        LightProperties properties;
         glm::vec3 direction;
     };
 
     struct PointLightComponent
     {
-        LightComponent properties;
+        LightProperties properties;
         // glm::vec3 position;
         float constant = 0.0f;
         float linear = 0.1f;

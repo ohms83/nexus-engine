@@ -130,7 +130,7 @@ public:
 
             if (ImGui::TreeNode("Directional"))
             {
-                ImGui::ColorEdit3("Color", R_CAST<float*>(&m_directionalLight->properties.color));
+                ImGui::ColorEdit3("Color", R_CAST<float*>(&m_directionalLight->Properties().color));
                 ImGui::TreePop();
             }
 
@@ -140,7 +140,7 @@ public:
                 static bool enableLight = false;
                 static float position[] = {0, 0, 0};
                 ImGui::Checkbox("Enable", &enableLight);
-                ImGui::ColorEdit3("Color", R_CAST<float*>(&m_pointLights[0]->properties.color));
+                ImGui::ColorEdit3("Color", R_CAST<float*>(&m_pointLights[0]->Properties().color));
                 ImGui::InputFloat3("Position", position);
                 ImGui::TreePop();
             }
@@ -149,7 +149,7 @@ public:
             {
                 static bool enableLight = false;
                 ImGui::Checkbox("Enable", &enableLight);
-                ImGui::ColorEdit3("Color", R_CAST<float*>(&m_pointLights[1]->properties.color));
+                ImGui::ColorEdit3("Color", R_CAST<float*>(&m_pointLights[1]->Properties().color));
                 ImGui::TreePop();
             }
         }
@@ -241,43 +241,40 @@ private:
 
         {
             auto light = m_scene.CreateNode<nxs::DirectionalLight>("Direct Light 1");
-            light->SetColor({1, 1, 1});
-            light->GetLightComponent().direction = {10, -10, 0};
-
-            m_directionalLight = &light->GetLightComponent();
+            light->Properties().color =  {1, 1, 1};
+            light->Direction() = {10, -10, 0};
+            m_directionalLight = light;
         }
         {
             auto light = m_scene.CreateNode<nxs::PointLight>("Point Light 1");
-            light->SetColor({1, 0, 0});
             light->Position() = {5, 0, 0};
+            light->PointLightProperties().constant = 0.01f;
+            
+            auto& properties = light->Properties();
+            properties.color = {1, 0, 0};
+            properties.cutoffRange = 100.f;
 
-            auto& component = light->GetLightComponent();
-            // component.position = {5, 0, 0};
-            component.properties.cutoffRange = 100.f;
-            component.constant = 0.01f;
-
-            m_pointLights[0] = &light->GetLightComponent();
+            m_pointLights[0] = light;
         }
         {
             auto light = m_scene.CreateNode<nxs::PointLight>("Point Light 2");
-            light->SetColor({0, 0, 1});
             light->Position() = {-5, 0, 0};
+            light->PointLightProperties().constant = 0.01f;
+            
+            auto& properties = light->Properties();
+            properties.color = {0, 1, 0};
+            properties.cutoffRange = 100.f;
 
-            auto& component = light->GetLightComponent();
-            // component.position = {-5, 0, 0};
-            component.properties.cutoffRange = 100.f;
-            component.constant = 0.01f;
-
-            m_pointLights[1] = &light->GetLightComponent();
+            m_pointLights[1] = light;
         }
     }
 
 protected:
     nxs::Scene m_scene;
     nxs::Transform m_cubeTransform;
-    nxs::CameraComponent m_camera;
-    nxs::DirectLightComponent* m_directionalLight = nullptr;
-    nxs::PointLightComponent* m_pointLights[2] {};
+    nxs::CameraProperties m_camera;
+    nxs::Ref<nxs::PointLight> m_pointLights[2] {};
+    nxs::Ref<nxs::DirectionalLight> m_directionalLight;
     nxs::Color3F m_ambient {0.5, 0.5, 0.5};
     glm::vec3 m_euler {};
     glm::vec3 m_cameraPos {0, 5, 5};

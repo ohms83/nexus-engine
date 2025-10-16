@@ -166,13 +166,17 @@ int Application::BeginMainLoop()
 
     LogDispatcher::Instance().ScheduleAutoFlush(*taskScheduler);
 
-    while(!m_quit)
+    // Main loop.
+    m_quit = false;
+    while(true)
     {
         rmt_ScopedCPUSample(MainLoop, 0);
         timerManager.Tick();
         m_deltaTime = m_timer->GetDeltaTime();
 
         PollEvents(e);
+
+        if (m_quit) break;
 
         {
             rmt_ScopedCPUSample(Update, 0);
@@ -217,11 +221,6 @@ void Application::RequestQuit()
     LOG_INFO(LogApplication, "RequestQuit");
     m_quit = true;
     Engine::BeginShutdown();
-}
-
-bool Application::IsQuitRequested() const
-{
-    return m_quit;
 }
 
 WindowContext Application::GetWindowContext() const

@@ -52,7 +52,6 @@ NXS_NAMESPACE
         int BeginMainLoop();
 
         void RequestQuit();
-        NODISCARD bool IsQuitRequested() const;
 
         NODISCARD WindowContext GetWindowContext() const;
 

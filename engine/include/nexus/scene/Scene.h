@@ -1,12 +1,13 @@
 #pragma once
 
 #include "nexus/NxsDefine.h"
-#include "SceneNode.h"
-#include "SceneRenderer.h"
 #include "nexus/ecs/Ecs.h"
-#include "nexus/ecs/component/scene/LightComponent.h"
 #include "nexus/graphics/Color.h"
 #include "nexus/core/LogDispatcher.h"
+
+#include "SceneNode.h"
+#include "SceneRenderer.h"
+#include "component/LightComponent.h"
 
 DECLARE_LOG_EXTERN(Scene);
 
