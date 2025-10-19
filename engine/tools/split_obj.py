@@ -24,19 +24,34 @@ parser.add_argument("filename", help="Path to the target OBJ file.")
 # parser.add_argument("objects", nargs="+", help="A list of the group of object that will be extracted to the output file.")
 # parser.add_argument("--output", "-o", help="Output filename.")
 
+class ParserError(Exception):
+    def __init__(self, line: str, e: Exception):
+        super().__init__(f"Error while parsing this line: {line}\nError: {e}")
+
 class Vector:
     def __init__(self, str_tokens):
-        if len(str_tokens) != 3:
-            raise RuntimeError(f"Invalid tokens={str_tokens}")
+        self.num_element = len(str_tokens)
         self.x = float(str_tokens[0])
         self.y = float(str_tokens[1])
-        self.z = float(str_tokens[2])
+        if self.num_element == 3:
+            self.z = float(str_tokens[2])
+        elif self.num_element > 3:
+            raise RuntimeError(f"Invalid tokens={str_tokens}")
     def __str__(self):
-        return f"{self.x:.4f} {self.y:.4f} {self.z:.4f}"
+        if self.num_element == 3:
+            return f"{self.x:.4f} {self.y:.4f} {self.z:.4f}"
+        else:
+            return f"{self.x:.4f} {self.y:.4f}"
     def __repr__(self):
-        return f"<{self.x:.4f} {self.y:.4f} {self.z:.4f}>"
+        if self.num_element == 3:
+            return f"<{self.x:.4f} {self.y:.4f} {self.z:.4f}>"
+        else:
+            return f"<{self.x:.4f} {self.y:.4f}>"
     def __eq__(self, value):
-        return math.isclose(self.x, value.x) and math.isclose(self.y, value.y) and math.isclose(self.z, value.z)
+        if self.num_element == 3:
+            return math.isclose(self.x, value.x) and math.isclose(self.y, value.y) and math.isclose(self.z, value.z)
+        else:
+            return math.isclose(self.x, value.x) and math.isclose(self.y, value.y)
 
 class Vertex:
     def __init__(self, vertex_data: str):
@@ -55,7 +70,7 @@ class PolyFace:
         if self.num_vertex < 3:
             raise RuntimeError(f"Invalid string tokens: {string_tokens}")
         self.v1 = Vertex(string_tokens[0])
-        self.v2 = Vertex(string_tokens[2])
+        self.v2 = Vertex(string_tokens[1])
         self.v3 = Vertex(string_tokens[2])
         if self.num_vertex == 4:
             self.v4 = Vertex(string_tokens[3])
@@ -83,64 +98,66 @@ class Mesh():
         self.vertex_texcoords = []
         self.vertex_normals = []
         self.surface_groups = []
-        self.usemat = ""
+        self.usemtl = ""
         self.name = name
 
-        position_dict = {}
-        texcoord_dict = {}
-        normal_dict = {}
         # Current surface group
         surface_group = None
 
         for line in in_file:
-            line = line.strip()
-            print(f"{line}")
+            try:
+                line = line.strip()
 
-            tokens = line.split()
-            if len(tokens) == 0 or tokens[0] == T_COMMENT:
-                continue
+                tokens = line.split()
+                if len(tokens) == 0 or tokens[0] == T_COMMENT:
+                    continue
 
-            tag = tokens[0]
-            if tag == T_FACE:
-                polygon = PolyFace(tokens[1:])
-                print(f"xx {polygon}")
-                polygon.v1 = self.localize_vertex(polygon.v1, position_dict, texcoord_dict, normal_dict)
-                polygon.v2 = self.localize_vertex(polygon.v2, position_dict, texcoord_dict, normal_dict)
-                polygon.v3 = self.localize_vertex(polygon.v3, position_dict, texcoord_dict, normal_dict)
-                print(f"{polygon}\n")
+                tag = tokens[0]
+                print(f"{tag}")
+                if tag == T_FACE:
+                    polygon = PolyFace(tokens[1:])
+                    # polygon.v1 = self.localize_vertex(polygon.v1)
+                    # polygon.v2 = self.localize_vertex(polygon.v2)
+                    # polygon.v3 = self.localize_vertex(polygon.v3)
+                    # if polygon.num_vertex == 4:
+                    #     polygon.v4 = self.localize_vertex(polygon.v4)
 
-                if not surface_group:
-                    surface_group = SurfaceGroup(0)
-                surface_group.polygons.append(polygon)
-            elif tag == T_SMOOTH:
-                surface_group = SurfaceGroup(int(tokens[1]))
-                self.surface_groups.append(surface_group)
-            elif tag == T_MTL:
-                self.usemat = tokens[1]
-            else:
-                return
+                    if not surface_group:
+                        surface_group = SurfaceGroup(0)
+                        self.surface_groups.append(surface_group)
+                    surface_group.polygons.append(polygon)
+                elif tag == T_SMOOTH:
+                    value = tokens[1]
+                    try:
+                        surface_group = SurfaceGroup(int(value))
+                    except ValueError:
+                        surface_group = SurfaceGroup(1 if bool(value) else 0)
+                    self.surface_groups.append(surface_group)
+                elif tag == T_MTL:
+                    self.usemtl = tokens[1]
+                else:
+                    return
+            except Exception as e:
+                raise ParserError(line, e)
 
-    def localize_vertex(self, vertex: Vertex, position_dict: dict, texcoord_dict: dict, normal_dict: dict):
-        vertex.position = Mesh.map_to_local_index(
-            vertex.position, positions, self.vertex_positions, position_dict)
-        vertex.texcoord = Mesh.map_to_local_index(
-            vertex.texcoord, texcoords, self.vertex_texcoords, texcoord_dict)
-        vertex.normal = Mesh.map_to_local_index(
-            vertex.normal, normals, self.vertex_normals, normal_dict)
+    def localize_vertex(self, vertex: Vertex):
+        vertex.position = Mesh.find_local_index(
+            vertex.position, positions, self.vertex_positions)
+        vertex.texcoord = Mesh.find_local_index(
+            vertex.texcoord, texcoords, self.vertex_texcoords)
+        vertex.normal = Mesh.find_local_index(
+            vertex.normal, normals, self.vertex_normals)
         return vertex
         
-    def map_to_local_index(index: int, global_list: list, local_list: list, index_map: dict):
-        local_index = 0
-        if index in index_map:
-            local_index = index_map[index]
-        else:
-            try:
-                local_list.append(global_list[index-1])
-            except IndexError:
-                raise IndexError(f"Index out of bound! index={index} global_list[{len(global_list)}]")
-
+    def find_local_index(index: int, global_list: list, local_list: list):
+        try:
+            item = global_list[index-1]
+            local_index = local_list.index(item) + 1
+        except IndexError:
+            raise IndexError(f"Index bound index={index} global_list[{len(global_list)}]")
+        except ValueError:
+            local_list.append(item)
             local_index = len(local_list)
-            index_map[index] = local_index
         return local_index
 
     def write_to_file(self, out_path: str):
@@ -149,6 +166,12 @@ class Mesh():
 
         with open(filepath, "w") as out_file:
             out_file.write(f"mtllib {material}\n\n")
+
+            # TODO: Temporary logic
+            self.vertex_positions = positions
+            self.vertex_texcoords = texcoords
+            self.vertex_normals   = normals
+            # END TODO
             
             for position in self.vertex_positions:
                 out_file.write(f"v {position}\n")
@@ -163,11 +186,11 @@ class Mesh():
             out_file.write(f"# {len(self.vertex_texcoords)} vertex texcoords\n\n")
 
             out_file.write(f"g {self.name}\n")
-            out_file.write(f"usemtl {self.usemat}\n")
+            out_file.write(f"usemtl {self.usemtl}\n")
 
             for surface_group in self.surface_groups:
-                out_file.write(f"{surface_group}\n")
-            out_file.write("\n")
+                out_file.write(f"{surface_group}")
+            # out_file.write("\n")
 
 args = parser.parse_args()
 filepath = Path(args.filename).resolve()
@@ -179,7 +202,6 @@ with open(filepath) as in_file:
         if len(tokens) == 0 or tokens[0] == T_COMMENT:
             continue
 
-        # print(f"{line}")
         tag = tokens[0]
         if tag == T_VERTEX:
             positions.append(Vector(tokens[1:]))
@@ -190,8 +212,13 @@ with open(filepath) as in_file:
         elif tag == T_MTL_LIB:
             material = tokens[1]
         elif tag == T_MESH:
-            meshes.append(Mesh(tokens[1], in_file))
-            break
+            mesh_name = tokens[1]
+            print(f"  Mesh[{len(meshes)}]: {mesh_name}")
+            try:
+                meshes.append(Mesh(mesh_name, in_file))
+            except Exception as e:
+                print(f"Error while parsing this line: {line}\n")
+                raise e
 
 for mesh in meshes:
     outpath, _ = os.path.split(filepath)

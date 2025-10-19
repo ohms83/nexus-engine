@@ -92,6 +92,7 @@ void Editor::InitMenu()
     std::vector<MenuItem> fileMenuItems = {
         {
             FILE_MENU_OPEN_SAVE,
+            MenuType::Button,
             "New",
             "",
             "Ctrl+N",
@@ -103,6 +104,7 @@ void Editor::InitMenu()
         },
         {
             FILE_MENU_OPEN_SAVE,
+            MenuType::Button,
             "Open...",
             "",
             "Ctrl+O",
@@ -114,6 +116,7 @@ void Editor::InitMenu()
         },
         {
             FILE_MENU_OPEN_SAVE,
+            MenuType::Button,
             "Save",
             "",
             "Ctrl+S",
@@ -125,6 +128,7 @@ void Editor::InitMenu()
         },
         {
             FILE_MENU_QUIT_APP,
+            MenuType::Button,
             "Quit",
             "",
             "Alt+F4",
@@ -144,6 +148,7 @@ void Editor::InitMenu()
     std::vector<MenuItem> editMenuItems = {
         {
             EDIT_UNDO_REDO,
+            MenuType::Button,
             "Undo",
             "",
             "Ctrl+Z",
@@ -155,6 +160,7 @@ void Editor::InitMenu()
         },
         {
             EDIT_UNDO_REDO,
+            MenuType::Button,
             "Redo",
             "",
             "Ctrl+Y",
@@ -166,6 +172,7 @@ void Editor::InitMenu()
         },
         {
             EDIT_COPY_PASTE,
+            MenuType::Button,
             "Cut",
             "",
             "Ctrl+X",
@@ -177,6 +184,7 @@ void Editor::InitMenu()
         },
         {
             EDIT_COPY_PASTE,
+            MenuType::Button,
             "Copy",
             "",
             "Ctrl+C",
@@ -188,6 +196,7 @@ void Editor::InitMenu()
         },
         {
             EDIT_COPY_PASTE,
+            MenuType::Button,
             "Paste",
             "",
             "Ctrl+V",
@@ -202,6 +211,7 @@ void Editor::InitMenu()
     // Console needs another initialization step, so it can't be put in the list.
     MenuItem console = {
         DEVELOPER_TOOLS,
+        MenuType::Toggle,
         "Console",
         "Open a debug console",
         "",
@@ -213,6 +223,7 @@ void Editor::InitMenu()
     std::vector<MenuItem> toolsMenuItems = {
         {
             DEVELOPER_TOOLS,
+            MenuType::Toggle,
             "Profiler",
             "Open a profiler",
             "",
@@ -241,7 +252,8 @@ void Editor::InitMenu()
 
 void Editor::DrawMainMenu()
 {
-    if (ImGui::BeginMainMenuBar()) {
+    if (ImGui::BeginMainMenuBar())
+    {
         for (const auto& [menu, items] : m_menuItems)
         {
             if (ImGui::BeginMenu(menu.c_str()))
@@ -255,14 +267,18 @@ void Editor::DrawMainMenu()
                     }
 
                     // ReSharper disable once CppTooWideScopeInitStatement
-                    bool selected = item.widget ? item.widget->GetVisibility() != EditorWidget::Visibility::Hidden : false;
-                    if (ImGui::MenuItem(item.name.c_str(), item.shortcut.c_str(), &selected))
+                    bool widgetVisible = item.widget ? item.widget->GetVisibility() != EditorWidget::Visibility::Hidden : false;
+                    bool* selected = nullptr;
+                    if (item.widget) selected = &widgetVisible;
+                    else if (item.type == MenuType::Toggle) selected = C_CAST<bool*>(&item.selected);
+
+                    if (ImGui::MenuItem(item.name.c_str(), item.shortcut.c_str(), selected))
                     {
                         if (item.handler) item.handler(item);
                     }
                     if (item.widget)
                     {
-                        if (selected)
+                        if (*selected)
                         {
                             item.widget->Show();
                         }
