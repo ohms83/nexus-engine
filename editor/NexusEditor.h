@@ -13,6 +13,7 @@ public:
 
 protected:
     bool Init_Internal() override;
+    void InitModel();
     void OnEvent(const SDL_Event& e) override;
     void Render(nxs::RenderSystem& renderSystem) override;
     void OnKeyDown(SDL_Keycode key) override;

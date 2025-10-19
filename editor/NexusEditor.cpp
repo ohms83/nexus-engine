@@ -25,16 +25,6 @@ static nxs::Ref<nxs::Camera> InitCamera(nxs::Scene& scene)
     return camera;
 }
 
-static void InitModel(nxs::Scene& scene, nxs::Ref<nxs::ModelManager> modelManager)
-{
-    auto node = scene.CreateNode<nxs::SceneNode3D>("Model");
-    node->Scale().value = glm::vec3 {3, 3, 3};
-
-    // const auto modelPath = std::filesystem::path(NXS_ASSETS_DIR) / "meshes/apple/3DApple001_SQ-1K-PNG.obj";
-    const auto modelPath = std::filesystem::path(NXS_ASSETS_DIR) / "meshes/sponza/sponza.obj";
-    node->AddComponent<nxs::ModelComponent>().model = modelManager->Get(modelPath.string());
-}
-
 static void InitLight(nxs::Scene& scene)
 {
     scene.Ambient() = {0.5, 0.2, 0.2};
@@ -80,6 +70,36 @@ NexusEditor::~NexusEditor()
 {
 }
 
+void NexusEditor::InitModel()
+{
+    const auto engine = nxs::Engine::Instance();
+    const auto taskScheduler = engine.GetTaskScheduler();
+    const auto resourceManager = engine.GetModelManager();
+    const auto assetPath = GetAssetPath("meshes/buddha/buddha.obj");
+    auto loadResult = resourceManager->RequestResourceAsync(assetPath, *taskScheduler);
+    auto waitingTask = std::make_shared<nxs::IntervalTask>(0, [this, loadResult]() {
+        const auto status = loadResult->status;
+        if (status == nxs::IResourceLoader::LoadResult::Status::Ready)
+        {
+            LOG_INFO(LogTemp, std::format("Finished loading model {}", loadResult->path));
+
+            auto scene = nxs::Engine::Instance().GetSceneManager()->GetCurrentScene();
+            auto node = scene->CreateNode<nxs::SceneNode3D>("Model");
+            auto model = PTR_CAST<nxs::Model>(loadResult->resource);
+            node->AddComponent<nxs::ModelComponent>().model = model;
+            node->Position().Translate(-model->GetBoundingSphere().center * node->Scale().value);
+            return false;
+        }
+        else if (status == nxs::IResourceLoader::LoadResult::Status::Failed)
+        {
+            LOG_INFO(LogTemp, std::format("Error loading model {}!!", loadResult->path));
+            return false;
+        }
+        return true;
+    });
+    taskScheduler->ScheduleTask(waitingTask);
+}
+
 bool NexusEditor::Init_Internal()
 {
     Application::Init_Internal();
@@ -94,7 +114,7 @@ bool NexusEditor::Init_Internal()
     scene->SetRenderer(std::make_unique<nxs::BasicSceneRenderer>());
 
     m_camera = InitCamera(*scene);
-    InitModel(*scene, engine.GetModelManager());
+    InitModel();
     InitLight(*scene);
 
     auto& inputManager = nxs::InputManager::Instance();
