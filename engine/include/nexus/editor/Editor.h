@@ -4,30 +4,28 @@
 
 #pragma once
 
-#include <nexus/NxsDefine.h>
+#include "nexus/NxsDefine.h"
+#include "nexus/graphics/GraphicsConst.h"
+
+#include "EditorWidget.h"
+#include "Menu.h"
 
 #include <vector>
 
-#include "MenuItem.h"
-#include "nexus/graphics/GraphicsConst.h"
-
 NXS_NAMESPACE
 {
-    class EditorWidget;
     class RenderSystem;
 
-    class Editor final
+    class Editor final : public IWidgetOwner
     {
     public:
         Editor();
         ~Editor();
 
-        void Update() const;
+        void Update();
         void Draw(RenderSystem& renderSystem);
-
-        void AddMenuItem(const std::string& menu, const MenuItem& menuItem);
         
-        void AddWidget(Ref<EditorWidget> widget)
+        void AddWidget(Ref<EditorWidget> widget) override
         {
             m_widgets.push_back(widget);
         }
@@ -38,14 +36,11 @@ NXS_NAMESPACE
         void InitMenu();
         void DrawMainMenu();
 
-    protected:
-        struct MenuItemList
-        {
-            std::string menu;
-            std::vector<MenuItem> items;
-        };
+        void UpdateWidgets() override;
+        void DrawWidgets(RenderSystem& renderSystem) const override;
 
-        std::vector<MenuItemList> m_menuItems;
+    protected:
+        Ptr<Menu> m_menu;
         std::vector<Ref<EditorWidget>> m_widgets;
     };
 }

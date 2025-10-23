@@ -12,6 +12,24 @@ NXS_NAMESPACE
 {
     class RenderSystem;
 
+    class IWidgetOwner
+    {
+    public:
+        virtual void AddWidget(Ref<class EditorWidget> widget) = 0;
+    
+    protected:
+        /**
+         * @brief Update all the widgets
+         * 
+         */
+        virtual void UpdateWidgets() = 0;
+        /**
+         * @brief Draw all the widgets
+         * 
+         */
+        virtual void DrawWidgets(RenderSystem& renderSystem) const = 0;
+    };
+
     class EditorWidget
     {
     public:

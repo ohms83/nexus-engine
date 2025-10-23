@@ -4,9 +4,9 @@
 
 #pragma once
 
-#include "MenuItem.h"
+#include "menu/MenuItem.h"
 
 NXS_NAMESPACE
 {
-    extern const std::vector<MenuItem> s_debugMenuItems;
+    // extern const std::vector<MenuItem> s_debugMenuItems;
 }
