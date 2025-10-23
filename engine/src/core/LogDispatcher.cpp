@@ -33,7 +33,7 @@ LogDispatcher& LogDispatcher::Instance()
     return *s_instance;
 }
 
-void LogDispatcher::AddLogger(const Ref<ILogger>& logger)
+void LogDispatcher::AddLogger(Ref<ILogger> logger)
 {
     m_loggers.push_back(logger);
 }

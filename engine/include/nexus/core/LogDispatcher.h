@@ -80,7 +80,7 @@ NXS_NAMESPACE
         static void Destroy();
         static LogDispatcher& Instance();
 
-        void AddLogger(const Ref<ILogger>& logger);
+        void AddLogger(Ref<ILogger> logger);
         void AddLoggers(std::initializer_list<Ref<ILogger>> loggers);
         void Flush() const;
         void ScheduleAutoFlush(TaskScheduler& scheduler, double interval = 1.0);
