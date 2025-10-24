@@ -147,8 +147,8 @@ bool NexusEditor::Init_Internal()
     inputManager.RegisterAxisInputMap("camera_turn", cameraTurnKeyInput);
     inputManager.RegisterMouseAxisInputMap("camera_turn", cameraTurnMouseInput);
 
-    m_sceneGraphWidget = std::make_shared<nxs::SceneGraphWidget>(scene);
-    m_propertyWindow = std::make_shared<nxs::PropertyWindow>(GetSceneManager());
+    m_sceneGraphWidget = std::make_shared<nxs::SceneGraphWidget>(*sceneManager);
+    m_propertyWindow = std::make_shared<nxs::PropertyWindow>(*sceneManager);
 
     const auto toolsMenuName = "Tools";
     auto& menu = m_editor->GetMenu();

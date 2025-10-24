@@ -3,25 +3,28 @@
 #include "imgui.h"
 
 USING_NAMESPACE_NXS;
+SceneGraphWidget::SceneGraphWidget(SceneManager& sceneManager)
+    : EditorWidget("Scene Graph")
+{
+    m_scene = sceneManager.GetCurrentScene();
+    sceneManager.sceneChangedCallback.connect([this] (Ref<Scene> prev, Ref<Scene> current) {
+        m_scene = current;
+    });
+}
 
 SceneGraphWidget::~SceneGraphWidget()
 {
     m_scene.reset();
-    m_highlightNode.reset();
-    m_selectedNode.reset();
 }
 
 SceneNode::Id SceneGraphWidget::GetSelectedNode() const
 {
-    if (m_selectedNode) {
-        return m_selectedNode->GetId();
-    }
-    return SceneNode::InvalidID;
+    return m_selectedNode;
 }
 
 void SceneGraphWidget::Draw_Internal(RenderSystem& renderSystem)
 {
-    m_highlightNode.reset();
+    bool treeNodeClicked = false;
 
     SceneNode::ChildList rootNodes;
     m_scene->GetAllRootNodes(rootNodes);
@@ -30,42 +33,33 @@ void SceneGraphWidget::Draw_Internal(RenderSystem& renderSystem)
         DrawSceneNode(node);
     }
 
-    // Check for user interactions (e.g., right-click context menu)
-    static const std::string contexMenuID = "node_context_menu";
-    if (m_highlightNode && ImGui::IsMouseReleased(ImGuiMouseButton_Left))
-    {
-        m_selectedNode = m_highlightNode;
-    }
-    if (m_highlightNode && ImGui::IsMouseReleased(ImGuiMouseButton_Right))
-    {
-        ImGui::OpenPopup(contexMenuID.c_str());
-        m_selectedNode = m_highlightNode;
-    }
-
-    if (ImGui::BeginPopup(contexMenuID.c_str()))
-    {
-        if (ImGui::MenuItem("Delete"))
-        {
-            DeleteNode(m_selectedNode);
-            m_selectedNode.reset();
-        }
-        ImGui::EndPopup();
-    }
-    else if (m_selectedNode)
-    {
-        m_selectedNode.reset();
-    }
+    ShowContextMenu();
 }
 
 void SceneGraphWidget::DrawSceneNode(Ref<SceneNode> node)
 {
     ImGui::PushID(&node);
-    bool isOpen = ImGui::TreeNode(node->GetName().c_str());
 
-    if (ImGui::IsItemHovered())
+    const auto nodeId = node->GetId();
+    const void* treeNodeID = (void*)((intptr_t)nodeId);
+    ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_SpanAvailWidth;
+    nodeFlags |= node->HasChild() ? ImGuiTreeNodeFlags_OpenOnArrow : ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Bullet;
+
+    if (nodeId == m_selectedNode)
     {
-        m_highlightNode = node;
+        ImGui::PushStyleColor(ImGuiCol_Header, IM_COL32(127, 127, 80, 255));
+        nodeFlags |= ImGuiTreeNodeFlags_Selected;
     }
+
+    const bool isOpen = ImGui::TreeNodeEx(treeNodeID, nodeFlags, "%s", node->GetName().c_str());
+
+    // Pop the custom color immediately after drawing the node.
+    if (nodeId == m_selectedNode)
+    {
+        ImGui::PopStyleColor();
+    }
+
+    HandleInput(node);
 
     if (isOpen)
     {
@@ -85,4 +79,42 @@ void SceneGraphWidget::DeleteNode(Ref<SceneNode> node)
 {
     if (!node) return;
     m_scene->RemoveNode(node);
+}
+
+void SceneGraphWidget::HandleInput(Ref<SceneNode> node)
+{
+    if (ImGui::IsItemClicked(ImGuiMouseButton_Left) || ImGui::IsItemClicked(ImGuiMouseButton_Right))
+    {
+        m_selectedNode = node->GetId();
+    }
+}
+
+void SceneGraphWidget::ShowContextMenu()
+{
+    if (m_selectedNode == SceneNode::InvalidID) return;
+    static const char* contexMenuID = "Scene Graph Context Menu";
+
+    auto node = m_scene->FindNode(m_selectedNode);
+    if (!node) return;
+
+    bool closePopup = false;
+
+    if (ImGui::BeginPopupContextWindow(contexMenuID, ImGuiPopupFlags_MouseButtonRight))
+    {
+        if (ImGui::MenuItem("Delete"))
+        {
+            DeleteNode(node);
+            closePopup = true;
+        }
+        if (ImGui::MenuItem("Cancel"))
+        {
+            closePopup = true;
+        }
+        ImGui::EndPopup();
+    }
+    
+    if (closePopup)
+    {
+        m_selectedNode = SceneNode::InvalidID;
+    }
 }

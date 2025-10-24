@@ -2,6 +2,7 @@
 
 #include "EditorWidget.h"
 #include "nexus/scene/Scene.h"
+#include "nexus/scene/SceneManager.h"
 
 #include "entt/entt.hpp"
 
@@ -11,11 +12,7 @@ NXS_NAMESPACE
     {
     public:
         // TODO: Change parameter to SceneManager.
-        SceneGraphWidget(Ref<Scene> scene)
-            : EditorWidget("Scene Graph")
-            , m_scene(scene)
-        {}
-
+        SceneGraphWidget(SceneManager& sceneManager);
         ~SceneGraphWidget();
 
         SceneNode::Id GetSelectedNode() const;
@@ -23,14 +20,13 @@ NXS_NAMESPACE
     protected:
         void Draw_Internal(RenderSystem& renderSystem) override;
         void DrawSceneNode(Ref<SceneNode> node);
+        void HandleInput(Ref<SceneNode> node);
+        void ShowContextMenu();
 
     private:
         void DeleteNode(Ref<SceneNode> node);
 
         Ref<Scene> m_scene;
-        // TODO: Use SceneNode::Id
-        Ref<SceneNode> m_highlightNode;
-        // TODO: Use SceneNode::Id
-        Ref<SceneNode> m_selectedNode;
+        SceneNode::Id m_selectedNode;
     };
 }

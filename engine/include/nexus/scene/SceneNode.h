@@ -50,6 +50,9 @@ NXS_NAMESPACE
         void GetAllChildren(ChildList& childrenList) const;
         void GetAllDescendants(ChildList& childrenList, bool parentFirst) const;
 
+        bool HasChild() const { return m_children.size() > 0; }
+        size_t GetNumChildren() const { return m_children.size(); }
+
         SceneNode* GetParent() const { return m_parent; }
         void RemoveFromParent();
 
