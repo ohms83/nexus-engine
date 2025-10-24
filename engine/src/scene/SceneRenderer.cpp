@@ -37,36 +37,37 @@ static void SetAmbientLightParams(RenderCommand& command, const entt::registry& 
 static void SetDirectLightParams(RenderCommand& command, const entt::registry& registry)
 {
     rmt_ScopedCPUSample(SceneRenderer_SetDirectLightParams, 0);
-    const auto lights = ECS::FindAllComponents<DirectLightComponent>(registry);
-    const auto numLights = CAST<int32>(lights.size());
-
-    for (int i = 0; i < lights.size(); ++i)
+    int32 numLight = 0;
+    for (const auto view = registry.view<SceneNodeComponent, DirectLightComponent>(); const auto& [entity, node, light] : view.each())
     {
-        const auto light = lights[i];
-        if (!light) continue;
+        if (!node.active) continue;
 
-        const auto uniformLocation = std::format("_DirectLights[{}]", i);
+        const auto uniformLocation = std::format("_DirectLights[{}]", numLight);
         const auto uniformLocationColor = std::format("{}.properties.color", uniformLocation);
         const auto uniformLocationDiffuse = std::format("{}.properties.diffuseIntensity", uniformLocation);
         const auto uniformLocationSpecular = std::format("{}.properties.specularIntensity", uniformLocation);
         const auto uniformLocationCutoff = std::format("{}.properties.cutoff", uniformLocation);
         const auto uniformLocationDirection = std::format("{}.direction", uniformLocation);
 
-        command.uniformVec3.emplace_back(uniformLocationColor, light->properties.color);
-        command.uniformVec3.emplace_back(uniformLocationDirection, light->direction);
-        command.uniformFloats.emplace_back(uniformLocationDiffuse, light->properties.diffuseIntensity);
-        command.uniformFloats.emplace_back(uniformLocationSpecular, light->properties.specularIntensity);
-        command.uniformFloats.emplace_back(uniformLocationCutoff, light->properties.cutoffRange);
+        command.uniformVec3.emplace_back(uniformLocationColor, light.properties.color);
+        command.uniformVec3.emplace_back(uniformLocationDirection, light.direction);
+        command.uniformFloats.emplace_back(uniformLocationDiffuse, light.properties.diffuseIntensity);
+        command.uniformFloats.emplace_back(uniformLocationSpecular, light.properties.specularIntensity);
+        command.uniformFloats.emplace_back(uniformLocationCutoff, light.properties.cutoffRange);
+
+        numLight++;
     }
-    command.uniformInts.emplace_back("_NumDirectLight", INT_CAST(lights.size()));
+    command.uniformInts.emplace_back("_NumDirectLight", numLight);
 }
 
 static void SetPointLightParams(RenderCommand& command, const entt::registry& registry)
 {
     rmt_ScopedCPUSample(SceneRenderer_SetPointLightParams, 0);
     int32 numLight = 0;
-    for (const auto view = registry.view<PointLightComponent, PositionComponent>(); const auto& [entity, light, position] : view.each())
+    for (const auto view = registry.view<SceneNodeComponent, PointLightComponent, PositionComponent>(); const auto& [entity, node, light, position] : view.each())
     {
+        if (!node.active) continue;
+
         rmt_BeginCPUSample(CreateUniformNames, 0);
         const auto uniformLocation = std::format("_PointLights[{}]", numLight);
         const auto uniformLocationColor = std::format("{}.properties.color", uniformLocation);
@@ -117,7 +118,7 @@ void BasicSceneRenderer::Render(RenderSystem& renderSystem, const entt::registry
     {
         if (!sceneNode.active) continue;
 
-        glm::mat4 viewMtx = Matrix::CreateViewMatrix(cameraPos.value, cameraOrient.value);
+        glm::mat4 viewMtx = Matrix::CreateViewMatrix(cameraPos.value, cameraOrient.quat);
         glm::mat4 projection;
         if (camera.projectionType == ProjectionType::Perspective) {
             projection = glm::perspective(glm::radians(camera.fov), camera.width / camera.height, camera.nearZ, camera.farZ);
@@ -130,9 +131,9 @@ void BasicSceneRenderer::Render(RenderSystem& renderSystem, const entt::registry
         const auto viewFrustum = Frustum::CreateViewFrustum(viewProjMtx);
         for (const auto view = registry.view<SceneNodeComponent, ModelComponent, PositionComponent, OrientationComponent, ScaleComponent>(); const auto& [entity, sceneNode, model, position, orient, scale] : view.each())
         {
-            if (!model.model) continue;
+            if (!sceneNode.active || !model.model) continue;
 
-            glm::mat4 modelMtx = Matrix::CreateModelMatrix(position.value, orient.value, scale.value);
+            glm::mat4 modelMtx = Matrix::CreateModelMatrix(position.value, orient.quat, scale.value);
             const auto& sphere = model.model->GetBoundingSphere();
             const glm::vec3 transformedCenter = modelMtx * glm::vec4(sphere.center, 1);
             // TODO: Handle non-uniform scaling.

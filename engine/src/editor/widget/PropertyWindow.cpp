@@ -64,22 +64,12 @@ void PropertyWindow::Draw_Internal(RenderSystem& renderSystem)
         auto comp = selectedNode->TryGetComponent<OrientationComponent>();
         if (comp)
         {
-            const glm::vec3 orgRadians = glm::eulerAngles(comp->value);
-            glm::vec3 eulerAngles = glm::degrees(orgRadians);
-            if (ImGui::InputFloat3("Euler Angles", R_CAST<float*>(&eulerAngles)))
+            if (ImGui::InputFloat3("Euler Angles", R_CAST<float*>(&comp->euler)))
             {
-                // const auto radians = glm::radians(eulerAngles);
-                // const float tolerance = 0.00001f;
-                // if (!glm::all(glm::epsilonEqual(radians, orgRadians, tolerance)))
-                // {
-                //     // Create a 4x4 matrix representing the combined rotation (order: X, then Y, then Z)
-                //     // Note: GLM's eulerAngle functions often use 4x4 matrices
-                //     glm::mat4 rotationMatrix = glm::eulerAngleXYZ(eulerAngles.x, eulerAngles.y, eulerAngles.z);
-                //     // Convert the 4x4 matrix (which is a 3x3 rotation plus translation) to a quaternion
-                //     comp->value = glm::quat(rotationMatrix);
-                //     LOG_DEBUG(LogTemp, std::format("New orient: radians={} euler={}",
-                //          math::ToString(radians),  math::ToString(eulerAngles)));
-                // }
+                const auto radians = glm::radians(comp->euler);
+                comp->quat = glm::quat(radians);
+                LOG_DEBUG(LogTemp, std::format("New orient: radians={} euler={}",
+                    math::ToString(radians),  math::ToString(comp->euler)));
             }
         }
     }

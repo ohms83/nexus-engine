@@ -60,7 +60,7 @@ public:
         m_euler.y += euler.y;
 
         auto modelNode = PTR_CAST<nxs::SceneNode3D>(m_scene.FindNodeWithName("Model"));
-        modelNode->Orient().value = glm::mat4_cast(glm::quat(glm::radians(m_euler)));
+        modelNode->Orient().quat = glm::mat4_cast(glm::quat(glm::radians(m_euler)));
         modelNode->Scale().value = modelScales[selectedModel] * scale;
 
         auto modelComp = modelNode->TryGetComponent<nxs::ModelComponent>();
@@ -68,7 +68,7 @@ public:
         {
             const auto model = modelComp->model;
             const auto position = modelNode->Position().value;
-            const auto orient = modelNode->Orient().value;
+            const auto orient = modelNode->Orient().quat;
             const float scale = modelNode->Scale().value.x;
             if (drawSphere)
             {

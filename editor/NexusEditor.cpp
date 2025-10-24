@@ -78,6 +78,7 @@ void NexusEditor::InitModel()
     const auto taskScheduler = engine.GetTaskScheduler();
     const auto resourceManager = engine.GetModelManager();
     const auto assetPath = GetAssetPath("meshes/buddha/buddha.obj");
+    // const auto assetPath = GetAssetPath("meshes/apple/3DApple001_SQ-1K-PNG.obj");
     auto loadResult = resourceManager->RequestResourceAsync(assetPath, *taskScheduler);
     auto waitingTask = std::make_shared<nxs::IntervalTask>(0, [this, loadResult]() {
         const auto status = loadResult->status;
@@ -213,7 +214,7 @@ void NexusEditor::Update()
     // Transform the translation vector into the camera's local coordinate.
     auto& cameraOrient = m_camera->Orient();
     auto& cameraPosition = m_camera->Position();
-    translation = cameraOrient.value * translation;
+    translation = cameraOrient.quat * translation;
     cameraPosition.Translate(translation * cameraSpeed * GetDeltaTime());
 
     glm::vec2 euler = inputManager.GetMouseAxisValue("camera_turn") * GetDeltaTime();

@@ -16,23 +16,24 @@ SceneNode3D::SceneNode3D(entt::registry &registry, std::string name)
 
 void SceneNode3D::LookAt(const glm::vec3& center, const glm::vec3& up)
 {
-    Orient().value = glm::quatLookAt(glm::normalize(center - Position().value), up);
+    // Orient().quat = glm::quatLookAt(glm::normalize(center - Position().value), up);
+    Orient().LookAt(Position().value, center, up);
 }
 
 glm::vec3 SceneNode3D::Right() const
 {
     static const glm::vec3 right = {1, 0, 0};
-    return Orient().value * right;
+    return Orient().quat * right;
 }
 
 glm::vec3 SceneNode3D::Up() const
 {
     static const glm::vec3 up = {0, 1, 0};
-    return Orient().value * up;
+    return Orient().quat * up;
 }
 
 glm::vec3 SceneNode3D::Forward() const
 {
     static const glm::vec3 forward = {0, 0, -1};
-    return Orient().value * forward;
+    return Orient().quat * forward;
 }

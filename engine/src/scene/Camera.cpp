@@ -45,7 +45,7 @@ void Camera::SetOrthographic(const float width, const float height, const float 
 glm::mat4 Camera::GetViewMtx() const
 {
     // TODO: Handle transform heirachy.
-    const auto worldOrientation = Orient().value;
+    const auto worldOrientation = Orient().quat;
     const auto worldPosition = Position().value;
     auto viewMatrix = glm::mat4(worldOrientation);
     viewMatrix[3] = glm::vec4(worldPosition, 1);
@@ -54,5 +54,6 @@ glm::mat4 Camera::GetViewMtx() const
 
 void Camera::LookAt(const glm::vec3 &center, const glm::vec3 &up)
 {
-    Orient().value = glm::quatLookAt(glm::normalize(center - Position().value), up);
+    // Orient().quat = glm::quatLookAt(glm::normalize(center - Position().value), up);
+    Orient().LookAt(Position().value, center, up);
 }
