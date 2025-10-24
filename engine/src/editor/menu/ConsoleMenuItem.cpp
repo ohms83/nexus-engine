@@ -1,5 +1,5 @@
 #include "editor/menu/ConsoleMenuItem.h"
-#include "editor/Console.h"
+#include "editor/widget/Console.h"
 
 #include "core/LogDispatcher.h"
 

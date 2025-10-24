@@ -71,9 +71,12 @@ bool SceneManager::ChangeScene_Internal(Ref<Scene> scene)
         if (m_current) {
             m_current->OnExit();
         }
+        m_prev = m_current;
         m_current = m_next;
         m_current->OnEnter();
         m_next.reset();
+
+        sceneChangedCallback(m_prev, m_current);
     }), TaskScheduler::UpdatePhase::PreUpdate);
 
     return true;

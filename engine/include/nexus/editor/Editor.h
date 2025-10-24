@@ -7,8 +7,9 @@
 #include "nexus/NxsDefine.h"
 #include "nexus/graphics/GraphicsConst.h"
 
-#include "EditorWidget.h"
 #include "Menu.h"
+
+#include "widget/EditorWidget.h"
 
 #include <vector>
 
@@ -24,7 +25,9 @@ NXS_NAMESPACE
 
         void Update();
         void Draw(RenderSystem& renderSystem);
-        
+
+        Menu& GetMenu() const { return *m_menu.get(); };
+
         void AddWidget(Ref<EditorWidget> widget) override
         {
             m_widgets.push_back(widget);

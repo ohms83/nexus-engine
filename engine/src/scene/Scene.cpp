@@ -41,7 +41,19 @@ void Scene::Init()
     AddSimulation(RotateNode);
 }
 
-Ref<SceneNode> Scene::FindNode(const std::string& name)
+Ref<SceneNode> Scene::FindNode(SceneNode::Id id)
+{
+    if (IsShuttingDown()) return nullptr;
+
+    const auto node = std::ranges::find_if(m_children, [&id](const Ref<SceneNode>& n)
+    {
+        return n->GetId() == id;
+    });
+
+    return node != m_children.end() ? *node : nullptr;
+}
+
+Ref<SceneNode> Scene::FindNodeWithName(const std::string& name)
 {
     if (IsShuttingDown()) return nullptr;
 
@@ -99,7 +111,7 @@ void Scene::RemoveNode(Ref<SceneNode> node)
 
 void Scene::RemoveNodeByName(const std::string& name)
 {
-    auto node = FindNode(name); 
+    auto node = FindNodeWithName(name); 
     if (node == nullptr)
     {
         LOG_WARNING(LogScene, std::format("Can't find a node with name={}", name));

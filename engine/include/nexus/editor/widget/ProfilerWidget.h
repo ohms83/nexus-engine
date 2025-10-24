@@ -5,8 +5,8 @@
 #pragma once
 
 #include <vector>
-#include <nexus/NxsDefine.h>
 
+#include "nexus/NxsDefine.h"
 #include "EditorWidget.h"
 
 NXS_NAMESPACE

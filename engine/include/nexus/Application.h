@@ -57,9 +57,15 @@ NXS_NAMESPACE
 
         NODISCARD RenderSystem& GetRenderSystem() const
         {
-            assert(m_renderSystem);
+            NXS_ASSERT(m_renderSystem);
             // ReSharper disable once CppDFANullDereference
             return *m_renderSystem;
+        }
+
+        NODISCARD SceneManager& GetSceneManager() const
+        {
+            NXS_ASSERT(m_sceneManager);
+            return *m_sceneManager;
         }
 
         /**

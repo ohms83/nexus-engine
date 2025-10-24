@@ -2,7 +2,7 @@
 // Created by nutta on 7/17/2025.
 //
 
-#include "editor/ProfilerWidget.h"
+#include "editor/widget/ProfilerWidget.h"
 
 #include "imgui.h"
 #include "implot.h"

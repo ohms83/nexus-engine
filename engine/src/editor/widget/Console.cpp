@@ -1,11 +1,11 @@
 //
 // Created by nutta on 7/16/2025.
 //
+#include "editor/widget/Console.h"
 
 #include <algorithm>
 #include <ranges>
 #include <sstream>
-#include <nexus/editor/Console.h>
 
 #include "core/LogDispatcher.h"
 #include "core/Logger.h"

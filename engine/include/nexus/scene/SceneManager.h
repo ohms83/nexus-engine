@@ -8,6 +8,8 @@
 #include <vector>
 #include <concepts>
 
+#include "sigslot/signal.hpp"
+
 NXS_NAMESPACE
 {
     class SceneManager
@@ -56,10 +58,13 @@ NXS_NAMESPACE
         void Update(float dt);
         void Render(RenderSystem &renderSystem);
 
+        sigslot::signal<Ref<Scene>, Ref<Scene>> sceneChangedCallback;
+
     private:
         bool ChangeScene_Internal(Ref<Scene> scene);
 
         std::vector<Ref<Scene>> m_sceneList;
+        Ref<Scene> m_prev;
         Ref<Scene> m_next;
         Ref<Scene> m_current;
         Ref<TaskScheduler> m_taskScheduler;

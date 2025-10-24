@@ -56,13 +56,15 @@ NXS_NAMESPACE
             }
             return CreateNode<T>(name, parent);
         }
+        
+        NODISCARD Ref<SceneNode> FindNode(SceneNode::Id id);
 
         /**
          * Find a node with the specified @c name.
          * @param name Node name
          * @return A scene node with specified name or a nullptr, if not found
          */
-        NODISCARD Ref<SceneNode> FindNode(const std::string& name);
+        NODISCARD Ref<SceneNode> FindNodeWithName(const std::string& name);
 
         const SceneNode::ChildList& GetAllChildren() const
         {

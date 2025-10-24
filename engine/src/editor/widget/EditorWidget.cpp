@@ -2,7 +2,7 @@
 // Created by nutta on 7/18/2025.
 //
 
-#include <nexus/editor/EditorWidget.h>
+#include "editor/widget/EditorWidget.h"
 #include "imgui.h"
 
 USING_NAMESPACE_NXS;

@@ -26,7 +26,7 @@ TEST_F(SceneNodeTest, AddNode)
 {
     // The specified node shouldn't have already existed before adding.
     const std::string name = "Test Node";
-    auto emptyNode = scene->FindNode(name);
+    auto emptyNode = scene->FindNodeWithName(name);
     EXPECT_EQ(emptyNode, nullptr);
 
     auto node = scene->CreateNode<SceneNode3D>(name);
@@ -41,14 +41,14 @@ TEST_F(SceneNodeTest, RemoveNode)
     auto node = scene->CreateNode<SceneNode>(name);
     EXPECT_NE(node, nullptr);
     EXPECT_EQ(node->GetName(), name);
-    EXPECT_NE(scene->FindNode(name), nullptr);
+    EXPECT_NE(scene->FindNodeWithName(name), nullptr);
 
     scene->RemoveNode(node);
     // The node shouldn't have been removed yet.
-    EXPECT_NE(scene->FindNode(name), nullptr);
+    EXPECT_NE(scene->FindNodeWithName(name), nullptr);
 
     scheduler->PostUpdate();
-    EXPECT_EQ(scene->FindNode(name), nullptr);
+    EXPECT_EQ(scene->FindNodeWithName(name), nullptr);
 }
 
 // Testing for a bug where removing a scene node will have side effects on the others

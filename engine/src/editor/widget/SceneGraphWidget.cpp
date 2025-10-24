@@ -1,4 +1,4 @@
-#include "editor/SceneGraphWidget.h"
+#include "editor/widget/SceneGraphWidget.h"
 
 #include "imgui.h"
 
@@ -9,6 +9,14 @@ SceneGraphWidget::~SceneGraphWidget()
     m_scene.reset();
     m_highlightNode.reset();
     m_selectedNode.reset();
+}
+
+SceneNode::Id SceneGraphWidget::GetSelectedNode() const
+{
+    if (m_selectedNode) {
+        return m_selectedNode->GetId();
+    }
+    return SceneNode::InvalidID;
 }
 
 void SceneGraphWidget::Draw_Internal(RenderSystem& renderSystem)
@@ -24,6 +32,10 @@ void SceneGraphWidget::Draw_Internal(RenderSystem& renderSystem)
 
     // Check for user interactions (e.g., right-click context menu)
     static const std::string contexMenuID = "node_context_menu";
+    if (m_highlightNode && ImGui::IsMouseReleased(ImGuiMouseButton_Left))
+    {
+        m_selectedNode = m_highlightNode;
+    }
     if (m_highlightNode && ImGui::IsMouseReleased(ImGuiMouseButton_Right))
     {
         ImGui::OpenPopup(contexMenuID.c_str());

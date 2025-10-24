@@ -1,7 +1,7 @@
 #pragma once
 
 #include "WidgetMenuItem.h"
-#include "../Console.h"
+#include "../widget/Console.h"
 
 NXS_NAMESPACE
 {

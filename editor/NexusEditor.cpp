@@ -8,10 +8,12 @@
 
 #include "nexus/Engine.h"
 #include "nexus/graphics/Model.h"
+#include "nexus/editor/widget/PropertyWindow.h"
 
 DEFINE_LOG(NexusEditor);
 
 static float cameraSpeed = 2.0f;
+static nxs::SceneNode::Id selectedNode = nxs::SceneNode::InvalidID;
 
 static nxs::Ref<nxs::Camera> InitCamera(nxs::Scene& scene)
 {
@@ -145,7 +147,32 @@ bool NexusEditor::Init_Internal()
     inputManager.RegisterAxisInputMap("camera_turn", cameraTurnKeyInput);
     inputManager.RegisterMouseAxisInputMap("camera_turn", cameraTurnMouseInput);
 
-    m_editor->AddWidget(std::make_shared<nxs::SceneGraphWidget>(scene));
+    m_sceneGraphWidget = std::make_shared<nxs::SceneGraphWidget>(scene);
+    m_propertyWindow = std::make_shared<nxs::PropertyWindow>(GetSceneManager());
+
+    const auto toolsMenuName = "Tools";
+    auto& menu = m_editor->GetMenu();
+    
+    menu.AddMenuItem(toolsMenuName,
+        std::make_shared<nxs::WidgetMenuItem> (
+            0,
+            "Scene Graph",
+            "",
+            "",
+            m_sceneGraphWidget,
+            CAST<nxs::IWidgetOwner&>(*m_editor.get())
+        )
+    );
+    menu.AddMenuItem(toolsMenuName,
+        std::make_shared<nxs::WidgetMenuItem> (
+            0,
+            "Property Window",
+            "",
+            "",
+            m_propertyWindow,
+            CAST<nxs::IWidgetOwner&>(*m_editor.get())
+        )
+    );
     return true;
 }
 
@@ -192,4 +219,7 @@ void NexusEditor::Update()
     glm::vec2 euler = inputManager.GetMouseAxisValue("camera_turn") * GetDeltaTime();
     glm::vec2 keyDeltaEuler = inputManager.GetAxisValue("camera_turn") * 20.f * GetDeltaTime();
     cameraOrient.Rotate(glm::vec3(euler.y + keyDeltaEuler.y, euler.x + keyDeltaEuler.x, 0));
+
+    const auto selectedNode = m_sceneGraphWidget->GetSelectedNode();
+    m_propertyWindow->SetSceneNode(selectedNode);
 }

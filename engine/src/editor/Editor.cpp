@@ -2,15 +2,11 @@
 // Created by nutta on 7/9/2025.
 //
 
-#include <nexus/editor/Editor.h>
-#include <nexus/graphics/RenderSystem.h>
+#include "editor/Editor.h"
+#include "graphics/RenderSystem.h"
 
 // ImGui headers
 #include <imgui.h>
-
-#include "editor/Console.h"
-#include "editor/ProfilerWidget.h"
-#include "editor/DebugMenuItem.h"
 
 #include "Remotery.h"
 

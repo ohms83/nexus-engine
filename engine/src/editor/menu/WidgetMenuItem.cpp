@@ -1,5 +1,5 @@
 #include "editor/menu/WidgetMenuItem.h"
-#include "editor/EditorWidget.h"
+#include "editor/widget/EditorWidget.h"
 
 USING_NAMESPACE_NXS;
 

@@ -18,6 +18,7 @@ NXS_NAMESPACE
     {
     public:
         using ChildList = std::vector<Ref<SceneNode>>;
+        using Id = uint64_t;
 
         SceneNode() = delete;
         explicit SceneNode(entt::registry& registry);
@@ -25,6 +26,8 @@ NXS_NAMESPACE
         virtual ~SceneNode();
 
         void Destroy();
+
+        NODISCARD Id GetId() const { return m_id; }
 
         NODISCARD const std::string& GetName() const
         {
@@ -60,10 +63,10 @@ NXS_NAMESPACE
         virtual void OnDestroy() {};
         virtual void OnUpdate(float dt) {}
 
-        static const uint64_t InvalidID;
+        static const Id InvalidID;
 
     protected:
-        uint64_t m_id = 0;
+        Id m_id = InvalidID;
         Scene* m_owner = nullptr;
         SceneNode* m_parent = nullptr;
         ChildList m_children;

@@ -1,10 +1,11 @@
 #include "editor/Menu.h"
-#include "editor/EditorWidget.h"
-#include "editor/ProfilerWidget.h"
 #include "editor/menu/ToggleMenuItem.h"
 #include "editor/menu/TriggerMenuItem.h"
 #include "editor/menu/WidgetMenuItem.h"
 #include "editor/menu/ConsoleMenuItem.h"
+#include "editor/widget/EditorWidget.h"
+#include "editor/widget/ProfilerWidget.h"
+#include "editor/widget/PropertyWindow.h"
 
 #include "imgui.h"
 
@@ -124,7 +125,7 @@ Menu::Menu(IWidgetOwner& widgetOwner)
         "Tools",
         {
             std::make_shared<ConsoleMenuItem> (
-                EDIT_UNDO_REDO,
+                DEVELOPER_TOOLS,
                 "Console",
                 "",
                 "",
@@ -133,7 +134,7 @@ Menu::Menu(IWidgetOwner& widgetOwner)
                 LogDispatcher::Instance()
             ),
             std::make_shared<WidgetMenuItem> (
-                EDIT_UNDO_REDO,
+                DEVELOPER_TOOLS,
                 "Profiler",
                 "",
                 "",
