@@ -72,12 +72,14 @@ static std::queue<Ref<IResourceLoader::LoadResult>> PreloadTextures(const aiScen
     for (unsigned int i = 0; i < scene.mNumMaterials; i++)
     {
         const aiMaterial* material = scene.mMaterials[i];
+        LOG_INFO(LogModelLoader, std::format("Loading texture: Material={}", material->GetName().C_Str()));
         for (const auto aiTexture : aiTextures)
         {
-            for (unsigned int j = 0; j < material->GetTextureCount(aiTexture); j++)
+            const auto numTexture = material->GetTextureCount(aiTexture);
+            for (unsigned int j = 0; j < numTexture; j++)
             {
                 aiString path;
-                material->GetTexture(aiTexture, i, &path);
+                material->GetTexture(aiTexture, j, &path);
                 auto texturePath = directory / path.C_Str();
                 result.push(manager.RequestResourceAsync(texturePath.string(), taskScheduler));
             }
