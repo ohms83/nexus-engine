@@ -1,6 +1,7 @@
 #pragma once
 
 #include "nexus/NxsDefine.h"
+#include "nexus/core/Reflection.h"
 
 #include "Entity.h"
 #include "Transform.h"
@@ -14,16 +15,20 @@ NXS_NAMESPACE
 {
     class Scene;
 
-    class SceneNode : public Entity
+    class SceneNode : public Entity, public IReflection
     {
     public:
         using ChildList = std::vector<Ref<SceneNode>>;
         using Id = uint64_t;
 
+        IMPLEMENT_REFLECTION(SceneNode);
+
         SceneNode() = delete;
         explicit SceneNode(entt::registry& registry);
         explicit SceneNode(entt::registry& registry, std::string  name);
         virtual ~SceneNode();
+
+        void AcceptReflector(IReflector& reflector);
 
         void Destroy();
 

@@ -26,6 +26,9 @@ NXS_NAMESPACE
         explicit DirectionalLight(entt::registry& registry, std::string  name);
         ~DirectionalLight() override = default;
 
+        IMPLEMENT_REFLECTION(DirectionalLight);
+        void AcceptReflector(IReflector& reflector);
+
         LightProperties& Properties() override
         {
             return GetComponent<DirectLightComponent>().properties;
@@ -53,6 +56,9 @@ NXS_NAMESPACE
         explicit PointLight(entt::registry& registry);
         explicit PointLight(entt::registry& registry, std::string  name);
         ~PointLight() override = default;
+
+        IMPLEMENT_REFLECTION(PointLight);
+        void AcceptReflector(IReflector& reflector);
 
         LightProperties& Properties() override
         {

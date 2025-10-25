@@ -19,6 +19,9 @@ NXS_NAMESPACE
         explicit Camera(entt::registry& registry);
         explicit Camera(entt::registry& registry, const std::string& name);
 
+        IMPLEMENT_REFLECTION(Camera);
+        void AcceptReflector(IReflector& reflector);
+
         CameraProperties& Properties() { return GetComponent<CameraProperties>(); }
         const CameraProperties& Properties() const { return GetComponent<CameraProperties>(); }
 

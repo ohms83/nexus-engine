@@ -29,6 +29,24 @@ SceneNode::~SceneNode()
     m_id = InvalidID;
 }
 
+void SceneNode::Destroy()
+{
+    // TODO: With how the scene nodes are passed around as shared pointers, there's no
+    // effective way to implement this yet. We need to implement a new memory management first.
+    NXS_ASSERT(false);
+}
+
+void SceneNode::AcceptReflector(IReflector& reflector)
+{
+    reflector.ChangeCatetory("Properties");
+
+    auto& comp = GetComponent<SceneNodeComponent>();
+    reflector.VisitPropertyWithFeedback("Name", typeid(std::string), (void*)(comp.name.c_str()), [&comp](void* newValue) {
+        comp.name = CAST<const char*>(newValue);
+    });
+    reflector.VisitProperty("Active", typeid(bool), (void*)&comp.active);
+}
+
 void SceneNode::Activate(const bool activate)
 {
     if (IsActive() != activate)

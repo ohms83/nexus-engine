@@ -2,13 +2,14 @@
 
 #include "EditorWidget.h"
 #include "nexus/scene/SceneNode.h"
+#include "nexus/core/Reflection.h"
 
 NXS_NAMESPACE
 {
     class SceneManager;
     class Scene;
 
-    class PropertyWindow : public EditorWidget
+    class PropertyWindow : public EditorWidget, public IReflector
     {
     public:
         explicit PropertyWindow(SceneManager& sceneManager);
@@ -18,6 +19,9 @@ NXS_NAMESPACE
 
         void Draw(RenderSystem& renderSystem);
         virtual void Update() {}
+        
+        void ChangeCatetory(const std::string& name) override;
+        void VisitPropertyWithFeedback(const std::string& name, std::type_index type, void* value, std::function<void(void*)> callback) override;
 
     protected:
         void Draw_Internal(RenderSystem& renderSystem) override;

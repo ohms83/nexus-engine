@@ -54,6 +54,37 @@ glm::mat4 Camera::GetViewMtx() const
 
 void Camera::LookAt(const glm::vec3 &center, const glm::vec3 &up)
 {
-    // Orient().quat = glm::quatLookAt(glm::normalize(center - Position().value), up);
     Orient().LookAt(Position().value, center, up);
+}
+
+void Camera::AcceptReflector(IReflector& reflector)
+{
+    SceneNode::AcceptReflector(reflector);
+
+    reflector.ChangeCatetory("Transform");
+    reflector.VisitProperty("Position", typeid(glm::vec3), &Position().value);
+    reflector.VisitProperty("Orient", typeid(OrientationComponent), &Orient());
+
+    auto& properties = Properties();
+    bool valueChanged = false;
+    auto valueChangeCallback = [&valueChanged](void*) { valueChanged = true; };
+
+    reflector.ChangeCatetory("View Fustrum");
+    reflector.VisitPropertyWithFeedback("FOV", typeid(float), &properties.fov, valueChangeCallback);
+    reflector.VisitPropertyWithFeedback("Near", typeid(float), &properties.nearZ, valueChangeCallback);
+    reflector.VisitPropertyWithFeedback("Far", typeid(float), &properties.farZ, valueChangeCallback);
+    reflector.VisitPropertyWithFeedback("Width", typeid(float), &properties.width, valueChangeCallback);
+    reflector.VisitPropertyWithFeedback("Height", typeid(float), &properties.height, valueChangeCallback);
+
+    if (valueChanged)
+    {
+        if (properties.projectionType == ProjectionType::Perspective)
+        {
+            SetProjection(properties.fov, properties.width, properties.height, properties.nearZ, properties.farZ);
+        }
+        else if (properties.projectionType == ProjectionType::Orthographic)
+        {
+            SetOrthographic(properties.width, properties.height, properties.nearZ, properties.farZ);
+        }
+    }
 }
