@@ -17,7 +17,8 @@ bool Frustum::IsPointInside(const glm::vec3& point) const
 
 bool Frustum::IsSphereInside(const glm::vec3& center, float radius) const
 {
-    NXS_ASSERT(radius > 0);
+    if(radius <= 0) return false;
+
     for (const auto& plane : planes)
     {
         if (glm::dot(plane.normal, center) + plane.distance < -radius) return false;
