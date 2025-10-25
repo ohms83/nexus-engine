@@ -173,7 +173,7 @@ static void GenerateDrawCommands(
 
 void Gizmos::Init(const RenderSystem& renderSystem)
 {
-#define CREATE_BUFFER(gizmo, drawMode) CreateDrawBuffers(renderSystem, s_va->##gizmo##Vertices, s_va->##gizmo##Indices, s_va->##gizmo##VertexBuffer, s_va->##gizmo##IndexBuffer, drawMode)
+#define CREATE_BUFFER(gizmo, drawMode) CreateDrawBuffers(renderSystem, s_va->gizmo##Vertices, s_va->gizmo##Indices, s_va->gizmo##VertexBuffer, s_va->gizmo##IndexBuffer, drawMode)
     CREATE_BUFFER(point, DrawMode::Point);
     CREATE_BUFFER(line, DrawMode::Line);
     // TODO: Use DrawMode::LineStrip
@@ -204,7 +204,7 @@ void Gizmos::Clear()
 void Gizmos::ProcessDraw(RenderSystem& renderSystem, const glm::mat4& cameraMtx)
 {
     rmt_ScopedCPUSample(DrawGizmos, 0);
-#define DRAW_GIZMOS(gizmo) GenerateDrawCommands(renderSystem, cameraMtx, s_va->##gizmo##Vertices, s_va->##gizmo##Indices, s_va->##gizmo##VertexBuffer, s_va->##gizmo##IndexBuffer)
+#define DRAW_GIZMOS(gizmo) GenerateDrawCommands(renderSystem, cameraMtx, s_va->gizmo##Vertices, s_va->gizmo##Indices, s_va->gizmo##VertexBuffer, s_va->gizmo##IndexBuffer)
     DRAW_GIZMOS(point);
     DRAW_GIZMOS(line);
     DRAW_GIZMOS(box);

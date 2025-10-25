@@ -3,6 +3,7 @@
 #include <nexus/NxsCommon.h>
 
 #include <type_traits>
+#include <float.h>
 
 #define NXS_INFINITE 0xFFFFFFFF
 

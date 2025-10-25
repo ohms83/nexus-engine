@@ -117,6 +117,10 @@ target_link_libraries(nexus-engine
     PRIVATE assimp::assimp
 )
 
+if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    target_link_libraries(nexus-engine PRIVATE ws2_32)
+endif()
+
 target_compile_definitions(nexus-engine
     PUBLIC IMGUI_IMPL_OPENGL_LOADER_GLAD
     PUBLIC NXS_PROJECT_PATH="${PROJECT_ROOT}"

@@ -54,7 +54,7 @@ NXS_NAMESPACE
     {
     public:
         /**
-         * @brief And iterator used for iterating over the list of vertices
+         * @brief An iterator used for iterating over the list of vertices
          * 
          * @tparam T Type of vertex. This must have the same memory layout as the data described by
          * the vertex attributes. 

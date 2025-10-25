@@ -5,12 +5,13 @@
 #include "nexus/core/LogDispatcher.h"
 #include "nexus/core/StringUtil.h"
 
+#include <concepts>
+
 USING_NAMESPACE_NXS;
 
 DEFINE_LOG(IniParser);
 
-template<typename T>
-requires std::floating_point
+template<std::floating_point T>
 bool IsDouble(T value)
 {
     return true;

@@ -11,7 +11,7 @@
 
 #include "EditorWidget.h"
 #include "imgui.h"
-#include "core/Logger.h"
+#include "nexus/core/Logger.h"
 #include "sigslot/signal.hpp"
 
 #define CONSOLE_INPUT_BUFFER_SIZE 1024

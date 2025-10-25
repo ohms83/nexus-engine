@@ -2,6 +2,7 @@
 // Created by nutta on 6/28/2025.
 //
 #include "nexus/memory/OwningBuffer.h"
+#include <cstring> // For memcpy
 
 USING_NAMESPACE_NXS;
 
@@ -33,11 +34,11 @@ uint64_t OwningBuffer::CopyData(uint8_t* data, const uint64_t bytes, const uint6
         // Resize the buffer.
         auto newBuffer = std::unique_ptr<uint8_t[]>(new uint8_t[newSize]);
         // Copy the old data (if exists).
-        if (m_buffer) std::memcpy(newBuffer.get(), m_buffer.get(), m_size);
+        if (m_buffer) memcpy(newBuffer.get(), m_buffer.get(), m_size);
         m_buffer = std::move(newBuffer);
         m_size = newSize;
     }
-    std::memcpy(m_buffer.get() + offset, data, bytes);
+    memcpy(m_buffer.get() + offset, data, bytes);
     return bytes;
 }
 

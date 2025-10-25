@@ -18,41 +18,49 @@ static nxs::SceneNode::Id selectedNode = nxs::SceneNode::InvalidID;
 static nxs::Ref<nxs::Camera> InitCamera(nxs::Scene& scene)
 {
     auto camera = scene.CreateNode<nxs::Camera>("Camera Node");
-    camera->Position().value = {0, 5, 5};
-    camera->LookAt({0, 0, 0}, {0, 1, 0});
+    camera->Position().value = {0, 50, 0};
+    camera->LookAt({0, 50, 0}, {0, 50, -10});
     camera->AddComponent<nxs::MoveComponent>(nxs::MoveComponent {
         glm::vec3(0, 0, 0),
-        10
+        100
     });
     return camera;
 }
 
 static void InitLight(nxs::Scene& scene)
 {
-    scene.Ambient() = {0.5, 0.2, 0.2};
+    scene.Ambient() = {0.3, 0.3, 0.3};
 
     {
         auto light = scene.CreateNode<nxs::DirectionalLight>("Direct Light 1");
-        light->Properties().color =  {1, 1, 1};
+        light->Properties().color =  {0.6, 0.6, 0.6};
         light->Direction() = {10, -10, 0};
     }
     {
-        auto light = scene.CreateNode<nxs::PointLight>("Point Light 1");
-        light->Position() = {5, 0, 0};
-        light->PointLightProperties().constant = 0.01f;
+        auto light = scene.CreateNode<nxs::PointLight>("Red Light");
+        light->Position() = {50, 50, 0};
+        
+        auto& pointLight = light->PointLightProperties();
+        pointLight.constant = 0.01f;
+        pointLight.linear = 0.001f;
+        pointLight.quadratic = 0.0001f;
         
         auto& properties = light->Properties();
         properties.color = {1, 0, 0};
-        properties.cutoffRange = 100.f;
+        properties.cutoffRange = 1000.f;
     }
     {
-        auto light = scene.CreateNode<nxs::PointLight>("Point Light 2");
-        light->Position() = {-5, 0, 0};
-        light->PointLightProperties().constant = 0.01f;
+        auto light = scene.CreateNode<nxs::PointLight>("Green Light");
+        light->Position() = {-50, 50, 0};
+        
+        auto& pointLight = light->PointLightProperties();
+        pointLight.constant = 0.01f;
+        pointLight.linear = 0.001f;
+        pointLight.quadratic = 0.0001f;
         
         auto& properties = light->Properties();
         properties.color = {0, 1, 0};
-        properties.cutoffRange = 100.f;
+        properties.cutoffRange = 1000.f;
     }
 }
 
@@ -77,8 +85,7 @@ void NexusEditor::InitModel()
     const auto engine = nxs::Engine::Instance();
     const auto taskScheduler = engine.GetTaskScheduler();
     const auto resourceManager = engine.GetModelManager();
-    const auto assetPath = GetAssetPath("meshes/buddha/buddha.obj");
-    // const auto assetPath = GetAssetPath("meshes/apple/3DApple001_SQ-1K-PNG.obj");
+    const auto assetPath = GetAssetPath("meshes/sponza/sponza.obj");
     auto loadResult = resourceManager->RequestResourceAsync(assetPath, *taskScheduler);
     auto waitingTask = std::make_shared<nxs::IntervalTask>(0, [this, loadResult]() {
         const auto status = loadResult->status;
@@ -117,8 +124,8 @@ bool NexusEditor::Init_Internal()
     scene->SetRenderer(std::make_unique<nxs::BasicSceneRenderer>());
 
     m_camera = InitCamera(*scene);
-    InitModel();
-    InitLight(*scene);
+    // InitModel();
+    // InitLight(*scene);
 
     auto& inputManager = nxs::InputManager::Instance();
     nxs::KeyInputMap cameraMovementKeyInput = {

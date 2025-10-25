@@ -1,4 +1,5 @@
 #include "memory/BorrowBuffer.h"
+#include <cstring> // For memcpy
 
 USING_NAMESPACE_NXS;
 
@@ -27,6 +28,6 @@ uint64_t BorrowBuffer::CopyData(uint8* data, const uint64_t bytes, const uint64_
     // The managed buffer is immutable; therefore, the function can only copy as much as
     // the underlying buffer can hold.
     const auto numCopied = std::min(bytes, m_size - offset);
-    std::memcpy(m_data + offset, data, numCopied);
+    memcpy(m_data + offset, data, numCopied);
     return numCopied;
 }

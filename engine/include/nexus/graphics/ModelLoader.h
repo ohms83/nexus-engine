@@ -13,6 +13,8 @@
 #include "TextureManager.h"
 #include "MaterialManager.h"
 
+#include <filesystem>
+
 NXS_NAMESPACE
 {
     class ModelLoader final : public IResourceLoader
