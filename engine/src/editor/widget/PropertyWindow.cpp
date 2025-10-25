@@ -67,7 +67,7 @@ void PropertyWindow::VisitPropertyWithFeedback(const std::string& name, std::typ
     }
     else if (type == typeid(float))
     {
-        if (ImGui::InputFloat(c_name, (float*)value)) callback(value);
+        if (ImGui::InputFloat(c_name, (float*)value, 0, 0, "%.6f")) callback(value);
     }
     else if (type == typeid(glm::vec2))
     {
