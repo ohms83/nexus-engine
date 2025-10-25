@@ -180,7 +180,6 @@ NXS_NAMESPACE
             {
                 if (result->status == IResourceLoader::LoadResult::Status::Ready)
                 {
-                    std::lock_guard<std::mutex> lock1(mutex);
                     loadingResources.erase(std::ranges::find(loadingResources, result));
                     return false;
                 }
