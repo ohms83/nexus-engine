@@ -19,7 +19,8 @@ static nxs::Ref<nxs::Camera> InitCamera(nxs::Scene& scene)
 {
     auto camera = scene.CreateNode<nxs::Camera>("Camera Node");
     camera->Position().value = {0, 50, 0};
-    camera->LookAt({0, 50, 0}, {0, 50, -10});
+    camera->LookAt({0, 50, -10}, {0, 1, 0});
+    camera->Properties().farZ = 10000.f;
     camera->AddComponent<nxs::MoveComponent>(nxs::MoveComponent {
         glm::vec3(0, 0, 0),
         100
@@ -29,11 +30,11 @@ static nxs::Ref<nxs::Camera> InitCamera(nxs::Scene& scene)
 
 static void InitLight(nxs::Scene& scene)
 {
-    scene.Ambient() = {0.3, 0.3, 0.3};
+    scene.Ambient() = {0.5, 0.5, 0.5};
 
     {
         auto light = scene.CreateNode<nxs::DirectionalLight>("Direct Light 1");
-        light->Properties().color =  {0.6, 0.6, 0.6};
+        light->Properties().color =  {1, 1, 1};
         light->Direction() = {10, -10, 0};
     }
     {
@@ -42,8 +43,8 @@ static void InitLight(nxs::Scene& scene)
         
         auto& pointLight = light->PointLightProperties();
         pointLight.constant = 0.01f;
-        pointLight.linear = 0.001f;
-        pointLight.quadratic = 0.0001f;
+        pointLight.linear = 0.0005f;
+        pointLight.quadratic = 0.00001f;
         
         auto& properties = light->Properties();
         properties.color = {1, 0, 0};
@@ -55,8 +56,8 @@ static void InitLight(nxs::Scene& scene)
         
         auto& pointLight = light->PointLightProperties();
         pointLight.constant = 0.01f;
-        pointLight.linear = 0.001f;
-        pointLight.quadratic = 0.0001f;
+        pointLight.linear = 0.0005f;
+        pointLight.quadratic = 0.00001f;
         
         auto& properties = light->Properties();
         properties.color = {0, 1, 0};
@@ -97,7 +98,6 @@ void NexusEditor::InitModel()
             auto node = scene->CreateNode<nxs::SceneNode3D>("Model");
             auto model = PTR_CAST<nxs::Model>(loadResult->resource);
             node->AddComponent<nxs::ModelComponent>().model = model;
-            node->Position().Translate(-model->GetBoundingSphere().center * node->Scale().value);
             return false;
         }
         else if (status == nxs::IResourceLoader::LoadResult::Status::Failed)
@@ -124,8 +124,8 @@ bool NexusEditor::Init_Internal()
     scene->SetRenderer(std::make_unique<nxs::BasicSceneRenderer>());
 
     m_camera = InitCamera(*scene);
-    // InitModel();
-    // InitLight(*scene);
+    InitModel();
+    InitLight(*scene);
 
     auto& inputManager = nxs::InputManager::Instance();
     nxs::KeyInputMap cameraMovementKeyInput = {
@@ -207,7 +207,13 @@ void NexusEditor::OnKeyUp(const SDL_Keycode key)
 void NexusEditor::OnResize(const glm::ivec2& screenSize, const glm::ivec2& actualSize)
 {
     Application::OnResize(screenSize, actualSize);
-    m_camera->SetProjection(45.f, CAST<float>(actualSize.x), CAST<float>(actualSize.y), 0.1f, 100.f);
+    auto& properties = m_camera->Properties();
+    m_camera->SetProjection(
+        45.f,
+        CAST<float>(actualSize.x),
+        CAST<float>(actualSize.y),
+        properties.nearZ,
+        properties.farZ);
 }
 
 void NexusEditor::Update()
