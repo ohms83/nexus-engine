@@ -10,13 +10,12 @@
 #include "graphics/RenderSystem.h"
 #include "graphics/RenderCommand.h"
 #include "geom/Frustum.h"
-#include "ecs/component/graphics/RenderComponent.h"
-#include "ecs/component/graphics/ModelComponent.h"
 #include "ecs/Ecs.h"
 #include "math/Math.h"
 #include "math/Matrix.h"
 #include "scene/component/CameraProperties.h"
 #include "scene/component/LightComponent.h"
+#include "scene/component/ModelComponent.h"
 #include "scene/component/SceneNodeComponent.h"
 #include "scene/component/TransformComponent.h"
 
@@ -96,20 +95,6 @@ static void SetPointLightParams(RenderCommand& command, const entt::registry& re
     command.uniformInts.emplace_back("_NumPointLight", numLight);
 }
 
-static void SetTextureParams(RenderCommand& command, const entt::registry& registry, const entt::entity& entity)
-{
-    rmt_ScopedCPUSample(SceneRenderer_SetTextureParams, 0);
-    if (const auto textureComponent = registry.try_get<DiffuseMapComponent>(entity))
-    {
-        auto& textures = textureComponent->textures;
-        for (int i = 0; i < textures.size(); i++)
-        {
-            auto texture = textures[i];
-            command.uniform2DTextures.emplace_back("_DiffuseMap", i, texture);
-        }
-    }
-}
-
 void BasicSceneRenderer::Render(RenderSystem& renderSystem, const entt::registry& registry)
 {
     // ReSharper disable once CppTooWideScopeInitStatement
@@ -154,7 +139,6 @@ void BasicSceneRenderer::Render(RenderSystem& renderSystem, const entt::registry
                     SetAmbientLightParams(command, registry);
                     SetDirectLightParams(command, registry);
                     SetPointLightParams(command, registry);
-                    SetTextureParams(command, registry, entity);
 
                     renderSystem.RegisterDrawCommand(command);
                 }
