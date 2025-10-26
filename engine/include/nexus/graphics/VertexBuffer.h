@@ -60,9 +60,15 @@ NXS_NAMESPACE
          * the vertex attributes. 
          */
         template<class T>
-        class Iterator : public std::iterator<std::forward_iterator_tag, T>
+        class Iterator
         {
         public:
+            using iterator_category = std::forward_iterator_tag;
+            using value_type = T;
+            using difference_type = std::ptrdiff_t;
+            using pointer = T*;
+            using reference = T&;
+
             explicit Iterator(const VertexBuffer& vertexBuffer)
             {
                 m_current = R_CAST<T*>(vertexBuffer.m_vertices->Data());
