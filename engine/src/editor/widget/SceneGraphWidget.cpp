@@ -24,15 +24,7 @@ SceneNode::Id SceneGraphWidget::GetSelectedNode() const
 
 void SceneGraphWidget::Draw_Internal(RenderSystem& renderSystem)
 {
-    bool treeNodeClicked = false;
-
-    SceneNode::ChildList rootNodes;
-    m_scene->GetAllRootNodes(rootNodes);
-    for (const auto node : rootNodes)
-    {
-        DrawSceneNode(node);
-    }
-
+    DrawSceneNode(m_scene);
     ShowContextMenu();
 }
 
@@ -78,7 +70,7 @@ void SceneGraphWidget::DrawSceneNode(Ref<SceneNode> node)
 void SceneGraphWidget::DeleteNode(Ref<SceneNode> node)
 {
     if (!node) return;
-    m_scene->RemoveNode(node);
+    m_scene->RemoveChild(node);
 }
 
 void SceneGraphWidget::HandleInput(Ref<SceneNode> node)

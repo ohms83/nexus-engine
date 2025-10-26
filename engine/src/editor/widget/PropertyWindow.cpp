@@ -28,7 +28,7 @@ void PropertyWindow::Draw_Internal(RenderSystem& renderSystem)
 {
     if (m_sceneNodeId == SceneNode::InvalidID || !m_currentScene) return;
 
-    auto selectedNode = m_currentScene->FindNode(m_sceneNodeId);
+    auto selectedNode = m_currentScene->GetId() == m_sceneNodeId ? m_currentScene : m_currentScene->FindNode(m_sceneNodeId);
     if (!selectedNode)
     {
         m_sceneNodeId = SceneNode::InvalidID;

@@ -12,7 +12,7 @@ protected:
     void SetUp() override {
         scheduler = std::make_shared<TaskScheduler>(std::make_shared<StandardTimeSource>());
 
-        scene = std::make_unique<Scene>();
+        scene = std::make_unique<Scene>("Test Scene");
         scene->SetTaskScheduler(scheduler);
     }
 
@@ -29,7 +29,7 @@ TEST_F(SceneNodeTest, AddNode)
     auto emptyNode = scene->FindNodeWithName(name);
     EXPECT_EQ(emptyNode, nullptr);
 
-    auto node = scene->CreateNode<SceneNode3D>(name);
+    auto node = scene->EmplaceChild<SceneNode3D>(name);
     EXPECT_NE(node, nullptr);
     EXPECT_EQ(node->GetName(), name);
 }
@@ -38,12 +38,12 @@ TEST_F(SceneNodeTest, RemoveNode)
 {
     const std::string name = "Test Node";
 
-    auto node = scene->CreateNode<SceneNode>(name);
+    auto node = scene->EmplaceChild<SceneNode>(name);
     EXPECT_NE(node, nullptr);
     EXPECT_EQ(node->GetName(), name);
     EXPECT_NE(scene->FindNodeWithName(name), nullptr);
 
-    scene->RemoveNode(node);
+    scene->RemoveChild(node);
     // The node shouldn't have been removed yet.
     EXPECT_NE(scene->FindNodeWithName(name), nullptr);
 
@@ -58,7 +58,7 @@ TEST_F(SceneNodeTest, DanglingReferences)
     const auto name1 = "Node 1";
     const auto name2 = "Node 2";
 
-    entt::registry registry;
+    auto registry = std::make_shared<entt::registry>();
     auto node1 = std::make_shared<SceneNode>(registry, name1);
     auto node2 = std::make_shared<SceneNode>(registry, name2);
     

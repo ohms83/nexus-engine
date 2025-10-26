@@ -7,13 +7,13 @@ USING_NAMESPACE_NXS;
 
 #define DEFAULT_CUTOFF 10.f
 
-DirectionalLight::DirectionalLight(entt::registry& registry)
+DirectionalLight::DirectionalLight(Ref<entt::registry>  registry)
     : SceneNode(registry)
 {
     AddComponent<DirectLightComponent>();
 }
 
-DirectionalLight::DirectionalLight(entt::registry& registry, std::string name)
+DirectionalLight::DirectionalLight(Ref<entt::registry>  registry, std::string name)
     : SceneNode(registry, name)
 {
     AddComponent<DirectLightComponent>();
@@ -33,14 +33,14 @@ void DirectionalLight::AcceptReflector(IReflector& reflector)
     reflector.VisitProperty("Direction", typeid(glm::vec3), &Direction());
 }
 
-PointLight::PointLight(entt::registry& registry)
+PointLight::PointLight(Ref<entt::registry>  registry)
     : SceneNode(registry)
 {
     auto [lightComp, position] = AddComponents<PointLightComponent, PositionComponent>();
     lightComp.properties.cutoffRange = DEFAULT_CUTOFF;
 }
 
-PointLight::PointLight(entt::registry& registry, std::string name)
+PointLight::PointLight(Ref<entt::registry>  registry, std::string name)
     : SceneNode(registry, name)
 {
     auto [lightComp, position] = AddComponents<PointLightComponent, PositionComponent>();

@@ -2,13 +2,13 @@
 
 USING_NAMESPACE_NXS;
 
-SceneNode3D::SceneNode3D(entt::registry &registry)
+SceneNode3D::SceneNode3D(Ref<entt::registry> registry)
     : SceneNode(registry)
 {
     AddComponents<PositionComponent, OrientationComponent, ScaleComponent>();
 }
 
-SceneNode3D::SceneNode3D(entt::registry &registry, std::string name)
+SceneNode3D::SceneNode3D(Ref<entt::registry> registry, std::string name)
     : SceneNode(registry, name)
 {
     AddComponents<PositionComponent, OrientationComponent, ScaleComponent>();

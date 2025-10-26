@@ -17,7 +17,7 @@ static nxs::SceneNode::Id selectedNode = nxs::SceneNode::InvalidID;
 
 static nxs::Ref<nxs::Camera> InitCamera(nxs::Scene& scene)
 {
-    auto camera = scene.CreateNode<nxs::Camera>("Camera Node");
+    auto camera = scene.EmplaceChild<nxs::Camera>("Camera Node");
     camera->Position().value = {0, 50, 0};
     camera->LookAt({0, 50, -10}, {0, 1, 0});
     camera->Properties().farZ = 10000.f;
@@ -33,32 +33,32 @@ static void InitLight(nxs::Scene& scene)
     scene.Ambient() = {0.5, 0.5, 0.5};
 
     {
-        auto light = scene.CreateNode<nxs::DirectionalLight>("Direct Light 1");
+        auto light = scene.EmplaceChild<nxs::DirectionalLight>("Direct Light 1");
         light->Properties().color =  {1, 1, 1};
         light->Direction() = {10, -10, 0};
     }
     {
-        auto light = scene.CreateNode<nxs::PointLight>("Red Light");
+        auto light = scene.EmplaceChild<nxs::PointLight>("Red Light");
         light->Position() = {50, 50, 0};
-        
+
         auto& pointLight = light->PointLightProperties();
         pointLight.constant = 0.01f;
         pointLight.linear = 0.0005f;
         pointLight.quadratic = 0.00001f;
-        
+
         auto& properties = light->Properties();
         properties.color = {1, 0, 0};
         properties.cutoffRange = 1000.f;
     }
     {
-        auto light = scene.CreateNode<nxs::PointLight>("Green Light");
+        auto light = scene.EmplaceChild<nxs::PointLight>("Green Light");
         light->Position() = {-50, 50, 0};
-        
+
         auto& pointLight = light->PointLightProperties();
         pointLight.constant = 0.01f;
         pointLight.linear = 0.0005f;
         pointLight.quadratic = 0.00001f;
-        
+
         auto& properties = light->Properties();
         properties.color = {0, 1, 0};
         properties.cutoffRange = 1000.f;
@@ -95,7 +95,7 @@ void NexusEditor::InitModel()
             LOG_INFO(LogTemp, std::format("Finished loading model {}", loadResult->path));
 
             auto scene = nxs::Engine::Instance().GetSceneManager()->GetCurrentScene();
-            auto node = scene->CreateNode<nxs::SceneNode3D>("Model");
+            auto node = scene->EmplaceChild<nxs::SceneNode3D>("Model");
             auto model = PTR_CAST<nxs::Model>(loadResult->resource);
             node->AddComponent<nxs::ModelComponent>().model = model;
             return false;
@@ -160,7 +160,7 @@ bool NexusEditor::Init_Internal()
 
     const auto toolsMenuName = "Tools";
     auto& menu = m_editor->GetMenu();
-    
+
     menu.AddMenuItem(toolsMenuName,
         std::make_shared<nxs::WidgetMenuItem> (
             0,
@@ -220,7 +220,7 @@ void NexusEditor::Update()
 {
     Application::Update();
 
-    auto& inputManager = nxs::InputManager::Instance();
+    const auto& inputManager = nxs::InputManager::Instance();
 
     glm::vec3 translation = inputManager.GetAxisValue("movement");
 

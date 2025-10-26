@@ -2,6 +2,7 @@
 
 #include "scene/SceneNode.h"
 #include "core/LogDispatcher.h"
+#include "core/task/OneshotTask.h"
 
 USING_NAMESPACE_NXS;
 
@@ -10,14 +11,14 @@ DEFINE_LOG(SceneNode);
 static uint64_t s_runningId = 0;
 const uint64_t SceneNode::InvalidID = 0;
 
-SceneNode::SceneNode(entt::registry& registry)
+SceneNode::SceneNode(Ref<entt::registry> registry)
     : Entity(registry)
     , m_id(++s_runningId)
 {
     AddComponent<SceneNodeComponent>();
 }
 
-SceneNode::SceneNode(entt::registry& registry, std::string name)
+SceneNode::SceneNode(Ref<entt::registry> registry, std::string name)
     : Entity(registry)
     , m_id(++s_runningId)
 {
@@ -27,6 +28,7 @@ SceneNode::SceneNode(entt::registry& registry, std::string name)
 SceneNode::~SceneNode()
 {
     m_id = InvalidID;
+    OnDestroy();
 }
 
 void SceneNode::Destroy()
@@ -63,13 +65,28 @@ void SceneNode::AddChild(Ref<SceneNode> child)
     m_children.push_back(child);
 }
 
-void SceneNode::RemoveChild(Ref<SceneNode> child)
+void SceneNode::RemoveChild(Ref<SceneNode> node)
 {
-    if (auto itr = std::ranges::find(m_children, child); itr != m_children.end())
+    if (IsShuttingDown() || !node) return;
+ 
+    if (!m_scheduler)
     {
-        child->m_parent = nullptr;
-        m_children.erase(itr);
+        LOG_WARNING(LogSceneNode, std::format("Unable to remove the node={}. Reason=The task scheduler is invalid.", node->GetName()));
+        return;
     }
+
+    m_scheduler->ScheduleTask(std::make_shared<OneshotTask>([this, node]() {
+        SceneNode::ChildList nodeList;
+        node->GetAllChildren(nodeList);
+
+        for (auto descendant : nodeList)
+        {
+            descendant->RemoveFromParent();
+            AddChild(descendant);
+        }
+
+        std::erase(m_children, node);
+    }), TaskScheduler::UpdatePhase::PostUpdate);
 }
 
 void SceneNode::GetAllChildren(ChildList& childrenList) const
@@ -86,6 +103,30 @@ void SceneNode::GetAllDescendants(ChildList& childrenList, bool parentFirst) con
 
         child->GetAllDescendants(childrenList, parentFirst);
     }
+}
+
+Ref<SceneNode> SceneNode::FindNode(const SceneNode::Id id)
+{
+    if (IsShuttingDown()) return nullptr;
+
+    const auto node = std::ranges::find_if(m_children, [&id](const Ref<SceneNode>& n)
+    {
+        return n->GetId() == id;
+    });
+
+    return node != m_children.end() ? *node : nullptr;
+}
+
+Ref<SceneNode> SceneNode::FindNodeWithName(const std::string& name)
+{
+    if (IsShuttingDown()) return nullptr;
+
+    const auto node = std::ranges::find_if(m_children, [&name](const Ref<SceneNode>& n)
+    {
+        return n->GetName() == name;
+    });
+
+    return node != m_children.end() ? *node : nullptr;
 }
 
 void SceneNode::RemoveFromParent()
@@ -116,5 +157,28 @@ void SceneNode::Update(float dt)
         script->Update(dt);
     });
 
+    auto& registry = *GetRegistry();
+    std::ranges::for_each(m_simulations, [dt, &registry](Simulation& sim) {
+        sim.system(registry, dt);
+    });
+    
+    std::ranges::for_each(m_children, [dt](Ref<SceneNode> node) {
+        node->Update(dt);
+    });
+
     OnUpdate(dt);
+}
+
+uint32_t SceneNode::AddSimulation(ECS::SimulationSystem system)
+{
+    static uint32_t runningNumber = 0;
+    m_simulations.push_back({ runningNumber, system });
+    return runningNumber++;
+}
+
+void SceneNode::RemoveSimulation(uint32_t id)
+{
+    if (auto itr = std::ranges::find(m_simulations, id, &Simulation::id); itr != m_simulations.end()) {
+        m_simulations.erase(itr);
+    }
 }

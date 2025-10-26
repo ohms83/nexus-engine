@@ -24,10 +24,10 @@ NXS_NAMESPACE
          * @brief Constructs an Entity and automatically creates a new entt::entity handle.
          * @param registry Reference to the entt::registry instance that owns this entity.
          */
-        explicit Entity(entt::registry& registry)
+        explicit Entity(Ref<entt::registry> registry)
             : m_registry(registry)
         {
-            m_entity = registry.create();
+            m_entity = registry->create();
         }
 
         /**
@@ -36,14 +36,14 @@ NXS_NAMESPACE
          */
         virtual ~Entity()
         {
-            m_registry.destroy(m_entity);
+             m_registry->destroy(m_entity);
         }
 
         /**
          * @brief Gets a reference to the entt::registry that owns this entity.
          * @return Reference to the owning entt::registry.
          */
-        entt::registry& GetRegistry() const
+        Ref<entt::registry> GetRegistry() const
         {
             return m_registry;
         }
@@ -67,7 +67,7 @@ NXS_NAMESPACE
         template<typename Type, typename... Args>
         MAYBE_UNUSED decltype(auto) AddComponent(Args &&...args)
         {
-            return m_registry.emplace<Type>(m_entity, std::forward<Args>(args)...);
+            return  m_registry->emplace<Type>(m_entity, std::forward<Args>(args)...);
         }
 
         /**
@@ -82,10 +82,10 @@ NXS_NAMESPACE
         MAYBE_UNUSED decltype(auto) AddComponents()
         {
             if constexpr(sizeof...(Types) == 1u) {
-                return (m_registry.emplace<Types>(m_entity), ...);
+                return ( m_registry->emplace<Types>(m_entity), ...);
             }
             else {
-                return std::forward_as_tuple(m_registry.emplace<Types>(m_entity)...);
+                return std::forward_as_tuple( m_registry->emplace<Types>(m_entity)...);
             }
         }
 
@@ -103,7 +103,7 @@ NXS_NAMESPACE
         template<typename... Types>
         NODISCARD decltype(auto) GetComponent() const
         {
-            return m_registry.get<Types...>(m_entity);
+            return  m_registry->get<Types...>(m_entity);
         }
 
         /**
@@ -117,7 +117,7 @@ NXS_NAMESPACE
         template<typename... Type>
         NODISCARD auto TryGetComponent() const
         {
-            return m_registry.try_get<Type...>(m_entity);
+            return  m_registry->try_get<Type...>(m_entity);
         }
 
         /**
@@ -129,7 +129,7 @@ NXS_NAMESPACE
         template<typename Type>
         MAYBE_UNUSED size_t RemoveComponent()
         {
-            return m_registry.remove<Type>(m_entity);
+            return  m_registry->remove<Type>(m_entity);
         }
 
     protected:
@@ -142,6 +142,6 @@ NXS_NAMESPACE
         /**
          * @brief Reference to the entity component registry that owns the entity.
          */
-        entt::registry& m_registry;
+        Ref<entt::registry> m_registry;
     };
 }

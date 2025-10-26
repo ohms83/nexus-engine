@@ -47,7 +47,7 @@ public:
             if (m_loadedModel->status != nxs::IResourceLoader::LoadResult::Status::Ready) return;
         }
 
-        auto& modelComp = m_scene.FindNodeWithName("Model")->GetComponent<nxs::ModelComponent>();
+        auto& modelComp = m_scene->FindNodeWithName("Model")->GetComponent<nxs::ModelComponent>();
         modelComp.model = PTR_CAST<nxs::Model>(m_loadedModels[selectedModel]->resource);
         m_finishLoading = true;
     }
@@ -59,7 +59,7 @@ public:
         m_euler.x += euler.x;
         m_euler.y += euler.y;
 
-        auto modelNode = PTR_CAST<nxs::SceneNode3D>(m_scene.FindNodeWithName("Model"));
+        auto modelNode = PTR_CAST<nxs::SceneNode3D>(m_scene->FindNodeWithName("Model"));
         modelNode->Orient().quat = glm::mat4_cast(glm::quat(glm::radians(m_euler)));
         modelNode->Scale().value = modelScales[selectedModel] * scale;
 
@@ -82,7 +82,7 @@ public:
             }
         }
 
-        m_scene.Render(renderSystem);
+        m_scene->Render(renderSystem);
     }
 
     void DrawUI() override
@@ -102,7 +102,7 @@ public:
 
                         if (m_loadedModels[n]->status == nxs::IResourceLoader::LoadResult::Status::Ready)
                         {
-                            auto& modelComp = m_scene.FindNodeWithName("Model")->GetComponent<nxs::ModelComponent>();
+                            auto& modelComp = m_scene->FindNodeWithName("Model")->GetComponent<nxs::ModelComponent>();
                             modelComp.model = PTR_CAST<nxs::Model>(m_loadedModels[n]->resource);
                         }
                     }
@@ -125,7 +125,7 @@ public:
                 ImGui::SliderFloat("AO Factor", &m_aoFactor, 0.0f, 1.0f);
                 ImGui::TreePop();
 
-                m_scene.Ambient() = m_ambient;
+                m_scene->Ambient() = m_ambient;
             }
 
             if (ImGui::TreeNode("Directional"))
@@ -170,6 +170,8 @@ protected:
             engine.GetMaterialManager()
         );
 
+        m_scene = std::make_unique<nxs::Scene>("Main Scene");
+
         InitScene();
         InitLights();
 
@@ -193,14 +195,14 @@ protected:
         m_camera.width = FLOAT_CAST(screenSize.x);
         m_camera.height = FLOAT_CAST(screenSize.y);
 
-        auto camera = PTR_CAST<nxs::Camera>(m_scene.FindNodeWithName("Camera"));
+        auto camera = PTR_CAST<nxs::Camera>(m_scene->FindNodeWithName("Camera"));
         camera->SetProjection(m_camera.fov, m_camera.width, m_camera.height, m_camera.nearZ, m_camera.farZ);
     }
 
 private:
     void InitScene()
     {
-        auto camera = m_scene.CreateNode<nxs::Camera>("Camera");
+        auto camera = m_scene->EmplaceChild<nxs::Camera>("Camera");
         camera->Position().value = {0, 0, 5};
         camera->LookAt(glm::vec3(0), glm::vec3(0, 0, 0));
 
@@ -210,11 +212,11 @@ private:
             m_loadedModels.emplace_back(LoadModel(i));
         }
 
-        auto node = m_scene.CreateNode<nxs::SceneNode3D>("Model");
+        auto node = m_scene->EmplaceChild<nxs::SceneNode3D>("Model");
         node->AddComponent<nxs::ModelComponent>();
         node->Scale().value = modelScales[0];
 
-        m_scene.SetRenderer(std::make_unique<nxs::BasicSceneRenderer>());
+        m_scene->SetRenderer(std::make_unique<nxs::BasicSceneRenderer>());
     }
 
     MAYBE_UNUSED nxs::Ref<nxs::IResourceLoader::LoadResult> LoadModel(const int index)
@@ -237,16 +239,16 @@ private:
 
     void InitLights()
     {
-        m_scene.Ambient() = {0.5f, 0.5f, 0.5f};
+        m_scene->Ambient() = {0.5f, 0.5f, 0.5f};
 
         {
-            auto light = m_scene.CreateNode<nxs::DirectionalLight>("Direct Light 1");
+            auto light = m_scene->EmplaceChild<nxs::DirectionalLight>("Direct Light 1");
             light->Properties().color =  {1, 1, 1};
             light->Direction() = {10, -10, 0};
             m_directionalLight = light;
         }
         {
-            auto light = m_scene.CreateNode<nxs::PointLight>("Point Light 1");
+            auto light = m_scene->EmplaceChild<nxs::PointLight>("Point Light 1");
             light->Position() = {5, 0, 0};
             light->PointLightProperties().constant = 0.01f;
             
@@ -257,7 +259,7 @@ private:
             m_pointLights[0] = light;
         }
         {
-            auto light = m_scene.CreateNode<nxs::PointLight>("Point Light 2");
+            auto light = m_scene->EmplaceChild<nxs::PointLight>("Point Light 2");
             light->Position() = {-5, 0, 0};
             light->PointLightProperties().constant = 0.01f;
             
@@ -270,7 +272,7 @@ private:
     }
 
 protected:
-    nxs::Scene m_scene;
+    nxs::Ptr<nxs::Scene> m_scene;
     nxs::Transform m_cubeTransform;
     nxs::CameraProperties m_camera;
     nxs::Ref<nxs::PointLight> m_pointLights[2] {};

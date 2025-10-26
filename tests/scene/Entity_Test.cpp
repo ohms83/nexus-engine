@@ -13,7 +13,12 @@ struct Health { int value; };
 class EntityTest : public ::testing::Test {
 protected:
     // We use a clean registry for each test case
-    entt::registry registry;
+    Ref<entt::registry> registry;
+    
+    void SetUp() override
+    {
+        registry = std::make_shared<entt::registry>();
+    }
 };
 
 // ===================================================================
@@ -29,13 +34,13 @@ TEST_F(EntityTest, ConstructionAndDestruction) {
         initial_entity = entity.GetHandle();
         
         // Check if the entity handle is valid
-        ASSERT_TRUE(registry.valid(initial_entity));
+        ASSERT_TRUE(registry->valid(initial_entity));
         
         // Test 2: GetRegistry - should return the correct registry
-        ASSERT_EQ(&registry, &entity.GetRegistry());
+        ASSERT_EQ(registry, entity.GetRegistry());
     }
     // Test 3: Destruction - entity should be destroyed upon scope exit
-    ASSERT_FALSE(registry.valid(initial_entity));
+    ASSERT_FALSE(registry->valid(initial_entity));
 }
 
 TEST_F(EntityTest, DeletedDefaultConstructor) {
@@ -56,7 +61,7 @@ TEST_F(EntityTest, AddComponent_Single_ParameterizedCtor) {
     Health& health = entity.AddComponent<Health>(100);
     
     // Check if the component exists and its value is correct
-    ASSERT_TRUE(registry.all_of<Health>(entity.GetHandle()));
+    ASSERT_TRUE(registry->all_of<Health>(entity.GetHandle()));
     ASSERT_EQ(health.value, 100);
 }
 
@@ -81,7 +86,7 @@ TEST_F(EntityTest, AddComponents_SingleType_ReturnsReference) {
     Position& pos = entity.AddComponents<Position>();
     
     // Check if the component exists and the return type is correct
-    ASSERT_TRUE(registry.all_of<Position>(entity.GetHandle()));
+    ASSERT_TRUE(registry->all_of<Position>(entity.GetHandle()));
     ASSERT_FLOAT_EQ(pos.x, 0.0f);
     
     static_assert(std::is_same_v<decltype(pos), Position&>, "Return type must be a single reference.");
@@ -95,7 +100,7 @@ TEST_F(EntityTest, AddComponents_MultipleTypes_ReturnsTuple) {
     auto components = entity.AddComponents<Position, Velocity, Health>();
     
     // Check if all components exist
-    const bool all_exist = registry.all_of<Position, Velocity, Health>(entity.GetHandle());
+    const bool all_exist = registry->all_of<Position, Velocity, Health>(entity.GetHandle());
     EXPECT_TRUE(all_exist);
 
     // Check if the return type is a tuple of references
@@ -192,14 +197,14 @@ TEST_F(EntityTest, RemoveExistingComponent) {
     entity.AddComponent<Position>();
     
     // Check existence before removal
-    ASSERT_TRUE(registry.all_of<Position>(entity.GetHandle()));
+    ASSERT_TRUE(registry->all_of<Position>(entity.GetHandle()));
     
     // Remove the component
     size_t removed_count = entity.RemoveComponent<Position>();
     
     // Check return value and check registry after removal
     ASSERT_EQ(removed_count, 1);
-    ASSERT_FALSE(registry.all_of<Position>(entity.GetHandle()));
+    ASSERT_FALSE(registry->all_of<Position>(entity.GetHandle()));
 }
 
 TEST_F(EntityTest, RemoveNonExistingComponent) {

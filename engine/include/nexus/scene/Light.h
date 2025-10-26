@@ -22,8 +22,8 @@ NXS_NAMESPACE
     class DirectionalLight final : public ILight, public SceneNode
     {
     public:
-        explicit DirectionalLight(entt::registry& registry);
-        explicit DirectionalLight(entt::registry& registry, std::string  name);
+        explicit DirectionalLight(Ref<entt::registry> registry);
+        explicit DirectionalLight(Ref<entt::registry> registry, std::string  name);
         ~DirectionalLight() override = default;
 
         IMPLEMENT_REFLECTION(DirectionalLight);
@@ -53,8 +53,8 @@ NXS_NAMESPACE
     class PointLight final : public ILight, public SceneNode
     {
     public:
-        explicit PointLight(entt::registry& registry);
-        explicit PointLight(entt::registry& registry, std::string  name);
+        explicit PointLight(Ref<entt::registry> registry);
+        explicit PointLight(Ref<entt::registry> registry, std::string  name);
         ~PointLight() override = default;
 
         IMPLEMENT_REFLECTION(PointLight);
