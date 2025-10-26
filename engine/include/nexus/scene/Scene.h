@@ -4,6 +4,7 @@
 #include "nexus/ecs/Ecs.h"
 #include "nexus/graphics/Color.h"
 #include "nexus/core/LogDispatcher.h"
+#include "nexus/core/Reflection.h"
 
 #include "SceneNode.h"
 #include "SceneRenderer.h"
@@ -15,13 +16,18 @@ NXS_NAMESPACE
 {
     class RenderSystem;
     class TaskScheduler;
-
-    class Scene
+    
+    // TODO: Create a new parent class named Node which both Scene and SceneNode inherit from.
+    class Scene : public IReflection
     {
     public:
+        IMPLEMENT_REFLECTION(Scene);
+
         Scene();
         explicit Scene(const std::string& name);
         virtual ~Scene();
+
+        void AcceptReflector(IReflector& reflector);
 
         NODISCARD const std::string& GetName() const { return m_name; }
         void ChangeName(const std::string& name) { m_name = name; }
@@ -98,13 +104,13 @@ NXS_NAMESPACE
         void Init();
 
     protected:
+        entt::entity m_entity;
+
         std::string m_name;
         std::vector<Ref<SceneNode>> m_children;
         Ref<TaskScheduler> m_scheduler;
 
         // --- Rendering ---
-        //! Ambient light.
-        AmbientLightComponent* m_ambientComponent = nullptr;
         Ptr<ISceneRenderer> m_renderer;
 
         // --- ECS ---

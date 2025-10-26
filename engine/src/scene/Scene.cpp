@@ -32,10 +32,16 @@ Scene::~Scene()
     m_simulations.clear();
 }
 
+void Scene::AcceptReflector(IReflector& reflector)
+{
+    reflector.ChangeCatetory("Rendering");
+    reflector.VisitProperty("Ambient Color", typeid(Color3F), &Ambient());
+}
+
 void Scene::Init()
 {
-    auto ambientEntt = m_registry.create();
-    m_ambientComponent = &m_registry.emplace<AmbientLightComponent>(ambientEntt, Color3F::Red);
+    m_entity = m_registry.create();
+    m_registry.emplace<AmbientLightComponent>(m_entity, Color3F::Gray);
 
     AddSimulation(MoveNode);
     AddSimulation(RotateNode);
@@ -159,12 +165,10 @@ void Scene::RemoveSimulation(uint32_t id)
 
 Color3F& Scene::Ambient()
 {
-    NXS_ASSERT(m_ambientComponent);
-    return m_ambientComponent->color;
+    return m_registry.get<AmbientLightComponent>(m_entity).color;
 }
 
 const Color3F& Scene::Ambient() const
 {
-    NXS_ASSERT(m_ambientComponent);
-    return m_ambientComponent->color;
+    return m_registry.get<AmbientLightComponent>(m_entity).color;
 }
