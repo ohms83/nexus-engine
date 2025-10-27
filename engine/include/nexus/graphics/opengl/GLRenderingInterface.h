@@ -31,7 +31,7 @@ NXS_NAMESPACE
 
         void OnResize(uint32_t pixel_w, uint32_t pixel_h) override;
 
-        void SetColorMask(const glm::vec<4, bool, glm::defaultp>& mask) override;
+        void SetColorMask(const glm::bvec4& mask) override;
         void SetDepthMask(bool mask) override;
 
         void SetDepthFunction(DepthFunction depthFunction) override;

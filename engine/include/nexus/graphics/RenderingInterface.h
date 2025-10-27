@@ -5,7 +5,7 @@
 #pragma once
 
 #include <cassert>
-#include <nexus/NxsDefine.h>
+#include "nexus/NxsCommon.h"
 
 #include "Color.h"
 #include "GraphicsConfig.h"
@@ -52,7 +52,7 @@ NXS_NAMESPACE
             return m_graphicsAPI;
         }
 
-        virtual void SetColorMask(const glm::vec<4, bool, glm::defaultp>& mask) = 0;
+        virtual void SetColorMask(const glm::bvec4& mask) = 0;
         virtual void SetDepthMask(bool mask) = 0;
 
         virtual void SetDepthFunction(DepthFunction depthFunction) = 0;

@@ -164,7 +164,7 @@ void GLRenderingInterface::OnResize(const uint32_t pixel_w, const uint32_t pixel
     CALL_GL_FUNC(glViewport(0, 0, INT_CAST(pixel_w), INT_CAST(pixel_h)));
 }
 
-void GLRenderingInterface::SetColorMask(const glm::vec<4, bool, glm::defaultp>& mask)
+void GLRenderingInterface::SetColorMask(const glm::bvec4& mask)
 {
     glColorMask((GLboolean)mask.r, (GLboolean)mask.g, (GLboolean)mask.b, (GLboolean)mask.a);
 }
