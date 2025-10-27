@@ -164,6 +164,16 @@ void GLRenderingInterface::OnResize(const uint32_t pixel_w, const uint32_t pixel
     CALL_GL_FUNC(glViewport(0, 0, INT_CAST(pixel_w), INT_CAST(pixel_h)));
 }
 
+void GLRenderingInterface::SetColorMask(const glm::vec<4, bool, glm::defaultp>& mask)
+{
+    glColorMask((GLboolean)mask.r, (GLboolean)mask.g, (GLboolean)mask.b, (GLboolean)mask.a);
+}
+
+void GLRenderingInterface::SetDepthMask(bool mask)
+{
+    glDepthMask((GLboolean)mask);
+}
+
 void GLRenderingInterface::SetDepthFunction(const DepthFunction depthFunction)
 {
     if (m_depthFunction == depthFunction) return;
@@ -184,6 +194,9 @@ void GLRenderingInterface::SetDepthFunction(const DepthFunction depthFunction)
         break;
     case DepthFunction::LesserOrEqual:
         CALL_GL_FUNC(glDepthFunc(GL_LEQUAL));
+        break;
+    case DepthFunction::Equal:
+        CALL_GL_FUNC(glDepthFunc(GL_EQUAL));
         break;
     case DepthFunction::Greater:
         CALL_GL_FUNC(glDepthFunc(GL_GREATER));
@@ -232,4 +245,23 @@ void GLRenderingInterface::SetFrontFace(FrontFace face)
     Super::SetFrontFace(face);
     const auto gl_face = GL::NxsFrontFaceToGL(face);
     CALL_GL_FUNC(glFrontFace(gl_face));
+}
+
+void GLRenderingInterface::EnableDrawBuffer(DrawBuffer buffer)
+{
+    switch (buffer)
+    {
+    case DrawBuffer::None:
+        glDrawBuffer(GL_NONE);
+        break;
+    case DrawBuffer::Front:
+        glDrawBuffer(GL_FRONT);
+        break;
+    case DrawBuffer::Back:
+        glDrawBuffer(GL_BACK);
+        break;
+    default:
+        NXS_ASSERT(false);
+        break;
+    }
 }

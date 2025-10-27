@@ -10,7 +10,7 @@ NXS_NAMESPACE
 {
     enum class RenderPass
     {
-        //! Depth fill pass
+        //! Depth pre-pass
         DepthFill,
         Opaque,
         AlphaBlend,

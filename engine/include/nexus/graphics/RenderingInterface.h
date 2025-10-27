@@ -52,7 +52,11 @@ NXS_NAMESPACE
             return m_graphicsAPI;
         }
 
+        virtual void SetColorMask(const glm::vec<4, bool, glm::defaultp>& mask) = 0;
+        virtual void SetDepthMask(bool mask) = 0;
+
         virtual void SetDepthFunction(DepthFunction depthFunction) = 0;
+
         virtual void SetLineWidth(float width) = 0;
 
         virtual void SetPolygonMode(PolygonMode mode) { m_polygonMode = mode; }
@@ -66,6 +70,8 @@ NXS_NAMESPACE
 
         NODISCARD Ref<GpuProgram> GetGlobalShader() const { return m_globalShader; }
         void SetGlobalShader(Ref<GpuProgram> shader) { m_globalShader = shader; }
+
+        virtual void EnableDrawBuffer(DrawBuffer buffer) = 0;
 
     protected:
         RenderingInterface() = default;

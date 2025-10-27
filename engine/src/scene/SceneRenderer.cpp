@@ -21,6 +21,31 @@
 
 #include "Remotery.h"
 
+// Shader sources
+static const char* s_depthVertexShader = R"(
+#version 330 core
+layout (location = 0) in vec3 aPos;
+
+uniform mat4 _Model;
+uniform mat4 _View;
+uniform mat4 _Projection;
+
+void main()
+{
+    gl_Position = _Projection * _View * _Model * vec4(aPos, 1.0);
+    gl_Position += 0.1;
+}
+)";
+
+const char* s_depthFragmentShader = R"(
+#version 330 core
+void main()
+{
+    // Do nothing. This shader outputs no color (gl_FragColor is not written), 
+    // but the depth value determined by gl_Position is still written to the depth buffer.
+}
+)";
+
 USING_NAMESPACE_NXS;
 
 DEFINE_LOG(BasicSceneRenderer);
@@ -93,6 +118,14 @@ static void SetPointLightParams(RenderCommand& command, const entt::registry& re
         numLight++;
     }
     command.uniformInts.emplace_back("_NumPointLight", numLight);
+}
+
+BasicSceneRenderer::BasicSceneRenderer(const RenderSystem& renderSystem)
+{
+    Hasher hasher;
+    const auto name = "_DepthShader";
+    m_depthShader = std::make_shared<Shader>(name, hasher.Hash32(name));
+    m_depthShader->CompileFromSource(*renderSystem.GetRenderInterface(), s_depthVertexShader, s_depthFragmentShader);
 }
 
 void BasicSceneRenderer::Render(RenderSystem& renderSystem, const entt::registry& registry)

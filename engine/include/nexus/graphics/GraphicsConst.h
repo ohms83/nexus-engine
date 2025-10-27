@@ -77,6 +77,7 @@ NXS_NAMESPACE
         None,
         Lesser,
         LesserOrEqual,
+        Equal,
         Greater,
         Always,
     };
@@ -126,5 +127,13 @@ NXS_NAMESPACE
         Fill,
         Wireframe,
         Point,
+    };
+
+    enum class DrawBuffer
+    {
+        None,
+        Front,
+        Back,
+        Num,
     };
 }
