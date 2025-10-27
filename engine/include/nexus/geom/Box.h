@@ -8,11 +8,11 @@ NXS_NAMESPACE
     {
         Box() = default;
         explicit Box(const glm::vec3& pos, const glm::vec3& ext)
-            : position(pos)
+            : center(pos)
             , extent(ext)
         {}
 
-        glm::vec3 position;
+        glm::vec3 center;
         glm::vec3 extent;
     };
 }

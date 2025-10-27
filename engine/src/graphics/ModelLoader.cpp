@@ -10,6 +10,8 @@
 #include "assimp/postprocess.h"
 #include "assimp/mesh.h"
 
+#include <glm/vec3.hpp>
+
 #include <filesystem>
 #include <future>
 #include <queue>
@@ -395,26 +397,32 @@ void ModelLoader::ProcessTextures(const Ref<Material>& newMat, const aiMaterial*
 void ModelLoader::ComputeBoundingVolume(const Ref<Model>& model)
 {
     glm::vec3 min{FLT_MAX}, max{FLT_MIN}, center{};
-    for (const auto& mesh : model->GetMeshes())
+    for (auto& mesh : model->GetMeshes())
     {
+        // Mesh's bounding sphere
+        Sphere sphere;
+        // Mesh's min and max bounding box's extent.
+        glm::vec3 min_v{FLT_MAX}, max_v{FLT_MIN};
         const auto vertexBuffer = mesh->GetVertexBuffer();
         const auto numVertex = vertexBuffer->VertexCount();
 
         for (auto vertexItr = vertexBuffer->Begin<Vertex>(); vertexItr != vertexBuffer->End<Vertex>(); ++vertexItr)
         {
             const auto& vertex = *vertexItr;
-            min.x = std::min(min.x, vertex.position.x);
-            min.y = std::min(min.y, vertex.position.y);
-            min.z = std::min(min.z, vertex.position.z);
-
-            max.x = std::max(max.x, vertex.position.x);
-            max.y = std::max(max.y, vertex.position.y);
-            max.z = std::max(max.z, vertex.position.z);
-
-            center += vertex.position / (float)numVertex;
+            min_v = glm::min(min_v, vertex.position);
+            max_v = glm::max(max_v, vertex.position);
         }
+
+        sphere.center = (max_v + min_v) / 2.f;
+        sphere.radius = (max_v - sphere.center).length();
+        mesh->SetSphere(sphere);
+        mesh->SetBox(Box(center, max_v - sphere.center));
+
+        min = glm::min(min_v, min);
+        max = glm::max(max_v, max);
     }
 
+    center = (max + min) / 2.f;
     LOG_DEBUG(LogModelLoader, std::format("center({}, {}, {}) max({}, {}, {}) min({}, {}, {})",
         center.x, center.y, center.z,
         max.x, max.y, max.z,

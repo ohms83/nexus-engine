@@ -38,6 +38,8 @@ std::vector<RenderCommand> Model::CreateDrawCommand() const
             mesh->GetVertexBuffer(),
             mesh->GetIndexBuffer(),
         };
+        auto& sphere = mesh->GetSphere();
+        command.sphereRadius = sphere.radius;
         material->WriteRenderCommand(command);
 
         {

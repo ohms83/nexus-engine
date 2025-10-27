@@ -37,15 +37,15 @@ NXS_NAMESPACE
             const std::array<Color3F, 3>& axisColors = {Color3F::Red, Color3F::Green, Color3F::Blue});
         static void DrawOutlineBox(
             RenderSystem& renderSystem,
-            const glm::vec3& position,
+            const glm::vec3& center,
             const glm::vec3& extent,
-            const glm::quat& rotation = glm::quat(1, 0, 0, 0),
+            const glm::mat4& transform = glm::mat4(1),
             const Color3F& color = Color3F::Red);
         static void DrawOutlineSphere(
             RenderSystem& renderSystem,
             const glm::vec3& position,
             float radius,
-            const glm::quat& rotation = glm::quat(1, 0, 0, 0),
+            const glm::mat4& transform = glm::mat4(1),
             uint32_t numSegments = 36,
             //! Thye color of Latitude-line along x-y plane
             const Color3F& xyLatColor = Color3F::Red,

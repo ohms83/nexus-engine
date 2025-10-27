@@ -25,6 +25,7 @@ NXS_NAMESPACE
         std::vector<std::tuple<std::string, float>> uniformFloats;
         std::vector<std::tuple<std::string, int32>> uniformInts;
         DepthFunction depthFunction = DepthFunction::Lesser;
+        float sphereRadius = 0;
 
         NODISCARD uint32 GetPolygonCount() const
         {

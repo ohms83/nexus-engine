@@ -69,16 +69,17 @@ public:
             const auto model = modelComp->model;
             const auto position = modelNode->Position().value;
             const auto orient = modelNode->Orient().quat;
-            const float scale = modelNode->Scale().value.x;
+            const auto scale = modelNode->Scale().value;
+            const auto transform = nxs::Matrix::CreateModelMatrix(position, orient, scale);
             if (drawSphere)
             {
                 auto sphere = model->GetBoundingSphere();
-                nxs::Gizmos::DrawOutlineSphere(renderSystem, (position + sphere.center) * scale, sphere.radius * scale);
+                nxs::Gizmos::DrawOutlineSphere(renderSystem, position + sphere.center, sphere.radius, transform);
             }
             if (drawBox)
             {
                 auto box = model->GetBoundingBox();
-                nxs::Gizmos::DrawOutlineBox(renderSystem, (position + box.position) * scale, box.extent * scale);
+                nxs::Gizmos::DrawOutlineBox(renderSystem, position + box.center, box.extent, transform);
             }
         }
 

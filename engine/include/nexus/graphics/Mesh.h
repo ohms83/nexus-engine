@@ -6,6 +6,8 @@
 #include "IndexBuffer.h"
 #include "Material.h"
 #include "RenderingInterface.h"
+#include "geom/Sphere.h"
+#include "geom/Box.h"
 
 NXS_NAMESPACE
 {
@@ -48,24 +50,24 @@ NXS_NAMESPACE
             return m_material;
         }
 
-        void SetSpehreRadius(float r)
+        void SetSphere(const Sphere& sphere)
         {
-            m_sphereRadius = r;
+            m_boundingSphere = sphere;
         }
 
-        NODISCARD float GetSphereRadius() const
+        const Sphere& GetSphere() const
         {
-            return m_sphereRadius;
+            return m_boundingSphere;
         }
 
-        void SetBoxExt(const glm::vec3& ext)
+        void SetBox(const Box& box)
         {
-            m_boxExtent = ext;
+            m_boundingBox = box;
         }
 
-        NODISCARD const glm::vec3& GetBoxExt() const
+        const Box& GetBox()
         {
-            return m_boxExtent;
+            return m_boundingBox;
         }
 
     protected:
@@ -73,9 +75,8 @@ NXS_NAMESPACE
         Ref<VertexBuffer> m_vertexBuffer;
         Ref<IndexBuffer> m_indexBuffer;
         Ref<Material> m_material;
-        //! A radius of the smallest bounding sphere that can cover the entire mesh.
-        float m_sphereRadius = 0;
-        //! The smallest value of the bounding-box's dimention in x/y/z coordinate that can cover the entire mesh.
-        glm::vec3 m_boxExtent{};
+        //! @brief Bounding sphere.
+        Sphere m_boundingSphere {};
+        Box m_boundingBox {};
     };
 }

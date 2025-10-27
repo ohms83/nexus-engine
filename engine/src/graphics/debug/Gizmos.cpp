@@ -255,11 +255,10 @@ void Gizmos::DrawLocalAxes(
 
 void Gizmos::DrawOutlineBox(
     RenderSystem& renderSystem,
-    const glm::vec3& position,
+    const glm::vec3& center,
     const glm::vec3& extent,
-    const glm::quat& rotation,
-    const Color3F& color
-)
+    const glm::mat4& transform,
+    const Color3F& color)
 {
     const std::array<glm::vec3, 8> boxVertices = {
         glm::vec3 {-1.0f,  1.0f,  1.0f},
@@ -295,7 +294,7 @@ void Gizmos::DrawOutlineBox(
 
     for (auto& vertex : boxVertices)
     {
-        auto pos = (position + (rotation * (vertex * extent)));
+        auto pos = transform * glm::vec4(center + (vertex * extent), 1);
         vertices.emplace_back(pos, color, 0);
     }
 
@@ -309,7 +308,7 @@ void Gizmos::DrawOutlineSphere(
     RenderSystem& renderSystem,
     const glm::vec3& position,
     const float radius,
-    const glm::quat& rotation,
+    const glm::mat4& transform,
     uint32_t numSegments,
     const Color3F& xyLatColor,
     const Color3F& yzLatColor,
@@ -333,7 +332,7 @@ void Gizmos::DrawOutlineSphere(
             const float x = radius * cos(rad);
             const float y = 0;
             const float z = radius * sin(rad);
-            vertices.emplace_back(position + (rotation * glm::vec3(x, y, z)), longColor, 0);
+            vertices.emplace_back(position + glm::vec3(x, y, z), longColor, 0);
 
             const auto i0 = startIndex + i;
             const auto i1 = (i + 1) >= numSegments ? startIndex : i0 + 1;
@@ -350,7 +349,7 @@ void Gizmos::DrawOutlineSphere(
             const float x = radius * cos(rad);
             const float y = radius * sin(rad);
             const float z = 0;
-            vertices.emplace_back(position + (rotation * glm::vec3(x, y, z)), xyLatColor, 0);
+            vertices.emplace_back(position + glm::vec3(x, y, z), xyLatColor, 0);
 
             const auto i0 = startIndex + i;
             const auto i1 = (i + 1) >= numSegments ? startIndex : i0 + 1;
@@ -367,12 +366,18 @@ void Gizmos::DrawOutlineSphere(
             const float x = 0;
             const float y = radius * sin(rad);
             const float z = radius * cos(rad);
-            vertices.emplace_back(position + (rotation * glm::vec3(x, y, z)), yzLatColor, 0);
+            vertices.emplace_back(position + glm::vec3(x, y, z), yzLatColor, 0);
 
             const auto i0 = startIndex + i;
             const auto i1 = (i + 1) >= numSegments ? startIndex : i0 + 1;
             indices.push_back(i0);
             indices.push_back(i1);
         }
+    }
+
+    for (auto& vertex : vertices)
+    {
+        // Transform vertex
+        vertex.pos = transform * glm::vec4(vertex.pos, 1);
     }
 }
