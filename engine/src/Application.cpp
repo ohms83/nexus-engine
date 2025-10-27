@@ -195,16 +195,17 @@ int Application::BeginMainLoop()
         {
             rmt_ScopedCPUSample(Render, 0);
             m_renderSystem->BeginDraw();
-            BeginDrawUI();
             Gizmos::Clear();
-
-            // Render UIs
-            DrawUI();
-            if (m_editor) m_editor->Draw(*m_renderSystem);
 
             // Render the scene
             Render(*m_renderSystem);
             m_renderSystem->Draw();
+
+            BeginDrawUI();
+
+            // Render UIs
+            DrawUI();
+            if (m_editor) m_editor->Draw(*m_renderSystem);
 
             EndDrawUI();
             m_renderSystem->EndDraw();
