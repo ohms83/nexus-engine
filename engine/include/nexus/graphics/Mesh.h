@@ -5,9 +5,8 @@
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
 #include "Material.h"
-#include "RenderingInterface.h"
-#include "geom/Sphere.h"
-#include "geom/Box.h"
+#include "nexus/geom/Sphere.h"
+#include "nexus/geom/Box.h"
 
 NXS_NAMESPACE
 {
@@ -18,7 +17,7 @@ NXS_NAMESPACE
         explicit Mesh(std::string name);
         virtual ~Mesh() = default;
 
-        const std::string& GetName() const { return m_name; }
+        NODISCARD const std::string& GetName() const { return m_name; }
 
         void SetVertexBuffer(const Ref<VertexBuffer>& vertexBuffer)
         {
@@ -55,7 +54,7 @@ NXS_NAMESPACE
             m_boundingSphere = sphere;
         }
 
-        const Sphere& GetSphere() const
+        NODISCARD const Sphere& GetSphere() const
         {
             return m_boundingSphere;
         }
@@ -65,7 +64,7 @@ NXS_NAMESPACE
             m_boundingBox = box;
         }
 
-        const Box& GetBox()
+        NODISCARD const Box& GetBox() const
         {
             return m_boundingBox;
         }
