@@ -23,58 +23,146 @@ namespace
         float size = 1;
     };
 
-    struct Variables
+    class VertexData
     {
-        std::vector<Vertex> pointVertices;
-        std::vector<uint32> pointIndices;
-        Ref<VertexBuffer>   pointVertexBuffer;
-        Ref<IndexBuffer>    pointIndexBuffer;
-
-        std::vector<Vertex> lineVertices;
-        std::vector<uint32> lineIndices;
-        Ref<VertexBuffer>   lineVertexBuffer;
-        Ref<IndexBuffer>    lineIndexBuffer;
-
-        std::vector<Vertex> boxVertices;
-        std::vector<uint32> boxIndices;
-        Ref<VertexBuffer>   boxVertexBuffer;
-        Ref<IndexBuffer>    boxIndexBuffer;
-
-        std::vector<Vertex> sphereVertices;
-        std::vector<uint32> sphereIndices;
-        Ref<VertexBuffer>   sphereVertexBuffer;
-        Ref<IndexBuffer>    sphereIndexBuffer;
-
-        Ref<GpuProgram>     gpuProgram;
-
-        Variables()
+    public:
+        VertexData(size_t maxSize, const RenderingInterface& renderInterface, const DrawMode drawMode)
+            : m_drawMode(drawMode)
+            , m_newMaxVertex(maxSize)
+            , m_newMaxIndex(maxSize)
         {
-            pointVertices.reserve(100);
-            pointIndices.reserve(100);
-
-            lineVertices.reserve(100);
-            lineIndices.reserve(100);
-
-            boxVertices.reserve(200);
-            boxIndices.reserve(200);
-
-            sphereVertices.reserve(500);
-            sphereIndices.reserve(500);
+            GenerateBuffers(renderInterface);
         }
 
-        void ClearData()
+        void GenerateBuffers(const RenderingInterface& renderInterface)
         {
-            pointVertices.clear();
-            pointIndices.clear();
-            lineVertices.clear();
-            lineIndices.clear();
-            boxVertices.clear();
-            boxIndices.clear();
-            sphereVertices.clear();
-            sphereIndices.clear();
+            if (m_newMaxVertex > 0)
+            {
+                LOG_DEBUG(LogGizmos, std::format("Resizing vertex buffer from {} to {}", m_maxVertex, m_newMaxVertex));
+                m_vertices.reserve(m_newMaxVertex);
+                m_maxVertex = m_newMaxVertex;
+                m_newMaxVertex = 0;
+
+                auto* data = R_CAST<uint8_t*>(m_vertices.data());
+                uint64_t bufferSize = sizeof(Vertex) * m_vertices.capacity();
+                const auto buffer = std::make_shared<BorrowBuffer>(data, bufferSize);
+                m_vertexBuffer.reset(renderInterface.CreateVertexBuffer());
+                m_vertexBuffer->Begin()
+                    .SetVertices(buffer)
+                    .SetUsage(BufferUsage::DynamicDraw)
+                    .AddAttribute(VertexAttribute::VertexPosition3D)
+                    .AddAttribute(VertexAttribute::VertexColor0)
+                    .AddAttribute({VertexAttribute::Type::Color1, DataType::Float, 1})
+                .Build();
+            }
+
+            if (m_newMaxIndex > 0)
+            {
+                LOG_DEBUG(LogGizmos, std::format("Resizing index buffer from {} to {}", m_maxIndex, m_newMaxIndex));
+                m_indices.reserve(m_newMaxIndex);
+                m_maxIndex = m_newMaxIndex;
+                m_newMaxIndex = 0;
+
+                auto* data = R_CAST<uint8_t*>(m_indices.data());
+                const uint64_t bufferSize = sizeof(uint32_t) * m_indices.capacity();
+                const auto buffer = std::make_shared<BorrowBuffer>(data, bufferSize);
+                m_indexBuffer.reset(renderInterface.CreateIndexBuffer());
+                m_indexBuffer->Begin()
+                    .SetIndices(buffer, FrontFace::ClockWise)
+                    .SetUsage(BufferUsage::DynamicDraw)
+                    .SetDrawMode(m_drawMode)
+                .Build();
+            }
         }
+
+        void AddVertex(const glm::vec3& pos, const glm::vec3& color, float size)
+        {
+            m_vertices.emplace_back(pos, color, size);
+
+            if (m_vertices.capacity() > m_maxVertex)
+            {
+                // The vertex buffer will be resized just before it's being used since recreating
+                // GPU buffers is expensive and shouldn't be done too frequently
+                m_newMaxVertex = m_vertices.capacity();
+            }
+        }
+
+        void AddIndex(uint32_t index)
+        {
+            m_indices.push_back(index);
+
+            if (m_indices.capacity() > m_maxIndex)
+            {
+                // The index buffer will be resized just before it's being used since recreating
+                // GPU buffers is expensive and shouldn't be done too frequently
+                m_newMaxIndex = m_indices.capacity();
+            }
+        }
+
+        size_t NumVertex() const
+        {
+            return m_vertices.size();
+        }
+
+        size_t NumIndex() const
+        {
+            return m_indices.size();
+        }
+
+        void GenerateDrawCommands(RenderSystem& renderSystem, Ref<GpuProgram> gpuProgram, const glm::mat4& cameraMtx)
+        {
+            if (!m_indices.empty())
+            {
+                if (m_newMaxVertex > 0 || m_newMaxIndex > 0) {
+                    GenerateBuffers(*renderSystem.GetRenderInterface());
+                }
+
+                m_vertexBuffer->Bind();
+                m_vertexBuffer->CopyData(m_vertices.data(), sizeof(Vertex) * m_vertices.size(), 0);
+
+                m_indexBuffer->Bind();
+                m_indexBuffer->CopyData(m_indices.data(), sizeof(uint32_t) * m_indices.size(), 0);
+                m_indexBuffer->SetDrawCount(m_indices.size());
+                RenderCommand command = {
+                    gpuProgram,
+                    m_vertexBuffer,
+                    m_indexBuffer,
+                    // Matrices
+                    {
+                        {"_Model", glm::mat4(1)},
+                        {"_CameraMtx", cameraMtx},
+                    },
+                };
+                command.depthFunction = DepthFunction::Always;
+                renderSystem.RegisterDrawCommand(command, RenderPass::Gizmo);
+            }
+        }
+
+        void Clear()
+        {
+            m_vertices.clear();
+            m_indices.clear();
+        }
+
+    private:
+        DrawMode m_drawMode;
+        std::vector<Vertex> m_vertices;
+        std::vector<uint32> m_indices;
+        Ref<VertexBuffer>   m_vertexBuffer;
+        Ref<IndexBuffer>    m_indexBuffer;
+        size_t m_maxVertex = 0;
+        size_t m_maxIndex = 0;
+        size_t m_newMaxVertex = 0;
+        size_t m_newMaxIndex = 0;
     };
-    Ptr<Variables> s_va = std::make_unique<Variables>();
+
+    const int POINT     = 0;
+    const int LINE      = 1;
+    const int BOX       = 2;
+    const int SPHERE    = 3;
+
+    std::map<int, Ref<VertexData>> s_vertexDataList;
+    Ref<GpuProgram> s_gpuProgram;
 }
 
 // Shader sources
@@ -109,107 +197,44 @@ void main()
 }
 )";
 
-static void CreateDrawBuffers(const RenderSystem& renderSystem, std::vector<Vertex>& vertices, std::vector<uint32_t>& indices, Ref<VertexBuffer>& vertexBuffer, Ref<IndexBuffer>& indexBuffer, const DrawMode drawMode)
-{
-    const auto renderInterface = renderSystem.GetRenderInterface();
-
-    {
-        auto* data = R_CAST<uint8_t*>(vertices.data());
-        uint64_t bufferSize = sizeof(Vertex) * vertices.capacity();
-        const auto buffer = std::make_shared<BorrowBuffer>(data, bufferSize);
-        vertexBuffer.reset(renderInterface->CreateVertexBuffer());
-        vertexBuffer->Begin()
-            .SetVertices(buffer)
-            .SetUsage(BufferUsage::DynamicDraw)
-            .AddAttribute(VertexAttribute::VertexPosition3D)
-            .AddAttribute(VertexAttribute::VertexColor0)
-            .AddAttribute({VertexAttribute::Type::Color1, DataType::Float, 1})
-        .Build();
-    }
-
-    {
-        auto* data = R_CAST<uint8_t*>(indices.data());
-        const uint64_t bufferSize = sizeof(uint32_t) * indices.capacity();
-        const auto buffer = std::make_shared<BorrowBuffer>(data, bufferSize);
-        indexBuffer.reset(renderInterface->CreateIndexBuffer());
-        indexBuffer->Begin()
-            .SetIndices(buffer, FrontFace::ClockWise)
-            .SetUsage(BufferUsage::DynamicDraw)
-            .SetDrawMode(drawMode)
-        .Build();
-    }
-}
-
-static void GenerateDrawCommands(
-    RenderSystem& renderSystem,
-    const glm::mat4& cameraMtx,
-    const std::vector<Vertex>& vertices,
-    const std::vector<uint32_t>& indices,
-    Ref<VertexBuffer> vertexBuffer,
-    Ref<IndexBuffer> indexBuffer)
-{
-    if (!indices.empty())
-    {
-        vertexBuffer->Bind();
-        vertexBuffer->CopyData(vertices.data(), sizeof(Vertex) * vertices.size(), 0);
-
-        indexBuffer->Bind();
-        indexBuffer->CopyData(indices.data(), sizeof(uint32_t) * indices.size(), 0);
-        indexBuffer->SetDrawCount(indices.size());
-        RenderCommand command = {
-            s_va->gpuProgram,
-            vertexBuffer,
-            indexBuffer,
-            // Matrices
-            {
-                {"_Model", glm::mat4(1)},
-                {"_CameraMtx", cameraMtx},
-            },
-        };
-        command.depthFunction = DepthFunction::Always;
-        renderSystem.RegisterDrawCommand(command, RenderPass::Gizmo);
-    }
-}
-
 void Gizmos::Init(const RenderSystem& renderSystem)
 {
-#define CREATE_BUFFER(gizmo, drawMode) CreateDrawBuffers(renderSystem, s_va->gizmo##Vertices, s_va->gizmo##Indices, s_va->gizmo##VertexBuffer, s_va->gizmo##IndexBuffer, drawMode)
-    CREATE_BUFFER(point, DrawMode::Point);
-    CREATE_BUFFER(line, DrawMode::Line);
-    // TODO: Use DrawMode::LineStrip
-    CREATE_BUFFER(box, DrawMode::Line);
-    // TODO: Use DrawMode::LineStrip
-    CREATE_BUFFER(sphere, DrawMode::Line);
-#undef CREATE_BUFFER
-
     const auto renderInterface = renderSystem.GetRenderInterface();
 
-    s_va->gpuProgram.reset(renderInterface->CreateGpuProgram());
-    s_va->gpuProgram->BeginCompile()
+    s_gpuProgram.reset(renderInterface->CreateGpuProgram());
+    s_gpuProgram->BeginCompile()
         .AddSource(s_vertexShaderSource, GpuProgram::Type::Vertex)
         .AddSource(s_fragmentShaderSource, GpuProgram::Type::Fragment)
     .Compile();
+
+    s_vertexDataList.emplace(POINT, std::make_shared<VertexData>(100, *renderInterface, DrawMode::Point));
+    s_vertexDataList.emplace(LINE, std::make_shared<VertexData>(100, *renderInterface, DrawMode::Line));
+    s_vertexDataList.emplace(BOX, std::make_shared<VertexData>(200, *renderInterface, DrawMode::Line));
+    // TODO: Use DrawMode::LineStrip
+    s_vertexDataList.emplace(SPHERE, std::make_shared<VertexData>(200, *renderInterface, DrawMode::Line));
 }
 
 void Gizmos::Destroy()
 {
-    s_va.reset();
+    s_gpuProgram.reset();
+    s_vertexDataList.clear();
 }
 
 void Gizmos::Clear()
 {
-    s_va->ClearData();
+    for (auto [index, vertexData] : s_vertexDataList)
+    {
+        vertexData->Clear();
+    }
 }
 
 void Gizmos::ProcessDraw(RenderSystem& renderSystem, const glm::mat4& cameraMtx)
 {
     rmt_ScopedCPUSample(DrawGizmos, 0);
-#define DRAW_GIZMOS(gizmo) GenerateDrawCommands(renderSystem, cameraMtx, s_va->gizmo##Vertices, s_va->gizmo##Indices, s_va->gizmo##VertexBuffer, s_va->gizmo##IndexBuffer)
-    DRAW_GIZMOS(point);
-    DRAW_GIZMOS(line);
-    DRAW_GIZMOS(box);
-    DRAW_GIZMOS(sphere);
-#undef DRAW_GIZMOS
+    for (auto [index, vertexData] : s_vertexDataList)
+    {
+        vertexData->GenerateDrawCommands(renderSystem, s_gpuProgram, cameraMtx);
+    }
 }
 
 void Gizmos::DrawPoint(
@@ -218,8 +243,9 @@ void Gizmos::DrawPoint(
     const Color3F& color,
     float size)
 {
-    s_va->pointVertices.emplace_back(Vertex{ position, color, size });
-    s_va->pointIndices.emplace_back(s_va->pointIndices.size());
+    auto pointVertex = s_vertexDataList[POINT];
+    pointVertex->AddVertex(position, color, size);
+    pointVertex->AddIndex(pointVertex->NumIndex());
 }
 
 void Gizmos::DrawLine(
@@ -228,10 +254,11 @@ void Gizmos::DrawLine(
     const glm::vec3& end,
     const Color3F& color)
 {
-    s_va->lineVertices.emplace_back(Vertex{ start, color, 0 });
-    s_va->lineVertices.emplace_back(Vertex{ end, color, 0 });
-    s_va->lineIndices.emplace_back(s_va->lineIndices.size());
-    s_va->lineIndices.emplace_back(s_va->lineIndices.size());
+    auto lineVertex = s_vertexDataList[LINE];
+    lineVertex->AddVertex(start, color, 0);
+    lineVertex->AddVertex(end, color, 0 );
+    lineVertex->AddIndex(lineVertex->NumIndex());
+    lineVertex->AddIndex(lineVertex->NumIndex());
 }
 
 void Gizmos::DrawLocalAxes(
@@ -288,19 +315,18 @@ void Gizmos::DrawOutlineBox(
         3, 7,
     };
 
-    auto& vertices = s_va->boxVertices;
-    auto& indices  = s_va->boxIndices;
-    const auto startIndex = vertices.size();
+    auto boxVertex = s_vertexDataList[BOX];
+    const auto startIndex = boxVertex->NumVertex();
 
     for (auto& vertex : boxVertices)
     {
         auto pos = transform * glm::vec4(center + (vertex * extent), 1);
-        vertices.emplace_back(pos, color, 0);
+        boxVertex->AddVertex(pos, color, 0);
     }
 
     for (const auto index : boxIndices)
     {
-        indices.push_back(startIndex + index);
+        boxVertex->AddIndex(startIndex + index);
     }
 }
 
@@ -320,64 +346,60 @@ void Gizmos::DrawOutlineSphere(
         return;
     }
 
+    auto sphereVertex = s_vertexDataList[SPHERE];
     const float thetha = 2 * Math::PI / FLOAT_CAST(numSegments);
-    auto& vertices = s_va->sphereVertices;
-    auto& indices  = s_va->sphereIndices;
     // Create longtitude lines
     {
-        const auto startIndex = vertices.size();
+        const auto startIndex = sphereVertex->NumVertex();
         for (int i = 0; i < numSegments; ++i)
         {
             const float rad = thetha * FLOAT_CAST(i);
             const float x = radius * cos(rad);
             const float y = 0;
             const float z = radius * sin(rad);
-            vertices.emplace_back(position + glm::vec3(x, y, z), longColor, 0);
+            const auto pos = transform * glm::vec4(position + glm::vec3(x, y, z), 1);
+            sphereVertex->AddVertex(pos, longColor, 0);
 
             const auto i0 = startIndex + i;
             const auto i1 = (i + 1) >= numSegments ? startIndex : i0 + 1;
-            indices.push_back(i0);
-            indices.push_back(i1);
+            sphereVertex->AddIndex(i0);
+            sphereVertex->AddIndex(i1);
         }
     }
     // Create x-y latitude lines
     {
-        const auto startIndex = vertices.size();
+        const auto startIndex = sphereVertex->NumVertex();
         for (int i = 0; i < numSegments; ++i)
         {
             const float rad = thetha * FLOAT_CAST(i);
             const float x = radius * cos(rad);
             const float y = radius * sin(rad);
             const float z = 0;
-            vertices.emplace_back(position + glm::vec3(x, y, z), xyLatColor, 0);
+            const auto pos = transform * glm::vec4(position + glm::vec3(x, y, z), 1);
+            sphereVertex->AddVertex(pos, xyLatColor, 0);
 
             const auto i0 = startIndex + i;
             const auto i1 = (i + 1) >= numSegments ? startIndex : i0 + 1;
-            indices.push_back(i0);
-            indices.push_back(i1);
+            sphereVertex->AddIndex(i0);
+            sphereVertex->AddIndex(i1);
         }
     }
     // Create y-z latitude lines
     {
-        const auto startIndex = vertices.size();
+        const auto startIndex = sphereVertex->NumVertex();
         for (int i = 0; i < numSegments; ++i)
         {
             const float rad = thetha * FLOAT_CAST(i);
             const float x = 0;
             const float y = radius * sin(rad);
             const float z = radius * cos(rad);
-            vertices.emplace_back(position + glm::vec3(x, y, z), yzLatColor, 0);
+            const auto pos = transform * glm::vec4(position + glm::vec3(x, y, z), 1);
+            sphereVertex->AddVertex(pos, yzLatColor, 0);
 
             const auto i0 = startIndex + i;
             const auto i1 = (i + 1) >= numSegments ? startIndex : i0 + 1;
-            indices.push_back(i0);
-            indices.push_back(i1);
+            sphereVertex->AddIndex(i0);
+            sphereVertex->AddIndex(i1);
         }
-    }
-
-    for (auto& vertex : vertices)
-    {
-        // Transform vertex
-        vertex.pos = transform * glm::vec4(vertex.pos, 1);
     }
 }
