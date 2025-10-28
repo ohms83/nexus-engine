@@ -84,3 +84,10 @@ void RenderSystem::RegisterDrawCommand(const RenderCommand& command, RenderPass 
     auto& commands = m_renderCommands[INT_CAST(pass)];
     commands.emplace_back(command);
 }
+
+void RenderSystem::RegisterDrawCommands(const CommandBuffer::iterator& begin, const CommandBuffer::iterator& end, RenderPass pass)
+{
+    rmt_ScopedCPUSample(RenderSystem_RegisterDrawCommand, 0)
+    auto& commands = m_renderCommands[INT_CAST(pass)];
+    commands.insert(commands.end(), begin, end);
+}
