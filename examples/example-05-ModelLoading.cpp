@@ -75,6 +75,12 @@ public:
             {
                 auto sphere = model->GetBoundingSphere();
                 nxs::Gizmos::DrawOutlineSphere(renderSystem, position + sphere.center, sphere.radius, transform);
+
+                for (auto mesh : model->GetMeshes())
+                {
+                    const auto& mesh_sphere = mesh->GetSphere();
+                    nxs::Gizmos::DrawOutlineSphere(renderSystem, position + mesh_sphere.center, mesh_sphere.radius, transform);
+                }
             }
             if (drawBox)
             {
@@ -301,6 +307,12 @@ int main()
         "Example 05 - Model Loading",
         graphicsConfig,
         fullscreen,
-        true
+        true,
+        // editMode
+        true,
+        // maximize
+        true,
+        // allowProfile
+        false,
     });
 }

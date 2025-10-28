@@ -71,12 +71,12 @@ NXS_NAMESPACE
 
             explicit Iterator(const VertexBuffer& vertexBuffer)
             {
-                m_current = R_CAST<T*>(vertexBuffer.m_vertices->Data());
+                m_current = R_CAST<T*>(vertexBuffer.GetData());
             }
 
             explicit Iterator(const VertexBuffer& vertexBuffer, size_t offset)
             {
-                m_current = R_CAST<T*>(vertexBuffer.m_vertices->Data() + offset);
+                m_current = R_CAST<T*>(vertexBuffer.GetData() + offset);
             }
 
             Iterator(const Iterator& rhs) : m_current(rhs.m_current) {}
@@ -113,6 +113,7 @@ NXS_NAMESPACE
 
         /**
          * Start building this vertex buffer.
+         * TODO: Rename this to make it less ambigious.
          */
         virtual VertexBuffer& Begin();
         virtual VertexBuffer& SetVertices(Ref<IBuffer> vertexData);
@@ -144,16 +145,41 @@ NXS_NAMESPACE
             return m_vertexCount;
         }
 
+        uint8_t* GetData() const
+        {
+            return m_vertices->Data();
+        }
+
+        size_t GetBufferSize() const
+        {
+            return m_stride * m_vertexCount;
+        }
+
+        // ---- STD Container compliance ----
+
         template<class T>
-        Iterator<T> Begin() const
+        Iterator<T> begin() const
         {
             return Iterator<T>(*this);
         }
 
         template<class T>
-        Iterator<T> End() const
+        Iterator<T> end() const
         {
             return Iterator<T>(*this, m_stride * m_vertexCount);
+        }
+
+        /**
+         * @brief Get the number of vertex this buffer is holding.
+         * 
+         * @return size_t The number of vertex.
+         * @warning This function is just an alias of @c VertexCount . It's here as STD container compliance.
+         * If you want to get the size of the buffer in bytes, please use @c GetBufferSize
+         * @see GetBufferSize
+         */
+        size_t size() const
+        {
+            return VertexCount();
         }
 
     private:

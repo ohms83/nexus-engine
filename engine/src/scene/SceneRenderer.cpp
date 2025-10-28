@@ -120,6 +120,14 @@ static void SetPointLightParams(RenderCommand& command, const entt::registry& re
     command.uniformInts.emplace_back("_NumPointLight", numLight);
 }
 
+static bool IsSphereInside(const Frustum& viewFustrum, const Sphere& sphere, glm::mat4 modelMtx, const glm::vec3& scale)
+{
+    const glm::vec3 pos = modelMtx * glm::vec4(sphere.center, 1);
+    // TODO: Handle non-uniform scaling.
+    const float scaledRadius = sphere.radius * scale.x;
+    return viewFustrum.IsSphereInside(pos, scaledRadius);
+}
+
 BasicSceneRenderer::BasicSceneRenderer(const RenderSystem& renderSystem)
 {
     Hasher hasher;
@@ -153,11 +161,10 @@ void BasicSceneRenderer::Render(RenderSystem& renderSystem, const entt::registry
 
             glm::mat4 modelMtx = Matrix::CreateModelMatrix(position.value, orient.quat, scale.value);
             const auto& sphere = model.model->GetBoundingSphere();
-            const glm::vec3 transformedCenter = modelMtx * glm::vec4(sphere.center, 1);
             // TODO: Handle non-uniform scaling.
             const float scaledRadius = sphere.radius * scale.value.x;
 
-            if (!viewFrustum.IsSphereInside(transformedCenter, scaledRadius)) continue;
+            if (!IsSphereInside(viewFrustum, sphere, modelMtx, scale.value)) continue;
 
             rmt_BeginCPUSample(SceneRenderer_CreateDrawCommand, 0)
             {
@@ -165,6 +172,10 @@ void BasicSceneRenderer::Render(RenderSystem& renderSystem, const entt::registry
                 for (auto& command : commands)
                 {
                     rmt_ScopedCPUSample(SceneRenderer_SetCommandParams, 0);
+
+                    // TODO: Fix this!
+                    // if (!IsSphereInside(viewFrustum, command.sphere, modelMtx, scale.value)) continue;
+
                     command.uniformMatrices.emplace("_Model", modelMtx);
                     command.uniformMatrices.emplace("_View", viewMtx);
                     command.uniformMatrices.emplace("_Projection", projection);

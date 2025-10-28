@@ -406,17 +406,33 @@ void ModelLoader::ComputeBoundingVolume(const Ref<Model>& model)
         const auto vertexBuffer = mesh->GetVertexBuffer();
         const auto numVertex = vertexBuffer->VertexCount();
 
-        for (auto vertexItr = vertexBuffer->Begin<Vertex>(); vertexItr != vertexBuffer->End<Vertex>(); ++vertexItr)
+        // Find AABB
+        for (auto vertexItr = vertexBuffer->begin<Vertex>(); vertexItr != vertexBuffer->end<Vertex>(); ++vertexItr)
         {
             const auto& vertex = *vertexItr;
             min_v = glm::min(min_v, vertex.position);
             max_v = glm::max(max_v, vertex.position);
         }
 
-        sphere.center = (max_v + min_v) / 2.f;
-        sphere.radius = (max_v - sphere.center).length();
-        mesh->SetSphere(sphere);
+        const auto center = (max_v + min_v) / 2.f;
         mesh->SetBox(Box(center, max_v - sphere.center));
+
+        // AABB and Sphere should share the same center
+        sphere.center = center;
+        
+        // Refine the search by re-iterate every vertex again to find the tighter fit sphere
+        float radius = 0;
+        for (auto vertexItr = vertexBuffer->begin<Vertex>(); vertexItr != vertexBuffer->end<Vertex>(); ++vertexItr)
+        {
+            const auto& vertex = *vertexItr;
+            radius = std::max(radius, glm::length(center - vertex.position));
+        }
+        sphere.radius = radius;
+        mesh->SetSphere(sphere);
+        
+        LOG_DEBUG(LogModelLoader, std::format("Mesh Name={} Bounding Sphere Center=({}, {}, {}) Radius={}",
+            mesh->GetName(), sphere.center.x, sphere.center.y, sphere.center.z, sphere.radius
+        ));
 
         min = glm::min(min_v, min);
         max = glm::max(max_v, max);
@@ -434,7 +450,7 @@ void ModelLoader::ComputeBoundingVolume(const Ref<Model>& model)
     for (const auto& mesh : model->GetMeshes())
     {
         const auto vertexBuffer = mesh->GetVertexBuffer();
-        for (auto vertexItr = vertexBuffer->Begin<Vertex>(); vertexItr != vertexBuffer->End<Vertex>(); ++vertexItr)
+        for (auto vertexItr = vertexBuffer->begin<Vertex>(); vertexItr != vertexBuffer->end<Vertex>(); ++vertexItr)
         {
             const auto& vertex = *vertexItr;
             radius = std::max(radius, glm::length(center - vertex.position));

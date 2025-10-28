@@ -39,7 +39,7 @@ std::vector<RenderCommand> Model::CreateDrawCommand() const
             mesh->GetIndexBuffer(),
         };
         auto& sphere = mesh->GetSphere();
-        command.sphereRadius = sphere.radius;
+        command.sphere = sphere;
         material->WriteRenderCommand(command);
 
         {

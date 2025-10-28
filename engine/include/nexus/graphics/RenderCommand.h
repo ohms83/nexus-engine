@@ -4,12 +4,14 @@
 
 #pragma once
 
-#include <map>
-#include <nexus/NxsDefine.h>
+#include "nexus/NxsDefine.h"
+#include "nexus/geom/Sphere.h"
 
 #include "IndexBuffer.h"
 #include "GpuProgram.h"
 #include "VertexBuffer.h"
+
+#include <map>
 
 NXS_NAMESPACE
 {
@@ -25,7 +27,7 @@ NXS_NAMESPACE
         std::vector<std::tuple<std::string, float>> uniformFloats;
         std::vector<std::tuple<std::string, int32>> uniformInts;
         DepthFunction depthFunction = DepthFunction::Lesser;
-        float sphereRadius = 0;
+        Sphere sphere {};
 
         NODISCARD uint32 GetPolygonCount() const
         {
