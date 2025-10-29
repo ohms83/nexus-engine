@@ -106,6 +106,33 @@ void Material::WriteRenderCommand(RenderCommand& command)
     }
 }
 
+void Material::Use()
+{
+    if (!m_shader)
+    {
+        LOG_WARNING(LogMaterial, std::format("Material does not have a shader"));
+        return;
+    }
+
+    auto gpuProgram = m_shader->GetGpuProgram();
+    NXS_ASSERT(gpuProgram);
+
+    gpuProgram->SetUniformVector("_Material.ambient", ambient);
+    gpuProgram->SetUniformVector("_Material.diffuse", diffuse);
+    gpuProgram->SetUniformVector("_Material.specular", specular);
+    gpuProgram->SetUniformVector("_Material.emissive", emissive);
+    gpuProgram->SetUniformFloat("_Material.shininess", shininess);
+
+    uint32 slot = 0;
+    for (const auto& textureInfo : m_textures)
+    {
+        gpuProgram->SetUniformTexture2D(
+            textureInfo.uniformName,
+            textureInfo.texture->GetProxy(),
+            slot);
+    }
+}
+
 void Material::DetermineShaderPaths(std::string& vertexShader, std::string& fragmentShader)
 {
     if (HasTextureType(TextureType::Normal))

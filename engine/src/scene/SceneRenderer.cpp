@@ -138,6 +138,8 @@ BasicSceneRenderer::BasicSceneRenderer(const RenderSystem& renderSystem)
 
 void BasicSceneRenderer::Render(RenderSystem& renderSystem, const entt::registry& registry)
 {
+    m_commandBuffer.clear();
+
     // ReSharper disable once CppTooWideScopeInitStatement
     const auto cameraView = registry.view<SceneNodeComponent, CameraProperties, PositionComponent, OrientationComponent>();
     for (const auto& [cameraEntity, sceneNode, camera, cameraPos, cameraOrient] : cameraView.each())
@@ -168,8 +170,8 @@ void BasicSceneRenderer::Render(RenderSystem& renderSystem, const entt::registry
 
             rmt_BeginCPUSample(SceneRenderer_CreateDrawCommand, 0)
             {
-                auto commands = model.model->CreateDrawCommand();
-                for (auto& command : commands)
+                model.model->CreateDrawCommand(m_commandBuffer);
+                for (auto& command : m_commandBuffer)
                 {
                     rmt_ScopedCPUSample(SceneRenderer_SetCommandParams, 0);
 
@@ -183,9 +185,8 @@ void BasicSceneRenderer::Render(RenderSystem& renderSystem, const entt::registry
                     SetAmbientLightParams(command, registry);
                     SetDirectLightParams(command, registry);
                     SetPointLightParams(command, registry);
-
-                    renderSystem.RegisterDrawCommand(command);
                 }
+                renderSystem.RegisterDrawCommands(m_commandBuffer.begin(), m_commandBuffer.end());
             }
             rmt_EndCPUSample();
         }

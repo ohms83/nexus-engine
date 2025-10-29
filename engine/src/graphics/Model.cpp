@@ -24,10 +24,9 @@ void Model::SetBoundingSphere(const glm::vec3& center, float radius)
     m_sphere = Sphere {center, radius};
 }
 
-std::vector<RenderCommand> Model::CreateDrawCommand() const
+void Model::CreateDrawCommand(std::vector<RenderCommand>& commandBuffer) const
 {
     rmt_ScopedCPUSample(Model_CreateDrawCommand, 0);
-    std::vector<RenderCommand> commands;
 
     for (const auto mesh : m_meshes)
     {
@@ -44,10 +43,9 @@ std::vector<RenderCommand> Model::CreateDrawCommand() const
 
         {
             rmt_ScopedCPUSample(CommandList_Emplace, 0);
-            commands.emplace_back(std::move(command));
+            commandBuffer.emplace_back(std::move(command));
         }
     }
-    return commands;
 }
 
 std::string Model::DumpStats() const
