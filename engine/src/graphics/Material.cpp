@@ -131,7 +131,7 @@ void Material::Use()
         gpuProgram->SetUniformTexture2D(
             textureInfo.uniformName,
             textureInfo.texture->GetProxy(),
-            slot);
+            slot++);
     }
 }
 
