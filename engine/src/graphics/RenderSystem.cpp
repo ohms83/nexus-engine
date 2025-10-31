@@ -39,13 +39,14 @@ void RenderSystem::BeginDraw()
     rmt_ScopedCPUSample(RenderSystem_BeginDraw, 0);
     m_timer.Tick();
     ClearScreen();
+
+    m_drawCount = 0;
+    m_polygonCount = 0;
 }
 
 void RenderSystem::Draw()
 {
     rmt_ScopedCPUSample(RenderSystem_Draw, 0);
-    m_drawCount = 0;
-    m_polygonCount = 0;
 
     for (auto& commandList : m_renderCommands)
     {
@@ -58,7 +59,13 @@ void RenderSystem::Draw()
         }
         commandList.clear();
     }
-    m_frameIndex++;
+}
+
+void RenderSystem::DrawIndexed(Ref<IndexBuffer> indexBuffer)
+{
+    m_renderingInterface->DrawIndexed(indexBuffer);
+    m_drawCount++;
+    m_polygonCount += indexBuffer->NumPolygons();
 }
 
 void RenderSystem::EndDraw()
@@ -69,6 +76,7 @@ void RenderSystem::EndDraw()
         m_renderingInterface->SwapBuffer();
     }
     m_renderTime = m_timer.GetDeltaTime() * 1000.f;
+    m_frameIndex++;
 }
 
 void RenderSystem::OnResize(const uint32 pixel_w, const uint32 pixel_h)

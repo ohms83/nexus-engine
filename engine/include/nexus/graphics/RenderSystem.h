@@ -56,6 +56,7 @@ NXS_NAMESPACE
 
         void BeginDraw();
         void Draw();
+        void DrawIndexed(Ref<IndexBuffer> indexBuffer);
         void EndDraw();
 
         //! An event handler called when the window resize event occured.

@@ -4,6 +4,7 @@
 #include "scene/SceneRenderer.h"
 
 #include <format>
+#include <algorithm>
 
 #include "core/Logger.h"
 #include "graphics/debug/Gizmos.h"
@@ -20,8 +21,6 @@
 #include "scene/component/TransformComponent.h"
 
 #include "Remotery.h"
-
-#define DRAW_COMMAND 0
 
 // Shader sources
 static const char* s_depthVertexShader = R"(
@@ -52,6 +51,39 @@ USING_NAMESPACE_NXS;
 
 DEFINE_LOG(BasicSceneRenderer);
 
+namespace
+{
+    //! @brief A 64 bit sort-key.
+    struct SortKey
+    {
+        //! @brief Translucency flag. 0 means opague. 1 means translucent.
+        uint8_t translucent : 1;
+        //! @brief Material's ID
+        uint32_t materialId : 31;
+        //! @brief Mesh's Z value in the viewport space (0..1) normalized to an integer.
+        uint32_t normalizedZ : 32;
+
+        void SetZValue(float z)
+        {
+            normalizedZ = CAST<uint32_t>(Math::Lerp<float>(0, UINT32_MAX, z));
+        }
+
+        bool operator < (const SortKey& rhs)
+        {
+            return *(uint64_t*)this < *(uint64_t*)&rhs;
+        }
+    };
+
+    struct SortedMesh
+    {
+        uint64_t key;
+        Mesh* mesh;
+        const glm::mat4* modelMatrix;
+    };
+
+    std::vector<SortedMesh> s_sortedMeshes;
+}
+
 static void SetAmbientLightParams(Ref<GpuProgram> gpuProgram, const entt::registry& registry)
 {
     rmt_ScopedCPUSample(SceneRenderer_SetAmbientLightParams, 0);
@@ -68,6 +100,7 @@ static void SetDirectLightParams(Ref<GpuProgram> gpuProgram, const entt::registr
     {
         if (!node.active) continue;
 
+        // TODO: Cache the uniform names.
         const auto uniformLocation = std::format("_DirectLights[{}]", numLight);
         const auto uniformLocationColor = std::format("{}.properties.color", uniformLocation);
         const auto uniformLocationDiffuse = std::format("{}.properties.diffuseIntensity", uniformLocation);
@@ -95,6 +128,7 @@ static void SetPointLightParams(Ref<GpuProgram> gpuProgram, const entt::registry
         if (!node.active) continue;
 
         rmt_BeginCPUSample(CreateUniformNames, 0);
+        // TODO: Cache the uniform names.
         const auto uniformLocation = std::format("_PointLights[{}]", numLight);
         const auto uniformLocationColor = std::format("{}.properties.color", uniformLocation);
         const auto uniformLocationDiffuse = std::format("{}.properties.diffuseIntensity", uniformLocation);
@@ -141,8 +175,10 @@ BasicSceneRenderer::BasicSceneRenderer(const RenderSystem& renderSystem)
 void BasicSceneRenderer::Render(RenderSystem& renderSystem, const entt::registry& registry)
 {
     m_commandBuffer.clear();
+    s_sortedMeshes.clear();
 
-    auto renderingInterface = renderSystem.GetRenderInterface();
+    // Storing mesh's model matrix for the rendering phase.
+    std::vector<glm::mat4> modelMatrices;
 
     // ReSharper disable once CppTooWideScopeInitStatement
     const auto cameraView = registry.view<SceneNodeComponent, CameraProperties, PositionComponent, OrientationComponent>();
@@ -165,32 +201,64 @@ void BasicSceneRenderer::Render(RenderSystem& renderSystem, const entt::registry
         {
             if (!sceneNode.active || !model.model) continue;
 
-            glm::mat4 modelMtx = Matrix::CreateModelMatrix(position.value, orient.quat, scale.value);
+            const glm::mat4& modelMtx = modelMatrices.emplace_back(Matrix::CreateModelMatrix(position.value, orient.quat, scale.value));
             const auto& sphere = model.model->GetBoundingSphere();
             // TODO: Handle non-uniform scaling.
             const float scaledRadius = sphere.radius * scale.value.x;
 
             if (!IsSphereInside(viewFrustum, sphere, modelMtx, scale.value)) continue;
 
-            rmt_BeginCPUSample(SceneRenderer_RenderMeshes, 0)
+            rmt_BeginCPUSample(SceneRenderer_CreateSortList, 0)
+            const auto mvpMtx = projection * viewMtx * modelMtx;
             for (auto mesh : model.model->GetMeshes())
             {
-                auto material = mesh->GetMaterial();
-                material->Use();
-
-                auto gpuProgram = material->GetShader()->GetGpuProgram();
-                gpuProgram->SetUniformMatrix("_Model", modelMtx, false);
-                gpuProgram->SetUniformMatrix("_View", viewMtx, false);
-                gpuProgram->SetUniformMatrix("_Projection", projection, false);
-
-                SetAmbientLightParams(gpuProgram, registry);
-                SetDirectLightParams(gpuProgram, registry);
-                SetPointLightParams(gpuProgram, registry);
-
-                mesh->GetVertexBuffer()->Bind();
-                renderingInterface->DrawIndexed(mesh->GetIndexBuffer());
+                const auto material = mesh->GetMaterial();
+                const auto meshSphere = mesh->GetSphere();
+                const auto pos = mvpMtx * glm::vec4(meshSphere.center, 1);
+                const auto clipZ = pos.z / pos.w;
+                uint64_t translucent = 0;
+                uint64_t materialId = 0x7FFFFFFF & material->GetId();
+                uint64_t depth = CAST<uint32_t>(Math::Lerp<float>(0, UINT32_MAX, clipZ));
+                uint64_t key = translucent << 63 | materialId << 32 | depth;
+                s_sortedMeshes.emplace_back(key, mesh.get(), &modelMtx);
             }
             rmt_EndCPUSample();
+        }
+
+        {
+            rmt_ScopedCPUSample(SceneRenderer_SortMeshes, 0)
+            std::sort(s_sortedMeshes.begin(), s_sortedMeshes.end(), [](const SortedMesh& a, const SortedMesh& b) {
+                return a.key < b.key;
+            });
+        }
+        {
+            // LOG_DEBUG(LogBasicSceneRenderer, std::format("Begin Draw..."));
+            rmt_ScopedCPUSample(SceneRenderer_RenderMeshes, 0)
+            Material* usingMaterial = nullptr;
+            for (const auto [key, mesh, modelMtx] : s_sortedMeshes)
+            {
+                auto material = mesh->GetMaterial();
+
+                if (material.get() != usingMaterial)
+                {
+                    // LOG_DEBUG(LogBasicSceneRenderer, std::format("Switch material={}", material->GetPath()));
+                    material->Use();
+                    usingMaterial = material.get();
+
+                    auto gpuProgram = material->GetShader()->GetGpuProgram();
+                    gpuProgram->SetUniformMatrix("_Model", *modelMtx, false);
+                    gpuProgram->SetUniformMatrix("_View", viewMtx, false);
+                    gpuProgram->SetUniformMatrix("_Projection", projection, false);
+
+                    SetAmbientLightParams(gpuProgram, registry);
+                    SetDirectLightParams(gpuProgram, registry);
+                    SetPointLightParams(gpuProgram, registry);
+                }
+
+                mesh->GetVertexBuffer()->Bind();
+                renderSystem.DrawIndexed(mesh->GetIndexBuffer());
+            }
+            // LOG_DEBUG(LogBasicSceneRenderer, std::format("End Draw"));
         }
 
         Gizmos::ProcessDraw(renderSystem, projection * viewMtx);
