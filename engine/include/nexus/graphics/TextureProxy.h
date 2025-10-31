@@ -41,8 +41,8 @@ NXS_NAMESPACE
         int32 channels = 4;
         PixelFormat format = PixelFormat::RGBA;
         DataType componentType = DataType::UByte;
-        TextureWrapMode wrapModeS = TextureWrapMode::Clamp;
-        TextureWrapMode wrapModeT = TextureWrapMode::Clamp;
+        TextureWrapMode wrapModeS = TextureWrapMode::Repeat;
+        TextureWrapMode wrapModeT = TextureWrapMode::Repeat;
         TextureFilterMode filterMin = TextureFilterMode::Linear;
         TextureFilterMode filterMag = TextureFilterMode::Linear;
         uint32 numMips = 0;
