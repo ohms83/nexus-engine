@@ -34,8 +34,13 @@ NXS_NAMESPACE
         NODISCARD uint32 NumIndex() const;
         NODISCARD uint32 NumPolygons() const;
 
-        void SetDrawCount(uint32_t count);
-        uint32_t GetDrawCount() const;
+        /**
+         * @brief Specify the number of index to be rendered.
+         * 
+         * @param count Index count
+         */
+        void SetNumIndexDraw(uint32_t count);
+        NODISCARD uint32_t GetNumIndexDraw() const;
 
         NODISCARD BufferUsage GetUsage() const
         {
@@ -68,9 +73,9 @@ NXS_NAMESPACE
          * @brief The number of index that's will be rendered.
          * 
          * The render command uses this value to tell the underlying render system how many indices will be rendered.
-         * This is equal to @c m_numIndex by default unless it was changed by the @c SetDrawCount function.
+         * This is equal to @c m_numIndex by default unless it was changed by the @c SetNumIndexDraw function.
          */
-        uint32_t m_drawCount = 0;
+        uint32_t m_numIndexDraw = 0;
         bool m_hasBuilt = false;
         BufferUsage m_usage = BufferUsage::StaticDraw;
         FrontFace m_frontFace = FrontFace::CounterClockWise;

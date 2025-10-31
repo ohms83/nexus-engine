@@ -122,7 +122,7 @@ namespace
 
                 m_indexBuffer->Bind();
                 m_indexBuffer->CopyData(m_indices.data(), sizeof(uint32_t) * m_indices.size(), 0);
-                m_indexBuffer->SetDrawCount(m_indices.size());
+                m_indexBuffer->SetNumIndexDraw(m_indices.size());
                 RenderCommand command = {
                     gpuProgram,
                     m_vertexBuffer,

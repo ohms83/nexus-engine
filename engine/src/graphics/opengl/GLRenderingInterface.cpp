@@ -153,7 +153,7 @@ void GLRenderingInterface::DrawIndexed(const Ref<IndexBuffer> indexBuffer)
         rmt_ScopedOpenGLSample(glDrawElements);
         CALL_GL_FUNC(glDrawElements(
             gl_drawMode,      // mode
-            CAST<GLsizei>(indexBuffer->GetDrawCount()),    // count
+            CAST<GLsizei>(indexBuffer->GetNumIndexDraw()),    // count
             GL_UNSIGNED_INT,   // type
             R_CAST<void*>(0)           // element array buffer offset
         ));
@@ -175,7 +175,7 @@ void GLRenderingInterface::Draw_Internal(const RenderCommand& command)
         rmt_ScopedOpenGLSample(glDrawElements);
         CALL_GL_FUNC(glDrawElements(
             gl_drawMode,      // mode
-            CAST<GLsizei>(command.indexBuffer->GetDrawCount()),    // count
+            CAST<GLsizei>(command.indexBuffer->GetNumIndexDraw()),   // count
             GL_UNSIGNED_INT,   // type
             R_CAST<void*>(0)           // element array buffer offset
         ));
