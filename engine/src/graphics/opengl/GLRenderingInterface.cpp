@@ -137,6 +137,29 @@ TextureProxy* GLRenderingInterface::CreateTexture() const
     return new GLTexture();
 }
 
+void GLRenderingInterface::DrawIndexed(const Ref<IndexBuffer> indexBuffer)
+{
+    rmt_ScopedCPUSample(GLRendering_DrawIndexed, 0);
+    NXS_ASSERT(indexBuffer != nullptr);
+    if (!indexBuffer->IsBinding()) indexBuffer->Bind();
+
+    CALL_GL_FUNC(glFrontFace(GL::NxsFrontFaceToGL(indexBuffer->GetFrontFace())));
+
+    // ReSharper disable once CppDFANullDereference
+    const GLuint gl_drawMode = GL::NxsDrawModeToGL(indexBuffer->GetDrawMode());
+    NXS_ASSERT_MSG(gl_drawMode != GL_QUADS, "GL_QUADS is not a valid primitive type.")
+    
+    {
+        rmt_ScopedOpenGLSample(glDrawElements);
+        CALL_GL_FUNC(glDrawElements(
+            gl_drawMode,      // mode
+            CAST<GLsizei>(indexBuffer->GetDrawCount()),    // count
+            GL_UNSIGNED_INT,   // type
+            R_CAST<void*>(0)           // element array buffer offset
+        ));
+    }
+}
+
 void GLRenderingInterface::Draw_Internal(const RenderCommand& command)
 {
     const auto indexBuffer = command.indexBuffer;

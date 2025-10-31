@@ -21,6 +21,8 @@
 
 #include "Remotery.h"
 
+#define DRAW_COMMAND 0
+
 // Shader sources
 static const char* s_depthVertexShader = R"(
 #version 330 core
@@ -50,15 +52,15 @@ USING_NAMESPACE_NXS;
 
 DEFINE_LOG(BasicSceneRenderer);
 
-static void SetAmbientLightParams(RenderCommand& command, const entt::registry& registry)
+static void SetAmbientLightParams(Ref<GpuProgram> gpuProgram, const entt::registry& registry)
 {
     rmt_ScopedCPUSample(SceneRenderer_SetAmbientLightParams, 0);
     const auto ambientLightEnt = registry.view<AmbientLightComponent>().front();
     const auto color = ambientLightEnt == entt::null ? Color3F::Grey : registry.get<AmbientLightComponent>(ambientLightEnt).color;
-    command.uniformVec3.emplace_back("_AmbientLight", color);
+    gpuProgram->SetUniformVector("_AmbientLight", color);
 }
 
-static void SetDirectLightParams(RenderCommand& command, const entt::registry& registry)
+static void SetDirectLightParams(Ref<GpuProgram> gpuProgram, const entt::registry& registry)
 {
     rmt_ScopedCPUSample(SceneRenderer_SetDirectLightParams, 0);
     int32 numLight = 0;
@@ -73,18 +75,18 @@ static void SetDirectLightParams(RenderCommand& command, const entt::registry& r
         const auto uniformLocationCutoff = std::format("{}.properties.cutoff", uniformLocation);
         const auto uniformLocationDirection = std::format("{}.direction", uniformLocation);
 
-        command.uniformVec3.emplace_back(uniformLocationColor, light.properties.color);
-        command.uniformVec3.emplace_back(uniformLocationDirection, light.direction);
-        command.uniformFloats.emplace_back(uniformLocationDiffuse, light.properties.diffuseIntensity);
-        command.uniformFloats.emplace_back(uniformLocationSpecular, light.properties.specularIntensity);
-        command.uniformFloats.emplace_back(uniformLocationCutoff, light.properties.cutoffRange);
+        gpuProgram->SetUniformVector(uniformLocationColor, light.properties.color);
+        gpuProgram->SetUniformVector(uniformLocationDirection, light.direction);
+        gpuProgram->SetUniformFloat(uniformLocationDiffuse, light.properties.diffuseIntensity);
+        gpuProgram->SetUniformFloat(uniformLocationSpecular, light.properties.specularIntensity);
+        gpuProgram->SetUniformFloat(uniformLocationCutoff, light.properties.cutoffRange);
 
         numLight++;
     }
-    command.uniformInts.emplace_back("_NumDirectLight", numLight);
+    gpuProgram->SetUniformInt("_NumDirectLight", numLight);
 }
 
-static void SetPointLightParams(RenderCommand& command, const entt::registry& registry)
+static void SetPointLightParams(Ref<GpuProgram> gpuProgram, const entt::registry& registry)
 {
     rmt_ScopedCPUSample(SceneRenderer_SetPointLightParams, 0);
     int32 numLight = 0;
@@ -105,19 +107,19 @@ static void SetPointLightParams(RenderCommand& command, const entt::registry& re
         rmt_EndCPUSample();
 
         rmt_BeginCPUSample(EmplaceUniformValues, 0);
-        command.uniformVec3.emplace_back(uniformLocationPosition, position.value);
-        command.uniformVec3.emplace_back(uniformLocationColor, light.properties.color);
-        command.uniformFloats.emplace_back(uniformLocationDiffuse, light.properties.diffuseIntensity);
-        command.uniformFloats.emplace_back(uniformLocationSpecular, light.properties.specularIntensity);
-        command.uniformFloats.emplace_back(uniformLocationCutOff, light.properties.cutoffRange);
-        command.uniformFloats.emplace_back(uniformLocationConst, light.constant);
-        command.uniformFloats.emplace_back(uniformLocationLinear, light.linear);
-        command.uniformFloats.emplace_back(uniformLocationQuad, light.quadratic);
+        gpuProgram->SetUniformVector(uniformLocationPosition, position.value);
+        gpuProgram->SetUniformVector(uniformLocationColor, light.properties.color);
+        gpuProgram->SetUniformFloat(uniformLocationDiffuse, light.properties.diffuseIntensity);
+        gpuProgram->SetUniformFloat(uniformLocationSpecular, light.properties.specularIntensity);
+        gpuProgram->SetUniformFloat(uniformLocationCutOff, light.properties.cutoffRange);
+        gpuProgram->SetUniformFloat(uniformLocationConst, light.constant);
+        gpuProgram->SetUniformFloat(uniformLocationLinear, light.linear);
+        gpuProgram->SetUniformFloat(uniformLocationQuad, light.quadratic);
         rmt_EndCPUSample();
 
         numLight++;
     }
-    command.uniformInts.emplace_back("_NumPointLight", numLight);
+    gpuProgram->SetUniformInt("_NumPointLight", numLight);
 }
 
 static bool IsSphereInside(const Frustum& viewFustrum, const Sphere& sphere, glm::mat4 modelMtx, const glm::vec3& scale)
@@ -139,6 +141,8 @@ BasicSceneRenderer::BasicSceneRenderer(const RenderSystem& renderSystem)
 void BasicSceneRenderer::Render(RenderSystem& renderSystem, const entt::registry& registry)
 {
     m_commandBuffer.clear();
+
+    auto renderingInterface = renderSystem.GetRenderInterface();
 
     // ReSharper disable once CppTooWideScopeInitStatement
     const auto cameraView = registry.view<SceneNodeComponent, CameraProperties, PositionComponent, OrientationComponent>();
@@ -168,25 +172,23 @@ void BasicSceneRenderer::Render(RenderSystem& renderSystem, const entt::registry
 
             if (!IsSphereInside(viewFrustum, sphere, modelMtx, scale.value)) continue;
 
-            rmt_BeginCPUSample(SceneRenderer_CreateDrawCommand, 0)
+            rmt_BeginCPUSample(SceneRenderer_RenderMeshes, 0)
+            for (auto mesh : model.model->GetMeshes())
             {
-                model.model->CreateDrawCommand(m_commandBuffer);
-                for (auto& command : m_commandBuffer)
-                {
-                    rmt_ScopedCPUSample(SceneRenderer_SetCommandParams, 0);
+                auto material = mesh->GetMaterial();
+                material->Use();
 
-                    // TODO: Fix this!
-                    // if (!IsSphereInside(viewFrustum, command.sphere, modelMtx, scale.value)) continue;
+                auto gpuProgram = material->GetShader()->GetGpuProgram();
+                gpuProgram->SetUniformMatrix("_Model", modelMtx, false);
+                gpuProgram->SetUniformMatrix("_View", viewMtx, false);
+                gpuProgram->SetUniformMatrix("_Projection", projection, false);
 
-                    command.uniformMatrices.emplace("_Model", modelMtx);
-                    command.uniformMatrices.emplace("_View", viewMtx);
-                    command.uniformMatrices.emplace("_Projection", projection);
+                SetAmbientLightParams(gpuProgram, registry);
+                SetDirectLightParams(gpuProgram, registry);
+                SetPointLightParams(gpuProgram, registry);
 
-                    SetAmbientLightParams(command, registry);
-                    SetDirectLightParams(command, registry);
-                    SetPointLightParams(command, registry);
-                }
-                renderSystem.RegisterDrawCommands(m_commandBuffer.begin(), m_commandBuffer.end());
+                mesh->GetVertexBuffer()->Bind();
+                renderingInterface->DrawIndexed(mesh->GetIndexBuffer());
             }
             rmt_EndCPUSample();
         }

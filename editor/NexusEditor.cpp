@@ -20,6 +20,8 @@ static nxs::Ref<nxs::Camera> InitCamera(nxs::Scene& scene)
     auto camera = scene.EmplaceChild<nxs::Camera>("Camera Node");
     camera->Position().value = {0, 50, 0};
     camera->LookAt({0, 50, -10}, {0, 1, 0});
+    // camera->Position().value = {0, 0, 5};
+    // camera->LookAt({0, 0, 0}, {0, 1, 0});
     camera->Properties().farZ = 10000.f;
     camera->AddComponent<nxs::MoveComponent>(nxs::MoveComponent {
         glm::vec3(0, 0, 0),

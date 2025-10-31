@@ -117,6 +117,8 @@ void Material::Use()
     auto gpuProgram = m_shader->GetGpuProgram();
     NXS_ASSERT(gpuProgram);
 
+    if (!gpuProgram->IsBinding()) gpuProgram->Bind();
+
     gpuProgram->SetUniformVector("_Material.ambient", ambient);
     gpuProgram->SetUniformVector("_Material.diffuse", diffuse);
     gpuProgram->SetUniformVector("_Material.specular", specular);
