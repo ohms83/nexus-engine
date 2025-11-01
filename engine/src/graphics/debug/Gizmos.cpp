@@ -108,13 +108,13 @@ namespace
         {
             return m_indices.size();
         }
-
-        void GenerateDrawCommands(RenderSystem& renderSystem, Ref<GpuProgram> gpuProgram, const glm::mat4& cameraMtx)
+        
+        void DrawIndexed(RenderingInterface& renderInterface)
         {
             if (!m_indices.empty())
             {
                 if (m_newMaxVertex > 0 || m_newMaxIndex > 0) {
-                    GenerateBuffers(*renderSystem.GetRenderInterface());
+                    GenerateBuffers(renderInterface);
                 }
 
                 m_vertexBuffer->Bind();
@@ -123,18 +123,8 @@ namespace
                 m_indexBuffer->Bind();
                 m_indexBuffer->CopyData(m_indices.data(), sizeof(uint32_t) * m_indices.size(), 0);
                 m_indexBuffer->SetNumIndexDraw(m_indices.size());
-                RenderCommand command = {
-                    gpuProgram,
-                    m_vertexBuffer,
-                    m_indexBuffer,
-                    // Matrices
-                    {
-                        {"_Model", glm::mat4(1)},
-                        {"_CameraMtx", cameraMtx},
-                    },
-                };
-                command.depthFunction = DepthFunction::Always;
-                renderSystem.RegisterDrawCommand(command, RenderPass::Gizmo);
+
+                renderInterface.DrawIndexed(m_indexBuffer);
             }
         }
 
@@ -231,9 +221,16 @@ void Gizmos::Clear()
 void Gizmos::ProcessDraw(RenderSystem& renderSystem, const glm::mat4& cameraMtx)
 {
     rmt_ScopedCPUSample(DrawGizmos, 0);
+    auto& renderInterface = *renderSystem.GetRenderInterface();
+    renderInterface.SetDepthFunction(DepthFunction::Always);
+
+    s_gpuProgram->Bind();
+    s_gpuProgram->SetUniformMatrix("_Model", glm::mat4(1), false);
+    s_gpuProgram->SetUniformMatrix("_CameraMtx", cameraMtx, false);
+
     for (auto [index, vertexData] : s_vertexDataList)
     {
-        vertexData->GenerateDrawCommands(renderSystem, s_gpuProgram, cameraMtx);
+        vertexData->DrawIndexed(renderInterface);
     }
 }
 

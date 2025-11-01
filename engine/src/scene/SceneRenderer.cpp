@@ -179,6 +179,7 @@ void BasicSceneRenderer::Render(RenderSystem& renderSystem, const entt::registry
 
     // Storing mesh's model matrix for the rendering phase.
     std::vector<glm::mat4> modelMatrices;
+    auto renderInterface = renderSystem.GetRenderInterface();
 
     // ReSharper disable once CppTooWideScopeInitStatement
     const auto cameraView = registry.view<SceneNodeComponent, CameraProperties, PositionComponent, OrientationComponent>();
@@ -244,6 +245,8 @@ void BasicSceneRenderer::Render(RenderSystem& renderSystem, const entt::registry
                     // LOG_DEBUG(LogBasicSceneRenderer, std::format("Switch material={}", material->GetPath()));
                     material->Use();
                     usingMaterial = material.get();
+
+                    renderInterface->SetDepthFunction(material->depthFunction);
 
                     auto gpuProgram = material->GetShader()->GetGpuProgram();
                     gpuProgram->SetUniformMatrix("_Model", *modelMtx, false);
