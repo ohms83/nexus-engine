@@ -61,19 +61,14 @@ public:
         glm::mat4 view = glm::mat4(1.0f); // Identity for 2D
         glm::mat4 projection = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f); // Ortho for 2D
 
-        const nxs::RenderCommand renderCommand
-        {
-            m_gpuProgram,
-            m_vertexBuffer,
-            m_indexBuffer,
-            {
-                {"model", model},
-                {"view", view},
-                {"projection", projection},
-            }
-        };
+        m_gpuProgram->Bind();
+        m_gpuProgram->SetUniformMatrix("model", model, false);
+        m_gpuProgram->SetUniformMatrix("view", view, false);
+        m_gpuProgram->SetUniformMatrix("projection", projection, false);
 
-        renderSystem.RegisterDrawCommand(renderCommand);
+        m_vertexBuffer->Bind();
+        m_indexBuffer->Bind();
+        renderSystem.DrawIndexed(m_indexBuffer);
     }
 
 protected:

@@ -45,9 +45,6 @@ NXS_NAMESPACE
         void EnableDrawBuffer(DrawBuffer buffer) override;
 
     protected:
-        void Draw_Internal(const RenderCommand& command) override;
-
-    protected:
         SDL_Window* m_window = nullptr;
     };
 }

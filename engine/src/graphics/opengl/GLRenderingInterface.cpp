@@ -160,28 +160,6 @@ void GLRenderingInterface::DrawIndexed(const Ref<IndexBuffer> indexBuffer)
     }
 }
 
-void GLRenderingInterface::Draw_Internal(const RenderCommand& command)
-{
-    const auto indexBuffer = command.indexBuffer;
-    NXS_ASSERT(indexBuffer != nullptr);
-
-    CALL_GL_FUNC(glFrontFace(GL::NxsFrontFaceToGL(indexBuffer->GetFrontFace())));
-
-    // ReSharper disable once CppDFANullDereference
-    const GLuint gl_drawMode = GL::NxsDrawModeToGL(indexBuffer->GetDrawMode());
-    NXS_ASSERT_MSG(gl_drawMode != GL_QUADS, "GL_QUADS is not a valid primitive type.")
-    
-    {
-        rmt_ScopedOpenGLSample(glDrawElements);
-        CALL_GL_FUNC(glDrawElements(
-            gl_drawMode,      // mode
-            CAST<GLsizei>(command.indexBuffer->GetNumIndexDraw()),   // count
-            GL_UNSIGNED_INT,   // type
-            R_CAST<void*>(0)           // element array buffer offset
-        ));
-    }
-}
-
 void GLRenderingInterface::OnResize(const uint32_t pixel_w, const uint32_t pixel_h)
 {
     CALL_GL_FUNC(glViewport(0, 0, INT_CAST(pixel_w), INT_CAST(pixel_h)));

@@ -90,12 +90,6 @@ NXS_NAMESPACE
         //! Create a default shader based on the material properties.
         void CreateDefaultShader(const Ref<RenderingInterface>& renderingInterface);
 
-        /**
-         * Write this material's properties to the given command.
-         * @param command
-         */
-        void WriteRenderCommand(RenderCommand& command);
-
         size_t TextureCount() const { return m_textures.size(); }
 
         void Use();

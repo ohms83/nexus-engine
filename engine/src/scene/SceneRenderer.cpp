@@ -174,7 +174,8 @@ BasicSceneRenderer::BasicSceneRenderer(const RenderSystem& renderSystem)
 
 void BasicSceneRenderer::Render(RenderSystem& renderSystem, const entt::registry& registry)
 {
-    m_commandBuffer.clear();
+    rmt_ScopedCPUSample(SceneRenderer_Render, 0);
+
     s_sortedMeshes.clear();
 
     // Storing mesh's model matrix for the rendering phase.
@@ -198,12 +199,13 @@ void BasicSceneRenderer::Render(RenderSystem& renderSystem, const entt::registry
 
         const auto viewProjMtx = projection * viewMtx;
         const auto viewFrustum = Frustum::CreateViewFrustum(viewProjMtx);
-        for (const auto view = registry.view<SceneNodeComponent, ModelComponent, PositionComponent, OrientationComponent, ScaleComponent>(); const auto& [entity, sceneNode, model, position, orient, scale] : view.each())
+        for (const auto view = registry.view<SceneNodeComponent, ModelComponent, PositionComponent, OrientationComponent, ScaleComponent>(); const auto& [entity, sceneNode, modelComp, position, orient, scale] : view.each())
         {
-            if (!sceneNode.active || !model.model) continue;
+            auto model = modelComp.model;
+            if (!sceneNode.active || !model) continue;
 
             const glm::mat4& modelMtx = modelMatrices.emplace_back(Matrix::CreateModelMatrix(position.value, orient.quat, scale.value));
-            const auto& sphere = model.model->GetBoundingSphere();
+            const auto& sphere = model->GetBoundingSphere();
             // TODO: Handle non-uniform scaling.
             const float scaledRadius = sphere.radius * scale.value.x;
 
@@ -211,7 +213,7 @@ void BasicSceneRenderer::Render(RenderSystem& renderSystem, const entt::registry
 
             rmt_BeginCPUSample(SceneRenderer_CreateSortList, 0)
             const auto mvpMtx = projection * viewMtx * modelMtx;
-            for (auto mesh : model.model->GetMeshes())
+            for (auto mesh : model->GetMeshes())
             {
                 const auto material = mesh->GetMaterial();
                 const auto meshSphere = mesh->GetSphere();

@@ -39,59 +39,6 @@ Ref<RenderingInterface> RenderingInterface::Create(WindowContext window, const G
     return result;
 }
 
-void RenderingInterface::Draw(const RenderCommand& command)
-{
-    rmt_ScopedCPUSample(RenderInterface_Draw, 0);
-    NXS_ASSERT(command.shader);
-    NXS_ASSERT(command.vertexBuffer);
-    NXS_ASSERT(command.indexBuffer);
-
-    auto shader = m_globalShader ? m_globalShader : command.shader;
-    shader->Bind();
-    for (const auto& [name, mtx] : command.uniformMatrices)
-    {
-        shader->SetUniformMatrix(name, mtx, false);
-    }
-
-    for (const auto& [name, textureUnit, texture] : command.uniform2DTextures)
-    {
-        shader->SetUniformTexture2D(name, texture, textureUnit);
-    }
-
-    for (const auto& [name, uVec3] : command.uniformVec3)
-    {
-        shader->SetUniformVector(name, uVec3);
-    }
-
-    for (const auto& [name, uVec4] : command.uniformVec4)
-    {
-        shader->SetUniformVector(name, uVec4);
-    }
-
-    for (const auto& [name, value] : command.uniformFloats)
-    {
-        shader->SetUniformFloat(name, value);
-    }
-
-    for (const auto& [name, value] : command.uniformInts)
-    {
-        shader->SetUniformInt(name, value);
-    }
-
-    command.vertexBuffer->Bind();
-    command.indexBuffer->Bind();
-
-    Draw_Internal(command);
-
-    for (const auto& [name, textureUnit, texture] : command.uniform2DTextures)
-    {
-        texture->Unbind();
-    }
-    command.shader->Unbind();
-    command.vertexBuffer->Unbind();
-    command.indexBuffer->Unbind();
-}
-
 RenderingInterface::~RenderingInterface()
 {
     LOG_INFO(LogRenderingInterface, "~RenderingInterface()");

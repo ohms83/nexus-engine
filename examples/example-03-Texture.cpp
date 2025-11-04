@@ -56,22 +56,17 @@ public:
 
         glm::mat4 projection = glm::perspective(glm::radians(m_camera.fov), m_camera.width / m_camera.height, m_camera.nearZ, m_camera.farZ);
 
-        const nxs::RenderCommand renderCommand
-        {
-            m_gpuProgram,
-            m_mesh->GetVertexBuffer(),
-            m_mesh->GetIndexBuffer(),
-            {
-                {"model", m_cubeTransform.GetMatrix()},
-                {"view", view},
-                {"projection", projection},
-            },
-            {
-                { "ourTexture", 0, m_texture->GetProxy() }
-            }
-        };
+        m_gpuProgram->Bind();
+        m_gpuProgram->SetUniformMatrix("model", m_cubeTransform.GetMatrix(), false);
+        m_gpuProgram->SetUniformMatrix("view", view, false);
+        m_gpuProgram->SetUniformMatrix("projection", projection, false);
+        m_gpuProgram->SetUniformTexture2D("ourTexture", m_texture->GetProxy(), 0);
 
-        renderSystem.RegisterDrawCommand(renderCommand);
+        auto vertexBuffer = m_mesh->GetVertexBuffer();
+        auto indexBuffer = m_mesh->GetIndexBuffer();
+        vertexBuffer->Bind();
+        indexBuffer->Bind();
+        renderSystem.DrawIndexed(indexBuffer);
     }
 
 protected:

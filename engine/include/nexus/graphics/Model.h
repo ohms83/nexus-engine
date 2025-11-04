@@ -48,8 +48,6 @@ NXS_NAMESPACE
             return m_sphere;
         }
 
-        void CreateDrawCommand(std::vector<RenderCommand>& commandBuffer) const;
-
         std::string DumpStats() const;
 
     private:

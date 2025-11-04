@@ -33,6 +33,5 @@ NXS_NAMESPACE
         void RenderDepthPrePass(RenderSystem& renderSystem, const entt::registry& registry);
     private:
         Ref<Shader> m_depthShader;
-        std::vector<RenderCommand> m_commandBuffer;
     };
 }

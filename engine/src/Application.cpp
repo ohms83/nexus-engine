@@ -199,7 +199,6 @@ int Application::BeginMainLoop()
 
             // Render the scene
             Render(*m_renderSystem);
-            m_renderSystem->Draw();
 
             BeginDrawUI();
 

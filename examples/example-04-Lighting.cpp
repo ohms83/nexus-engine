@@ -109,33 +109,25 @@ public:
                                     );
 
         glm::mat4 projection = glm::perspective(glm::radians(m_camera.fov), m_camera.width / m_camera.height, m_camera.nearZ, m_camera.farZ);
-        nxs::RenderCommand renderCommand
-        {
-            m_gpuProgram,
-            m_cubeMesh->GetVertexBuffer(),
-            m_cubeMesh->GetIndexBuffer(),
-            {
-                {"model", model},
-                {"view", view},
-                {"projection", projection},
-            },
-            {
-                { "u_DiffuseMap", 0, m_texture->GetProxy() },
-            },
-            {
-                { "u_Ambient", m_ambient },
-                { "u_DirectLight.position", m_directionalLight.direction },
-                { "u_DirectLight.diffuse", m_directionalLight.properties.color },
-                { "u_PointLights[0].position", m_lightPositions[0] },
-                { "u_PointLights[0].diffuse", m_pointLights[0].properties.color },
-                { "u_PointLights[1].position", m_lightPositions[1] },
-                { "u_PointLights[1].diffuse", m_pointLights[1].properties.color },
-            }
-        };
-        renderCommand.uniformFloats.emplace_back("u_PointLights[0].cutoff", m_pointLights[0].properties.cutoffRange);
-        renderCommand.uniformFloats.emplace_back("u_PointLights[1].cutoff", m_pointLights[1].properties.cutoffRange);
 
-        renderSystem.RegisterDrawCommand(renderCommand);
+        m_gpuProgram->Bind();
+        m_gpuProgram->SetUniformMatrix("model", model, false);
+        m_gpuProgram->SetUniformMatrix("view", view, false);
+        m_gpuProgram->SetUniformMatrix("projection", projection, false);
+
+        m_gpuProgram->SetUniformTexture2D("u_DiffuseMap", m_texture->GetProxy(), 0);
+
+        m_gpuProgram->SetUniformVector("u_Ambient", m_ambient);
+        m_gpuProgram->SetUniformVector("u_DirectLight.position", m_directionalLight.direction);
+        m_gpuProgram->SetUniformVector("u_DirectLight.diffuse", m_directionalLight.properties.color);
+        m_gpuProgram->SetUniformVector("u_PointLights[0].position", m_lightPositions[0]);
+        m_gpuProgram->SetUniformVector("u_PointLights[0].diffuse", m_pointLights[0].properties.color);
+        m_gpuProgram->SetUniformVector("u_PointLights[1].position", m_lightPositions[1]);
+        m_gpuProgram->SetUniformVector("u_PointLights[1].diffuse", m_pointLights[1].properties.color );
+
+        m_cubeMesh->GetVertexBuffer()->Bind();
+        m_cubeMesh->GetIndexBuffer()->Bind();
+        renderSystem.DrawIndexed(m_cubeMesh->GetIndexBuffer());
     }
 
     void DrawUI() override

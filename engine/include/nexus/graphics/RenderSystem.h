@@ -22,8 +22,6 @@ NXS_NAMESPACE
     class RenderSystem final
     {
     public:
-        using CommandBuffer = std::vector<RenderCommand>;
-
         explicit RenderSystem(WindowContext window, const GraphicsConfig& config);
         ~RenderSystem();
 
@@ -61,9 +59,6 @@ NXS_NAMESPACE
 
         //! An event handler called when the window resize event occured.
         void OnResize(uint32_t pixel_w, uint32_t pixel_h);
-
-        void RegisterDrawCommand(const RenderCommand& command, RenderPass pass = RenderPass::Opaque);
-        void RegisterDrawCommands(const CommandBuffer::iterator& begin, const CommandBuffer::iterator& end, RenderPass pass = RenderPass::Opaque);
 
         NODISCARD Ref<RenderingInterface> GetRenderInterface() const
         {
@@ -110,7 +105,6 @@ NXS_NAMESPACE
         Ref<RenderingInterface> m_renderingInterface;
         Color4F m_clearColor = Color4F::White;
         float m_clearDepth = 1.0f;
-        std::array<CommandBuffer, INT_CAST(RenderPass::Num)> m_renderCommands;
 
         uint32 m_frameIndex = 0;
         uint32 m_drawCount = 0;

@@ -81,31 +81,6 @@ bool Material::HasTextureType(TextureType type) const
     return itr != m_textures.end();
 }
 
-void Material::WriteRenderCommand(RenderCommand& command)
-{
-    rmt_ScopedCPUSample(Material_WriteRenderCommand, 0);
-    if (!m_shader)
-    {
-        LOG_WARNING(LogMaterial, std::format("Material does not have a shader"));
-        return;
-    }
-
-    command.uniformVec3.emplace_back("_Material.ambient", ambient);
-    command.uniformVec3.emplace_back("_Material.diffuse", diffuse);
-    command.uniformVec3.emplace_back("_Material.specular", specular);
-    command.uniformVec3.emplace_back("_Material.emissive", emissive);
-    command.uniformFloats.emplace_back("_Material.shininess", shininess);
-
-    uint32 slot = 0;
-    for (const auto& textureInfo : m_textures)
-    {
-        command.uniform2DTextures.emplace_back(
-            textureInfo.uniformName,
-            slot++,
-            textureInfo.texture->GetProxy());
-    }
-}
-
 void Material::Use()
 {
     if (!m_shader)
