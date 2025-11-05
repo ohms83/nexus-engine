@@ -1,0 +1,32 @@
+#pragma once
+
+#include "SceneNode3D.h"
+#include "component/ModelComponent.h"
+
+#include "nexus/graphics/Model.h"
+#include "nexus/graphics/ModelManager.h"
+
+NXS_NAMESPACE
+{
+    class ModelNode : public SceneNode3D
+    {
+    public:
+        ModelNode(Ref<entt::registry> registry);
+        ModelNode(Ref<entt::registry> registry, const std::string& name);
+        ModelNode(Ref<entt::registry> registry, Ref<Model> model);
+        virtual ~ModelNode() = default;
+
+        bool IsModelReady() const { return GetModel() != nullptr; }
+        void SetModel(Ref<Model> model);
+
+        Ref<const Model> GetModel() const
+        {
+            return GetComponent<ModelComponent>().model;
+        }
+        
+        Ref<Model> GetModel()
+        {
+            return GetComponent<ModelComponent>().model;
+        }
+    };
+}

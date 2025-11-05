@@ -98,9 +98,10 @@ void NexusEditor::InitModel()
             LOG_INFO(LogTemp, std::format("Finished loading model {}", loadResult->path));
 
             auto scene = nxs::Engine::Instance().GetSceneManager()->GetCurrentScene();
-            auto node = scene->EmplaceChild<nxs::SceneNode3D>("Model");
             auto model = PTR_CAST<nxs::Model>(loadResult->resource);
-            node->AddComponent<nxs::ModelComponent>().model = model;
+            auto path = std::filesystem::path(model->GetPath());
+            auto node = scene->EmplaceChild<nxs::ModelNode>(path.filename().string());
+            node->SetModel(model);
             return false;
         }
         else if (status == nxs::IResourceLoader::LoadResult::Status::Failed)
