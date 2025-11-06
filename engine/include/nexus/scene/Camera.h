@@ -8,7 +8,7 @@
 #include "nexus/geom/Frustum.h"
 
 #include "SceneNode.h"
-#include "component/CameraProperties.h"
+#include "component/CameraComponent.h"
 #include "component/TransformComponent.h"
 
 NXS_NAMESPACE
@@ -22,8 +22,8 @@ NXS_NAMESPACE
         IMPLEMENT_REFLECTION(Camera);
         void AcceptReflector(IReflector& reflector);
 
-        CameraProperties& Properties() { return GetComponent<CameraProperties>(); }
-        const CameraProperties& Properties() const { return GetComponent<CameraProperties>(); }
+        CameraComponent& Properties() { return GetComponent<CameraComponent>(); }
+        const CameraComponent& Properties() const { return GetComponent<CameraComponent>(); }
 
         NODISCARD PositionComponent& Position() { return GetComponent<PositionComponent>(); }
         NODISCARD const PositionComponent& Position() const { return GetComponent<PositionComponent>(); }

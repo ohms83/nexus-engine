@@ -108,7 +108,7 @@
 #include "scene/SceneRenderer.h"
 #include "scene/Script.h"
 #include "scene/Transform.h"
-#include "scene/component/CameraProperties.h"
+#include "scene/component/CameraComponent.h"
 #include "scene/component/LightComponent.h"
 #include "scene/component/ModelComponent.h"
 #include "scene/component/SceneNodeComponent.h"

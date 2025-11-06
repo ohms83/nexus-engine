@@ -281,7 +281,7 @@ private:
 protected:
     nxs::Ptr<nxs::Scene> m_scene;
     nxs::Transform m_cubeTransform;
-    nxs::CameraProperties m_camera;
+    nxs::CameraComponent m_camera;
     nxs::Ref<nxs::PointLight> m_pointLights[2] {};
     nxs::Ref<nxs::DirectionalLight> m_directionalLight;
     nxs::Color3F m_ambient {0.5, 0.5, 0.5};

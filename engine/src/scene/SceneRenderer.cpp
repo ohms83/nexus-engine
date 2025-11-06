@@ -14,7 +14,7 @@
 #include "ecs/Ecs.h"
 #include "math/Math.h"
 #include "math/Matrix.h"
-#include "scene/component/CameraProperties.h"
+#include "scene/component/CameraComponent.h"
 #include "scene/component/LightComponent.h"
 #include "scene/component/ModelComponent.h"
 #include "scene/component/SceneNodeComponent.h"
@@ -183,7 +183,7 @@ void BasicSceneRenderer::Render(RenderSystem& renderSystem, const entt::registry
     auto renderInterface = renderSystem.GetRenderInterface();
 
     // ReSharper disable once CppTooWideScopeInitStatement
-    const auto cameraView = registry.view<SceneNodeComponent, CameraProperties, PositionComponent, OrientationComponent>();
+    const auto cameraView = registry.view<SceneNodeComponent, CameraComponent, PositionComponent, OrientationComponent>();
     for (const auto& [cameraEntity, cameraNode, camera, cameraPos, cameraOrient] : cameraView.each())
     {
         if (!cameraNode.active) continue;
@@ -198,7 +198,7 @@ void BasicSceneRenderer::Render(RenderSystem& renderSystem, const entt::registry
         }
 
         const auto viewProjMtx = projection * viewMtx;
-        const auto viewFrustum = Frustum::CreateViewFrustum(cameraPos.value, cameraOrient.quat, camera.fov, camera.GetAspect(), camera.nearZ, camera.farZ);
+        const auto viewFrustum = camera.GetViewFrustum(cameraPos.value, cameraOrient.quat);
         for (const auto view = registry.view<SceneNodeComponent, ModelComponent, PositionComponent, OrientationComponent, ScaleComponent>(); const auto& [entity, sceneNode, modelComp, position, orient, scale] : view.each())
         {
             auto model = modelComp.model;

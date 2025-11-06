@@ -1,11 +1,13 @@
 #pragma once
 
-#include "nexus/NxsDefine.h"
+#include "nexus/NxsCommon.h"
 #include "nexus/graphics/GraphicsConst.h"
 
 NXS_NAMESPACE
 {
-    struct CameraProperties
+    struct Frustum;
+
+    struct CameraComponent
     {
         ProjectionType projectionType = ProjectionType::Perspective;
         /**
@@ -23,5 +25,14 @@ NXS_NAMESPACE
         float farZ = 1000.0f;
 
         float GetAspect() const { return height == 0 ? 0 : width / height; };
+
+        /**
+         * @brief Create a View Frustum in the object space.
+         * 
+         * @param cameraPos 
+         * @param cameraOrient 
+         * @return Frustum 
+         */
+        Frustum GetViewFrustum(const glm::vec3& cameraPos, const glm::quat& cameraOrient) const;
     };
 }
