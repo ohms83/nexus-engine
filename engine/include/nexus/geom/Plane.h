@@ -37,8 +37,9 @@ NXS_NAMESPACE
          */
         explicit Plane(const glm::vec3& n, const glm::vec3& p)
             : normal(glm::normalize(n))
-            , distance(glm::dot(n, p))
-        {}
+        {
+            distance = -1.f * glm::dot(normal, p);
+        }
 
         /**
          * @brief Construct a plane from an unnormalized plane vector.

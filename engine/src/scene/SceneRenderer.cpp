@@ -156,9 +156,9 @@ static void SetPointLightParams(Ref<GpuProgram> gpuProgram, const entt::registry
     gpuProgram->SetUniformInt("_NumPointLight", numLight);
 }
 
-static bool IsSphereInside(const Frustum& viewFustrum, const Sphere& sphere, glm::mat4 modelViewMtx, const glm::vec3& scale)
+static bool IsSphereInside(const Frustum& viewFustrum, const Sphere& sphere, glm::mat4 modelMtx, const glm::vec3& scale)
 {
-    const glm::vec3 pos = modelViewMtx * glm::vec4(sphere.center, 1);
+    const glm::vec3 pos = modelMtx * glm::vec4(sphere.center, 1);
     const float maxScale = std::max(std::max(scale.x, scale.y), scale.z);
     const float scaledRadius = sphere.radius * maxScale;
     return viewFustrum.IsSphereInside(pos, scaledRadius);
@@ -198,7 +198,6 @@ void BasicSceneRenderer::Render(RenderSystem& renderSystem, const entt::registry
         }
 
         const auto viewProjMtx = projection * viewMtx;
-        // const auto viewFrustum = Frustum::CreateViewFrustum(viewProjMtx);
         const auto viewFrustum = Frustum::CreateViewFrustum(cameraPos.value, cameraOrient.quat, camera.fov, camera.GetAspect(), camera.nearZ, camera.farZ);
         for (const auto view = registry.view<SceneNodeComponent, ModelComponent, PositionComponent, OrientationComponent, ScaleComponent>(); const auto& [entity, sceneNode, modelComp, position, orient, scale] : view.each())
         {
@@ -206,16 +205,15 @@ void BasicSceneRenderer::Render(RenderSystem& renderSystem, const entt::registry
             if (!sceneNode.active || !model) continue;
 
             const glm::mat4& modelMtx = modelMatrices.emplace_back(Matrix::CreateModelMatrix(position.value, orient.quat, scale.value));
-            const auto modelViewMtx = viewMtx * modelMtx;
-            const auto& sphere = model->GetBoundingSphere();
-            // TODO: Handle non-uniform scaling.
 
-            if (!IsSphereInside(viewFrustum, sphere, modelViewMtx, scale.value)) continue;
+            if (!IsSphereInside(viewFrustum, model->GetBoundingSphere(), modelMtx, scale.value)) continue;
 
             rmt_BeginCPUSample(SceneRenderer_CreateSortList, 0)
             const auto mvpMtx = projection * viewMtx * modelMtx;
             for (auto mesh : model->GetMeshes())
             {
+                if (!IsSphereInside(viewFrustum, mesh->GetSphere(), modelMtx, scale.value)) continue;
+
                 const auto material = mesh->GetMaterial();
                 const auto meshSphere = mesh->GetSphere();
                 const auto pos = mvpMtx * glm::vec4(meshSphere.center, 1);
