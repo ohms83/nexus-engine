@@ -156,11 +156,11 @@ static void SetPointLightParams(Ref<GpuProgram> gpuProgram, const entt::registry
     gpuProgram->SetUniformInt("_NumPointLight", numLight);
 }
 
-static bool IsSphereInside(const Frustum& viewFustrum, const Sphere& sphere, glm::mat4 modelMtx, const glm::vec3& scale)
+static bool IsSphereInside(const Frustum& viewFustrum, const Sphere& sphere, glm::mat4 modelViewMtx, const glm::vec3& scale)
 {
-    const glm::vec3 pos = modelMtx * glm::vec4(sphere.center, 1);
-    // TODO: Handle non-uniform scaling.
-    const float scaledRadius = sphere.radius * scale.x;
+    const glm::vec3 pos = modelViewMtx * glm::vec4(sphere.center, 1);
+    const float maxScale = std::max(std::max(scale.x, scale.y), scale.z);
+    const float scaledRadius = sphere.radius * maxScale;
     return viewFustrum.IsSphereInside(pos, scaledRadius);
 }
 
@@ -184,9 +184,9 @@ void BasicSceneRenderer::Render(RenderSystem& renderSystem, const entt::registry
 
     // ReSharper disable once CppTooWideScopeInitStatement
     const auto cameraView = registry.view<SceneNodeComponent, CameraProperties, PositionComponent, OrientationComponent>();
-    for (const auto& [cameraEntity, sceneNode, camera, cameraPos, cameraOrient] : cameraView.each())
+    for (const auto& [cameraEntity, cameraNode, camera, cameraPos, cameraOrient] : cameraView.each())
     {
-        if (!sceneNode.active) continue;
+        if (!cameraNode.active) continue;
 
         glm::mat4 viewMtx = Matrix::CreateViewMatrix(cameraPos.value, cameraOrient.quat);
         glm::mat4 projection;
@@ -198,18 +198,19 @@ void BasicSceneRenderer::Render(RenderSystem& renderSystem, const entt::registry
         }
 
         const auto viewProjMtx = projection * viewMtx;
-        const auto viewFrustum = Frustum::CreateViewFrustum(viewProjMtx);
+        // const auto viewFrustum = Frustum::CreateViewFrustum(viewProjMtx);
+        const auto viewFrustum = Frustum::CreateViewFrustum(cameraPos.value, cameraOrient.quat, camera.fov, camera.GetAspect(), camera.nearZ, camera.farZ);
         for (const auto view = registry.view<SceneNodeComponent, ModelComponent, PositionComponent, OrientationComponent, ScaleComponent>(); const auto& [entity, sceneNode, modelComp, position, orient, scale] : view.each())
         {
             auto model = modelComp.model;
             if (!sceneNode.active || !model) continue;
 
             const glm::mat4& modelMtx = modelMatrices.emplace_back(Matrix::CreateModelMatrix(position.value, orient.quat, scale.value));
+            const auto modelViewMtx = viewMtx * modelMtx;
             const auto& sphere = model->GetBoundingSphere();
             // TODO: Handle non-uniform scaling.
-            const float scaledRadius = sphere.radius * scale.value.x;
 
-            if (!IsSphereInside(viewFrustum, sphere, modelMtx, scale.value)) continue;
+            if (!IsSphereInside(viewFrustum, sphere, modelViewMtx, scale.value)) continue;
 
             rmt_BeginCPUSample(SceneRenderer_CreateSortList, 0)
             const auto mvpMtx = projection * viewMtx * modelMtx;
@@ -266,6 +267,20 @@ void BasicSceneRenderer::Render(RenderSystem& renderSystem, const entt::registry
             // LOG_DEBUG(LogBasicSceneRenderer, std::format("End Draw"));
         }
 
+        for (const auto view = registry.view<SceneNodeComponent, MeshComponent>(); const auto& [entity, sceneNode, meshComp] : view.each())
+        {
+            auto mesh = meshComp.mesh;
+            if (meshComp.showBoundingBox)
+            {
+                const auto& box = mesh->GetBox();
+                Gizmos::DrawOutlineBox(renderSystem, box.center, box.extent);
+            }
+            if (meshComp.showBoundingSphere)
+            {
+                const auto& sphere = mesh->GetSphere();
+                Gizmos::DrawOutlineSphere(renderSystem, sphere.center, sphere.radius);
+            }
+        }
         Gizmos::ProcessDraw(renderSystem, projection * viewMtx);
         // Only render from the first active camera POV.
         break;

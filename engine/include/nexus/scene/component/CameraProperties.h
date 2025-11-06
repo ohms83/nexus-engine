@@ -21,5 +21,7 @@ NXS_NAMESPACE
         float nearZ = 0.1f;
         //! Fustrum's far clipping plane.
         float farZ = 1000.0f;
+
+        float GetAspect() const { return height == 0 ? 0 : width / height; };
     };
 }
