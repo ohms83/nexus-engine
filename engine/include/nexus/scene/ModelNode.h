@@ -4,7 +4,6 @@
 #include "component/ModelComponent.h"
 
 #include "nexus/graphics/Model.h"
-#include "nexus/graphics/ModelManager.h"
 
 NXS_NAMESPACE
 {
@@ -15,6 +14,9 @@ NXS_NAMESPACE
         ModelNode(Ref<entt::registry> registry, const std::string& name);
         ModelNode(Ref<entt::registry> registry, Ref<Model> model);
         virtual ~ModelNode() = default;
+
+        IMPLEMENT_REFLECTION(ModelNode);
+        void AcceptReflector(IReflector& reflector) override;
 
         bool IsModelReady() const { return GetModel() != nullptr; }
         void SetModel(Ref<Model> model);
