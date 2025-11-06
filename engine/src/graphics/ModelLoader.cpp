@@ -396,36 +396,33 @@ void ModelLoader::ProcessTextures(const Ref<Material>& newMat, const aiMaterial*
 
 void ModelLoader::ComputeBoundingVolume(const Ref<Model>& model)
 {
-    glm::vec3 min{FLT_MAX}, max{FLT_MIN}, center{};
+    glm::vec3 min{FLT_MAX}, max{-FLT_MAX};
     for (auto& mesh : model->GetMeshes())
     {
         // Mesh's bounding sphere
         Sphere sphere;
         // Mesh's min and max bounding box's extent.
-        glm::vec3 min_v{FLT_MAX}, max_v{FLT_MIN};
+        glm::vec3 min_v{FLT_MAX}, max_v{-FLT_MAX};
         const auto vertexBuffer = mesh->GetVertexBuffer();
         const auto numVertex = vertexBuffer->VertexCount();
 
         // Find AABB
         for (auto vertexItr = vertexBuffer->begin<Vertex>(); vertexItr != vertexBuffer->end<Vertex>(); ++vertexItr)
         {
-            const auto& vertex = *vertexItr;
-            min_v = glm::min(min_v, vertex.position);
-            max_v = glm::max(max_v, vertex.position);
+            const auto& pos = (*vertexItr).position;
+            min_v = glm::min(min_v, pos);
+            max_v = glm::max(max_v, pos);
         }
 
-        const auto center = (max_v + min_v) / 2.f;
-        mesh->SetBox(Box(center, max_v - sphere.center));
-
-        // AABB and Sphere should share the same center
-        sphere.center = center;
+        sphere.center = (max_v + min_v) / 2.f;
+        mesh->SetBox(Box(sphere.center, max_v - sphere.center));
         
         // Refine the search by re-iterate every vertex again to find the tighter fit sphere
         float radius = 0;
         for (auto vertexItr = vertexBuffer->begin<Vertex>(); vertexItr != vertexBuffer->end<Vertex>(); ++vertexItr)
         {
             const auto& vertex = *vertexItr;
-            radius = std::max(radius, glm::length(center - vertex.position));
+            radius = std::max(radius, glm::length(sphere.center - vertex.position));
         }
         sphere.radius = radius;
         mesh->SetSphere(sphere);
@@ -438,7 +435,7 @@ void ModelLoader::ComputeBoundingVolume(const Ref<Model>& model)
         max = glm::max(max_v, max);
     }
 
-    center = (max + min) / 2.f;
+    glm::vec3 center = (max + min) / 2.f;
     LOG_DEBUG(LogModelLoader, std::format("center({}, {}, {}) max({}, {}, {}) min({}, {}, {})",
         center.x, center.y, center.z,
         max.x, max.y, max.z,
