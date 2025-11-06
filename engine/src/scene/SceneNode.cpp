@@ -109,24 +109,26 @@ Ref<SceneNode> SceneNode::FindNode(const SceneNode::Id id)
 {
     if (IsShuttingDown()) return nullptr;
 
-    const auto node = std::ranges::find_if(m_children, [&id](const Ref<SceneNode>& n)
+    for (const auto child : m_children)
     {
-        return n->GetId() == id;
-    });
+        if (child->GetId() == id) return child;
+        if (auto node = child->FindNode(id); node != nullptr) return node;
+    }
 
-    return node != m_children.end() ? *node : nullptr;
+    return nullptr;
 }
 
 Ref<SceneNode> SceneNode::FindNodeWithName(const std::string& name)
 {
     if (IsShuttingDown()) return nullptr;
 
-    const auto node = std::ranges::find_if(m_children, [&name](const Ref<SceneNode>& n)
+    for (const auto child : m_children)
     {
-        return n->GetName() == name;
-    });
+        if (child->GetName() == name) return child;
+        if (auto node = child->FindNodeWithName(name); node != nullptr) return node;
+    }
 
-    return node != m_children.end() ? *node : nullptr;
+    return nullptr;
 }
 
 void SceneNode::RemoveFromParent()
