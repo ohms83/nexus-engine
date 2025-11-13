@@ -18,10 +18,10 @@ namespace nxs
 
     void RotateNode(entt::registry& registry, float dt)
     {
-        const auto view = registry.view<TransformComponent, const RotationComponent>();
-        view.each([dt](TransformComponent& transform, const RotationComponent& rotation)
+        const auto view = registry.view<OrientationComponent, const RotationComponent>();
+        view.each([dt](OrientationComponent& orient, const RotationComponent& rotation)
         {
-            transform.rotation = glm::rotate(transform.rotation, glm::radians(rotation.degree * dt), rotation.axis);
+            orient.Rotate(rotation.degree * dt, rotation.axis);
         });
     }
 }

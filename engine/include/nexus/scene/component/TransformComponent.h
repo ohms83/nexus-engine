@@ -4,18 +4,12 @@
 
 #pragma once
 
-#include "nexus/NxsDefine.h"
-#include <nexus/NxsCommon.h>
+#include "nexus/NxsCommon.h"
+#include "nexus/ecs/Component.h"
+#include "nexus/math/Math.h"
 
 NXS_NAMESPACE
 {
-    struct TransformComponent
-    {
-        glm::vec3 translation;
-        glm::quat rotation;
-        glm::vec3 scale{1, 1, 1};
-    };
-
     struct PositionComponent
     {
         glm::vec3 value;
@@ -73,6 +67,9 @@ NXS_NAMESPACE
          */
         void Rotate(const float degree, const glm::vec3& axis)
         {
+            // Checks for a zero vector.
+            if (glm::all(glm::epsilonEqual(axis, glm::vec3(0), glm::vec3(FLT_EPSILON)))) return;
+
             quat = glm::rotate(quat, glm::radians(degree), axis);
             euler = glm::degrees(glm::eulerAngles(quat));
         }
@@ -112,14 +109,66 @@ NXS_NAMESPACE
         glm::vec3 value {1, 1, 1};
     };
 
-    struct MoveComponent
+    struct MoveComponent : public IComponent
     {
+        MoveComponent()
+        {
+            RegisterComponent(GetComponentID());
+        }
+
+        MoveComponent(const glm::vec3& dir, float spd) : direction(dir), speed(spd)
+        {
+            RegisterComponent(GetComponentID());
+        }
+
+        virtual ~MoveComponent() = default;
+
+        IMPLEMENT_REFLECTION(MoveComponent);
+
+        ComponentID GetComponentID() const override
+        {
+            return COMPONENT_HASH(MoveComponent);
+        }
+
+        void AcceptReflector(IReflector& reflector) override
+        {
+            reflector->ChangeCategory("Move Component");
+            reflector->VisitProperty("Direction", typeid(glm::vec3), &direction);
+            reflector->VisitProperty("Speed", typeid(float), &speed);
+        }
+
         glm::vec3 direction;
         float speed = 0;
     };
 
-    struct RotationComponent
+    struct RotationComponent : public IComponent
     {
+        RotationComponent() 
+        {
+            RegisterComponent(GetComponentID());
+        }
+
+        RotationComponent(const glm::vec3& ax, float deg) : axis(ax), degree(deg)
+        {
+            RegisterComponent(GetComponentID());
+        }
+
+        virtual ~RotationComponent() = default;
+
+        IMPLEMENT_REFLECTION(RotationComponent);
+
+        ComponentID GetComponentID() const override
+        {
+            return COMPONENT_HASH(RotationComponent);
+        }
+        
+        void AcceptReflector(IReflector& reflector) override
+        {
+            reflector->ChangeCategory("Rotation Component");
+            reflector->VisitProperty("Axis", typeid(glm::vec3), &axis);
+            reflector->VisitProperty("Degree", typeid(float), &degree);
+        }
+
         //! Rotation axis
         glm::vec3 axis;
         //! Rotation speed in degree per second
