@@ -3,6 +3,8 @@
 #include "nexus/NxsDefine.h"
 #include "entt/entt.hpp"
 
+#include <vector>
+
 NXS_NAMESPACE
 {
     /**
@@ -67,6 +69,10 @@ NXS_NAMESPACE
         template<typename Type, typename... Args>
         MAYBE_UNUSED decltype(auto) AddComponent(Args &&...args)
         {
+            if (HasComponent<Type>()) {
+                return GetComponent<Type>();
+            }
+            m_components.push_back(entt::type_id<Type>().hash());
             return  m_registry->emplace<Type>(m_entity, std::forward<Args>(args)...);
         }
 
@@ -132,6 +138,13 @@ NXS_NAMESPACE
             return  m_registry->remove<Type>(m_entity);
         }
 
+        template<typename Type>
+        NODISCARD bool HasComponent() const
+        {
+            const auto id = entt::type_id<Type>().hash();
+            return std::ranges::find(m_components, id) != m_components.end();
+        }
+
     protected:
         /**
          * @brief The unique entity handle managed by this class.
@@ -143,5 +156,10 @@ NXS_NAMESPACE
          * @brief Reference to the entity component registry that owns the entity.
          */
         Ref<entt::registry> m_registry;
+        /**
+         * @brief A list of registered components.
+         * The list ensures uniqueness and there will be no component of the same type.
+         */
+        std::vector<entt::id_type> m_components;
     };
 }
