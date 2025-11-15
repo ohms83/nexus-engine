@@ -18,7 +18,7 @@ NXS_NAMESPACE
     class IReflector
     {
     public:
-        virtual void ChangeCatetory(const std::string& name) = 0;
+        virtual void ChangeCategory(const std::string& name) = 0;
         virtual void VisitPropertyWithFeedback(const std::string& name, std::type_index type, void* value, std::function<void(void*)> callback) = 0;
         
         virtual void VisitProperty(const std::string& name, std::type_index type, void* value)

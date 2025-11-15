@@ -13,7 +13,7 @@ void MeshNode::AcceptReflector(IReflector& reflector)
     SceneNode3D::AcceptReflector(reflector);
 
     auto& meshComp = GetComponent<MeshComponent>();
-    reflector.ChangeCatetory("Mesh");
+    reflector.ChangeCategory("Mesh");
     reflector.VisitPropertyWithFeedback("Name", typeid(std::string), (void*)(meshComp.mesh->GetName().c_str()),  [](void* newValue) {
         // TODO:
     });

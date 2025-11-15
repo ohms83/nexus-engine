@@ -34,7 +34,7 @@ void ModelNode::AcceptReflector(IReflector& reflector)
 {
     SceneNode3D::AcceptReflector(reflector);
 
-    reflector.ChangeCatetory("Model");
+    reflector.ChangeCategory("Model");
 
     auto& modelComp = GetComponent<ModelComponent>();
     auto model = modelComp.model;

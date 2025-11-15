@@ -38,7 +38,7 @@ void PropertyWindow::Draw_Internal(RenderSystem& renderSystem)
     selectedNode->AcceptReflector(CAST<IReflector&>(*this));
 }
 
-void PropertyWindow::ChangeCatetory(const std::string& name)
+void PropertyWindow::ChangeCategory(const std::string& name)
 {
     ImGui::SeparatorText(name.c_str());
 }

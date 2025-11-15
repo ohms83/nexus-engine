@@ -24,12 +24,12 @@ void DirectionalLight::AcceptReflector(IReflector& reflector)
     SceneNode::AcceptReflector(reflector);
 
     auto& properties = Properties();
-    reflector.ChangeCatetory("Light");
+    reflector.ChangeCategory("Light");
     reflector.VisitProperty("Color", typeid(Color3F), &properties.color);
     reflector.VisitProperty("Diffuse Intensity", typeid(float), &properties.diffuseIntensity);
     reflector.VisitProperty("Specular Intensity", typeid(float), &properties.specularIntensity);
 
-    reflector.ChangeCatetory("Direct Light");
+    reflector.ChangeCategory("Direct Light");
     reflector.VisitProperty("Direction", typeid(glm::vec3), &Direction());
 }
 
@@ -51,18 +51,18 @@ void PointLight::AcceptReflector(IReflector& reflector)
 {
     SceneNode::AcceptReflector(reflector);
 
-    reflector.ChangeCatetory("Transform");
+    reflector.ChangeCategory("Transform");
     reflector.VisitProperty("Position", typeid(glm::vec3), &Position());
 
     auto& properties = Properties();
-    reflector.ChangeCatetory("Light");
+    reflector.ChangeCategory("Light");
     reflector.VisitProperty("Color", typeid(Color3F), &properties.color);
     reflector.VisitProperty("Diffuse Intensity", typeid(float), &properties.diffuseIntensity);
     reflector.VisitProperty("Specular Intensity", typeid(float), &properties.specularIntensity);
     reflector.VisitProperty("Cutoff", typeid(float), &properties.cutoffRange);
 
     auto& pointLight = PointLightProperties();
-    reflector.ChangeCatetory("Point Light");
+    reflector.ChangeCategory("Point Light");
     reflector.VisitProperty("Constant", typeid(float), &pointLight.constant);
     reflector.VisitProperty("Linear", typeid(float), &pointLight.linear);
     reflector.VisitProperty("Quadratic", typeid(float), &pointLight.quadratic);

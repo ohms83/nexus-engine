@@ -132,7 +132,7 @@ NXS_NAMESPACE
 
         void AcceptReflector(IReflector& reflector) override
         {
-            reflector.ChangeCatetory("Move Component");
+            reflector.ChangeCategory("Move Component");
             reflector.VisitProperty("Direction", typeid(glm::vec3), &direction);
             reflector.VisitProperty("Speed", typeid(float), &speed);
         }
@@ -164,7 +164,7 @@ NXS_NAMESPACE
         
         void AcceptReflector(IReflector& reflector) override
         {
-            reflector.ChangeCatetory("Rotation Component");
+            reflector.ChangeCategory("Rotation Component");
             reflector.VisitProperty("Axis", typeid(glm::vec3), &axis);
             reflector.VisitProperty("Degree", typeid(float), &degree);
         }

@@ -61,7 +61,7 @@ void Camera::AcceptReflector(IReflector& reflector)
 {
     SceneNode::AcceptReflector(reflector);
 
-    reflector.ChangeCatetory("Transform");
+    reflector.ChangeCategory("Transform");
     reflector.VisitProperty("Position", typeid(glm::vec3), &Position().value);
     reflector.VisitProperty("Orient", typeid(OrientationComponent), &Orient());
 
@@ -69,7 +69,7 @@ void Camera::AcceptReflector(IReflector& reflector)
     bool valueChanged = false;
     auto valueChangeCallback = [&valueChanged](void*) { valueChanged = true; };
 
-    reflector.ChangeCatetory("View Fustrum");
+    reflector.ChangeCategory("View Fustrum");
     reflector.VisitPropertyWithFeedback("FOV", typeid(float), &properties.fov, valueChangeCallback);
     reflector.VisitPropertyWithFeedback("Near", typeid(float), &properties.nearZ, valueChangeCallback);
     reflector.VisitPropertyWithFeedback("Far", typeid(float), &properties.farZ, valueChangeCallback);

@@ -20,7 +20,7 @@ NXS_NAMESPACE
         void Draw(RenderSystem& renderSystem);
         virtual void Update() {}
         
-        void ChangeCatetory(const std::string& name) override;
+        void ChangeCategory(const std::string& name) override;
         void VisitPropertyWithFeedback(const std::string& name, std::type_index type, void* value, std::function<void(void*)> callback) override;
 
     protected:

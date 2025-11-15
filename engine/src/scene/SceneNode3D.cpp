@@ -18,7 +18,7 @@ void SceneNode3D::AcceptReflector(IReflector& reflector)
 {
     SceneNode::AcceptReflector(reflector);
 
-    reflector.ChangeCatetory("Transform");
+    reflector.ChangeCategory("Transform");
     reflector.VisitProperty("Position", typeid(glm::vec3), &Position().value);
     reflector.VisitProperty("Orient", typeid(OrientationComponent), &Orient());
     reflector.VisitProperty("Scale", typeid(glm::vec3), &Scale().value);

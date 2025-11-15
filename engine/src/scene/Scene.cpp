@@ -31,7 +31,7 @@ Scene::~Scene()
 
 void Scene::AcceptReflector(IReflector& reflector)
 {
-    reflector.ChangeCatetory("Rendering");
+    reflector.ChangeCategory("Rendering");
     reflector.VisitProperty("Ambient Color", typeid(Color3F), &Ambient());
 }
 

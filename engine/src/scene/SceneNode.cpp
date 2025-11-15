@@ -40,7 +40,7 @@ void SceneNode::Destroy()
 
 void SceneNode::AcceptReflector(IReflector& reflector)
 {
-    reflector.ChangeCatetory("Properties");
+    reflector.ChangeCategory("Properties");
 
     auto& comp = GetComponent<SceneNodeComponent>();
     reflector.VisitPropertyWithFeedback("Name", typeid(std::string), (void*)(comp.name.c_str()), [&comp](void* newValue) {
