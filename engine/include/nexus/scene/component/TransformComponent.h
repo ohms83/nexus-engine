@@ -113,12 +113,12 @@ NXS_NAMESPACE
     {
         MoveComponent()
         {
-            RegisterComponent(GetComponentID());
+            RegisterComponent<MoveComponent>();
         }
 
         MoveComponent(const glm::vec3& dir, float spd) : direction(dir), speed(spd)
         {
-            RegisterComponent(GetComponentID());
+            RegisterComponent<MoveComponent>();;
         }
 
         virtual ~MoveComponent() = default;
@@ -132,9 +132,9 @@ NXS_NAMESPACE
 
         void AcceptReflector(IReflector& reflector) override
         {
-            reflector->ChangeCategory("Move Component");
-            reflector->VisitProperty("Direction", typeid(glm::vec3), &direction);
-            reflector->VisitProperty("Speed", typeid(float), &speed);
+            reflector.ChangeCatetory("Move Component");
+            reflector.VisitProperty("Direction", typeid(glm::vec3), &direction);
+            reflector.VisitProperty("Speed", typeid(float), &speed);
         }
 
         glm::vec3 direction;
@@ -145,12 +145,12 @@ NXS_NAMESPACE
     {
         RotationComponent() 
         {
-            RegisterComponent(GetComponentID());
+            RegisterComponent<RotationComponent>();
         }
 
         RotationComponent(const glm::vec3& ax, float deg) : axis(ax), degree(deg)
         {
-            RegisterComponent(GetComponentID());
+            RegisterComponent<RotationComponent>();
         }
 
         virtual ~RotationComponent() = default;
@@ -164,9 +164,9 @@ NXS_NAMESPACE
         
         void AcceptReflector(IReflector& reflector) override
         {
-            reflector->ChangeCategory("Rotation Component");
-            reflector->VisitProperty("Axis", typeid(glm::vec3), &axis);
-            reflector->VisitProperty("Degree", typeid(float), &degree);
+            reflector.ChangeCatetory("Rotation Component");
+            reflector.VisitProperty("Axis", typeid(glm::vec3), &axis);
+            reflector.VisitProperty("Degree", typeid(float), &degree);
         }
 
         //! Rotation axis

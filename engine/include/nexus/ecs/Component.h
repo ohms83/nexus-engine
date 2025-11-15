@@ -25,7 +25,7 @@ NXS_NAMESPACE
 
     protected:
         template<typename Type>
-        void RegisterComponent()
+        static void RegisterComponent()
         {
             s_componentTypes.insert(COMPONENT_HASH(Type));
         }
