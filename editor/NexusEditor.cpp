@@ -12,7 +12,6 @@
 
 DEFINE_LOG(NexusEditor);
 
-static float cameraSpeed = 2.0f;
 static nxs::SceneNode::Id selectedNode = nxs::SceneNode::InvalidID;
 
 static nxs::Ref<nxs::Camera> InitCamera(nxs::Scene& scene)
@@ -20,13 +19,9 @@ static nxs::Ref<nxs::Camera> InitCamera(nxs::Scene& scene)
     auto camera = scene.EmplaceChild<nxs::Camera>("Camera Node");
     camera->Position().value = {0, 50, 0};
     camera->LookAt({0, 50, -10}, {0, 1, 0});
-    // camera->Position().value = {0, 0, 5};
-    // camera->LookAt({0, 0, 0}, {0, 1, 0});
     camera->Properties().farZ = 10000.f;
-    camera->AddComponent<nxs::MoveComponent>(nxs::MoveComponent {
-        glm::vec3(0, 0, 0),
-        100
-    });
+    auto& moveComp = camera->AddComponent<nxs::MoveComponent>();
+    moveComp.speed = 100.f;
     return camera;
 }
 
@@ -231,8 +226,9 @@ void NexusEditor::Update()
     // Transform the translation vector into the camera's local coordinate.
     auto& cameraOrient = m_camera->Orient();
     auto& cameraPosition = m_camera->Position();
+    auto& moveComp = m_camera->GetComponent<nxs::MoveComponent>();
     translation = cameraOrient.quat * translation;
-    cameraPosition.Translate(translation * cameraSpeed * GetDeltaTime());
+    cameraPosition.Translate(translation * moveComp.speed * GetDeltaTime());
 
     glm::vec2 euler = inputManager.GetMouseAxisValue("camera_turn") * GetDeltaTime();
     glm::vec2 keyDeltaEuler = inputManager.GetAxisValue("camera_turn") * 20.f * GetDeltaTime();

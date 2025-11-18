@@ -31,6 +31,8 @@ NXS_NAMESPACE
 
         static void BeginShutdown();
 
+        static void InitModules();
+
         NODISCARD Ref<RenderSystem> GetRenderSystem() const
         {
             NXS_ASSERT_MSG(m_renderSystem != nullptr, "Render System hasn't been initialized");

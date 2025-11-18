@@ -21,6 +21,7 @@ NXS_NAMESPACE
         virtual void Update() {}
         
         void ChangeCategory(const std::string& name) override;
+        void VisitReadOnlyProperty(const std::string& name, std::type_index type, void* value) override;
         void VisitPropertyWithFeedback(const std::string& name, std::type_index type, void* value, std::function<void(void*)> callback) override;
 
     protected:

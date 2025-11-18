@@ -1,8 +1,10 @@
 #include <utility>
 
 #include "scene/SceneNode.h"
+
 #include "core/LogDispatcher.h"
 #include "core/task/OneshotTask.h"
+#include "ecs/Component.h"
 
 USING_NAMESPACE_NXS;
 
@@ -47,6 +49,19 @@ void SceneNode::AcceptReflector(IReflector& reflector)
         comp.name = CAST<const char*>(newValue);
     });
     reflector.VisitProperty("Active", typeid(bool), (void*)&comp.active);
+
+    const auto registry = GetRegistry();
+    for (const auto id : GetRegisteredComponentIDs())
+    {
+        if (!IComponent::HasRegisteredID(id)) continue;
+
+        const auto storage = registry->storage(id);
+        if (storage && storage->contains(m_entity))
+        {
+            auto componentPtr = R_CAST<IComponent*>(storage->value(m_entity));
+            componentPtr->AcceptReflector(reflector);
+        }
+    }
 }
 
 void SceneNode::Activate(const bool activate)

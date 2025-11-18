@@ -104,25 +104,25 @@ NXS_NAMESPACE
         }
     };
 
-    struct ScaleComponent
+    struct ScaleComponent : public IComponent
     {
+        IMPLEMENT_REFLECTION(ScaleComponent);
+
+        ComponentID GetComponentID() const override
+        {
+            return COMPONENT_HASH(ScaleComponent);
+        }
+
+        void AcceptReflector(IReflector& reflector) override
+        {
+            reflector.VisitProperty("Scale", typeid(glm::vec3), &value);
+        }
+
         glm::vec3 value {1, 1, 1};
     };
 
     struct MoveComponent : public IComponent
     {
-        MoveComponent()
-        {
-            RegisterComponent<MoveComponent>();
-        }
-
-        MoveComponent(const glm::vec3& dir, float spd) : direction(dir), speed(spd)
-        {
-            RegisterComponent<MoveComponent>();;
-        }
-
-        virtual ~MoveComponent() = default;
-
         IMPLEMENT_REFLECTION(MoveComponent);
 
         ComponentID GetComponentID() const override
@@ -133,7 +133,7 @@ NXS_NAMESPACE
         void AcceptReflector(IReflector& reflector) override
         {
             reflector.ChangeCategory("Move Component");
-            reflector.VisitProperty("Direction", typeid(glm::vec3), &direction);
+            reflector.VisitReadOnlyProperty("Direction", typeid(glm::vec3), &direction);
             reflector.VisitProperty("Speed", typeid(float), &speed);
         }
 
@@ -143,18 +143,6 @@ NXS_NAMESPACE
 
     struct RotationComponent : public IComponent
     {
-        RotationComponent() 
-        {
-            RegisterComponent<RotationComponent>();
-        }
-
-        RotationComponent(const glm::vec3& ax, float deg) : axis(ax), degree(deg)
-        {
-            RegisterComponent<RotationComponent>();
-        }
-
-        virtual ~RotationComponent() = default;
-
         IMPLEMENT_REFLECTION(RotationComponent);
 
         ComponentID GetComponentID() const override

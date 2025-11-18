@@ -1,8 +1,9 @@
 //
 // Created by nutta on 8/16/2025.
 //
-#include "nexus/Engine.h"
-#include "nexus/graphics/Model.h"
+#include "Engine.h"
+#include "graphics/Model.h"
+#include "scene/component/TransformComponent.h"
 #include "time/StandardTimeSource.h"
 
 USING_NAMESPACE_NXS;
@@ -31,6 +32,8 @@ Engine& Engine::Initialize(WindowContext window, const GraphicsConfig& graphicsC
         s_engine->m_materialManager);
     s_engine->m_taskScheduler = std::make_shared<TaskScheduler>(std::make_shared<StandardTimeSource>());
     s_engine->m_sceneManager =  std::make_shared<SceneManager>(s_engine->GetTaskScheduler());
+
+    InitModules();
     return *s_engine;
 }
 
@@ -48,4 +51,15 @@ Engine& Engine::Instance()
 {
     NXS_ASSERT(s_engine != nullptr);
     return *s_engine;
+}
+
+void Engine::InitModules()
+{
+    // TODO: Create each module as a plugin.
+    // Init scene modules
+    // IComponent::RegisterComponent<PositionComponent>();
+    // IComponent::RegisterComponent<OrientationComponent>();
+    // IComponent::RegisterComponent<ScaleComponent>();
+    IComponent::RegisterComponent<MoveComponent>();
+    IComponent::RegisterComponent<RotationComponent>();
 }

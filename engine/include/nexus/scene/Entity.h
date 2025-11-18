@@ -1,9 +1,9 @@
 #pragma once
 
-#include "nexus/NxsDefine.h"
-#include "entt/entt.hpp"
+#include "nexus/ecs/EcsDefine.h"
 
 #include <vector>
+#include <ranges>
 
 NXS_NAMESPACE
 {
@@ -91,7 +91,7 @@ NXS_NAMESPACE
                 return ( m_registry->emplace<Types>(m_entity), ...);
             }
             else {
-                return std::forward_as_tuple( m_registry->emplace<Types>(m_entity)...);
+                return std::forward_as_tuple(AddComponent<Types>()...);
             }
         }
 
@@ -135,7 +135,12 @@ NXS_NAMESPACE
         template<typename Type>
         MAYBE_UNUSED size_t RemoveComponent()
         {
-            return  m_registry->remove<Type>(m_entity);
+            const auto numRemoved = m_registry->remove<Type>(m_entity);
+            if (numRemoved > 0) {
+                const auto [begin, end] = std::ranges::remove(m_components, entt::type_id<Type>().hash());
+                m_components.erase(begin, end);
+            }
+            return numRemoved;
         }
 
         template<typename Type>
@@ -151,6 +156,11 @@ NXS_NAMESPACE
          */
         entt::entity m_entity{};
 
+        const std::vector<ComponentID>& GetRegisteredComponentIDs() const
+        {
+            return m_components;
+        }
+
     private:
         /**
          * @brief Reference to the entity component registry that owns the entity.
@@ -160,6 +170,6 @@ NXS_NAMESPACE
          * @brief A list of registered components.
          * The list ensures uniqueness and there will be no component of the same type.
          */
-        std::vector<entt::id_type> m_components;
+        std::vector<ComponentID> m_components;
     };
 }

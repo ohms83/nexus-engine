@@ -43,6 +43,56 @@ void PropertyWindow::ChangeCategory(const std::string& name)
     ImGui::SeparatorText(name.c_str());
 }
 
+void PropertyWindow::VisitReadOnlyProperty(const std::string& name, std::type_index type, void* value)
+{
+    const char* const c_name = name.c_str();
+
+    if (type == typeid(std::string))
+    {
+        const char* const str = (const char* const)value;
+        ImGui::LabelText(c_name, str);
+    }
+    else if (type == typeid(int32_t))
+    {
+        static char buf[24] = "";
+        snprintf(buf, sizeof(char) * 24, "%d", *(int32_t*)value);
+        ImGui::LabelText(c_name, buf);
+    }
+    else if (type == typeid(bool))
+    {
+        ImGui::Checkbox(c_name, (bool*)value);
+    }
+    else if (type == typeid(float))
+    {
+        ImGui::InputFloat(c_name, (float*)value, 0, 0, "%.6f");
+    }
+    else if (type == typeid(glm::vec2))
+    {
+        ImGui::InputFloat2(c_name, (float*)value);
+    }
+    else if (type == typeid(glm::vec3))
+    {
+        ImGui::InputFloat3(c_name, (float*)value);
+    }
+    else if (type == typeid(glm::vec4))
+    {
+        ImGui::InputFloat4(c_name, (float*)value);
+    }
+    else if (type == typeid(Color3F))
+    {
+        ImGui::ColorPicker3(c_name, (float*)value);
+    }
+    else if (type == typeid(Color4F))
+    {
+        ImGui::ColorPicker4(c_name, (float*)value);
+    }
+    else if (type == typeid(OrientationComponent))
+    {
+        auto* comp = (OrientationComponent*)value;
+        ImGui::InputFloat3(c_name, (float*)&comp->euler);
+    }
+}
+
 void PropertyWindow::VisitPropertyWithFeedback(const std::string& name, std::type_index type, void* value, std::function<void(void*)> callback)
 {
     const char* const c_name = name.c_str();

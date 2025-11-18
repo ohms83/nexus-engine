@@ -1,29 +1,33 @@
 #pragma once
 
 #include "nexus/core/Reflection.h"
+#include "EcsDefine.h"
 
-#include "entt/entt.hpp"
 #include <set>
 
 #define COMPONENT_HASH(Type) entt::type_id<Type>().hash()
 
 NXS_NAMESPACE
 {
+    using ComponentID = entt::id_type;
+
     class IComponent : public IReflection
     {
     public:
-        using ComponentID = entt::id_type;
-
         virtual ~IComponent() = default;
         virtual ComponentID GetComponentID() const = 0;
         
         template<typename Type>
-        static bool HasRegistered()
+        static bool HasRegisteredType()
         {
             return s_componentTypes.find(COMPONENT_HASH(Type)) != s_componentTypes.end();
         }
 
-    protected:
+        static bool HasRegisteredID(const ComponentID id)
+        {
+            return s_componentTypes.find(id) != s_componentTypes.end();
+        }
+
         template<typename Type>
         static void RegisterComponent()
         {

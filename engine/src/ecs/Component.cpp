@@ -2,4 +2,4 @@
 
 USING_NAMESPACE_NXS;
 
-std::set<IComponent::ComponentID> IComponent::s_componentTypes;
+std::set<nxs::ComponentID> IComponent::s_componentTypes;
