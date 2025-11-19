@@ -16,7 +16,6 @@ NXS_NAMESPACE
         virtual ~ModelNode() = default;
 
         IMPLEMENT_REFLECTION(ModelNode);
-        void AcceptReflector(IReflector& reflector) override;
 
         bool IsModelReady() const { return GetModel() != nullptr; }
         void SetModel(Ref<Model> model);

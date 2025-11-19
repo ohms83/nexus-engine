@@ -5,6 +5,7 @@
 #include "graphics/Model.h"
 #include "scene/component/TransformComponent.h"
 #include "scene/component/LightComponent.h"
+#include "scene/component/ModelComponent.h"
 #include "time/StandardTimeSource.h"
 
 USING_NAMESPACE_NXS;
@@ -68,4 +69,7 @@ void Engine::InitModules()
     IComponent::RegisterComponent<LightProperties>();
     IComponent::RegisterComponent<DirectLightComponent>();
     IComponent::RegisterComponent<PointLightComponent>();
+
+    IComponent::RegisterComponent<ModelComponent>();
+    IComponent::RegisterComponent<MeshComponent>();
 }

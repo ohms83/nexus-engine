@@ -6,6 +6,12 @@
 #include <set>
 
 #define COMPONENT_HASH(Type) entt::type_id<Type>().hash()
+#define IMPLEMENT_COMPONENT(Type) \
+    IMPLEMENT_REFLECTION(Type); \
+    ComponentID GetComponentID() const override \
+    { \
+        return COMPONENT_HASH(Type); \
+    }
 
 NXS_NAMESPACE
 {

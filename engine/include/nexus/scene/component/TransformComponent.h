@@ -12,12 +12,7 @@ NXS_NAMESPACE
 {
     struct PositionComponent : public IComponent
     {
-        IMPLEMENT_REFLECTION(PositionComponent);
-
-        ComponentID GetComponentID() const override
-        {
-            return COMPONENT_HASH(PositionComponent);
-        }
+        IMPLEMENT_COMPONENT(PositionComponent);
 
         void AcceptReflector(IReflector& reflector) override
         {
@@ -44,12 +39,7 @@ NXS_NAMESPACE
      */
     struct OrientationComponent : public IComponent
     {
-        IMPLEMENT_REFLECTION(OrientationComponent);
-
-        ComponentID GetComponentID() const override
-        {
-            return COMPONENT_HASH(OrientationComponent);
-        }
+        IMPLEMENT_COMPONENT(OrientationComponent);
 
         void AcceptReflector(IReflector& reflector) override
         {
@@ -135,12 +125,7 @@ NXS_NAMESPACE
 
     struct ScaleComponent : public IComponent
     {
-        IMPLEMENT_REFLECTION(ScaleComponent);
-
-        ComponentID GetComponentID() const override
-        {
-            return COMPONENT_HASH(ScaleComponent);
-        }
+        IMPLEMENT_COMPONENT(ScaleComponent);
 
         void AcceptReflector(IReflector& reflector) override
         {
@@ -153,12 +138,7 @@ NXS_NAMESPACE
 
     struct MoveComponent : public IComponent
     {
-        IMPLEMENT_REFLECTION(MoveComponent);
-
-        ComponentID GetComponentID() const override
-        {
-            return COMPONENT_HASH(MoveComponent);
-        }
+        IMPLEMENT_COMPONENT(MoveComponent);
 
         void AcceptReflector(IReflector& reflector) override
         {
@@ -173,12 +153,7 @@ NXS_NAMESPACE
 
     struct RotationComponent : public IComponent
     {
-        IMPLEMENT_REFLECTION(RotationComponent);
-
-        ComponentID GetComponentID() const override
-        {
-            return COMPONENT_HASH(RotationComponent);
-        }
+        IMPLEMENT_COMPONENT(RotationComponent);
         
         void AcceptReflector(IReflector& reflector) override
         {

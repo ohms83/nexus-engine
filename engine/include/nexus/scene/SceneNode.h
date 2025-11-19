@@ -30,7 +30,7 @@ NXS_NAMESPACE
         explicit SceneNode(Ref<entt::registry> registry, std::string  name);
         virtual ~SceneNode();
 
-        void AcceptReflector(IReflector& reflector);
+        void AcceptReflector(IReflector& reflector) override;
 
         void Destroy();
 

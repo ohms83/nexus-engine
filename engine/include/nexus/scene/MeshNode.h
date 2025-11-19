@@ -14,6 +14,5 @@ NXS_NAMESPACE
         MeshNode(Ref<entt::registry> registry, const std::string& name);
 
         IMPLEMENT_REFLECTION(MeshNode);
-        void AcceptReflector(IReflector& reflector) override;
     };
 }

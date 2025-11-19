@@ -23,28 +23,11 @@ ModelNode::ModelNode(Ref<entt::registry> registry, const std::string& name)
 ModelNode::ModelNode(Ref<entt::registry> registry, Ref<Model> model)
     : SceneNode3D(registry)
 {
-    AddComponent<ModelComponent>(model);
+    AddComponent<ModelComponent>().model = model;
 
     auto path = std::filesystem::path(model->GetPath());
     SetName(path.filename().string());
     SetModel(model);
-}
-
-void ModelNode::AcceptReflector(IReflector& reflector)
-{
-    SceneNode3D::AcceptReflector(reflector);
-
-    reflector.ChangeCategory("Model");
-
-    auto& modelComp = GetComponent<ModelComponent>();
-    auto model = modelComp.model;
-    auto path = model->GetPath();
-
-    reflector.VisitPropertyWithFeedback("Path", typeid(std::string), (void*)(path.c_str()), [&path](void* newValue) {
-        // TODO:
-    });
-    reflector.VisitProperty("Show Bounding Sphere", typeid(bool), &modelComp.showBoundingSphere);
-    reflector.VisitProperty("Show Bounding Box", typeid(bool), &modelComp.showBoundingBox);
 }
 
 void ModelNode::SetModel(Ref<Model> model)
