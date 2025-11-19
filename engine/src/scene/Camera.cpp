@@ -9,13 +9,18 @@ USING_NAMESPACE_NXS;
 Camera::Camera(Ref<entt::registry>  registry)
     : SceneNode(registry)
 {
-    AddComponents<CameraComponent, PositionComponent, OrientationComponent, RotationComponent>();
+    InitComponents();
 }
 
 Camera::Camera(Ref<entt::registry>  registry, const std::string& name)
     : SceneNode(registry, name)
 {
-    AddComponents<CameraComponent, PositionComponent, OrientationComponent, RotationComponent>();
+    InitComponents();
+}
+
+void Camera::InitComponents()
+{
+    AddComponents<CameraComponent, PositionComponent, OrientationComponent>();
 }
 
 void Camera::SetProjection(const float fov, const float width, const float height, const float nearZ, const float farZ)
@@ -60,10 +65,6 @@ void Camera::LookAt(const glm::vec3 &center, const glm::vec3 &up)
 void Camera::AcceptReflector(IReflector& reflector)
 {
     SceneNode::AcceptReflector(reflector);
-
-    reflector.ChangeCategory("Transform");
-    reflector.VisitProperty("Position", typeid(glm::vec3), &Position().value);
-    reflector.VisitProperty("Orient", typeid(OrientationComponent), &Orient());
 
     auto& properties = Properties();
     bool valueChanged = false;

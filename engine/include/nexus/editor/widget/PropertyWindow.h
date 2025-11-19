@@ -30,5 +30,6 @@ NXS_NAMESPACE
     private:
         SceneNode::Id m_sceneNodeId = SceneNode::InvalidID;
         Ref<Scene> m_currentScene;
+        uint32_t m_currentCategory = 0;
     };
 }

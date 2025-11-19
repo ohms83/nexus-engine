@@ -23,14 +23,14 @@ void DirectionalLight::AcceptReflector(IReflector& reflector)
 {
     SceneNode::AcceptReflector(reflector);
 
-    auto& properties = Properties();
-    reflector.ChangeCategory("Light");
-    reflector.VisitProperty("Color", typeid(Color3F), &properties.color);
-    reflector.VisitProperty("Diffuse Intensity", typeid(float), &properties.diffuseIntensity);
-    reflector.VisitProperty("Specular Intensity", typeid(float), &properties.specularIntensity);
+    // auto& properties = Properties();
+    // reflector.ChangeCategory("Light");
+    // reflector.VisitProperty("Color", typeid(Color3F), &properties.color);
+    // reflector.VisitProperty("Diffuse Intensity", typeid(float), &properties.diffuseIntensity);
+    // reflector.VisitProperty("Specular Intensity", typeid(float), &properties.specularIntensity);
 
-    reflector.ChangeCategory("Direct Light");
-    reflector.VisitProperty("Direction", typeid(glm::vec3), &Direction());
+    // reflector.ChangeCategory("Direct Light");
+    // reflector.VisitProperty("Direction", typeid(glm::vec3), &Direction());
 }
 
 PointLight::PointLight(Ref<entt::registry>  registry)
@@ -51,19 +51,16 @@ void PointLight::AcceptReflector(IReflector& reflector)
 {
     SceneNode::AcceptReflector(reflector);
 
-    reflector.ChangeCategory("Transform");
-    reflector.VisitProperty("Position", typeid(glm::vec3), &Position());
+    // auto& properties = Properties();
+    // reflector.ChangeCategory("Light");
+    // reflector.VisitProperty("Color", typeid(Color3F), &properties.color);
+    // reflector.VisitProperty("Diffuse Intensity", typeid(float), &properties.diffuseIntensity);
+    // reflector.VisitProperty("Specular Intensity", typeid(float), &properties.specularIntensity);
+    // reflector.VisitProperty("Cutoff", typeid(float), &properties.cutoffRange);
 
-    auto& properties = Properties();
-    reflector.ChangeCategory("Light");
-    reflector.VisitProperty("Color", typeid(Color3F), &properties.color);
-    reflector.VisitProperty("Diffuse Intensity", typeid(float), &properties.diffuseIntensity);
-    reflector.VisitProperty("Specular Intensity", typeid(float), &properties.specularIntensity);
-    reflector.VisitProperty("Cutoff", typeid(float), &properties.cutoffRange);
-
-    auto& pointLight = PointLightProperties();
-    reflector.ChangeCategory("Point Light");
-    reflector.VisitProperty("Constant", typeid(float), &pointLight.constant);
-    reflector.VisitProperty("Linear", typeid(float), &pointLight.linear);
-    reflector.VisitProperty("Quadratic", typeid(float), &pointLight.quadratic);
+    // auto& pointLight = PointLightProperties();
+    // reflector.ChangeCategory("Point Light");
+    // reflector.VisitProperty("Constant", typeid(float), &pointLight.constant);
+    // reflector.VisitProperty("Linear", typeid(float), &pointLight.linear);
+    // reflector.VisitProperty("Quadratic", typeid(float), &pointLight.quadratic);
 }

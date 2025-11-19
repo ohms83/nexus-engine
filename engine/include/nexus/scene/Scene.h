@@ -24,8 +24,6 @@ NXS_NAMESPACE
         explicit Scene(const std::string& name);
         virtual ~Scene();
 
-        void AcceptReflector(IReflector& reflector) override;
-
         virtual void OnEnter() {}
         virtual void OnExit() {}
         virtual void Render(RenderSystem& renderSystem);

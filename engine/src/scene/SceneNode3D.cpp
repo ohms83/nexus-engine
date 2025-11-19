@@ -14,16 +14,6 @@ SceneNode3D::SceneNode3D(Ref<entt::registry> registry, std::string name)
     AddComponents<PositionComponent, OrientationComponent, ScaleComponent>();
 }
 
-void SceneNode3D::AcceptReflector(IReflector& reflector)
-{
-    SceneNode::AcceptReflector(reflector);
-
-    reflector.ChangeCategory("Transform");
-    reflector.VisitProperty("Position", typeid(glm::vec3), &Position().value);
-    reflector.VisitProperty("Orient", typeid(OrientationComponent), &Orient());
-    reflector.VisitProperty("Scale", typeid(glm::vec3), &Scale().value);
-}
-
 void SceneNode3D::LookAt(const glm::vec3& center, const glm::vec3& up)
 {
     Orient().LookAt(Position().value, center, up);

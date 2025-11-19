@@ -22,7 +22,6 @@ NXS_NAMESPACE
         ~SceneNode3D() override = default;
 
         IMPLEMENT_REFLECTION(SceneNode3D);
-        void AcceptReflector(IReflector& reflector) override;
 
         PositionComponent& Position() { return GetComponent<PositionComponent>(); }
         const PositionComponent& Position() const { return GetComponent<PositionComponent>(); }

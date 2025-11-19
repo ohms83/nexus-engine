@@ -7,7 +7,7 @@
 
 NXS_NAMESPACE
 {
-    namespace math
+    namespace Math
     {
         std::string ToString(glm::vec2 vec);
         std::string ToString(glm::vec3 vec);

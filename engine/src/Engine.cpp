@@ -4,6 +4,7 @@
 #include "Engine.h"
 #include "graphics/Model.h"
 #include "scene/component/TransformComponent.h"
+#include "scene/component/LightComponent.h"
 #include "time/StandardTimeSource.h"
 
 USING_NAMESPACE_NXS;
@@ -57,9 +58,14 @@ void Engine::InitModules()
 {
     // TODO: Create each module as a plugin.
     // Init scene modules
-    // IComponent::RegisterComponent<PositionComponent>();
-    // IComponent::RegisterComponent<OrientationComponent>();
-    // IComponent::RegisterComponent<ScaleComponent>();
+    IComponent::RegisterComponent<PositionComponent>();
+    IComponent::RegisterComponent<OrientationComponent>();
+    IComponent::RegisterComponent<ScaleComponent>();
     IComponent::RegisterComponent<MoveComponent>();
     IComponent::RegisterComponent<RotationComponent>();
+    
+    IComponent::RegisterComponent<AmbientLightComponent>();
+    IComponent::RegisterComponent<LightProperties>();
+    IComponent::RegisterComponent<DirectLightComponent>();
+    IComponent::RegisterComponent<PointLightComponent>();
 }

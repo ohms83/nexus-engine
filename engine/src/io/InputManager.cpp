@@ -96,9 +96,9 @@ glm::vec2 InputManager::GetMouseAxisValue(const std::string& actionName) const
         const auto& [mapping, pos, prevPos] = itr->second;
         LOG_DEBUG(LogInputManager, std::format("actionName={} pos={} prevPos={} diff={}",
             actionName,
-            math::ToString(pos),
-            math::ToString(prevPos),
-            math::ToString(prevPos - pos)));
+            Math::ToString(pos),
+            Math::ToString(prevPos),
+            Math::ToString(prevPos - pos)));
         return mapping.scale * (prevPos - pos);
     }
     return glm::vec3{0, 0, 0};
@@ -172,7 +172,7 @@ void InputManager::OnMouseMove(const float x, const float y)
 
         prevPos = pos;
         pos = {x, y};
-        LOG_DEBUG(LogInputManager, std::format("OnMouseMove pos={} prevPos={}", math::ToString(pos), math::ToString(prevPos)));
+        LOG_DEBUG(LogInputManager, std::format("OnMouseMove pos={} prevPos={}", Math::ToString(pos), Math::ToString(prevPos)));
     }
     mouseMotionEventCallback(x, y);
 }

@@ -29,12 +29,6 @@ Scene::~Scene()
     m_simulations.clear();
 }
 
-void Scene::AcceptReflector(IReflector& reflector)
-{
-    reflector.ChangeCategory("Rendering");
-    reflector.VisitProperty("Ambient Color", typeid(Color3F), &Ambient());
-}
-
 void Scene::Init()
 {
     AddSimulation(MoveNode);

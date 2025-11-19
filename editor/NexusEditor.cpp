@@ -221,14 +221,15 @@ void NexusEditor::Update()
 
     const auto& inputManager = nxs::InputManager::Instance();
 
-    glm::vec3 translation = inputManager.GetAxisValue("movement");
+    glm::vec3 moveVec = inputManager.GetAxisValue("movement");
 
     // Transform the translation vector into the camera's local coordinate.
     auto& cameraOrient = m_camera->Orient();
     auto& cameraPosition = m_camera->Position();
     auto& moveComp = m_camera->GetComponent<nxs::MoveComponent>();
-    translation = cameraOrient.quat * translation;
-    cameraPosition.Translate(translation * moveComp.speed * GetDeltaTime());
+    moveComp.direction = nxs::Math::Approx(glm::length2(moveVec), 0) ?
+        glm::vec3(0) : glm::normalize(cameraOrient.quat * moveVec);
+    // cameraPosition.Translate(translation * moveComp.speed * GetDeltaTime());
 
     glm::vec2 euler = inputManager.GetMouseAxisValue("camera_turn") * GetDeltaTime();
     glm::vec2 keyDeltaEuler = inputManager.GetAxisValue("camera_turn") * 20.f * GetDeltaTime();

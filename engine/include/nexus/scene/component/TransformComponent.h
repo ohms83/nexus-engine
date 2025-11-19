@@ -10,8 +10,21 @@
 
 NXS_NAMESPACE
 {
-    struct PositionComponent
+    struct PositionComponent : public IComponent
     {
+        IMPLEMENT_REFLECTION(PositionComponent);
+
+        ComponentID GetComponentID() const override
+        {
+            return COMPONENT_HASH(PositionComponent);
+        }
+
+        void AcceptReflector(IReflector& reflector) override
+        {
+            reflector.ChangeCategory("Transform");
+            reflector.VisitProperty("Position", typeid(glm::vec3), &value);
+        }
+
         glm::vec3 value;
 
         void Translate(const glm::vec3& translation)
@@ -29,8 +42,24 @@ NXS_NAMESPACE
      * issues like Gimbal Lock. The Euler angles are maintained solely for UI presentation
      * and must be modified only through the provided member functions.
      */
-    struct OrientationComponent
+    struct OrientationComponent : public IComponent
     {
+        IMPLEMENT_REFLECTION(OrientationComponent);
+
+        ComponentID GetComponentID() const override
+        {
+            return COMPONENT_HASH(OrientationComponent);
+        }
+
+        void AcceptReflector(IReflector& reflector) override
+        {
+            reflector.ChangeCategory("Transform");
+            reflector.VisitPropertyWithFeedback("Orient", typeid(glm::vec3), &euler, [this](void* new_value) {
+                const auto radians = glm::radians(euler);
+                quat = glm::quat(radians);
+            });
+        }
+
         /// @brief The Quaternion (main source of truth) used for all transformations.
         glm::quat quat;
 
@@ -115,6 +144,7 @@ NXS_NAMESPACE
 
         void AcceptReflector(IReflector& reflector) override
         {
+            reflector.ChangeCategory("Transform");
             reflector.VisitProperty("Scale", typeid(glm::vec3), &value);
         }
 
