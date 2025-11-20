@@ -10,6 +10,7 @@
 #include "nexus/NxsDefine.h"
 
 #define IMPLEMENT_REFLECTION(Class) \
+public: \
     const std::string& ClassName() const override { static std::string className = #Class; return className; } \
     static const std::string& StaticClassName() { static std::string className = #Class; return className; } \
 

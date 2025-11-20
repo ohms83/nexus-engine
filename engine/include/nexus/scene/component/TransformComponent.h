@@ -142,7 +142,7 @@ NXS_NAMESPACE
 
         void AcceptReflector(IReflector& reflector) override
         {
-            reflector.ChangeCategory("Move Component");
+            reflector.ChangeCategory("Movement");
             reflector.VisitReadOnlyProperty("Direction", typeid(glm::vec3), &direction);
             reflector.VisitProperty("Speed", typeid(float), &speed);
         }
@@ -151,14 +151,14 @@ NXS_NAMESPACE
         float speed = 0;
     };
 
-    struct RotationComponent : public IComponent
+    struct TurningComponent : public IComponent
     {
-        IMPLEMENT_COMPONENT(RotationComponent);
+        IMPLEMENT_COMPONENT(TurningComponent);
         
         void AcceptReflector(IReflector& reflector) override
         {
-            reflector.ChangeCategory("Rotation Component");
-            reflector.VisitProperty("Axis", typeid(glm::vec3), &axis);
+            reflector.ChangeCategory("Turning");
+            reflector.VisitReadOnlyProperty("Axis", typeid(glm::vec3), &axis);
             reflector.VisitProperty("Degree", typeid(float), &degree);
         }
 

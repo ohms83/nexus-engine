@@ -22,6 +22,8 @@ static nxs::Ref<nxs::Camera> InitCamera(nxs::Scene& scene)
     camera->Properties().farZ = 10000.f;
     auto& moveComp = camera->AddComponent<nxs::MoveComponent>();
     moveComp.speed = 100.f;
+    auto& turninComp = camera->AddComponent<nxs::TurningComponent>();
+    turninComp.degree = 30.f;
     return camera;
 }
 
@@ -225,15 +227,16 @@ void NexusEditor::Update()
 
     // Transform the translation vector into the camera's local coordinate.
     auto& cameraOrient = m_camera->Orient();
-    auto& cameraPosition = m_camera->Position();
-    auto& moveComp = m_camera->GetComponent<nxs::MoveComponent>();
-    moveComp.direction = nxs::Math::Approx(glm::length2(moveVec), 0) ?
-        glm::vec3(0) : glm::normalize(cameraOrient.quat * moveVec);
-    // cameraPosition.Translate(translation * moveComp.speed * GetDeltaTime());
-
     glm::vec2 euler = inputManager.GetMouseAxisValue("camera_turn") * GetDeltaTime();
-    glm::vec2 keyDeltaEuler = inputManager.GetAxisValue("camera_turn") * 20.f * GetDeltaTime();
-    cameraOrient.Rotate(glm::vec3(euler.y + keyDeltaEuler.y, euler.x + keyDeltaEuler.x, 0));
+    cameraOrient.Rotate(glm::vec3(euler.y, euler.x, 0));
+
+    m_camera->GetComponent<nxs::MoveComponent>().direction =
+        nxs::Vector::SafeNormalize(cameraOrient.quat * moveVec);
+
+    const auto turninAxis = nxs::Vector::SafeNormalize(inputManager.GetAxisValue("camera_turn"));
+    auto& compAxis = m_camera->GetComponent<nxs::TurningComponent>().axis;
+    compAxis.x = turninAxis.y;
+    compAxis.y = turninAxis.x;
 
     const auto selectedNode = m_sceneGraphWidget->GetSelectedNode();
     m_propertyWindow->SetSceneNode(selectedNode);

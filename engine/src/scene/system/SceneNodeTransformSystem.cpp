@@ -18,8 +18,8 @@ namespace nxs
 
     void RotateNode(entt::registry& registry, float dt)
     {
-        const auto view = registry.view<OrientationComponent, const RotationComponent>();
-        view.each([dt](OrientationComponent& orient, const RotationComponent& rotation)
+        const auto view = registry.view<OrientationComponent, const TurningComponent>();
+        view.each([dt](OrientationComponent& orient, const TurningComponent& rotation)
         {
             orient.Rotate(rotation.degree * dt, rotation.axis);
         });

@@ -63,7 +63,7 @@ void Engine::InitModules()
     IComponent::RegisterComponent<OrientationComponent>();
     IComponent::RegisterComponent<ScaleComponent>();
     IComponent::RegisterComponent<MoveComponent>();
-    IComponent::RegisterComponent<RotationComponent>();
+    IComponent::RegisterComponent<TurningComponent>();
     
     IComponent::RegisterComponent<AmbientLightComponent>();
     IComponent::RegisterComponent<LightProperties>();

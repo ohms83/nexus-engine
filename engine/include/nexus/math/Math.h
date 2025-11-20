@@ -50,6 +50,18 @@ NXS_NAMESPACE
             return abs(a - b) < epsilon;
         }
 
+        //! Compare whether the two double are approximately equal
+        inline bool AlmostZero(float a, float epsilon = FLT_EPSILON)
+        {
+            return abs(a) < epsilon;
+        }
+
+        //! Compare whether the two double are approximately equal
+        inline bool AlmostZero(double a, double epsilon = DBL_EPSILON)
+        {
+            return abs(a) < epsilon;
+        }
+
         /**
          * Compare the two floating-points
          * @return 0, if both are approximately equal, 1 if a is greater, or -1 if a is lesser.
