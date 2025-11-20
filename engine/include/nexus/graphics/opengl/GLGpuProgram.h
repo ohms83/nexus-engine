@@ -28,7 +28,6 @@ NXS_NAMESPACE
         void Unbind() override;
         bool IsBinding() const override;
 
-        NODISCARD int32 FindUniform(const std::string& name) const override;
         MAYBE_UNUSED bool SetUniformInt(const std::string& name, int32 value) override;
         MAYBE_UNUSED bool SetUniformFloat(const std::string& name, float value) override;
         MAYBE_UNUSED bool SetUniformVector(const std::string& name, const glm::vec2& vec) override;
@@ -39,15 +38,16 @@ NXS_NAMESPACE
         MAYBE_UNUSED bool SetUniformTexture2D(const std::string& name, Ref<const TextureProxy> texture, int32 textureUnit) override;
 
     protected:
-        uint32 Alloc() override;
-        void Release() override;
-
         void ClearHandles();
         //! Error GpuProgram is used as a fallback mechanism when the GpuProgram compilation failed.
         // TODO: Remove
         void CreateErrorGpuProgram();
 
     private:
+        uint32 Alloc() override;
+        void Release() override;
+        NODISCARD int32_t FindUniform_Internal(const std::string& name) const override;
+
         //! A list of the handles of vertex, fragment, etc. shaders binding to this gpu program.
         std::vector<GLuint> m_shaderHandles;
 

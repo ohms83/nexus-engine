@@ -134,7 +134,7 @@ bool GLGpuProgram::IsBinding() const
     return GetHandle() == s_bindingShader.load();
 }
 
-int32 GLGpuProgram::FindUniform(const std::string& name) const
+int32 GLGpuProgram::FindUniform_Internal(const std::string& name) const
 {
     const auto location = glGetUniformLocation(m_id, name.c_str());
     CHECK_GL_ERROR(glGetUniformLocation);

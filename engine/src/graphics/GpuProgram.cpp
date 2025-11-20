@@ -1,7 +1,9 @@
 
 
-#include "nexus/graphics/GpuProgram.h"
-#include "nexus/core/LogDispatcher.h"
+#include "graphics/GpuProgram.h"
+#include "core/LogDispatcher.h"
+
+#include <ranges>
 
 USING_NAMESPACE_NXS;
 
@@ -25,4 +27,12 @@ void GpuProgram::Compile()
 {
     assert(m_compiling);
     m_compiling = false;
+}
+int32_t GpuProgram::FindUniform(const std::string &name)
+{
+    if (const auto& itr = m_uniforms.find(name); itr != m_uniforms.end()) return itr->second;
+
+    int32_t location = FindUniform_Internal(name);
+    m_uniforms[name] = location;
+    return location;
 }

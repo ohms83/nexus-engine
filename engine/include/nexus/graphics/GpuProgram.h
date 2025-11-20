@@ -8,6 +8,7 @@
 #include "TextureProxy.h"
 
 #include <string>
+#include <unordered_map>
 
 NXS_NAMESPACE
 {
@@ -26,7 +27,7 @@ NXS_NAMESPACE
         GpuProgram() = default;
         virtual ~GpuProgram() = default;
 
-        NODISCARD uint32 GetHandle() const
+        NODISCARD uint32_t GetHandle() const
         {
             return m_id;
         }
@@ -44,29 +45,34 @@ NXS_NAMESPACE
          * A uniform can be considered as shader's global variable where application
          * can use it to control vertex and fragment shader's behavior.
          */
-        NODISCARD virtual int32 FindUniform(const std::string& name) const = 0;
+        NODISCARD int32_t FindUniform(const std::string& name);
 
-        MAYBE_UNUSED virtual bool SetUniformInt(const std::string& name, int32 value) = 0;
+        MAYBE_UNUSED virtual bool SetUniformInt(const std::string& name, int32_t value) = 0;
         MAYBE_UNUSED virtual bool SetUniformFloat(const std::string& name, float value) = 0;
         MAYBE_UNUSED virtual bool SetUniformVector(const std::string& name, const glm::vec2& vec) = 0;
         MAYBE_UNUSED virtual bool SetUniformVector(const std::string& name, const glm::vec3& vec) = 0;
         MAYBE_UNUSED virtual bool SetUniformVector(const std::string& name, const glm::vec4& vec) = 0;
         MAYBE_UNUSED virtual bool SetUniformMatrix(const std::string& name, const glm::mat3& matrix, bool tranpose) = 0;
         MAYBE_UNUSED virtual bool SetUniformMatrix(const std::string& name, const glm::mat4& matrix, bool tranpose) = 0;
-        MAYBE_UNUSED virtual bool SetUniformTexture2D(const std::string& name, Ref<const TextureProxy> texture, int32 textureUnit) = 0;
+        MAYBE_UNUSED virtual bool SetUniformTexture2D(const std::string& name, Ref<const TextureProxy> texture, int32_t textureUnit) = 0;
 
     protected:
+        uint32_t m_id = 0;
+        bool m_compiling = false;
+
+        std::unordered_map<std::string, int32_t> m_uniforms;
+
+    private:
         /**
          * Allocating the resource object on GPU. The child classes
          * must provide the implementation of this function.
          * @return The generated resource handle; otherwise 0, if failed.
          */
-        NODISCARD virtual uint32 Alloc() = 0;
+        NODISCARD virtual uint32_t Alloc() = 0;
 
         //! Release the allocated GPU resource.
         virtual void Release() = 0;
 
-        uint32 m_id = 0;
-        bool m_compiling = false;
+        NODISCARD virtual int32_t FindUniform_Internal(const std::string& name) const = 0;
     };
 }
