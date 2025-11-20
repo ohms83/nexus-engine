@@ -1,5 +1,4 @@
 #include "scene/ModelNode.h"
-#include "scene/MeshNode.h"
 
 #include <format>
 #include <filesystem>
@@ -36,7 +35,7 @@ void ModelNode::SetModel(Ref<Model> model)
     modelComp.model = model;
     for (const auto mesh : model->GetMeshes())
     {
-        auto child = EmplaceChild<MeshNode>(mesh->GetName());
-        child->GetComponent<MeshComponent>().mesh = mesh;
+        auto child = EmplaceChild<SceneNode3D>(mesh->GetName());
+        child->AddComponent<MeshComponent>().mesh = mesh;
     }
 }

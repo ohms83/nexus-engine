@@ -103,7 +103,6 @@
 #include "scene/Camera.h"
 #include "scene/Entity.h"
 #include "scene/Light.h"
-#include "scene/MeshNode.h"
 #include "scene/ModelNode.h"
 #include "scene/Scene.h"
 #include "scene/SceneManager.h"
