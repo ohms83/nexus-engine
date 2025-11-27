@@ -25,10 +25,10 @@ NXS_NAMESPACE
         virtual void Render(RenderSystem& renderSystem, const entt::registry& registry) = 0;
     };
 
-    class BasicSceneRenderer final :public ISceneRenderer
+    class ForwardSceneRenderer final :public ISceneRenderer
     {
     public:
-        BasicSceneRenderer(const RenderSystem& renderSystem);
+        ForwardSceneRenderer(const RenderSystem& renderSystem);
         void Render(RenderSystem& renderSystem, const entt::registry& registry) override;
         void RenderDepthPrePass(RenderSystem& renderSystem, const entt::registry& registry);
     private:

@@ -49,7 +49,7 @@ void main()
 
 USING_NAMESPACE_NXS;
 
-DEFINE_LOG(BasicSceneRenderer);
+DEFINE_LOG(ForwardSceneRenderer);
 
 namespace
 {
@@ -164,7 +164,7 @@ static bool IsSphereInside(const Frustum& viewFustrum, const Sphere& sphere, glm
     return viewFustrum.IsSphereInside(pos, scaledRadius);
 }
 
-BasicSceneRenderer::BasicSceneRenderer(const RenderSystem& renderSystem)
+ForwardSceneRenderer::ForwardSceneRenderer(const RenderSystem& renderSystem)
 {
     Hasher hasher;
     const auto name = "_DepthShader";
@@ -172,7 +172,7 @@ BasicSceneRenderer::BasicSceneRenderer(const RenderSystem& renderSystem)
     m_depthShader->CompileFromSource(*renderSystem.GetRenderInterface(), s_depthVertexShader, s_depthFragmentShader);
 }
 
-void BasicSceneRenderer::Render(RenderSystem& renderSystem, const entt::registry& registry)
+void ForwardSceneRenderer::Render(RenderSystem& renderSystem, const entt::registry& registry)
 {
     rmt_ScopedCPUSample(SceneRenderer_Render, 0);
 

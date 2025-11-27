@@ -223,7 +223,7 @@ private:
         node->AddComponent<nxs::ModelComponent>();
         node->Scale().value = modelScales[0];
 
-        m_scene->SetRenderer(std::make_unique<nxs::BasicSceneRenderer>(GetRenderSystem()));
+        m_scene->SetRenderer(std::make_unique<nxs::ForwardSceneRenderer>(GetRenderSystem()));
     }
 
     MAYBE_UNUSED nxs::Ref<nxs::IResourceLoader::LoadResult> LoadModel(const int index)

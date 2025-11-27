@@ -122,7 +122,7 @@ bool NexusEditor::Init_Internal()
 
     auto sceneManager = engine.GetSceneManager();
     auto scene = sceneManager->EmplaceAndChange<nxs::Scene>("Editor Scene");
-    scene->SetRenderer(std::make_unique<nxs::BasicSceneRenderer>(GetRenderSystem()));
+    scene->SetRenderer(std::make_unique<nxs::ForwardSceneRenderer>(GetRenderSystem()));
 
     m_camera = InitCamera(*scene);
     InitModel();
