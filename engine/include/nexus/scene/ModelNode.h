@@ -10,8 +10,6 @@ NXS_NAMESPACE
     class ModelNode : public SceneNode3D
     {
     public:
-        ModelNode(Ref<entt::registry> registry);
-        ModelNode(Ref<entt::registry> registry, const std::string& name);
         ModelNode(Ref<entt::registry> registry, Ref<Model> model);
         virtual ~ModelNode() = default;
 

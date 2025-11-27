@@ -26,6 +26,7 @@ NXS_NAMESPACE
 
     protected:
         void Draw_Internal(RenderSystem& renderSystem) override;
+        void ChangeCurrentScene(Ref<Scene> scene);
 
     private:
         Identifier m_sceneNodeId = InvalidID;

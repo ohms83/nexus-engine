@@ -20,7 +20,6 @@ NXS_NAMESPACE
     public:
         IMPLEMENT_REFLECTION(Scene);
 
-        Scene();
         explicit Scene(const std::string& name);
         virtual ~Scene();
 
@@ -32,9 +31,6 @@ NXS_NAMESPACE
 
         Color3F& Ambient();
         NODISCARD const Color3F& Ambient() const;
-
-    private:
-        void Init();
 
     protected:
         // --- Rendering ---

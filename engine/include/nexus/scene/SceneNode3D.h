@@ -17,8 +17,7 @@ NXS_NAMESPACE
     {
     public:
         SceneNode3D() = delete;
-        explicit SceneNode3D(Ref<entt::registry> registry);
-        explicit SceneNode3D(Ref<entt::registry> registry, std::string  name);
+        explicit SceneNode3D(Ref<entt::registry> registry, std::string  name = "");
         ~SceneNode3D() override = default;
 
         IMPLEMENT_REFLECTION(SceneNode3D);

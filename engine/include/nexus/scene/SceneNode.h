@@ -12,12 +12,15 @@
 #include "component/SceneNodeComponent.h"
 
 #include <string>
+#include <memory>
 
 NXS_NAMESPACE
 {
     class Scene;
 
     class SceneNode : public Entity, public IReflection
+    // TODO: Consider replacing std::enable_shared_from_this with a custom solution
+    , public std::enable_shared_from_this<SceneNode>
     {
     public:
         using ChildList = std::vector<Ref<SceneNode>>;
@@ -25,11 +28,12 @@ NXS_NAMESPACE
         IMPLEMENT_REFLECTION(SceneNode);
 
         SceneNode() = delete;
-        explicit SceneNode(Ref<entt::registry> registry);
-        explicit SceneNode(Ref<entt::registry> registry, std::string  name);
+        explicit SceneNode(Ref<entt::registry> registry, std::string  name = "");
         virtual ~SceneNode();
 
         void AcceptReflector(IReflector& reflector) override;
+
+        Ref<SceneNode> GetSelf() { return PTR_CAST<SceneNode>(shared_from_this()); }
 
         void Destroy();
 
@@ -51,11 +55,12 @@ NXS_NAMESPACE
             return GetComponent<SceneNodeComponent>().active;
         }
 
-        template<typename T>
+        template<typename T, typename... Args>
         requires std::derived_from<T, SceneNode>
-        MAYBE_UNUSED Ref<T> EmplaceChild(const std::string& name)
+        MAYBE_UNUSED Ref<T> EmplaceChild(Args&&... args)
         {
-            auto node = m_children.emplace_back(std::make_shared<T>(GetRegistry(), name));
+            auto node = m_children.emplace_back(
+                std::make_shared<T>(GetRegistry(), std::forward<Args>(args)...));
             return PTR_CAST<T>(node);
         }
 

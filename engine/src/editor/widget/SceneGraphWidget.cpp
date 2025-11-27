@@ -6,15 +6,21 @@ USING_NAMESPACE_NXS;
 SceneGraphWidget::SceneGraphWidget(SceneManager& sceneManager)
     : EditorWidget("Scene Graph")
 {
-    m_scene = sceneManager.GetCurrentScene();
+    SetCurrentScene(sceneManager.GetCurrentScene());
     sceneManager.sceneChangedCallback.connect([this] (Ref<Scene> prev, Ref<Scene> current) {
-        m_scene = current;
+        SetCurrentScene(current);
     });
 }
 
 SceneGraphWidget::~SceneGraphWidget()
 {
     m_scene.reset();
+}
+
+void SceneGraphWidget::SetCurrentScene(Ref<Scene> scene)
+{
+    m_scene = scene;
+    m_selectedNode = m_scene ? m_scene->GetId() : InvalidID;
 }
 
 Identifier SceneGraphWidget::GetSelectedNode() const

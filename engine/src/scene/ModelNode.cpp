@@ -7,20 +7,8 @@ USING_NAMESPACE_NXS;
 
 static uint32_t s_numNode = 0;
 
-ModelNode::ModelNode(Ref<entt::registry> registry)
-    : SceneNode3D(registry, std::format("Model_{}", s_numNode++))
-{
-    AddComponent<ModelComponent>();
-}
-
-ModelNode::ModelNode(Ref<entt::registry> registry, const std::string& name)
-    : SceneNode3D(registry, name)
-{
-    AddComponent<ModelComponent>();
-}
-
 ModelNode::ModelNode(Ref<entt::registry> registry, Ref<Model> model)
-    : SceneNode3D(registry)
+    : SceneNode3D(registry, "")
 {
     AddComponent<ModelComponent>().model = model;
 

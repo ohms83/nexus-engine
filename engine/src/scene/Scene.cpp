@@ -11,30 +11,19 @@ USING_NAMESPACE_NXS;
 
 DEFINE_LOG(Scene);
 
-Scene::Scene()
-    : SceneNode(std::make_shared<entt::registry>())
-{
-    Init();
-}
-
 Scene::Scene(const std::string& name)
     : SceneNode(std::make_shared<entt::registry>(), name)
 {
-    Init();
+    AddSimulation(MoveNode);
+    AddSimulation(RotateNode);
+
+    AddComponent<AmbientLightComponent>();
 }
 
 Scene::~Scene()
 {
     m_children.clear();
     m_simulations.clear();
-}
-
-void Scene::Init()
-{
-    AddSimulation(MoveNode);
-    AddSimulation(RotateNode);
-
-    AddComponent<AmbientLightComponent>();
 }
 
 void Scene::Render(RenderSystem &renderSystem)

@@ -12,20 +12,16 @@ DEFINE_LOG(SceneNode);
 
 static Identifier s_runningId = 0;
 
-SceneNode::SceneNode(Ref<entt::registry> registry)
-    : Entity(registry)
-{
-    auto& sceneNode = AddComponent<SceneNodeComponent>();
-    NXS_ASSERT(s_runningId < MaxIdentifier);
-    sceneNode.id = s_runningId++;
-}
-
 SceneNode::SceneNode(Ref<entt::registry> registry, std::string name)
     : Entity(registry)
 {
     NXS_ASSERT(s_runningId < MaxIdentifier);
+    if (name.empty())
+    {
+        name = std::format("SceneNode_{}", s_runningId);
+    }
     AddComponent<SceneNodeComponent>(
-        s_runningId++, std::move(name), true
+        ++s_runningId, std::move(name), true
     );
 }
 
@@ -124,6 +120,8 @@ void SceneNode::GetAllDescendants(ChildList& childrenList, bool parentFirst) con
 Ref<SceneNode> SceneNode::FindNode(const Identifier id)
 {
     if (IsShuttingDown()) return nullptr;
+
+    if (GetId() == id) return GetSelf();
 
     for (const auto child : m_children)
     {

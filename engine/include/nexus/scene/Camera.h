@@ -16,8 +16,7 @@ NXS_NAMESPACE
     class Camera : public SceneNode
     {
     public:
-        explicit Camera(Ref<entt::registry> registry);
-        explicit Camera(Ref<entt::registry> registry, const std::string& name);
+        explicit Camera(Ref<entt::registry> registry, const std::string& name = "");
 
         IMPLEMENT_REFLECTION(Camera);
         void AcceptReflector(IReflector& reflector);
@@ -49,9 +48,6 @@ NXS_NAMESPACE
         {
             return m_projMtx;
         }
-
-    private:
-        void InitComponents();
 
     protected:
         //! Projection matrix.

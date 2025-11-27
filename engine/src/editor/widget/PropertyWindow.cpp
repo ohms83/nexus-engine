@@ -13,9 +13,15 @@ PropertyWindow::PropertyWindow(SceneManager& sceneManager)
     : EditorWidget("Property Window")
 {
     sceneManager.sceneChangedCallback.connect([this](Ref<Scene> prev, Ref<Scene> current) {
-        m_currentScene = current;
+        ChangeCurrentScene(current);
     });
-    m_currentScene = sceneManager.GetCurrentScene();
+    ChangeCurrentScene(sceneManager.GetCurrentScene());
+}
+
+void PropertyWindow::ChangeCurrentScene(Ref<Scene> scene)
+{
+    m_currentScene = scene;
+    m_sceneNodeId = m_currentScene ? m_currentScene->GetId() : InvalidID;
 }
 
 void PropertyWindow::SetSceneNode(Identifier sceneNodeId)

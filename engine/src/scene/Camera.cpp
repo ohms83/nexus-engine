@@ -6,19 +6,8 @@
 
 USING_NAMESPACE_NXS;
 
-Camera::Camera(Ref<entt::registry>  registry)
-    : SceneNode(registry)
-{
-    InitComponents();
-}
-
 Camera::Camera(Ref<entt::registry>  registry, const std::string& name)
     : SceneNode(registry, name)
-{
-    InitComponents();
-}
-
-void Camera::InitComponents()
 {
     AddComponents<CameraComponent, PositionComponent, OrientationComponent>();
 }

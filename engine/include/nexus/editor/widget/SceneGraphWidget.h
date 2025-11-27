@@ -19,6 +19,7 @@ NXS_NAMESPACE
 
     protected:
         void Draw_Internal(RenderSystem& renderSystem) override;
+        void SetCurrentScene(Ref<Scene> scene);
         void DrawSceneNode(Ref<SceneNode> node);
         void HandleInput(Ref<SceneNode> node);
         void ShowContextMenu();
