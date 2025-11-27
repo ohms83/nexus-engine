@@ -21,7 +21,6 @@ NXS_NAMESPACE
     {
     public:
         using ChildList = std::vector<Ref<SceneNode>>;
-        using Id = uint64_t;
 
         IMPLEMENT_REFLECTION(SceneNode);
 
@@ -34,7 +33,7 @@ NXS_NAMESPACE
 
         void Destroy();
 
-        NODISCARD Id GetId() const { return m_id; }
+        NODISCARD Identifier GetId() const { return GetComponent<SceneNodeComponent>().id; }
 
         NODISCARD const std::string& GetName() const
         {
@@ -75,7 +74,7 @@ NXS_NAMESPACE
          */
         void GetAllDescendants(ChildList& childrenList, bool parentFirst) const;
 
-        NODISCARD Ref<SceneNode> FindNode(SceneNode::Id id);
+        NODISCARD Ref<SceneNode> FindNode(Identifier id);
 
         /**
          * Find a node with the specified @c name.
@@ -105,10 +104,7 @@ NXS_NAMESPACE
         virtual void OnDestroy() {};
         virtual void OnUpdate(float dt) {}
 
-        static const Id InvalidID;
-
     protected:
-        Id m_id = InvalidID;
         SceneNode* m_parent = nullptr;
         ChildList m_children;
         Ref<TaskScheduler> m_scheduler;

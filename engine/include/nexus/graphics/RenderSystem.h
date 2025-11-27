@@ -8,17 +8,6 @@
 
 NXS_NAMESPACE
 {
-    enum class RenderPass
-    {
-        //! Depth pre-pass
-        DepthFill,
-        Opaque,
-        AlphaBlend,
-        //! Gizmos will always be rendered last.
-        Gizmo,
-        Num,
-    };
-
     class RenderSystem final
     {
     public:

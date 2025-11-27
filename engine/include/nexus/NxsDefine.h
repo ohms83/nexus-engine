@@ -50,6 +50,10 @@ NXS_NAMESPACE
 {
     using WindowContext = SDL_Window*;
 
+    using Identifier = uint32_t;
+    const extern Identifier InvalidID;
+    const extern Identifier MaxIdentifier;
+
     union RenderContext
     {
         SDL_GLContext gl_context;

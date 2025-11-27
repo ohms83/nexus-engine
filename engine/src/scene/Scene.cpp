@@ -43,7 +43,7 @@ void Scene::Render(RenderSystem &renderSystem)
     if (m_renderer) m_renderer->Render(renderSystem, *GetRegistry());
 }
 
-void Scene::SetRenderer(Ptr<ISceneRenderer> renderer)
+void Scene::SetRenderer(Ptr<SceneRenderer> renderer)
 {
     m_renderer = std::move(renderer);
 }

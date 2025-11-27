@@ -167,9 +167,9 @@ static bool IsSphereInside(const Frustum& viewFustrum, const Sphere& sphere, glm
 ForwardSceneRenderer::ForwardSceneRenderer(const RenderSystem& renderSystem)
 {
     Hasher hasher;
-    const auto name = "_DepthShader";
-    m_depthShader = std::make_shared<Shader>(name, hasher.Hash32(name));
-    m_depthShader->CompileFromSource(*renderSystem.GetRenderInterface(), s_depthVertexShader, s_depthFragmentShader);
+    // const auto name = "_DepthShader";
+    // m_depthShader = std::make_shared<Shader>(name, hasher.Hash32(name));
+    // m_depthShader->CompileFromSource(*renderSystem.GetRenderInterface(), s_depthVertexShader, s_depthFragmentShader);
 }
 
 void ForwardSceneRenderer::Render(RenderSystem& renderSystem, const entt::registry& registry)

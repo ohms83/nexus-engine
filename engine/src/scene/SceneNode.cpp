@@ -10,26 +10,27 @@ USING_NAMESPACE_NXS;
 
 DEFINE_LOG(SceneNode);
 
-static uint64_t s_runningId = 0;
-const uint64_t SceneNode::InvalidID = 0;
+static Identifier s_runningId = 0;
 
 SceneNode::SceneNode(Ref<entt::registry> registry)
     : Entity(registry)
-    , m_id(++s_runningId)
 {
-    AddComponent<SceneNodeComponent>();
+    auto& sceneNode = AddComponent<SceneNodeComponent>();
+    NXS_ASSERT(s_runningId < MaxIdentifier);
+    sceneNode.id = s_runningId++;
 }
 
 SceneNode::SceneNode(Ref<entt::registry> registry, std::string name)
     : Entity(registry)
-    , m_id(++s_runningId)
 {
-    AddComponent<SceneNodeComponent>(name, true);
+    NXS_ASSERT(s_runningId < MaxIdentifier);
+    AddComponent<SceneNodeComponent>(
+        s_runningId++, std::move(name), true
+    );
 }
 
 SceneNode::~SceneNode()
 {
-    m_id = InvalidID;
     OnDestroy();
 }
 
@@ -120,7 +121,7 @@ void SceneNode::GetAllDescendants(ChildList& childrenList, bool parentFirst) con
     }
 }
 
-Ref<SceneNode> SceneNode::FindNode(const SceneNode::Id id)
+Ref<SceneNode> SceneNode::FindNode(const Identifier id)
 {
     if (IsShuttingDown()) return nullptr;
 

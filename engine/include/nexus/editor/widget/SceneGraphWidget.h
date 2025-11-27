@@ -15,7 +15,7 @@ NXS_NAMESPACE
         SceneGraphWidget(SceneManager& sceneManager);
         ~SceneGraphWidget();
 
-        SceneNode::Id GetSelectedNode() const;
+        Identifier GetSelectedNode() const;
 
     protected:
         void Draw_Internal(RenderSystem& renderSystem) override;
@@ -27,6 +27,6 @@ NXS_NAMESPACE
         void DeleteNode(Ref<SceneNode> node);
 
         Ref<Scene> m_scene;
-        SceneNode::Id m_selectedNode;
+        Identifier m_selectedNode;
     };
 }

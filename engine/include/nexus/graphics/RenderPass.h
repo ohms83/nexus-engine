@@ -9,6 +9,8 @@
 
 NXS_NAMESPACE
 {
+    class Shader;
+
     struct RenderPass
     {
         //! Render-pass name. Mainly used for debugging.
@@ -16,5 +18,10 @@ NXS_NAMESPACE
         uint32_t priority;
         DepthFunction depthFunction = DepthFunction::None;
         StencilOperation stencilOp = StencilOperation::Zero;
+        /** 
+         * If set, the renderer will bind this shader before rendering the pass,
+         * and ignore any material shaders.
+         */
+        Shader* globalShader = nullptr;
     };
 }

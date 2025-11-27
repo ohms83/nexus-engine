@@ -12,7 +12,7 @@
 
 DEFINE_LOG(NexusEditor);
 
-static nxs::SceneNode::Id selectedNode = nxs::SceneNode::InvalidID;
+static nxs::Identifier selectedNode = nxs::InvalidID;
 
 static nxs::Ref<nxs::Camera> InitCamera(nxs::Scene& scene)
 {

@@ -10,6 +10,7 @@ NXS_NAMESPACE
 {
     struct SceneNodeComponent
     {
+        Identifier id = 0;
         std::string name;
         bool active = true;
     };

@@ -15,7 +15,7 @@ NXS_NAMESPACE
         explicit PropertyWindow(SceneManager& sceneManager);
         virtual ~PropertyWindow() = default;
 
-        void SetSceneNode(SceneNode::Id sceneNodeId);
+        void SetSceneNode(Identifier sceneNodeId);
 
         void Draw(RenderSystem& renderSystem);
         virtual void Update() {}
@@ -28,7 +28,7 @@ NXS_NAMESPACE
         void Draw_Internal(RenderSystem& renderSystem) override;
 
     private:
-        SceneNode::Id m_sceneNodeId = SceneNode::InvalidID;
+        Identifier m_sceneNodeId = InvalidID;
         Ref<Scene> m_currentScene;
         uint32_t m_currentCategory = 0;
     };

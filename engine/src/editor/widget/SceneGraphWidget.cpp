@@ -17,7 +17,7 @@ SceneGraphWidget::~SceneGraphWidget()
     m_scene.reset();
 }
 
-SceneNode::Id SceneGraphWidget::GetSelectedNode() const
+Identifier SceneGraphWidget::GetSelectedNode() const
 {
     return m_selectedNode;
 }
@@ -83,7 +83,7 @@ void SceneGraphWidget::HandleInput(Ref<SceneNode> node)
 
 void SceneGraphWidget::ShowContextMenu()
 {
-    if (m_selectedNode == SceneNode::InvalidID) return;
+    if (m_selectedNode == InvalidID) return;
     static const char* contexMenuID = "Scene Graph Context Menu";
 
     auto node = m_scene->FindNode(m_selectedNode);
@@ -107,6 +107,6 @@ void SceneGraphWidget::ShowContextMenu()
     
     if (closePopup)
     {
-        m_selectedNode = SceneNode::InvalidID;
+        m_selectedNode = InvalidID;
     }
 }
