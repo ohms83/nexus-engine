@@ -236,32 +236,88 @@ void ForwardSceneRenderer::Render(RenderSystem& renderSystem, const entt::regist
         {
             // LOG_DEBUG(LogBasicSceneRenderer, std::format("Begin Draw..."));
             rmt_ScopedCPUSample(SceneRenderer_RenderMeshes, 0)
-            Material* usingMaterial = nullptr;
-            for (const auto [key, mesh, modelMtx] : s_sortedMeshes)
+
+            if (!m_renderPasses.empty())
             {
-                auto material = mesh->GetMaterial();
-
-                if (material.get() != usingMaterial)
+                for (const auto& pass : m_renderPasses)
                 {
-                    // LOG_DEBUG(LogBasicSceneRenderer, std::format("Switch material={}", material->GetPath()));
-                    material->Use();
-                    usingMaterial = material.get();
+                    if (!pass.enabled) continue;
+                    pass.Begin(renderSystem);
 
-                    renderInterface->SetDepthFunction(material->depthFunction);
+                    Ref<GpuProgram> usingProgram = nullptr;
+                    for (const auto [key, mesh, modelMtx] : s_sortedMeshes)
+                    {
+                        auto material = mesh->GetMaterial();
+                        if (!material) continue;
 
-                    auto gpuProgram = material->GetShader()->GetGpuProgram();
-                    gpuProgram->SetUniformMatrix("_Model", *modelMtx, false);
-                    gpuProgram->SetUniformMatrix("_View", viewMtx, false);
-                    gpuProgram->SetUniformMatrix("_Projection", projection, false);
+                        if (!pass.MatchesMaterial(*material)) continue;
 
-                    SetAmbientLightParams(gpuProgram, registry);
-                    SetDirectLightParams(gpuProgram, registry);
-                    SetPointLightParams(gpuProgram, registry);
+                        Ref<GpuProgram> gpuProgram = pass.globalShader ? pass.globalShader->GetGpuProgram() : material->GetShader()->GetGpuProgram();
+
+                        if (gpuProgram != usingProgram)
+                        {
+                            if (!pass.globalShader)
+                            {
+                                material->Use();
+                            }
+                            else
+                            {
+                                if (!gpuProgram->IsBinding()) gpuProgram->Bind();
+                            }
+
+                            renderInterface->SetDepthFunction(pass.pipelineState.depthFunction);
+
+                            gpuProgram->SetUniformMatrix("_Model", *modelMtx, false);
+                            gpuProgram->SetUniformMatrix("_View", viewMtx, false);
+                            gpuProgram->SetUniformMatrix("_Projection", projection, false);
+
+                            SetAmbientLightParams(gpuProgram, registry);
+                            SetDirectLightParams(gpuProgram, registry);
+                            SetPointLightParams(gpuProgram, registry);
+                            usingProgram = gpuProgram;
+                        }
+                        else
+                        {
+                            gpuProgram->SetUniformMatrix("_Model", *modelMtx, false);
+                        }
+
+                        mesh->GetVertexBuffer()->Bind();
+                        renderSystem.DrawIndexed(mesh->GetIndexBuffer());
+                    }
+
+                    pass.End(renderSystem);
                 }
-
-                mesh->GetVertexBuffer()->Bind();
-                renderSystem.DrawIndexed(mesh->GetIndexBuffer());
             }
+            else
+            {
+                Material* usingMaterial = nullptr;
+                for (const auto [key, mesh, modelMtx] : s_sortedMeshes)
+                {
+                    auto material = mesh->GetMaterial();
+
+                    if (material.get() != usingMaterial)
+                    {
+                        // LOG_DEBUG(LogBasicSceneRenderer, std::format("Switch material={}", material->GetPath()));
+                        material->Use();
+                        usingMaterial = material.get();
+
+                        renderInterface->SetDepthFunction(material->depthFunction);
+
+                        auto gpuProgram = material->GetShader()->GetGpuProgram();
+                        gpuProgram->SetUniformMatrix("_Model", *modelMtx, false);
+                        gpuProgram->SetUniformMatrix("_View", viewMtx, false);
+                        gpuProgram->SetUniformMatrix("_Projection", projection, false);
+
+                        SetAmbientLightParams(gpuProgram, registry);
+                        SetDirectLightParams(gpuProgram, registry);
+                        SetPointLightParams(gpuProgram, registry);
+                    }
+
+                    mesh->GetVertexBuffer()->Bind();
+                    renderSystem.DrawIndexed(mesh->GetIndexBuffer());
+                }
+            }
+
             // LOG_DEBUG(LogBasicSceneRenderer, std::format("End Draw"));
         }
 
