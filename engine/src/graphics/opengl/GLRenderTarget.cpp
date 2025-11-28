@@ -1,6 +1,3 @@
-//
-// Created by copilot on 11/28/2025.
-//
 
 #include "graphics/opengl/GLRenderTarget.h"
 #include "graphics/opengl/GLTexture.h"

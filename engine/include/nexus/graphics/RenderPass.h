@@ -5,7 +5,9 @@
 #include "Shader.h"
 #include "Material.h"
 #include "RenderingInterface.h"
+
 #include "nexus/io/Serializable.h"
+
 #include <functional>
 #include <string>
 #include <vector>
@@ -88,7 +90,8 @@ NXS_NAMESPACE
          * @brief Optional offscreen render target for this pass.
          * If targetType is Offscreen, this must be set.
          */
-        Ref<RenderTarget> offscreenTarget; // optional
+        //! Optional name of an offscreen render target assigned by the engine.
+        std::string offscreenTargetName;
 
         // Clear
         ClearFlags clearFlags = ClearFlags::Color | ClearFlags::Depth;
@@ -141,5 +144,23 @@ NXS_NAMESPACE
         RenderPass& SetPriority(uint32_t p) { priority = p; return *this; }
         RenderPass& SetGlobalShader(const Ref<Shader>& s) { globalShader = s; return *this; }
         RenderPass& SetFilter(std::function<bool(const Material&)> f) { filter = std::move(f); return *this; }
+    };
+
+    struct RenderPassBuilder
+    {
+        RenderPass m_pass;
+        static RenderPassBuilder Begin(std::string name, uint32_t priority)
+        {
+            RenderPassBuilder b;
+            b.m_pass.name = std::move(name);
+            b.m_pass.priority = priority;
+            return b;
+        }
+        RenderPassBuilder& DepthTest(bool v) { m_pass.pipelineState.depthTest = v; return *this; }
+        RenderPassBuilder& DepthWrite(bool v) { m_pass.pipelineState.depthWrite = v; return *this; }
+        RenderPassBuilder& GlobalShader(const Ref<Shader>& s) { m_pass.globalShader = s; return *this; }
+        RenderPassBuilder& FilterType(const std::string& t) { m_pass.filterType = t; return *this; }
+        RenderPassBuilder& TargetType(RenderTargetType t) { m_pass.targetType = t; return *this; }
+        RenderPass Build() && { return std::move(m_pass); }
     };
 }

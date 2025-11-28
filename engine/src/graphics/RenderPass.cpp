@@ -1,7 +1,3 @@
-//
-// Created by copilot on 11/28/2025.
-//
-
 #include "nexus/graphics/RenderPass.h"
 #include "nexus/graphics/RenderSystem.h"
 #include "nexus/io/Serializer.h"
@@ -11,13 +7,9 @@ USING_NAMESPACE_NXS;
 void RenderPass::Begin(RenderSystem& rs) const
 {
     auto renderInterface = rs.GetRenderInterface();
-    // Bind offscreen target if requested.
-    if (targetType == RenderTargetType::Offscreen && offscreenTarget)
-    {
-        offscreenTarget->Bind(rs);
-    }
+    // Offscreen target is bound by the caller (SceneRenderer/RenderSystem).
     // Clear
-    auto hasFlag = [](ClearFlags flags, ClearFlags f){ return (static_cast<uint32_t>(flags) & static_cast<uint32_t>(f)) != 0; };
+    auto hasFlag = [](ClearFlags flags, ClearFlags f){ return (UINT_CAST(flags) & UINT_CAST(f)) != 0; };
     if (hasFlag(clearFlags, ClearFlags::Color) && hasFlag(clearFlags, ClearFlags::Depth))
     {
         renderInterface->ClearBuffer(Color4F{clearColor.r, clearColor.g, clearColor.b, 1.0f}, clearDepth);
@@ -61,11 +53,7 @@ void RenderPass::End(RenderSystem& rs) const
     auto renderInterface = rs.GetRenderInterface();
     // Reset the global shader.
     renderInterface->SetGlobalShader(nullptr);
-    // Unbind offscreen target if requested.
-    if (targetType == RenderTargetType::Offscreen && offscreenTarget)
-    {
-        offscreenTarget->Unbind(rs);
-    }
+    // Offscreen target is unbound by the caller (SceneRenderer/RenderSystem).
     // Hook
     if (onEnd) onEnd(rs);
 }
@@ -76,28 +64,28 @@ VariantData RenderPass::Serialize() const
     data["name"] = name;
     data["priority"] = INT_CAST(priority);
     data["enabled"] = enabled;
-    data["targetType"] = INT_CAST(static_cast<int>(targetType));
-    data["clearFlags"] = INT_CAST(static_cast<int>(clearFlags));
+    data["targetType"] = INT_CAST(targetType);
+    data["clearFlags"] = INT_CAST(clearFlags);
     data["clearColor"] = VariantData::Map {
-        {"r", static_cast<double>(clearColor.r)},
-        {"g", static_cast<double>(clearColor.g)},
-        {"b", static_cast<double>(clearColor.b)},
+        {"r", CAST<double>(clearColor.r)},
+        {"g", CAST<double>(clearColor.g)},
+        {"b", CAST<double>(clearColor.b)},
     };
-    data["clearDepth"] = static_cast<double>(clearDepth);
+    data["clearDepth"] = CAST<double>(clearDepth);
     data["clearStencil"] = INT_CAST(clearStencil);
 
     // Pipeline
     VariantData::Map pipeline;
     pipeline["depthTest"] = pipelineState.depthTest;
     pipeline["depthWrite"] = pipelineState.depthWrite;
-    pipeline["depthFunction"] = INT_CAST(static_cast<int>(pipelineState.depthFunction));
+    pipeline["depthFunction"] = INT_CAST(pipelineState.depthFunction);
     pipeline["stencilTest"] = pipelineState.stencilTest;
-    pipeline["stencilOp"] = INT_CAST(static_cast<int>(pipelineState.stencilOp));
+    pipeline["stencilOp"] = INT_CAST(pipelineState.stencilOp);
     pipeline["cullBackFaces"] = pipelineState.cullBackFaces;
-    pipeline["overrideBlendMode"] = INT_CAST(static_cast<int>(pipelineState.overrideBlendMode));
-    pipeline["polygonMode"] = INT_CAST(static_cast<int>(pipelineState.polygonMode));
-    pipeline["cullMode"] = INT_CAST(static_cast<int>(pipelineState.cullMode));
-    pipeline["frontFace"] = INT_CAST(static_cast<int>(pipelineState.frontFace));
+    pipeline["overrideBlendMode"] = INT_CAST(pipelineState.overrideBlendMode);
+    pipeline["polygonMode"] = INT_CAST(pipelineState.polygonMode);
+    pipeline["cullMode"] = INT_CAST(pipelineState.cullMode);
+    pipeline["frontFace"] = INT_CAST(pipelineState.frontFace);
     data["pipelineState"] = pipeline;
 
     // Shader
@@ -108,7 +96,7 @@ VariantData RenderPass::Serialize() const
     for (const auto& a : attachments)
     {
         attachArr.emplace_back(VariantData::Map{
-            {"format", INT_CAST(static_cast<int>(a.format))},
+            {"format", INT_CAST(a.format)},
             {"load", a.load},
             {"store", a.store},
             {"clear", a.clear},
@@ -119,6 +107,7 @@ VariantData RenderPass::Serialize() const
 
     data["layerMask"] = INT_CAST(layerMask);
     data["filterType"] = filterType;
+    data["offscreenTargetName"] = offscreenTargetName;
 
     return data;
 }
@@ -128,8 +117,8 @@ void RenderPass::Deserialize(const VariantData& data)
     name = data["name"].GetString();
     priority = UINT_CAST(data["priority"].GetInt());
     enabled = data["enabled"].GetBool();
-    targetType = static_cast<RenderTargetType>(data["targetType"].GetInt());
-    clearFlags = static_cast<ClearFlags>(data["clearFlags"].GetInt());
+    targetType = CAST<RenderTargetType>(data["targetType"].GetInt());
+    clearFlags = CAST<ClearFlags>(data["clearFlags"].GetInt());
     const auto& cc = data["clearColor"].GetMap();
     clearColor.r = FLOAT_CAST(cc.at("r").GetDouble());
     clearColor.g = FLOAT_CAST(cc.at("g").GetDouble());
@@ -141,14 +130,14 @@ void RenderPass::Deserialize(const VariantData& data)
     const auto& p = data["pipelineState"].GetMap();
     pipelineState.depthTest = p.at("depthTest").GetBool();
     pipelineState.depthWrite = p.at("depthWrite").GetBool();
-    pipelineState.depthFunction = static_cast<DepthFunction>(p.at("depthFunction").GetInt());
+    pipelineState.depthFunction = CAST<DepthFunction>(p.at("depthFunction").GetInt());
     pipelineState.stencilTest = p.at("stencilTest").GetBool();
-    pipelineState.stencilOp = static_cast<StencilOperation>(p.at("stencilOp").GetInt());
+    pipelineState.stencilOp = CAST<StencilOperation>(p.at("stencilOp").GetInt());
     pipelineState.cullBackFaces = p.at("cullBackFaces").GetBool();
-    pipelineState.overrideBlendMode = static_cast<BlendMode>(p.at("overrideBlendMode").GetInt());
-    pipelineState.polygonMode = static_cast<PolygonMode>(p.at("polygonMode").GetInt());
-    pipelineState.cullMode = static_cast<PolygonFacing>(p.at("cullMode").GetInt());
-    pipelineState.frontFace = static_cast<FrontFace>(p.at("frontFace").GetInt());
+    pipelineState.overrideBlendMode = CAST<BlendMode>(p.at("overrideBlendMode").GetInt());
+    pipelineState.polygonMode = CAST<PolygonMode>(p.at("polygonMode").GetInt());
+    pipelineState.cullMode = CAST<PolygonFacing>(p.at("cullMode").GetInt());
+    pipelineState.frontFace = CAST<FrontFace>(p.at("frontFace").GetInt());
 
     // global shader path, do not try to auto-load here (resource managers/callers may handle)
     const auto shaderPath = data["globalShader"].GetString();
@@ -167,17 +156,18 @@ void RenderPass::Deserialize(const VariantData& data)
         {
             const auto& am = av.GetMap();
             AttachmentDesc a;
-            a.format = static_cast<PixelFormat>(am.at("format").GetInt());
+            a.format = CAST<PixelFormat>(am.at("format").GetInt());
             a.load = am.at("load").GetBool();
             a.store = am.at("store").GetBool();
             a.clear = am.at("clear").GetBool();
-            a.samples = static_cast<uint32_t>(am.at("samples").GetInt());
+            a.samples = UINT_CAST(am.at("samples").GetInt());
             attachments.push_back(a);
         }
     }
 
     layerMask = UINT_CAST(data["layerMask"].GetInt());
     filterType = data["filterType"].GetString();
+    offscreenTargetName = data["offscreenTargetName"].GetString();
 
     // Restore filter based on filterType preset
     if (filterType == "opaque")

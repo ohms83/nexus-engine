@@ -33,9 +33,16 @@ NXS_NAMESPACE
             std::ranges::sort(m_renderPasses, std::ranges::less{}, &RenderPass::priority);
         }
 
+        //! Register an offscreen render target which can be referenced by renderpasses.
+        void RegisterRenderTarget(const std::string& name, const Ref<RenderTarget>& target)
+        {
+            m_renderTargets[name] = target;
+        }
+
     protected:
         //! A list of render passes sorted by their priority.
         std::vector<RenderPass> m_renderPasses;
+        std::unordered_map<std::string, Ref<RenderTarget>> m_renderTargets;
     };
 
     class ForwardSceneRenderer final :public SceneRenderer

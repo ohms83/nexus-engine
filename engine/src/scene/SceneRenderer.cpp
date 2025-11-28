@@ -10,6 +10,7 @@
 #include "graphics/debug/Gizmos.h"
 #include "graphics/RenderSystem.h"
 #include "graphics/RenderCommand.h"
+#include "graphics/RenderTarget.h"
 #include "geom/Frustum.h"
 #include "ecs/Ecs.h"
 #include "math/Math.h"
@@ -285,6 +286,11 @@ void ForwardSceneRenderer::Render(RenderSystem& renderSystem, const entt::regist
                 for (const auto& pass : m_renderPasses)
                 {
                     if (!pass.enabled) continue;
+                    if (pass.targetType == RenderTargetType::Offscreen && !pass.offscreenTargetName.empty()) {
+                        if (const auto it = m_renderTargets.find(pass.offscreenTargetName); it != m_renderTargets.end() && it->second) {
+                            it->second->Bind(renderSystem);
+                        }
+                    }
                     pass.Begin(renderSystem);
 
                     Ref<GpuProgram> usingProgram = nullptr;
@@ -329,6 +335,11 @@ void ForwardSceneRenderer::Render(RenderSystem& renderSystem, const entt::regist
                     }
 
                     pass.End(renderSystem);
+                    if (pass.targetType == RenderTargetType::Offscreen && !pass.offscreenTargetName.empty()) {
+                        if (const auto it = m_renderTargets.find(pass.offscreenTargetName); it != m_renderTargets.end() && it->second) {
+                            it->second->Unbind(renderSystem);
+                        }
+                    }
                 }
             }
             else
