@@ -9,7 +9,7 @@ int main(int argc, char** argv)
     config.screenHeight = 600;
 
     Engine::Initialize(nullptr, config);
-    auto& renderSystem = Engine::Instance().m_renderSystem;
+    auto renderSystem = Engine::Instance().GetRenderSystem();
 
     // Register a simple depth-only pass
     RenderPass depthPass;
