@@ -11,6 +11,11 @@ USING_NAMESPACE_NXS;
 void RenderPass::Begin(RenderSystem& rs) const
 {
     auto renderInterface = rs.GetRenderInterface();
+    // Bind offscreen target if requested.
+    if (targetType == RenderTargetType::Offscreen && offscreenTarget)
+    {
+        offscreenTarget->Bind(rs);
+    }
     // Clear
     auto hasFlag = [](ClearFlags flags, ClearFlags f){ return (static_cast<uint32_t>(flags) & static_cast<uint32_t>(f)) != 0; };
     if (hasFlag(clearFlags, ClearFlags::Color) && hasFlag(clearFlags, ClearFlags::Depth))
@@ -56,6 +61,11 @@ void RenderPass::End(RenderSystem& rs) const
     auto renderInterface = rs.GetRenderInterface();
     // Reset the global shader.
     renderInterface->SetGlobalShader(nullptr);
+    // Unbind offscreen target if requested.
+    if (targetType == RenderTargetType::Offscreen && offscreenTarget)
+    {
+        offscreenTarget->Unbind(rs);
+    }
     // Hook
     if (onEnd) onEnd(rs);
 }
