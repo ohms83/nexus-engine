@@ -67,11 +67,11 @@ VariantData RenderPass::Serialize() const
     data["targetType"] = INT_CAST(targetType);
     data["clearFlags"] = INT_CAST(clearFlags);
     data["clearColor"] = VariantData::Map {
-        {"r", CAST<double>(clearColor.r)},
-        {"g", CAST<double>(clearColor.g)},
-        {"b", CAST<double>(clearColor.b)},
+        {"r", DOUBLE_CAST(clearColor.r)},
+        {"g", DOUBLE_CAST(clearColor.g)},
+        {"b", DOUBLE_CAST(clearColor.b)},
     };
-    data["clearDepth"] = CAST<double>(clearDepth);
+    data["clearDepth"] = DOUBLE_CAST(clearDepth);
     data["clearStencil"] = INT_CAST(clearStencil);
 
     // Pipeline
