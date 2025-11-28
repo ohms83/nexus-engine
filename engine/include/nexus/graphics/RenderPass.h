@@ -5,6 +5,7 @@
 #include "Shader.h"
 #include "Material.h"
 #include "RenderingInterface.h"
+#include "nexus/io/Serializable.h"
 #include <functional>
 #include <string>
 #include <vector>
@@ -69,7 +70,7 @@ NXS_NAMESPACE
      * @brief Represents a single render pass in the rendering pipeline.
      * 
      */
-    struct RenderPass
+    struct RenderPass : public ISerializable
     {
         //! Pass name. Mainly used for debugging purposes.
         std::string name;
@@ -106,6 +107,8 @@ NXS_NAMESPACE
         // Filtering: a pass can decide which materials/objects to render using
         // this callback. `MatchesMaterial` will check it, falling back to true.
         std::function<bool(const Material& material)> filter = nullptr;
+        //! A name or preset to deserialize a filter (serializable). Valid values: "opaque", "alpha", "all"
+        std::string filterType = "all";
 
         // Optional lifecycle hooks, called at the start / end of the pass.
         std::function<void(RenderSystem&)> onBegin = nullptr;
@@ -128,6 +131,10 @@ NXS_NAMESPACE
         // These functions are designed to be called by the renderer.
         void Begin(RenderSystem& rs) const;
         void End(RenderSystem& rs) const;
+
+        // Serialization helpers
+        VariantData Serialize() const override;
+        void Deserialize(const VariantData& data) override;
 
         // Simple chaining builder helpers
         RenderPass& SetName(const std::string& s) { name = s; return *this; }
