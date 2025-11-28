@@ -68,6 +68,7 @@
 #include "graphics/ModelManager.h"
 #include "graphics/RenderCommand.h"
 #include "graphics/RenderingInterface.h"
+#include "graphics/RenderPass.h"
 #include "graphics/RenderSystem.h"
 #include "graphics/Shader.h"
 #include "graphics/Texture.h"

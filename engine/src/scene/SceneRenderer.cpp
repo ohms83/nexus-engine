@@ -167,9 +167,52 @@ static bool IsSphereInside(const Frustum& viewFustrum, const Sphere& sphere, glm
 ForwardSceneRenderer::ForwardSceneRenderer(const RenderSystem& renderSystem)
 {
     Hasher hasher;
-    // const auto name = "_DepthShader";
-    // m_depthShader = std::make_shared<Shader>(name, hasher.Hash32(name));
-    // m_depthShader->CompileFromSource(*renderSystem.GetRenderInterface(), s_depthVertexShader, s_depthFragmentShader);
+    // Depth shader used by depth-only prepass
+    const auto name = "_DepthShader";
+    Ref<Shader> depthShader = std::make_shared<Shader>(name, hasher.Hash32(name));
+    depthShader->CompileFromSource(*renderSystem.GetRenderInterface(), s_depthVertexShader, s_depthFragmentShader);
+
+    // Default passes
+    // Depth prepass
+    RenderPass depthPass;
+    depthPass.enabled = false; // Temporarily disable depth prepass
+    depthPass.clearFlags = ClearFlags::Depth;
+    depthPass.SetName("DepthPrepass").SetPriority(RENDER_PASS_DEPTH_FILL);
+    depthPass.pipelineState.depthWrite = true;
+    depthPass.pipelineState.depthTest = true;
+    depthPass.SetGlobalShader(depthShader);
+    depthPass.filter = [](const Material& m){ return m.blendMode == BlendMode::None; };
+    RegisterRenderPass(depthPass);
+
+    // Opaque pass
+    RenderPass opaquePass;
+    opaquePass.SetName("Opaque").SetPriority(RENDER_PASS_OPAQUE);
+    opaquePass.clearFlags = ClearFlags::Color | ClearFlags::Depth;
+    opaquePass.pipelineState.depthWrite = true;
+    opaquePass.pipelineState.depthTest = true;
+    opaquePass.filter = [](const Material& m) { return m.blendMode == BlendMode::None; };
+    RegisterRenderPass(opaquePass);
+
+    // Alpha/translucent pass
+    RenderPass alphaPass;
+    alphaPass.clearFlags = ClearFlags::None;
+    alphaPass.SetName("Alpha").SetPriority(RENDER_PASS_ALPHA);
+    alphaPass.pipelineState.depthWrite = false;
+    alphaPass.pipelineState.depthTest = true;
+    alphaPass.filter = [](const Material& m) { return m.blendMode != BlendMode::None; };
+    RegisterRenderPass(alphaPass);
+
+    // Overlay pass (for UI / always-on-top)
+    RenderPass overlayPass;
+    overlayPass.enabled = true;
+    overlayPass.clearFlags = ClearFlags::None;
+    overlayPass.SetName("Overlay").SetPriority(RENDER_PASS_OVERLAY);
+    // default pipeline state for overlay, usually draws last
+    overlayPass.filter = [](const Material& m) {
+        // Temporary: no overlay materials yet
+        return false;
+    };
+    RegisterRenderPass(overlayPass);
 }
 
 void ForwardSceneRenderer::Render(RenderSystem& renderSystem, const entt::registry& registry)

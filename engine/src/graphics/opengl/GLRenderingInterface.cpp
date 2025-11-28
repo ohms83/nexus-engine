@@ -167,12 +167,12 @@ void GLRenderingInterface::OnResize(const uint32_t pixel_w, const uint32_t pixel
 
 void GLRenderingInterface::SetColorMask(const glm::bvec4& mask)
 {
-    glColorMask((GLboolean)mask.r, (GLboolean)mask.g, (GLboolean)mask.b, (GLboolean)mask.a);
+    CALL_GL_FUNC(glColorMask((GLboolean)mask.r, (GLboolean)mask.g, (GLboolean)mask.b, (GLboolean)mask.a));
 }
 
 void GLRenderingInterface::SetDepthMask(bool mask)
 {
-    glDepthMask((GLboolean)mask);
+    CALL_GL_FUNC(glDepthMask((GLboolean)mask));
 }
 
 void GLRenderingInterface::SetDepthFunction(const DepthFunction depthFunction)
