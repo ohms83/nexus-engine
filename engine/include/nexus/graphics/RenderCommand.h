@@ -31,7 +31,7 @@ NXS_NAMESPACE
             return k;
         }
 
-        bool operator<(const SortKey& other) const { return key < other.key; }
+        bool operator < (const SortKey& other) const { return key < other.key; }
     };
 
     //! RenderCommand describes a single draw call. It is intentionally a value type with

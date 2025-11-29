@@ -57,27 +57,6 @@ DEFINE_LOG(ForwardSceneRenderer);
 
 namespace
 {
-    //! @brief A 64 bit sort-key.
-    struct SortKey
-    {
-        //! @brief Translucency flag. 0 means opague. 1 means translucent.
-        uint8_t translucent : 1;
-        //! @brief Material's ID
-        uint32_t materialId : 31;
-        //! @brief Mesh's Z value in the viewport space (0..1) normalized to an integer.
-        uint32_t normalizedZ : 32;
-
-        void SetZValue(float z)
-        {
-            normalizedZ = CAST<uint32_t>(Math::Lerp<float>(0, UINT32_MAX, z));
-        }
-
-        bool operator < (const SortKey& rhs)
-        {
-            return *(uint64_t*)this < *(uint64_t*)&rhs;
-        }
-    };
-
     // Render command-based sorting/batching
 }
 
@@ -285,7 +264,9 @@ void ForwardSceneRenderer::Render(RenderSystem& renderSystem, const entt::regist
 
         {
             rmt_ScopedCPUSample(SceneRenderer_SortMeshes, 0)
-            std::ranges::sort(commands, std::ranges::less{}, &RenderCommand::sortKey);
+            std::ranges::sort(commands, [](const RenderCommand& a, const RenderCommand& b) {
+                return a.sortKey < b.sortKey;
+            });
         }
         {
             // LOG_DEBUG(LogBasicSceneRenderer, std::format("Begin Draw..."));
