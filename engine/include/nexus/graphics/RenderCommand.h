@@ -55,6 +55,8 @@ NXS_NAMESPACE
 
         // Per-instance/model matrix: pointer because many commands share the same matrix
         const glm::mat4* modelMatrix = nullptr;
+        // For batched commands with multiple instances, store a list of pointers to model matrices.
+        std::vector<const glm::mat4*> instanceModels;
 
         // Bounding volume for frustum culling and sorting
         Sphere bounds;
@@ -73,6 +75,29 @@ NXS_NAMESPACE
         {
             const uint32 depth = static_cast<uint32>(std::clamp(depthNormalized, 0.0f, 1.0f) * static_cast<float>(UINT32_MAX));
             sortKey = SortKey::From(translucent, materialId, depth);
+        }
+
+        NODISCARD bool CanBatchWith(const RenderCommand& other) const
+        {
+            return vertexBuffer.get() == other.vertexBuffer.get()
+                && indexBuffer.get() == other.indexBuffer.get()
+                && material.get() == other.material.get()
+                && gpuProgram.get() == other.gpuProgram.get()
+                && indexCount == other.indexCount
+                && indexOffset == other.indexOffset
+                && vertexOffset == other.vertexOffset
+                && layerMask == other.layerMask;
+        }
+
+        void AddInstance(const glm::mat4* model)
+        {
+            if (instanceModels.empty())
+            {
+                if (modelMatrix) instanceModels.push_back(modelMatrix);
+                modelMatrix = nullptr;
+            }
+            instanceModels.push_back(model);
+            instanceCount = static_cast<uint32>(instanceModels.size());
         }
     };
 }

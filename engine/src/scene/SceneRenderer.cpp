@@ -11,6 +11,8 @@
 #include "graphics/RenderSystem.h"
 #include "graphics/RenderCommand.h"
 #include "graphics/RenderTarget.h"
+#include "graphics/RenderCommandBatcher.h"
+#include "graphics/RenderCommand.h"
 #include "graphics/RenderGraph.h"
 #include "geom/Frustum.h"
 #include "ecs/Ecs.h"
@@ -76,14 +78,7 @@ namespace
         }
     };
 
-    struct SortedMesh
-    {
-        uint64_t key;
-        Mesh* mesh;
-        const glm::mat4* modelMatrix;
-    };
-
-    std::vector<SortedMesh> s_sortedMeshes;
+    // Render command-based sorting/batching
 }
 
 static void SetAmbientLightParams(Ref<GpuProgram> gpuProgram, const entt::registry& registry)
@@ -224,7 +219,8 @@ void ForwardSceneRenderer::Render(RenderSystem& renderSystem, const entt::regist
 {
     rmt_ScopedCPUSample(SceneRenderer_Render, 0);
 
-    s_sortedMeshes.clear();
+    std::vector<RenderCommand> commands;
+    commands.reserve(1024);
 
     // Storing mesh's model matrix for the rendering phase.
     std::vector<glm::mat4> modelMatrices;
@@ -266,20 +262,30 @@ void ForwardSceneRenderer::Render(RenderSystem& renderSystem, const entt::regist
                 const auto meshSphere = mesh->GetSphere();
                 const auto pos = mvpMtx * glm::vec4(meshSphere.center, 1);
                 const auto clipZ = pos.z / pos.w;
-                uint64_t translucent = 0;
-                uint64_t materialId = 0x7FFFFFFF & material->GetId();
-                uint64_t depth = CAST<uint32_t>(Math::Lerp<float>(0, UINT32_MAX, clipZ));
-                uint64_t key = translucent << 63 | materialId << 32 | depth;
-                s_sortedMeshes.emplace_back(key, mesh.get(), &modelMtx);
+                const bool translucent = (material->blendMode != BlendMode::None);
+                const uint32_t materialId = 0x7FFFFFFF & material->GetId();
+                const float depthN = clipZ; // normalized in -1..1
+                const float depthNormalized = (depthN + 1.0f) * 0.5f;
+                RenderCommand cmd;
+                cmd.vertexBuffer = mesh->GetVertexBuffer();
+                cmd.indexBuffer = mesh->GetIndexBuffer();
+                cmd.indexCount = mesh->GetIndexBuffer()->GetNumIndexDraw();
+                cmd.indexOffset = 0;
+                cmd.vertexOffset = 0;
+                cmd.modelMatrix = &modelMtx;
+                cmd.bounds = mesh->GetSphere();
+                cmd.layerMask = 0xFFFFFFFFu;
+                cmd.material = material;
+                cmd.gpuProgram = material->GetShader()->GetGpuProgram();
+                cmd.SetSortKey(translucent, materialId, depthNormalized);
+                commands.emplace_back(std::move(cmd));
             }
             rmt_EndCPUSample();
         }
 
         {
             rmt_ScopedCPUSample(SceneRenderer_SortMeshes, 0)
-            std::sort(s_sortedMeshes.begin(), s_sortedMeshes.end(), [](const SortedMesh& a, const SortedMesh& b) {
-                return a.key < b.key;
-            });
+            std::ranges::sort(commands, std::ranges::less{}, &RenderCommand::sortKey);
         }
         {
             // LOG_DEBUG(LogBasicSceneRenderer, std::format("Begin Draw..."));
@@ -299,15 +305,14 @@ void ForwardSceneRenderer::Render(RenderSystem& renderSystem, const entt::regist
                     pass.Begin(renderSystem);
 
                     Ref<GpuProgram> usingProgram = nullptr;
-                    for (const auto [key, mesh, modelMtx] : s_sortedMeshes)
+                    const auto batched = RenderCommandBatcher::Batch(commands);
+                    for (const auto& cmd : batched)
                     {
-                        auto material = mesh->GetMaterial();
+                        auto material = cmd.material;
                         if (!material) continue;
-
                         if (!pass.MatchesMaterial(*material)) continue;
 
-                        Ref<GpuProgram> gpuProgram = pass.globalShader ? pass.globalShader->GetGpuProgram() : material->GetShader()->GetGpuProgram();
-
+                        Ref<GpuProgram> gpuProgram = pass.globalShader ? pass.globalShader->GetGpuProgram() : cmd.gpuProgram;
                         if (gpuProgram != usingProgram)
                         {
                             if (!pass.globalShader)
@@ -319,9 +324,6 @@ void ForwardSceneRenderer::Render(RenderSystem& renderSystem, const entt::regist
                                 if (!gpuProgram->IsBinding()) gpuProgram->Bind();
                             }
 
-                            // The depth function / pipeline state is applied per-pass by the renderer (via RenderPass::Begin)
-
-                            gpuProgram->SetUniformMatrix("_Model", *modelMtx, false);
                             gpuProgram->SetUniformMatrix("_View", viewMtx, false);
                             gpuProgram->SetUniformMatrix("_Projection", projection, false);
 
@@ -330,13 +332,24 @@ void ForwardSceneRenderer::Render(RenderSystem& renderSystem, const entt::regist
                             SetPointLightParams(gpuProgram, registry);
                             usingProgram = gpuProgram;
                         }
+
+                        if (!cmd.instanceModels.empty())
+                        {
+                            for (const auto mtxPtr : cmd.instanceModels)
+                            {
+                                gpuProgram->SetUniformMatrix("_Model", *mtxPtr, false);
+                                cmd.vertexBuffer->Bind();
+                                cmd.indexBuffer->Bind();
+                                renderSystem.DrawIndexed(cmd.indexBuffer);
+                            }
+                        }
                         else
                         {
-                            gpuProgram->SetUniformMatrix("_Model", *modelMtx, false);
+                            if (cmd.modelMatrix) gpuProgram->SetUniformMatrix("_Model", *cmd.modelMatrix, false);
+                            cmd.vertexBuffer->Bind();
+                            cmd.indexBuffer->Bind();
+                            renderSystem.DrawIndexed(cmd.indexBuffer);
                         }
-
-                        mesh->GetVertexBuffer()->Bind();
-                        renderSystem.DrawIndexed(mesh->GetIndexBuffer());
                     }
 
                     pass.End(renderSystem);
@@ -350,20 +363,17 @@ void ForwardSceneRenderer::Render(RenderSystem& renderSystem, const entt::regist
             else
             {
                 Material* usingMaterial = nullptr;
-                for (const auto [key, mesh, modelMtx] : s_sortedMeshes)
+                const auto batched = RenderCommandBatcher::Batch(commands);
+                for (const auto& cmd : batched)
                 {
-                    auto material = mesh->GetMaterial();
-
+                    auto material = cmd.material;
                     if (material.get() != usingMaterial)
                     {
-                        // LOG_DEBUG(LogBasicSceneRenderer, std::format("Switch material={}", material->GetPath()));
                         material->Use();
                         usingMaterial = material.get();
 
                         renderInterface->SetDepthFunction(material->depthFunction);
-
                         auto gpuProgram = material->GetShader()->GetGpuProgram();
-                        gpuProgram->SetUniformMatrix("_Model", *modelMtx, false);
                         gpuProgram->SetUniformMatrix("_View", viewMtx, false);
                         gpuProgram->SetUniformMatrix("_Projection", projection, false);
 
@@ -372,8 +382,24 @@ void ForwardSceneRenderer::Render(RenderSystem& renderSystem, const entt::regist
                         SetPointLightParams(gpuProgram, registry);
                     }
 
-                    mesh->GetVertexBuffer()->Bind();
-                    renderSystem.DrawIndexed(mesh->GetIndexBuffer());
+                    auto gpuProgram = material->GetShader()->GetGpuProgram();
+                    if (!cmd.instanceModels.empty())
+                    {
+                        for (const auto mtxPtr : cmd.instanceModels)
+                        {
+                            gpuProgram->SetUniformMatrix("_Model", *mtxPtr, false);
+                            cmd.vertexBuffer->Bind();
+                            cmd.indexBuffer->Bind();
+                            renderSystem.DrawIndexed(cmd.indexBuffer);
+                        }
+                    }
+                    else
+                    {
+                        if (cmd.modelMatrix) gpuProgram->SetUniformMatrix("_Model", *cmd.modelMatrix, false);
+                        cmd.vertexBuffer->Bind();
+                        cmd.indexBuffer->Bind();
+                        renderSystem.DrawIndexed(cmd.indexBuffer);
+                    }
                 }
             }
 
