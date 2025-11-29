@@ -27,22 +27,11 @@ void RenderPass::Begin(RenderSystem& rs) const
         // Stencil: Not supported yet by the generic interface. Add later if needed.
     }
 
-    // Pipeline state
-    renderInterface->SetDepthFunction(pipelineState.depthFunction);
-    renderInterface->SetDepthMask(pipelineState.depthWrite);
-    renderInterface->SetCullMode(pipelineState.cullMode);
-    renderInterface->SetFrontFace(pipelineState.frontFace);
-    renderInterface->SetPolygonMode(pipelineState.polygonMode);
+    // Pipeline state using RenderSystem caching to avoid redundant state flips
+    rs.ApplyPipelineState(pipelineState);
 
-    // Global shader override
-    if (globalShader)
-    {
-        renderInterface->SetGlobalShader(globalShader->GetGpuProgram());
-    }
-    else
-    {
-        renderInterface->SetGlobalShader(nullptr);
-    }
+    // Set global shader override via RenderSystem to allow caching
+    rs.SetGlobalShader(globalShader ? globalShader->GetGpuProgram() : nullptr);
 
     // Hook
     if (onBegin) onBegin(rs);
@@ -50,9 +39,8 @@ void RenderPass::Begin(RenderSystem& rs) const
 
 void RenderPass::End(RenderSystem& rs) const
 {
-    auto renderInterface = rs.GetRenderInterface();
     // Reset the global shader.
-    renderInterface->SetGlobalShader(nullptr);
+    rs.SetGlobalShader(nullptr);
     // Offscreen target is unbound by the caller (SceneRenderer/RenderSystem).
     // Hook
     if (onEnd) onEnd(rs);
@@ -81,7 +69,6 @@ VariantData RenderPass::Serialize() const
     pipeline["depthFunction"] = INT_CAST(pipelineState.depthFunction);
     pipeline["stencilTest"] = pipelineState.stencilTest;
     pipeline["stencilOp"] = INT_CAST(pipelineState.stencilOp);
-    pipeline["cullBackFaces"] = pipelineState.cullBackFaces;
     pipeline["overrideBlendMode"] = INT_CAST(pipelineState.overrideBlendMode);
     pipeline["polygonMode"] = INT_CAST(pipelineState.polygonMode);
     pipeline["cullMode"] = INT_CAST(pipelineState.cullMode);
@@ -108,6 +95,9 @@ VariantData RenderPass::Serialize() const
     data["layerMask"] = INT_CAST(layerMask);
     data["filterType"] = filterType;
     data["offscreenTargetName"] = offscreenTargetName;
+    VariantData::Array readArr;
+    for (const auto& r : readTargets) readArr.emplace_back(r);
+    data["readTargets"] = readArr;
 
     return data;
 }
@@ -133,7 +123,6 @@ void RenderPass::Deserialize(const VariantData& data)
     pipelineState.depthFunction = CAST<DepthFunction>(p.at("depthFunction").GetInt());
     pipelineState.stencilTest = p.at("stencilTest").GetBool();
     pipelineState.stencilOp = CAST<StencilOperation>(p.at("stencilOp").GetInt());
-    pipelineState.cullBackFaces = p.at("cullBackFaces").GetBool();
     pipelineState.overrideBlendMode = CAST<BlendMode>(p.at("overrideBlendMode").GetInt());
     pipelineState.polygonMode = CAST<PolygonMode>(p.at("polygonMode").GetInt());
     pipelineState.cullMode = CAST<PolygonFacing>(p.at("cullMode").GetInt());
@@ -168,19 +157,16 @@ void RenderPass::Deserialize(const VariantData& data)
     layerMask = UINT_CAST(data["layerMask"].GetInt());
     filterType = data["filterType"].GetString();
     offscreenTargetName = data["offscreenTargetName"].GetString();
+    readTargets.clear();
+    if (data.HasKey("readTargets") && data["readTargets"].IsArray())
+    {
+        for (const auto& rv : data["readTargets"].GetArray())
+        {
+            readTargets.emplace_back(rv.GetString());
+        }
+    }
 
     // Restore filter based on filterType preset
-    if (filterType == "opaque")
-    {
-        filter = [](const Material& m){ return m.blendMode == BlendMode::None; };
-    }
-    else if (filterType == "alpha")
-    {
-        filter = [](const Material& m){ return m.blendMode != BlendMode::None; };
-    }
-    else
-    {
-        filter = nullptr;
-    }
+    SetFilterType(filterType);
 }
 

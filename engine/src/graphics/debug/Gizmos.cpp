@@ -220,6 +220,8 @@ void Gizmos::Clear()
 
 void Gizmos::ProcessDraw(RenderSystem& renderSystem, const glm::mat4& cameraMtx)
 {
+    // TODO: Perform drawing during the overlay render pass
+#if 0
     rmt_ScopedCPUSample(DrawGizmos, 0);
     auto& renderInterface = *renderSystem.GetRenderInterface();
     renderInterface.SetDepthFunction(DepthFunction::Always);
@@ -232,6 +234,7 @@ void Gizmos::ProcessDraw(RenderSystem& renderSystem, const glm::mat4& cameraMtx)
     {
         vertexData->DrawIndexed(renderInterface);
     }
+#endif
 }
 
 void Gizmos::DrawPoint(

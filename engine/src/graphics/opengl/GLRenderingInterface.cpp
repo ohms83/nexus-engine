@@ -205,6 +205,9 @@ void GLRenderingInterface::SetDepthFunction(const DepthFunction depthFunction)
     case DepthFunction::Always:
         CALL_GL_FUNC(glDepthFunc(GL_ALWAYS));
         break;
+    case DepthFunction::None:
+        // Handled above.
+        break;
     default:
         NXS_ASSERT(false);
         break;

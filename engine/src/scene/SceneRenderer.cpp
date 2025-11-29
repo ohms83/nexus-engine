@@ -11,6 +11,7 @@
 #include "graphics/RenderSystem.h"
 #include "graphics/RenderCommand.h"
 #include "graphics/RenderTarget.h"
+#include "graphics/RenderGraph.h"
 #include "geom/Frustum.h"
 #include "ecs/Ecs.h"
 #include "math/Math.h"
@@ -182,7 +183,7 @@ ForwardSceneRenderer::ForwardSceneRenderer(const RenderSystem& renderSystem)
     depthPass.pipelineState.depthWrite = true;
     depthPass.pipelineState.depthTest = true;
     depthPass.SetGlobalShader(depthShader);
-    depthPass.filter = [](const Material& m){ return m.blendMode == BlendMode::None; };
+    depthPass.filter = [](const Material& m) { return m.blendMode == BlendMode::None; };
     RegisterRenderPass(depthPass);
 
     // Opaque pass
@@ -196,6 +197,8 @@ ForwardSceneRenderer::ForwardSceneRenderer(const RenderSystem& renderSystem)
 
     // Alpha/translucent pass
     RenderPass alphaPass;
+    // Temporarily disable alpha pass. There's a bug in the ApplyPipelineState causing issues.
+    alphaPass.enabled = false;
     alphaPass.clearFlags = ClearFlags::None;
     alphaPass.SetName("Alpha").SetPriority(RENDER_PASS_ALPHA);
     alphaPass.pipelineState.depthWrite = false;
@@ -205,7 +208,8 @@ ForwardSceneRenderer::ForwardSceneRenderer(const RenderSystem& renderSystem)
 
     // Overlay pass (for UI / always-on-top)
     RenderPass overlayPass;
-    overlayPass.enabled = true;
+    // Temporarily disable overlay pass. There's a bug in the ApplyPipelineState causing issues.
+    overlayPass.enabled = false;
     overlayPass.clearFlags = ClearFlags::None;
     overlayPass.SetName("Overlay").SetPriority(RENDER_PASS_OVERLAY);
     // default pipeline state for overlay, usually draws last
@@ -283,7 +287,8 @@ void ForwardSceneRenderer::Render(RenderSystem& renderSystem, const entt::regist
 
             if (!m_renderPasses.empty())
             {
-                for (const auto& pass : m_renderPasses)
+                auto ordered = nxs::RenderGraph::Build(m_renderPasses);
+                for (const auto& pass : ordered)
                 {
                     if (!pass.enabled) continue;
                     if (pass.targetType == RenderTargetType::Offscreen && !pass.offscreenTargetName.empty()) {
@@ -314,7 +319,7 @@ void ForwardSceneRenderer::Render(RenderSystem& renderSystem, const entt::regist
                                 if (!gpuProgram->IsBinding()) gpuProgram->Bind();
                             }
 
-                            renderInterface->SetDepthFunction(pass.pipelineState.depthFunction);
+                            // The depth function / pipeline state is applied per-pass by the renderer (via RenderPass::Begin)
 
                             gpuProgram->SetUniformMatrix("_Model", *modelMtx, false);
                             gpuProgram->SetUniformMatrix("_View", viewMtx, false);

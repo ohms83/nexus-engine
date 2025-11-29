@@ -11,12 +11,15 @@
 #include "entt/entity/registry.hpp"
 
 #include <algorithm>
+#include <string>
+#include <unordered_map>
 
 NXS_NAMESPACE
 {
     class RenderSystem;
     class Scene;
     class Shader;
+    class RenderTarget;
     struct LightProperties;
     struct PointLightComponent;
     struct DirectLightComponent;
@@ -32,6 +35,8 @@ NXS_NAMESPACE
             m_renderPasses.push_back(renderPass);
             std::ranges::sort(m_renderPasses, std::ranges::less{}, &RenderPass::priority);
         }
+
+        NODISCARD const std::vector<RenderPass>& GetRenderPasses() const { return m_renderPasses; }
 
         //! Register an offscreen render target which can be referenced by renderpasses.
         void RegisterRenderTarget(const std::string& name, const Ref<RenderTarget>& target)

@@ -14,7 +14,6 @@
 #include "core/Logger.h"
 #include "core/FileLogger.h"
 #include "core/StdOutLogger.h"
-#include "graphics/Mesh.h"
 #include "graphics/debug/Gizmos.h"
 #include "io/InputManager.h"
 #include "time/TimerManager.h"

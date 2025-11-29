@@ -2,8 +2,8 @@
 
 #include "GraphicsConst.h"
 #include "Color.h"
-#include "Shader.h"
 #include "Material.h"
+#include "PipelineStage.h"
 #include "RenderingInterface.h"
 
 #include "nexus/io/Serializable.h"
@@ -54,20 +54,6 @@ NXS_NAMESPACE
         uint32_t samples = 1;
     };
 
-    struct PipelineState
-    {
-        bool depthTest = true;
-        bool depthWrite = true;
-        DepthFunction depthFunction = DepthFunction::Lesser;
-        bool stencilTest = false;
-        StencilOperation stencilOp = StencilOperation::Zero;
-        bool cullBackFaces = true;
-        BlendMode overrideBlendMode = BlendMode::None;
-        PolygonMode polygonMode = PolygonMode::Fill;
-        PolygonFacing cullMode = PolygonFacing::Back;
-        FrontFace frontFace = FrontFace::CounterClockWise;
-    };
-
     /**
      * @brief Represents a single render pass in the rendering pipeline.
      * 
@@ -92,6 +78,8 @@ NXS_NAMESPACE
          */
         //! Optional name of an offscreen render target assigned by the engine.
         std::string offscreenTargetName;
+        //! A list of offscreen render targets that this pass reads/samples from
+        std::vector<std::string> readTargets;
 
         // Clear
         ClearFlags clearFlags = ClearFlags::Color | ClearFlags::Depth;
@@ -144,6 +132,30 @@ NXS_NAMESPACE
         RenderPass& SetPriority(uint32_t p) { priority = p; return *this; }
         RenderPass& SetGlobalShader(const Ref<Shader>& s) { globalShader = s; return *this; }
         RenderPass& SetFilter(std::function<bool(const Material&)> f) { filter = std::move(f); return *this; }
+
+        /**
+         * @brief Set the filter by type preset.
+         * 
+         * @param type A string representing the filter type. Valid values are "opaque", "alpha", and "all".
+         * @return Reference to this render pass for chaining.
+         */
+        RenderPass& SetFilterType(std::string type)
+        {
+            filterType = std::move(type);
+            if (filterType == "opaque")
+            {
+                filter = [](const Material& m) { return m.blendMode == BlendMode::None; };
+            }
+            else if (filterType == "alpha")
+            {
+                filter = [](const Material& m) { return m.blendMode != BlendMode::None; };
+            }
+            else // "all" or unknown
+            {
+                filter = nullptr;
+            }
+            return *this;
+        }
     };
 
     struct RenderPassBuilder

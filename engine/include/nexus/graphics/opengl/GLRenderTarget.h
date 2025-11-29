@@ -18,6 +18,7 @@ NXS_NAMESPACE
         NODISCARD uint32 GetFBO() const { return m_fbo; }
         NODISCARD uint32 GetWidth() const { return m_width; }
         NODISCARD uint32 GetHeight() const { return m_height; }
+        NODISCARD Ref<TextureProxy> GetColorTextureProxy() const { return m_colorTexture; }
 
     private:
         uint32 m_fbo = 0;

@@ -2,6 +2,7 @@
 #include "graphics/opengl/GLRenderTarget.h"
 #include "graphics/opengl/GLTexture.h"
 #include "graphics/opengl/GLRenderingInterface.h"
+#include "graphics/RenderSystem.h"
 #include <vector>
 
 USING_NAMESPACE_NXS;

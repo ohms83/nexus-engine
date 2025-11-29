@@ -5,6 +5,7 @@
 #include "nexus/core/LogDispatcher.h"
 #include "Color.h"
 #include "RenderingInterface.h"
+#include "PipelineStage.h"
 
 NXS_NAMESPACE
 {
@@ -89,7 +90,18 @@ NXS_NAMESPACE
             return m_config;
         }
 
+        //! Apply pipeline state with minimal redundant state transitions.
+        void ApplyPipelineState(const PipelineState& state);
+        void SetGlobalShader(Ref<GpuProgram> shader);
+
     protected:
+        // State cache to reduce redundant calls to the rendering backend
+        DepthFunction m_cachedDepthFunction = DepthFunction::None;
+        bool m_cachedDepthMask = true;
+        PolygonMode m_cachedPolygonMode = PolygonMode::Fill;
+        PolygonFacing m_cachedCullMode = PolygonFacing::Back;
+        FrontFace m_cachedFrontFace = FrontFace::CounterClockWise;
+        Ref<GpuProgram> m_cachedGlobalShader;
         GraphicsConfig m_config;
         Ref<RenderingInterface> m_renderingInterface;
         Color4F m_clearColor = Color4F::White;

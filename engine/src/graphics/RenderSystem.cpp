@@ -1,10 +1,9 @@
 #include <format>
 #include <iostream>
-#include "nexus/graphics/RenderSystem.h"
-#include "nexus/graphics/Shader.h"
-
-#include "nexus/core/LogDispatcher.h"
-#include "nexus/time/HighResTimeSource.h"
+#include "graphics/RenderSystem.h"
+#include "graphics/Shader.h"
+#include "core/LogDispatcher.h"
+#include "time/HighResTimeSource.h"
 #include "time/StandardTimeSource.h"
 
 #include "Remotery.h"
@@ -65,4 +64,60 @@ void RenderSystem::OnResize(const uint32 pixel_w, const uint32 pixel_h)
     m_config.screenWidth = CAST<int>(pixel_w);
     m_config.screenHeight = CAST<int>(pixel_h);
     m_renderingInterface->OnResize(pixel_w, pixel_h);
+}
+
+void RenderSystem::ApplyPipelineState(const PipelineState& state)
+{
+    if (state.depthTest)
+    {
+        if (m_cachedDepthFunction != state.depthFunction)
+        {
+            m_renderingInterface->SetDepthFunction(state.depthFunction);
+            m_cachedDepthFunction = state.depthFunction;
+        }
+    }
+    else if (m_cachedDepthFunction != DepthFunction::None)
+    {
+        m_renderingInterface->SetDepthFunction(DepthFunction::None);
+        m_cachedDepthFunction = DepthFunction::None;
+    }
+
+    if (m_cachedDepthMask != state.depthWrite)
+    {
+        m_renderingInterface->SetDepthMask(state.depthWrite);
+        m_cachedDepthMask = state.depthWrite;
+    }
+
+    if (m_cachedPolygonMode != state.polygonMode)
+    {
+        m_renderingInterface->SetPolygonMode(state.polygonMode);
+        m_cachedPolygonMode = state.polygonMode;
+    }
+
+    if (m_cachedCullMode != state.cullMode)
+    {
+        m_renderingInterface->SetCullMode(state.cullMode);
+        m_cachedCullMode = state.cullMode;
+    }
+
+    if (m_cachedFrontFace != state.frontFace)
+    {
+        m_renderingInterface->SetFrontFace(state.frontFace);
+        m_cachedFrontFace = state.frontFace;
+    }
+
+    if (m_cachedGlobalShader != state.globalShader)
+    {
+        m_renderingInterface->SetGlobalShader(state.globalShader);
+        m_cachedGlobalShader = state.globalShader;
+    }
+}
+
+void RenderSystem::SetGlobalShader(Ref<GpuProgram> shader)
+{
+    if (m_cachedGlobalShader != shader)
+    {
+        m_renderingInterface->SetGlobalShader(shader);
+        m_cachedGlobalShader = shader;
+    }
 }
