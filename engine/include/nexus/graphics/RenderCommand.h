@@ -1,12 +1,17 @@
-// Created by copilot on behalf of the user
+//
+// Created by nutta on 7/7/2025.
+//
+
 #pragma once
 
 #include "nexus/NxsCommon.h"
 #include "nexus/geom/Sphere.h"
-#include "nexus/graphics/IndexBuffer.h"
-#include "nexus/graphics/VertexBuffer.h"
-#include "nexus/graphics/GpuProgram.h"
-#include "nexus/graphics/Material.h"
+
+#include "IndexBuffer.h"
+#include "VertexBuffer.h"
+#include "GpuProgram.h"
+#include "Material.h"
+#include "PipelineState.h"
 
 NXS_NAMESPACE
 {
@@ -70,25 +75,4 @@ NXS_NAMESPACE
             sortKey = SortKey::From(translucent, materialId, depth);
         }
     };
-}
-//
-// Created by nutta on 7/7/2025.
-//
-
-#pragma once
-
-#include "nexus/NxsDefine.h"
-#include "nexus/geom/Sphere.h"
-
-#include "IndexBuffer.h"
-#include "GpuProgram.h"
-#include "VertexBuffer.h"
-
-#include <map>
-
-NXS_NAMESPACE
-{
-    // struct RenderCommand
-    // {
-    // };
 }

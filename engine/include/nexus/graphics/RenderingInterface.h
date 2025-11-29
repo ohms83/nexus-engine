@@ -10,7 +10,6 @@
 #include "Color.h"
 #include "GraphicsConfig.h"
 #include "IndexBuffer.h"
-#include "RenderCommand.h"
 #include "GpuProgram.h"
 #include "TextureProxy.h"
 #include "VertexBuffer.h"

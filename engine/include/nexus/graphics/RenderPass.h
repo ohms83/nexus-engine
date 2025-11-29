@@ -3,7 +3,7 @@
 #include "GraphicsConst.h"
 #include "Color.h"
 #include "Material.h"
-#include "PipelineStage.h"
+#include "PipelineState.h"
 #include "RenderingInterface.h"
 
 #include "nexus/io/Serializable.h"

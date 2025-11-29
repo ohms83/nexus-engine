@@ -5,7 +5,7 @@
 #include "nexus/core/LogDispatcher.h"
 #include "Color.h"
 #include "RenderingInterface.h"
-#include "PipelineStage.h"
+#include "PipelineState.h"
 
 NXS_NAMESPACE
 {

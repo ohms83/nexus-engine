@@ -9,6 +9,7 @@
 #include "GraphicsConst.h"
 #include "Color.h"
 #include "Shader.h"
+#include "RenderingInterface.h"
 
 #include "nexus/core/Resource.h"
 
