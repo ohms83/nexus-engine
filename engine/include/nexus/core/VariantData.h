@@ -134,6 +134,18 @@ NXS_NAMESPACE
         NODISCARD bool IsString() const { return std::holds_alternative<std::string>(m_value); }
         NODISCARD bool IsArray() const { return std::holds_alternative<std::vector<VariantData>>(m_value); }
         NODISCARD bool IsMap() const { return std::holds_alternative<Map>(m_value); }
+        NODISCARD bool IsNumeric() const { return IsInt() || IsDouble(); }
+        NODISCARD bool IsPrimitive() const {
+            return IsNull() || IsBool() || IsInt() || IsDouble() || IsString();
+        }
+
+        NODISCARD bool HasKey(const std::string_view key) const noexcept {
+            if (!IsMap()) {
+                return false;
+            }
+            const auto& map = GetMap();
+            return map.find(key) != map.end();
+        }
 
         // --- Getters (with error handling) ---
         NODISCARD bool GetBool() const {
@@ -322,6 +334,7 @@ NXS_NAMESPACE
             return std::visit(std::forward<Visitor>(visitor), m_value);
         }
 
+        // --- Static Null Instance ---
         static const VariantData None;
 
     private:
