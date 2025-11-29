@@ -23,10 +23,14 @@ TEST(RenderCommandBatcher, BatchesAdjacentSameDraw)
     a.gpuProgram = nullptr; b.gpuProgram = nullptr; c.gpuProgram = nullptr;
 
     std::vector<RenderCommand> inputs{a, b, c};
+    // Test both batch functions
     auto out = RenderCommandBatcher::Batch(inputs);
     // First two are batchable, third is separate
     EXPECT_EQ(out.size(), 2);
     // Check that first output has instanceModels size 2 and second output has instanceModels 0 (single)
     EXPECT_EQ(out[0].instanceModels.size(), 2);
     EXPECT_TRUE(out[1].instanceModels.empty());
+    // In-place batch
+    RenderCommandBatcher::BatchInPlace(inputs);
+    EXPECT_EQ(inputs.size(), 2);
 }

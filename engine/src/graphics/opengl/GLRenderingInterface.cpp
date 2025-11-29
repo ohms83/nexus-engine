@@ -160,6 +160,28 @@ void GLRenderingInterface::DrawIndexed(const Ref<IndexBuffer> indexBuffer)
     }
 }
 
+void GLRenderingInterface::DrawIndexedInstanced(const Ref<IndexBuffer> indexBuffer, const uint32 instanceCount)
+{
+    rmt_ScopedCPUSample(GLRendering_DrawIndexedInstanced, 0);
+    NXS_ASSERT(indexBuffer != nullptr);
+    if (!indexBuffer->IsBinding()) indexBuffer->Bind();
+
+    CALL_GL_FUNC(glFrontFace(GL::NxsFrontFaceToGL(indexBuffer->GetFrontFace())));
+
+    const GLuint gl_drawMode = GL::NxsDrawModeToGL(indexBuffer->GetDrawMode());
+    NXS_ASSERT_MSG(gl_drawMode != GL_QUADS, "GL_QUADS is not a valid primitive type.")
+    {
+        rmt_ScopedOpenGLSample(glDrawElementsInstanced);
+        CALL_GL_FUNC(glDrawElementsInstanced(
+            gl_drawMode,
+            CAST<GLsizei>(indexBuffer->GetNumIndexDraw()),
+            GL_UNSIGNED_INT,
+            R_CAST<void*>(0),
+            CAST<GLsizei>(instanceCount)
+        ));
+    }
+}
+
 void GLRenderingInterface::OnResize(const uint32_t pixel_w, const uint32_t pixel_h)
 {
     CALL_GL_FUNC(glViewport(0, 0, INT_CAST(pixel_w), INT_CAST(pixel_h)));

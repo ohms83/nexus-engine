@@ -48,6 +48,13 @@ void RenderSystem::DrawIndexed(Ref<IndexBuffer> indexBuffer)
     m_polygonCount += indexBuffer->NumPolygons();
 }
 
+void RenderSystem::DrawIndexedInstanced(Ref<IndexBuffer> indexBuffer, uint32 instanceCount)
+{
+    m_renderingInterface->DrawIndexedInstanced(indexBuffer, instanceCount);
+    m_drawCount++;
+    m_polygonCount += indexBuffer->NumPolygons() * instanceCount;
+}
+
 void RenderSystem::EndDraw()
 {
     rmt_ScopedCPUSample(EndDraw, 0);

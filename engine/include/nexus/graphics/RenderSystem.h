@@ -45,6 +45,7 @@ NXS_NAMESPACE
         void BeginDraw();
         void Draw();
         void DrawIndexed(Ref<IndexBuffer> indexBuffer);
+        void DrawIndexedInstanced(Ref<IndexBuffer> indexBuffer, uint32 instanceCount);
         void EndDraw();
 
         //! An event handler called when the window resize event occured.

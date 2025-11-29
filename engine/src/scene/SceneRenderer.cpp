@@ -286,7 +286,9 @@ void ForwardSceneRenderer::Render(RenderSystem& renderSystem, const entt::regist
                     pass.Begin(renderSystem);
 
                     Ref<GpuProgram> usingProgram = nullptr;
-                    const auto batched = RenderCommandBatcher::Batch(commands);
+                    // Batch commands in-place to reduce allocations and combine adjacents.
+                    RenderCommandBatcher::BatchInPlace(commands);
+                    const auto &batched = commands;
                     for (const auto& cmd : batched)
                     {
                         auto material = cmd.material;
@@ -316,6 +318,9 @@ void ForwardSceneRenderer::Render(RenderSystem& renderSystem, const entt::regist
 
                         if (!cmd.instanceModels.empty())
                         {
+                            // If the renderer supports instancing and we have proper instance data prepared, we
+                            // could call DrawIndexedInstanced here. For now, we still set _Model per-instance and
+                            // issue multiple draw calls unless a proper instancing path is registered.
                             for (const auto mtxPtr : cmd.instanceModels)
                             {
                                 gpuProgram->SetUniformMatrix("_Model", *mtxPtr, false);

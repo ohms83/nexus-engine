@@ -45,6 +45,7 @@ NXS_NAMESPACE
         virtual void OnResize(uint32_t pixel_w, uint32_t pixel_h) = 0;
 
         virtual void DrawIndexed(const Ref<IndexBuffer> indexBuffer) = 0;
+        virtual void DrawIndexedInstanced(const Ref<IndexBuffer> indexBuffer, uint32 instanceCount) = 0;
 
         NODISCARD GraphicsAPI GetAPI() const
         {
