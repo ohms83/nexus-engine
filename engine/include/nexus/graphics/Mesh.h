@@ -1,6 +1,7 @@
 #pragma once
 
 #include "nexus/NxsDefine.h"
+#include "nexus/io/Serializable.h"
 
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
@@ -10,7 +11,9 @@
 
 NXS_NAMESPACE
 {
-    class Mesh
+    class MaterialManager;
+    class TextureManager;
+    class Mesh : public ISerializable
     {
     public:
         Mesh();
@@ -48,6 +51,13 @@ NXS_NAMESPACE
         {
             return m_material;
         }
+        // Removed: Mesh no longer holds a material path since the Material resource
+        // retains its own path via Material::GetPath(). Use the serialized data to recover
+        // material path when necessary.
+
+        // Serialization
+        VariantData Serialize() const override;
+        void Deserialize(const VariantData& data) override;
 
         void SetSphere(const Sphere& sphere)
         {
@@ -69,7 +79,14 @@ NXS_NAMESPACE
             return m_boundingBox;
         }
 
-    protected:
+    public:
+        // Resolve a material reference using a MaterialManager and TextureManager. This will set m_material
+        // if the mesh currently only stores a material path (e.g., deserialized state). It will also cause
+        // the material to resolve its textures via the texture manager.
+        void Resolve(class MaterialManager& materialManager, class TextureManager& textureManager);
+
+        // Mesh stores the material path when deserializing and will attempt to resolve it when Resolve() is called.
+        std::string m_materialPath;
         std::string m_name;
         Ref<VertexBuffer> m_vertexBuffer;
         Ref<IndexBuffer> m_indexBuffer;

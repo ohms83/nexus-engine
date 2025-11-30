@@ -18,6 +18,8 @@
 #include "ecs/Ecs.h"
 #include "math/Math.h"
 #include "math/Matrix.h"
+#include "memory/OwningBuffer.h"
+#include <cstring>
 #include "scene/component/CameraComponent.h"
 #include "scene/component/LightComponent.h"
 #include "scene/component/ModelComponent.h"
@@ -287,7 +289,7 @@ void ForwardSceneRenderer::Render(RenderSystem& renderSystem, const entt::regist
 
                     Ref<GpuProgram> usingProgram = nullptr;
                     // Batch commands in-place to reduce allocations and combine adjacents.
-                    RenderCommandBatcher::BatchInPlace(commands);
+                    RenderCommandBatcher::Batch(commands);
                     const auto &batched = commands;
                     for (const auto& cmd : batched)
                     {
@@ -318,16 +320,35 @@ void ForwardSceneRenderer::Render(RenderSystem& renderSystem, const entt::regist
 
                         if (!cmd.instanceModels.empty())
                         {
-                            // If the renderer supports instancing and we have proper instance data prepared, we
-                            // could call DrawIndexedInstanced here. For now, we still set _Model per-instance and
-                            // issue multiple draw calls unless a proper instancing path is registered.
-                            for (const auto mtxPtr : cmd.instanceModels)
+                            // Build an OwningBuffer holding all model matrices
+                            const auto instanceCount = static_cast<uint32>(cmd.instanceModels.size());
+                            const size_t bytes = instanceCount * sizeof(glm::mat4);
+                            uint8_t* mem = new uint8_t[bytes];
+                            // Copy matrices
+                            for (uint32 i = 0; i < instanceCount; ++i)
                             {
-                                gpuProgram->SetUniformMatrix("_Model", *mtxPtr, false);
-                                cmd.vertexBuffer->Bind();
-                                cmd.indexBuffer->Bind();
-                                renderSystem.DrawIndexed(cmd.indexBuffer);
+                                std::memcpy(&mem[i * sizeof(glm::mat4)], cmd.instanceModels[i], sizeof(glm::mat4));
                             }
+                            Ref<IBuffer> instanceBuffer = std::make_shared<OwningBuffer>(mem, bytes);
+
+                            // Create instance attributes for mat4 as 4 vec4 attributes (layout locations 10..13)
+                            std::vector<VertexAttribute> attrs;
+                            for (int i = 0; i < 4; ++i)
+                            {
+                                VertexAttribute a;
+                                a.type = VertexAttribute::Type::TexCoord0; // type is unused if attribIndex set
+                                a.dataType = DataType::Float;
+                                a.numElements = 4;
+                                a.attribIndex = 10 + i; // locations 10..13
+                                a.divisor = 1;
+                                attrs.push_back(a);
+                            }
+
+                            cmd.vertexBuffer->AttachInstanceStream(std::static_pointer_cast<IBuffer>(instanceBuffer), attrs, BufferUsage::StaticDraw);
+                            renderSystem.DrawIndexedInstanced(cmd.indexBuffer, instanceCount);
+                            cmd.vertexBuffer->DetachInstanceStreams();
+                            // free temporary allocation (OwningBuffer::Take took ownership)
+                            // OwningBuffer destructor will free it
                         }
                         else
                         {
@@ -346,48 +367,66 @@ void ForwardSceneRenderer::Render(RenderSystem& renderSystem, const entt::regist
                     }
                 }
             }
-            else
-            {
-                Material* usingMaterial = nullptr;
-                const auto batched = RenderCommandBatcher::Batch(commands);
-                for (const auto& cmd : batched)
-                {
-                    auto material = cmd.material;
-                    if (material.get() != usingMaterial)
-                    {
-                        material->Use();
-                        usingMaterial = material.get();
+            // else
+            // {
+            //     Material* usingMaterial = nullptr;
+            //     const auto batched = RenderCommandBatcher::Batch(commands);
+            //     for (const auto& cmd : batched)
+            //     {
+            //         auto material = cmd.material;
+            //         if (material.get() != usingMaterial)
+            //         {
+            //             material->Use();
+            //             usingMaterial = material.get();
 
-                        renderInterface->SetDepthFunction(material->depthFunction);
-                        auto gpuProgram = material->GetShader()->GetGpuProgram();
-                        gpuProgram->SetUniformMatrix("_View", viewMtx, false);
-                        gpuProgram->SetUniformMatrix("_Projection", projection, false);
+            //             renderInterface->SetDepthFunction(material->depthFunction);
+            //             auto gpuProgram = material->GetShader()->GetGpuProgram();
+            //             gpuProgram->SetUniformMatrix("_View", viewMtx, false);
+            //             gpuProgram->SetUniformMatrix("_Projection", projection, false);
 
-                        SetAmbientLightParams(gpuProgram, registry);
-                        SetDirectLightParams(gpuProgram, registry);
-                        SetPointLightParams(gpuProgram, registry);
-                    }
+            //             SetAmbientLightParams(gpuProgram, registry);
+            //             SetDirectLightParams(gpuProgram, registry);
+            //             SetPointLightParams(gpuProgram, registry);
+            //         }
 
-                    auto gpuProgram = material->GetShader()->GetGpuProgram();
-                    if (!cmd.instanceModels.empty())
-                    {
-                        for (const auto mtxPtr : cmd.instanceModels)
-                        {
-                            gpuProgram->SetUniformMatrix("_Model", *mtxPtr, false);
-                            cmd.vertexBuffer->Bind();
-                            cmd.indexBuffer->Bind();
-                            renderSystem.DrawIndexed(cmd.indexBuffer);
-                        }
-                    }
-                    else
-                    {
-                        if (cmd.modelMatrix) gpuProgram->SetUniformMatrix("_Model", *cmd.modelMatrix, false);
-                        cmd.vertexBuffer->Bind();
-                        cmd.indexBuffer->Bind();
-                        renderSystem.DrawIndexed(cmd.indexBuffer);
-                    }
-                }
-            }
+            //         auto gpuProgram = material->GetShader()->GetGpuProgram();
+            //         if (!cmd.instanceModels.empty())
+            //         {
+            //             // Build an OwningBuffer holding all model matrices
+            //             const auto instanceCount = static_cast<uint32>(cmd.instanceModels.size());
+            //             const size_t bytes = instanceCount * sizeof(glm::mat4);
+            //             uint8_t* mem = new uint8_t[bytes];
+            //             for (uint32 i = 0; i < instanceCount; ++i)
+            //             {
+            //                 std::memcpy(&mem[i * sizeof(glm::mat4)], cmd.instanceModels[i], sizeof(glm::mat4));
+            //             }
+            //             Ref<IBuffer> instanceBuffer = std::make_shared<nxs::OwningBuffer>(mem, bytes);
+
+            //             // Create instance attributes for mat4 as 4 vec4 attributes (layout locations 10..13)
+            //             std::vector<VertexAttribute> attrs;
+            //             for (int i = 0; i < 4; ++i)
+            //             {
+            //                 VertexAttribute a;
+            //                 a.type = VertexAttribute::Type::TexCoord0; // type is unused if attribIndex set
+            //                 a.dataType = DataType::Float;
+            //                 a.numElements = 4;
+            //                 a.attribIndex = 10 + i; // locations 10..13
+            //                 a.divisor = 1;
+            //                 attrs.push_back(a);
+            //             }
+            //             cmd.vertexBuffer->AttachInstanceStream(std::static_pointer_cast<IBuffer>(instanceBuffer), attrs, BufferUsage::StaticDraw);
+            //             renderSystem.DrawIndexedInstanced(cmd.indexBuffer, instanceCount);
+            //             cmd.vertexBuffer->DetachInstanceStreams();
+            //         }
+            //         else
+            //         {
+            //             if (cmd.modelMatrix) gpuProgram->SetUniformMatrix("_Model", *cmd.modelMatrix, false);
+            //             cmd.vertexBuffer->Bind();
+            //             cmd.indexBuffer->Bind();
+            //             renderSystem.DrawIndexed(cmd.indexBuffer);
+            //         }
+            //     }
+            // }
 
             // LOG_DEBUG(LogBasicSceneRenderer, std::format("End Draw"));
         }

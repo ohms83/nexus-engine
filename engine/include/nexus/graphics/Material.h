@@ -10,11 +10,13 @@
 #include "Color.h"
 #include "Shader.h"
 #include "RenderingInterface.h"
+#include "nexus/io/Serializable.h"
 
 #include "nexus/core/Resource.h"
 
 NXS_NAMESPACE
 {
+    class TextureManager;
     //! A list of enumerations representing commonly used texture types.
     enum class TextureType
     {
@@ -46,7 +48,7 @@ NXS_NAMESPACE
         LightMap,
     };
 
-    class Material final : public Resource
+    class Material final : public Resource, public ISerializable
     {
     public:
         explicit Material(std::string path, uint32 resourceId);
@@ -93,18 +95,32 @@ NXS_NAMESPACE
 
         size_t TextureCount() const { return m_textures.size(); }
 
+        // Serialization
+        VariantData Serialize() const override;
+        void Deserialize(const VariantData& data) override;
+
         void Use();
+
+        // Resolve referenced textures and optionally shaders by using resource managers.
+        void Resolve(class TextureManager& textureManager, RenderingInterface* renderingInterface = nullptr);
+
+        // Accessors for texture metadata
+        NODISCARD std::string GetTexturePath(uint32 slot) const;
+        NODISCARD std::string GetTextureUniform(uint32 slot) const;
+        NODISCARD TextureType GetTextureType(uint32 slot) const;
 
     private:
         void DetermineShaderPaths(std::string& vertexShader, std::string& fragmentShader);
 
         Ref<Shader> m_shader;
+        std::string m_shaderPath;
 
         struct TextureInfo
         {
             Ref<Texture> texture;
             TextureType type;
             std::string uniformName;
+            std::string path;
         };
         std::vector<TextureInfo> m_textures;
     };

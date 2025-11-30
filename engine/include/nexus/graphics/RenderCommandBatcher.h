@@ -9,8 +9,6 @@ NXS_NAMESPACE
     {
     public:
         // Batch adjacent commands with identical draw parameters to reduce state changes.
-        static std::vector<RenderCommand> Batch(const std::vector<RenderCommand>& commands);
-        // Batch commands in place without creating a new vector. This compacts the list.
-        static void BatchInPlace(std::vector<RenderCommand>& commands);
+        static void Batch(std::vector<RenderCommand>& commands);
     };
 }

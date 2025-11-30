@@ -31,7 +31,11 @@ NXS_NAMESPACE
 
         Type type;
         DataType dataType;
-        int32 numElements;
+        int32_t numElements;
+        //! Optional explicit attribute index. If negative, Type enum is used.
+        int32_t attribIndex = -1;
+        //! Optional attribute divisor for instanced attributes (0 = per-vertex, 1 = per-instance)
+        int32_t divisor = 0;
 
         static const VertexAttribute VertexPosition3D;
         static const VertexAttribute VertexPosition2D;
@@ -48,6 +52,14 @@ NXS_NAMESPACE
         static const VertexAttribute VertexTexCoord5;
         static const VertexAttribute VertexTexCoord6;
         static const VertexAttribute VertexTexCoord7;
+    };
+
+    struct VertexInstanceStream
+    {
+        Ref<IBuffer> buffer;
+        std::vector<VertexAttribute> attributes;
+        BufferUsage usage;
+        uint32_t stride;
     };
 
     class VertexBuffer : public IGpuResource
@@ -119,7 +131,13 @@ NXS_NAMESPACE
         virtual VertexBuffer& SetVertices(Ref<IBuffer> vertexData);
         virtual VertexBuffer& SetUsage(BufferUsage usage);
         virtual VertexBuffer& AddAttribute(const VertexAttribute& attribute);
+        //! Add an instance data stream with its attributes. The buffer holds per-instance data.
+        virtual VertexBuffer& AddInstanceStream(Ref<IBuffer> instanceData, const std::vector<VertexAttribute>& attributes, BufferUsage usage = BufferUsage::StaticDraw);
+        virtual VertexBuffer& AttachInstanceStream(Ref<IBuffer> instanceData, const std::vector<VertexAttribute>& attributes, BufferUsage usage = BufferUsage::StaticDraw);
+        virtual void DetachInstanceStreams();
         void Build();
+
+        NODISCARD const std::vector<VertexInstanceStream>& GetInstanceStreams() const { return m_instanceStreams; }
 
         NODISCARD uint32_t GetStride() const
         {
@@ -194,5 +212,6 @@ NXS_NAMESPACE
         Ref<IBuffer> m_vertices;
         BufferUsage m_usage = BufferUsage::StaticDraw;
         std::vector<VertexAttribute> m_attributes;
+        std::vector<VertexInstanceStream> m_instanceStreams;
     };
 }

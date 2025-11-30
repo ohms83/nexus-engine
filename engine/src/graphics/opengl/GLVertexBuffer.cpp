@@ -16,6 +16,10 @@ GLVertexBuffer::~GLVertexBuffer()
     if (IsBinding()) Unbind();
     if (m_handle) CALL_GL_FUNC(glDeleteVertexArrays(1, &m_handle));
     if (m_vbo) CALL_GL_FUNC(glDeleteBuffers(1, &m_vbo));
+    for (const auto v : m_instanceVBOs)
+    {
+        if (v) CALL_GL_FUNC(glDeleteBuffers(1, &v));
+    }
 }
 
 VertexBuffer& GLVertexBuffer::Begin()
@@ -63,20 +67,20 @@ void GLVertexBuffer::Build_Impl()
     CALL_GL_FUNC(glBufferData(GL_ARRAY_BUFFER, m_vertices->Size(), m_vertices->Data(), glUsage));
 
     uint64_t offset = 0;
-    for (const auto& [type, dataType, numElements] : m_attributes)
+    for (const auto& v : m_attributes)
     {
-        const auto attribIndex = INT_CAST(type);
-        const auto glDataType = GL::NxsDataToGLenum(dataType);
+        const auto attribIndex = v.attribIndex >= 0 ? v.attribIndex : INT_CAST(v.type);
+        const auto glDataType = GL::NxsDataToGLenum(v.dataType);
         CALL_GL_FUNC(glVertexAttribPointer(
             attribIndex,
-            numElements,
+            v.numElements,
             glDataType,
             GL_FALSE,
             INT_CAST(m_stride),
             R_CAST<const void *>(offset)));
         CALL_GL_FUNC(glEnableVertexAttribArray(attribIndex));
 
-        offset += numElements * NxsDataTypeSize(dataType);
+        offset += v.numElements * NxsDataTypeSize(v.dataType);
     }
 
     // Unbind VBO (it's safe to unbind after glVertexAttribPointer calls,
@@ -84,6 +88,43 @@ void GLVertexBuffer::Build_Impl()
     CALL_GL_FUNC(glBindBuffer(GL_ARRAY_BUFFER, 0));
     // Unbind VAO
     CALL_GL_FUNC(glBindVertexArray(0));
+
+    // Build and attach instance buffers to VAO: instance streams declared in VertexBuffer
+    for (const auto& s : m_instanceStreams)
+    {
+        GLuint instanceVBO = 0;
+        CALL_GL_FUNC(glGenBuffers(1, &instanceVBO));
+        CALL_GL_FUNC(glBindBuffer(GL_ARRAY_BUFFER, instanceVBO));
+        CALL_GL_FUNC(glBufferData(GL_ARRAY_BUFFER, CAST<GLsizeiptr>(s.buffer->Size()), s.buffer->Data(), NxsBufferUsageToGLenum(s.usage)));
+
+        // Bind the VAO to register attribute pointers that reference this VBO
+        CALL_GL_FUNC(glBindVertexArray(m_handle));
+        uint64_t ioffset = 0;
+        for (const auto& a : s.attributes)
+        {
+            const auto attribIndex = a.attribIndex >= 0 ? a.attribIndex : INT_CAST(a.type);
+            const auto glDataType = GL::NxsDataToGLenum(a.dataType);
+            CALL_GL_FUNC(glVertexAttribPointer(
+                attribIndex,
+                a.numElements,
+                glDataType,
+                GL_FALSE,
+                INT_CAST(s.stride),
+                R_CAST<const void*>(ioffset)));
+            CALL_GL_FUNC(glEnableVertexAttribArray(attribIndex));
+            if (a.divisor > 0)
+            {
+                CALL_GL_FUNC(glVertexAttribDivisor(attribIndex, a.divisor));
+            }
+            ioffset += a.numElements * NxsDataTypeSize(a.dataType);
+        }
+        // Unbind instance VBO
+        CALL_GL_FUNC(glBindBuffer(GL_ARRAY_BUFFER, 0));
+        CALL_GL_FUNC(glBindVertexArray(0));
+        m_instanceVBOs.push_back(instanceVBO);
+    }
+
+    // Runtime-attached instance buffers are handled by AttachInstanceStream and immediately registered
 }
 
 uint32 GLVertexBuffer::Alloc()
@@ -100,4 +141,57 @@ void GLVertexBuffer::Release()
     if (m_vbo) {
         CALL_GL_FUNC(glDeleteBuffers(1, &m_vbo));
     }
+    for (const auto v : m_instanceVBOs)
+    {
+        if (v) CALL_GL_FUNC(glDeleteBuffers(1, &v));
+    }
+    m_instanceVBOs.clear();
+}
+
+VertexBuffer& GLVertexBuffer::AttachInstanceStream(Ref<IBuffer> instanceData, const std::vector<VertexAttribute>& attributes, BufferUsage usage)
+{
+    VertexInstanceStream s; s.buffer = instanceData; s.attributes = attributes; s.usage = usage; s.stride = 0; for (const auto &a : attributes) s.stride += NxsDataTypeSize(a.dataType) * a.numElements;
+    m_instanceStreamsLocal.push_back(std::move(s));
+    const auto& si = m_instanceStreamsLocal.back();
+
+    GLuint instanceVBO = 0;
+    CALL_GL_FUNC(glGenBuffers(1, &instanceVBO));
+    CALL_GL_FUNC(glBindBuffer(GL_ARRAY_BUFFER, instanceVBO));
+    CALL_GL_FUNC(glBufferData(GL_ARRAY_BUFFER, CAST<GLsizeiptr>(si.buffer->Size()), si.buffer->Data(), NxsBufferUsageToGLenum(si.usage)));
+
+    CALL_GL_FUNC(glBindVertexArray(m_handle));
+    uint64_t ioffset_local = 0;
+    for (const auto& a : si.attributes)
+    {
+        const auto attribIndex = a.attribIndex >= 0 ? a.attribIndex : INT_CAST(a.type);
+        const auto glDataType = GL::NxsDataToGLenum(a.dataType);
+        CALL_GL_FUNC(glVertexAttribPointer(
+            attribIndex,
+            a.numElements,
+            glDataType,
+            GL_FALSE,
+            INT_CAST(si.stride),
+            R_CAST<const void*>(ioffset_local)));
+        CALL_GL_FUNC(glEnableVertexAttribArray(attribIndex));
+        if (a.divisor > 0)
+        {
+            CALL_GL_FUNC(glVertexAttribDivisor(attribIndex, a.divisor));
+        }
+        ioffset_local += a.numElements * NxsDataTypeSize(a.dataType);
+    }
+    CALL_GL_FUNC(glBindBuffer(GL_ARRAY_BUFFER, 0));
+    CALL_GL_FUNC(glBindVertexArray(0));
+
+    m_instanceVBOs.push_back(instanceVBO);
+    return *this;
+}
+
+void GLVertexBuffer::DetachInstanceStreams()
+{
+    for (const auto v : m_instanceVBOs)
+    {
+        if (v) CALL_GL_FUNC(glDeleteBuffers(1, &v));
+    }
+    m_instanceVBOs.clear();
+    m_instanceStreamsLocal.clear();
 }

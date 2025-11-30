@@ -97,7 +97,7 @@ NXS_NAMESPACE
                 modelMatrix = nullptr;
             }
             instanceModels.push_back(model);
-            instanceCount = static_cast<uint32>(instanceModels.size());
+            instanceCount = UINT_CAST(instanceModels.size());
         }
     };
 }

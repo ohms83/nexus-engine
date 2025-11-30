@@ -84,6 +84,42 @@ VertexBuffer& VertexBuffer::AddAttribute(const VertexAttribute& attribute)
     return *this;
 }
 
+VertexBuffer& VertexBuffer::AddInstanceStream(Ref<IBuffer> instanceData, const std::vector<VertexAttribute>& attributes, BufferUsage usage)
+{
+    assert(m_hasBuilt);
+    VertexInstanceStream s;
+    s.buffer = instanceData;
+    s.attributes = attributes;
+    s.usage = usage;
+    // compute stride
+    uint32_t stride = 0;
+    for (const auto& a : attributes) {
+        stride += NxsDataTypeSize(a.dataType) * a.numElements;
+    }
+    s.stride = stride;
+    m_instanceStreams.push_back(std::move(s));
+    return *this;
+}
+
+VertexBuffer& VertexBuffer::AttachInstanceStream(Ref<IBuffer> instanceData, const std::vector<VertexAttribute>& attributes, BufferUsage usage)
+{
+    assert(m_hasBuilt);
+    VertexInstanceStream s;
+    s.buffer = instanceData;
+    s.attributes = attributes;
+    s.usage = usage;
+    s.stride = 0;
+    for (const auto& a : attributes) s.stride += NxsDataTypeSize(a.dataType) * a.numElements;
+    m_instanceStreams.push_back(std::move(s));
+    // Platform-specific VAO attachment happens in GLVertexBuffer::AttachInstanceStream_Impl
+    return *this;
+}
+
+void VertexBuffer::DetachInstanceStreams()
+{
+    m_instanceStreams.clear();
+}
+
 void VertexBuffer::Build()
 {
     assert(m_hasBuilt);

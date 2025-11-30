@@ -3,6 +3,8 @@
 //
 
 #include "graphics/Material.h"
+#include "nexus/io/Serializer.h"
+#include "nexus/graphics/TextureManager.h"
 #include "core/LogDispatcher.h"
 #include "core/Path.h"
 #include "graphics/Material.h"
@@ -50,14 +52,24 @@ int32 Material::AddTexture(Ref<Texture> texture, TextureType type)
     }
 
     const int32 slot = INT_CAST(m_textures.size());
-    m_textures.emplace_back(texture, type, itr->second);
+    Material::TextureInfo info;
+    info.texture = texture;
+    info.type = type;
+    info.uniformName = itr->second;
+    info.path = texture ? texture->GetPath() : std::string();
+    m_textures.push_back(std::move(info));
     return slot;
 }
 
 int32 Material::AddTexture(Ref<Texture> texture, std::string uniform)
 {
     const int32 slot = INT_CAST(m_textures.size());
-    m_textures.emplace_back(texture, TextureType::Undefined, uniform);
+    Material::TextureInfo info;
+    info.texture = texture;
+    info.type = TextureType::Undefined;
+    info.uniformName = uniform;
+    info.path = texture ? texture->GetPath() : std::string();
+    m_textures.push_back(std::move(info));
     return slot;
 }
 
@@ -103,11 +115,148 @@ void Material::Use()
     uint32 slot = 0;
     for (const auto& textureInfo : m_textures)
     {
+        if (!textureInfo.texture) continue;
         gpuProgram->SetUniformTexture2D(
             textureInfo.uniformName,
             textureInfo.texture->GetProxy(),
             slot++);
     }
+}
+
+VariantData Material::Serialize() const
+{
+    VariantData::Map data;
+    data["ambient"] = VariantData::Array{ ambient.r, ambient.g, ambient.b };
+    data["diffuse"] = VariantData::Array{ diffuse.r, diffuse.g, diffuse.b };
+    data["specular"] = VariantData::Array{ specular.r, specular.g, specular.b };
+    data["emissive"] = VariantData::Array{ emissive.r, emissive.g, emissive.b };
+    data["shininess"] = DOUBLE_CAST(shininess);
+    data["wireframe"] = wireframe;
+    data["cull"] = cull;
+    data["depthTest"] = depthTest;
+    data["depthWrite"] = depthWrite;
+    data["blendMode"] = INT_CAST(blendMode);
+    data["depthFunction"] = INT_CAST(depthFunction);
+    data["shader"] = m_shader ? m_shader->GetPath() : std::string();
+
+    VariantData::Array texArr;
+    for (const auto& t : m_textures)
+    {
+        texArr.emplace_back(VariantData::Map{
+            {"path", t.texture ? t.texture->GetPath() : t.path},
+            {"type", INT_CAST(t.type)},
+            {"uniform", t.uniformName}
+        });
+    }
+    data["textures"] = texArr;
+
+    return data;
+}
+
+void Material::Deserialize(const VariantData& data)
+{
+    if (data.HasKey("ambient") && data["ambient"].IsArray())
+    {
+        const auto& arr = data["ambient"].GetArray();
+        ambient.r = FLOAT_CAST(arr.at(0).GetDouble());
+        ambient.g = FLOAT_CAST(arr.at(1).GetDouble());
+        ambient.b = FLOAT_CAST(arr.at(2).GetDouble());
+    }
+    if (data.HasKey("diffuse") && data["diffuse"].IsArray())
+    {
+        const auto& arr = data["diffuse"].GetArray();
+        diffuse.r = FLOAT_CAST(arr.at(0).GetDouble());
+        diffuse.g = FLOAT_CAST(arr.at(1).GetDouble());
+        diffuse.b = FLOAT_CAST(arr.at(2).GetDouble());
+    }
+    if (data.HasKey("specular") && data["specular"].IsArray())
+    {
+        const auto& arr = data["specular"].GetArray();
+        specular.r = FLOAT_CAST(arr.at(0).GetDouble());
+        specular.g = FLOAT_CAST(arr.at(1).GetDouble());
+        specular.b = FLOAT_CAST(arr.at(2).GetDouble());
+    }
+    if (data.HasKey("emissive") && data["emissive"].IsArray())
+    {
+        const auto& arr = data["emissive"].GetArray();
+        emissive.r = FLOAT_CAST(arr.at(0).GetDouble());
+        emissive.g = FLOAT_CAST(arr.at(1).GetDouble());
+        emissive.b = FLOAT_CAST(arr.at(2).GetDouble());
+    }
+    if (data.HasKey("shininess")) shininess = FLOAT_CAST(data["shininess"].GetDouble());
+    if (data.HasKey("wireframe")) wireframe = data["wireframe"].GetBool();
+    if (data.HasKey("cull")) cull = data["cull"].GetBool();
+    if (data.HasKey("depthTest")) depthTest = data["depthTest"].GetBool();
+    if (data.HasKey("depthWrite")) depthWrite = data["depthWrite"].GetBool();
+    if (data.HasKey("blendMode")) blendMode = CAST<BlendMode>(data["blendMode"].GetInt());
+    if (data.HasKey("depthFunction")) depthFunction = CAST<DepthFunction>(data["depthFunction"].GetInt());
+
+    // Shader path - do not auto-load; store the path and optionally resolve later via Resolve().
+    if (data.HasKey("shader"))
+    {
+        const auto shaderPath = data["shader"].GetString();
+        if (!shaderPath.empty())
+        {
+            m_shader = nullptr; // caller should resolve
+            m_shaderPath = shaderPath;
+        }
+    }
+
+    // Textures
+    m_textures.clear();
+    if (data.HasKey("textures") && data["textures"].IsArray())
+    {
+        for (const auto& tv : data["textures"].GetArray())
+        {
+            const auto& tmap = tv.GetMap();
+            TextureInfo ti;
+            ti.path = tmap.at("path").GetString();
+            ti.type = CAST<TextureType>(tmap.at("type").GetInt());
+            ti.uniformName = tmap.at("uniform").GetString();
+            ti.texture = nullptr; // The caller should resolve the resource using resource manager
+            m_textures.push_back(std::move(ti));
+        }
+    }
+}
+
+void Material::Resolve(TextureManager& textureManager, RenderingInterface* renderingInterface)
+{
+    // Resolve textures using textureManager
+    for (auto& ti : m_textures)
+    {
+        if (!ti.texture && !ti.path.empty())
+        {
+            auto tex = textureManager.Get(ti.path);
+            if (tex) ti.texture = tex;
+        }
+    }
+
+    // Optional: Resolve shader by compiling it if shader path exists.
+    if (!m_shader && !m_shaderPath.empty() && renderingInterface)
+    {
+        // A concrete shader loader or manager would be preferred; temporarily create and compile.
+        m_shader = std::make_shared<Shader>(m_shaderPath, 0);
+        // Assume m_shaderPath indicates a shader with VS/FS - just attempt compileFromFile if possible.
+        // The path format is ambiguous; we do not attempt to auto-compile complex shader objects.
+    }
+}
+
+std::string Material::GetTexturePath(uint32 slot) const
+{
+    if (slot < m_textures.size()) return m_textures[slot].path;
+    return std::string();
+}
+
+std::string Material::GetTextureUniform(uint32 slot) const
+{
+    if (slot < m_textures.size()) return m_textures[slot].uniformName;
+    return std::string();
+}
+
+TextureType Material::GetTextureType(uint32 slot) const
+{
+    if (slot < m_textures.size()) return m_textures[slot].type;
+    return TextureType::Undefined;
 }
 
 void Material::DetermineShaderPaths(std::string& vertexShader, std::string& fragmentShader)
