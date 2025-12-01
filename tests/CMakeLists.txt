@@ -15,6 +15,10 @@ add_executable(nexus-test
     ${TEST_SOURCES}
 )
 
+target_include_directories(nexus-test
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
 # 2. Link to Google Test's main library
 # googletest::gtest_main provides the main() function that runs all tests.
 target_link_libraries(nexus-test PRIVATE
