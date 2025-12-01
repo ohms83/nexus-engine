@@ -73,7 +73,7 @@ void SceneNode::Activate(const bool activate)
 
 void SceneNode::AddChild(Ref<SceneNode> child)
 {
-    child->m_parent = this;
+    child->m_parent = this->GetSelf();
     m_children.push_back(child);
 }
 

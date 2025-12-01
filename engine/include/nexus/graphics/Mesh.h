@@ -51,9 +51,6 @@ NXS_NAMESPACE
         {
             return m_material;
         }
-        // Removed: Mesh no longer holds a material path since the Material resource
-        // retains its own path via Material::GetPath(). Use the serialized data to recover
-        // material path when necessary.
 
         // Serialization
         VariantData Serialize() const override;

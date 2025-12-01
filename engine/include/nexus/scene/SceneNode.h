@@ -91,7 +91,7 @@ NXS_NAMESPACE
         bool HasChild() const { return m_children.size() > 0; }
         size_t GetNumChildren() const { return m_children.size(); }
 
-        SceneNode* GetParent() const { return m_parent; }
+        Ref<SceneNode> GetParent() const { return m_parent; }
         void RemoveFromParent();
 
         void SetTaskScheduler(Ref<TaskScheduler> taskScheduler) { m_scheduler = taskScheduler; }
@@ -110,7 +110,7 @@ NXS_NAMESPACE
         virtual void OnUpdate(float dt) {}
 
     protected:
-        SceneNode* m_parent = nullptr;
+        Ref<SceneNode> m_parent;
         ChildList m_children;
         Ref<TaskScheduler> m_scheduler;
         std::vector<Ref<Script>> m_scripts;
