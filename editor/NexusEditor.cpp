@@ -158,10 +158,10 @@ bool NexusEditor::Init_Internal()
     m_sceneGraphWidget = std::make_shared<nxs::SceneGraphWidget>(*sceneManager);
     m_propertyWindow = std::make_shared<nxs::PropertyWindow>(*sceneManager);
 
-    const auto toolsMenuName = "Tools";
+    const auto windowMenuName = "Window";
     auto& menu = m_editor->GetMenu();
 
-    menu.AddMenuItem(toolsMenuName,
+    menu.AddMenuItem(windowMenuName,
         std::make_shared<nxs::WidgetMenuItem> (
             0,
             "Scene Graph",
@@ -171,7 +171,7 @@ bool NexusEditor::Init_Internal()
             CAST<nxs::IWidgetOwner&>(*m_editor.get())
         )
     );
-    menu.AddMenuItem(toolsMenuName,
+    menu.AddMenuItem(windowMenuName,
         std::make_shared<nxs::WidgetMenuItem> (
             0,
             "Property Window",

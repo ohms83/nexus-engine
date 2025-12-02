@@ -122,7 +122,7 @@ Menu::Menu(IWidgetOwner& widgetOwner)
     };
 
     MenuItemList toolsMenuItems = {
-        "Tools",
+        "Window",
         {
             std::make_shared<ConsoleMenuItem> (
                 DEVELOPER_TOOLS,
