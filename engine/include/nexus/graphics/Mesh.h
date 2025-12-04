@@ -96,6 +96,11 @@ NXS_NAMESPACE
     class PrimitiveMesh
     {
     public:
-        static Ref<Mesh> CreatePlane(std::string name, Ref<RenderingInterface> renderingInterface, float width, float height);
+        static Ref<Mesh> CreatePlane(
+            std::string name,
+            float width, float height,
+            Ref<RenderingInterface> renderingInterface,
+            Ref<Material> material = nullptr
+        );
     };
 }

@@ -19,8 +19,9 @@ TEST(MeshTest, SerializeDeserialize)
     mesh2.Deserialize(serialized);
     EXPECT_EQ(mesh2.GetName(), mesh.GetName());
     // Create a simple resource manager environment for resolution
-    MaterialManager mm;
-    TextureManager tm(std::make_shared<FakeRendering>());
+    auto fakeRendering = std::make_shared<FakeRendering>();
+    MaterialManager mm(fakeRendering);
+    TextureManager tm(fakeRendering);
     // Create placeholder material and texture in managers
     auto createdMat = mm.Create("path/to/mat");
     auto tex = tm.Create("assets/tex.png");

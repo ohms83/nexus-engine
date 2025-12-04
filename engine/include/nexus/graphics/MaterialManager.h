@@ -15,9 +15,14 @@ NXS_NAMESPACE
     class MaterialManager final : public ResourceManager<Material>
     {
     public:
-        MaterialManager()
+        MaterialManager(Ref<RenderingInterface> renderingInterface);
+
+        Ref<Material> GetDefaultMaterial() const
         {
-            RegisterLoader(std::make_unique<MaterialLoader>());
+            return m_defaultMaterial;
         }
+
+    private:
+        Ref<Material> m_defaultMaterial;
     };
 }

@@ -84,14 +84,14 @@ NXS_NAMESPACE
         //! Check whether a texture of the specified type is used in this material.
         bool HasTextureType(TextureType type) const;
 
-        void SetShader(const Ref<Shader>& shader);
+        void SetShader(Ref<Shader> shader);
         Ref<Shader> GetShader() const
         {
             return m_shader;
         }
 
         //! Create a default shader based on the material properties.
-        void CreateDefaultShader(const Ref<RenderingInterface>& renderingInterface);
+        void CreateDefaultShader(Ref<RenderingInterface> renderingInterface);
 
         size_t TextureCount() const { return m_textures.size(); }
 

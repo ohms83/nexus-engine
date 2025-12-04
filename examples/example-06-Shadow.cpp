@@ -206,8 +206,9 @@ private:
             "Ground Plane",
             nxs::PrimitiveMesh::CreatePlane(
                 "Ground Plane",
+                20, 20,
                 GetRenderSystem().GetRenderInterface(),
-                20, 20
+                nxs::Engine::Instance().GetMaterialManager()->GetDefaultMaterial()
             )
         );
         m_scene->EmplaceChild<nxs::SceneNode3D>("Ground")->AddComponent<nxs::ModelComponent>().model = groundModel;

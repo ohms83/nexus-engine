@@ -60,7 +60,11 @@ PlaneMesh::PlaneMesh(const Ref<RenderingInterface>& renderingInterface)
     .Build();
 }
 
-Ref<Mesh> PrimitiveMesh::CreatePlane(std::string name, Ref<RenderingInterface> renderingInterface, float width, float height)
+Ref<Mesh> PrimitiveMesh::CreatePlane(
+    std::string name,
+    float width, float height,
+    Ref<RenderingInterface> renderingInterface,
+    Ref<Material> material)
 {
     std::vector<Vertex>* vertices = new std::vector<Vertex> {
         // Position                             Normal                Texcoord0
@@ -100,5 +104,6 @@ Ref<Mesh> PrimitiveMesh::CreatePlane(std::string name, Ref<RenderingInterface> r
     auto mesh = std::make_shared<Mesh>(std::move(name));
     mesh->SetVertexBuffer(vertexBuffer);
     mesh->SetIndexBuffer(indexBuffer);
+    mesh->SetMaterial(material);
     return mesh;
 }
