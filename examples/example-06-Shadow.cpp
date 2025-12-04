@@ -40,6 +40,9 @@ public:
 
     void Update() override
     {
+        const auto selectedNode = m_sceneGraphWidget->GetSelectedNode();
+        m_propertyWindow->SetSceneNode(selectedNode);
+
         if (m_finishLoading)
         {
             const auto& inputManager = nxs::InputManager::Instance();
