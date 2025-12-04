@@ -166,6 +166,7 @@ ForwardSceneRenderer::ForwardSceneRenderer(const RenderSystem& renderSystem)
     RenderPass opaquePass;
     opaquePass.SetName("Opaque").SetPriority(RENDER_PASS_OPAQUE);
     opaquePass.clearFlags = ClearFlags::Color | ClearFlags::Depth;
+    opaquePass.clearColor = 0x303030ff;
     opaquePass.pipelineState.depthWrite = true;
     opaquePass.pipelineState.depthTest = true;
     opaquePass.filter = [](const Material& m) { return m.blendMode == BlendMode::None; };
