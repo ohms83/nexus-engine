@@ -70,6 +70,8 @@ list(APPEND ENGINE_SOURCES
 include(src/CMakeLists.txt)
 include(include/CMakeLists.txt)
 
+add_subdirectory(modules)
+
 find_package(Python3 COMPONENTS Interpreter REQUIRED)
 find_package(OpenGL REQUIRED)
 
