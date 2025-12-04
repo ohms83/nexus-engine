@@ -25,6 +25,13 @@ NXS_NAMESPACE
         {
         }
 
+        static Ref<Model> CreateFromMesh(std::string name, Ref<Mesh> mesh)
+        {
+            auto model = std::make_shared<Model>(std::move(name), 0);
+            model->AddMesh(mesh);
+            return model;
+        }
+
         ~Model() override = default;
 
         void AddMesh(const Ref<Mesh>& mesh);

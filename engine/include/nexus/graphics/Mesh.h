@@ -92,4 +92,10 @@ NXS_NAMESPACE
         Sphere m_boundingSphere {};
         Box m_boundingBox {};
     };
+
+    class PrimitiveMesh
+    {
+    public:
+        static Ref<Mesh> CreatePlane(std::string name, Ref<RenderingInterface> renderingInterface, float width, float height);
+    };
 }
