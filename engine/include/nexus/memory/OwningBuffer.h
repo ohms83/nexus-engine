@@ -24,7 +24,7 @@ NXS_NAMESPACE
 
         /**
          * @brief Constructs an owning buffer from a raw pointer.
-         * * The buffer takes ownership of the given dynamically allocated data.
+         * The buffer takes ownership of the given dynamically allocated data.
          * @param data A pointer to the data to manage. The object is now responsible for freeing this memory.
          * @param size The data size in bytes.
          */
