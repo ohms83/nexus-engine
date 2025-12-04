@@ -3,6 +3,7 @@
 //
 
 #include "editor/widget/EditorWidget.h"
+#include "core/LogDispatcher.h"
 #include "imgui.h"
 
 USING_NAMESPACE_NXS;
@@ -32,7 +33,8 @@ void EditorWidget::Hide()
 
 void EditorWidget::BeginDraw()
 {
-    const bool isCollapsed = !ImGui::Begin(m_name.data(), &m_visible);
+    NXS_ASSERT(!m_name.empty());
+    const bool isCollapsed = !ImGui::Begin(m_name.c_str(), &m_visible);
     if (m_visible) {
         m_visibility = isCollapsed ? Visibility::Collapsed : Visibility::Visible;
     }
