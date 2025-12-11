@@ -396,6 +396,7 @@ void ModelLoader::ProcessTextures(const Ref<Material>& newMat, const aiMaterial*
 
 void ModelLoader::ComputeBoundingVolume(const Ref<Model>& model)
 {
+#if 0
     glm::vec3 min{FLT_MAX}, max{-FLT_MAX};
     for (auto& mesh : model->GetMeshes())
     {
@@ -454,4 +455,7 @@ void ModelLoader::ComputeBoundingVolume(const Ref<Model>& model)
         }
     }
     model->SetBoundingSphere(center, radius);
+#else
+    model->ComputeBounds();
+#endif
 }

@@ -76,6 +76,8 @@ NXS_NAMESPACE
             return m_boundingBox;
         }
 
+        void ComputeBounds();
+
     public:
         // Resolve a material reference using a MaterialManager and TextureManager. This will set m_material
         // if the mesh currently only stores a material path (e.g., deserialized state). It will also cause
@@ -91,5 +93,16 @@ NXS_NAMESPACE
         //! @brief Bounding sphere.
         Sphere m_boundingSphere {};
         Box m_boundingBox {};
+    };
+
+    class PrimitiveMesh
+    {
+    public:
+        static Ref<Mesh> CreatePlane(
+            std::string name,
+            float width, float height,
+            Ref<RenderingInterface> renderingInterface,
+            Ref<Material> material = nullptr
+        );
     };
 }

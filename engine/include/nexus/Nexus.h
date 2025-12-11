@@ -33,7 +33,6 @@
 #include "ecs/Component.h"
 #include "ecs/Ecs.h"
 #include "ecs/EcsDefine.h"
-#include "editor/DebugMenuItem.h"
 #include "editor/Editor.h"
 #include "editor/Menu.h"
 #include "editor/menu/ConsoleMenuItem.h"

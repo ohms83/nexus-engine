@@ -144,6 +144,25 @@ NXS_NAMESPACE
             return m_stride;
         }
 
+        NODISCARD const std::vector<VertexAttribute>& GetAttributes() const
+        {
+            return m_attributes;
+        }
+
+        NODISCARD const VertexAttribute* FindAttribute(VertexAttribute::Type type) const
+        {
+            for (const auto& attr : m_attributes)
+            {
+                if (attr.type == type)
+                {
+                    return &attr;
+                }
+            }
+            return nullptr;
+        }
+
+        NODISCARD uint32_t GetAttributeOffset(VertexAttribute::Type type) const;
+
         template<typename T>
         std::vector<T> GetVertices() const
         {

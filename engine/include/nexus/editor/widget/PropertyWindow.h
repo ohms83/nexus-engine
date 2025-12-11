@@ -17,7 +17,6 @@ NXS_NAMESPACE
 
         void SetSceneNode(Identifier sceneNodeId);
 
-        void Draw(RenderSystem& renderSystem);
         virtual void Update() {}
         
         void ChangeCategory(const std::string& name) override;

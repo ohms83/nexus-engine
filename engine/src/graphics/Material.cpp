@@ -80,7 +80,7 @@ Ref<Texture> Material::GetTexture(uint32 slot)
     return nullptr;
 }
 
-void Material::SetShader(const Ref<Shader> &shader)
+void Material::SetShader(Ref<Shader> shader)
 {
     m_shader = shader;
 }
@@ -278,7 +278,7 @@ void Material::DetermineShaderPaths(std::string& vertexShader, std::string& frag
     }
 }
 
-void Material::CreateDefaultShader(const Ref<RenderingInterface>& renderingInterface)
+void Material::CreateDefaultShader(Ref<RenderingInterface> renderingInterface)
 {
     // TODO: Use resource manager.
     std::string vertexShaderPath, fragmentShaderPath;

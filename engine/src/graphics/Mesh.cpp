@@ -19,6 +19,51 @@ Mesh::Mesh(std::string name)
 {
 }
 
+void Mesh::ComputeBounds()
+{
+    if (!m_vertexBuffer) return;
+
+    const auto vertexCount = m_vertexBuffer->VertexCount();
+    if (vertexCount == 0) return;
+
+    glm::vec3 minPoint(FLT_MAX);
+    glm::vec3 maxPoint(-FLT_MAX);
+
+    auto vertexData = m_vertexBuffer->GetData();
+
+    const auto* positionAttr = m_vertexBuffer->FindAttribute(VertexAttribute::Type::Position);
+    if (!positionAttr) return; // No position attribute found
+
+    const auto offset = m_vertexBuffer->GetAttributeOffset(VertexAttribute::Type::Position);
+    const size_t vertexSize = m_vertexBuffer->GetStride();
+    for (size_t i = 0; i < vertexCount; ++i)
+    {
+        const uint8* vertexPtr = CAST<const uint8_t*>(vertexData) + i * vertexSize;
+        const float* positionPtr = R_CAST<const float*>(vertexPtr + offset);
+        glm::vec3 position(positionPtr[0], positionPtr[1], positionPtr[2]);
+
+        minPoint = glm::min(minPoint, position);
+        maxPoint = glm::max(maxPoint, position);
+    }
+
+    m_boundingBox.center = (minPoint + maxPoint) * 0.5f;
+    m_boundingBox.extent = (maxPoint - minPoint) * 0.5f;
+
+    // Compute bounding sphere
+    m_boundingSphere.center = m_boundingBox.center;
+    // float maxRadiusSq = 0.0f;
+    // for (size_t i = 0; i < vertexCount; ++i)
+    // {
+    //     const uint8* vertexPtr = CAST<const uint8_t*>(vertexData) + i * vertexSize;
+    //     const float* positionPtr = R_CAST<const float*>(vertexPtr + offset);
+    //     glm::vec3 position(positionPtr[0], positionPtr[1], positionPtr[2]);
+
+    //     float distSq = glm::length2(position - m_boundingSphere.center);
+    //     maxRadiusSq = glm::max(maxRadiusSq, distSq);
+    // }
+    m_boundingSphere.radius = glm::length(m_boundingBox.extent);
+}
+
 VariantData Mesh::Serialize() const
 {
     VariantData::Map data;

@@ -30,12 +30,15 @@ Identifier SceneGraphWidget::GetSelectedNode() const
 
 void SceneGraphWidget::Draw_Internal(RenderSystem& renderSystem)
 {
+    if (!m_scene) return;
     DrawSceneNode(m_scene);
     ShowContextMenu();
 }
 
 void SceneGraphWidget::DrawSceneNode(Ref<SceneNode> node)
 {
+    if (!node) return;
+
     ImGui::PushID(&node);
 
     const auto nodeId = node->GetId();
