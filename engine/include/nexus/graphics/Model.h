@@ -29,6 +29,7 @@ NXS_NAMESPACE
         {
             auto model = std::make_shared<Model>(std::move(name), 0);
             model->AddMesh(mesh);
+            model->ComputeBounds();
             return model;
         }
 
@@ -54,6 +55,8 @@ NXS_NAMESPACE
         {
             return m_sphere;
         }
+
+        void ComputeBounds();
 
         std::string DumpStats() const;
 

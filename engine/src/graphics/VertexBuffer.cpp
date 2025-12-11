@@ -1,9 +1,8 @@
 //
 // Created by nutta on 6/27/2025.
 //
-
+#include "graphics/VertexBuffer.h"
 #include <cstring>
-#include <nexus/graphics/VertexBuffer.h>
 
 USING_NAMESPACE_NXS;
 
@@ -125,4 +124,18 @@ void VertexBuffer::Build()
     assert(m_hasBuilt);
     m_vertexCount = m_vertices->Size() / m_stride;
     Build_Impl();
+}
+
+NODISCARD uint32_t VertexBuffer::GetAttributeOffset(VertexAttribute::Type type) const
+{
+    uint32_t offset = 0;
+    for (const auto& attr : m_attributes)
+    {
+        if (attr.type == type)
+        {
+            return offset;
+        }
+        offset += NxsDataTypeSize(attr.dataType) * attr.numElements;
+    }
+    return 0;
 }

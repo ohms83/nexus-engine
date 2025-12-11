@@ -76,6 +76,8 @@ NXS_NAMESPACE
             return m_boundingBox;
         }
 
+        void ComputeBounds();
+
     public:
         // Resolve a material reference using a MaterialManager and TextureManager. This will set m_material
         // if the mesh currently only stores a material path (e.g., deserialized state). It will also cause

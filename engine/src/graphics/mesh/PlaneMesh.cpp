@@ -105,5 +105,6 @@ Ref<Mesh> PrimitiveMesh::CreatePlane(
     mesh->SetVertexBuffer(vertexBuffer);
     mesh->SetIndexBuffer(indexBuffer);
     mesh->SetMaterial(material);
+    mesh->ComputeBounds();
     return mesh;
 }

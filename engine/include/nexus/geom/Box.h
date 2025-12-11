@@ -12,6 +12,16 @@ NXS_NAMESPACE
             , extent(ext)
         {}
 
+        glm::vec3 GetMin() const
+        {
+            return center - extent;
+        }
+
+        glm::vec3 GetMax() const
+        {
+            return center + extent;
+        }
+
         glm::vec3 center;
         glm::vec3 extent;
     };

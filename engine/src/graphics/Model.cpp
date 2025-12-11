@@ -40,3 +40,20 @@ std::string Model::DumpStats() const
 
     return output.str();
 }
+void Model::ComputeBounds()
+{
+    glm::vec3 min{ FLT_MAX }, max{ -FLT_MAX };
+    for (const auto& mesh : m_meshes)
+    {
+        mesh->ComputeBounds();
+        const auto& box = mesh->GetBox();
+        min = glm::min(min, box.GetMin());
+        max = glm::max(max, box.GetMax());
+    }
+
+    glm::vec3 sphereCenter = (max + min) * 0.5f;
+    glm::vec3 extent = max - sphereCenter;
+    float sphereRadius = glm::length(extent);
+    SetBoundingBox(sphereCenter, extent);
+    SetBoundingSphere(sphereCenter, sphereRadius);
+}
