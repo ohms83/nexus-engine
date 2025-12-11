@@ -7,6 +7,8 @@
 #include "editor/widget/ProfilerWidget.h"
 #include "editor/widget/PropertyWindow.h"
 
+#include "DebugMenuItem.inl"
+
 #include "imgui.h"
 
 USING_NAMESPACE_NXS;
@@ -147,6 +149,7 @@ Menu::Menu(IWidgetOwner& widgetOwner)
     m_menuItems.emplace_back(fileMenu);
     m_menuItems.emplace_back(editMenu);
     m_menuItems.emplace_back(toolsMenuItems);
+    m_menuItems.emplace_back(s_debugMenuItems);
 }
 
 void Menu::Update() const
