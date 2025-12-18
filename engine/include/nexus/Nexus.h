@@ -80,8 +80,6 @@
 #include "graphics/TextureProxy.h"
 #include "graphics/VertexBuffer.h"
 #include "graphics/debug/Gizmos.h"
-#include "graphics/mesh/CubeMesh.h"
-#include "graphics/mesh/PlaneMesh.h"
 #include "graphics/opengl/GLGpuBuffer.h"
 #include "graphics/opengl/GLGpuProgram.h"
 #include "graphics/opengl/GLIndexBuffer.h"

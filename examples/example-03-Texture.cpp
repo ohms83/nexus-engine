@@ -86,7 +86,11 @@ protected:
         m_texture->SetWrapMode(nxs::TextureWrapMode::Clamp, nxs::TextureWrapMode::Clamp);
         m_texture->SetFiltering(nxs::TextureFilterMode::Linear, nxs::TextureFilterMode::Linear);
 
-        m_mesh = std::make_unique<nxs::CubeMesh>(renderInterface);
+        m_mesh = nxs::PrimitiveMesh::CreateBox(
+            "Cube",
+            glm::vec3(1.0f),
+            renderInterface
+        );
         return true;
     }
 
@@ -99,7 +103,7 @@ protected:
 
     nxs::Ref<nxs::GpuProgram> m_gpuProgram;
     nxs::Ref<nxs::Texture> m_texture;
-    nxs::Ptr<nxs::Mesh> m_mesh;
+    nxs::Ref<nxs::Mesh> m_mesh;
     nxs::Transform m_cubeTransform;
     nxs::CameraComponent m_camera;
 };

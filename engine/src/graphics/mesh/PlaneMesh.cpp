@@ -2,9 +2,8 @@
 // Created by nutta on 7/22/2025.
 //
 
-#include "graphics/mesh/PlaneMesh.h"
+#include "graphics/Mesh.h"
 #include "graphics/RenderingInterface.h"
-#include "memory/BorrowBuffer.h"
 #include "memory/OwningBuffer.h"
 
 USING_NAMESPACE_NXS;
@@ -30,34 +29,6 @@ namespace
         0, 1, 2,
         0, 2, 3,
     };
-}
-
-PlaneMesh::PlaneMesh(const Ref<RenderingInterface>& renderingInterface)
-    : Mesh("PlaneMesh")
-{
-    static uint64 count = 0;
-    m_name = std::format("PlaneMesh_{}", count++);
-
-    // constexpr auto vertexSize = sizeof(Vertex);
-    // const auto bufferSize = vertices.size() * vertexSize;
-    Ref<IBuffer> vertexData = std::make_shared<BorrowBuffer>(s_vertices);
-
-    m_vertexBuffer.reset(renderingInterface->CreateVertexBuffer());
-    m_vertexBuffer->Begin()
-        .SetVertices(vertexData)
-        .SetUsage(BufferUsage::StaticDraw)
-        .AddAttribute(VertexAttribute {VertexAttribute::Type::Position, DataType::Float, 3})
-        .AddAttribute(VertexAttribute {VertexAttribute::Type::Normal, DataType::Float, 3})
-        .AddAttribute(VertexAttribute {VertexAttribute::Type::TexCoord0, DataType::Float, 2})
-    .Build();
-
-    Ref<IBuffer> indexData = std::make_shared<BorrowBuffer>(s_indices);
-    m_indexBuffer.reset(renderingInterface->CreateIndexBuffer());
-    m_indexBuffer->Begin()
-        .SetIndices(indexData, FrontFace::CounterClockWise)
-        .SetUsage(BufferUsage::StaticDraw)
-        .SetDrawMode(DrawMode::Triangle)
-    .Build();
 }
 
 Ref<Mesh> PrimitiveMesh::CreatePlane(

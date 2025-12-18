@@ -190,7 +190,11 @@ protected:
         m_texture->SetWrapMode(nxs::TextureWrapMode::Clamp, nxs::TextureWrapMode::Clamp);
         m_texture->SetFiltering(nxs::TextureFilterMode::Linear, nxs::TextureFilterMode::Linear);
 
-        m_cubeMesh = std::make_shared<nxs::CubeMesh>(renderInterface);
+        m_cubeMesh = nxs::PrimitiveMesh::CreateBox(
+            "Cube",
+            glm::vec3(1.0f),
+            renderInterface
+        );
         m_cubeTransform.SetPosition({0, 0, 0});
 
         InitLights();

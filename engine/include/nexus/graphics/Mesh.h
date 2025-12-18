@@ -104,5 +104,21 @@ NXS_NAMESPACE
             Ref<RenderingInterface> renderingInterface,
             Ref<Material> material = nullptr
         );
+
+        static Ref<Mesh> CreateBox(
+            std::string name,
+            const glm::vec3& size,
+            Ref<RenderingInterface> renderingInterface,
+            Ref<Material> material = nullptr
+        );
+
+        static Ref<Mesh> CreateSphere(
+            std::string name,
+            float radius,
+            uint32_t sectorCount,
+            uint32_t stackCount,
+            Ref<RenderingInterface> renderingInterface,
+            Ref<Material> material = nullptr
+        );
     };
 }

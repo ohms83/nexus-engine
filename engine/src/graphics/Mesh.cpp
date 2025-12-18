@@ -1,7 +1,5 @@
 #include "graphics/Mesh.h"
 
-#include "graphics/mesh/CubeMesh.h"
-#include "graphics/mesh/PlaneMesh.h"
 #include "nexus/graphics/MaterialManager.h"
 #include "nexus/graphics/TextureManager.h"
 #include "nexus/io/Serializer.h"
@@ -51,16 +49,6 @@ void Mesh::ComputeBounds()
 
     // Compute bounding sphere
     m_boundingSphere.center = m_boundingBox.center;
-    // float maxRadiusSq = 0.0f;
-    // for (size_t i = 0; i < vertexCount; ++i)
-    // {
-    //     const uint8* vertexPtr = CAST<const uint8_t*>(vertexData) + i * vertexSize;
-    //     const float* positionPtr = R_CAST<const float*>(vertexPtr + offset);
-    //     glm::vec3 position(positionPtr[0], positionPtr[1], positionPtr[2]);
-
-    //     float distSq = glm::length2(position - m_boundingSphere.center);
-    //     maxRadiusSq = glm::max(maxRadiusSq, distSq);
-    // }
     m_boundingSphere.radius = glm::length(m_boundingBox.extent);
 }
 

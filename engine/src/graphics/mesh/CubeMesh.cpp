@@ -1,6 +1,6 @@
-#include "graphics/mesh/CubeMesh.h"
+#include "graphics/Mesh.h"
 #include "graphics/RenderingInterface.h"
-#include "memory/BorrowBuffer.h"
+#include "memory/OwningBuffer.h"
 
 USING_NAMESPACE_NXS;
 
@@ -14,7 +14,7 @@ namespace
     };
 
     // Vertices for a standard cube (24 vertices for 6 faces * 4 vertices/face)
-    std::vector<Vertex> vertices = {
+    std::vector<Vertex> s_vertices = {
         // Front face (Z+)
         // Position             Normal                 TexCoord
         {{-0.5f, -0.5f,  0.5f}, { 0.0f,  0.0f,  1.0f}, {0.0f, 0.0f}}, // 0
@@ -48,46 +48,57 @@ namespace
         {{-0.5f,  0.5f,  0.5f}, {-1.0f,  0.0f,  0.0f}, {1.0f, 1.0f}}
     };
 
-    std::vector<uint32_t> indices = {
-        // Front face (Z+): Vertices 0, 1, 2, 3. View from +Z. (BL, BR, TR, TL)
-        0, 3, 2,  // Triangle 1: Bottom-Left, Top-Left, Top-Right (CCW)
-        0, 2, 1,  // Triangle 2: Bottom-Left, Top-Right, Bottom-Right (CCW)
+    std::vector<uint32_t> s_indices = {
+        // Front face (Z+): CCW when viewed from +Z
+        0, 1, 2,
+        0, 2, 3,
 
-        // Back face (Z-): Vertices 4, 5, 6, 7. View from -Z.
-        // Relative order when viewed from -Z: 6 (BL), 7 (BR), 4 (TR), 5 (TL)
-        6, 4, 5,  // Triangle 1: Bottom-Left, Top-Left, Top-Right (CCW)
-        6, 7, 4,  // Triangle 2: Bottom-Left, Bottom-Right, Top-Right (CCW)
+        // Back face (Z-): CCW when viewed from -Z
+        6, 5, 4,
+        6, 4, 7,
 
-        // Top face (Y+): Vertices 8, 9, 10, 11. View from +Y.
-        // Relative order when viewed from +Y: 8 (BL), 9 (BR), 10 (TR), 11 (TL)
-        8, 11, 10, // Triangle 1: Bottom-Left, Top-Left, Top-Right (CCW)
-        8, 10, 9,  // Triangle 2: Bottom-Left, Top-Right, Bottom-Right (CCW)
+        // Top face (Y+): CCW when viewed from +Y
+        8, 9, 10,
+        8, 10, 11,
 
-        // Bottom face (Y-): Vertices 12, 13, 14, 15. View from -Y.
-        // Relative order when viewed from -Y: 15 (BL), 14 (BR), 13 (TR), 12 (TL)
-        15, 12, 13, // Triangle 1: Bottom-Left, Top-Left, Top-Right (CCW)
-        15, 13, 14, // Triangle 2: Bottom-Left, Top-Right, Bottom-Right (CCW)
+        // Bottom face (Y-): CCW when viewed from -Y
+        12, 14, 13,
+        12, 15, 14,
 
-        // Right face (X+): Vertices 16, 17, 18, 19. View from +X.
-        // Relative order when viewed from +X: 16 (BL), 17 (BR), 18 (TR), 19 (TL)
-        16, 19, 18, // Triangle 1: Bottom-Left, Top-Left, Top-Right (CCW)
-        16, 18, 17, // Triangle 2: Bottom-Left, Top-Right, Bottom-Right (CCW)
+        // Right face (X+): CCW when viewed from +X
+        16, 17, 18,
+        16, 18, 19,
 
-        // Left face (X-): Vertices 20, 21, 22, 23. View from -X.
-        // Relative order when viewed from -X: 21 (BL), 20 (BR), 23 (TR), 22 (TL)
-        21, 22, 23, // Triangle 1: Bottom-Left, Top-Left, Top-Right (CCW)
-        21, 23, 20  // Triangle 2: Bottom-Left, Top-Right, Bottom-Right (CCW)
+        // Left face (X-): CCW when viewed from -X
+        21, 20, 23,
+        21, 23, 22
     };
 }
 
-CubeMesh::CubeMesh(const Ref<RenderingInterface>& renderingInterface)
+Ref<Mesh> PrimitiveMesh::CreateBox(
+    std::string name,
+    const glm::vec3& size,
+    Ref<RenderingInterface> renderingInterface,
+    Ref<Material> material)
 {
-    static uint64 count = 0;
-    m_name = std::format("CubeMesh_{}", count++);
+    // Scale the unit cube vertices by the specified size
+    std::vector<Vertex>* scaledVertices = new std::vector<Vertex>();
+    scaledVertices->reserve(s_vertices.size());
+    for (const auto& v : s_vertices)
+    {
+        Vertex sv;
+        sv.position = v.position * size;
+        sv.normal = v.normal;
+        sv.texCoord0 = v.texCoord0;
+        scaledVertices->push_back(sv);
+    }
 
-    const auto vertexData = std::make_shared<BorrowBuffer>(vertices);
-    m_vertexBuffer.reset(renderingInterface->CreateVertexBuffer());
-    m_vertexBuffer->Begin()
+    Ref<IBuffer> vertexData = std::make_shared<OwningBuffer>(
+        (uint8_t*)scaledVertices->data(), sizeof(Vertex) * scaledVertices->size());
+
+    Ref<VertexBuffer> vertexBuffer;
+    vertexBuffer.reset(renderingInterface->CreateVertexBuffer());
+    vertexBuffer->Begin()
         .SetVertices(vertexData)
         .SetUsage(BufferUsage::StaticDraw)
         .AddAttribute(VertexAttribute {VertexAttribute::Type::Position, DataType::Float, 3})
@@ -95,11 +106,25 @@ CubeMesh::CubeMesh(const Ref<RenderingInterface>& renderingInterface)
         .AddAttribute(VertexAttribute {VertexAttribute::Type::TexCoord0, DataType::Float, 2})
     .Build();
 
-    Ref<BorrowBuffer> indexData = std::make_shared<BorrowBuffer>(indices);
-    m_indexBuffer.reset(renderingInterface->CreateIndexBuffer());
-    m_indexBuffer->Begin()
-        .SetIndices(indexData, FrontFace::ClockWise)
+    std::vector<uint32_t>* indices = new std::vector<uint32_t>(s_indices);
+
+    Ref<IBuffer> indexData = std::make_shared<OwningBuffer>(
+        (uint8_t*)indices->data(), sizeof(uint32_t) * indices->size());
+    Ref<IndexBuffer> indexBuffer;
+    indexBuffer.reset(renderingInterface->CreateIndexBuffer());
+    indexBuffer->Begin()
+        .SetIndices(indexData, FrontFace::CounterClockWise)
         .SetUsage(BufferUsage::StaticDraw)
         .SetDrawMode(DrawMode::Triangle)
     .Build();
+
+    Ref<Mesh> mesh = std::make_shared<Mesh>(name);
+    mesh->SetVertexBuffer(vertexBuffer);
+    mesh->SetIndexBuffer(indexBuffer);
+    if (material)
+    {
+        mesh->SetMaterial(material);
+    }
+    mesh->ComputeBounds();
+    return mesh;
 }
