@@ -41,6 +41,10 @@ NXS_NAMESPACE
         // Sorting key used by the renderer to order draw calls efficiently.
         SortKey sortKey{};
 
+#ifdef NXS_BUILD_DEBUG
+        std::string debugName; // optional debug name for the command
+#endif
+
         // GPU resources (non-owning references managed by Resource Manager)
         Ref<VertexBuffer> vertexBuffer;
         Ref<IndexBuffer> indexBuffer;

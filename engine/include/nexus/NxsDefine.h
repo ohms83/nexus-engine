@@ -5,6 +5,16 @@
 
 #include "NxsDataType.h"
 
+#ifdef NXS_BUILD_DEBUG
+constexpr char const* NXS_BUILD_CFG = "Debug";
+#elif defined(NXS_BUILD_RELWITHDEBINFO)
+constexpr char const* NXS_BUILD_CFG = "RelWithDebInfo";
+#elif defined(NXS_BUILD_RELEASE)
+constexpr char const* NXS_BUILD_CFG = "Release";
+#else
+constexpr char const* NXS_BUILD_CFG = "Unknown";
+#endif
+
 #if defined(_WIN32)
     #ifndef NXS_PLATFORM_WINDOWS
         #define NXS_PLATFORM_WINDOWS 1
