@@ -85,8 +85,6 @@ NXS_NAMESPACE
         void ExtractUniform(std::string_view source);
 
         Ref<GpuProgram> m_gpuProgram;
-        std::string m_vertexShaderFile;
-        std::string m_fragmentShaderFile;
         std::string m_vertexShader;
         std::string m_fragmentShader;
         std::vector<Uniform> m_uniforms;

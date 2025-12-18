@@ -76,15 +76,15 @@ bool Shader::Compile(RenderingInterface& renderingInterface)
 VariantData Shader::Serialize() const
 {
     return VariantData::Map {
-        {"vertex", m_vertexShaderFile},
-        {"fragment", m_fragmentShaderFile}
+        {"vertex", m_vertexShader},
+        {"fragment", m_fragmentShader}
     };
 }
 
 void Shader::Deserialize(const VariantData &data)
 {
-    m_vertexShaderFile = data["vertex"].GetString();
-    m_fragmentShaderFile = data["fragment"].GetString();
+    m_vertexShader = data["vertex"].GetString();
+    m_fragmentShader = data["fragment"].GetString();
 }
 
 bool Shader::HasUniformType(Uniform::Type type)
