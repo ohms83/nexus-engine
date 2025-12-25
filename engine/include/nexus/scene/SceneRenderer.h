@@ -47,11 +47,12 @@ NXS_NAMESPACE
             m_renderTargets[name] = target;
         }
 
+        static bool IsSphereInside(const Frustum& viewFustrum, const Sphere& sphere, glm::mat4 modelMtx, const glm::vec3& scale);
+
     protected:
         static void SetAmbientLightParams(Ref<GpuProgram> gpuProgram, const entt::registry& registry);
         static void SetDirectLightParams(Ref<GpuProgram> gpuProgram, const entt::registry& registry);
         static void SetPointLightParams(Ref<GpuProgram> gpuProgram, const entt::registry& registry);
-        static bool IsSphereInside(const Frustum& viewFustrum, const Sphere& sphere, glm::mat4 modelMtx, const glm::vec3& scale);
 
         //! A list of render passes sorted by their priority.
         std::vector<RenderPass> m_renderPasses;
