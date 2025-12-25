@@ -22,8 +22,10 @@ Ref<Mesh> PrimitiveMesh::CreateSphere(
     Ref<RenderingInterface> renderingInterface,
     Ref<Material> material)
 {
-    std::vector<Vertex>* vertices = new std::vector<Vertex>();
-    std::vector<uint32_t>* indices = new std::vector<uint32_t>();
+    auto vertices = new Vertex[ (sectorCount + 1) * (stackCount + 1) ];
+    auto indices = new uint32_t[ sectorCount * stackCount * 6 ];
+    uint32_t vertexIndex = 0;
+    uint32_t indexIndex = 0;
 
     for (uint32_t i = 0; i <= stackCount; ++i)
     {
@@ -46,7 +48,7 @@ Ref<Mesh> PrimitiveMesh::CreateSphere(
             vertex.texCoord0.x = (float)j / sectorCount;
             vertex.texCoord0.y = (float)i / stackCount;
 
-            vertices->push_back(vertex);
+            vertices[vertexIndex++] = vertex;
         }
     }
 
@@ -59,22 +61,22 @@ Ref<Mesh> PrimitiveMesh::CreateSphere(
         {
             if (i != 0)
             {
-                indices->push_back(k1);
-                indices->push_back(k2);
-                indices->push_back(k1 + 1);
+                indices[indexIndex++] = k1;
+                indices[indexIndex++] = k2;
+                indices[indexIndex++] = k1 + 1;
             }
 
             if (i != (stackCount - 1))
             {
-                indices->push_back(k1 + 1);
-                indices->push_back(k2);
-                indices->push_back(k2 + 1);
+                indices[indexIndex++] = k1 + 1;
+                indices[indexIndex++] = k2;
+                indices[indexIndex++] = k2 + 1;
             }
         }
     }
 
     Ref<IBuffer> vertexData = std::make_shared<OwningBuffer>(
-        (uint8_t*)vertices->data(), sizeof(Vertex) * vertices->size());
+        (uint8_t*)vertices, sizeof(Vertex) * (sectorCount + 1) * (stackCount + 1));
     Ref<VertexBuffer> vertexBuffer;
     vertexBuffer.reset(renderingInterface->CreateVertexBuffer());
     vertexBuffer->Begin()
@@ -86,7 +88,7 @@ Ref<Mesh> PrimitiveMesh::CreateSphere(
     .Build();
 
     Ref<IBuffer> indexData = std::make_shared<OwningBuffer>(
-        (uint8_t*)indices->data(), sizeof(uint32_t) * indices->size());
+        (uint8_t*)indices, sizeof(uint32_t) * sectorCount * stackCount * 6);
     Ref<IndexBuffer> indexBuffer;
     indexBuffer.reset(renderingInterface->CreateIndexBuffer());
     indexBuffer->Begin()
