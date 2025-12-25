@@ -119,10 +119,24 @@ NXS_NAMESPACE
          * or if the entity is destroyed. The pointers might also become invalid if the registry is modified in a way that
          * affects component storage (eg., component reordering).
          */
-        template<typename... Type>
+        template<typename Type>
         NODISCARD auto GetComponent() const
         {
-            return  m_registry->try_get<Type...>(m_entity);
+            if (!HasComponent<Type>()) {
+                return static_cast<Type*>(nullptr);
+            }
+            return  m_registry->try_get<Type>(m_entity);
+        }
+
+        template<typename... Types>
+        NODISCARD auto GetComponents() const
+        {
+            if constexpr(sizeof...(Types) == 1u) {
+                return (GetComponent<Types>(), ...);
+            }
+            else {
+                return std::make_tuple(GetComponent<Types>()...);
+            }
         }
 
         /**
@@ -146,7 +160,7 @@ NXS_NAMESPACE
         NODISCARD bool HasComponent() const
         {
             const auto id = entt::type_id<Type>().hash();
-            return std::ranges::find(m_components, id) != m_components.end();
+            return !m_components.empty() && std::ranges::find(m_components, id) != m_components.end();
         }
 
     protected:
