@@ -7,7 +7,6 @@ TEST(RenderCommandBatcher, BatchesAdjacentSameDraw)
 {
     RenderCommand a, b, c;
     // Mock vertex/index buffers and materials
-    auto ri = Engine::Instance().GetRenderSystem()->GetRenderInterface();
     a.vertexBuffer = nullptr; b.vertexBuffer = nullptr; c.vertexBuffer = nullptr;
     a.indexBuffer = nullptr; b.indexBuffer = nullptr; c.indexBuffer = nullptr;
 
