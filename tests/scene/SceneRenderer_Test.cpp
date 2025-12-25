@@ -1,11 +1,13 @@
 #include "nexus/Nexus.h"
 #include "gtest/gtest.h"
 
+#include "helpers/TestRenderingInterface.h"
+
 using namespace nxs;
 
 TEST(SceneRenderer, RegisterRenderPass_SortsByPriority)
 {
-    ForwardSceneRenderer renderer(*Engine::Instance().GetRenderSystem());
+    FakeRenderer renderer;
 
     RenderPass p1; p1.SetName("p1").SetPriority(100);
     RenderPass p2; p2.SetName("p2").SetPriority(10);
