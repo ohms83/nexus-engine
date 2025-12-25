@@ -29,22 +29,22 @@ NXS_NAMESPACE
 
         LightProperties& Properties() override
         {
-            return GetComponent<DirectLightComponent>().properties;
+            return GetComponent<DirectLightComponent>()->properties;
         }
 
         const LightProperties& Properties() const override
         {
-            return GetComponent<DirectLightComponent>().properties;
+            return GetComponent<DirectLightComponent>()->properties;
         }
 
         glm::vec3& Direction()
         {
-            return GetComponent<DirectLightComponent>().direction;
+            return GetComponent<DirectLightComponent>()->direction;
         }
 
         const glm::vec3& Direction() const
         {
-            return GetComponent<DirectLightComponent>().direction;
+            return GetComponent<DirectLightComponent>()->direction;
         }
     };
 
@@ -58,32 +58,32 @@ NXS_NAMESPACE
 
         LightProperties& Properties() override
         {
-            return GetComponent<PointLightComponent>().properties;
+            return GetComponent<PointLightComponent>()->properties;
         }
 
         const LightProperties& Properties() const override
         {
-            return GetComponent<PointLightComponent>().properties;
+            return GetComponent<PointLightComponent>()->properties;
         }
 
         PointLightComponent& PointLightProperties()
         {
-            return GetComponent<PointLightComponent>();
+            return *GetComponent<PointLightComponent>();
         }
 
         const PointLightComponent& PointLightProperties() const
         {
-            return GetComponent<PointLightComponent>();
+            return *GetComponent<PointLightComponent>();
         }
 
         glm::vec3& Position()
         {
-            return GetComponent<PositionComponent>().value;
+            return GetComponent<PositionComponent>()->value;
         }
 
         const glm::vec3& Position() const
         {
-            return GetComponent<PositionComponent>().value;
+            return GetComponent<PositionComponent>()->value;
         }
     };
 }

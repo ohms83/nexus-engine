@@ -20,10 +20,10 @@ static nxs::Ref<nxs::Camera> InitCamera(nxs::Scene& scene)
     camera->Position().value = {0, 50, 0};
     camera->LookAt({0, 50, -10}, {0, 1, 0});
     camera->Properties().farZ = 10000.f;
-    auto& moveComp = camera->AddComponent<nxs::MoveComponent>();
-    moveComp.speed = 100.f;
-    auto& turninComp = camera->AddComponent<nxs::TurningComponent>();
-    turninComp.degree = 30.f;
+    auto moveComp = camera->AddComponent<nxs::MoveComponent>();
+    moveComp->speed = 100.f;
+    auto turninComp = camera->AddComponent<nxs::TurningComponent>();
+    turninComp->degree = 30.f;
     return camera;
 }
 
@@ -229,11 +229,11 @@ void NexusEditor::Update()
     glm::vec2 euler = inputManager.GetMouseAxisValue("camera_turn") * GetDeltaTime();
     cameraOrient.Rotate(glm::vec3(euler.y, euler.x, 0));
 
-    m_camera->GetComponent<nxs::MoveComponent>().direction =
+    m_camera->GetComponent<nxs::MoveComponent>()->direction =
         nxs::Vector::SafeNormalize(cameraOrient.quat * moveVec);
 
     const auto turninAxis = nxs::Vector::SafeNormalize(inputManager.GetAxisValue("camera_turn"));
-    auto& compAxis = m_camera->GetComponent<nxs::TurningComponent>().axis;
+    auto& compAxis = m_camera->GetComponent<nxs::TurningComponent>()->axis;
     compAxis.x = turninAxis.y;
     compAxis.y = turninAxis.x;
 

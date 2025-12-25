@@ -10,7 +10,7 @@ static uint32_t s_numNode = 0;
 ModelNode::ModelNode(Ref<entt::registry> registry, Ref<Model> model)
     : SceneNode3D(registry, "")
 {
-    AddComponent<ModelComponent>().model = model;
+    AddComponent<ModelComponent>()->model = model;
 
     auto path = std::filesystem::path(model->GetPath());
     SetName(path.filename().string());
@@ -19,11 +19,11 @@ ModelNode::ModelNode(Ref<entt::registry> registry, Ref<Model> model)
 
 void ModelNode::SetModel(Ref<Model> model)
 {
-    ModelComponent& modelComp = GetComponent<ModelComponent>();
+    ModelComponent& modelComp = *GetComponent<ModelComponent>();
     modelComp.model = model;
     for (const auto mesh : model->GetMeshes())
     {
         auto child = EmplaceChild<SceneNode3D>(mesh->GetName());
-        child->AddComponent<MeshComponent>().mesh = mesh;
+        child->AddComponent<MeshComponent>()->mesh = mesh;
     }
 }

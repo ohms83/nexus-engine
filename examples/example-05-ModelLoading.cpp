@@ -47,8 +47,8 @@ public:
             if (m_loadedModel->status != nxs::IResourceLoader::LoadResult::Status::Ready) return;
         }
 
-        auto& modelComp = m_scene->FindNodeWithName("Model")->GetComponent<nxs::ModelComponent>();
-        modelComp.model = PTR_CAST<nxs::Model>(m_loadedModels[selectedModel]->resource);
+        auto modelComp = m_scene->FindNodeWithName("Model")->GetComponent<nxs::ModelComponent>();
+        modelComp->model = PTR_CAST<nxs::Model>(m_loadedModels[selectedModel]->resource);
         m_finishLoading = true;
     }
 
@@ -63,7 +63,7 @@ public:
         modelNode->Orient().quat = glm::mat4_cast(glm::quat(glm::radians(m_euler)));
         modelNode->Scale().value = modelScales[selectedModel] * scale;
 
-        auto modelComp = modelNode->TryGetComponent<nxs::ModelComponent>();
+        auto modelComp = modelNode->GetComponent<nxs::ModelComponent>();
         if (modelComp)
         {
             const auto model = modelComp->model;
@@ -109,8 +109,8 @@ public:
 
                         if (m_loadedModels[n]->status == nxs::IResourceLoader::LoadResult::Status::Ready)
                         {
-                            auto& modelComp = m_scene->FindNodeWithName("Model")->GetComponent<nxs::ModelComponent>();
-                            modelComp.model = PTR_CAST<nxs::Model>(m_loadedModels[n]->resource);
+                            auto modelComp = m_scene->FindNodeWithName("Model")->GetComponent<nxs::ModelComponent>();
+                            modelComp->model = PTR_CAST<nxs::Model>(m_loadedModels[n]->resource);
                         }
                     }
 

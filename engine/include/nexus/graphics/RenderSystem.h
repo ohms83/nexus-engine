@@ -13,6 +13,8 @@ NXS_NAMESPACE
     {
     public:
         explicit RenderSystem(WindowContext window, const GraphicsConfig& config);
+        explicit RenderSystem(Ref<RenderingInterface> renderingInterface);
+
         ~RenderSystem();
 
         void ClearScreen() const;

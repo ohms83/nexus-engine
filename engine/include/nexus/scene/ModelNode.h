@@ -20,12 +20,12 @@ NXS_NAMESPACE
 
         Ref<const Model> GetModel() const
         {
-            return GetComponent<ModelComponent>().model;
+            return GetComponent<ModelComponent>()->model;
         }
         
         Ref<Model> GetModel()
         {
-            return GetComponent<ModelComponent>().model;
+            return GetComponent<ModelComponent>()->model;
         }
     };
 }

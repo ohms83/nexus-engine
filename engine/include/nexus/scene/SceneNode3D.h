@@ -22,14 +22,13 @@ NXS_NAMESPACE
 
         IMPLEMENT_REFLECTION(SceneNode3D);
 
-        PositionComponent& Position() { return GetComponent<PositionComponent>(); }
-        const PositionComponent& Position() const { return GetComponent<PositionComponent>(); }
+        PositionComponent& Position() { return *GetComponent<PositionComponent>(); }
+        const PositionComponent& Position() const { return *GetComponent<PositionComponent>(); }
 
-        OrientationComponent& Orient() { return GetComponent<OrientationComponent>(); }
-        const OrientationComponent& Orient() const { return GetComponent<OrientationComponent>(); }
-
-        ScaleComponent& Scale() { return GetComponent<ScaleComponent>(); }
-        const ScaleComponent& Scale() const { return GetComponent<ScaleComponent>(); }
+        OrientationComponent& Orient() { return *GetComponent<OrientationComponent>(); }
+        const OrientationComponent& Orient() const { return *GetComponent<OrientationComponent>(); }    
+        ScaleComponent& Scale() { return *GetComponent<ScaleComponent>(); }
+        const ScaleComponent& Scale() const { return *GetComponent<ScaleComponent>(); }
 
         void LookAt(const glm::vec3& center, const glm::vec3& up);
 

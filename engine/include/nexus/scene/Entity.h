@@ -64,7 +64,12 @@ NXS_NAMESPACE
          * This is a wrapper around `entt::registry::emplace`.
          * @tparam Type The type of the component to register.
          * @tparam Args Constructor arguments for the component type.
-         * @return A reference to the newly added component.
+         * @return A pointer to the newly added component.
+         * @note The returned pointer is guaranteed to be valid.
+         *
+         * @warning DO NOT CACHE THE RETURNED POINTER. The returned pointer may become invalid if components are removed
+         * or if the entity is destroyed. The pointers might also become invalid if the registry is modified in a way that
+         * affects component storage (eg., component reordering).
          */
         template<typename Type, typename... Args>
         MAYBE_UNUSED decltype(auto) AddComponent(Args &&...args)
@@ -73,7 +78,7 @@ NXS_NAMESPACE
                 return GetComponent<Type>();
             }
             m_components.push_back(entt::type_id<Type>().hash());
-            return  m_registry->emplace<Type>(m_entity, std::forward<Args>(args)...);
+            return &m_registry->emplace<Type>(m_entity, std::forward<Args>(args)...);
         }
 
         /**
@@ -81,35 +86,25 @@ NXS_NAMESPACE
          * This is a specialized wrapper that calls `entt::registry::emplace` for each type.
          * @note All components must be default-constructible.
          * @tparam Types Types of components to register.
-         * @return A single reference to the component if only one type is specified,
-         * or a tuple of references to the registered components if multiple types are specified.
+         * @return A single pointer to the component if only one type is specified,
+         * or a tuple of pointers to the registered components if multiple types are specified.
+         * 
+         * @warning DO NOT CACHE THE RETURNED POINTERS. The returned pointers may become invalid if components are removed
+         * or if the entity is destroyed. The pointers might also become invalid if the registry is modified in a way that
+         * affects component storage (eg., component reordering).
          */
         template<typename... Types>
         MAYBE_UNUSED decltype(auto) AddComponents()
         {
             if constexpr(sizeof...(Types) == 1u) {
-                return ( m_registry->emplace<Types>(m_entity), ...);
+                return (AddComponent<Types>(), ...);
             }
             else {
-                return std::forward_as_tuple(AddComponent<Types>()...);
+                // Use make_tuple so the returned tuple stores pointer values (not rvalue references)
+                // forward_as_tuple creates tuple of references (e.g., Position* &&) which does not match
+                // expectations (tuple of pointer values) and may dangle since it binds to temporaries.
+                return std::make_tuple(AddComponent<Types>()...);
             }
-        }
-
-        /**
-         * @brief Returns references to the registered components owned by this entity.
-         * This is a non-checking accessor, matching `entt::registry::get`.
-         * 
-         * @warning
-         * Attempting to get a component that the entity doesn't own results
-         * in undefined behavior.
-         * 
-         * @tparam Types Types of components to get.
-         * @return References to the components owned by the entity.
-         */
-        template<typename... Types>
-        NODISCARD decltype(auto) GetComponent() const
-        {
-            return  m_registry->get<Types...>(m_entity);
         }
 
         /**
@@ -119,9 +114,13 @@ NXS_NAMESPACE
          * @tparam Type Types of components to get.
          * @return Pointers to the components owned by the entity, or nullptr if not found.
          * Returns a single pointer or a tuple of pointers depending on the number of types requested.
+         * 
+         * @warning DO NOT CACHE THE RETURNED POINTERS. The returned pointers may become invalid if components are removed
+         * or if the entity is destroyed. The pointers might also become invalid if the registry is modified in a way that
+         * affects component storage (eg., component reordering).
          */
         template<typename... Type>
-        NODISCARD auto TryGetComponent() const
+        NODISCARD auto GetComponent() const
         {
             return  m_registry->try_get<Type...>(m_entity);
         }

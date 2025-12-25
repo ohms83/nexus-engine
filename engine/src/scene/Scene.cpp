@@ -39,10 +39,10 @@ void Scene::SetRenderer(Ptr<SceneRenderer> renderer)
 
 Color3F& Scene::Ambient()
 {
-    return GetComponent<AmbientLightComponent>().color;
+    return GetComponent<AmbientLightComponent>()->color;
 }
 
 const Color3F& Scene::Ambient() const
 {
-    return GetComponent<AmbientLightComponent>().color;
+    return GetComponent<AmbientLightComponent>()->color;
 }

@@ -37,22 +37,22 @@ NXS_NAMESPACE
 
         void Destroy();
 
-        NODISCARD Identifier GetId() const { return GetComponent<SceneNodeComponent>().id; }
+        NODISCARD Identifier GetId() const { return GetComponent<SceneNodeComponent>()->id; }
 
         NODISCARD const std::string& GetName() const
         {
-            return GetComponent<SceneNodeComponent>().name;
+            return GetComponent<SceneNodeComponent>()->name;
         }
 
         void SetName(const std::string& name)
         {
-            GetComponent<SceneNodeComponent>().name = name;
+            GetComponent<SceneNodeComponent>()->name = name;
         }
 
         void Activate(bool activate);
         NODISCARD bool IsActive() const
         {
-            return GetComponent<SceneNodeComponent>().active;
+            return GetComponent<SceneNodeComponent>()->active;
         }
 
         template<typename T, typename... Args>

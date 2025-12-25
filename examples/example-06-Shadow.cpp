@@ -61,8 +61,8 @@ public:
             if (m_loadedModel->status != nxs::IResourceLoader::LoadResult::Status::Ready) return;
         }
 
-        auto& modelComp = m_scene->FindNodeWithName("Model")->GetComponent<nxs::ModelComponent>();
-        modelComp.model = PTR_CAST<nxs::Model>(m_loadedModels[selectedModel]->resource);
+        auto modelComp = m_scene->FindNodeWithName("Model")->GetComponent<nxs::ModelComponent>();
+        modelComp->model = PTR_CAST<nxs::Model>(m_loadedModels[selectedModel]->resource);
         m_finishLoading = true;
     }
 
@@ -114,8 +114,8 @@ public:
 
                         if (m_loadedModels[n]->status == nxs::IResourceLoader::LoadResult::Status::Ready)
                         {
-                            auto& modelComp = m_scene->FindNodeWithName("Model")->GetComponent<nxs::ModelComponent>();
-                            modelComp.model = PTR_CAST<nxs::Model>(m_loadedModels[n]->resource);
+                            auto modelComp = m_scene->FindNodeWithName("Model")->GetComponent<nxs::ModelComponent>();
+                            modelComp->model = PTR_CAST<nxs::Model>(m_loadedModels[n]->resource);
                         }
                     }
 
@@ -211,7 +211,7 @@ private:
                 nxs::Engine::Instance().GetMaterialManager()->GetDefaultMaterial()
             )
         );
-        m_scene->EmplaceChild<nxs::SceneNode3D>("Ground")->AddComponent<nxs::ModelComponent>().model = groundModel;
+        m_scene->EmplaceChild<nxs::SceneNode3D>("Ground")->AddComponent<nxs::ModelComponent>()->model = groundModel;
 
         m_scene->SetRenderer(std::make_unique<nxs::ForwardSceneRenderer>(GetRenderSystem()));
     }
