@@ -7,6 +7,7 @@
 #include "nexus/NxsDefine.h"
 #include "nexus/graphics/RenderCommand.h"
 #include "nexus/graphics/RenderPass.h"
+#include "nexus/geom/Frustum.h"
 
 #include "entt/entity/registry.hpp"
 
@@ -23,6 +24,8 @@ NXS_NAMESPACE
     struct LightProperties;
     struct PointLightComponent;
     struct DirectLightComponent;
+
+    DECLARE_LOG_EXTERN(SceneRenderer);
 
     class SceneRenderer
     {
@@ -45,6 +48,11 @@ NXS_NAMESPACE
         }
 
     protected:
+        static void SetAmbientLightParams(Ref<GpuProgram> gpuProgram, const entt::registry& registry);
+        static void SetDirectLightParams(Ref<GpuProgram> gpuProgram, const entt::registry& registry);
+        static void SetPointLightParams(Ref<GpuProgram> gpuProgram, const entt::registry& registry);
+        static bool IsSphereInside(const Frustum& viewFustrum, const Sphere& sphere, glm::mat4 modelMtx, const glm::vec3& scale);
+
         //! A list of render passes sorted by their priority.
         std::vector<RenderPass> m_renderPasses;
         std::unordered_map<std::string, Ref<RenderTarget>> m_renderTargets;

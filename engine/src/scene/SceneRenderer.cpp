@@ -55,14 +55,9 @@ void main()
 
 USING_NAMESPACE_NXS;
 
-DEFINE_LOG(ForwardSceneRenderer);
+DEFINE_LOG(SceneRenderer);
 
-namespace
-{
-    // Render command-based sorting/batching
-}
-
-static void SetAmbientLightParams(Ref<GpuProgram> gpuProgram, const entt::registry& registry)
+void SceneRenderer::SetAmbientLightParams(Ref<GpuProgram> gpuProgram, const entt::registry& registry)
 {
     rmt_ScopedCPUSample(SceneRenderer_SetAmbientLightParams, 0);
     const auto ambientLightEnt = registry.view<AmbientLightComponent>().front();
@@ -70,7 +65,7 @@ static void SetAmbientLightParams(Ref<GpuProgram> gpuProgram, const entt::regist
     gpuProgram->SetUniformVector("_AmbientLight", color);
 }
 
-static void SetDirectLightParams(Ref<GpuProgram> gpuProgram, const entt::registry& registry)
+void SceneRenderer::SetDirectLightParams(Ref<GpuProgram> gpuProgram, const entt::registry& registry)
 {
     rmt_ScopedCPUSample(SceneRenderer_SetDirectLightParams, 0);
     int32 numLight = 0;
@@ -97,7 +92,7 @@ static void SetDirectLightParams(Ref<GpuProgram> gpuProgram, const entt::registr
     gpuProgram->SetUniformInt("_NumDirectLight", numLight);
 }
 
-static void SetPointLightParams(Ref<GpuProgram> gpuProgram, const entt::registry& registry)
+void SceneRenderer::SetPointLightParams(Ref<GpuProgram> gpuProgram, const entt::registry& registry)
 {
     rmt_ScopedCPUSample(SceneRenderer_SetPointLightParams, 0);
     int32 numLight = 0;
@@ -134,7 +129,7 @@ static void SetPointLightParams(Ref<GpuProgram> gpuProgram, const entt::registry
     gpuProgram->SetUniformInt("_NumPointLight", numLight);
 }
 
-static bool IsSphereInside(const Frustum& viewFustrum, const Sphere& sphere, glm::mat4 modelMtx, const glm::vec3& scale)
+bool SceneRenderer::IsSphereInside(const Frustum& viewFustrum, const Sphere& sphere, glm::mat4 modelMtx, const glm::vec3& scale)
 {
     const glm::vec3 pos = modelMtx * glm::vec4(sphere.center, 1);
     const float maxScale = std::max(std::max(scale.x, scale.y), scale.z);
@@ -272,7 +267,6 @@ void ForwardSceneRenderer::Render(RenderSystem& renderSystem, const entt::regist
             });
         }
         {
-            // LOG_DEBUG(LogBasicSceneRenderer, std::format("Begin Draw..."));
             rmt_ScopedCPUSample(SceneRenderer_RenderMeshes, 0)
 
             if (!m_renderPasses.empty())
