@@ -1,6 +1,7 @@
 #include "graphics/Mesh.h"
 #include "graphics/RenderingInterface.h"
 #include "memory/OwningBuffer.h"
+#include "core/LogDispatcher.h"
 
 USING_NAMESPACE_NXS;
 
@@ -22,6 +23,9 @@ Ref<Mesh> PrimitiveMesh::CreateSphere(
     Ref<RenderingInterface> renderingInterface,
     Ref<Material> material)
 {
+    NXS_ASSERT(sectorCount);
+    NXS_ASSERT(stackCount);
+
     auto vertices = new Vertex[ (sectorCount + 1) * (stackCount + 1) ];
     auto indices = new uint32_t[ sectorCount * stackCount * 6 ];
     uint32_t vertexIndex = 0;
