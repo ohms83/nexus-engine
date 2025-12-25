@@ -79,7 +79,7 @@ TEST_F(EntityTest, AddComponent_Single_DefaultCtor) {
 // ADD COMPONENTS TESTS (MULTIPLE - Default Construction Only)
 // ===================================================================
 
-TEST_F(EntityTest, AddComponents_SingleType_ReturnsReference) {
+TEST_F(EntityTest, AddComponents_SingleType_ReturnsPointer) {
     Entity entity(registry);
     
     // Test: Calling AddComponents with one type should use the single-type path
@@ -87,9 +87,11 @@ TEST_F(EntityTest, AddComponents_SingleType_ReturnsReference) {
     
     // Check if the component exists and the return type is correct
     ASSERT_TRUE(registry->all_of<Position>(entity.GetHandle()));
+    ASSERT_NE(pos, nullptr);
     ASSERT_FLOAT_EQ(pos->x, 0.0f);
-    
-    static_assert(std::is_same_v<decltype(pos), Position*>, "Return type must be a single reference.");
+    ASSERT_FLOAT_EQ(pos->y, 0.0f);
+
+    static_assert(std::is_same_v<decltype(pos), Position*>, "Return type must be a single pointer.");
 }
 
 
@@ -102,10 +104,13 @@ TEST_F(EntityTest, AddComponents_MultipleTypes_ReturnsTuple) {
     const bool all_exist = registry->all_of<Position, Velocity, Health>(entity.GetHandle());
     EXPECT_TRUE(all_exist);
 
-    // Check if the return type is a tuple of references
+    // Check if the return type is a tuple of pointers
     static_assert(std::is_same_v<decltype(components), std::tuple<Position*, Velocity*, Health*>>, "Return type should be tuple of pointers.");
     
     // Check default values from the tuple
+    ASSERT_NE(std::get<0>(components), nullptr);
+    ASSERT_NE(std::get<1>(components), nullptr);
+    ASSERT_NE(std::get<2>(components), nullptr);
     ASSERT_FLOAT_EQ(std::get<0>(components)->x, 0.0f); // Position default constructed
     ASSERT_FLOAT_EQ(std::get<1>(components)->dx, 1.0f); // Velocity default constructed
     
@@ -126,6 +131,7 @@ TEST_F(EntityTest, GetSingleComponent) {
     // Retrieve the component
     const auto pos = entity.GetComponent<Position>();
     
+    ASSERT_NE(pos, nullptr);
     ASSERT_FLOAT_EQ(pos->x, 1.0f);
     ASSERT_FLOAT_EQ(pos->y, 2.0f);
     
@@ -142,12 +148,13 @@ TEST_F(EntityTest, GetMultipleComponents) {
     entity.AddComponent<Velocity>(3.0f, 4.0f);
     
     // Retrieve multiple components
-    const auto [pos, vel] = entity.GetComponent<Position, Velocity>();
+    const auto [pos, vel] = entity.GetComponents<Position, Velocity>();
     
+    ASSERT_NE(pos, nullptr);
+    ASSERT_NE(vel, nullptr);
     ASSERT_FLOAT_EQ(pos->x, 1.0f);
     ASSERT_FLOAT_EQ(vel->dx, 3.0f);
 }
-
 
 // ===================================================================
 // TRY GET COMPONENT TESTS
@@ -180,11 +187,38 @@ TEST_F(EntityTest, TryGetMultipleComponents) {
     entity.AddComponent<Position>(1.0f, 2.0f);
     
     // Try to retrieve two components, one existing, one missing
-    const auto [pos_ptr, vel_ptr] = entity.GetComponent<Position, Velocity>();
+    const auto [pos_ptr, vel_ptr] = entity.GetComponents<Position, Velocity>();
     
     // Position should be found, Velocity should not
     ASSERT_NE(pos_ptr, nullptr);
     ASSERT_EQ(vel_ptr, nullptr);
+}
+
+// ===================================================================
+// HAS COMPONENT TESTS
+// ===================================================================
+
+TEST_F(EntityTest, HasComponent_BeforeAndAfterAdd) {
+    Entity entity(registry);
+    ASSERT_FALSE(entity.HasComponent<Position>());
+    entity.AddComponent<Position>();
+    ASSERT_TRUE(entity.HasComponent<Position>());
+}
+
+TEST_F(EntityTest, HasComponent_AfterRemove_ReturnsFalse) {
+    Entity entity(registry);
+    entity.AddComponent<Position>();
+    ASSERT_TRUE(entity.HasComponent<Position>());
+    entity.RemoveComponent<Position>();
+    ASSERT_FALSE(entity.HasComponent<Position>());
+}
+
+TEST_F(EntityTest, HasComponent_MultipleComponents) {
+    Entity entity(registry);
+    entity.AddComponents<Position, Velocity>();
+    ASSERT_TRUE(entity.HasComponent<Position>());
+    ASSERT_TRUE(entity.HasComponent<Velocity>());
+    ASSERT_FALSE(entity.HasComponent<Health>());
 }
 
 // ===================================================================
