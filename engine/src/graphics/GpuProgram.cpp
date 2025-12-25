@@ -28,6 +28,7 @@ void GpuProgram::Compile()
     assert(m_compiling);
     m_compiling = false;
 }
+
 int32_t GpuProgram::FindUniform(const std::string &name)
 {
     if (const auto& itr = m_uniforms.find(name); itr != m_uniforms.end()) return itr->second;
