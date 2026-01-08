@@ -5,9 +5,8 @@
 #pragma once
 
 #include "nexus/NxsDefine.h"
+#include "entt/entt.hpp"
 #include <vector>
-
-#include "nexus/scene/SceneRenderer.h"
 
 NXS_NAMESPACE
 {

@@ -58,12 +58,4 @@ NXS_NAMESPACE
         std::vector<RenderPass> m_renderPasses;
         std::unordered_map<std::string, Ref<RenderTarget>> m_renderTargets;
     };
-
-    class ForwardSceneRenderer final :public SceneRenderer
-    {
-    public:
-        ForwardSceneRenderer(const RenderSystem& renderSystem);
-        void Render(RenderSystem& renderSystem, const entt::registry& registry) override;
-        void RenderDepthPrePass(RenderSystem& renderSystem, const entt::registry& registry);
-    };
 }

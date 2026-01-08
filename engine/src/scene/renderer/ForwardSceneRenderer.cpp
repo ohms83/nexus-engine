@@ -1,10 +1,8 @@
-//
-// Created by nutta on 7/25/2025.
-//
-#include "scene/SceneRenderer.h"
+#include "scene/renderer/ForwardSceneRenderer.h"
 
 #include <format>
 #include <algorithm>
+#include <cstring>
 
 #include "core/Logger.h"
 #include "graphics/debug/Gizmos.h"
@@ -19,7 +17,6 @@
 #include "math/Math.h"
 #include "math/Matrix.h"
 #include "memory/OwningBuffer.h"
-#include <cstring>
 #include "scene/component/CameraComponent.h"
 #include "scene/component/LightComponent.h"
 #include "scene/component/ModelComponent.h"
@@ -27,6 +24,8 @@
 #include "scene/component/TransformComponent.h"
 
 #include "Remotery.h"
+
+USING_NAMESPACE_NXS;
 
 // Shader sources
 static const char* s_depthVertexShader = R"(
@@ -52,90 +51,6 @@ void main()
     // but the depth value determined by gl_Position is still written to the depth buffer.
 }
 )";
-
-USING_NAMESPACE_NXS;
-
-DEFINE_LOG(SceneRenderer);
-
-void SceneRenderer::SetAmbientLightParams(Ref<GpuProgram> gpuProgram, const entt::registry& registry)
-{
-    rmt_ScopedCPUSample(SceneRenderer_SetAmbientLightParams, 0);
-    const auto ambientLightEnt = registry.view<AmbientLightComponent>().front();
-    const auto color = ambientLightEnt == entt::null ? Color3F::Grey : registry.get<AmbientLightComponent>(ambientLightEnt).color;
-    gpuProgram->SetUniformVector("_AmbientLight", color);
-}
-
-void SceneRenderer::SetDirectLightParams(Ref<GpuProgram> gpuProgram, const entt::registry& registry)
-{
-    rmt_ScopedCPUSample(SceneRenderer_SetDirectLightParams, 0);
-    int32 numLight = 0;
-    for (const auto view = registry.view<SceneNodeComponent, DirectLightComponent>(); const auto& [entity, node, light] : view.each())
-    {
-        if (!node.active) continue;
-
-        // TODO: Cache the uniform names.
-        const auto uniformLocation = std::format("_DirectLights[{}]", numLight);
-        const auto uniformLocationColor = std::format("{}.properties.color", uniformLocation);
-        const auto uniformLocationDiffuse = std::format("{}.properties.diffuseIntensity", uniformLocation);
-        const auto uniformLocationSpecular = std::format("{}.properties.specularIntensity", uniformLocation);
-        const auto uniformLocationCutoff = std::format("{}.properties.cutoff", uniformLocation);
-        const auto uniformLocationDirection = std::format("{}.direction", uniformLocation);
-
-        gpuProgram->SetUniformVector(uniformLocationColor, light.properties.color);
-        gpuProgram->SetUniformVector(uniformLocationDirection, light.direction);
-        gpuProgram->SetUniformFloat(uniformLocationDiffuse, light.properties.diffuseIntensity);
-        gpuProgram->SetUniformFloat(uniformLocationSpecular, light.properties.specularIntensity);
-        gpuProgram->SetUniformFloat(uniformLocationCutoff, light.properties.cutoffRange);
-
-        numLight++;
-    }
-    gpuProgram->SetUniformInt("_NumDirectLight", numLight);
-}
-
-void SceneRenderer::SetPointLightParams(Ref<GpuProgram> gpuProgram, const entt::registry& registry)
-{
-    rmt_ScopedCPUSample(SceneRenderer_SetPointLightParams, 0);
-    int32 numLight = 0;
-    for (const auto view = registry.view<SceneNodeComponent, PointLightComponent, PositionComponent>(); const auto& [entity, node, light, position] : view.each())
-    {
-        if (!node.active) continue;
-
-        rmt_BeginCPUSample(CreateUniformNames, 0);
-        // TODO: Cache the uniform names.
-        const auto uniformLocation = std::format("_PointLights[{}]", numLight);
-        const auto uniformLocationColor = std::format("{}.properties.color", uniformLocation);
-        const auto uniformLocationDiffuse = std::format("{}.properties.diffuseIntensity", uniformLocation);
-        const auto uniformLocationSpecular = std::format("{}.properties.specularIntensity", uniformLocation);
-        const auto uniformLocationCutOff = std::format("{}.cutoff", uniformLocation);
-        const auto uniformLocationPosition = std::format("{}.position", uniformLocation);
-        const auto uniformLocationConst = std::format("{}.constant", uniformLocation);
-        const auto uniformLocationLinear = std::format("{}.linear", uniformLocation);
-        const auto uniformLocationQuad = std::format("{}.quadratic", uniformLocation);
-        rmt_EndCPUSample();
-
-        rmt_BeginCPUSample(EmplaceUniformValues, 0);
-        gpuProgram->SetUniformVector(uniformLocationPosition, position.value);
-        gpuProgram->SetUniformVector(uniformLocationColor, light.properties.color);
-        gpuProgram->SetUniformFloat(uniformLocationDiffuse, light.properties.diffuseIntensity);
-        gpuProgram->SetUniformFloat(uniformLocationSpecular, light.properties.specularIntensity);
-        gpuProgram->SetUniformFloat(uniformLocationCutOff, light.properties.cutoffRange);
-        gpuProgram->SetUniformFloat(uniformLocationConst, light.constant);
-        gpuProgram->SetUniformFloat(uniformLocationLinear, light.linear);
-        gpuProgram->SetUniformFloat(uniformLocationQuad, light.quadratic);
-        rmt_EndCPUSample();
-
-        numLight++;
-    }
-    gpuProgram->SetUniformInt("_NumPointLight", numLight);
-}
-
-bool SceneRenderer::IsSphereInside(const Frustum& viewFustrum, const Sphere& sphere, glm::mat4 modelMtx, const glm::vec3& scale)
-{
-    const glm::vec3 pos = modelMtx * glm::vec4(sphere.center, 1);
-    const float maxScale = std::max(std::max(scale.x, scale.y), scale.z);
-    const float scaledRadius = sphere.radius * maxScale;
-    return viewFustrum.IsSphereInside(pos, scaledRadius);
-}
 
 ForwardSceneRenderer::ForwardSceneRenderer(const RenderSystem& renderSystem)
 {
@@ -362,68 +277,6 @@ void ForwardSceneRenderer::Render(RenderSystem& renderSystem, const entt::regist
                     }
                 }
             }
-            // else
-            // {
-            //     Material* usingMaterial = nullptr;
-            //     const auto batched = RenderCommandBatcher::Batch(commands);
-            //     for (const auto& cmd : batched)
-            //     {
-            //         auto material = cmd.material;
-            //         if (material.get() != usingMaterial)
-            //         {
-            //             material->Use();
-            //             usingMaterial = material.get();
-
-            //             renderInterface->SetDepthFunction(material->depthFunction);
-            //             auto gpuProgram = material->GetShader()->GetGpuProgram();
-            //             gpuProgram->SetUniformMatrix("_View", viewMtx, false);
-            //             gpuProgram->SetUniformMatrix("_Projection", projection, false);
-
-            //             SetAmbientLightParams(gpuProgram, registry);
-            //             SetDirectLightParams(gpuProgram, registry);
-            //             SetPointLightParams(gpuProgram, registry);
-            //         }
-
-            //         auto gpuProgram = material->GetShader()->GetGpuProgram();
-            //         if (!cmd.instanceModels.empty())
-            //         {
-            //             // Build an OwningBuffer holding all model matrices
-            //             const auto instanceCount = static_cast<uint32>(cmd.instanceModels.size());
-            //             const size_t bytes = instanceCount * sizeof(glm::mat4);
-            //             uint8_t* mem = new uint8_t[bytes];
-            //             for (uint32 i = 0; i < instanceCount; ++i)
-            //             {
-            //                 std::memcpy(&mem[i * sizeof(glm::mat4)], cmd.instanceModels[i], sizeof(glm::mat4));
-            //             }
-            //             Ref<IBuffer> instanceBuffer = std::make_shared<nxs::OwningBuffer>(mem, bytes);
-
-            //             // Create instance attributes for mat4 as 4 vec4 attributes (layout locations 10..13)
-            //             std::vector<VertexAttribute> attrs;
-            //             for (int i = 0; i < 4; ++i)
-            //             {
-            //                 VertexAttribute a;
-            //                 a.type = VertexAttribute::Type::TexCoord0; // type is unused if attribIndex set
-            //                 a.dataType = DataType::Float;
-            //                 a.numElements = 4;
-            //                 a.attribIndex = 10 + i; // locations 10..13
-            //                 a.divisor = 1;
-            //                 attrs.push_back(a);
-            //             }
-            //             cmd.vertexBuffer->AttachInstanceStream(std::static_pointer_cast<IBuffer>(instanceBuffer), attrs, BufferUsage::StaticDraw);
-            //             renderSystem.DrawIndexedInstanced(cmd.indexBuffer, instanceCount);
-            //             cmd.vertexBuffer->DetachInstanceStreams();
-            //         }
-            //         else
-            //         {
-            //             if (cmd.modelMatrix) gpuProgram->SetUniformMatrix("_Model", *cmd.modelMatrix, false);
-            //             cmd.vertexBuffer->Bind();
-            //             cmd.indexBuffer->Bind();
-            //             renderSystem.DrawIndexed(cmd.indexBuffer);
-            //         }
-            //     }
-            // }
-
-            // LOG_DEBUG(LogBasicSceneRenderer, std::format("End Draw"));
         }
 
         for (const auto view = registry.view<SceneNodeComponent, MeshComponent>(); const auto& [entity, sceneNode, meshComp] : view.each())
@@ -440,8 +293,10 @@ void ForwardSceneRenderer::Render(RenderSystem& renderSystem, const entt::regist
                 Gizmos::DrawOutlineSphere(renderSystem, sphere.center, sphere.radius);
             }
         }
+        // TODO: Perform drawing during the overlay render pass
         Gizmos::ProcessDraw(renderSystem, projection * viewMtx);
         // Only render from the first active camera POV.
+        // TODO: Support render to offscreen targets from multiple cameras.
         break;
     }
 }

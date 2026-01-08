@@ -76,7 +76,6 @@ NXS_NAMESPACE
          * @brief Optional offscreen render target for this pass.
          * If targetType is Offscreen, this must be set.
          */
-        //! Optional name of an offscreen render target assigned by the engine.
         std::string offscreenTargetName;
         //! A list of offscreen render targets that this pass reads/samples from
         std::vector<std::string> readTargets;

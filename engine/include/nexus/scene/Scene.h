@@ -5,7 +5,7 @@
 #include "nexus/core/LogDispatcher.h"
 
 #include "SceneNode.h"
-#include "SceneRenderer.h"
+#include "renderer/SceneRenderer.h"
 #include "component/LightComponent.h"
 
 DECLARE_LOG_EXTERN(Scene);
