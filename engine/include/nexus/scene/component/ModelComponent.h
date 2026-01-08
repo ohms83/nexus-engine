@@ -12,6 +12,8 @@ NXS_NAMESPACE
         
         void AcceptReflector(IReflector& reflector) override
         {
+            if (!model) return;
+
             auto path = model->GetPath();
 
             reflector.ChangeCategory("Model");
