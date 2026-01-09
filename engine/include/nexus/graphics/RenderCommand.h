@@ -58,9 +58,9 @@ NXS_NAMESPACE
         uint32 instanceCount = 1;
 
         // Per-instance/model matrix: pointer because many commands share the same matrix
-        const glm::mat4* modelMatrix = nullptr;
-        // For batched commands with multiple instances, store a list of pointers to model matrices.
-        std::vector<const glm::mat4*> instanceModels;
+        glm::mat4 modelMatrix;
+        // For batched commands with multiple instances, store a list of model matrices.
+        std::vector<glm::mat4> instanceModels;
 
         // Bounding volume for frustum culling and sorting
         Sphere bounds;
@@ -93,12 +93,11 @@ NXS_NAMESPACE
                 && layerMask == other.layerMask;
         }
 
-        void AddInstance(const glm::mat4* model)
+        void AddInstance(const glm::mat4& model)
         {
             if (instanceModels.empty())
             {
-                if (modelMatrix) instanceModels.push_back(modelMatrix);
-                modelMatrix = nullptr;
+                instanceModels.push_back(modelMatrix);
             }
             instanceModels.push_back(model);
             instanceCount = UINT_CAST(instanceModels.size());

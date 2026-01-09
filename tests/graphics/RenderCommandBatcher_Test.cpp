@@ -15,9 +15,9 @@ TEST(RenderCommandBatcher, BatchesAdjacentSameDraw)
     a.material = matA; b.material = matA; c.material = std::make_shared<Material>("mC", 2u);
 
     glm::mat4 m1(1.0f), m2(1.0f), m3(1.0f);
-    a.modelMatrix = &m1;
-    b.modelMatrix = &m2;
-    c.modelMatrix = &m3;
+    a.modelMatrix = m1;
+    b.modelMatrix = m2;
+    c.modelMatrix = m3;
 
     a.gpuProgram = nullptr; b.gpuProgram = nullptr; c.gpuProgram = nullptr;
 

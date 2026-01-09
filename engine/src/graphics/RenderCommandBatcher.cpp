@@ -16,7 +16,7 @@ void RenderCommandBatcher::Batch(std::vector<RenderCommand>& commands)
         auto& src = commands[read];
         if (dst.CanBatchWith(src))
         {
-            if (src.modelMatrix) dst.AddInstance(src.modelMatrix);
+            dst.AddInstance(src.modelMatrix);
         }
         else
         {

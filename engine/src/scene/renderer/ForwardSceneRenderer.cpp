@@ -33,7 +33,8 @@ ForwardSceneRenderer::ForwardSceneRenderer(const RenderSystem& renderSystem)
     RegisterRenderPass(DepthPrepass);
     RegisterRenderPass(OpaquePass);
     RegisterRenderPass(AlphaPass);
-    RegisterRenderPass(OverlayPass);
+    // Overlay pass is still buggy. Temporarily disable it.
+    // RegisterRenderPass(OverlayPass);
 }
 
 void ForwardSceneRenderer::Render(RenderSystem& renderSystem, const entt::registry& registry)
@@ -69,7 +70,7 @@ void ForwardSceneRenderer::Render(RenderSystem& renderSystem, const entt::regist
             auto model = modelComp.model;
             if (!sceneNode.active || !model) continue;
 
-            const glm::mat4& modelMtx = modelMatrices.emplace_back(Matrix::CreateModelMatrix(position.value, orient.quat, scale.value));
+            glm::mat4 modelMtx = Matrix::CreateModelMatrix(position.value, orient.quat, scale.value);
 
             if (!IsSphereInside(viewFrustum, model->GetBoundingSphere(), modelMtx, scale.value)) continue;
 
@@ -78,28 +79,7 @@ void ForwardSceneRenderer::Render(RenderSystem& renderSystem, const entt::regist
             for (auto mesh : model->GetMeshes())
             {
                 if (!IsSphereInside(viewFrustum, mesh->GetSphere(), modelMtx, scale.value)) continue;
-
-                const auto material = mesh->GetMaterial();
-                const auto meshSphere = mesh->GetSphere();
-                const auto pos = mvpMtx * glm::vec4(meshSphere.center, 1);
-                const auto clipZ = pos.z / pos.w;
-                const bool translucent = (material->blendMode != BlendMode::None);
-                const uint32_t materialId = 0x7FFFFFFF & material->GetId();
-                const float depthN = clipZ; // normalized in -1..1
-                const float depthNormalized = (depthN + 1.0f) * 0.5f;
-                RenderCommand cmd;
-                cmd.vertexBuffer = mesh->GetVertexBuffer();
-                cmd.indexBuffer = mesh->GetIndexBuffer();
-                cmd.indexCount = mesh->GetIndexBuffer()->GetNumIndexDraw();
-                cmd.indexOffset = 0;
-                cmd.vertexOffset = 0;
-                cmd.modelMatrix = &modelMtx;
-                cmd.bounds = mesh->GetSphere();
-                cmd.layerMask = 0xFFFFFFFFu;
-                cmd.material = material;
-                cmd.gpuProgram = material->GetShader()->GetGpuProgram();
-                cmd.SetSortKey(translucent, materialId, depthNormalized);
-                commands.emplace_back(std::move(cmd));
+                commands.emplace_back(CreateRenderCommand(mesh, std::move(modelMtx), mvpMtx));
             }
             rmt_EndCPUSample();
         }
@@ -166,7 +146,7 @@ void ForwardSceneRenderer::Render(RenderSystem& renderSystem, const entt::regist
                             // Copy matrices
                             for (uint32 i = 0; i < instanceCount; ++i)
                             {
-                                std::memcpy(&mem[i * sizeof(glm::mat4)], cmd.instanceModels[i], sizeof(glm::mat4));
+                                std::memcpy(&mem[i * sizeof(glm::mat4)], &cmd.instanceModels[i], sizeof(glm::mat4));
                             }
                             Ref<IBuffer> instanceBuffer = std::make_shared<OwningBuffer>(mem, bytes);
 
@@ -191,7 +171,7 @@ void ForwardSceneRenderer::Render(RenderSystem& renderSystem, const entt::regist
                         }
                         else
                         {
-                            if (cmd.modelMatrix) gpuProgram->SetUniformMatrix("_Model", *cmd.modelMatrix, false);
+                            gpuProgram->SetUniformMatrix("_Model", cmd.modelMatrix, false);
                             cmd.vertexBuffer->Bind();
                             cmd.indexBuffer->Bind();
                             renderSystem.DrawIndexed(cmd.indexBuffer);

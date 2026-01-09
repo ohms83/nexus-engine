@@ -10,7 +10,7 @@ NXS_NAMESPACE
     class DummySceneRenderer final : public SceneRenderer
     {
     public:
-        DummySceneRenderer() = default;
+        DummySceneRenderer();
         ~DummySceneRenderer() override = default;
 
         void Render(RenderSystem& renderSystem, const entt::registry& registry) override;

@@ -32,7 +32,32 @@ USING_NAMESPACE_NXS;
 
 DEFINE_LOG(SceneRenderer);
 
-void SceneRenderer::SetAmbientLightParams(Ref<GpuProgram> gpuProgram, const entt::registry& registry)
+RenderCommand SceneRenderer::CreateRenderCommand(Ref<const Mesh> mesh, glm::mat4&& modelMtx, const glm::mat4& mvpMtx)
+{
+    const auto material = mesh->GetMaterial();
+    const auto meshSphere = mesh->GetSphere();
+    const auto pos = mvpMtx * glm::vec4(meshSphere.center, 1);
+    const auto clipZ = pos.z / pos.w;
+    const bool translucent = (material->blendMode != BlendMode::None);
+    const uint32_t materialId = 0x7FFFFFFF & material->GetId();
+    const float depthN = clipZ; // normalized in -1..1
+    const float depthNormalized = (depthN + 1.0f) * 0.5f;
+    RenderCommand cmd;
+    cmd.vertexBuffer = mesh->GetVertexBuffer();
+    cmd.indexBuffer = mesh->GetIndexBuffer();
+    cmd.indexCount = mesh->GetIndexBuffer()->GetNumIndexDraw();
+    cmd.indexOffset = 0;
+    cmd.vertexOffset = 0;
+    cmd.modelMatrix = modelMtx;
+    cmd.bounds = mesh->GetSphere();
+    cmd.layerMask = 0xFFFFFFFFu;
+    cmd.material = material;
+    cmd.gpuProgram = material->GetShader()->GetGpuProgram();
+    cmd.SetSortKey(translucent, materialId, depthNormalized);
+    return cmd;
+}
+
+void SceneRenderer::SetAmbientLightParams(Ref<GpuProgram> gpuProgram, const entt::registry &registry)
 {
     rmt_ScopedCPUSample(SceneRenderer_SetAmbientLightParams, 0);
     const auto ambientLightEnt = registry.view<AmbientLightComponent>().front();

@@ -20,6 +20,8 @@ NXS_NAMESPACE
     class RenderSystem;
     class Scene;
     class Shader;
+    class Mesh;
+    class GpuProgram;
     class RenderTarget;
     struct LightProperties;
     struct PointLightComponent;
@@ -50,6 +52,7 @@ NXS_NAMESPACE
         static bool IsSphereInside(const Frustum& viewFustrum, const Sphere& sphere, glm::mat4 modelMtx, const glm::vec3& scale);
 
     protected:
+        static RenderCommand CreateRenderCommand(Ref<const Mesh> mesh, glm::mat4&& modelMtx, const glm::mat4& mvpMtx);
         static void SetAmbientLightParams(Ref<GpuProgram> gpuProgram, const entt::registry& registry);
         static void SetDirectLightParams(Ref<GpuProgram> gpuProgram, const entt::registry& registry);
         static void SetPointLightParams(Ref<GpuProgram> gpuProgram, const entt::registry& registry);
