@@ -2,7 +2,7 @@
 
 #include "SceneRenderer.h"
 
-NAMESPACE_NXS
+NXS_NAMESPACE
 {
     /**
      * @brief A dummy implementation of SceneRenderer that mainly used for testing new features.
@@ -13,6 +13,6 @@ NAMESPACE_NXS
         DummySceneRenderer() = default;
         ~DummySceneRenderer() override = default;
 
-        void RenderScene(Ref<Scene> scene, Ref<Camera> camera) override;
+        void Render(RenderSystem& renderSystem, const entt::registry& registry) override;
     };
 }

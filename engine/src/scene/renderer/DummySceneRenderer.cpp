@@ -1,6 +1,8 @@
 #include "scene/renderer/DummySceneRenderer.h"
-#include "DummySceneRenderer.h"
+#include "scene/Camera.h"
 
-void DummySceneRenderer::RenderScene(Ref<Scene> scene, Ref<Camera> camera)
+USING_NAMESPACE_NXS;
+
+void DummySceneRenderer::Render(RenderSystem& renderSystem, const entt::registry& registry)
 {
 }
