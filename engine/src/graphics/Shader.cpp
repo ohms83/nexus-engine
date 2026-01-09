@@ -17,74 +17,110 @@ DEFINE_LOG(Shader);
 bool Shader::CompileFromSource(
     RenderingInterface& renderingInterface,
     std::string&& vertexShaderSource,
-    std::string&& fragmentShaderSource)
+    std::string&& fragmentShaderSource,
+    std::string&& geometryShaderSource)
 {
+    m_sources[GpuProgram::Type::Vertex] = vertexShaderSource;
+    m_sources[GpuProgram::Type::Fragment] = fragmentShaderSource;
+    m_sources[GpuProgram::Type::Geometry] = geometryShaderSource;
+
     m_gpuProgram.reset(renderingInterface.CreateGpuProgram());
     m_gpuProgram->BeginCompile()
         .AddSource(vertexShaderSource, GpuProgram::Type::Vertex)
         .AddSource(fragmentShaderSource, GpuProgram::Type::Fragment)
+        .AddSource(geometryShaderSource, GpuProgram::Type::Geometry)
     .Compile();
 
     if (m_gpuProgram->GetHandle() == 0) return false;
 
-    m_vertexShader = std::move(vertexShaderSource);
-    m_fragmentShader = std::move(fragmentShaderSource);
+    ExtractUniform(vertexShaderSource);
+    ExtractUniform(fragmentShaderSource);
+    ExtractUniform(geometryShaderSource);
+}
+
+bool Shader::CompileFromSource(
+    RenderingInterface& renderingInterface,
+    const std::string& vertexShaderSource,
+    const std::string& fragmentShaderSource,
+    const std::string& geometryShaderSource)
+{
+    m_sources[GpuProgram::Type::Vertex] = vertexShaderSource;
+    m_sources[GpuProgram::Type::Fragment] = fragmentShaderSource;
+    m_sources[GpuProgram::Type::Geometry] = geometryShaderSource;
+
+    m_gpuProgram.reset(renderingInterface.CreateGpuProgram());
+    m_gpuProgram->BeginCompile()
+        .AddSource(vertexShaderSource, GpuProgram::Type::Vertex)
+        .AddSource(fragmentShaderSource, GpuProgram::Type::Fragment)
+        .AddSource(geometryShaderSource, GpuProgram::Type::Geometry)
+    .Compile();
+
+    if (m_gpuProgram->GetHandle() == 0) return false;
 
     ExtractUniform(vertexShaderSource);
     ExtractUniform(fragmentShaderSource);
-    return true;
+    ExtractUniform(geometryShaderSource);
 }
 
 bool Shader::CompileFromFile(
     RenderingInterface& renderingInterface,
     const std::string& vertexShaderPath,
-    const std::string& fragmentShaderPath)
+    const std::string& fragmentShaderPath,
+    const std::string& geometryShaderPath)
 {
-    std::fstream vertexShader, fragmentShader;
+    std::fstream vertexShader, fragmentShader, geometryShader;
     vertexShader.open(vertexShaderPath);
     fragmentShader.open(fragmentShaderPath);
-
+    geometryShader.open(geometryShaderPath);
     if (!vertexShader.is_open() || !fragmentShader.is_open())
     {
         LOG_ERROR(LogShader, std::format("Error loading shader VS={} FS={}", vertexShaderPath, fragmentShaderPath));
         return false;
     }
 
-    std::stringstream vertexShaderSource, fragmenShaderSource;
+    std::stringstream vertexShaderSource, fragmenShaderSource, geometryShaderSource;
 
     vertexShaderSource << vertexShader.rdbuf();
     fragmenShaderSource << fragmentShader.rdbuf();
+    geometryShaderSource << geometryShader.rdbuf();
 
-    return CompileFromSource(renderingInterface, vertexShaderSource.str(), fragmenShaderSource.str());
+    return CompileFromSource(renderingInterface, vertexShaderSource.str(), fragmenShaderSource.str(), geometryShaderSource.str());
 }
 
 bool Shader::Compile(RenderingInterface& renderingInterface)
 {
+    const auto vertex = m_sources.at(GpuProgram::Type::Vertex);
+    const auto fragment = m_sources.at(GpuProgram::Type::Fragment);
+    const auto geometry = m_sources.at(GpuProgram::Type::Geometry);
+
     m_gpuProgram.reset(renderingInterface.CreateGpuProgram());
     m_gpuProgram->BeginCompile()
-        .AddSource(m_vertexShader, GpuProgram::Type::Vertex)
-        .AddSource(m_fragmentShader, GpuProgram::Type::Fragment)
+        .AddSource(vertex, GpuProgram::Type::Vertex)
+        .AddSource(fragment, GpuProgram::Type::Fragment)
+        .AddSource(geometry, GpuProgram::Type::Geometry)
     .Compile();
 
     if (m_gpuProgram->GetHandle() == 0) return false;
 
-    ExtractUniform(m_vertexShader);
-    ExtractUniform(m_fragmentShader);
+    ExtractUniform(vertex);
+    ExtractUniform(fragment);
     return true;
 }
 
 VariantData Shader::Serialize() const
 {
     return VariantData::Map {
-        {"vertex", m_vertexShader},
-        {"fragment", m_fragmentShader}
+        {"vertex", m_sources.at(GpuProgram::Type::Vertex)},
+        {"fragment", m_sources.at(GpuProgram::Type::Fragment)},
+        {"geometry", m_sources.at(GpuProgram::Type::Geometry)},
     };
 }
 
 void Shader::Deserialize(const VariantData &data)
 {
-    m_vertexShader = data["vertex"].GetString();
-    m_fragmentShader = data["fragment"].GetString();
+    m_sources[GpuProgram::Type::Vertex] = data["vertex"].GetString();
+    m_sources[GpuProgram::Type::Fragment] = data["fragment"].GetString();
+    m_sources[GpuProgram::Type::Geometry] = data["geometry"].GetString();
 }
 
 bool Shader::HasUniformType(Uniform::Type type)

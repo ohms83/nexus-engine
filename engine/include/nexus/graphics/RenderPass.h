@@ -89,10 +89,10 @@ NXS_NAMESPACE
         // Pipeline state
         PipelineState pipelineState;
 
-        /**
-         * @brief Shader override for this render pass. If set, this shader will be used
-         */
-        Ref<Shader> globalShader;
+        /**< @brief Name of the global shader program to use. */
+        std::string globalShaderName;
+        /**< @brief Source code for the global shader, per program type. */
+        std::map<GpuProgram::Type, std::string> globalShaderSources;
 
         // Filtering: a pass can decide which materials/objects to render using
         // this callback. `MatchesMaterial` will check it, falling back to true.
@@ -110,6 +110,9 @@ NXS_NAMESPACE
         // Optional layer mask filtering. 0 => all layers.
         uint32_t layerMask = 0;
 
+        /**< @brief Release all resources held by this render pass. */
+        void ReleaseResources();
+
         // Helpers:
         bool MatchesMaterial(const Material& m) const
         {
@@ -125,12 +128,20 @@ NXS_NAMESPACE
         // Serialization helpers
         VariantData Serialize() const override;
         void Deserialize(const VariantData& data) override;
+        /**
+         * @brief Resolve referenced resources such as shaders. This must be called after deserialization.
+         */
+        void Resolve(RenderingInterface& renderingInterface);
 
-        // Simple chaining builder helpers
-        RenderPass& SetName(const std::string& s) { name = s; return *this; }
-        RenderPass& SetPriority(uint32_t p) { priority = p; return *this; }
-        RenderPass& SetGlobalShader(const Ref<Shader>& s) { globalShader = s; return *this; }
-        RenderPass& SetFilter(std::function<bool(const Material&)> f) { filter = std::move(f); return *this; }
+        /**
+         * @brief Check if the render pass has been resolved.
+         * 
+         * @return true, if resolved; otherwise, false.
+         */
+        bool IsResolved() const
+        {
+            return pipelineState.globalShader != nullptr;
+        }
 
         /**
          * @brief Set the filter by type preset.
@@ -159,19 +170,42 @@ NXS_NAMESPACE
 
     struct RenderPassBuilder
     {
-        RenderPass m_pass;
+        RenderPass pass;
         static RenderPassBuilder Begin(std::string name, uint32_t priority)
         {
             RenderPassBuilder b;
-            b.m_pass.name = std::move(name);
-            b.m_pass.priority = priority;
+            b.pass.name = std::move(name);
+            b.pass.priority = priority;
             return b;
         }
-        RenderPassBuilder& DepthTest(bool v) { m_pass.pipelineState.depthTest = v; return *this; }
-        RenderPassBuilder& DepthWrite(bool v) { m_pass.pipelineState.depthWrite = v; return *this; }
-        RenderPassBuilder& GlobalShader(const Ref<Shader>& s) { m_pass.globalShader = s; return *this; }
-        RenderPassBuilder& FilterType(const std::string& t) { m_pass.filterType = t; return *this; }
-        RenderPassBuilder& TargetType(RenderTargetType t) { m_pass.targetType = t; return *this; }
-        RenderPass Build() && { return std::move(m_pass); }
+
+        RenderPassBuilder& ClearFlags(ClearFlags flags) { pass.clearFlags = flags; return *this; }
+        RenderPassBuilder& ClearColor(const Color3F& color) { pass.clearColor = color; return *this; }
+        RenderPassBuilder& ClearDepth(float depth) { pass.clearDepth = depth; return *this; }
+        RenderPassBuilder& DepthTest(bool v) { pass.pipelineState.depthTest = v; return *this; }
+        RenderPassBuilder& DepthWrite(bool v) { pass.pipelineState.depthWrite = v; return *this; }
+        RenderPassBuilder& GlobalShader(const Ref<GpuProgram>& s) { pass.pipelineState.globalShader = s; return *this; }
+        RenderPassBuilder& GlobalShaderSources(const std::map<GpuProgram::Type, std::string>& sources)
+        {
+            pass.globalShaderSources = sources;
+            return *this;
+        }
+        RenderPassBuilder& GlobalShaderName(const std::string& name) { pass.globalShaderName = name; return *this; }
+        RenderPassBuilder& FilterType(const std::string& t) { pass.SetFilterType(t); return *this; }
+        RenderPassBuilder& TargetType(RenderTargetType t) { pass.targetType = t; return *this; }
+        /**
+         * @brief Finalize and build the render pass.
+         * @note If the render pass has global shader sources set, the caller must
+         * ensure that the @c Resolve() function is called before using the render pass.
+         * @return The constructed RenderPass object.
+         * @see RenderPass::Resolve
+         */
+        RenderPass&& Build() { return std::move(pass); }
     };
+
+    // Global predefined render passes
+    extern RenderPass DepthPrepass;
+    extern RenderPass OpaquePass;
+    extern RenderPass AlphaPass;
+    extern RenderPass OverlayPass;
 }

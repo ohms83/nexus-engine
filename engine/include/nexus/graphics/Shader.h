@@ -14,6 +14,7 @@
 
 #include <string>
 #include <string_view>
+#include <map>
 
 NXS_NAMESPACE
 {
@@ -43,10 +44,39 @@ NXS_NAMESPACE
 
         Shader(std::string path, const uint32 id) : Resource(std::move(path), id) {}
 
-        MAYBE_UNUSED bool CompileFromSource(RenderingInterface& renderingInterface,
-            std::string&& vertexShaderSource, std::string&& fragmentShaderSource);
-        MAYBE_UNUSED bool CompileFromFile(RenderingInterface& renderingInterface,
-            const std::string& vertexShaderPath, const std::string& fragmentShaderPath);
+        MAYBE_UNUSED bool CompileFromSource(
+            RenderingInterface& renderingInterface,
+            std::string&& vertexShaderSource,
+            std::string&& fragmentShaderSource,
+            std::string&& geometryShaderSource);
+
+        MAYBE_UNUSED bool CompileFromSource(
+            RenderingInterface& renderingInterface,
+            const std::string& vertexShaderSource,
+            const std::string& fragmentShaderSource,
+            const std::string& geometryShaderSource);
+
+        MAYBE_UNUSED bool CompileFromFile(
+            RenderingInterface& renderingInterface,
+            const std::string& vertexShaderPath,
+            const std::string& fragmentShaderPath,
+            const std::string& geometryShaderPath);
+
+        NODISCARD bool HasShader(GpuProgram::Type shaderType) const
+        {
+            return !GetSource(shaderType).empty();
+        }
+
+        const std::string& GetSource(GpuProgram::Type shaderType) const
+        {
+            if (const auto& itr = m_sources.find(shaderType); itr != m_sources.end())
+            {
+                return itr->second;
+            }
+            static const std::string empty = "";
+            return empty;
+        }
+
         /**
          * @brief Compile the shader from the existing source files. This is usually called after @c Deserialized.
          * 
@@ -85,8 +115,7 @@ NXS_NAMESPACE
         void ExtractUniform(std::string_view source);
 
         Ref<GpuProgram> m_gpuProgram;
-        std::string m_vertexShader;
-        std::string m_fragmentShader;
+        std::map<GpuProgram::Type, std::string> m_sources;
         std::vector<Uniform> m_uniforms;
     };
 }

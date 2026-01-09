@@ -298,5 +298,5 @@ void Material::CreateDefaultShader(Ref<RenderingInterface> renderingInterface)
     fragmentShaderStream << fragmentShader.rdbuf();
 
     m_shader.reset(new Shader("Default", 0));
-    m_shader->CompileFromSource(*renderingInterface, vertexShaderStream.str(), fragmentShaderStream.str());
+    m_shader->CompileFromSource(*renderingInterface, vertexShaderStream.str(), fragmentShaderStream.str(), "");
 }

@@ -12,6 +12,7 @@
 #include "graphics/RenderCommandBatcher.h"
 #include "graphics/RenderCommand.h"
 #include "graphics/RenderGraph.h"
+#include "graphics/RenderPass.h"
 #include "geom/Frustum.h"
 #include "ecs/Ecs.h"
 #include "math/Math.h"
@@ -27,84 +28,12 @@
 
 USING_NAMESPACE_NXS;
 
-// Shader sources
-static const char* s_depthVertexShader = R"(
-#version 330 core
-layout (location = 0) in vec3 aPos;
-
-uniform mat4 _Model;
-uniform mat4 _View;
-uniform mat4 _Projection;
-
-void main()
-{
-    gl_Position = _Projection * _View * _Model * vec4(aPos, 1.0);
-    gl_Position += 0.1;
-}
-)";
-
-const char* s_depthFragmentShader = R"(
-#version 330 core
-void main()
-{
-    // Do nothing. This shader outputs no color (gl_FragColor is not written), 
-    // but the depth value determined by gl_Position is still written to the depth buffer.
-}
-)";
-
 ForwardSceneRenderer::ForwardSceneRenderer(const RenderSystem& renderSystem)
 {
-    Hasher hasher;
-    // Depth shader used by depth-only prepass
-    const auto name = "_DepthShader";
-    Ref<Shader> depthShader = std::make_shared<Shader>(name, hasher.Hash32(name));
-    depthShader->CompileFromSource(*renderSystem.GetRenderInterface(), s_depthVertexShader, s_depthFragmentShader);
-
-    // Default passes
-    // Depth prepass
-    RenderPass depthPass;
-    depthPass.enabled = false; // Temporarily disable depth prepass
-    depthPass.clearFlags = ClearFlags::Depth;
-    depthPass.SetName("DepthPrepass").SetPriority(RENDER_PASS_DEPTH_FILL);
-    depthPass.pipelineState.depthWrite = true;
-    depthPass.pipelineState.depthTest = true;
-    depthPass.SetGlobalShader(depthShader);
-    depthPass.filter = [](const Material& m) { return m.blendMode == BlendMode::None; };
-    RegisterRenderPass(depthPass);
-
-    // Opaque pass
-    RenderPass opaquePass;
-    opaquePass.SetName("Opaque").SetPriority(RENDER_PASS_OPAQUE);
-    opaquePass.clearFlags = ClearFlags::Color | ClearFlags::Depth;
-    opaquePass.clearColor = 0x303030ff;
-    opaquePass.pipelineState.depthWrite = true;
-    opaquePass.pipelineState.depthTest = true;
-    opaquePass.filter = [](const Material& m) { return m.blendMode == BlendMode::None; };
-    RegisterRenderPass(opaquePass);
-
-    // Alpha/translucent pass
-    RenderPass alphaPass;
-    // Temporarily disable alpha pass. There's a bug in the ApplyPipelineState causing issues.
-    alphaPass.enabled = false;
-    alphaPass.clearFlags = ClearFlags::None;
-    alphaPass.SetName("Alpha").SetPriority(RENDER_PASS_ALPHA);
-    alphaPass.pipelineState.depthWrite = false;
-    alphaPass.pipelineState.depthTest = true;
-    alphaPass.filter = [](const Material& m) { return m.blendMode != BlendMode::None; };
-    RegisterRenderPass(alphaPass);
-
-    // Overlay pass (for UI / always-on-top)
-    RenderPass overlayPass;
-    // Temporarily disable overlay pass. There's a bug in the ApplyPipelineState causing issues.
-    overlayPass.enabled = false;
-    overlayPass.clearFlags = ClearFlags::None;
-    overlayPass.SetName("Overlay").SetPriority(RENDER_PASS_OVERLAY);
-    // default pipeline state for overlay, usually draws last
-    overlayPass.filter = [](const Material& m) {
-        // Temporary: no overlay materials yet
-        return false;
-    };
-    RegisterRenderPass(overlayPass);
+    RegisterRenderPass(DepthPrepass);
+    RegisterRenderPass(OpaquePass);
+    RegisterRenderPass(AlphaPass);
+    RegisterRenderPass(OverlayPass);
 }
 
 void ForwardSceneRenderer::Render(RenderSystem& renderSystem, const entt::registry& registry)
@@ -207,10 +136,10 @@ void ForwardSceneRenderer::Render(RenderSystem& renderSystem, const entt::regist
                         if (!material) continue;
                         if (!pass.MatchesMaterial(*material)) continue;
 
-                        Ref<GpuProgram> gpuProgram = pass.globalShader ? pass.globalShader->GetGpuProgram() : cmd.gpuProgram;
+                        Ref<GpuProgram> gpuProgram = pass.pipelineState.globalShader ? pass.pipelineState.globalShader : cmd.gpuProgram;
                         if (gpuProgram != usingProgram)
                         {
-                            if (!pass.globalShader)
+                            if (!pass.pipelineState.globalShader)
                             {
                                 material->Use();
                             }

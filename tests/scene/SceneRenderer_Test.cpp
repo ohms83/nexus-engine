@@ -9,9 +9,9 @@ TEST(SceneRenderer, RegisterRenderPass_SortsByPriority)
 {
     FakeRenderer renderer;
 
-    RenderPass p1; p1.SetName("p1").SetPriority(100);
-    RenderPass p2; p2.SetName("p2").SetPriority(10);
-    RenderPass p3; p3.SetName("p3").SetPriority(50);
+    RenderPass p1 = RenderPassBuilder::Begin("p1", 100).Build();
+    RenderPass p2 = RenderPassBuilder::Begin("p2", 10).Build();
+    RenderPass p3 = RenderPassBuilder::Begin("p3", 50).Build();
 
     renderer.RegisterRenderPass(p1);
     renderer.RegisterRenderPass(p2);

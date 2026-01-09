@@ -5,6 +5,8 @@
 #include "imgui.h"
 #include <glm/gtc/type_ptr.hpp>
 
+#define SHOW_MODEL 1
+
 static const std::vector<std::string> modelPaths = {
     "meshes/apple/3DApple001_SQ-1K-PNG.obj",
     "meshes/armadillo/armadillo.obj",
@@ -42,7 +44,7 @@ public:
     {
         const auto selectedNode = m_sceneGraphWidget->GetSelectedNode();
         m_propertyWindow->SetSceneNode(selectedNode);
-
+#if SHOW_MODEL
         if (m_finishLoading)
         {
             const auto& inputManager = nxs::InputManager::Instance();
@@ -55,14 +57,16 @@ public:
             modelNode->Scale().value = modelScales[selectedModel] * scale;
             return;
         }
-
+#endif
         for (const auto & m_loadedModel : m_loadedModels)
         {
             if (m_loadedModel->status != nxs::IResourceLoader::LoadResult::Status::Ready) return;
         }
 
+#if SHOW_MODEL
         auto modelComp = m_scene->FindNodeWithName("Model")->GetComponent<nxs::ModelComponent>();
         modelComp->model = PTR_CAST<nxs::Model>(m_loadedModels[selectedModel]->resource);
+#endif
         m_finishLoading = true;
     }
 
@@ -99,6 +103,7 @@ public:
 
     void DrawUI() override
     {
+#if SHOW_MODEL
         ImGui::Begin("Model Settings");
         {
             ImGui::SeparatorText("Model");
@@ -131,6 +136,7 @@ public:
             ImGui::Checkbox("Draw Box", &drawBox);
         }
         ImGui::End();
+#endif
 
         auto renderSystem = nxs::Engine::Instance().GetRenderSystem();
         m_propertyWindow->Draw(*renderSystem);
@@ -189,7 +195,7 @@ private:
     void InitScene()
     {
         auto camera = m_scene->EmplaceChild<nxs::Camera>("Camera");
-        camera->Position().value = {0, 5, 5};
+        camera->Position().value = {5, 5, 5};
         camera->LookAt(glm::vec3(0), glm::vec3(0, 1, 0));
 
         for (int i = 0; i < modelPaths.size(); i++)
@@ -198,15 +204,17 @@ private:
             m_loadedModels.emplace_back(LoadModel(i));
         }
 
+#if SHOW_MODEL
         auto node = m_scene->EmplaceChild<nxs::SceneNode3D>("Model");
         node->AddComponent<nxs::ModelComponent>();
         node->Scale().value = modelScales[0];
+#endif
 
         auto groundModel = nxs::Model::CreateFromMesh(
             "Ground Plane",
             nxs::PrimitiveMesh::CreatePlane(
                 "Ground Plane",
-                20, 20,
+                10, 10,
                 GetRenderSystem().GetRenderInterface(),
                 nxs::Engine::Instance().GetMaterialManager()->GetDefaultMaterial()
             )
