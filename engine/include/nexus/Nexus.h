@@ -119,6 +119,7 @@
 #include "scene/component/ModelComponent.h"
 #include "scene/component/SceneNodeComponent.h"
 #include "scene/component/TransformComponent.h"
+#include "scene/renderer/DummySceneRenderer.h"
 #include "scene/renderer/ForwardSceneRenderer.h"
 #include "scene/renderer/SceneRenderer.h"
 #include "scene/system/SceneNodeTransformSystem.h"
