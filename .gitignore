@@ -9,3 +9,7 @@ cmake-build-*
 
 # VS Code
 .vscode/
+
+# Patch files
+*.patch
+*.diff
