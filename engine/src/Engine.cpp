@@ -47,6 +47,7 @@ void Engine::Destroy()
 void Engine::BeginShutdown()
 {
     s_shuttingDown = true;
+    ShutdownModules();
 }
 
 Engine& Engine::Instance()
@@ -72,4 +73,12 @@ void Engine::InitModules()
 
     IComponent::RegisterComponent<ModelComponent>();
     IComponent::RegisterComponent<MeshComponent>();
+
+    // Init Graphics module
+    DepthPrepass.Resolve(*s_engine->GetRenderingInterface());
+}
+
+void Engine::ShutdownModules()
+{
+    DepthPrepass.ReleaseResources();
 }

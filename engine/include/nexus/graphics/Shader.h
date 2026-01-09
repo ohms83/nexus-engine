@@ -111,7 +111,6 @@ NXS_NAMESPACE
         bool HasUniform(const std::string_view name);
 
     private:
-
         void ExtractUniform(std::string_view source);
 
         Ref<GpuProgram> m_gpuProgram;
