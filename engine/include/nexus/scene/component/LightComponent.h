@@ -75,7 +75,7 @@ NXS_NAMESPACE
             properties.AcceptReflector(reflector);
 
             reflector.ChangeCategory("Light");
-            reflector.VisitProperty("Direction", typeid(Color3F), &direction);
+            reflector.VisitProperty("Direction", typeid(glm::vec3), &direction);
         }
 
         LightProperties properties;
