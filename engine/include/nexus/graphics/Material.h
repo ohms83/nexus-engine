@@ -53,11 +53,11 @@ NXS_NAMESPACE
     public:
         explicit Material(std::string path, uint32 resourceId);
 
-        Color3F ambient {Color3F::White};
-        Color3F diffuse {Color3F::White};
-        Color3F specular {Color3F::White};
-        Color3F emissive {Color3F::White};
-        float shininess = 0;
+        Color3F ambient {0.1f, 0.1f, 0.1f};
+        Color3F diffuse {0.8f, 0.8f, 0.8f};
+        Color3F specular {0.3f, 0.3f, 0.3f};
+        Color3F emissive {Color3F::Black};
+        float shininess = 32.f;
         bool wireframe = false;
         bool cull = false;
         bool depthTest = false;
