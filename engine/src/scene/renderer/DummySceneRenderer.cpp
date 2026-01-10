@@ -112,6 +112,7 @@ void DummySceneRenderer::Render(RenderSystem& renderSystem, const entt::registry
                                 if (!gpuProgram->IsBinding()) gpuProgram->Bind();
                             }
 
+                            gpuProgram->SetUniformVector("_CameraPos", cameraPos.value);
                             gpuProgram->SetUniformMatrix("_View", viewMtx, false);
                             gpuProgram->SetUniformMatrix("_Projection", projection, false);
 

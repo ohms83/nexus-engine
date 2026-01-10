@@ -128,6 +128,7 @@ void ForwardSceneRenderer::Render(RenderSystem& renderSystem, const entt::regist
                                 if (!gpuProgram->IsBinding()) gpuProgram->Bind();
                             }
 
+                            gpuProgram->SetUniformVector("_CameraPos", cameraPos.value);
                             gpuProgram->SetUniformMatrix("_View", viewMtx, false);
                             gpuProgram->SetUniformMatrix("_Projection", projection, false);
 
