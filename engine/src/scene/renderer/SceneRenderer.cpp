@@ -82,7 +82,7 @@ void SceneRenderer::SetDirectLightParams(Ref<GpuProgram> gpuProgram, const entt:
         const auto uniformLocationDirection = std::format("{}.direction", uniformLocation);
 
         gpuProgram->SetUniformVector(uniformLocationColor, light.properties.color);
-        gpuProgram->SetUniformVector(uniformLocationDirection, light.direction);
+        gpuProgram->SetUniformVector(uniformLocationDirection, glm::normalize(light.direction));
         gpuProgram->SetUniformFloat(uniformLocationDiffuse, light.properties.diffuseIntensity);
         gpuProgram->SetUniformFloat(uniformLocationSpecular, light.properties.specularIntensity);
         gpuProgram->SetUniformFloat(uniformLocationCutoff, light.properties.cutoffRange);
