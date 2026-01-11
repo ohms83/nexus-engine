@@ -62,16 +62,15 @@ vec3 CalcAmbientLight()
     return _AmbientLight * _Material.ambient * ao;
 }
 
-vec3 CalcSpecularColor(vec3 specularLight, vec3 lightDir, vec3 normal)
+// New CalcSpecularColor used in all shaders
+vec3 CalcSpecularColor(vec3 specularColor, vec3 lightDir, vec3 normal, vec3 viewDir)
 {
-    vec3 viewDir = normalize(_CameraPos - FragPos);
-    vec3 reflectDir = reflect(-lightDir, normal);
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), _Material.shininess);
-    vec3 specular = specularLight * (spec * _Material.specular);
-    return max(specular, 0);
+    vec3 halfwayDir = normalize(lightDir + viewDir);
+    float spec = pow(max(dot(normal, halfwayDir), 0.0), _Material.shininess);
+    return max(vec3(0.0), specularColor * _Material.specular * spec);
 }
 
-vec3 CalcDirLight(DirectLight light, vec3 normal)
+vec3 CalcDirectLight(DirectLight light, vec3 normal, vec3 viewDir)
 {
     vec3 lightDir = normalize(-light.direction); // Direction TO the light source
 
@@ -82,49 +81,62 @@ vec3 CalcDirLight(DirectLight light, vec3 normal)
 
     // Specular color
     vec3 specularLight = light.properties.color * light.properties.specularIntensity;
-    vec3 specular = CalcSpecularColor(specularLight, lightDir, normal);
+    vec3 specular = CalcSpecularColor(specularLight, lightDir, normal, viewDir);
     return diffuse + specular;
 }
 
-vec3 CalcPointLight(PointLight light, vec3 fragPos, vec3 normal)
+vec3 CalcPointLight(PointLight light, vec3 fragPos, vec3 normal, vec3 viewDir)
 {
     vec3 lightDir = light.position - fragPos;
-    float dist = length(light.position - fragPos);
-    if (dist >= light.cutoff) return vec3(0);
+    float dist = length(lightDir);
+    float window = clamp(1.0 - pow(dist / light.cutoff, 4.0), 0.0, 1.0);
 
     lightDir = normalize(lightDir);
+    float attenuation = (window * window) / (light.constant + (light.linear * dist) + (light.quadratic * dist * dist));
 
-    // Attenuation
-    float attenuation = 1 / (light.constant + (light.linear * dist) + (light.quadratic * dist * dist));
-    
     // Diffuse color
     float diff = max(dot(normal, lightDir), 0.0);
     vec3 diffuseLight = light.properties.color * light.properties.diffuseIntensity;
     vec3 diffuse = diffuseLight * _Material.diffuse * diff * attenuation;
-    
+
     // Specular color
     vec3 specularLight = light.properties.color * light.properties.specularIntensity;
-    vec3 specular = CalcSpecularColor(specularLight, lightDir, normal);
+    vec3 specular = CalcSpecularColor(specularLight, lightDir, normal, viewDir) * attenuation;
     return diffuse + specular;
 }
 
 void main()
 {
+    // 1. Prepare standard vectors
     vec3 N = normalize(Normal);
-    vec4 albedo = texture(_DiffuseMap, TexCoord0);
-    vec3 ambientColor = CalcAmbientLight();
+    vec3 V = normalize(_CameraPos - FragPos);
+    
+    // 2. Sample textures (if applicable)
+    // If this is a textured shader, sample albedo now.
+    // If it's a basic shader, albedo is effectively vec3(1.0).
+    vec3 albedo = texture(_DiffuseMap, TexCoord0).rgb; 
 
-    vec3 directColor = vec3(0);
+    // 3. Initialize result with Ambient (The Baseline)
+    // We multiply ambient by albedo so that the object's color shows in shadows.
+    vec3 ambientBase = CalcAmbientLight() * albedo;
+    vec3 lightingAccumulator = vec3(0.0);
+
+    // 4. Accumulate Directional Lights
     for (int i = 0; i < _NumDirectLight; ++i)
     {
-        directColor += CalcDirLight(_DirectLights[i], N);
+        lightingAccumulator += CalcDirectLight(_DirectLights[i], N, V);
     }
 
-    vec3 pointColor = vec3(0);
+    // 5. Accumulate Point Lights
     for (int i = 0; i < _NumPointLight; ++i)
     {
-        pointColor += CalcPointLight(_PointLights[i], FragPos, N);
+        lightingAccumulator += CalcPointLight(_PointLights[i], FragPos, N, V);
     }
 
-    FragColor = albedo * vec4((ambientColor + directColor + pointColor), 1);
+    // 6. Final Composition
+    // Lighting is multiplied by albedo, then added to the ambient base.
+    vec3 finalColor = ambientBase + (lightingAccumulator * albedo);
+
+    // 7. Output with full opacity
+    FragColor = vec4(finalColor, 1.0);
 }

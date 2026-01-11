@@ -14,10 +14,12 @@ uniform mat4 _Projection;
 void main()
 {
     vec4 worldPos = _Model * vec4(aPos, 1.0);
-    mat4 normalMatrix = transpose(inverse(_Model));
     FragPos = vec3(worldPos);
     TexCoord0 = aTexCoord0;
-    Normal = normalize(vec3(normalMatrix * vec4(aNormal, 1.0)));
+
+    // Use mat3 to ignore translation and handle non-uniform scaling correctly
+    mat3 normalMatrix = mat3(transpose(inverse(_Model)));
+    Normal = normalize(normalMatrix * aNormal);
 
     gl_Position = _Projection * _View * worldPos;
 }

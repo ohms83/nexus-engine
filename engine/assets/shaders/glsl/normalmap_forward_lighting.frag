@@ -60,78 +60,100 @@ uniform float _AOFactor;
 vec3 CalcAmbientLight()
 {
     float ao = texture(_OcclusionMap, TexCoord0).r;
-    ao = mix(1.0, ao, _AOFactor);
+    ao = max(0.1, mix(1.0, ao, _AOFactor));
     return _AmbientLight * _Material.ambient * ao;
 }
 
-vec3 CalcSpecularColor(vec3 specularLight, vec3 lightDir, vec3 normal)
+vec3 CalcSpecularColor(vec3 specularColor, vec3 lightDir, vec3 normal, vec3 viewDir)
 {
-    vec3 viewDir = normalize(_CameraPos - FragPos);
-    vec3 reflectDir = reflect(-lightDir, normal);
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), _Material.shininess);
-    vec3 specular = specularLight * (spec * _Material.specular);
-    return max(specular, 0);
+    // 1. Calculate the Halfway Vector (Blinn-Phong)
+    vec3 halfwayDir = normalize(lightDir + viewDir);
+
+    // 2. Calculate the Specular Factor
+    float spec = pow(max(dot(normal, halfwayDir), 0.0), _Material.shininess);
+
+    // 3. Combine with Material properties and Light color
+    return max(vec3(0.0), specularColor * _Material.specular * spec);
 }
 
-vec3 CalcDirLight(DirectLight light, vec3 normal)
+vec3 CalcDirectLight(DirectLight light, vec3 normal, vec3 viewDir)
 {
-    vec3 lightDir = normalize(-light.direction); // Direction TO the light source
+    // Ensure the direction is normalized (Incase CPU normalization failed)
+    vec3 lightDir = normalize(-light.direction);
 
-    // Diffuse color
-    float diff = max(dot(normal, lightDir), 0.0);
+    float dotNL = dot(normal, lightDir);
+    float diff = max(dotNL, 0.0);
+
     vec3 diffuseLight = light.properties.color * light.properties.diffuseIntensity;
     vec3 diffuse = diffuseLight * _Material.diffuse * diff;
 
     // Specular color
     vec3 specularLight = light.properties.color * light.properties.specularIntensity;
-    vec3 specular = CalcSpecularColor(specularLight, lightDir, normal);
-    return diffuse + specular;
+    vec3 specular = CalcSpecularColor(specularLight, lightDir, normal, viewDir);
+
+    return max(vec3(0.0), diffuse + specular);
 }
 
-vec3 CalcPointLight(PointLight light, vec3 fragPos, vec3 normal)
+vec3 CalcPointLight(PointLight light, vec3 fragPos, vec3 normal, vec3 viewDir)
 {
     vec3 lightDir = light.position - fragPos;
-    float dist = length(light.position - fragPos);
-    if (dist >= light.cutoff) return vec3(0);
+    float dist = length(lightDir);
+    
+    // Smooth windowing
+    float window = clamp(1.0 - pow(dist / light.cutoff, 4.0), 0.0, 1.0);
+    window = window * window;
 
+    float attenuation = window / (light.constant + (light.linear * dist) + (light.quadratic * dist * dist));
+
+    // INSTEAD OF RETURN: Use attenuation to multiply everything
+    // If attenuation is 0, the whole result becomes 0, which is safe to add in main.
+    
     lightDir = normalize(lightDir);
-
-    // Attenuation
-    float attenuation = 1 / (light.constant + (light.linear * dist) + (light.quadratic * dist * dist));
-    
-    // Diffuse color
     float diff = max(dot(normal, lightDir), 0.0);
-    vec3 diffuseLight = light.properties.color * light.properties.diffuseIntensity;
-    vec3 diffuse = diffuseLight * _Material.diffuse * diff * attenuation;
     
-    // Specular color
-    vec3 specularLight = light.properties.color * light.properties.specularIntensity;
-    vec3 specular = CalcSpecularColor(specularLight, lightDir, normal);
-    return diffuse + specular;
+    vec3 diffuse = light.properties.color * light.properties.diffuseIntensity * diff;
+    vec3 specular = CalcSpecularColor(light.properties.color * light.properties.specularIntensity, lightDir, normal, viewDir);
+
+    return (diffuse + specular) * attenuation;
 }
 
 void main()
 {
+    // 1. Prepare standard vectors
     vec3 normal = texture(_NormalMap, TexCoord0).rgb;
     // The texture stores normal vectors as colors (0 to 1). We convert them
     // back to the standard vector range (-1 to 1).
-    normal = normalize((normal * 2) - 1);
+    normal = normalize(normal * 2.0 - 1.0);
     normal = normalize(TBN * normal);
 
-    vec4 albedo = texture(_DiffuseMap, TexCoord0);
-    vec3 ambientColor = CalcAmbientLight();
+    vec3 V = normalize(_CameraPos - FragPos);
+    
+    // 2. Sample textures (if applicable)
+    // If this is a textured shader, sample albedo now.
+    // If it's a basic shader, albedo is effectively vec3(1.0).
+    vec3 albedo = texture(_DiffuseMap, TexCoord0).rgb; 
 
-    vec3 directColor = vec3(0);
+    // 3. Initialize result with Ambient (The Baseline)
+    // We multiply ambient by albedo so that the object's color shows in shadows.
+    vec3 ambientBase = CalcAmbientLight() * albedo;
+    vec3 lightingAccumulator = vec3(0.0);
+
+    // 4. Accumulate Directional Lights
     for (int i = 0; i < _NumDirectLight; ++i)
     {
-        directColor += CalcDirLight(_DirectLights[i], normal);
+        lightingAccumulator += CalcDirectLight(_DirectLights[i], normal, V);
     }
 
-    vec3 pointColor = vec3(0);
+    // 5. Accumulate Point Lights
     for (int i = 0; i < _NumPointLight; ++i)
     {
-        pointColor += CalcPointLight(_PointLights[i], FragPos, normal);
+        lightingAccumulator += CalcPointLight(_PointLights[i], FragPos, normal, V);
     }
 
-    FragColor = albedo * vec4((ambientColor + directColor + pointColor), 1);
+    // 6. Final Composition
+    // Lighting is multiplied by albedo, then added to the ambient base.
+    vec3 finalColor = ambientBase + (lightingAccumulator * albedo);
+
+    // 7. Output with full opacity
+    FragColor = vec4(finalColor, 1.0);
 }

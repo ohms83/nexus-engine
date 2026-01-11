@@ -71,26 +71,20 @@ vec3 CalcSpecularColor(vec3 specularColor, vec3 lightDir, vec3 normal, vec3 view
 
 vec3 CalcDirectLight(DirectLight light, vec3 normal, vec3 viewDir)
 {
-    // 1. Ensure the direction is normalized (Incase CPU normalization failed)
+    // Ensure the direction is normalized (Incase CPU normalization failed)
     vec3 lightDir = normalize(-light.direction);
 
-    // 2. Softened Diffuse (The "Terminator" Fix)
-    // Instead of a hard max(dot, 0), we use a slight wrap factor 
-    // to prevent the light from cutting off instantly at 90 degrees.
     float dotNL = dot(normal, lightDir);
     float diff = max(dotNL, 0.0);
-    
-    // Optional: If you want it even smoother, use a 'Soft' clamp:
-    // float diff = smoothstep(-0.05, 0.1, dotNL);
 
     vec3 diffuseLight = light.properties.color * light.properties.diffuseIntensity;
     vec3 diffuse = diffuseLight * _Material.diffuse * diff;
 
-    // 3. Specular color
+    // Specular color
     vec3 specularLight = light.properties.color * light.properties.specularIntensity;
     vec3 specular = CalcSpecularColor(specularLight, lightDir, normal, viewDir);
 
-    return diffuse + specular;
+    return max(vec3(0.0), diffuse + specular);
 }
 
 vec3 CalcPointLight(PointLight light, vec3 fragPos, vec3 normal, vec3 viewDir)

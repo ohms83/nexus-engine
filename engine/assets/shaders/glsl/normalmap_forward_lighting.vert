@@ -20,8 +20,11 @@ void main()
     TexCoord0 = aTexCoord0;
 
     // Transform TBN vectors to the same space as our lighting vectors (world space)
-    vec3 T = normalize(vec3(_Model * vec4(aTangent, 0.0)));
-    vec3 N = normalize(vec3(_Model * vec4(aNormal, 0.0)));
+    vec3 T = normalize(mat3(_Model) * aTangent);
+    vec3 N = normalize(mat3(_Model) * aNormal);
+
+    // Re-orthogonalize T with respect to N (Gram-Schmidt process)
+    T = normalize(T - dot(T, N) * N);
     // Recalculate Bitangent to ensure it's orthonormal
     vec3 B = cross(N, T);
 
