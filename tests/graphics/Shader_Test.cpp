@@ -62,48 +62,7 @@ TEST(ShaderTest, CompileExtractsUniforms)
 
 TEST(ShaderTest, CompileFailsWithBadGpuProgram)
 {
-    struct BadGpuProgram : public GpuProgram
-    {
-        GpuProgram& BeginCompile() override { return *this; }
-        GpuProgram& AddSource(const std::string& source, Type shaderType) override { return *this; }
-        void Compile() override {}
-        void Bind() override {}
-        void Unbind() override {}
-        bool IsBinding() const override { return false; }
-        bool SetUniformInt(const std::string&, int32_t) override { return true; }
-        bool SetUniformFloat(const std::string&, float) override { return true; }
-        bool SetUniformVector(const std::string&, const glm::vec2&) override { return true; }
-        bool SetUniformVector(const std::string&, const glm::vec3&) override { return true; }
-        bool SetUniformVector(const std::string&, const glm::vec4&) override { return true; }
-        bool SetUniformMatrix(const std::string&, const glm::mat3&, bool) override { return true; }
-        bool SetUniformMatrix(const std::string&, const glm::mat4&, bool) override { return true; }
-        bool SetUniformTexture2D(const std::string&, Ref<const TextureProxy>, int32_t) override { return true; }
-    private:
-        uint32_t Alloc() override { return 0; }
-        void Release() override {}
-        int32_t FindUniform_Internal(const std::string&) const override { return 0; }
-    };
-
-    struct BadRendering : public RenderingInterface
-    {
-        GpuProgram* CreateGpuProgram() const override { return new BadGpuProgram(); }
-        void ClearColor(const Color4F&) override {}
-        void ClearDepth(float) override {}
-        void ClearBuffer(const Color4F&, float) override {}
-        void SwapBuffer() override {}
-        void SetViewport(int32 x, int32 y, int32 w, int32 h) override {}
-        VertexBuffer* CreateVertexBuffer() const override { return nullptr; }
-        IndexBuffer* CreateIndexBuffer() const override { return nullptr; }
-        TextureProxy* CreateTexture() const override { return nullptr; }
-        void OnResize(uint32_t pixel_w, uint32_t pixel_h) override {}
-        void DrawIndexed(const Ref<IndexBuffer> indexBuffer) override {}
-        void DrawIndexedInstanced(const Ref<IndexBuffer> indexBuffer, uint32 instanceCount) override {}
-        void SetColorMask(const glm::bvec4& mask) override {}
-        void SetDepthMask(bool mask) override {}
-        void SetDepthFunction(DepthFunction depthFunction) override {}
-        void SetLineWidth(float width) override {}
-        void EnableDrawBuffer(DrawBuffer buffer) override {}
-    } bad;
+    BadRendering bad;
 
     Shader s("shaders/bad", 12);
     const std::string vert = R"(
@@ -192,16 +151,105 @@ TEST(ShaderTest, UniformParsingEdgeCases)
     Shader s("shaders/edge", 24);
 
     const std::string vert = R"(
-        uniform float a, b; // multiple declarators on one line - should be ignored
-        uniform    mat4   Model ; // extra spaces
+        uniform float a, b, c; // multiple declarators on one line - this should be handled
+        uniform vec3 d,e , f; // various spaces
+        uniform vec4 g,h;uniform vec2 i; // no line breaks
+        uniform vec3 j /* inline comment */, k; // inline comment should be ignored
+        uniform    mat4   _Model ; // extra spaces
         uniform unknownType x; // unknown type should be ignored
         void main(){}
     )";
 
     s.CompileFromSource(fake, vert, "void main(){}", "");
 
-    EXPECT_TRUE(s.HasUniform("Model"));
-    EXPECT_FALSE(s.HasUniform("a"));
-    EXPECT_FALSE(s.HasUniform("b"));
+    EXPECT_TRUE(s.HasUniformType(Shader::Uniform::Type::Mat4));
+    EXPECT_TRUE(s.HasUniform("_Model"));
+
+    EXPECT_TRUE(s.HasUniform("a"));
+    EXPECT_TRUE(s.HasUniform("b"));
+    EXPECT_TRUE(s.HasUniform("c"));
+    EXPECT_TRUE(s.HasUniform("d"));
+    EXPECT_TRUE(s.HasUniform("e"));
+    EXPECT_TRUE(s.HasUniform("f"));
+    EXPECT_TRUE(s.HasUniform("g"));
+    EXPECT_TRUE(s.HasUniform("h"));
+    EXPECT_TRUE(s.HasUniform("i"));
+    EXPECT_TRUE(s.HasUniform("j"));
+    EXPECT_TRUE(s.HasUniform("k"));
+
     EXPECT_FALSE(s.HasUniform("x"));
+    // Check whether the parser didn't mistakenly include parts of initializers/comments
+    EXPECT_FALSE(s.HasUniform("vec3(0.0)"));
+    EXPECT_FALSE(s.HasUniform("1.0"));
+    EXPECT_FALSE(s.HasUniform("/* inline comment */"));
+}
+
+class ShaderGeneratorTest : public ::testing::Test {
+protected:
+    void SetUp() override {
+        if (std::filesystem::exists(tempDir)) {
+            std::filesystem::remove_all(tempDir);
+        }
+        std::filesystem::create_directory(tempDir);
+        std::filesystem::current_path(tempDir);
+    }
+
+    void TearDown() override {
+    }
+
+    void CreateFile(const std::string& path, const std::string& content) {
+        std::ofstream ofs((tempDir / path).string());
+        ofs << content;
+        ofs.close();
+    }
+
+    std::filesystem::path tempDir = std::filesystem::temp_directory_path() / "test_shaders";
+};
+
+TEST_F(ShaderGeneratorTest, BasicVertexFragmentGeneration) {
+    CreateFile("basic.shader", 
+        "@glsl_version 450 core\n"
+        "@section vertex\n"
+        "layout(location = 0) in vec3 aPos;\n"
+        "@endsection\n"
+        "@section fragment\n"
+        "out vec4 FragColor;\n"
+        "@endsection");
+
+    std::string vs, fs, gs;
+    bool success = ShaderGenerator::GenerateShaderSource("test_shaders/basic.shader", vs, fs, gs);
+
+    EXPECT_TRUE(success);
+    EXPECT_TRUE(vs.find("#version 450 core") != std::string::npos);
+    EXPECT_TRUE(vs.find("aPos") != std::string::npos);
+    EXPECT_TRUE(fs.find("FragColor") != std::string::npos);
+    EXPECT_EQ(gs, "");
+}
+
+TEST_F(ShaderGeneratorTest, HandlesNestedIncludes) {
+    CreateFile("consts.glsl", "#define PI 3.14");
+    CreateFile("math.glsl", "@include \"consts.glsl\"\nfloat getPi() { return PI; }");
+    CreateFile("main.shader", 
+        "@glsl_version 330\n"
+        "@section vertex\n"
+        "@include \"math.glsl\"\n"
+        "@endsection");
+
+    std::string vs, fs, gs;
+    ShaderGenerator::GenerateShaderSource("test_shaders/main.shader", vs, fs, gs);
+
+    EXPECT_TRUE(vs.find("#define PI 3.14") != std::string::npos);
+    EXPECT_TRUE(vs.find("float getPi()") != std::string::npos);
+}
+
+TEST_F(ShaderGeneratorTest, FailsIfNoVersionSpecified) {
+    CreateFile("invalid.shader", 
+        "@section vertex\n"
+        "void main() {}\n"
+        "@endsection");
+
+    std::string vs, fs, gs;
+    bool success = ShaderGenerator::GenerateShaderSource("test_shaders/invalid.shader", vs, fs, gs);
+
+    EXPECT_FALSE(success);
 }

@@ -25,6 +25,7 @@ NXS_NAMESPACE
         {
             enum class Type
             {
+                Unknown = -1,
                 Int,
                 Float,
                 Vec2i,
@@ -110,11 +111,44 @@ NXS_NAMESPACE
         bool HasUniformType(Uniform::Type type);
         bool HasUniform(const std::string_view name);
 
+        /**
+         * @brief Parses a uniform type string into a Uniform::Type enum.
+         * 
+         * @param typeStr The string representation of the uniform type.
+         * @return Uniform::Type The parsed uniform type.
+         */
+        static Uniform::Type ParseUniformType(const std::string& typeStr);
+        /**
+         * @brief Converts the uniform type enum to its string representation.
+         * 
+         * @param type The uniform type enum.
+         * @return std::string_view The string representation of the uniform type.
+         */
+        static std::string_view UniformTypeToString(Uniform::Type type);
+
     private:
         void ExtractUniform(std::string_view source);
 
         Ref<GpuProgram> m_gpuProgram;
         std::map<GpuProgram::Type, std::string> m_sources;
         std::vector<Uniform> m_uniforms;
+    };
+
+    /**
+     * @brief A utility class for generating shader source code from the engine's .shader custom format.
+     */
+    class ShaderGenerator
+    {
+    public:
+        static bool GenerateShaderSource(
+            const std::string& shaderFilePath,
+            std::string& outVertexShader,
+            std::string& outFragmentShader,
+            std::string& outGeometryShader);
+
+    private:
+        static bool ParseShaderFile(
+            const std::string& shaderFilePath,
+            std::map<std::string, std::string>& outSections);
     };
 }

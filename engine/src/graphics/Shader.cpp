@@ -9,6 +9,8 @@
 #include <fstream>
 #include <string_view>
 #include <ranges>
+#include <filesystem>
+#include <set>
 
 USING_NAMESPACE_NXS;
 
@@ -36,6 +38,7 @@ bool Shader::CompileFromSource(
     ExtractUniform(vertexShaderSource);
     ExtractUniform(fragmentShaderSource);
     ExtractUniform(geometryShaderSource);
+    return true;
 }
 
 bool Shader::CompileFromSource(
@@ -60,6 +63,7 @@ bool Shader::CompileFromSource(
     ExtractUniform(vertexShaderSource);
     ExtractUniform(fragmentShaderSource);
     ExtractUniform(geometryShaderSource);
+    return true;
 }
 
 bool Shader::CompileFromFile(
@@ -139,31 +143,216 @@ bool Shader::HasUniform(const std::string_view name)
 
 void Shader::ExtractUniform(std::string_view source)
 {
-    for (const auto line : StrUtil::Split(source, "\n"))
+    auto lines = StrUtil::Split(source, "\n;");
+    for (const auto& line : lines)
     {
-        bool foundUniform = false;
-        Uniform uniform {};
-        const auto tokens = StrUtil::Split(line, " \t;");
+        auto copyLine = line;
+        // Remove single-line comments
+        const auto commentPos = copyLine.find("//");
+        if (commentPos != std::string::npos)
+        {
+            copyLine = copyLine.substr(0, commentPos);
+        }
 
-        if (tokens.size() != 3) continue;
+        // Remove inline block comments
+        auto startBlockComment = copyLine.find("/*");
+        while (startBlockComment != std::string::npos)
+        {
+            auto endBlockComment = copyLine.find("*/", startBlockComment);
+            if (endBlockComment != std::string::npos)
+            {
+                copyLine.replace(startBlockComment, endBlockComment - startBlockComment + 2, "");
+            }
+            startBlockComment = copyLine.find("/*");
+        }
+
+        auto tokens = StrUtil::Split(StrUtil::Trim(copyLine), ", \t");
+        if (tokens.size() < 3) continue;
         if (tokens[0] != "uniform") continue;
 
-        uniform.name = tokens[2];
+        const auto type = ParseUniformType(tokens[1]);
+        if (type == Uniform::Type::Unknown) continue;
 
-        const auto& type = tokens[1];
-        if (type == "int") uniform.type = Uniform::Type::Int;
-        else if (type == "float") uniform.type = Uniform::Type::Float;
-        else if (type == "vec2") uniform.type = Uniform::Type::Vec2;
-        else if (type == "vec3") uniform.type = Uniform::Type::Vec3;
-        else if (type == "vec4") uniform.type = Uniform::Type::Vec4;
-        else if (type == "ivec2") uniform.type = Uniform::Type::Vec2i;
-        else if (type == "ivec3") uniform.type = Uniform::Type::Vec3i;
-        else if (type == "ivec4") uniform.type = Uniform::Type::Vec4i;
-        else if (type == "mat3") uniform.type = Uniform::Type::Mat3;
-        else if (type == "mat4") uniform.type = Uniform::Type::Mat4;
-        else if (type == "sampler2D") uniform.type = Uniform::Type::Texture2D;
-        else { LOG_WARNING(LogShader, std::format("Unknown type: {}", type)); continue; }
+        // Handle multiple uniform declarations in a single line.
+        std::vector<std::string> names(tokens.begin() + 2, tokens.end());
+        for (const auto& name : names)
+        {
+            auto uniformName = name;
+            // Remove inline array size if any, e.g., "u_Lights[10]" -> "u_Lights"
+            const auto bracketPos = name.find('[');
+            if (bracketPos != std::string::npos)
+            {
+                uniformName = name.substr(0, bracketPos);
+            }
+            // Remove inline block comments if any, e.g., "u_Color /* color uniform */" -> "u_Color"
+            const auto commentPos = uniformName.find("/*");
+            if (commentPos != std::string::npos)
+            {
+                uniformName = uniformName.substr(0, commentPos);
+            }
 
-        m_uniforms.emplace_back(std::move(uniform));
+            uniformName = StrUtil::Trim(uniformName);
+            if (uniformName.empty()) continue;
+
+            m_uniforms.emplace_back(Shader::Uniform { uniformName, type });
+        }
     }
+}
+
+Shader::Uniform::Type Shader::ParseUniformType(const std::string &typeStr)
+{
+    if (typeStr == "int") return Uniform::Type::Int;
+    if (typeStr == "float") return Uniform::Type::Float;
+    if (typeStr == "vec2") return Uniform::Type::Vec2;
+    if (typeStr == "vec3") return Uniform::Type::Vec3;
+    if (typeStr == "vec4") return Uniform::Type::Vec4;
+    if (typeStr == "ivec2") return Uniform::Type::Vec2i;
+    if (typeStr == "ivec3") return Uniform::Type::Vec3i;
+    if (typeStr == "ivec4") return Uniform::Type::Vec4i;
+    if (typeStr == "mat3") return Uniform::Type::Mat3;
+    if (typeStr == "mat4") return Uniform::Type::Mat4;
+    if (typeStr == "sampler2D") return Uniform::Type::Texture2D;
+    return Uniform::Type::Unknown;
+}
+
+std::string_view Shader::UniformTypeToString(Shader::Uniform::Type type)
+{
+    switch (type)
+    {
+        case Uniform::Type::Int: return "int";
+        case Uniform::Type::Float: return "float";
+        case Uniform::Type::Vec2: return "vec2";
+        case Uniform::Type::Vec3: return "vec3";
+        case Uniform::Type::Vec4: return "vec4";
+        case Uniform::Type::Vec2i: return "ivec2";
+        case Uniform::Type::Vec3i: return "ivec3";
+        case Uniform::Type::Vec4i: return "ivec4";
+        case Uniform::Type::Mat3: return "mat3";
+        case Uniform::Type::Mat4: return "mat4";
+        case Uniform::Type::Texture2D: return "sampler2D";
+        default: LOG_WARNING(LogShader, std::format("Unknown uniform type: {}", INT_CAST(type))); return "";
+    }
+}
+
+bool ShaderGenerator::GenerateShaderSource(const std::string &shaderFilePath, std::string &outVertexShader, std::string &outFragmentShader, std::string &outGeometryShader)
+{
+    auto shaderSources = std::map<std::string, std::string> {
+        {"vertex", ""},
+        {"fragment", ""},
+        {"geometry", ""}
+    };
+    bool success = ParseShaderFile(shaderFilePath, shaderSources);
+
+    outVertexShader = std::move(shaderSources["vertex"]);
+    outFragmentShader = std::move(shaderSources["fragment"]);
+    outGeometryShader = std::move(shaderSources["geometry"]);
+
+    return success;
+}
+
+static std::string ProcessIncludes(const std::string& source, const std::filesystem::path& currentDir, std::set<std::filesystem::path>& includedFiles)
+{
+    std::stringstream output;
+    std::istringstream stream(source);
+    std::string line;
+
+    while (std::getline(stream, line))
+    {
+        if (StrUtil::Trim(line).rfind("@include", 0) == 0)
+        {
+            auto includeSubstr = StrUtil::Trim(line.substr(8)); // Get what's after @include
+            auto pathStart = includeSubstr.find('\"');
+            auto pathEnd = includeSubstr.rfind('\"');
+
+            if (pathStart == std::string::npos || pathEnd == std::string::npos || pathStart == pathEnd)
+            {
+                LOG_WARNING(LogShader, std::format("Malformed include directive: {}", line));
+                output << line << '\n';
+                continue;
+            }
+
+            auto includePathStr = includeSubstr.substr(pathStart + 1, pathEnd - pathStart - 1);
+            auto includeFilePath = std::filesystem::absolute(currentDir / includePathStr);
+
+            if (includedFiles.count(includeFilePath))
+            {
+                continue; // Skip already included file
+            }
+
+            std::fstream includeFile(includeFilePath);
+            if (!includeFile.is_open())
+            {
+                LOG_ERROR(LogShader, std::format("Cannot open include file: {}. Base directory: {}", includeFilePath.string(), currentDir.string()));
+                output << line << '\n'; // Keep the problematic include for debugging
+                continue;
+            }
+
+            includedFiles.insert(includeFilePath);
+
+            std::stringstream includeSourceStream;
+            includeSourceStream << includeFile.rdbuf();
+            includeFile.close();
+
+            output << ProcessIncludes(includeSourceStream.str(), includeFilePath.parent_path(), includedFiles);
+        }
+        else
+        {
+            output << line << '\n';
+        }
+    }
+    return output.str();
+}
+
+bool ShaderGenerator::ParseShaderFile(const std::string& shaderFilePath, std::map<std::string, std::string>& outSections)
+{
+    std::fstream shaderFile(shaderFilePath);
+    if (!shaderFile.is_open())
+    {
+        LOG_ERROR(LogShader, std::format("Error loading shader file: {}", shaderFilePath));
+        return false;
+    }
+
+    std::filesystem::path fsPath(shaderFilePath);
+    auto shaderDir = fsPath.parent_path();
+
+    std::string line;
+    std::string glslVersion;
+
+    while (std::getline(shaderFile, line))
+    {
+        line = StrUtil::Trim(line);
+        if (line.rfind("@glsl_version", 0) == 0)
+        {
+            glslVersion = StrUtil::Trim(line.substr(13));
+        }
+        else if (line.rfind("@section", 0) == 0)
+        {
+            if (glslVersion.empty())
+            {
+                LOG_ERROR(LogShader, std::format("GLSL version not specified before sections in shader file: {}", shaderFilePath));
+                return false;
+            }
+
+            const auto sectionName = StrUtil::Trim(line.substr(8));
+            std::stringstream sectionSource;
+
+            // Prepend GLSL version
+            sectionSource << "#version " << glslVersion << "\n\n";
+            // Read until @endsection
+            while (std::getline(shaderFile, line))
+            {
+                if (StrUtil::Trim(line).rfind("@endsection", 0) == 0)
+                {
+                    break;
+                }
+                sectionSource << line << "\n";
+            }
+
+            std::set<std::filesystem::path> includedFiles;
+            includedFiles.insert(std::filesystem::absolute(fsPath)); // Add the root file itself
+            outSections[sectionName] = std::move(ProcessIncludes(sectionSource.str(), shaderDir, includedFiles));
+        }
+    }
+
+    return true;
 }
