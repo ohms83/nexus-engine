@@ -187,20 +187,35 @@ TEST(ShaderTest, UniformParsingEdgeCases)
 class ShaderGeneratorTest : public ::testing::Test {
 protected:
     void SetUp() override {
-        if (std::filesystem::exists(tempDir)) {
-            std::filesystem::remove_all(tempDir);
+        try {
+            if (!std::filesystem::exists(tempDir)) {
+                std::filesystem::create_directory(tempDir);
+            }
+        } catch (const std::filesystem::filesystem_error& ex) {
+            std::cerr << "Filesystem error: " << ex.what() << std::endl;
+            return;
         }
-        std::filesystem::create_directory(tempDir);
         std::filesystem::current_path(tempDir);
     }
 
     void TearDown() override {
+        try {
+            if (std::filesystem::exists(tempDir)) {
+                std::filesystem::remove_all(tempDir);
+            }
+        } catch (const std::filesystem::filesystem_error& ex) {
+            std::cerr << "Filesystem error during teardown: " << ex.what() << std::endl;
+        }
     }
 
     void CreateFile(const std::string& path, const std::string& content) {
         std::ofstream ofs((tempDir / path).string());
         ofs << content;
         ofs.close();
+    }
+
+    std::string GetFilePath(const std::string& filename) {
+        return (tempDir / filename).string();
     }
 
     std::filesystem::path tempDir = std::filesystem::temp_directory_path() / "test_shaders";
@@ -217,7 +232,8 @@ TEST_F(ShaderGeneratorTest, BasicVertexFragmentGeneration) {
         "@endsection");
 
     std::string vs, fs, gs;
-    bool success = ShaderGenerator::GenerateShaderSource("test_shaders/basic.shader", vs, fs, gs);
+    const auto path = GetFilePath("basic.shader");
+    bool success = ShaderGenerator::GenerateShaderSource(path, vs, fs, gs);
 
     EXPECT_TRUE(success);
     EXPECT_TRUE(vs.find("#version 450 core") != std::string::npos);
@@ -236,8 +252,10 @@ TEST_F(ShaderGeneratorTest, HandlesNestedIncludes) {
         "@endsection");
 
     std::string vs, fs, gs;
-    ShaderGenerator::GenerateShaderSource("test_shaders/main.shader", vs, fs, gs);
+    const auto path = GetFilePath("main.shader");
+    bool success = ShaderGenerator::GenerateShaderSource(path, vs, fs, gs);
 
+    EXPECT_TRUE(success);
     EXPECT_TRUE(vs.find("#define PI 3.14") != std::string::npos);
     EXPECT_TRUE(vs.find("float getPi()") != std::string::npos);
 }
@@ -249,7 +267,8 @@ TEST_F(ShaderGeneratorTest, FailsIfNoVersionSpecified) {
         "@endsection");
 
     std::string vs, fs, gs;
-    bool success = ShaderGenerator::GenerateShaderSource("test_shaders/invalid.shader", vs, fs, gs);
+    const auto path = GetFilePath("invalid.shader");
+    bool success = ShaderGenerator::GenerateShaderSource(path, vs, fs, gs);
 
     EXPECT_FALSE(success);
 }
