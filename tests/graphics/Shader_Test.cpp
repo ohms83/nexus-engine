@@ -187,25 +187,33 @@ TEST(ShaderTest, UniformParsingEdgeCases)
 class ShaderGeneratorTest : public ::testing::Test {
 protected:
     void SetUp() override {
+        tempDir = std::filesystem::temp_directory_path() / "test_shaders";
+        genDir = tempDir / "gen";
+
         try {
             if (!std::filesystem::exists(tempDir)) {
                 std::filesystem::create_directory(tempDir);
             }
-        } catch (const std::filesystem::filesystem_error& ex) {
+            // genDir is created by ShaderGenerator when writing files.
+        }
+        catch (const std::filesystem::filesystem_error& ex) {
             std::cerr << "Filesystem error: " << ex.what() << std::endl;
             return;
         }
         std::filesystem::current_path(tempDir);
+
+        shaderGen.SetOutputDirectory(genDir.string());
     }
 
     void TearDown() override {
-        try {
-            if (std::filesystem::exists(tempDir)) {
-                std::filesystem::remove_all(tempDir);
-            }
-        } catch (const std::filesystem::filesystem_error& ex) {
-            std::cerr << "Filesystem error during teardown: " << ex.what() << std::endl;
-        }
+        // try {
+        //     if (std::filesystem::exists(tempDir)) {
+        //         std::filesystem::remove_all(tempDir);
+        //     }
+        // }
+        // catch (const std::filesystem::filesystem_error& ex) {
+        //     std::cerr << "Filesystem error during teardown: " << ex.what() << std::endl;
+        // }
     }
 
     void CreateFile(const std::string& path, const std::string& content) {
@@ -218,7 +226,9 @@ protected:
         return (tempDir / filename).string();
     }
 
-    std::filesystem::path tempDir = std::filesystem::temp_directory_path() / "test_shaders";
+    ShaderGenerator shaderGen;
+    std::filesystem::path tempDir;
+    std::filesystem::path genDir;
 };
 
 TEST_F(ShaderGeneratorTest, BasicVertexFragmentGeneration) {
@@ -233,7 +243,7 @@ TEST_F(ShaderGeneratorTest, BasicVertexFragmentGeneration) {
 
     std::string vs, fs, gs;
     const auto path = GetFilePath("basic.shader");
-    bool success = ShaderGenerator::GenerateShaderSource(path, vs, fs, gs);
+    bool success = shaderGen.GenerateShaderSource(path, vs, fs, gs);
 
     EXPECT_TRUE(success);
     EXPECT_TRUE(vs.find("#version 450 core") != std::string::npos);
@@ -253,7 +263,7 @@ TEST_F(ShaderGeneratorTest, HandlesNestedIncludes) {
 
     std::string vs, fs, gs;
     const auto path = GetFilePath("main.shader");
-    bool success = ShaderGenerator::GenerateShaderSource(path, vs, fs, gs);
+    bool success = shaderGen.GenerateShaderSource(path, vs, fs, gs);
 
     EXPECT_TRUE(success);
     EXPECT_TRUE(vs.find("#define PI 3.14") != std::string::npos);
@@ -268,7 +278,52 @@ TEST_F(ShaderGeneratorTest, FailsIfNoVersionSpecified) {
 
     std::string vs, fs, gs;
     const auto path = GetFilePath("invalid.shader");
-    bool success = ShaderGenerator::GenerateShaderSource(path, vs, fs, gs);
+    bool success = shaderGen.GenerateShaderSource(path, vs, fs, gs);
 
     EXPECT_FALSE(success);
+}
+
+TEST_F(ShaderGeneratorTest, WritesGeneratedFilesToDisk) {
+    // 1. Setup paths
+    genDir = (tempDir / "gen").string();
+    shaderGen.SetOutputDirectory(genDir.string());
+
+    // 2. Create mock source with include
+    CreateFile("math.glsl", "#define PI 3.14");
+    CreateFile("test.shader", 
+        "@glsl_version 330\n"
+        "@section vertex\n"
+        "@include \"math.glsl\"\n"
+        "void main() {}\n"
+        "@endsection");
+
+    // 3. Execute
+    std::string vs, fs, gs;
+    bool success = shaderGen.GenerateShaderSource(GetFilePath("test.shader"), vs, fs, gs);
+
+    // 4. Assertions
+    EXPECT_TRUE(success);
+    
+    // Check if file was actually written to the 'gen' directory
+    std::filesystem::path expectedPath = genDir / "test_vert.glsl";
+    EXPECT_TRUE(std::filesystem::exists(expectedPath));
+
+    // Verify content of the written file
+    std::ifstream ifs(expectedPath);
+    std::string content((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
+    EXPECT_TRUE(content.find("#version 330") != std::string::npos);
+    EXPECT_TRUE(content.find("#define PI 3.14") != std::string::npos);
+}
+
+TEST_F(ShaderGeneratorTest, HandlesInvalidOutputDirectory) {
+    // Create a file where a directory should be to block directory creation
+    CreateFile("blocked_path", "I am a file, not a folder");
+    shaderGen.SetOutputDirectory(GetFilePath("blocked_path"));
+
+    // This should not crash, but should log an error internally
+    std::string vs, fs, gs;
+    bool success = shaderGen.GenerateShaderSource(GetFilePath("test.shader"), vs, fs, gs);
+    
+    // The source generation should still succeed even if the disk-write fails
+    EXPECT_TRUE(success); 
 }

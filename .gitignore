@@ -1,5 +1,6 @@
 build/
 lib/
+gen/
 # FetchContent download directory
 _deps/
 
