@@ -11,10 +11,8 @@ USING_NAMESPACE_NXS;
 
 DEFINE_LOG(ShaderGenerator);
 
-static std::string ProcessIncludes(const std::string& source, const std::filesystem::path& currentDir, std::set<std::filesystem::path>& includedFiles)
+static bool ProcessIncludes(std::stringstream& stream, const std::filesystem::path& currentDir, std::set<std::filesystem::path>& includedFiles, std::ostringstream& outSourceStream)
 {
-    std::stringstream output;
-    std::istringstream stream(source);
     std::string line;
 
     while (std::getline(stream, line))
@@ -28,7 +26,7 @@ static std::string ProcessIncludes(const std::string& source, const std::filesys
             if (pathStart == std::string::npos || pathEnd == std::string::npos || pathStart == pathEnd)
             {
                 LOG_WARNING(LogShaderGenerator, std::format("Malformed include directive: {}", line));
-                output << line << '\n';
+                outSourceStream << line << '\n';
                 continue;
             }
 
@@ -44,8 +42,8 @@ static std::string ProcessIncludes(const std::string& source, const std::filesys
             if (!includeFile.is_open())
             {
                 LOG_ERROR(LogShaderGenerator, std::format("Cannot open include file: {}. Base directory: {}", includeFilePath.string(), currentDir.string()));
-                output << line << '\n'; // Keep the problematic include for debugging
-                continue;
+                outSourceStream << line << '\n'; // Keep the problematic include for debugging
+                return false;
             }
 
             includedFiles.insert(includeFilePath);
@@ -54,14 +52,15 @@ static std::string ProcessIncludes(const std::string& source, const std::filesys
             includeSourceStream << includeFile.rdbuf();
             includeFile.close();
 
-            output << ProcessIncludes(includeSourceStream.str(), includeFilePath.parent_path(), includedFiles);
+            if (!ProcessIncludes(includeSourceStream, includeFilePath.parent_path(), includedFiles, outSourceStream)) {
+                return false;
+            }
         }
         else
         {
-            output << line << '\n';
+            outSourceStream << line << '\n';
         }
     }
-    return output.str();
 }
 
 std::unordered_set<std::string> ShaderGenerator::s_knownProgramTypes {
@@ -149,9 +148,13 @@ bool ShaderGenerator::ParseShaderFile(const std::string& shaderFilePath, std::ma
             includedFiles.insert(std::filesystem::absolute(fsPath)); // Add the root file itself
 
             // Process all @include statements
-            const auto source = std::move(ProcessIncludes(programSource.str(), shaderDir, includedFiles));
+            std::ostringstream outSourceStream;
+            if (!ProcessIncludes(programSource, shaderDir, includedFiles, outSourceStream)) {
+                return false;
+            }
 
             // Write to file for debugging/inspection.
+            const auto source = std::move(outSourceStream.str());
             const auto& shortName = GetProgramShortName(programName);
             WriteGeneratedShader(shaderFilePath, shortName, source);
             // TODO: Use the short name as map keys

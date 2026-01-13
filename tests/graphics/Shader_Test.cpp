@@ -259,6 +259,20 @@ TEST_F(ShaderGeneratorTest, BasicVertexFragmentGeneration) {
     EXPECT_EQ(gs, "");
 }
 
+TEST_F(ShaderGeneratorTest, HandlesInvalidIncludePath) {
+    CreateFile("main.shader", 
+        "@glsl_version 330\n"
+        "@program vertex\n"
+        "@include \"math.glsl\"\n"
+        "@endprogram");
+
+    std::string vs, fs, gs;
+    const auto path = GetFilePath("main.shader");
+    bool success = shaderGen.GenerateShaderSource(path, vs, fs, gs);
+
+    EXPECT_FALSE(success);
+}
+
 TEST_F(ShaderGeneratorTest, HandlesNestedIncludes) {
     CreateFile("consts.glsl", "#define PI 3.14");
     CreateFile("math.glsl", "@include \"consts.glsl\"\nfloat getPi() { return PI; }");

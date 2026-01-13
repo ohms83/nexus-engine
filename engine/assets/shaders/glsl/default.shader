@@ -42,7 +42,7 @@ uniform DirectLight _DirectLights[8];
 uniform int _NumPointLight;
 uniform PointLight _PointLights[20];
 
-@include "include/lighting.glsl"
+@include "include/light_functions.glsl"
 
 void main()
 {
