@@ -154,7 +154,12 @@ TEST(ShaderTest, UniformParsingEdgeCases)
         uniform float a, b, c; // multiple declarators on one line - this should be handled
         uniform vec3 d,e , f; // various spaces
         uniform vec4 g,h;uniform vec2 i; // no line breaks
-        uniform vec3 j /* inline comment */, k; // inline comment should be ignored
+        uniform vec3 j /* inline block comment */, k; // the comment should be ignored
+        /** 
+         * Multi lines block comment.
+         * uniform float l; must be ignored.
+         */
+        // uniform float m; inline comment should be ignored
         uniform    mat4   _Model ; // extra spaces
         uniform unknownType x; // unknown type should be ignored
         void main(){}
@@ -177,6 +182,8 @@ TEST(ShaderTest, UniformParsingEdgeCases)
     EXPECT_TRUE(s.HasUniform("j"));
     EXPECT_TRUE(s.HasUniform("k"));
 
+    EXPECT_FALSE(s.HasUniform("l"));
+    EXPECT_FALSE(s.HasUniform("m"));
     EXPECT_FALSE(s.HasUniform("x"));
     // Check whether the parser didn't mistakenly include parts of initializers/comments
     EXPECT_FALSE(s.HasUniform("vec3(0.0)"));
@@ -206,14 +213,14 @@ protected:
     }
 
     void TearDown() override {
-        // try {
-        //     if (std::filesystem::exists(tempDir)) {
-        //         std::filesystem::remove_all(tempDir);
-        //     }
-        // }
-        // catch (const std::filesystem::filesystem_error& ex) {
-        //     std::cerr << "Filesystem error during teardown: " << ex.what() << std::endl;
-        // }
+        try {
+            if (std::filesystem::exists(tempDir)) {
+                std::filesystem::remove_all(tempDir);
+            }
+        }
+        catch (const std::filesystem::filesystem_error& ex) {
+            std::cerr << "Filesystem error during teardown: " << ex.what() << std::endl;
+        }
     }
 
     void CreateFile(const std::string& path, const std::string& content) {

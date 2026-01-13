@@ -158,11 +158,13 @@ void Shader::ExtractUniform(std::string_view source)
         auto startBlockComment = copyLine.find("/*");
         while (startBlockComment != std::string::npos)
         {
-            auto endBlockComment = copyLine.find("*/", startBlockComment);
-            if (endBlockComment != std::string::npos)
-            {
-                copyLine.replace(startBlockComment, endBlockComment - startBlockComment + 2, "");
-            }
+            size_t endBlockComment = copyLine.find("*/", startBlockComment);
+            // Multi-lines comment is skipped.
+            if (endBlockComment == std::string::npos) break;
+
+            // Remove the block comment
+            copyLine.replace(startBlockComment, endBlockComment - startBlockComment + 2, "");
+            // Find the next block comment
             startBlockComment = copyLine.find("/*");
         }
 

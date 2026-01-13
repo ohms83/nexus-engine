@@ -3,6 +3,7 @@
 //
 
 #include "graphics/Material.h"
+#include "graphics/ShaderGenerator.h"
 #include "nexus/io/Serializer.h"
 #include "nexus/graphics/TextureManager.h"
 #include "core/LogDispatcher.h"
@@ -17,6 +18,7 @@ USING_NAMESPACE_NXS;
 
 DEFINE_LOG(Material);
 
+static constexpr auto default_shader = "shaders/glsl/default.shader";
 static constexpr auto default_vertex_shader = "shaders/glsl/default_forward_lighting.vert";
 static constexpr auto default_fragment_shader = "shaders/glsl/default_forward_lighting.frag";
 static constexpr auto textured_vertex_shader = "shaders/glsl/textured_forward_lighting.vert";
@@ -259,44 +261,62 @@ TextureType Material::GetTextureType(uint32 slot) const
     return TextureType::Undefined;
 }
 
-void Material::DetermineShaderPaths(std::string& vertexShader, std::string& fragmentShader)
+bool Material::DetermineShaderPaths(std::string& vertexShader, std::string& fragmentShader)
 {
     if (HasTextureType(TextureType::Normal))
     {
         vertexShader = Path::GetEngineAssetPath(normalmap_vertex_shader);
         fragmentShader = Path::GetEngineAssetPath(normalmap_fragment_shader);
+        return true;
     }
     else if (HasTextureType(TextureType::Diffuse))
     {
         vertexShader = Path::GetEngineAssetPath(textured_vertex_shader);
         fragmentShader = Path::GetEngineAssetPath(textured_fragment_shader);
+        return true;
     }
-    else
-    {
-        vertexShader = Path::GetEngineAssetPath(default_vertex_shader);
-        fragmentShader = Path::GetEngineAssetPath(default_fragment_shader);
-    }
+    return false;
 }
 
 void Material::CreateDefaultShader(Ref<RenderingInterface> renderingInterface)
 {
-    // TODO: Use resource manager.
+    // TODO: Acquire the shader from ShaderManager.
+    std::string veretxShaderSource, fragmentShaderSource, geomtryShaderSource;
     std::string vertexShaderPath, fragmentShaderPath;
-    DetermineShaderPaths(vertexShaderPath, fragmentShaderPath);
-
-    std::fstream vertexShader(vertexShaderPath, std::ios::in);
-    std::fstream fragmentShader(fragmentShaderPath, std::ios::in);
-    if (!vertexShader.is_open() || !fragmentShader.is_open())
+    
+    if (DetermineShaderPaths(vertexShaderPath, fragmentShaderPath))
     {
-        LOG_FATAL(LogMaterial,
-            std::format("Failed to load shaders! VS={} FS={}", vertexShaderPath, fragmentShaderPath));
-        return;
+        std::fstream vertexShader(vertexShaderPath, std::ios::in);
+        std::fstream fragmentShader(fragmentShaderPath, std::ios::in);
+        if (!vertexShader.is_open() || !fragmentShader.is_open())
+        {
+            LOG_FATAL(LogMaterial,
+                std::format("Failed to load shaders! VS={} FS={}", vertexShaderPath, fragmentShaderPath));
+            return;
+        }
+
+        std::stringstream vertexShaderStream, fragmentShaderStream;
+        vertexShaderStream << vertexShader.rdbuf();
+        fragmentShaderStream << fragmentShader.rdbuf();
+
+        veretxShaderSource = std::move(vertexShaderStream.str());
+        fragmentShaderSource = std::move(fragmentShaderStream.str());
+    }
+    else
+    {
+        auto shaderGen = ShaderGenerator();
+        const auto shaderPath = Path::GetEngineAssetPath(default_shader);
+        if (!shaderGen.GenerateShaderSource(
+            shaderPath,
+            veretxShaderSource,
+            fragmentShaderSource,
+            geomtryShaderSource))
+        {
+            LOG_FATAL(LogMaterial, std::format("Failed to generate default shader: {}", default_shader));
+            return;
+        }
     }
 
-    std::stringstream vertexShaderStream, fragmentShaderStream;
-    vertexShaderStream << vertexShader.rdbuf();
-    fragmentShaderStream << fragmentShader.rdbuf();
-
     m_shader.reset(new Shader("Default", 0));
-    m_shader->CompileFromSource(*renderingInterface, vertexShaderStream.str(), fragmentShaderStream.str(), "");
+    m_shader->CompileFromSource(*renderingInterface, veretxShaderSource, fragmentShaderSource, "");
 }
