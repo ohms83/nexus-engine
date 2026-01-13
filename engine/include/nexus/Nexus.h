@@ -74,6 +74,7 @@
 #include "graphics/RenderSystem.h"
 #include "graphics/RenderTarget.h"
 #include "graphics/Shader.h"
+#include "graphics/ShaderGenerator.h"
 #include "graphics/Texture.h"
 #include "graphics/TextureLoader.h"
 #include "graphics/TextureManager.h"
