@@ -26,21 +26,23 @@ void main()
 @endprogram vertex
 
 @program fragment
-@include "include/lighting.glsl"
 @include "include/material.glsl"
+@include "include/light_types.glsl"
 
 out vec4 FragColor;
 
 in vec3 FragPos;
 in vec3 Normal;
 
-uniform Material _Material;
 uniform vec3 _CameraPos;
+uniform Material _Material;
 uniform vec3 _AmbientLight;
 uniform int _NumDirectLight;
 uniform DirectLight _DirectLights[8];
 uniform int _NumPointLight;
 uniform PointLight _PointLights[20];
+
+@include "include/lighting.glsl"
 
 void main()
 {
