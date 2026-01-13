@@ -81,7 +81,6 @@ std::map<std::string, std::string> ShaderGenerator::s_programShortNames {
 
 bool ShaderGenerator::GenerateShaderSource(const std::string &shaderFilePath, std::string &outVertexShader, std::string &outFragmentShader, std::string &outGeometryShader)
 {
-    // TODO: Use the short name as map keys
     auto shaderSources = std::map<std::string, std::string> {
         {"vertex", ""},
         {"fragment", ""},
@@ -118,52 +117,52 @@ bool ShaderGenerator::ParseShaderFile(const std::string& shaderFilePath, std::ma
         {
             glslVersion = StrUtil::Trim(line.substr(13));
         }
-        else if (line.rfind("@section", 0) == 0)
+        else if (line.rfind("@program", 0) == 0)
         {
             if (glslVersion.empty())
             {
-                LOG_ERROR(LogShaderGenerator, std::format("GLSL version not specified before sections in shader file: {}", shaderFilePath));
+                LOG_ERROR(LogShaderGenerator, std::format("GLSL version not specified before programs in shader file: {}", shaderFilePath));
                 return false;
             }
 
-            const auto sectionName = StrUtil::Trim(line.substr(8));
-            std::stringstream sectionSource;
-            if (!IsKnownProgramType(sectionName))
+            const auto programName = StrUtil::Trim(line.substr(8));
+            std::stringstream programSource;
+            if (!IsKnownProgramType(programName))
             {
-                LOG_ERROR(LogShaderGenerator, std::format("Unknown program type: {}", sectionName));
+                LOG_ERROR(LogShaderGenerator, std::format("Unknown program type: {}", programName));
                 return false;
             }
 
             // Prepend GLSL version
-            sectionSource << "#version " << glslVersion << "\n\n";
-            // Read until @endsection
+            programSource << "#version " << glslVersion << "\n\n";
+            // Read until @endprogram
             while (std::getline(shaderFile, line))
             {
-                if (StrUtil::Trim(line).rfind("@endsection", 0) == 0)
+                if (StrUtil::Trim(line).rfind("@endprogram", 0) == 0)
                 {
                     break;
                 }
-                sectionSource << line << "\n";
+                programSource << line << "\n";
             }
 
             std::set<std::filesystem::path> includedFiles;
             includedFiles.insert(std::filesystem::absolute(fsPath)); // Add the root file itself
 
             // Process all @include statements
-            const auto source = std::move(ProcessIncludes(sectionSource.str(), shaderDir, includedFiles));
+            const auto source = std::move(ProcessIncludes(programSource.str(), shaderDir, includedFiles));
 
             // Write to file for debugging/inspection.
-            const auto& shortName = GetProgramShortName(sectionName);
+            const auto& shortName = GetProgramShortName(programName);
             WriteGeneratedShader(shaderFilePath, shortName, source);
             // TODO: Use the short name as map keys
-            outSections[sectionName] = std::move(source);
+            outSections[programName] = std::move(source);
         }
     }
 
     return true;
 }
 
-void ShaderGenerator::WriteGeneratedShader(const std::string& shaderFilePath, const std::string& sectionName, const std::string& source)
+void ShaderGenerator::WriteGeneratedShader(const std::string& shaderFilePath, const std::string& programName, const std::string& source)
 {
     if (m_outputDirectory.empty()) return;
 
@@ -176,7 +175,7 @@ void ShaderGenerator::WriteGeneratedShader(const std::string& shaderFilePath, co
 
         // 2. Generate the filename: e.g., "default_vertex.glsl"
         std::filesystem::path sourcePath(shaderFilePath);
-        std::string fileName = sourcePath.stem().string() + "_" + sectionName + ".glsl";
+        std::string fileName = sourcePath.stem().string() + "_" + programName + ".glsl";
         std::filesystem::path fullPath = outDirPath / fileName;
 
         // 3. Write the file

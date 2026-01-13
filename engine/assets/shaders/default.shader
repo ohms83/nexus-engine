@@ -1,6 +1,6 @@
 @glsl_version 330 core
 
-@section vertex_program
+@program vertex
 @include "include/common.glsl"
 
 layout (location = 0) in vec3 aPos;
@@ -23,9 +23,9 @@ void main()
 
     gl_Position = _Projection * _View * worldPos;
 }
-@endsection vertex_program
+@endprogram vertex
 
-@section fragment_program
+@program fragment
 @include "include/lighting.glsl"
 @include "include/material.glsl"
 
@@ -65,4 +65,4 @@ void main()
 
     FragColor = vec4(result, 1.0);
 }
-@endsection fragment_program
+@endprogram fragment

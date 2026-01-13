@@ -234,12 +234,12 @@ protected:
 TEST_F(ShaderGeneratorTest, BasicVertexFragmentGeneration) {
     CreateFile("basic.shader", 
         "@glsl_version 450 core\n"
-        "@section vertex\n"
+        "@program vertex\n"
         "layout(location = 0) in vec3 aPos;\n"
-        "@endsection\n"
-        "@section fragment\n"
+        "@endprogram\n"
+        "@program fragment\n"
         "out vec4 FragColor;\n"
-        "@endsection");
+        "@endprogram");
 
     std::string vs, fs, gs;
     const auto path = GetFilePath("basic.shader");
@@ -257,9 +257,9 @@ TEST_F(ShaderGeneratorTest, HandlesNestedIncludes) {
     CreateFile("math.glsl", "@include \"consts.glsl\"\nfloat getPi() { return PI; }");
     CreateFile("main.shader", 
         "@glsl_version 330\n"
-        "@section vertex\n"
+        "@program vertex\n"
         "@include \"math.glsl\"\n"
-        "@endsection");
+        "@endprogram");
 
     std::string vs, fs, gs;
     const auto path = GetFilePath("main.shader");
@@ -272,9 +272,9 @@ TEST_F(ShaderGeneratorTest, HandlesNestedIncludes) {
 
 TEST_F(ShaderGeneratorTest, FailsIfNoVersionSpecified) {
     CreateFile("invalid.shader", 
-        "@section vertex\n"
+        "@program vertex\n"
         "void main() {}\n"
-        "@endsection");
+        "@endprogram");
 
     std::string vs, fs, gs;
     const auto path = GetFilePath("invalid.shader");
@@ -292,10 +292,10 @@ TEST_F(ShaderGeneratorTest, WritesGeneratedFilesToDisk) {
     CreateFile("math.glsl", "#define PI 3.14");
     CreateFile("test.shader", 
         "@glsl_version 330\n"
-        "@section vertex\n"
+        "@program vertex\n"
         "@include \"math.glsl\"\n"
         "void main() {}\n"
-        "@endsection");
+        "@endprogram");
 
     // 3. Execute
     std::string vs, fs, gs;

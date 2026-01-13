@@ -40,12 +40,12 @@ NXS_NAMESPACE
          * The default output directory is defined by @c NXS_GENERATED_ASSETS_DIR.
          * 
          * @param shaderFilePath The path to the shader file.
-         * @param sectionName The name of the section being written.
+         * @param programName The name of the program being written.
          * @param source The generated shader source code.
          */
         void WriteGeneratedShader(
             const std::string& shaderFilePath,
-            const std::string& sectionName,
+            const std::string& programName,
             const std::string& source);
 
         std::string m_outputDirectory = NXS_GENERATED_ASSETS_DIR;
