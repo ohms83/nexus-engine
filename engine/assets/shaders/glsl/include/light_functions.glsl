@@ -95,7 +95,11 @@ vec3 CalcPointLight(Material material, PointLight light, vec3 fragPos, vec3 norm
     float diff = max(dot(normal, lightDir), 0.0);
     
     vec3 diffuse = light.properties.color * light.properties.diffuseIntensity * diff;
-    vec3 specular = CalcSpecularColor(light.properties.color * light.properties.specularIntensity, lightDir, normal, viewDir);
+
+    // Specular color
+    vec3 specularLight = light.properties.color * light.properties.specularIntensity;
+    vec3 specular = CalcSpecularColor(material, specularLight, lightDir, normal, viewDir);
+
 
     return (diffuse + specular) * attenuation;
 }
