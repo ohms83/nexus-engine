@@ -47,23 +47,11 @@ uniform PointLight _PointLights[20];
 void main()
 {
     // Re-normalize the interpolated inputs
-    vec3 N = normalize(Normal);
-    vec3 V = normalize(_CameraPos - FragPos);
+    vec3 normal = normalize(Normal);
+    vec3 viewDir = normalize(_CameraPos - FragPos);
     
-    vec3 ambientColor = CalcAmbientLight();
-    vec3 result = CalcAmbientLight() + AccumulateLighting(_Material, FragPos, N, V, _DirectLights, _NumDirectLight, _PointLights, _NumPointLight);
-
-    // Directional Lights
-    for (int i = 0; i < _NumDirectLight; ++i)
-    {
-        result += CalcDirectLight(_Material, _DirectLights[i], N, V);
-    }
-
-    // Point Lights
-    for (int i = 0; i < _NumPointLight; ++i)
-    {
-        result += CalcPointLight(_Material, _PointLights[i], FragPos, N, V);
-    }
+    vec3 ambientColor = CalcAmbientLight(_Material, _AmbientLight);
+    vec3 result = ambientColor + AccumulateLighting(_Material, FragPos, normal, viewDir);
 
     FragColor = vec4(result, 1.0);
 }
