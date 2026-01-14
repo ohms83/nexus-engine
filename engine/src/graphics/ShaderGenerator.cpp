@@ -73,9 +73,6 @@ std::map<std::string, std::string> ShaderGenerator::s_programShortNames {
     {"vertex", "vert"},
     {"fragment", "frag"},
     {"geometry", "geom"},
-    {"vert", "vert"},
-    {"frag", "frag"},
-    {"geom", "geom"},
 };
 
 // These extensions work better with the syntax-highlighters.
@@ -83,9 +80,6 @@ std::map<std::string, std::string> ShaderGenerator::s_programExtensions {
     {"vertex", "vert"},
     {"fragment", "frag"},
     {"geometry", "geom"},
-    {"vert", "vert"},
-    {"frag", "frag"},
-    {"geom", "geom"},
 };
 
 bool ShaderGenerator::GenerateShaderSource(const std::string &shaderFilePath, std::string &outVertexShader, std::string &outFragmentShader, std::string &outGeometryShader)
@@ -104,7 +98,7 @@ bool ShaderGenerator::GenerateShaderSource(const std::string &shaderFilePath, st
     return success;
 }
 
-bool ShaderGenerator::ParseShaderFile(const std::string& shaderFilePath, std::map<std::string, std::string>& outSections)
+bool ShaderGenerator::ParseShaderFile(const std::string& shaderFilePath, std::map<std::string, std::string>& outPrograms)
 {
     std::fstream shaderFile(shaderFilePath);
     if (!shaderFile.is_open())
@@ -165,11 +159,15 @@ bool ShaderGenerator::ParseShaderFile(const std::string& shaderFilePath, std::ma
 
             // Write to file for debugging/inspection.
             const auto source = std::move(outSourceStream.str());
-            const auto& shortName = GetProgramShortName(programName);
-            WriteGeneratedShader(shaderFilePath, shortName, source);
-            // TODO: Use the short name as map keys
-            outSections[programName] = std::move(source);
+            WriteGeneratedShader(shaderFilePath, programName, source);
+            outPrograms[programName] = std::move(source);
         }
+    }
+
+    if (outPrograms.empty())
+    {
+        LOG_ERROR(LogShaderGenerator, std::format("No programs found in shader file: {}", shaderFilePath));
+        return false;
     }
 
     return true;
@@ -196,7 +194,8 @@ void ShaderGenerator::WriteGeneratedShader(const std::string& shaderFilePath, co
         std::ofstream outFile(fullPath, std::ios::out | std::ios::trunc);
         if (!outFile.is_open())
         {
-            LOG_ERROR(LogShaderGenerator, std::format("Failed to open file for writing: {}", fullPath.string()));
+            // Writing generated shader is optional and should be treated as an ignorable error.
+            LOG_WARNING(LogShaderGenerator, std::format("Failed to open file for writing: {}", fullPath.string()));
             return;
         }
 
@@ -205,8 +204,8 @@ void ShaderGenerator::WriteGeneratedShader(const std::string& shaderFilePath, co
         
         LOG_INFO(LogShaderGenerator, std::format("Generated shader written to: {}", fullPath.string()));
     }
-    catch (const std::filesystem::filesystem_error& e) {
-        LOG_ERROR(LogShaderGenerator, std::format("Filesystem error during shader write: {}", e.what()));
+    catch (const std::exception& e) {
+        LOG_ERROR(LogShaderGenerator, std::format("Error while writing generated shader. Program Name: {}. Error: {}", programName, e.what()));
     }
 }
 const std::string &ShaderGenerator::GetProgramShortName(const std::string &name)

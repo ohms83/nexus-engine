@@ -30,9 +30,16 @@ NXS_NAMESPACE
         }
 
     private:
+        /**
+         * @brief Parse the engine's propretiary ".shader" file and generate shader programs.
+         *
+         * @param shaderFilePath
+         * @param outPrograms
+         * @return true on success; otherwise, false.
+         */
         bool ParseShaderFile(
             const std::string& shaderFilePath,
-            std::map<std::string, std::string>& outSections);
+            std::map<std::string, std::string>& outPrograms);
 
         /**
          * @brief Write the generated shader sources to files. The output files are named

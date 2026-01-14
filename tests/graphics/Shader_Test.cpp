@@ -198,9 +198,10 @@ protected:
         genDir = tempDir / "gen";
 
         try {
-            if (!std::filesystem::exists(tempDir)) {
-                std::filesystem::create_directory(tempDir);
+            if (std::filesystem::exists(tempDir)) {
+                std::filesystem::remove_all(tempDir);
             }
+            std::filesystem::create_directory(tempDir);
             // genDir is created by ShaderGenerator when writing files.
         }
         catch (const std::filesystem::filesystem_error& ex) {
@@ -304,6 +305,20 @@ TEST_F(ShaderGeneratorTest, FailsIfNoVersionSpecified) {
     EXPECT_FALSE(success);
 }
 
+TEST_F(ShaderGeneratorTest, FailsUnknownProgramType) {
+    CreateFile("invalid.shader", 
+        "@glsl_version 330\n"
+        "@program vert\n"
+        "void main() {}\n"
+        "@endprogram");
+
+    std::string vs, fs, gs;
+    const auto path = GetFilePath("invalid.shader");
+    bool success = shaderGen.GenerateShaderSource(path, vs, fs, gs);
+
+    EXPECT_FALSE(success);
+}
+
 TEST_F(ShaderGeneratorTest, WritesGeneratedFilesToDisk) {
     // 1. Setup paths
     genDir = (tempDir / "gen").string();
@@ -326,7 +341,7 @@ TEST_F(ShaderGeneratorTest, WritesGeneratedFilesToDisk) {
     EXPECT_TRUE(success);
     
     // Check if file was actually written to the 'gen' directory
-    std::filesystem::path expectedPath = genDir / "test_vert.glsl";
+    std::filesystem::path expectedPath = genDir / "test.vert";
     EXPECT_TRUE(std::filesystem::exists(expectedPath));
 
     // Verify content of the written file
@@ -339,6 +354,12 @@ TEST_F(ShaderGeneratorTest, WritesGeneratedFilesToDisk) {
 TEST_F(ShaderGeneratorTest, HandlesInvalidOutputDirectory) {
     // Create a file where a directory should be to block directory creation
     CreateFile("blocked_path", "I am a file, not a folder");
+    CreateFile("test.shader", 
+        "@glsl_version 330\n"
+        "@program vertex\n"
+        "void main() {}\n"
+        "@endprogram");
+
     shaderGen.SetOutputDirectory(GetFilePath("blocked_path"));
 
     // This should not crash, but should log an error internally
