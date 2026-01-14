@@ -78,6 +78,16 @@ std::map<std::string, std::string> ShaderGenerator::s_programShortNames {
     {"geom", "geom"},
 };
 
+// These extensions work better with the syntax-highlighters.
+std::map<std::string, std::string> ShaderGenerator::s_programExtensions {
+    {"vertex", "vert"},
+    {"fragment", "frag"},
+    {"geometry", "geom"},
+    {"vert", "vert"},
+    {"frag", "frag"},
+    {"geom", "geom"},
+};
+
 bool ShaderGenerator::GenerateShaderSource(const std::string &shaderFilePath, std::string &outVertexShader, std::string &outFragmentShader, std::string &outGeometryShader)
 {
     auto shaderSources = std::map<std::string, std::string> {
@@ -170,18 +180,19 @@ void ShaderGenerator::WriteGeneratedShader(const std::string& shaderFilePath, co
     if (m_outputDirectory.empty()) return;
 
     try {
-        // 1. Ensure the output directory exists
+        // Ensure the output directory exists
         std::filesystem::path outDirPath(m_outputDirectory);
         if (!std::filesystem::exists(outDirPath)) {
             std::filesystem::create_directories(outDirPath);
         }
 
-        // 2. Generate the filename: e.g., "default_vertex.glsl"
+        // Generate the filename: e.g., "default.vert"
         std::filesystem::path sourcePath(shaderFilePath);
-        std::string fileName = sourcePath.stem().string() + "_" + programName + ".glsl";
+        const auto& extension = s_programExtensions.at(programName);
+        const auto fileName = std::format("{}.{}", sourcePath.stem().string(), extension);
         std::filesystem::path fullPath = outDirPath / fileName;
 
-        // 3. Write the file
+        // Write the file
         std::ofstream outFile(fullPath, std::ios::out | std::ios::trunc);
         if (!outFile.is_open())
         {

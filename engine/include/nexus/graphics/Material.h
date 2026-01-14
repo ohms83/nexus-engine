@@ -110,9 +110,6 @@ NXS_NAMESPACE
         NODISCARD TextureType GetTextureType(uint32 slot) const;
 
     private:
-        // TODO: Deprecate this and move all the logic to ShaderGenerator.
-        bool DetermineShaderPaths(std::string& vertexShader, std::string& fragmentShader);
-
         Ref<Shader> m_shader;
         std::string m_shaderPath;
 

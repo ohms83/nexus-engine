@@ -50,9 +50,12 @@ vec3 TransformNormalToWorldSpace(vec3 normal, mat4 modelMtx)
  * @param TBN The TBN matrix.
  * @return The normal vector in world space.
  */
-vec3 TransformNormalToWorldSpace(sampler2D normalmap, vec2 uv, mat3 TBN)
+vec3 SampleNormalmapToWorldSpace(sampler2D normalmap, vec2 uv, mat3 TBN)
 {
     vec3 normal = texture2D(normalmap, uv).xyz;
+    // The texture stores normal vectors as colors (0 to 1). We convert them
+    // back to the standard vector range (-1 to 1).
+    normal = normalize(normal * 2.0 - 1.0);
     normal = normalize(TBN * normal);
     return normal;
 }

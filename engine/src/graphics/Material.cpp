@@ -18,13 +18,9 @@ USING_NAMESPACE_NXS;
 
 DEFINE_LOG(Material);
 
-static constexpr auto default_shader = "shaders/glsl/default.shader";
-static constexpr auto default_vertex_shader = "shaders/glsl/default_forward_lighting.vert";
-static constexpr auto default_fragment_shader = "shaders/glsl/default_forward_lighting.frag";
-static constexpr auto textured_vertex_shader = "shaders/glsl/textured_forward_lighting.vert";
-static constexpr auto textured_fragment_shader = "shaders/glsl/textured_forward_lighting.frag";
-static constexpr auto normalmap_vertex_shader = "shaders/glsl/normalmap_forward_lighting.vert";
-static constexpr auto normalmap_fragment_shader = "shaders/glsl/normalmap_forward_lighting.frag";
+static constexpr auto default_shader = "shaders/glsl/default_forward_lighting.shader";
+static constexpr auto textured_shader = "shaders/glsl/textured_forward_lighting.shader";
+static constexpr auto normalmap_shader = "shaders/glsl/normalmap_forward_lighting.shader";
 
 static const std::map<TextureType, std::string> s_textureTypeUniformNames = {
     {TextureType::Diffuse, "_DiffuseMap"},
@@ -261,60 +257,34 @@ TextureType Material::GetTextureType(uint32 slot) const
     return TextureType::Undefined;
 }
 
-bool Material::DetermineShaderPaths(std::string& vertexShader, std::string& fragmentShader)
-{
-    if (HasTextureType(TextureType::Normal))
-    {
-        vertexShader = Path::GetEngineAssetPath(normalmap_vertex_shader);
-        fragmentShader = Path::GetEngineAssetPath(normalmap_fragment_shader);
-        return true;
-    }
-    else if (HasTextureType(TextureType::Diffuse))
-    {
-        vertexShader = Path::GetEngineAssetPath(textured_vertex_shader);
-        fragmentShader = Path::GetEngineAssetPath(textured_fragment_shader);
-        return true;
-    }
-    return false;
-}
-
 void Material::CreateDefaultShader(Ref<RenderingInterface> renderingInterface)
 {
     // TODO: Acquire the shader from ShaderManager.
     std::string veretxShaderSource, fragmentShaderSource, geomtryShaderSource;
-    std::string vertexShaderPath, fragmentShaderPath;
-    
-    if (DetermineShaderPaths(vertexShaderPath, fragmentShaderPath))
+    std::string shaderPath;
+
+    if (HasTextureType(TextureType::Normal))
     {
-        std::fstream vertexShader(vertexShaderPath, std::ios::in);
-        std::fstream fragmentShader(fragmentShaderPath, std::ios::in);
-        if (!vertexShader.is_open() || !fragmentShader.is_open())
-        {
-            LOG_FATAL(LogMaterial,
-                std::format("Failed to load shaders! VS={} FS={}", vertexShaderPath, fragmentShaderPath));
-            return;
-        }
-
-        std::stringstream vertexShaderStream, fragmentShaderStream;
-        vertexShaderStream << vertexShader.rdbuf();
-        fragmentShaderStream << fragmentShader.rdbuf();
-
-        veretxShaderSource = std::move(vertexShaderStream.str());
-        fragmentShaderSource = std::move(fragmentShaderStream.str());
+        shaderPath = Path::GetEngineAssetPath(normalmap_shader);
+    }
+    else if (HasTextureType(TextureType::Diffuse))
+    {
+        shaderPath = Path::GetEngineAssetPath(textured_shader);
     }
     else
     {
-        auto shaderGen = ShaderGenerator();
-        const auto shaderPath = Path::GetEngineAssetPath(default_shader);
-        if (!shaderGen.GenerateShaderSource(
-            shaderPath,
-            veretxShaderSource,
-            fragmentShaderSource,
-            geomtryShaderSource))
-        {
-            LOG_FATAL(LogMaterial, std::format("Failed to generate default shader: {}", default_shader));
-            return;
-        }
+        shaderPath = Path::GetEngineAssetPath(default_shader);
+    }
+
+    auto shaderGen = ShaderGenerator();
+    if (!shaderGen.GenerateShaderSource(
+        shaderPath,
+        veretxShaderSource,
+        fragmentShaderSource,
+        geomtryShaderSource))
+    {
+        LOG_FATAL(LogMaterial, std::format("Failed to generate shader: {}", shaderPath));
+        return;
     }
 
     m_shader.reset(new Shader("Default", 0));

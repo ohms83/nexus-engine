@@ -52,6 +52,7 @@ NXS_NAMESPACE
 
         static std::unordered_set<std::string> s_knownProgramTypes;
         static std::map<std::string, std::string> s_programShortNames;
+        static std::map<std::string, std::string> s_programExtensions;
 
         static bool IsKnownProgramType(const std::string& name)
         {
