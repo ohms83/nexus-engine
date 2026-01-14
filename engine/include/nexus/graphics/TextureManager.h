@@ -3,6 +3,7 @@
 #pragma once
 
 #include "nexus/NxsDefine.h"
+#include "nexus/core/ResourceManager.h"
 #include "TextureLoader.h"
 #include "RenderingInterface.h"
 
