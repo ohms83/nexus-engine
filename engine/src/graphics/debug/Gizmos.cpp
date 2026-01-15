@@ -108,6 +108,16 @@ namespace
         {
             return m_indices.size();
         }
+
+        Ref<VertexBuffer> GetVertexBuffer() const
+        {
+            return m_vertexBuffer;
+        }
+
+        Ref<IndexBuffer> GetIndexBuffer() const
+        {
+            return m_indexBuffer;
+        }
         
         void DrawIndexed(RenderingInterface& renderInterface)
         {
@@ -126,6 +136,23 @@ namespace
 
                 renderInterface.DrawIndexed(m_indexBuffer);
             }
+        }
+
+        //! @brief Copy the data to GPU buffers.
+        void CopyToGpu(RenderingInterface& renderInterface)
+        {
+            if (m_indices.empty()) return;
+
+            if (m_newMaxVertex > 0 || m_newMaxIndex > 0) {
+                GenerateBuffers(renderInterface);
+            }
+
+            m_vertexBuffer->Bind();
+            m_vertexBuffer->CopyData(m_vertices.data(), sizeof(Vertex) * m_vertices.size(), 0);
+
+            m_indexBuffer->Bind();
+            m_indexBuffer->CopyData(m_indices.data(), sizeof(uint32_t) * m_indices.size(), 0);
+            m_indexBuffer->SetNumIndexDraw(m_indices.size());
         }
 
         void Clear()
@@ -152,7 +179,8 @@ namespace
     const int SPHERE    = 3;
 
     std::map<int, Ref<VertexData>> s_vertexDataList;
-    Ref<GpuProgram> s_gpuProgram;
+    Ref<Shader> s_overlayShader;
+    Ref<Material> s_overlayMaterial;
 }
 
 // Shader sources
@@ -163,14 +191,14 @@ layout (location = 2) in vec3 aColor;
 layout (location = 3) in float aSize;
 
 uniform mat4 _Model;
-// Projection x View matrix
-uniform mat4 _CameraMtx;
+uniform mat4 _View;
+uniform mat4 _Projection;
 
 out vec3 Color;
 
 void main()
 {
-    gl_Position = _CameraMtx * vec4(aPos, 1.0);
+    gl_Position = _Projection * _View * vec4(aPos, 1.0);
     gl_PointSize = aSize;
     Color = aColor;
 }
@@ -191,11 +219,20 @@ void Gizmos::Init(const RenderSystem& renderSystem)
 {
     const auto renderInterface = renderSystem.GetRenderInterface();
 
-    s_gpuProgram.reset(renderInterface->CreateGpuProgram());
-    s_gpuProgram->BeginCompile()
-        .AddSource(s_vertexShaderSource, GpuProgram::Type::Vertex)
-        .AddSource(s_fragmentShaderSource, GpuProgram::Type::Fragment)
-    .Compile();
+    s_overlayShader = std::make_shared<Shader>("_OverlayShader", 0);
+    const auto succeed = s_overlayShader->CompileFromSource(
+        *renderInterface,
+        s_vertexShaderSource,
+        s_fragmentShaderSource,
+        "");
+    NXS_ASSERT(succeed);
+
+    s_overlayMaterial = std::make_shared<Material>("_OverlayMaterial", 0);
+    s_overlayMaterial->SetShader(s_overlayShader);
+    s_overlayMaterial->blendMode = BlendMode::None;
+    s_overlayMaterial->depthFunction = DepthFunction::Always;
+    s_overlayMaterial->depthTest = false;
+    s_overlayMaterial->depthWrite = false;
 
     s_vertexDataList.emplace(POINT, std::make_shared<VertexData>(100, *renderInterface, DrawMode::Point));
     s_vertexDataList.emplace(LINE, std::make_shared<VertexData>(100, *renderInterface, DrawMode::Line));
@@ -206,7 +243,8 @@ void Gizmos::Init(const RenderSystem& renderSystem)
 
 void Gizmos::Destroy()
 {
-    s_gpuProgram.reset();
+    s_overlayShader.reset();
+    s_overlayMaterial.reset();
     s_vertexDataList.clear();
 }
 
@@ -235,6 +273,32 @@ void Gizmos::ProcessDraw(RenderSystem& renderSystem, const glm::mat4& cameraMtx)
         vertexData->DrawIndexed(renderInterface);
     }
 #endif
+}
+
+void Gizmos::CreateRenderCommands(std::vector<RenderCommand>& outCommands)
+{
+    static const Sphere boundingSphere { glm::vec3(0), FLT_MAX };
+    for (auto [index, vertexData] : s_vertexDataList)
+    {
+        auto vertexBuffer = vertexData->GetVertexBuffer();
+        auto indexBuffer = vertexData->GetIndexBuffer();
+        NXS_ASSERT(vertexBuffer && indexBuffer);
+
+        RenderCommand command {};
+        command.vertexBuffer = vertexBuffer;
+        command.indexBuffer = indexBuffer;
+        command.indexCount = indexBuffer->GetNumIndexDraw();
+        command.material = s_overlayMaterial;
+        command.bounds = boundingSphere;
+
+        // Override pipeline states
+        command.pipelineOverrides.depthFunction = DepthFunction::Always;
+        command.pipelineOverrides.depthWrite = false;
+        command.pipelineOverrides.depthTest = false;
+        // vertexData->DrawIndexed(renderInterface);
+
+        outCommands.push_back(command);
+    }
 }
 
 void Gizmos::DrawPoint(

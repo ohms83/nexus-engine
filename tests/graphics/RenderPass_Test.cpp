@@ -45,11 +45,16 @@ TEST(RenderPassTest, FilterPreset)
     pass.filterType = "alpha";
     pass.Deserialize(pass.Serialize());
     // The filter callback should be set to alpha preset (blendMode != None)
-    Material mOpaque("mat", 1);
-    mOpaque.blendMode = BlendMode::None;
-    Material mAlpha("matA", 2);
-    mAlpha.blendMode = BlendMode::Alpha;
+    Ref<Material> mOpaque = std::make_shared<Material>("mat", 1);
+    mOpaque->blendMode = BlendMode::None;
+    RenderCommand cmdOpaque;
+    cmdOpaque.material = mOpaque;
 
-    EXPECT_FALSE(pass.MatchesMaterial(mOpaque));
-    EXPECT_TRUE(pass.MatchesMaterial(mAlpha));
+    Ref<Material> mAlpha = std::make_shared<Material>("matA", 2);
+    mAlpha->blendMode = BlendMode::Alpha;
+    RenderCommand cmdAlpha;
+    cmdAlpha.material = mAlpha;
+
+    EXPECT_FALSE(pass.IsPassFiltered(cmdOpaque));
+    EXPECT_TRUE(pass.IsPassFiltered(cmdAlpha));
 }

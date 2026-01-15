@@ -92,6 +92,11 @@ NXS_NAMESPACE
             return m_shader;
         }
 
+        Ref<GpuProgram> GetGpuProgram() const
+        {
+            return m_shader ? m_shader->GetGpuProgram() : nullptr;
+        }
+
         //! Create a default shader based on the material properties.
         void CreateDefaultShader(Ref<ShaderManager> shaderManager);
 
@@ -101,7 +106,7 @@ NXS_NAMESPACE
         VariantData Serialize() const override;
         void Deserialize(const VariantData& data) override;
 
-        void Use();
+        Ref<GpuProgram> Use();
 
         // Resolve referenced textures and optionally shaders by using resource managers.
         void Resolve(class TextureManager& textureManager, RenderingInterface* renderingInterface = nullptr);

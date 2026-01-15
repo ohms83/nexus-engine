@@ -67,7 +67,7 @@ NXS_NAMESPACE
         .DepthTest(false)
         .DepthWrite(false)
         .GlobalShader(nullptr) // Use material shaders
-        .FilterType("all")
+        .FilterType("overlay")
         .Build();
 }
 
@@ -78,6 +78,10 @@ void RenderPass::ReleaseResources()
 
 void RenderPass::Begin(RenderSystem& rs) const
 {
+    // Pipeline state using RenderSystem caching to avoid redundant state flips
+    // NOTE: Pipeline state should be applied before anything.
+    rs.ApplyPipelineState(pipelineState);
+
     auto renderInterface = rs.GetRenderInterface();
     // Offscreen target is bound by the caller (SceneRenderer/RenderSystem).
     // Clear
@@ -98,9 +102,6 @@ void RenderPass::Begin(RenderSystem& rs) const
         }
         // Stencil: Not supported yet by the generic interface. Add later if needed.
     }
-
-    // Pipeline state using RenderSystem caching to avoid redundant state flips
-    rs.ApplyPipelineState(pipelineState);
 
     // Set global shader override via RenderSystem to allow caching
     rs.SetGlobalShader(pipelineState.globalShader ? pipelineState.globalShader : nullptr);
@@ -260,5 +261,35 @@ void RenderPass::Resolve(RenderingInterface &renderingInterface)
         {
             pipelineState.globalShader = shader->GetGpuProgram();
         }
+    }
+}
+
+void RenderPass::SetFilterType(std::string type)
+{
+    filterType = std::move(type);
+    if (filterType == "opaque")
+    {
+        filter = [](const RenderCommand& cmd) {
+            return cmd.material && cmd.material->blendMode == BlendMode::None;
+        };
+    }
+    else if (filterType == "alpha")
+    {
+        filter = [](const RenderCommand& cmd) {
+            return cmd.material && cmd.material->blendMode != BlendMode::None;
+        };
+    }
+    else if (filterType == "overlay")
+    {
+        filter = [](const RenderCommand& cmd) {
+            return cmd.material &&
+                   cmd.material->blendMode == BlendMode::None &&
+                   !cmd.material->depthWrite &&
+                   cmd.material->depthFunction == DepthFunction::Always;
+        };
+    }
+    else // "all" or unknown
+    {
+        filter = nullptr;
     }
 }

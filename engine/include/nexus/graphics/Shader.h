@@ -46,19 +46,19 @@ NXS_NAMESPACE
         Shader(std::string path, const uint32 id) : Resource(std::move(path), id) {}
 
         MAYBE_UNUSED bool CompileFromSource(
-            RenderingInterface& renderingInterface,
+            const RenderingInterface& renderingInterface,
             std::string&& vertexShaderSource,
             std::string&& fragmentShaderSource,
             std::string&& geometryShaderSource);
 
         MAYBE_UNUSED bool CompileFromSource(
-            RenderingInterface& renderingInterface,
+            const RenderingInterface& renderingInterface,
             const std::string& vertexShaderSource,
             const std::string& fragmentShaderSource,
             const std::string& geometryShaderSource);
 
         MAYBE_UNUSED bool CompileFromFile(
-            RenderingInterface& renderingInterface,
+            const RenderingInterface& renderingInterface,
             const std::string& vertexShaderPath,
             const std::string& fragmentShaderPath,
             const std::string& geometryShaderPath);

@@ -48,7 +48,6 @@ NXS_NAMESPACE
         // GPU resources (non-owning references managed by Resource Manager)
         Ref<VertexBuffer> vertexBuffer;
         Ref<IndexBuffer> indexBuffer;
-        Ref<GpuProgram> gpuProgram;
         Ref<Material> material; // optional - used to set uniforms and textures
 
         // Draw parameters
@@ -71,9 +70,6 @@ NXS_NAMESPACE
         PipelineState pipelineOverrides;
         bool hasPipelineOverrides = false;
 
-        // Helper method to check whether the draw uses an override GPU program (global override)
-        NODISCARD bool HasGpuProgram() const { return gpuProgram.operator bool(); }
-
         // Convenience: set the sort key by evaluating translucency/material/depth
         void SetSortKey(bool translucent, uint32 materialId, float depthNormalized)
         {
@@ -86,7 +82,6 @@ NXS_NAMESPACE
             return vertexBuffer.get() == other.vertexBuffer.get()
                 && indexBuffer.get() == other.indexBuffer.get()
                 && material.get() == other.material.get()
-                && gpuProgram.get() == other.gpuProgram.get()
                 && indexCount == other.indexCount
                 && indexOffset == other.indexOffset
                 && vertexOffset == other.vertexOffset
