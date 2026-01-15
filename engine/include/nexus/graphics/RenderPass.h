@@ -147,25 +147,8 @@ NXS_NAMESPACE
          * @brief Set the filter by type preset.
          * 
          * @param type A string representing the filter type. Valid values are "opaque", "alpha", and "all".
-         * @return Reference to this render pass for chaining.
          */
-        RenderPass& SetFilterType(std::string type)
-        {
-            filterType = std::move(type);
-            if (filterType == "opaque")
-            {
-                filter = [](const Material& m) { return m.blendMode == BlendMode::None; };
-            }
-            else if (filterType == "alpha")
-            {
-                filter = [](const Material& m) { return m.blendMode != BlendMode::None; };
-            }
-            else // "all" or unknown
-            {
-                filter = nullptr;
-            }
-            return *this;
-        }
+        void SetFilterType(std::string type);
     };
 
     struct RenderPassBuilder

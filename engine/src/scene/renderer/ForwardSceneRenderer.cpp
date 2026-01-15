@@ -33,8 +33,7 @@ ForwardSceneRenderer::ForwardSceneRenderer(const RenderSystem& renderSystem)
     RegisterRenderPass(DepthPrepass);
     RegisterRenderPass(OpaquePass);
     RegisterRenderPass(AlphaPass);
-    // Overlay pass is still buggy. Temporarily disable it.
-    // RegisterRenderPass(OverlayPass);
+    RegisterRenderPass(OverlayPass);
 }
 
 void ForwardSceneRenderer::Render(RenderSystem& renderSystem, const entt::registry& registry)
@@ -45,7 +44,6 @@ void ForwardSceneRenderer::Render(RenderSystem& renderSystem, const entt::regist
     commands.reserve(1024);
 
     // Storing mesh's model matrix for the rendering phase.
-    std::vector<glm::mat4> modelMatrices;
     auto renderInterface = renderSystem.GetRenderInterface();
 
     // ReSharper disable once CppTooWideScopeInitStatement
