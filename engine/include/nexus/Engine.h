@@ -12,6 +12,7 @@
 #include "graphics/MaterialManager.h"
 #include "graphics/ModelManager.h"
 #include "graphics/TextureManager.h"
+#include "graphics/ShaderManager.h"
 #include "scene/SceneManager.h"
 
 NXS_NAMESPACE
@@ -58,6 +59,11 @@ NXS_NAMESPACE
             NXS_ASSERT_MSG(m_materialManager != nullptr, "MaterialManager hasn't been initialized");
             return m_materialManager;
         }
+        NODISCARD Ref<ShaderManager> GetShaderManager() const
+        {
+            NXS_ASSERT_MSG(m_shaderManager != nullptr, "ShaderManager hasn't been initialized");
+            return m_shaderManager;
+        }
         NODISCARD Ref<TaskScheduler> GetTaskScheduler() const
         {
             NXS_ASSERT_MSG(m_taskScheduler != nullptr, "TaskScheduler hasn't been initialized");
@@ -76,6 +82,7 @@ NXS_NAMESPACE
         Ref<MaterialManager> m_materialManager;
         Ref<TaskScheduler> m_taskScheduler;
         Ref<SceneManager> m_sceneManager;
+        Ref<ShaderManager> m_shaderManager;
 
         static void InitModules();
         static void ShutdownModules();

@@ -7,6 +7,7 @@
 
 #include "Material.h"
 #include "MaterialLoader.h"
+#include "RenderingInterface.h"
 
 #include "nexus/core/ResourceManager.h"
 
@@ -16,13 +17,5 @@ NXS_NAMESPACE
     {
     public:
         MaterialManager(Ref<RenderingInterface> renderingInterface);
-
-        Ref<Material> GetDefaultMaterial() const
-        {
-            return m_defaultMaterial;
-        }
-
-    private:
-        Ref<Material> m_defaultMaterial;
     };
 }

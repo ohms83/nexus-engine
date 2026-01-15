@@ -3,12 +3,11 @@
 //
 
 #include "graphics/Material.h"
-#include "graphics/ShaderGenerator.h"
+#include "graphics/ShaderManager.h"
 #include "nexus/io/Serializer.h"
 #include "nexus/graphics/TextureManager.h"
 #include "core/LogDispatcher.h"
 #include "core/Path.h"
-#include "graphics/Material.h"
 
 #include "Remotery.h"
 
@@ -257,9 +256,8 @@ TextureType Material::GetTextureType(uint32 slot) const
     return TextureType::Undefined;
 }
 
-void Material::CreateDefaultShader(Ref<RenderingInterface> renderingInterface)
+void Material::CreateDefaultShader(Ref<ShaderManager> shaderManager)
 {
-    // TODO: Acquire the shader from ShaderManager.
     std::string veretxShaderSource, fragmentShaderSource, geomtryShaderSource;
     std::string shaderPath;
 
@@ -276,17 +274,6 @@ void Material::CreateDefaultShader(Ref<RenderingInterface> renderingInterface)
         shaderPath = Path::GetEngineAssetPath(default_shader);
     }
 
-    auto shaderGen = ShaderGenerator();
-    if (!shaderGen.GenerateShaderSource(
-        shaderPath,
-        veretxShaderSource,
-        fragmentShaderSource,
-        geomtryShaderSource))
-    {
-        LOG_FATAL(LogMaterial, std::format("Failed to generate shader: {}", shaderPath));
-        return;
-    }
-
-    m_shader.reset(new Shader("Default", 0));
-    m_shader->CompileFromSource(*renderingInterface, veretxShaderSource, fragmentShaderSource, "");
+    m_shader = shaderManager->Get(shaderPath);
+    NXS_ASSERT(m_shader);
 }

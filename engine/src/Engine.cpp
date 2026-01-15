@@ -28,10 +28,12 @@ Engine& Engine::Initialize(WindowContext window, const GraphicsConfig& graphicsC
     s_engine->m_renderSystem = std::make_shared<RenderSystem>(window, graphicsConfig);
     s_engine->m_textureManager = std::make_shared<TextureManager>(s_engine->GetRenderingInterface());
     s_engine->m_materialManager = std::make_shared<MaterialManager>(s_engine->GetRenderingInterface());
+    s_engine->m_shaderManager= std::make_shared<ShaderManager>(s_engine->GetRenderingInterface());
     s_engine->m_modelManager = std::make_shared<ModelManager>(
         s_engine->GetRenderingInterface(),
         s_engine->m_textureManager,
-        s_engine->m_materialManager);
+        s_engine->m_materialManager,
+        s_engine->m_shaderManager);
     s_engine->m_taskScheduler = std::make_shared<TaskScheduler>(std::make_shared<StandardTimeSource>());
     s_engine->m_sceneManager =  std::make_shared<SceneManager>(s_engine->GetTaskScheduler());
 

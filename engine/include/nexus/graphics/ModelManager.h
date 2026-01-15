@@ -11,6 +11,7 @@
 #include "Model.h"
 #include "TextureManager.h"
 #include "MaterialManager.h"
+#include "ShaderManager.h"
 
 NXS_NAMESPACE
 {
@@ -20,6 +21,7 @@ NXS_NAMESPACE
         ModelManager(
             const Ref<RenderingInterface>& renderingInterface,
             const Ref<TextureManager>& textureManager,
-            const Ref<MaterialManager>& materialManager);
+            const Ref<MaterialManager>& materialManager,
+            const Ref<ShaderManager>& shaderManager);
     };
 }

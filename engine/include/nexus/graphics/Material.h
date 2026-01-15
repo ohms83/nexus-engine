@@ -10,13 +10,15 @@
 #include "Color.h"
 #include "Shader.h"
 #include "RenderingInterface.h"
-#include "nexus/io/Serializable.h"
 
+#include "nexus/io/Serializable.h"
 #include "nexus/core/Resource.h"
 
 NXS_NAMESPACE
 {
     class TextureManager;
+    class ShaderManager;
+
     //! A list of enumerations representing commonly used texture types.
     enum class TextureType
     {
@@ -91,7 +93,7 @@ NXS_NAMESPACE
         }
 
         //! Create a default shader based on the material properties.
-        void CreateDefaultShader(Ref<RenderingInterface> renderingInterface);
+        void CreateDefaultShader(Ref<ShaderManager> shaderManager);
 
         size_t TextureCount() const { return m_textures.size(); }
 

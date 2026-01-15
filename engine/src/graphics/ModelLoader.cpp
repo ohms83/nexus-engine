@@ -93,12 +93,14 @@ static std::queue<Ref<IResourceLoader::LoadResult>> PreloadTextures(const aiScen
 ModelLoader::ModelLoader(
     const Ref<RenderingInterface>& renderingInterface,
     const Ref<TextureManager>& textureManager,
-    const Ref<MaterialManager>& materialManager)
+    const Ref<MaterialManager>& materialManager,
+    const Ref<ShaderManager>& shaderManager)
+    : m_renderingInterface(renderingInterface)
+    , m_textureManager(textureManager)
+    , m_materialManager(materialManager)
+    , m_shaderManager(shaderManager)
 {
     NXS_ASSERT(renderingInterface && textureManager && materialManager);
-    m_renderingInterface = renderingInterface;
-    m_textureManager = textureManager;
-    m_materialManager = materialManager;
 }
 
 Ref<Resource> ModelLoader::Load(const std::string &path, uint32 id)
@@ -370,7 +372,7 @@ void ModelLoader::ProcessMaterial(const Ref<Mesh>& newMesh, const aiMesh* mesh, 
     ProcessTextures(newMat, material, directory);
 
     if (newMat->GetShader() == nullptr) {
-        newMat->CreateDefaultShader(m_renderingInterface);
+        newMat->CreateDefaultShader(m_shaderManager);
     }
     newMesh->SetMaterial(newMat);
 }

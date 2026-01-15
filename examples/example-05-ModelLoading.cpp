@@ -174,7 +174,8 @@ protected:
         m_modelLoader = std::make_unique<nxs::ModelLoader>(
             renderInterface,
             engine.GetTextureManager(),
-            engine.GetMaterialManager()
+            engine.GetMaterialManager(),
+            engine.GetShaderManager()
         );
 
         m_scene = std::make_unique<nxs::Scene>("Main Scene");
