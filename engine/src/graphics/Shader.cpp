@@ -17,7 +17,7 @@ USING_NAMESPACE_NXS;
 DEFINE_LOG(Shader);
 
 bool Shader::CompileFromSource(
-    RenderingInterface& renderingInterface,
+    const RenderingInterface& renderingInterface,
     std::string&& vertexShaderSource,
     std::string&& fragmentShaderSource,
     std::string&& geometryShaderSource)
@@ -42,7 +42,7 @@ bool Shader::CompileFromSource(
 }
 
 bool Shader::CompileFromSource(
-    RenderingInterface& renderingInterface,
+    const RenderingInterface& renderingInterface,
     const std::string& vertexShaderSource,
     const std::string& fragmentShaderSource,
     const std::string& geometryShaderSource)
@@ -67,7 +67,7 @@ bool Shader::CompileFromSource(
 }
 
 bool Shader::CompileFromFile(
-    RenderingInterface& renderingInterface,
+    const RenderingInterface& renderingInterface,
     const std::string& vertexShaderPath,
     const std::string& fragmentShaderPath,
     const std::string& geometryShaderPath)

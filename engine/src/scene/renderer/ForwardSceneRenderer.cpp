@@ -78,9 +78,37 @@ void ForwardSceneRenderer::Render(RenderSystem& renderSystem, const entt::regist
             {
                 if (!IsSphereInside(viewFrustum, mesh->GetSphere(), modelMtx, scale.value)) continue;
                 commands.emplace_back(CreateRenderCommand(mesh, std::move(modelMtx), mvpMtx));
+
+                if (modelComp.showBoundingBox)
+                {
+                    const auto& box = mesh->GetBox();
+                    Gizmos::DrawOutlineBox(renderSystem, box.center, box.extent);
+                }
+                if (modelComp.showBoundingSphere)
+                {
+                    const auto& sphere = mesh->GetSphere();
+                    Gizmos::DrawOutlineSphere(renderSystem, sphere.center, sphere.radius);
+                }
             }
             rmt_EndCPUSample();
         }
+
+        for (const auto view = registry.view<SceneNodeComponent, MeshComponent>(); const auto& [entity, sceneNode, meshComp] : view.each())
+        {
+            auto mesh = meshComp.mesh;
+            if (meshComp.showBoundingBox)
+            {
+                const auto& box = mesh->GetBox();
+                Gizmos::DrawOutlineBox(renderSystem, box.center, box.extent);
+            }
+            if (meshComp.showBoundingSphere)
+            {
+                const auto& sphere = mesh->GetSphere();
+                Gizmos::DrawOutlineSphere(renderSystem, sphere.center, sphere.radius);
+            }
+        }
+
+        Gizmos::CreateRenderCommands(commands);
 
         {
             rmt_ScopedCPUSample(SceneRenderer_SortMeshes, 0)
@@ -182,22 +210,6 @@ void ForwardSceneRenderer::Render(RenderSystem& renderSystem, const entt::regist
             }
         }
 
-        for (const auto view = registry.view<SceneNodeComponent, MeshComponent>(); const auto& [entity, sceneNode, meshComp] : view.each())
-        {
-            auto mesh = meshComp.mesh;
-            if (meshComp.showBoundingBox)
-            {
-                const auto& box = mesh->GetBox();
-                Gizmos::DrawOutlineBox(renderSystem, box.center, box.extent);
-            }
-            if (meshComp.showBoundingSphere)
-            {
-                const auto& sphere = mesh->GetSphere();
-                Gizmos::DrawOutlineSphere(renderSystem, sphere.center, sphere.radius);
-            }
-        }
-        // TODO: Perform drawing during the overlay render pass
-        Gizmos::ProcessDraw(renderSystem, projection * viewMtx);
         // Only render from the first active camera POV.
         // TODO: Support render to offscreen targets from multiple cameras.
         break;
