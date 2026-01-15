@@ -110,21 +110,16 @@ void ForwardSceneRenderer::Render(RenderSystem& renderSystem, const entt::regist
                     const auto &batched = commands;
                     for (const auto& cmd : batched)
                     {
-                        auto material = cmd.material;
-                        if (!material) continue;
-                        if (!pass.MatchesMaterial(*material)) continue;
+                        if (!cmd.material) continue;
+                        if (!pass.IsPassFiltered(cmd)) continue;
 
-                        Ref<GpuProgram> gpuProgram = pass.pipelineState.globalShader ? pass.pipelineState.globalShader : cmd.gpuProgram;
+                        Ref<GpuProgram> gpuProgram = pass.pipelineState.globalShader;
+                        if (!gpuProgram) {
+                            gpuProgram = cmd.material->Use();
+                        }
                         if (gpuProgram != usingProgram)
                         {
-                            if (!pass.pipelineState.globalShader)
-                            {
-                                material->Use();
-                            }
-                            else
-                            {
-                                if (!gpuProgram->IsBinding()) gpuProgram->Bind();
-                            }
+                            if (!gpuProgram->IsBinding()) gpuProgram->Bind();
 
                             gpuProgram->SetUniformVector("_CameraPos", cameraPos.value);
                             gpuProgram->SetUniformMatrix("_View", viewMtx, false);

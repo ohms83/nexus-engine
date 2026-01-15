@@ -5,6 +5,7 @@
 #include "Material.h"
 #include "PipelineState.h"
 #include "RenderingInterface.h"
+#include "RenderCommand.h"
 
 #include "nexus/io/Serializable.h"
 
@@ -94,10 +95,9 @@ NXS_NAMESPACE
         /**< @brief Source code for the global shader, per program type. */
         std::map<GpuProgram::Type, std::string> globalShaderSources;
 
-        // Filtering: a pass can decide which materials/objects to render using
-        // this callback. `MatchesMaterial` will check it, falling back to true.
-        std::function<bool(const Material& material)> filter = nullptr;
-        //! A name or preset to deserialize a filter (serializable). Valid values: "opaque", "alpha", "all"
+        // Filtering: a pass can decide which objects to render using this callback.
+        std::function<bool(const RenderCommand& command)> filter = nullptr;
+        //! A name or preset to deserialize a filter (serializable). Valid values: "opaque", "alpha", "overlay", and "all"
         std::string filterType = "all";
 
         // Optional lifecycle hooks, called at the start / end of the pass.
@@ -112,13 +112,6 @@ NXS_NAMESPACE
 
         /**< @brief Release all resources held by this render pass. */
         void ReleaseResources();
-
-        // Helpers:
-        bool MatchesMaterial(const Material& m) const
-        {
-            if (!filter) return true;
-            return filter(m);
-        }
 
         // Map this pass to a concrete RenderingInterface state (GL/VK).
         // These functions are designed to be called by the renderer.
@@ -149,6 +142,11 @@ NXS_NAMESPACE
          * @param type A string representing the filter type. Valid values are "opaque", "alpha", and "all".
          */
         void SetFilterType(std::string type);
+
+        bool IsPassFiltered(const RenderCommand& cmd) const
+        {
+            return !filter || filter(cmd);
+        }
     };
 
     struct RenderPassBuilder

@@ -93,12 +93,12 @@ bool Material::HasTextureType(TextureType type) const
     return itr != m_textures.end();
 }
 
-void Material::Use()
+Ref<GpuProgram> Material::Use()
 {
     if (!m_shader)
     {
         LOG_WARNING(LogMaterial, std::format("Material does not have a shader"));
-        return;
+        return nullptr;
     }
 
     auto gpuProgram = m_shader->GetGpuProgram();
@@ -121,6 +121,8 @@ void Material::Use()
             textureInfo.texture->GetProxy(),
             slot++);
     }
+
+    return gpuProgram;
 }
 
 VariantData Material::Serialize() const

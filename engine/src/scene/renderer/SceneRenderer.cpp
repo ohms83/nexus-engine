@@ -52,7 +52,6 @@ RenderCommand SceneRenderer::CreateRenderCommand(Ref<const Mesh> mesh, glm::mat4
     cmd.bounds = mesh->GetSphere();
     cmd.layerMask = 0xFFFFFFFFu;
     cmd.material = material;
-    cmd.gpuProgram = material->GetShader()->GetGpuProgram();
     cmd.SetSortKey(translucent, materialId, depthNormalized);
     return cmd;
 }

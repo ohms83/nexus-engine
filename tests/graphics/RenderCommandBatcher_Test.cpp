@@ -19,8 +19,6 @@ TEST(RenderCommandBatcher, BatchesAdjacentSameDraw)
     b.modelMatrix = m2;
     c.modelMatrix = m3;
 
-    a.gpuProgram = nullptr; b.gpuProgram = nullptr; c.gpuProgram = nullptr;
-
     std::vector<RenderCommand> inputs{a, b, c};
     // Test both batch functions
     RenderCommandBatcher::Batch(inputs);

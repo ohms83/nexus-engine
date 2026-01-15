@@ -269,18 +269,23 @@ void RenderPass::SetFilterType(std::string type)
     filterType = std::move(type);
     if (filterType == "opaque")
     {
-        filter = [](const Material& m) { return m.blendMode == BlendMode::None; };
+        filter = [](const RenderCommand& cmd) {
+            return cmd.material && cmd.material->blendMode == BlendMode::None;
+        };
     }
     else if (filterType == "alpha")
     {
-        filter = [](const Material& m) { return m.blendMode != BlendMode::None; };
+        filter = [](const RenderCommand& cmd) {
+            return cmd.material && cmd.material->blendMode != BlendMode::None;
+        };
     }
     else if (filterType == "overlay")
     {
-        filter = [](const Material& m) {
-            return m.blendMode == BlendMode::None &&
-                   !m.depthWrite &&
-                   m.depthFunction == DepthFunction::Always;
+        filter = [](const RenderCommand& cmd) {
+            return cmd.material &&
+                   cmd.material->blendMode == BlendMode::None &&
+                   !cmd.material->depthWrite &&
+                   cmd.material->depthFunction == DepthFunction::Always;
         };
     }
     else // "all" or unknown
