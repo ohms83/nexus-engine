@@ -16,7 +16,7 @@ uniform mat4 _Projection;
 void main()
 {
     gl_Position = _Projection * _View * _Model * vec4(aPos, 1.0);
-    gl_Position += 0.1;
+    gl_Position.z += 0.1;
 }
 )";
 
@@ -83,6 +83,7 @@ void RenderPass::Begin(RenderSystem& rs) const
     rs.ApplyPipelineState(pipelineState);
 
     auto renderInterface = rs.GetRenderInterface();
+    renderInterface->DebugMarker(name);
     // Offscreen target is bound by the caller (SceneRenderer/RenderSystem).
     // Clear
     auto hasFlag = [](ClearFlags flags, ClearFlags f){ return (UINT_CAST(flags) & UINT_CAST(f)) != 0; };

@@ -82,7 +82,7 @@ NXS_NAMESPACE
         std::vector<std::string> readTargets;
 
         // Clear
-        ClearFlags clearFlags = ClearFlags::Color | ClearFlags::Depth;
+        ClearFlags clearFlags = ClearFlags::None;
         Color3F clearColor{0.0f, 0.0f, 0.0f};
         float clearDepth = 1.0f;
         uint32_t clearStencil = 0;

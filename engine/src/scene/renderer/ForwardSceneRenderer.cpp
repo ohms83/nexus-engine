@@ -30,7 +30,6 @@ USING_NAMESPACE_NXS;
 
 ForwardSceneRenderer::ForwardSceneRenderer(const RenderSystem& renderSystem)
 {
-    RegisterRenderPass(DepthPrepass);
     RegisterRenderPass(OpaquePass);
     RegisterRenderPass(AlphaPass);
     RegisterRenderPass(OverlayPass);
