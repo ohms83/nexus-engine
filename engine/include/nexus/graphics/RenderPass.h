@@ -165,6 +165,8 @@ NXS_NAMESPACE
         RenderPassBuilder& ClearDepth(float depth) { pass.clearDepth = depth; return *this; }
         RenderPassBuilder& DepthTest(bool v) { pass.pipelineState.depthTest = v; return *this; }
         RenderPassBuilder& DepthWrite(bool v) { pass.pipelineState.depthWrite = v; return *this; }
+        RenderPassBuilder& DepthFunction(DepthFunction f) { pass.pipelineState.depthFunction = f; return *this; }
+        RenderPassBuilder& StencilTest(bool v) { pass.pipelineState.depthTest = v; return *this; }
         RenderPassBuilder& GlobalShader(const Ref<GpuProgram>& s) { pass.pipelineState.globalShader = s; return *this; }
         RenderPassBuilder& GlobalShaderSources(const std::map<GpuProgram::Type, std::string>& sources)
         {
