@@ -275,11 +275,17 @@ void Gizmos::ProcessDraw(RenderSystem& renderSystem, const glm::mat4& cameraMtx)
 #endif
 }
 
-void Gizmos::CreateRenderCommands(std::vector<RenderCommand>& outCommands)
+void Gizmos::CreateRenderCommands(std::vector<RenderCommand>& outCommands, RenderSystem& renderSystem)
 {
     static const Sphere boundingSphere { glm::vec3(0), FLT_MAX };
+
+    auto renderInterface = renderSystem.GetRenderInterface();
     for (auto [index, vertexData] : s_vertexDataList)
     {
+        if (vertexData->NumVertex() == 0 || vertexData->NumIndex() == 0) continue;
+
+        vertexData->CopyToGpu(*renderInterface);
+
         auto vertexBuffer = vertexData->GetVertexBuffer();
         auto indexBuffer = vertexData->GetIndexBuffer();
         NXS_ASSERT(vertexBuffer && indexBuffer);

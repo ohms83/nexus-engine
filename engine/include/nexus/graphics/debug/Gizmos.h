@@ -20,7 +20,7 @@ NXS_NAMESPACE
         //! Clear gizmos data from the last frame.
         static void Clear();
         static void ProcessDraw(RenderSystem& renderSystem, const glm::mat4& cameraMtx);
-        static void CreateRenderCommands(std::vector<RenderCommand>& outCommands);
+        static void CreateRenderCommands(std::vector<RenderCommand>& outCommands, RenderSystem& renderSystem);
         static void DrawPoint(
             RenderSystem& renderSystem,
             const glm::vec3& position,
