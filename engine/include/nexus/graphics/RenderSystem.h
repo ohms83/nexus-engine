@@ -107,7 +107,7 @@ NXS_NAMESPACE
         Ref<GpuProgram> m_cachedGlobalShader;
         GraphicsConfig m_config;
         Ref<RenderingInterface> m_renderingInterface;
-        Color4F m_clearColor = Color4F::White;
+        Color4F m_clearColor = Color4F::Grey;
         float m_clearDepth = 1.0f;
 
         uint32 m_frameIndex = 0;
