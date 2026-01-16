@@ -45,6 +45,8 @@ NXS_NAMESPACE
 
         void EnableDrawBuffer(DrawBuffer buffer) override;
 
+        void DebugMarker(const std::string& message) override;
+
     protected:
         SDL_Window* m_window = nullptr;
     };

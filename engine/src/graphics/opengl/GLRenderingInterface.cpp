@@ -291,3 +291,15 @@ void GLRenderingInterface::EnableDrawBuffer(DrawBuffer buffer)
         break;
     }
 }
+
+void GLRenderingInterface::DebugMarker(const std::string& message)
+{
+    CALL_GL_FUNC(glDebugMessageInsert(
+        GL_DEBUG_SOURCE_APPLICATION ,
+        GL_DEBUG_TYPE_MARKER ,
+        0,
+        GL_DEBUG_SEVERITY_NOTIFICATION,
+        message.length(),
+        message.c_str()
+    ));
+}

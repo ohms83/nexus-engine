@@ -9,6 +9,7 @@
 
 #include "Color.h"
 #include "GraphicsConfig.h"
+#include "GraphicsConst.h"
 #include "IndexBuffer.h"
 #include "GpuProgram.h"
 #include "TextureProxy.h"
@@ -72,6 +73,8 @@ NXS_NAMESPACE
         void SetGlobalShader(Ref<GpuProgram> shader) { m_globalShader = shader; }
 
         virtual void EnableDrawBuffer(DrawBuffer buffer) = 0;
+
+        virtual void DebugMarker(const std::string& message) = 0;
 
     protected:
         RenderingInterface() = default;
