@@ -130,7 +130,6 @@ Ref<Resource> ModelLoader::Load(const std::string &path, uint32 id)
 
     // Process Assimp's root node recursively
     ProcessNode(model, scene->mRootNode, scene, directory);
-    ComputeBoundingVolume(model);
 
     LOG_INFO(LogModelLoader, "Model loaded successfully!!");
     LOG_INFO(LogModelLoader, model->DumpStats());
@@ -211,7 +210,6 @@ Ref<IResourceLoader::LoadResult> ModelLoader::LoadAsync(const std::string& path,
 
         // Process Assimp's root node recursively
         ProcessNode(model, scene->mRootNode, scene.get(), directory);
-        ComputeBoundingVolume(model);
 
         result->status = LoadResult::Status::Ready;
         result->resource = model;
@@ -236,6 +234,7 @@ void ModelLoader::ProcessNode(const Ref<Model>& model, const aiNode* node, const
     for (unsigned int i = 0; i < node->mNumChildren; i++) {
         ProcessNode(model, node->mChildren[i], scene, directory);
     }
+    model->ComputeBounds();
 }
 
 void ModelLoader::ProcessMesh(const Ref<Model>& model, const aiMesh* mesh, const aiScene* scene, const std::filesystem::path& directory) const
@@ -394,70 +393,4 @@ void ModelLoader::ProcessTextures(const Ref<Material>& newMat, const aiMaterial*
             }
         }
     }
-}
-
-void ModelLoader::ComputeBoundingVolume(const Ref<Model>& model)
-{
-#if 0
-    glm::vec3 min{FLT_MAX}, max{-FLT_MAX};
-    for (auto& mesh : model->GetMeshes())
-    {
-        // Mesh's bounding sphere
-        Sphere sphere;
-        // Mesh's min and max bounding box's extent.
-        glm::vec3 min_v{FLT_MAX}, max_v{-FLT_MAX};
-        const auto vertexBuffer = mesh->GetVertexBuffer();
-        const auto numVertex = vertexBuffer->VertexCount();
-
-        // Find AABB
-        for (auto vertexItr = vertexBuffer->begin<Vertex>(); vertexItr != vertexBuffer->end<Vertex>(); ++vertexItr)
-        {
-            const auto& pos = (*vertexItr).position;
-            min_v = glm::min(min_v, pos);
-            max_v = glm::max(max_v, pos);
-        }
-
-        sphere.center = (max_v + min_v) / 2.f;
-        mesh->SetBox(Box(sphere.center, max_v - sphere.center));
-        
-        // Refine the search by re-iterate every vertex again to find the tighter fit sphere
-        float radius = 0;
-        for (auto vertexItr = vertexBuffer->begin<Vertex>(); vertexItr != vertexBuffer->end<Vertex>(); ++vertexItr)
-        {
-            const auto& vertex = *vertexItr;
-            radius = std::max(radius, glm::length(sphere.center - vertex.position));
-        }
-        sphere.radius = radius;
-        mesh->SetSphere(sphere);
-        
-        LOG_DEBUG(LogModelLoader, std::format("Mesh Name={} Bounding Sphere Center=({}, {}, {}) Radius={}",
-            mesh->GetName(), sphere.center.x, sphere.center.y, sphere.center.z, sphere.radius
-        ));
-
-        min = glm::min(min_v, min);
-        max = glm::max(max_v, max);
-    }
-
-    glm::vec3 center = (max + min) / 2.f;
-    LOG_DEBUG(LogModelLoader, std::format("center({}, {}, {}) max({}, {}, {}) min({}, {}, {})",
-        center.x, center.y, center.z,
-        max.x, max.y, max.z,
-        min.x, min.y, min.z
-    ));
-    model->SetBoundingBox(center, max - center);
-
-    float radius = 0;
-    for (const auto& mesh : model->GetMeshes())
-    {
-        const auto vertexBuffer = mesh->GetVertexBuffer();
-        for (auto vertexItr = vertexBuffer->begin<Vertex>(); vertexItr != vertexBuffer->end<Vertex>(); ++vertexItr)
-        {
-            const auto& vertex = *vertexItr;
-            radius = std::max(radius, glm::length(center - vertex.position));
-        }
-    }
-    model->SetBoundingSphere(center, radius);
-#else
-    model->ComputeBounds();
-#endif
 }
