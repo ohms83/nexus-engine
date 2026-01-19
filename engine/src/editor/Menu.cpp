@@ -1,4 +1,5 @@
 #include "editor/Menu.h"
+#include "editor/FileDialog.h"
 #include "editor/menu/ToggleMenuItem.h"
 #include "editor/menu/TriggerMenuItem.h"
 #include "editor/menu/WidgetMenuItem.h"
@@ -30,29 +31,55 @@ Menu::Menu(IWidgetOwner& widgetOwner)
         {
             std::make_shared<TriggerMenuItem> (
                 FILE_MENU_OPEN_SAVE,
-                "New",
+                "New Scene",
                 "",
                 "Ctrl+N",
                 []() {
-
                 }
             ),
             std::make_shared<TriggerMenuItem> (
                 FILE_MENU_OPEN_SAVE,
-                "Open...",
-                "",
+                "Open Scene",
+                "Open an existing scene.",
                 "Ctrl+O",
-                []() {
-
+                [&widgetOwner]() {
+                    FileDialogContext context {
+                        .windowContext = widgetOwner.GetWindowContext(),
+                        .title = "Open Scene",
+                        .mode = FileDialogContext::Mode::Open,
+                    };
+                    // TODO:
+                    (void)ShowFileDialog(context);
                 }
             ),
             std::make_shared<TriggerMenuItem> (
                 FILE_MENU_OPEN_SAVE,
-                "Save",
+                "Save Scene",
                 "",
                 "Ctrl+S",
-                []() {
-
+                [&widgetOwner]() {
+                    FileDialogContext context {
+                        .windowContext = widgetOwner.GetWindowContext(),
+                        .title = "Save File",
+                        .mode = FileDialogContext::Mode::Save,
+                    };
+                    // TODO:
+                    (void)ShowFileDialog(context);
+                }
+            ),
+            std::make_shared<TriggerMenuItem> (
+                FILE_MENU_OPEN_SAVE,
+                "Import",
+                "Import a 3D model to the currently active scene.",
+                "Ctrl+I",
+                [&widgetOwner]() {
+                    FileDialogContext context {
+                        .windowContext = widgetOwner.GetWindowContext(),
+                        .title = "Import Model",
+                        .mode = FileDialogContext::Mode::Open,
+                    };
+                    // TODO:
+                    (void)ShowFileDialog(context);
                 }
             ),
             std::make_shared<TriggerMenuItem> (

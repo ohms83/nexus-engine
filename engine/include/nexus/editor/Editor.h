@@ -20,8 +20,10 @@ NXS_NAMESPACE
     class Editor final : public IWidgetOwner
     {
     public:
-        Editor();
+        Editor(WindowContext windowContext);
         ~Editor();
+
+        WindowContext GetWindowContext() const override { return m_windowContext; }
 
         void Update();
         void Draw(RenderSystem& renderSystem);
@@ -43,6 +45,7 @@ NXS_NAMESPACE
         void DrawWidgets(RenderSystem& renderSystem) const override;
 
     protected:
+        WindowContext m_windowContext {};
         Ptr<Menu> m_menu;
         std::vector<Ref<EditorWidget>> m_widgets;
     };

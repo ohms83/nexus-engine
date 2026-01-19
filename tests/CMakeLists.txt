@@ -17,6 +17,7 @@ add_executable(nexus-test
 
 target_include_directories(nexus-test
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/..
 )
 
 # 2. Link to Google Test's main library

@@ -137,7 +137,7 @@ bool Application::Init(const ApplicationConfig& info)
 
     if (info.editMode)
     {
-        m_editor = std::make_unique<Editor>();
+        m_editor = std::make_unique<Editor>(m_window);
     }
 
     Gizmos::Init(*m_renderSystem);

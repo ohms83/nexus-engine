@@ -4,25 +4,14 @@
 
 #include "editor/Editor.h"
 #include "graphics/RenderSystem.h"
-
-// ImGui headers
-#include <imgui.h>
-
 #include "Remotery.h"
 
 USING_NAMESPACE_NXS;
 
-#define FILE_MENU_OPEN_SAVE 0
-#define FILE_MENU_QUIT_APP 1
-
-#define EDIT_UNDO_REDO 0
-#define EDIT_COPY_PASTE 1
-
-#define DEVELOPER_TOOLS 0
-
 DEFINE_LOG(Editor);
 
-Editor::Editor()
+Editor::Editor(WindowContext windowContext)
+    : m_windowContext(windowContext)
 {
     m_menu = std::make_unique<Menu>(*this);
 }

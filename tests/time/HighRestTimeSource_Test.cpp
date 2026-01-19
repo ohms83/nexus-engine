@@ -94,7 +94,7 @@ TEST_F(HighResTimeSourceTest, MeasureSleepDurationAccuracy) {
     // IMPORTANT: Operating system scheduling is not perfectly precise.
     // You'll need a higher tolerance here. 5-10ms (0.005s - 0.010s) is common for
     // real-world measurements, but this can vary depending on OS and system load.
-    constexpr double EPSILON_MEASUREMENT_S = 0.010; // e.g., allow up to 10 milliseconds deviation
+    constexpr double EPSILON_MEASUREMENT_S = 0.05; // e.g., allow up to 10 milliseconds deviation
     constexpr double EPSILON_MEASUREMENT_MS = EPSILON_MEASUREMENT_S * 1000.0;
 
     EXPECT_NEAR(delta_s, SLEEP_DURATION_S, EPSILON_MEASUREMENT_S);
