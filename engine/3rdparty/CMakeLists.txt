@@ -14,8 +14,8 @@ add_subdirectory(rapidjson)
 # MessagePack
 FetchContent_Declare(
   msgpackcxx
-  GIT_REPOSITORY https://github.com/msgpack/msgpack-c.git
-  GIT_TAG      cpp-7.0.0 # Or the latest stable release tag you want
+  GIT_REPOSITORY https://github.com/ohms83/msgpack-c.git
+  GIT_TAG        cpp-7.0.0 # Or the latest stable release tag you want
 )
 
 # Fetch the content (downloads if not already downloaded)
