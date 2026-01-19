@@ -61,6 +61,7 @@ static bool ProcessIncludes(std::stringstream& stream, const std::filesystem::pa
             outSourceStream << line << '\n';
         }
     }
+    return true;
 }
 
 std::unordered_set<std::string> ShaderGenerator::s_knownProgramTypes {
