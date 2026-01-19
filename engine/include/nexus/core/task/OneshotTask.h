@@ -35,7 +35,7 @@ NXS_NAMESPACE
          *
          * @return Always returns `false`.
          */
-        MAYBE_UNUSED bool Update()
+        MAYBE_UNUSED bool Update() override
         {
             m_task();
             return false;

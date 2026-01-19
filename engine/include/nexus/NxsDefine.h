@@ -2,6 +2,7 @@
 
 #include <SDL3/SDL.h>
 #include <memory>
+#include <cstring>
 
 #include "NxsDataType.h"
 
@@ -56,6 +57,12 @@ constexpr char const* NXS_BUILD_CFG = "Unknown";
 
 #define DECLARE_LOG_EXTERN(LogCategory) extern const std::string Log##LogCategory
 #define DEFINE_LOG(LogCategory) const std::string Log##LogCategory = #LogCategory
+
+#ifdef NXS_PLATFORM_WIN64
+#define NXS_STRNCPY(dst, dstsize, src, count) strncpy_s(dst, dstsize, src, count)
+#else
+#define NXS_STRNCPY(dst, dstsize, src, count) strncpy(dst, src, count)
+#endif
 
 NXS_NAMESPACE
 {

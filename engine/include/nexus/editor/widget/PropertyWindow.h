@@ -17,7 +17,7 @@ NXS_NAMESPACE
 
         void SetSceneNode(Identifier sceneNodeId);
 
-        virtual void Update() {}
+        virtual void Update() override {}
         
         void ChangeCategory(const std::string& name) override;
         void VisitReadOnlyProperty(const std::string& name, std::type_index type, void* value) override;

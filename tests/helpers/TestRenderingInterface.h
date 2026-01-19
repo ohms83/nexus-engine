@@ -30,10 +30,10 @@ public:
     bool SetUniformTexture2D(const std::string& name, Ref<const TextureProxy> texture, int32_t textureUnit) override { return true; }
 
 private:
-    NODISCARD uint32_t Alloc() { return 1; }
+    NODISCARD uint32_t Alloc() override { return 1; }
     void Release() override {}
 
-    int32_t FindUniform_Internal(const std::string& name) const { return 0; }
+    int32_t FindUniform_Internal(const std::string& name) const override { return 0; }
 };
 
 class FakeRendering : public RenderingInterface

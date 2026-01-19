@@ -63,7 +63,7 @@ void PropertyWindow::VisitReadOnlyProperty(const std::string& name, std::type_in
         char buf[2048] = "";
         const char* const str = (const char* const)value;
         const auto size = sizeof(buf);
-        strncpy(buf, str, size);
+        NXS_STRNCPY(buf, 2048, str, size);
 
         ImGui::InputText(c_name, buf, size);
     }
@@ -71,7 +71,7 @@ void PropertyWindow::VisitReadOnlyProperty(const std::string& name, std::type_in
     {
         static char buf[24] = "";
         snprintf(buf, sizeof(char) * 24, "%d", *(int32_t*)value);
-        ImGui::LabelText(c_name, buf);
+        ImGui::LabelText(c_name, "%s", buf);
     }
     else if (type == typeid(bool))
     {
@@ -115,7 +115,7 @@ void PropertyWindow::VisitPropertyWithFeedback(const std::string& name, std::typ
         char buf[2048] = "";
         const char* const str = (const char* const)value;
         const auto size = sizeof(buf);
-        strncpy(buf, str, size);
+        NXS_STRNCPY(buf, 2048, str, size);
 
         ImGui::InputText(c_name, buf, size);
         if (strncmp(buf, str, size) != 0) callback(buf);

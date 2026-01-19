@@ -34,7 +34,7 @@ NXS_NAMESPACE
     {
         IMPLEMENT_COMPONENT(MeshComponent);
 
-        void AcceptReflector(IReflector& reflector)
+        void AcceptReflector(IReflector& reflector) override
         {
             reflector.ChangeCategory("Mesh");
             reflector.VisitProperty("Show Bounding Sphere", typeid(bool), &showBoundingSphere);
