@@ -40,11 +40,11 @@ namespace nxs
 
             if (nameLen + filterLen >= (filterSize - index - 3)) break;
 
-            strncpy(&filter[index], extFilter.name.c_str(), nameLen);
+            NXS_STRNCPY(&filter[index], filterSize, extFilter.name.c_str(), nameLen);
             index += nameLen;
             filter[index] = '\0';
             index++;
-            strncpy(&filter[index], extFilter.filter.c_str(), filterLen);
+            NXS_STRNCPY(&filter[index], filterSize, extFilter.filter.c_str(), filterLen);
             index += filterLen;
             filter[index] = '\0';
             index++;
