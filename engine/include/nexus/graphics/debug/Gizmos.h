@@ -5,7 +5,7 @@
 #pragma once
 
 #include "nexus/NxsCommon.h"
-#include "nexus/graphics/Color.h"
+#include "nexus/core/Color.h"
 #include "nexus/graphics/RenderCommand.h"
 
 NXS_NAMESPACE

@@ -5,9 +5,10 @@
 #pragma once
 
 #include <cassert>
-#include "nexus/NxsCommon.h"
 
-#include "Color.h"
+#include "nexus/NxsCommon.h"
+#include "nexus/core/Color.h"
+
 #include "GraphicsConfig.h"
 #include "GraphicsConst.h"
 #include "IndexBuffer.h"

@@ -7,12 +7,12 @@
 
 #include "Texture.h"
 #include "GraphicsConst.h"
-#include "Color.h"
 #include "Shader.h"
 #include "RenderingInterface.h"
 
 #include "nexus/io/Serializable.h"
 #include "nexus/core/Resource.h"
+#include "nexus/core/Color.h"
 
 NXS_NAMESPACE
 {

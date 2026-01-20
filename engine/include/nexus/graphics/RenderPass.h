@@ -1,12 +1,12 @@
 #pragma once
 
 #include "GraphicsConst.h"
-#include "Color.h"
 #include "Material.h"
 #include "PipelineState.h"
 #include "RenderingInterface.h"
 #include "RenderCommand.h"
 
+#include "nexus/core/Color.h"
 #include "nexus/io/Serializable.h"
 
 #include <functional>
