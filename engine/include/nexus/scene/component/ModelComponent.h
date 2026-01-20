@@ -16,12 +16,12 @@ NXS_NAMESPACE
 
             auto path = model->GetPath();
 
-            reflector.ChangeCategory("Model");
-            reflector.VisitPropertyWithFeedback("Model Path", typeid(std::string), (void*)(path.c_str()), [&path](void* newValue) {
+            reflector.SetMarker("Model");
+            if (reflector.VisitString("Model Path", path)) {
                 // TODO:
-            });
-            reflector.VisitProperty("Show Bounding Sphere", typeid(bool), &showBoundingSphere);
-            reflector.VisitProperty("Show Bounding Box", typeid(bool), &showBoundingBox);
+            };
+            reflector.VisitBool("Show Bounding Sphere", showBoundingSphere);
+            reflector.VisitBool("Show Bounding Box", showBoundingBox);
         };
 
         Ref<Model> model;
@@ -36,9 +36,9 @@ NXS_NAMESPACE
 
         void AcceptReflector(IReflector& reflector) override
         {
-            reflector.ChangeCategory("Mesh");
-            reflector.VisitProperty("Show Bounding Sphere", typeid(bool), &showBoundingSphere);
-            reflector.VisitProperty("Show Bounding Box", typeid(bool), &showBoundingBox);
+            reflector.SetMarker("Mesh");
+            reflector.VisitBool("Show Bounding Sphere", showBoundingSphere);
+            reflector.VisitBool("Show Bounding Box", showBoundingBox);
         }
 
         Ref<Mesh> mesh;

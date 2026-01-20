@@ -39,13 +39,13 @@ void SceneNode::Destroy()
 
 void SceneNode::AcceptReflector(IReflector& reflector)
 {
-    reflector.ChangeCategory("Properties");
+    reflector.SetMarker("Properties");
 
     auto comp = GetComponent<SceneNodeComponent>();
-    reflector.VisitPropertyWithFeedback("Name", typeid(std::string), (void*)(comp->name.c_str()), [&comp](void* newValue) {
-        comp->name = CAST<const char*>(newValue);
-    });
-    reflector.VisitProperty("Active", typeid(bool), (void*)&comp->active);
+    reflector.VisitString("Name", comp->name);
+    if (reflector.VisitBool("Active", comp->active)) {
+        comp->active ? OnActivate() : OnDeactivate();
+    }
 
     const auto registry = GetRegistry();
     for (const auto id : GetRegisteredComponentIDs())
@@ -55,7 +55,7 @@ void SceneNode::AcceptReflector(IReflector& reflector)
         const auto storage = registry->storage(id);
         if (storage && storage->contains(m_entity))
         {
-            auto componentPtr = R_CAST<IComponent*>(storage->value(m_entity));
+            auto componentPtr = R_CAST<IReflection*>(storage->value(m_entity));
             componentPtr->AcceptReflector(reflector);
         }
     }

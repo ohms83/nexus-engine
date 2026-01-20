@@ -16,8 +16,8 @@ NXS_NAMESPACE
 
         void AcceptReflector(IReflector& reflector) override
         {
-            reflector.ChangeCategory("Transform");
-            reflector.VisitProperty("Position", typeid(glm::vec3), &value);
+            reflector.SetMarker("Transform");
+            reflector.VisitVec3("Position", value);
         }
 
         glm::vec3 value;
@@ -43,11 +43,11 @@ NXS_NAMESPACE
 
         void AcceptReflector(IReflector& reflector) override
         {
-            reflector.ChangeCategory("Transform");
-            reflector.VisitPropertyWithFeedback("Orient", typeid(glm::vec3), &euler, [this](void* new_value) {
+            reflector.SetMarker("Transform");
+            if (reflector.VisitVec3("Orient", euler)) {
                 const auto radians = glm::radians(euler);
                 quat = glm::quat(radians);
-            });
+            };
         }
 
         /// @brief The Quaternion (main source of truth) used for all transformations.
@@ -129,8 +129,8 @@ NXS_NAMESPACE
 
         void AcceptReflector(IReflector& reflector) override
         {
-            reflector.ChangeCategory("Transform");
-            reflector.VisitProperty("Scale", typeid(glm::vec3), &value);
+            reflector.SetMarker("Transform");
+            reflector.VisitVec3("Scale", value);
         }
 
         glm::vec3 value {1, 1, 1};
@@ -142,9 +142,12 @@ NXS_NAMESPACE
 
         void AcceptReflector(IReflector& reflector) override
         {
-            reflector.ChangeCategory("Movement");
-            reflector.VisitReadOnlyProperty("Direction", typeid(glm::vec3), &direction);
-            reflector.VisitProperty("Speed", typeid(float), &speed);
+            reflector.SetMarker("Movement");
+            reflector.VisitFloat("Speed", speed);
+
+            reflector.SetReadOnlyFlag(true);
+            reflector.VisitVec3("Direction", direction);
+            reflector.SetReadOnlyFlag(false);
         }
 
         glm::vec3 direction;
@@ -157,9 +160,12 @@ NXS_NAMESPACE
         
         void AcceptReflector(IReflector& reflector) override
         {
-            reflector.ChangeCategory("Turning");
-            reflector.VisitReadOnlyProperty("Axis", typeid(glm::vec3), &axis);
-            reflector.VisitProperty("Degree", typeid(float), &degree);
+            reflector.SetMarker("Turning");
+            reflector.VisitFloat("Degree", degree);
+
+            reflector.SetReadOnlyFlag(true);
+            reflector.VisitVec3("Axis", axis);
+            reflector.SetReadOnlyFlag(false);
         }
 
         //! Rotation axis

@@ -43,7 +43,7 @@ void PropertyWindow::Draw_Internal(RenderSystem& renderSystem)
     selectedNode->AcceptReflector(CAST<IReflector&>(*this));
 }
 
-void PropertyWindow::ChangeCategory(const std::string& name)
+void PropertyWindow::SetMarker(const std::string& name)
 {
     if (const auto hash = Hasher().Hash32(name); hash != m_currentCategory)
     {
@@ -52,104 +52,79 @@ void PropertyWindow::ChangeCategory(const std::string& name)
     }
 }
 
-void PropertyWindow::VisitReadOnlyProperty(const std::string& name, std::type_index type, void* value)
+void PropertyWindow::SetReadOnlyFlag(bool value)
 {
-    const char* const c_name = name.c_str();
-
-    ImGui::BeginDisabled();
-
-    if (type == typeid(std::string))
-    {
-        char buf[2048] = "";
-        const char* const str = (const char* const)value;
-        const auto size = sizeof(buf);
-        NXS_STRNCPY(buf, 2048, str, size);
-
-        ImGui::InputText(c_name, buf, size);
-    }
-    else if (type == typeid(int32_t))
-    {
-        static char buf[24] = "";
-        snprintf(buf, sizeof(char) * 24, "%d", *(int32_t*)value);
-        ImGui::LabelText(c_name, "%s", buf);
-    }
-    else if (type == typeid(bool))
-    {
-        bool flag = (bool*)value;
-        ImGui::Checkbox(c_name, &flag);
-    }
-    else if (type == typeid(float))
-    {
-        ImGui::InputFloat(c_name, (float*)value, 0, 0, "%.6f");
-    }
-    else if (type == typeid(glm::vec2))
-    {
-        ImGui::InputFloat2(c_name, (float*)value, "%.3f");
-    }
-    else if (type == typeid(glm::vec3))
-    {
-        ImGui::InputFloat3(c_name, (float*)value, "%.3f");
-    }
-    else if (type == typeid(glm::vec4))
-    {
-        ImGui::InputFloat4(c_name, (float*)value, "%.3f");
-    }
-    else if (type == typeid(Color3F))
-    {
-        ImGui::ColorPicker3(c_name, (float*)value);
-    }
-    else if (type == typeid(Color4F))
-    {
-        ImGui::ColorPicker4(c_name, (float*)value);
-    }
-
-    ImGui::EndDisabled();
+    if (value) ImGui::BeginDisabled();
+    else ImGui::EndDisabled();
 }
 
-void PropertyWindow::VisitPropertyWithFeedback(const std::string& name, std::type_index type, void* value, std::function<void(void*)> callback)
+bool PropertyWindow::VisitBool(const std::string& name, bool& value)
 {
-    const char* const c_name = name.c_str();
+    return ImGui::Checkbox(name.c_str(), &value);
+}
 
-    if (type == typeid(std::string))
-    {
-        char buf[2048] = "";
-        const char* const str = (const char* const)value;
-        const auto size = sizeof(buf);
-        NXS_STRNCPY(buf, 2048, str, size);
+bool PropertyWindow::VisitInt(const std::string& name, int64_t& value)
+{
+    NXS_ASSERT_MSG(value > INT32_MAX, std::format("Integer value overflow - {}: {}", name, value));
+    return ImGui::InputInt(name.c_str(), R_CAST<int*>(&value));
+}
 
-        ImGui::InputText(c_name, buf, size);
-        if (strncmp(buf, str, size) != 0) callback(buf);
+bool PropertyWindow::VisitUInt(const std::string& name, uint64_t& value)
+{
+    NXS_ASSERT_MSG(value > INT32_MAX, std::format("Integer value overflow - {}: {}", name, value));
+    return ImGui::InputInt(name.c_str(), R_CAST<int*>(&value));
+}
+
+bool PropertyWindow::VisitFloat(const std::string& name, float& value)
+{
+    return ImGui::InputFloat(name.c_str(), &value);
+}
+
+bool PropertyWindow::VisitDouble(const std::string & name, double & value)
+{
+    return ImGui::InputDouble(name.c_str(), &value);
+}
+
+bool PropertyWindow::VisitString(const std::string& name, std::string& value)
+{
+    char buf[2048] = "";
+    const auto size = sizeof(buf);
+    NXS_STRNCPY(buf, size, value.c_str(), value.length());
+
+    if (ImGui::InputText(name.c_str(), buf, size)) {
+        value = buf;
+        return true;
     }
-    else if (type == typeid(int32_t))
-    {
-        if (ImGui::InputInt(c_name, (int32_t*)value)) callback(value);
-    }
-    else if (type == typeid(bool))
-    {
-        if (ImGui::Checkbox(c_name, (bool*)value)) callback(value);
-    }
-    else if (type == typeid(float))
-    {
-        if (ImGui::InputFloat(c_name, (float*)value, 0, 0, "%.6f")) callback(value);
-    }
-    else if (type == typeid(glm::vec2))
-    {
-        if (ImGui::InputFloat2(c_name, (float*)value)) callback(value);
-    }
-    else if (type == typeid(glm::vec3))
-    {
-        if (ImGui::InputFloat3(c_name, (float*)value)) callback(value);
-    }
-    else if (type == typeid(glm::vec4))
-    {
-        if (ImGui::InputFloat4(c_name, (float*)value)) callback(value);
-    }
-    else if (type == typeid(Color3F))
-    {
-        if (ImGui::ColorPicker3(c_name, (float*)value)) callback(value);
-    }
-    else if (type == typeid(Color4F))
-    {
-        if (ImGui::ColorPicker4(c_name, (float*)value)) callback(value);
-    }
+    return false;
+}
+
+bool PropertyWindow::VisitVec2(const std::string& name, glm::vec2& value)
+{
+    return ImGui::InputFloat2(name.c_str(), R_CAST<float*>(&value));
+}
+
+bool PropertyWindow::VisitVec3(const std::string& name, glm::vec3& value)
+{
+    return ImGui::InputFloat3(name.c_str(), R_CAST<float*>(&value));
+}
+
+bool PropertyWindow::VisitVec4(const std::string& name, glm::vec4& value)
+{
+    return ImGui::InputFloat4(name.c_str(), R_CAST<float*>(&value));
+}
+
+bool PropertyWindow::VisitColor3(const std::string& name, Color3F& value)
+{
+    return ImGui::ColorPicker3(name.c_str(), R_CAST<float*>(&value));
+}
+
+bool PropertyWindow::VisitColor4(const std::string& name, Color4F& value)
+{
+    return ImGui::ColorPicker3(name.c_str(), R_CAST<float*>(&value));
+}
+
+bool PropertyWindow::VisitObject(const std::string &name, IReflector &value)
+{
+    // Property window doesn't support nested object so it will be silently ignored.
+    return false;
 }

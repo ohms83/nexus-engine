@@ -21,8 +21,8 @@ NXS_NAMESPACE
 
         void AcceptReflector(IReflector& reflector) override
         {
-            reflector.ChangeCategory("Light");
-            reflector.VisitProperty("Ambient Color", typeid(Color3F), &color);
+            reflector.SetMarker("Light");
+            reflector.VisitColor3("Ambient Color", color);
         }
 
         Color3F color {};
@@ -39,10 +39,10 @@ NXS_NAMESPACE
 
         void AcceptReflector(IReflector& reflector) override
         {
-            reflector.ChangeCategory("Light");
-            reflector.VisitProperty("Color", typeid(Color3F), &color);
-            reflector.VisitProperty("Diffuse Intensity", typeid(float), &diffuseIntensity);
-            reflector.VisitProperty("Specular Intensity", typeid(float), &specularIntensity);
+            reflector.SetMarker("Light");
+            reflector.VisitColor3("Color",  color);
+            reflector.VisitFloat("Diffuse Intensity", diffuseIntensity);
+            reflector.VisitFloat("Specular Intensity", specularIntensity);
         }
 
         Color3F color {};
@@ -74,8 +74,8 @@ NXS_NAMESPACE
         {
             properties.AcceptReflector(reflector);
 
-            reflector.ChangeCategory("Light");
-            reflector.VisitProperty("Direction", typeid(glm::vec3), &direction);
+            reflector.SetMarker("Light");
+            reflector.VisitVec3("Direction", direction);
         }
 
         LightProperties properties;
@@ -95,10 +95,10 @@ NXS_NAMESPACE
         {
             properties.AcceptReflector(reflector);
 
-            reflector.ChangeCategory("Light");
-            reflector.VisitProperty("Constant", typeid(float), &constant);
-            reflector.VisitProperty("Linear", typeid(float), &linear);
-            reflector.VisitProperty("Quadratic", typeid(float), &quadratic);
+            reflector.SetMarker("Light");
+            reflector.VisitFloat("Constant", constant);
+            reflector.VisitFloat("Linear",  linear);
+            reflector.VisitFloat("Quadratic",  quadratic);
         }
 
         LightProperties properties;
