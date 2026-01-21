@@ -1,10 +1,3 @@
-//
-//  Serialize.hpp
-//  MiniRPG
-//
-//  Created by nuttachai on 30/10/19.
-//
-
 #pragma once
 
 #include "Serializer.h"

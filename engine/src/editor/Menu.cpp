@@ -1,4 +1,5 @@
 #include "editor/Menu.h"
+#include "editor/Editor.h"
 #include "editor/FileDialog.h"
 #include "editor/menu/ToggleMenuItem.h"
 #include "editor/menu/TriggerMenuItem.h"
@@ -7,10 +8,16 @@
 #include "editor/widget/EditorWidget.h"
 #include "editor/widget/ProfilerWidget.h"
 #include "editor/widget/PropertyWindow.h"
+#include "core/LogDispatcher.h"
+#include "io/JsonSerializer.h"
+
+#include "Application.h"
 
 #include "DebugMenuItem.inl"
 
 #include "imgui.h"
+
+#include <fstream>
 
 USING_NAMESPACE_NXS;
 
@@ -45,7 +52,9 @@ Menu::Menu(IWidgetOwner& widgetOwner)
                 [&widgetOwner]() {
                     FileDialogContext context {
                         .windowContext = widgetOwner.GetWindowContext(),
+                        .filters = { {"Nexus scene file (*.nxs)", "*.nxs"} },
                         .title = "Open Scene",
+                        .defaultExtension = "nxs",
                         .mode = FileDialogContext::Mode::Open,
                     };
                     // TODO:
@@ -60,11 +69,24 @@ Menu::Menu(IWidgetOwner& widgetOwner)
                 [&widgetOwner]() {
                     FileDialogContext context {
                         .windowContext = widgetOwner.GetWindowContext(),
-                        .title = "Save File",
+                        .filters = { {"Nexus scene file (*.nxs)", "*.nxs"} },
+                        .title = "Save Scene",
+                        .defaultExtension = "nxs",
                         .mode = FileDialogContext::Mode::Save,
                     };
-                    // TODO:
-                    (void)ShowFileDialog(context);
+                    // TODO: Move the serialization code to a separate file.
+                    const auto filepath = ShowFileDialog(context);
+                    LOG_INFO(LogTemp, std::format("Filepath={}", filepath));
+                    if (filepath.empty()) return;
+
+                    std::ofstream file(filepath);
+                    if (!file.good()) return;
+
+                    auto serializer = JsonSerializer();
+                    auto& application = CAST<Editor*>(&widgetOwner)->GetParentApp();
+                    auto& sceneManager = application.GetSceneManager();
+                    auto scene = sceneManager.GetCurrentScene();
+                    serializer.Pack(scene->Serialize(), file);
                 }
             ),
             std::make_shared<TriggerMenuItem> (
