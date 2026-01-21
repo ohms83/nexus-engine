@@ -307,18 +307,27 @@ NXS_NAMESPACE
             return 0; // Or throw an exception for non-container types
         }
 
+        /**
+         * @brief Appends a value to the back of the VariantData if it is an array.
+         * 
+         * If the VariantData does not hold an array, this function does nothing.
+         * 
+         * @param value The VariantData object to be appended.
+         */
+        void PushBack(const VariantData& value) {
+            if (!IsArray()) {
+                return;
+            }
+            GetArray().push_back(value);
+        }
+
         void Clear() {
             m_value = std::monostate{}; // Reset to null
         }
 
         // Template getter to reduce boilerplate and allow direct access if type is known
         template<typename T>
-        const T& Get() const {
-            return std::get<T>(m_value);
-        }
-
-        template<typename T>
-        T& Get() {
+        T Get() const {
             return std::get<T>(m_value);
         }
 
