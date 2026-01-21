@@ -11,7 +11,7 @@ NXS_NAMESPACE
      * a flexible, typeless data container, often used for saving/loading data
      * or network transmission.
      */
-    class ISerializable
+    class ISerializeable
     {
     public:
         /**

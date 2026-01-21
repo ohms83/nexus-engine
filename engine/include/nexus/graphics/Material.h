@@ -50,7 +50,7 @@ NXS_NAMESPACE
         LightMap,
     };
 
-    class Material final : public Resource, public ISerializable
+    class Material final : public Resource, public ISerializeable
     {
     public:
         explicit Material(std::string path, uint32 resourceId);

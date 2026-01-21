@@ -18,7 +18,7 @@
 
 NXS_NAMESPACE
 {
-    class Shader : public Resource, public ISerializable
+    class Shader : public Resource, public ISerializeable
     {
     public:
         struct Uniform

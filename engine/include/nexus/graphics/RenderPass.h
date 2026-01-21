@@ -59,7 +59,7 @@ NXS_NAMESPACE
      * @brief Represents a single render pass in the rendering pipeline.
      * 
      */
-    struct RenderPass : public ISerializable
+    struct RenderPass : public ISerializeable
     {
         //! Pass name. Mainly used for debugging purposes.
         std::string name;

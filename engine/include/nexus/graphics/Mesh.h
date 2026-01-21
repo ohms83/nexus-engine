@@ -13,7 +13,7 @@ NXS_NAMESPACE
 {
     class MaterialManager;
     class TextureManager;
-    class Mesh : public ISerializable
+    class Mesh : public ISerializeable
     {
     public:
         Mesh();
