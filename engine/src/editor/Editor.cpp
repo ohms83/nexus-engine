@@ -4,14 +4,16 @@
 
 #include "editor/Editor.h"
 #include "graphics/RenderSystem.h"
+#include "Application.h"
+
 #include "Remotery.h"
 
 USING_NAMESPACE_NXS;
 
 DEFINE_LOG(Editor);
 
-Editor::Editor(WindowContext windowContext)
-    : m_windowContext(windowContext)
+Editor::Editor(Application& parentApp)
+    : m_parentApp(parentApp)
 {
     m_menu = std::make_unique<Menu>(*this);
 }
@@ -19,6 +21,11 @@ Editor::Editor(WindowContext windowContext)
 Editor::~Editor()
 {
     Clear();
+}
+
+WindowContext Editor::GetWindowContext() const
+{
+    return m_parentApp.GetWindowContext();
 }
 
 // ReSharper disable once CppMemberFunctionMayBeStatic

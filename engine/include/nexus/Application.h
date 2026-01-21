@@ -15,7 +15,6 @@
 #include <glm/glm.hpp>
 
 #include "time/Timer.h"
-#include "editor/Editor.h"
 #include "graphics/Mesh.h"
 #include "graphics/Texture.h"
 #include "graphics/RenderSystem.h"
@@ -28,6 +27,8 @@
 
 NXS_NAMESPACE
 {
+    class Editor;
+
     struct ApplicationConfig
     {
         std::string title;
