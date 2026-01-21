@@ -1,14 +1,15 @@
 #pragma once
 
 #include "nexus/NxsDefine.h"
+#include "nexus/io/Serializable.h"
 #include "nexus/core/Reflection.h"
 #include "nexus/ecs/Ecs.h"
 #include "nexus/core/task/TaskScheduler.h"
+#include "nexus/graphics/RenderingInterface.h"
 
 #include "Entity.h"
 #include "Transform.h"
 #include "Script.h"
-
 #include "component/SceneNodeComponent.h"
 
 #include <string>
@@ -18,7 +19,7 @@ NXS_NAMESPACE
 {
     class Scene;
 
-    class SceneNode : public Entity, public IReflection
+    class SceneNode : public Entity, public IReflection, public ISerializeable
     // TODO: Consider replacing std::enable_shared_from_this with a custom solution
     , public std::enable_shared_from_this<SceneNode>
     {
@@ -32,6 +33,16 @@ NXS_NAMESPACE
         virtual ~SceneNode();
 
         void AcceptReflector(IReflector& reflector) override;
+
+        VariantData Serialize() const override;
+        void Deserialize(const VariantData& data) override;
+
+        /**
+         * @brief Resolve object's dependencies. This must be called after `Deserialization`.
+         * 
+         * @param renderingInterface 
+         */
+        virtual void Resolve(RenderingInterface& renderingInterface);
 
         Ref<SceneNode> GetSelf() { return PTR_CAST<SceneNode>(shared_from_this()); }
 

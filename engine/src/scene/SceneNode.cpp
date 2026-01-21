@@ -61,6 +61,69 @@ void SceneNode::AcceptReflector(IReflector& reflector)
     }
 }
 
+VariantData SceneNode::Serialize() const
+{
+    auto data = VariantData::Map();
+    data["__class__"] = ClassName();
+    // Node data
+    data["children"] = VariantData::Array();
+    for (const auto child : m_children)
+    {
+        data["children"].PushBack(child->Serialize());
+    }
+
+    // SceneComponent
+    auto& sceneCompData = data["SceneNodeComponent"];
+    auto comp = GetComponent<SceneNodeComponent>();
+    sceneCompData["id"] = INT_CAST(comp->id);
+    sceneCompData["active"] = comp->active;
+    sceneCompData["name"] = GetName();
+
+    // TODO: Generic component serialization
+
+    return data;
+}
+
+void SceneNode::Deserialize(const VariantData &data)
+{
+    if (!data.IsMap())
+    {
+        LOG_ERROR(LogSerialize, std::format("Invalid data type. Type={}", NxsGetTypeString(data.GetType())));
+        return;
+    }
+    NXS_ASSERT_MSG(data["__class__"] == ClassName(),
+        std::format("Unexpected object class. Expected={}, Actual={}", ClassName(), data["__class__"].GetString()));
+
+    // SceneComponent
+    const auto& sceneCompData = data["SceneNodeComponent"];
+    auto comp = GetComponent<SceneNodeComponent>();
+    comp->active = sceneCompData["active"].GetBool();
+    comp->name = sceneCompData["name"].GetString();
+    comp->id = UINT_CAST(sceneCompData["id"].GetInt());
+
+    for (const auto child : data["children"].GetArray())
+    {
+        if (child["__class__"] == "SceneNode")
+        {
+            auto childNode = EmplaceChild<SceneNode>();
+            childNode->Deserialize(child);
+        }
+    }
+}
+
+void SceneNode::Resolve(RenderingInterface &renderingInterface)
+{
+    // TODO: Resolve component dependencies
+    for (const auto child : m_children)
+    {
+        child->Resolve(renderingInterface);
+    }
+
+    // Activation callback must be called after all the dependencies are resolved.
+    if (IsActive()) OnActivate();
+    else OnDeactivate();
+}
+
 void SceneNode::Activate(const bool activate)
 {
     if (IsActive() != activate)
