@@ -2,7 +2,6 @@
 
 #include "nexus/NxsDefine.h"
 
-#include "Entity.h"
 #include "SceneNode.h"
 #include "component/TransformComponent.h"
 

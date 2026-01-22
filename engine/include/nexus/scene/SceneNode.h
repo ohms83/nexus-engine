@@ -4,10 +4,10 @@
 #include "nexus/core/serialize/Serializeable.h"
 #include "nexus/core/Reflection.h"
 #include "nexus/ecs/Ecs.h"
+#include "nexus/ecs/Entity.h"
 #include "nexus/core/task/TaskScheduler.h"
 #include "nexus/graphics/RenderingInterface.h"
 
-#include "Entity.h"
 #include "Transform.h"
 #include "Script.h"
 #include "component/SceneNodeComponent.h"
@@ -19,7 +19,7 @@ NXS_NAMESPACE
 {
     class Scene;
 
-    class SceneNode : public Entity, public IReflection, public ISerializeable
+    class SceneNode : public Entity, public IReflection
     // TODO: Consider replacing std::enable_shared_from_this with a custom solution
     , public std::enable_shared_from_this<SceneNode>
     {

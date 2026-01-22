@@ -8,6 +8,7 @@
 #include <typeindex>
 
 #include "nexus/NxsCommon.h"
+#include "nexus/core/serialize/Serializeable.h"
 #include "Color.h"
 
 #define IMPLEMENT_REFLECTION(Class) \
@@ -52,7 +53,7 @@ NXS_NAMESPACE
         virtual bool VisitObject(const std::string& name, IReflector& value) = 0;
     };
 
-    class IReflection
+    class IReflection : public ISerializeable
     {
     public:
         virtual ~IReflection() {}

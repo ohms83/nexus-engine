@@ -8,8 +8,7 @@
 #define COMPONENT_HASH(Type) entt::type_id<Type>().hash()
 #define IMPLEMENT_COMPONENT(Type) \
     IMPLEMENT_REFLECTION(Type); \
-    ComponentID GetComponentID() const override \
-    { \
+    ComponentID GetComponentID() const override { \
         return COMPONENT_HASH(Type); \
     }
 
@@ -22,6 +21,17 @@ NXS_NAMESPACE
     public:
         virtual ~IComponent() = default;
         virtual ComponentID GetComponentID() const = 0;
+
+        // --- Temporary implementation ----
+        VariantData Serialize() const override
+        {
+            return VariantData::Map();
+        }
+
+        void Deserialize(const VariantData&) override
+        {
+        }
+        // ---------------------------------
         
         template<typename Type>
         static bool HasRegisteredType()
