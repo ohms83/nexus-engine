@@ -1,10 +1,10 @@
-#include "nexus/io/JsonSerializer.h"
+#include "core/serialize/JsonSerializer.h"
 #include "rapidjson/document.h"
 #include "rapidjson/writer.h"
 #include "rapidjson/stringbuffer.h"
 #include <sstream>
 
-#include "nexus/core/LogDispatcher.h"
+#include "core/LogDispatcher.h"
 
 USING_NAMESPACE_NXS;
 using namespace std;

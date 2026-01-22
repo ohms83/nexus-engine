@@ -76,13 +76,16 @@ VariantData SceneNode::Serialize() const
     }
 
     // SceneComponent
-    auto& sceneCompData = data["SceneNodeComponent"];
+    auto sceneCompData = VariantData::Map();
     auto comp = GetComponent<SceneNodeComponent>();
+    sceneCompData["__class__"] = "SceneNodeComponent";
     sceneCompData["id"] = INT_CAST(comp->id);
     sceneCompData["active"] = comp->active;
     sceneCompData["name"] = GetName();
 
     // TODO: Generic component serialization
+    auto& components = data["components"] = VariantData::Array();
+    components.PushBack(sceneCompData);
 
     return data;
 }

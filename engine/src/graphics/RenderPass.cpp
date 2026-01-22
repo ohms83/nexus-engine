@@ -1,6 +1,6 @@
 #include "graphics/RenderPass.h"
 #include "graphics/RenderSystem.h"
-#include "io/Serializer.h"
+#include "core/serialize/Serializer.h"
 
 USING_NAMESPACE_NXS;
 

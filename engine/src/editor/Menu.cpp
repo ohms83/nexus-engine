@@ -9,7 +9,7 @@
 #include "editor/widget/ProfilerWidget.h"
 #include "editor/widget/PropertyWindow.h"
 #include "core/LogDispatcher.h"
-#include "io/JsonSerializer.h"
+#include "core/serialize/JsonSerializer.h"
 
 #include "Application.h"
 

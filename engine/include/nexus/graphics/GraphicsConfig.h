@@ -5,7 +5,7 @@
 #pragma once
 
 #include "nexus/NxsDefine.h"
-#include "nexus/io/IniParser.h"
+#include "nexus/core/serialize/IniParser.h"
 #include "GraphicsConst.h"
 
 NXS_NAMESPACE

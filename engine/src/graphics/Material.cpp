@@ -4,7 +4,7 @@
 
 #include "graphics/Material.h"
 #include "graphics/ShaderManager.h"
-#include "nexus/io/Serializer.h"
+#include "nexus/core/serialize/Serializer.h"
 #include "nexus/graphics/TextureManager.h"
 #include "core/LogDispatcher.h"
 #include "core/Path.h"

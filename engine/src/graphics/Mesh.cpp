@@ -2,7 +2,7 @@
 
 #include "nexus/graphics/MaterialManager.h"
 #include "nexus/graphics/TextureManager.h"
-#include "nexus/io/Serializer.h"
+#include "nexus/core/serialize/Serializer.h"
 
 USING_NAMESPACE_NXS;
 
