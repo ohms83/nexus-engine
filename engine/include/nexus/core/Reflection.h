@@ -37,8 +37,10 @@ NXS_NAMESPACE
         virtual void SetReadOnlyFlag(bool value) = 0;
 
         virtual bool VisitBool(const std::string& name, bool& value) = 0;
-        virtual bool VisitInt(const std::string& name, int64_t& value) = 0;
-        virtual bool VisitUInt(const std::string& name, uint64_t& value) = 0;
+        virtual bool VisitInt(const std::string& name, int32_t& value) = 0;
+        virtual bool VisitUInt(const std::string& name, uint32_t& value) = 0;
+        virtual bool VisitInt64(const std::string& name, int64_t& value) = 0;
+        virtual bool VisitUInt64(const std::string& name, uint64_t& value) = 0;
         virtual bool VisitFloat(const std::string& name, float& value) = 0;
         virtual bool VisitDouble(const std::string& name, double& value) = 0;
         virtual bool VisitString(const std::string& name, std::string& value) = 0;
