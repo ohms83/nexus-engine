@@ -164,6 +164,19 @@ NXS_NAMESPACE
             };
             return std::get<int64_t>(m_value);
         }
+        NODISCARD double GetFloat() const {
+            if (!IsDouble())
+            {
+                LOG_ERROR(LogSerialize, std::format("Not a floating point type. Type={}", NxsGetTypeString(GetType())));
+                return 0;
+            }
+            auto value = std::get<double>(m_value);
+            if (value > FLT_MAX) {
+                LOG_WARNING(LogSerialize, std::format("Floating point value overflow. Value={}", value));
+                return FLT_MAX;
+            }
+            return static_cast<float>(value);
+        }
         NODISCARD double GetDouble() const {
             if (!IsDouble())
             {
@@ -328,7 +341,12 @@ NXS_NAMESPACE
         // Template getter to reduce boilerplate and allow direct access if type is known
         template<typename T>
         T Get() const {
-            return std::get<T>(m_value);
+            if constexpr (std::is_same_v<T, float>) {
+                return GetFloat();
+            }
+            else {
+                return std::get<T>(m_value);
+            }
         }
 
         // Explicit conversions (optional, but convenient)
