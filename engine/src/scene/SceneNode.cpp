@@ -90,15 +90,19 @@ VariantData SceneNode::Serialize() const
     return data;
 }
 
-void SceneNode::Deserialize(const VariantData &data)
+bool SceneNode::Deserialize(const VariantData &data)
 {
     if (!data.IsMap())
     {
         LOG_ERROR(LogSerialize, std::format("Invalid data type. Type={}", NxsGetTypeString(data.GetType())));
-        return;
+        return false;
     }
-    NXS_ASSERT_MSG(data["__class__"] == ClassName(),
-        std::format("Unexpected object class. Expected={}, Actual={}", ClassName(), data["__class__"].GetString()));
+    
+    if (data["__class__"] != ClassName()) {
+        LOG_ERROR(LogSerialize,
+            std::format("Unexpected object class. Expected={}, Actual={}", ClassName(), data["__class__"].GetString()));
+        return false;
+    }
 
     // SceneComponent
     const auto& sceneCompData = data["SceneNodeComponent"];
@@ -115,6 +119,8 @@ void SceneNode::Deserialize(const VariantData &data)
             childNode->Deserialize(child);
         }
     }
+
+    return true;
 }
 
 void SceneNode::Resolve(RenderingInterface &renderingInterface)

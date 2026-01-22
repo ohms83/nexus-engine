@@ -68,7 +68,7 @@ VariantData Mesh::Serialize() const
     return data;
 }
 
-void Mesh::Deserialize(const VariantData& data)
+bool Mesh::Deserialize(const VariantData& data)
 {
     m_name = data["name"].GetString();
     // Material path is stored for later resolution by a ResourceManager.
@@ -96,6 +96,8 @@ void Mesh::Deserialize(const VariantData& data)
         m_boundingBox.extent.y = FLOAT_CAST(earr.at(1).GetDouble());
         m_boundingBox.extent.z = FLOAT_CAST(earr.at(2).GetDouble());
     }
+
+    return true;
 }
 
 void Mesh::Resolve(MaterialManager& materialManager, TextureManager& textureManager)

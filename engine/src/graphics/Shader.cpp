@@ -120,11 +120,12 @@ VariantData Shader::Serialize() const
     };
 }
 
-void Shader::Deserialize(const VariantData &data)
+bool Shader::Deserialize(const VariantData &data)
 {
     m_sources[GpuProgram::Type::Vertex] = data["vertex"].GetString();
     m_sources[GpuProgram::Type::Fragment] = data["fragment"].GetString();
     m_sources[GpuProgram::Type::Geometry] = data["geometry"].GetString();
+    return true;
 }
 
 bool Shader::HasUniformType(Uniform::Type type)

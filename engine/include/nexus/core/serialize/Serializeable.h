@@ -28,7 +28,10 @@ NXS_NAMESPACE
          * @c VariantData container. This process should handle the data type conversions
          * and structure validation.
          * @param data The VariantData container to deserialize from.
+         * 
+         * @return True if deserialization was successful and the data was valid for this type; 
+         * false otherwise.
          */
-        virtual void Deserialize(const VariantData& data) = 0;
+        MAYBE_UNUSED virtual bool Deserialize(const VariantData& data) = 0;
     };
 }

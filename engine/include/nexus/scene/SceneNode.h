@@ -35,7 +35,7 @@ NXS_NAMESPACE
         void AcceptReflector(IReflector& reflector) override;
 
         VariantData Serialize() const override;
-        void Deserialize(const VariantData& data) override;
+        MAYBE_UNUSED bool Deserialize(const VariantData& data) override;
 
         /**
          * @brief Resolve object's dependencies. This must be called after `Deserialization`.

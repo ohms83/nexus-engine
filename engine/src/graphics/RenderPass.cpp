@@ -181,7 +181,7 @@ VariantData RenderPass::Serialize() const
     return data;
 }
 
-void RenderPass::Deserialize(const VariantData& data)
+bool RenderPass::Deserialize(const VariantData& data)
 {
     name = data["name"].GetString();
     priority = UINT_CAST(data["priority"].GetInt());
@@ -245,6 +245,7 @@ void RenderPass::Deserialize(const VariantData& data)
 
     // Restore filter based on filterType preset
     SetFilterType(filterType);
+    return true;
 }
 
 void RenderPass::Resolve(RenderingInterface &renderingInterface)

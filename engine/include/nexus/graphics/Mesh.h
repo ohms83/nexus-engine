@@ -54,7 +54,7 @@ NXS_NAMESPACE
 
         // Serialization
         VariantData Serialize() const override;
-        void Deserialize(const VariantData& data) override;
+        MAYBE_UNUSED bool Deserialize(const VariantData& data) override;
 
         void SetSphere(const Sphere& sphere)
         {

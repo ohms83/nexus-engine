@@ -25,11 +25,20 @@ NXS_NAMESPACE
         // --- Temporary implementation ----
         VariantData Serialize() const override
         {
-            return VariantData::Map();
+            auto data = VariantData::Map();
+            data["__class__"] = ClassName();
+            return data;
         }
 
-        void Deserialize(const VariantData&) override
+        MAYBE_UNUSED bool Deserialize(const VariantData& data) override
         {
+            if (data["__class__"].GetString() == ClassName())
+            {
+                LOG_ERROR(LogSerialize, std::format("Unexpected object class. Expected={}, Actual={}",
+                    ClassName(), data["__class__"].GetString()));
+                return false;
+            }
+            return true;
         }
         // ---------------------------------
         

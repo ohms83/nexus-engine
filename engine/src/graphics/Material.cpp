@@ -152,7 +152,7 @@ VariantData Material::Serialize() const
     return data;
 }
 
-void Material::Deserialize(const VariantData& data)
+bool Material::Deserialize(const VariantData& data)
 {
     if (data.HasKey("ambient") && data["ambient"].IsArray())
     {
@@ -216,6 +216,8 @@ void Material::Deserialize(const VariantData& data)
             m_textures.push_back(std::move(ti));
         }
     }
+
+    return true;
 }
 
 void Material::Resolve(TextureManager& textureManager, RenderingInterface* renderingInterface)

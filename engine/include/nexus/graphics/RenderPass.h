@@ -120,7 +120,7 @@ NXS_NAMESPACE
 
         // Serialization helpers
         VariantData Serialize() const override;
-        void Deserialize(const VariantData& data) override;
+        MAYBE_UNUSED bool Deserialize(const VariantData& data) override;
         /**
          * @brief Resolve referenced resources such as shaders. This must be called after deserialization.
          */

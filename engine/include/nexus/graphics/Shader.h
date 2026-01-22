@@ -101,7 +101,7 @@ NXS_NAMESPACE
          * @brief Deserializes the shader from a given @c VariantData.
          * @param data The VariantData container to deserialize from.
          */
-        void Deserialize(const VariantData& data) override;
+        MAYBE_UNUSED bool Deserialize(const VariantData& data) override;
 
         const std::vector<Uniform>& GetUniforms() const
         {
