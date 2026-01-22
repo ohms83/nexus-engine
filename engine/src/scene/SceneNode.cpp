@@ -20,9 +20,10 @@ SceneNode::SceneNode(Ref<entt::registry> registry, std::string name)
     {
         name = std::format("SceneNode_{}", s_runningId);
     }
-    AddComponent<SceneNodeComponent>(
-        ++s_runningId, std::move(name), true
-    );
+    auto component = AddComponent<SceneNodeComponent>();
+    component->id = ++s_runningId;
+    component->name = std::move(name);
+    component->active = true;
 }
 
 SceneNode::~SceneNode()
@@ -41,11 +42,7 @@ void SceneNode::AcceptReflector(IReflector& reflector)
 {
     reflector.SetMarker("Properties");
 
-    auto comp = GetComponent<SceneNodeComponent>();
-    reflector.VisitString("Name", comp->name);
-    if (reflector.VisitBool("Active", comp->active)) {
-        comp->active ? OnActivate() : OnDeactivate();
-    }
+    const auto isActive = IsActive();
 
     const auto registry = GetRegistry();
     for (const auto id : GetRegisteredComponentIDs())
@@ -58,6 +55,12 @@ void SceneNode::AcceptReflector(IReflector& reflector)
             auto componentPtr = R_CAST<IReflection*>(storage->value(m_entity));
             componentPtr->AcceptReflector(reflector);
         }
+    }
+
+    if (isActive != IsActive())
+    {
+        if (IsActive()) OnActivate();
+        else OnDeactivate();
     }
 }
 

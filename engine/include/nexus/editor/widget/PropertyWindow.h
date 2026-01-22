@@ -24,8 +24,10 @@ NXS_NAMESPACE
         void SetReadOnlyFlag(bool value) override;
 
         bool VisitBool(const std::string& name, bool& value) override;
-        bool VisitInt(const std::string& name, int64_t& value) override;
-        bool VisitUInt(const std::string& name, uint64_t& value) override;
+        bool VisitInt(const std::string& name, int32_t& value) override;
+        bool VisitUInt(const std::string& name, uint32_t& value) override;
+        bool VisitInt64(const std::string& name, int64_t& value) override;
+        bool VisitUInt64(const std::string& name, uint64_t& value) override;
         bool VisitFloat(const std::string& name, float& value) override;
         bool VisitDouble(const std::string& name, double& value) override;
         bool VisitString(const std::string& name, std::string& value) override;

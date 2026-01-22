@@ -12,12 +12,7 @@ NXS_NAMESPACE
 {
     struct AmbientLightComponent : public IComponent
     {
-        IMPLEMENT_REFLECTION(AmbientLightComponent);
-
-        ComponentID GetComponentID() const override
-        {
-            return COMPONENT_HASH(AmbientLightComponent);
-        }
+        IMPLEMENT_COMPONENT(AmbientLightComponent);
 
         void AcceptReflector(IReflector& reflector) override
         {
@@ -30,12 +25,7 @@ NXS_NAMESPACE
 
     struct LightProperties : public IComponent
     {
-        IMPLEMENT_REFLECTION(LightProperties);
-
-        ComponentID GetComponentID() const override
-        {
-            return COMPONENT_HASH(LightProperties);
-        }
+        IMPLEMENT_COMPONENT(LightProperties);
 
         void AcceptReflector(IReflector& reflector) override
         {
@@ -63,12 +53,7 @@ NXS_NAMESPACE
 
     struct DirectLightComponent : public IComponent
     {
-        IMPLEMENT_REFLECTION(DirectLightComponent);
-
-        ComponentID GetComponentID() const override
-        {
-            return COMPONENT_HASH(DirectLightComponent);
-        }
+        IMPLEMENT_COMPONENT(DirectLightComponent);
 
         void AcceptReflector(IReflector& reflector) override
         {
@@ -84,12 +69,7 @@ NXS_NAMESPACE
 
     struct PointLightComponent : public IComponent
     {
-        IMPLEMENT_REFLECTION(PointLightComponent);
-
-        ComponentID GetComponentID() const override
-        {
-            return COMPONENT_HASH(PointLightComponent);
-        }
+        IMPLEMENT_COMPONENT(PointLightComponent);
 
         void AcceptReflector(IReflector& reflector) override
         {

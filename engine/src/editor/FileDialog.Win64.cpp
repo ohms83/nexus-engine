@@ -40,11 +40,11 @@ namespace nxs
 
             if (nameLen + filterLen >= (filterSize - index - 3)) break;
 
-            NXS_STRNCPY(&filter[index], filterSize, extFilter.name.c_str(), nameLen);
+            NXS_STRNCPY(&filter[index], filterSize - index, extFilter.name.c_str(), nameLen);
             index += nameLen;
             filter[index] = '\0';
             index++;
-            NXS_STRNCPY(&filter[index], filterSize, extFilter.filter.c_str(), filterLen);
+            NXS_STRNCPY(&filter[index], filterSize - index, extFilter.filter.c_str(), filterLen);
             index += filterLen;
             filter[index] = '\0';
             index++;
@@ -58,7 +58,6 @@ namespace nxs
     std::string ShowFileDialog(const FileDialogContext& context)
     {
         OPENFILENAME ofn;
-        char fileName[MAX_PATH] = ""; // Output file path.
         ZeroMemory(&ofn, sizeof(ofn));
 
         HWND hwnd = (HWND)SDL_GetPointerProperty(
@@ -66,9 +65,15 @@ namespace nxs
             SDL_PROP_WINDOW_WIN32_HWND_POINTER,
             NULL);
         // Convert the initial filepath to the OS preferred format (replacing "/" with "\" in the case of Windows).
-        const auto defaultDirectory = std::filesystem::path(context.initalDirectory).make_preferred().string();
+        std::string defaultDir = std::filesystem::path(context.initalDirectory).make_preferred().string();
+        std::string title = context.title;
+        std::string ext = context.defaultExtension;
 
+        char fileName[MAX_PATH] = ""; // Output file path.
         char filter[FILTER_MAX] = "";
+        ZeroMemory(&fileName, sizeof(fileName));
+        ZeroMemory(&filter, sizeof(filter));
+
         const auto numFilter = ConstructFilterList(context.filters, filter, FILTER_MAX);
         if (numFilter != context.filters.size())
         {
@@ -76,14 +81,14 @@ namespace nxs
         }
 
         ofn.lStructSize = sizeof(ofn);
-        ofn.lpstrInitialDir = defaultDirectory.c_str();
-        ofn.lpstrTitle = context.title.empty() ? nullptr : context.title.c_str();
+        ofn.lpstrInitialDir = defaultDir.c_str();
+        ofn.lpstrTitle = title.empty() ? nullptr : title.c_str();
         ofn.hwndOwner = hwnd;
         ofn.lpstrFilter = filter;
         ofn.lpstrFile = fileName;
         ofn.nMaxFile = MAX_PATH;
         ofn.Flags = OFN_EXPLORER | OFN_HIDEREADONLY;
-        ofn.lpstrDefExt = context.defaultExtension.c_str();
+        ofn.lpstrDefExt = ext.empty() ? nullptr : ext.c_str();
 
         bool success = false;
         if (context.mode == FileDialogContext::Mode::Open)
@@ -96,7 +101,9 @@ namespace nxs
             ofn.Flags |= OFN_OVERWRITEPROMPT;
             success = GetSaveFileName(&ofn);
         }
-        return success ? ofn.lpstrFile : std::string();
+
+        std::string result = success ? ofn.lpstrFile : std::string();
+        return result;
     }
 }
 
