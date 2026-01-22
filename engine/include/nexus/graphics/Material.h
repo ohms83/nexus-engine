@@ -10,7 +10,7 @@
 #include "Shader.h"
 #include "RenderingInterface.h"
 
-#include "nexus/core/serialize/Serializable.h"
+#include "nexus/core/serialize/Serializeable.h"
 #include "nexus/core/Resource.h"
 #include "nexus/core/Color.h"
 

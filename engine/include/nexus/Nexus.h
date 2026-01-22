@@ -25,7 +25,7 @@
 #include "core/serialize/IniParser.h"
 #include "core/serialize/JsonSerializer.h"
 #include "core/serialize/MsgPackSerializer.h"
-#include "core/serialize/Serializable.h"
+#include "core/serialize/Serializeable.h"
 #include "core/serialize/Serializer.h"
 #include "core/task/Delay.h"
 #include "core/task/FutureWaitingTask.h"

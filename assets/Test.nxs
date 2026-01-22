@@ -1,0 +1,61 @@
+{
+    "__class__": "Scene",
+    "children": [
+        {
+            "__class__": "Camera",
+            "children": [],
+            "components": [
+                {
+                    "__class__": "SceneNodeComponent",
+                    "active": true,
+                    "id": 2,
+                    "name": "Camera"
+                }
+            ]
+        },
+        {
+            "__class__": "SceneNode3D",
+            "children": [],
+            "components": [
+                {
+                    "__class__": "SceneNodeComponent",
+                    "active": true,
+                    "id": 3,
+                    "name": "Model"
+                }
+            ]
+        },
+        {
+            "__class__": "SceneNode3D",
+            "children": [],
+            "components": [
+                {
+                    "__class__": "SceneNodeComponent",
+                    "active": true,
+                    "id": 4,
+                    "name": "Ground"
+                }
+            ]
+        },
+        {
+            "__class__": "DirectionalLight",
+            "children": [],
+            "components": [
+                {
+                    "__class__": "SceneNodeComponent",
+                    "active": true,
+                    "id": 5,
+                    "name": "Direct Light"
+                }
+            ]
+        }
+    ],
+    "components": [
+        {
+            "__class__": "SceneNodeComponent",
+            "active": true,
+            "id": 1,
+            "name": "Main Scene"
+        }
+    ]
+}
