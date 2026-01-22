@@ -14,3 +14,7 @@ cmake-build-*
 # Patch files
 *.patch
 *.diff
+
+# ImGui
+imgui.ini
+imgui_editor_layout.ini
