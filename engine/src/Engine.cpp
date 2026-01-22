@@ -62,6 +62,7 @@ void Engine::InitModules()
 {
     // TODO: Create each module as a plugin.
     // Init scene modules
+    IComponent::RegisterComponent<SceneNodeComponent>();
     IComponent::RegisterComponent<PositionComponent>();
     IComponent::RegisterComponent<OrientationComponent>();
     IComponent::RegisterComponent<ScaleComponent>();
