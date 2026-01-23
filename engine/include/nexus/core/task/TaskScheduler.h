@@ -19,7 +19,7 @@ NXS_NAMESPACE
      * @typedef TaskID
      * @brief A unique identifier for a scheduled task.
      */
-    using TaskID = std::uint32_t;
+    using TaskID = std::uint64_t;
 
     /**
      * @class TaskScheduler
@@ -106,25 +106,44 @@ NXS_NAMESPACE
          */
         void PostUpdate();
 
-        TaskList GetAllTasks() const;
-        const TaskList& GetAllTasksFromGroup(UpdatePhase phase) const;
+        void TransferPendingTasks();
 
-        size_t GetNumTask() const { return m_tasks.size(); }
-        size_t GetNumTaskInGroup(UpdatePhase phase) const { return GetAllTasksFromGroup(phase).size(); }
+        TaskList GetAllTasks(bool includePending = true) const;
+        TaskList GetAllTasksFromGroup(UpdatePhase phase, bool includePending = true) const;
+
+        size_t GetNumTask(bool includePending = true) const
+        {
+            size_t count = 0;
+            for (auto& keyValue : m_taskGroups) count += keyValue.second.GetTasks().size();
+            return includePending ? count + GetNumPending() : count;
+        }
+
+        size_t GetNumTaskInGroup(UpdatePhase phase, bool includePending = true) const
+        {
+            auto count = m_taskGroups.at(phase).GetTasks().size();
+            return includePending ? count + GetNumPendingFromGroup(phase) : count;
+        }
+
+        size_t GetNumPendingFromGroup(UpdatePhase phase) const
+        {
+            const auto& itr = m_pendingTasks.find(phase);
+            if (itr == m_pendingTasks.end()) return 0;
+            return itr->second.GetTasks().size();
+        }
+        
+        size_t GetNumPending() const
+        {
+            size_t count = 0;
+            for (auto& keyValue : m_pendingTasks) count += keyValue.second.GetTasks().size();
+            return count;
+        }
 
     protected:
-        /**
-         * @brief A struct to store task information.
-         */
-        struct TaskData
-        {
-            TaskID id = 0;           ///< The unique task ID.
-            Ref<IRunnable> action;   ///< A reference to the IRunnable task.
-        };
-
-        std::vector<TaskData> m_tasks;
         std::map<UpdatePhase, TaskGroup> m_taskGroups;
-        std::mutex m_mutex;
+        // A temporary task queue. All the tasks in this list will be transfered
+        // to the main queue after the post update.
+        std::map<UpdatePhase, TaskGroup> m_pendingTasks;
+        std::mutex m_mutex, m_pendingMutex;
 
     private:
         /**

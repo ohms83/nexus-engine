@@ -190,6 +190,7 @@ int Application::BeginMainLoop()
 
             if (m_editor) m_editor->Update();
             taskScheduler->PostUpdate();
+            taskScheduler->TransferPendingTasks();
         }
 
         {

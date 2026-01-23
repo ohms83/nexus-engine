@@ -23,6 +23,20 @@ NXS_NAMESPACE
          */
         TaskGroup() = default;
 
+        TaskGroup(TaskGroup&& other)
+        {
+            m_tasks = std::move(other.m_tasks);
+            taskFinishedCallback = std::move(other.taskFinishedCallback);
+        }
+
+        TaskGroup& operator=(TaskGroup&& other)
+        {
+            m_tasks = std::move(other.m_tasks);
+            taskFinishedCallback = std::move(other.taskFinishedCallback);
+            return *this;
+        }
+
+
         /**
          * @brief Virtual destructor to ensure proper cleanup.
          */
@@ -73,6 +87,14 @@ NXS_NAMESPACE
          * @param other The TaskGroup to be merged and cleared.
          */
         void Merge(TaskGroup& other);
+
+        /**
+         * @brief Clears all tasks from the group.
+         */
+        void Clear()
+        {
+            m_tasks.clear();
+        }
 
         /**
          * @brief Updates all tasks within the group.

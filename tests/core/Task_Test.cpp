@@ -38,6 +38,7 @@ protected:
         for (size_t i = 0; i < num; ++i) {
             ids.push_back(scheduler->ScheduleTask(std::make_shared<OneshotTask>([&]() {}), phase));
         }
+        scheduler->TransferPendingTasks();
     }
 
     void StopTasks(nxs::TaskScheduler::UpdatePhase phase)
@@ -179,7 +180,7 @@ TEST_F(TaskSchedulerTest, ScheduleAndStopTask) {
 
     // Schedule the task
     TaskID id = scheduler->ScheduleTask(task);
-    ASSERT_EQ(id, 1);
+    scheduler->TransferPendingTasks();
 
     // Update the scheduler, task should run
     scheduler->Update();
@@ -211,6 +212,8 @@ TEST_F(TaskSchedulerTest, ScheduleToCorrectPhases) {
         postUpdateRan = true;
     }), TaskScheduler::UpdatePhase::PostUpdate);
 
+    scheduler->TransferPendingTasks();
+
     // Run PreUpdate phase, only preUpdateRan should be true
     scheduler->PreUpdate();
     ASSERT_TRUE(preUpdateRan);
@@ -240,6 +243,7 @@ TEST_F(TaskSchedulerTest, HandleTaskTermination) {
         const size_t numTask = 1;
 
         ScheduleTasks(phase, numTask);
+
         ASSERT_EQ(scheduler->GetNumTaskInGroup(phase), numTask);
         ASSERT_EQ(scheduler->GetNumTask(), numTask);
 
@@ -261,6 +265,7 @@ TEST_F(TaskSchedulerTest, HandleTaskTermination) {
         const size_t numTask = 2;
 
         ScheduleTasks(phase, numTask);
+
         ASSERT_EQ(scheduler->GetNumTaskInGroup(phase), numTask);
         ASSERT_EQ(scheduler->GetNumTask(), numTask);
 
@@ -402,4 +407,243 @@ TEST(TaskGroupTest, FinishesWhenAllTasksTerminate) {
     ASSERT_FALSE(group.Update());
     ASSERT_EQ(task1->GetUpdateCount(), 1);
     ASSERT_EQ(task2->GetUpdateCount(), 1);
+}
+
+TEST(TaskGroupTest, ClearsAllTasks) {
+    TaskGroup group;
+    auto task1 = std::make_shared<MockTask>();
+    auto task2 = std::make_shared<MockTask>();
+
+    group.Add(task1);
+    group.Add(task2);
+    ASSERT_EQ(group.GetNumTask(), 2);
+
+    group.Clear();
+    ASSERT_EQ(group.GetNumTask(), 0);
+    ASSERT_TRUE(group.GetTasks().empty());
+}
+
+TEST(TaskGroupTest, RemovesTaskUsingPredicate) {
+    TaskGroup group;
+    auto task1 = std::make_shared<MockTask>();
+    auto task2 = std::make_shared<MockTask>();
+    auto task3 = std::make_shared<MockTask>();
+
+    group.Add(task1);
+    group.Add(task2);
+    group.Add(task3);
+
+    // Remove task2 using predicate (e.g., based on some property, but since MockTask is simple, use pointer comparison)
+    group.RemoveIf([&](Ref<IRunnable> task) { return task == task2; });
+
+    ASSERT_EQ(group.GetNumTask(), 2);
+    ASSERT_TRUE(std::find(group.GetTasks().begin(), group.GetTasks().end(), task2) == group.GetTasks().end());
+    ASSERT_TRUE(std::find(group.GetTasks().begin(), group.GetTasks().end(), task1) != group.GetTasks().end());
+    ASSERT_TRUE(std::find(group.GetTasks().begin(), group.GetTasks().end(), task3) != group.GetTasks().end());
+}
+
+TEST(TaskGroupTest, FindsTask) {
+    TaskGroup group;
+    auto task1 = std::make_shared<MockTask>();
+    auto task2 = std::make_shared<MockTask>();
+
+    group.Add(task1);
+    group.Add(task2);
+
+    auto found = group.Find(task1);
+    ASSERT_EQ(found, task1);
+
+    auto notFound = group.Find(std::make_shared<MockTask>());
+    ASSERT_EQ(notFound, nullptr);
+}
+
+TEST(TaskGroupTest, FindsTaskUsingPredicate) {
+    TaskGroup group;
+    auto task1 = std::make_shared<MockTask>();
+    auto task2 = std::make_shared<MockTask>();
+
+    group.Add(task1);
+    group.Add(task2);
+
+    // Find task1 using predicate
+    auto found = group.FindIf([&](Ref<IRunnable> task) { return task == task1; });
+    ASSERT_EQ(found, task1);
+
+    // Find non-existent
+    auto notFound = group.FindIf([&](Ref<IRunnable> task) { return false; });
+    ASSERT_EQ(notFound, nullptr);
+}
+
+TEST(TaskGroupTest, MergesTaskGroups) {
+    TaskGroup group1;
+    TaskGroup group2;
+
+    auto task1 = std::make_shared<MockTask>();
+    auto task2 = std::make_shared<MockTask>();
+    auto task3 = std::make_shared<MockTask>();
+    auto task4 = std::make_shared<MockTask>();
+
+    group1.Add(task1);
+    group1.Add(task2);
+    group2.Add(task3);
+    group2.Add(task4);
+
+    ASSERT_EQ(group1.GetNumTask(), 2);
+    ASSERT_EQ(group2.GetNumTask(), 2);
+
+    group1.Merge(group2);
+
+    ASSERT_EQ(group1.GetNumTask(), 4);
+    ASSERT_EQ(group2.GetNumTask(), 0);
+
+    // Check that tasks are in group1
+    auto tasks = group1.GetTasks();
+    ASSERT_TRUE(std::find(tasks.begin(), tasks.end(), task1) != tasks.end());
+    ASSERT_TRUE(std::find(tasks.begin(), tasks.end(), task2) != tasks.end());
+    ASSERT_TRUE(std::find(tasks.begin(), tasks.end(), task3) != tasks.end());
+    ASSERT_TRUE(std::find(tasks.begin(), tasks.end(), task4) != tasks.end());
+}
+
+TEST(TaskGroupTest, GetNumTaskReturnsCorrectCount) {
+    TaskGroup group;
+    ASSERT_EQ(group.GetNumTask(), 0);
+
+    auto task1 = std::make_shared<MockTask>();
+    auto task2 = std::make_shared<MockTask>();
+
+    group.Add(task1);
+    ASSERT_EQ(group.GetNumTask(), 1);
+
+    group.Add(task2);
+    ASSERT_EQ(group.GetNumTask(), 2);
+
+    group.Remove(task1);
+    ASSERT_EQ(group.GetNumTask(), 1);
+}
+
+// ============================================================================
+// Additional Task Scheduler Tests for Updated Design
+// ============================================================================
+
+TEST_F(TaskSchedulerTest, GetAllTasksIncludesPending) {
+    auto task1 = std::make_shared<OneshotTask>([]() {});
+    auto task2 = std::make_shared<OneshotTask>([]() {});
+    auto task3 = std::make_shared<OneshotTask>([]() {});
+
+    // Schedule tasks but do not transfer yet
+    scheduler->ScheduleTask(task1, TaskScheduler::UpdatePhase::PreUpdate);
+    scheduler->ScheduleTask(task2, TaskScheduler::UpdatePhase::Update);
+    scheduler->ScheduleTask(task3, TaskScheduler::UpdatePhase::PostUpdate);
+
+    // Get all tasks including pending
+    auto allTasks = scheduler->GetAllTasks(true);
+    ASSERT_EQ(allTasks.size(), 3);
+    ASSERT_TRUE(std::find(allTasks.begin(), allTasks.end(), task1) != allTasks.end());
+    ASSERT_TRUE(std::find(allTasks.begin(), allTasks.end(), task2) != allTasks.end());
+    ASSERT_TRUE(std::find(allTasks.begin(), allTasks.end(), task3) != allTasks.end());
+
+    // Transfer pending tasks
+    scheduler->TransferPendingTasks();
+
+    // Now get all tasks should still include them
+    allTasks = scheduler->GetAllTasks(true);
+    ASSERT_EQ(allTasks.size(), 3);
+}
+
+TEST_F(TaskSchedulerTest, GetAllTasksExcludesPending) {
+    auto task1 = std::make_shared<OneshotTask>([]() {});
+    auto task2 = std::make_shared<OneshotTask>([]() {});
+
+    // Schedule tasks but do not transfer
+    scheduler->ScheduleTask(task1, TaskScheduler::UpdatePhase::PreUpdate);
+    scheduler->ScheduleTask(task2, TaskScheduler::UpdatePhase::Update);
+
+    // Get all tasks excluding pending (should be empty)
+    auto allTasks = scheduler->GetAllTasks(false);
+    ASSERT_EQ(allTasks.size(), 0);
+
+    // Transfer pending tasks
+    scheduler->TransferPendingTasks();
+
+    // Now get all tasks excluding pending should include them
+    allTasks = scheduler->GetAllTasks(false);
+    ASSERT_EQ(allTasks.size(), 2);
+    ASSERT_TRUE(std::find(allTasks.begin(), allTasks.end(), task1) != allTasks.end());
+    ASSERT_TRUE(std::find(allTasks.begin(), allTasks.end(), task2) != allTasks.end());
+}
+
+TEST_F(TaskSchedulerTest, GetAllTasksFromGroup) {
+    auto task1 = std::make_shared<OneshotTask>([]() {});
+    auto task2 = std::make_shared<OneshotTask>([]() {});
+    auto task3 = std::make_shared<OneshotTask>([]() {});
+
+    scheduler->ScheduleTask(task1, TaskScheduler::UpdatePhase::Update);
+    scheduler->ScheduleTask(task2, TaskScheduler::UpdatePhase::Update);
+    scheduler->ScheduleTask(task3, TaskScheduler::UpdatePhase::PostUpdate);
+    scheduler->TransferPendingTasks();
+
+    // Get tasks from Update phase
+    auto updateTasks = scheduler->GetAllTasksFromGroup(TaskScheduler::UpdatePhase::Update, true);
+    ASSERT_EQ(updateTasks.size(), 2);
+    ASSERT_TRUE(std::find(updateTasks.begin(), updateTasks.end(), task1) != updateTasks.end());
+    ASSERT_TRUE(std::find(updateTasks.begin(), updateTasks.end(), task2) != updateTasks.end());
+
+    // Get tasks from PostUpdate phase
+    auto postTasks = scheduler->GetAllTasksFromGroup(TaskScheduler::UpdatePhase::PostUpdate, true);
+    ASSERT_EQ(postTasks.size(), 1);
+    ASSERT_EQ(postTasks[0], task3);
+}
+
+TEST_F(TaskSchedulerTest, GetNumPending) {
+    ASSERT_EQ(scheduler->GetNumPending(), 0);
+
+    auto task1 = std::make_shared<OneshotTask>([]() {});
+    auto task2 = std::make_shared<OneshotTask>([]() {});
+
+    scheduler->ScheduleTask(task1, TaskScheduler::UpdatePhase::PreUpdate);
+    scheduler->ScheduleTask(task2, TaskScheduler::UpdatePhase::Update);
+
+    ASSERT_EQ(scheduler->GetNumPending(), 2);
+
+    scheduler->TransferPendingTasks();
+
+    ASSERT_EQ(scheduler->GetNumPending(), 0);
+}
+
+TEST_F(TaskSchedulerTest, GetNumPendingFromGroup) {
+    auto task1 = std::make_shared<OneshotTask>([]() {});
+    auto task2 = std::make_shared<OneshotTask>([]() {});
+    auto task3 = std::make_shared<OneshotTask>([]() {});
+
+    scheduler->ScheduleTask(task1, TaskScheduler::UpdatePhase::PreUpdate);
+    scheduler->ScheduleTask(task2, TaskScheduler::UpdatePhase::Update);
+    scheduler->ScheduleTask(task3, TaskScheduler::UpdatePhase::Update);
+
+    ASSERT_EQ(scheduler->GetNumPendingFromGroup(TaskScheduler::UpdatePhase::PreUpdate), 1);
+    ASSERT_EQ(scheduler->GetNumPendingFromGroup(TaskScheduler::UpdatePhase::Update), 2);
+    ASSERT_EQ(scheduler->GetNumPendingFromGroup(TaskScheduler::UpdatePhase::PostUpdate), 0);
+
+    scheduler->TransferPendingTasks();
+
+    ASSERT_EQ(scheduler->GetNumPendingFromGroup(TaskScheduler::UpdatePhase::PreUpdate), 0);
+    ASSERT_EQ(scheduler->GetNumPendingFromGroup(TaskScheduler::UpdatePhase::Update), 0);
+    ASSERT_EQ(scheduler->GetNumPendingFromGroup(TaskScheduler::UpdatePhase::PostUpdate), 0);
+}
+
+TEST_F(TaskSchedulerTest, TransferPendingTasksMovesToGroups) {
+    auto task1 = std::make_shared<OneshotTask>([]() {});
+    auto task2 = std::make_shared<OneshotTask>([]() {});
+
+    scheduler->ScheduleTask(task1, TaskScheduler::UpdatePhase::PreUpdate);
+    scheduler->ScheduleTask(task2, TaskScheduler::UpdatePhase::Update);
+
+    // Before transfer, groups should be empty
+    ASSERT_EQ(scheduler->GetNumTaskInGroup(TaskScheduler::UpdatePhase::PreUpdate, false), 0);
+    ASSERT_EQ(scheduler->GetNumTaskInGroup(TaskScheduler::UpdatePhase::Update, false), 0);
+
+    scheduler->TransferPendingTasks();
+
+    // After transfer, tasks should be in groups
+    ASSERT_EQ(scheduler->GetNumTaskInGroup(TaskScheduler::UpdatePhase::PreUpdate, false), 1);
+    ASSERT_EQ(scheduler->GetNumTaskInGroup(TaskScheduler::UpdatePhase::Update, false), 1);
 }
