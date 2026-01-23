@@ -11,6 +11,8 @@
 #include "nexus/core/serialize/Serializeable.h"
 #include "Color.h"
 
+#include "sigslot/signal.hpp"
+
 #define IMPLEMENT_REFLECTION(Class) \
 public: \
     const std::string& ClassName() const override { static std::string className = #Class; return className; } \
@@ -51,6 +53,76 @@ NXS_NAMESPACE
         virtual bool VisitColor3(const std::string& name, Color3F& value) = 0;
         virtual bool VisitColor4(const std::string& name, Color4F& value) = 0;
         virtual bool VisitObject(const std::string& name, IReflector& value) = 0;
+
+        template<typename T>
+        bool Visit(const std::string& name, T& value)
+        {
+            #define VISIT(Type) if (Visit##Type(name, value)) { onValueChangedEvent(name); return true; }
+
+            if constexpr (std::is_same_v<T, bool>)
+            {
+                VISIT(Bool);
+            }
+            else if constexpr (std::is_same_v<T, int32_t>)
+            {
+                VISIT(Int);
+            }
+            else if constexpr (std::is_same_v<T, uint32_t>)
+            {
+                VISIT(UInt);
+            }
+            else if constexpr (std::is_same_v<T, int64_t>)
+            {
+                VISIT(Int64);
+            }
+            else if constexpr (std::is_same_v<T, uint64_t>)
+            {
+                VISIT(UInt64);
+            }
+            else if constexpr (std::is_same_v<T, float>)
+            {
+                VISIT(Float);
+            }
+            else if constexpr (std::is_same_v<T, double>)
+            {
+                VISIT(Double);
+            }
+            else if constexpr (std::is_same_v<T, std::string>)
+            {
+                VISIT(String);
+            }
+            else if constexpr (std::is_same_v<T, glm::vec2>)
+            {
+                VISIT(Vec2);
+            }
+            else if constexpr (std::is_same_v<T, glm::vec3>)
+            {
+                VISIT(Vec3);
+            }
+            else if constexpr (std::is_same_v<T, glm::vec4>)
+            {
+                VISIT(Vec4);
+            }
+            else if constexpr (std::is_same_v<T, Color3F>)
+            {
+                VISIT(Color3);
+            }
+            else if constexpr (std::is_same_v<T, Color4F>)
+            {
+                VISIT(Color4);
+            }
+            else if constexpr (std::is_base_of_v<IReflector, T>)
+            {
+                VISIT(Object);
+            }
+            else {
+                static_assert(false);
+            }
+            #undef VISIT
+            return false;
+        }
+
+        sigslot::signal<const std::string&> onValueChangedEvent;
     };
 
     class IReflection : public ISerializeable
