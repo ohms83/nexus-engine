@@ -12,6 +12,8 @@ NXS_NAMESPACE
 {
     struct AmbientLightComponent : public IComponent
     {
+        using Super = IComponent;
+
         IMPLEMENT_COMPONENT(AmbientLightComponent);
 
         void AcceptReflector(IReflector& reflector) override
@@ -20,11 +22,27 @@ NXS_NAMESPACE
             reflector.VisitColor3("Ambient Color", color);
         }
 
+        VariantData Serialize() const override
+        {
+            auto data = Super::Serialize();
+            data["color"] = color;
+            return data;
+        }
+
+        MAYBE_UNUSED bool Deserialize(const VariantData& data) override
+        {
+            if (!Super::Deserialize(data)) return false;
+            color = CAST<Color3F>(data["color"].GetVec3());
+            return true;
+        }
+
         Color3F color {};
     };
 
     struct LightProperties : public IComponent
     {
+        using Super = IComponent;
+
         IMPLEMENT_COMPONENT(LightProperties);
 
         void AcceptReflector(IReflector& reflector) override
@@ -33,6 +51,26 @@ NXS_NAMESPACE
             reflector.VisitColor3("Color",  color);
             reflector.VisitFloat("Diffuse Intensity", diffuseIntensity);
             reflector.VisitFloat("Specular Intensity", specularIntensity);
+        }
+
+        VariantData Serialize() const override
+        {
+            auto data = Super::Serialize();
+            data["color"] = color;
+            data["diffuseIntensity"] = diffuseIntensity;
+            data["specularIntensity"] = specularIntensity;
+            data["cutoffRange"] = cutoffRange;
+            return data;
+        }
+
+        MAYBE_UNUSED bool Deserialize(const VariantData& data) override
+        {
+            if (!Super::Deserialize(data)) return false;
+            color = CAST<Color3F>(data["color"].GetVec3());
+            diffuseIntensity = data["diffuseIntensity"].GetFloat();
+            specularIntensity = data["specularIntensity"].GetFloat();
+            cutoffRange = data["cutoffRange"].GetFloat();
+            return true;
         }
 
         Color3F color {};
@@ -53,6 +91,8 @@ NXS_NAMESPACE
 
     struct DirectLightComponent : public IComponent
     {
+        using Super = IComponent;
+
         IMPLEMENT_COMPONENT(DirectLightComponent);
 
         void AcceptReflector(IReflector& reflector) override
@@ -63,12 +103,30 @@ NXS_NAMESPACE
             reflector.VisitVec3("Direction", direction);
         }
 
+        VariantData Serialize() const override
+        {
+            auto data = Super::Serialize();
+            data["properties"] = properties.Serialize();
+            data["direction"] = direction;
+            return data;
+        }
+
+        MAYBE_UNUSED bool Deserialize(const VariantData& data) override
+        {
+            if (!Super::Deserialize(data)) return false;
+            direction = data["direction"].GetVec3();
+            properties.Deserialize(data["properties"]);
+            return true;
+        }
+
         LightProperties properties;
         glm::vec3 direction;
     };
 
     struct PointLightComponent : public IComponent
     {
+        using Super = IComponent;
+
         IMPLEMENT_COMPONENT(PointLightComponent);
 
         void AcceptReflector(IReflector& reflector) override
@@ -80,6 +138,28 @@ NXS_NAMESPACE
             reflector.VisitFloat("Linear",  linear);
             reflector.VisitFloat("Quadratic",  quadratic);
         }
+
+        VariantData Serialize() const override
+        {
+            
+            auto data = Super::Serialize();
+            data["properties"] = properties.Serialize();
+            data["constant"] = constant;
+            data["linear"] = linear;
+            data["quadratic"] = quadratic;
+            return data;
+        }
+
+        MAYBE_UNUSED bool Deserialize(const VariantData& data) override
+        {
+            if (!Super::Deserialize(data)) return false;
+            constant = data["constant"].GetFloat();
+            linear = data["linear"].GetFloat();
+            quadratic = data["quadratic"].GetFloat();
+            properties.Deserialize(data["properties"]);
+            return true;
+        }
+
 
         LightProperties properties;
         float constant = 1.0f;

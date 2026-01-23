@@ -6,8 +6,11 @@
 
 NXS_NAMESPACE
 {
+    // TODO: Deprecate this in favor of MeshComponent
     struct ModelComponent : public IComponent
     {
+        using Super = IComponent;
+
         IMPLEMENT_COMPONENT(ModelComponent);
         
         void AcceptReflector(IReflector& reflector) override
@@ -23,6 +26,24 @@ NXS_NAMESPACE
             reflector.VisitBool("Show Bounding Sphere", showBoundingSphere);
             reflector.VisitBool("Show Bounding Box", showBoundingBox);
         };
+
+        VariantData Serialize() const override
+        {
+            auto data = Super::Serialize();
+            data["modelPath"] = model->GetPath();
+            data["showBoundingBox"] = showBoundingBox;
+            data["showBoundingSphere"] = showBoundingSphere;
+            return data;
+        }
+
+        MAYBE_UNUSED bool Deserialize(const VariantData& data) override
+        {
+            if (!Super::Deserialize(data)) return false;
+            // TODO: Load model
+            showBoundingBox = data["showBoundingBox"].GetBool();
+            showBoundingSphere = data["showBoundingSphere"].GetBool();
+            return true;
+        }
 
         Ref<Model> model;
         bool visible = true;

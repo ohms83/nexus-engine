@@ -2,13 +2,54 @@
 
 #include "nexus/NxsCommon.h"
 #include "nexus/graphics/GraphicsConst.h"
+#include "nexus/ecs/Component.h"
 
 NXS_NAMESPACE
 {
     struct Frustum;
 
-    struct CameraComponent
+    struct CameraComponent : public IComponent
     {
+        using Super = IComponent;
+
+        IMPLEMENT_COMPONENT(CameraComponent);
+
+        void AcceptReflector(IReflector& reflector) override
+        {
+            reflector.SetMarker("Camera");
+            // TODO: Reflect enum types.
+            // reflector.VisitInt("Projection", INT_CAST(projectionType));
+            reflector.Visit<float>("FOV", fov);
+            reflector.Visit<float>("Near", nearZ);
+            reflector.Visit<float>("Far", farZ);
+            reflector.Visit<float>("Width", width);
+            reflector.Visit<float>("Height", height);
+        }
+
+        VariantData Serialize() const override
+        {
+            auto data = Super::Serialize();
+            data["projection"] = INT_CAST(projectionType);
+            data["fov"] = fov;
+            data["near"] = nearZ;
+            data["far"] = farZ;
+            data["width"] = width;
+            data["height"] = height;
+            return data;
+        }
+
+        bool Deserialize(const VariantData& data) override
+        {
+            if (!Super::Deserialize(data)) return false;
+            projectionType = CAST<ProjectionType>(data["projection"].GetInt());
+            fov = data["fov"].GetFloat();
+            nearZ = data["near"].GetFloat();
+            farZ = data["far"].GetFloat();
+            width = data["width"].GetFloat();
+            height = data["height"].GetFloat();
+            return true;
+        }   
+
         ProjectionType projectionType = ProjectionType::Perspective;
         /**
          * Camera's field-of-view in degree. This will always be 90 in case of the

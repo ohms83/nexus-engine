@@ -75,17 +75,21 @@ VariantData SceneNode::Serialize() const
         data["children"].PushBack(child->Serialize());
     }
 
-    // SceneComponent
-    auto sceneCompData = VariantData::Map();
-    auto comp = GetComponent<SceneNodeComponent>();
-    sceneCompData["__class__"] = "SceneNodeComponent";
-    sceneCompData["id"] = INT_CAST(comp->id);
-    sceneCompData["active"] = comp->active;
-    sceneCompData["name"] = GetName();
-
-    // TODO: Generic component serialization
     auto& components = data["components"] = VariantData::Array();
-    components.PushBack(sceneCompData);
+
+    // Component data
+    const auto registry = GetRegistry();
+    for (const auto id : GetRegisteredComponentIDs())
+    {
+        if (!IComponent::HasRegisteredID(id)) continue;
+
+        const auto storage = registry->storage(id);
+        if (storage && storage->contains(m_entity))
+        {
+            auto componentPtr = R_CAST<ISerializeable*>(storage->value(m_entity));
+            components.PushBack(componentPtr->Serialize());
+        }
+    }
 
     return data;
 }
