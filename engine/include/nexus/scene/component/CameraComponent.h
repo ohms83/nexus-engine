@@ -24,6 +24,7 @@ NXS_NAMESPACE
             reflector.Visit<float>("Far", farZ);
             reflector.Visit<float>("Width", width);
             reflector.Visit<float>("Height", height);
+            Validate();
         }
 
         VariantData Serialize() const override
@@ -47,8 +48,22 @@ NXS_NAMESPACE
             farZ = data["far"].GetFloat();
             width = data["width"].GetFloat();
             height = data["height"].GetFloat();
+            Validate();
             return true;
-        }   
+        }
+
+        void Validate()
+        {
+            // Clamp values
+            if (projectionType == ProjectionType::Orthographic) {
+                fov = 90.0f;
+            }
+            // Prevent invalid values
+            nearZ = std::max(nearZ, 0.01f);
+            farZ = std::max(farZ, 0.01f);
+            width = std::max(width, 0.01f);
+            height = std::max(height, 0.01f);
+        }
 
         ProjectionType projectionType = ProjectionType::Perspective;
         /**

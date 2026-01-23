@@ -54,9 +54,11 @@ void ForwardSceneRenderer::Render(RenderSystem& renderSystem, const entt::regist
         glm::mat4 viewMtx = Matrix::CreateViewMatrix(cameraPos.value, cameraOrient.quat);
         glm::mat4 projection;
         if (camera.projectionType == ProjectionType::Perspective) {
+            NXS_ASSERT(!Math::AlmostZero(camera.nearZ) && !Math::AlmostZero(camera.farZ) && !Math::AlmostZero(camera.height));
             projection = glm::perspective(glm::radians(camera.fov), camera.width / camera.height, camera.nearZ, camera.farZ);
         }
         else {
+            NXS_ASSERT(!Math::AlmostZero(camera.nearZ));
             projection = glm::ortho(-camera.width/2, camera.width/2, -camera.height/2, camera.height/2, camera.nearZ, camera.farZ);
         }
 
