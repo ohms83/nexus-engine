@@ -12,6 +12,8 @@
 #include <map>
 #include <string_view> // For robust accessors
 
+#include "glm/glm.hpp"
+
 DECLARE_LOG_EXTERN(Serialize);
 
 NXS_NAMESPACE
@@ -97,6 +99,7 @@ NXS_NAMESPACE
         VariantData(bool value) : m_value(value) {}
         VariantData(const int value) : m_value(static_cast<int64_t>(value)) {}
         VariantData(int64_t value) : m_value(value) {}
+        VariantData(float value) : m_value(static_cast<double>(value)) {}
         VariantData(double value) : m_value(value) {}
         VariantData(const char* value) : m_value(std::string(value)) {}
         VariantData(const std::string_view value) : m_value(std::string(value)) {}
@@ -117,6 +120,28 @@ NXS_NAMESPACE
         // For example, VariantData::Map {{key, value}} works while {{key, value}} will create a nested array instead.
         // VariantData(const std::initializer_list<std::pair<const std::string, VariantData>> list)
         //     : m_value(Map(list)) {}
+
+        /**
+         * @brief Constructs a VariantData from a glm::vec2.
+         * The vector is stored as an array of two floating-point numbers.
+         * @param value The glm::vec2 to construct from.
+         */
+        VariantData(const glm::vec2& value)
+            : m_value(std::vector<VariantData>{value.x, value.y}) {}
+        /**
+         * @brief Constructs a VariantData from a glm::vec3.
+         * The vector is stored as an array of three floating-point numbers.
+         * @param value The glm::vec3 to construct from.
+         */
+        VariantData(const glm::vec3& value)
+            : m_value(std::vector<VariantData>{value.x, value.y, value.z}) {}
+        /**
+         * @brief Constructs a VariantData from a glm::vec4.
+         * The vector is stored as an array of four floating-point numbers.
+         * @param value The glm::vec4 to construct from.
+         */
+        VariantData(const glm::vec4& value)
+            : m_value(std::vector<VariantData>{value.x, value.y, value.z, value.w}) {}
 
         // Copy and Move Constructors/Assignment Operators (handled by std::variant implicitly)
         VariantData(const VariantData&) = default;
@@ -209,20 +234,79 @@ NXS_NAMESPACE
             }
             return std::get<Map>(m_value);
         }
+        /**
+         * @brief Retrieves the value as a glm::vec2.
+         *
+         * Assumes the VariantData holds an array of at least two numbers.
+         * If not, an error is logged and a zero vector is returned.
+         * @return The value as a glm::vec2.
+         */
+        NODISCARD const glm::vec2 GetVec2() const {
+            if (!IsArray() || GetArray().size() != 2)
+            {
+                LOG_ERROR(LogSerialize, std::format("Not a 2D vector type. Type={}", NxsGetTypeString(GetType())));
+                return glm::vec2();
+            }
+            return glm::vec2(
+                GetArray()[0].GetFloat(),
+                GetArray()[1].GetFloat()
+            );
+        }
+
+        /**
+         * @brief Retrieves the value as a glm::vec3.
+         *
+         * Assumes the VariantData holds an array of at least three numbers.
+         * If not, an error is logged and a zero vector is returned.
+         * @return The value as a glm::vec3.
+         */
+        NODISCARD const glm::vec3 GetVec3() const {
+            if (!IsArray() || GetArray().size() != 3)
+            {
+                LOG_ERROR(LogSerialize, std::format("Not a 3D vector type. Type={}", NxsGetTypeString(GetType())));
+                return glm::vec3();
+            }
+            return glm::vec3(
+                GetArray()[0].GetFloat(),
+                GetArray()[1].GetFloat(),
+                GetArray()[2].GetFloat()
+            );
+        }
+        
+        /**
+         * @brief Retrieves the value as a glm::vec4.
+         *
+         * Assumes the VariantData holds an array of at least four numbers.
+         * If not, an error is logged and a zero vector is returned.
+         * @return The value as a glm::vec4.
+         */
+        NODISCARD const glm::vec4 GetVec4() const {
+            if (!IsArray() || GetArray().size() != 4)
+            {
+                LOG_ERROR(LogSerialize, std::format("Not a 4D vector type. Type={}", NxsGetTypeString(GetType())));
+                return glm::vec4();
+            }
+            return glm::vec4(
+                GetArray()[0].GetFloat(),
+                GetArray()[1].GetFloat(),
+                GetArray()[2].GetFloat(),
+                GetArray()[3].GetFloat()
+            );
+        }
 
         // Non-const versions for modification
-        std::string& GetString()
+        NODISCARD std::string& GetString()
         {
             NXS_ASSERT_MSG(IsString(), std::format("VariantData: Not a string type. Type={}", NxsGetTypeString(GetType())));
             return std::get<std::string>(m_value);
         }
-        std::vector<VariantData>& GetArray() {
+        NODISCARD std::vector<VariantData>& GetArray() {
             if (!IsArray()) {
                 m_value.emplace<std::vector<VariantData>>();
             }
             return std::get<std::vector<VariantData>>(m_value);
         }
-        Map& GetMap() {
+        NODISCARD Map& GetMap() {
             if (!IsMap()) {
                 m_value.emplace<Map>();
             }
