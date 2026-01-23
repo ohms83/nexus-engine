@@ -52,3 +52,13 @@ const Color3B Color3B::Magenta {0xFF, 0x00, 0xFF};
 const Color3B Color3B::Orange  {0xFF, 0x9B, 0x00};
 const Color3B Color3B::Gray    {0xA6, 0xA6, 0xA6};
 const Color3B Color3B::Grey    {0xA6, 0xA6, 0xA6};
+
+Color3F::operator Color4B() const
+{
+    return Color4B(CAST<uint8>(this->r * 255), CAST<uint8>(this->g * 255), CAST<uint8>(this->b * 255));
+}
+
+Color3F::operator Color3B() const
+{
+    return Color3B(CAST<uint8>(this->r * 255), CAST<uint8>(this->g * 255), CAST<uint8>(this->b * 255));
+}

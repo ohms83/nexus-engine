@@ -5,6 +5,11 @@
 
 NXS_NAMESPACE
 {
+    class Color4F;
+    class Color3F;
+    class Color4B;
+    class Color3B;
+
     template<typename T>
     class Color4 : public glm::vec<4, T>
     {
@@ -177,6 +182,19 @@ NXS_NAMESPACE
             return ToRGB();
         }
 
+        explicit operator Color4F() const
+        {
+            return Color4F(this->r, this->g, this->b, 1.0f);
+        }
+
+        explicit operator glm::vec4() const
+        {
+            return glm::vec4(this->r, this->g, this->b, 1.0f);
+        }
+
+        explicit operator Color4B() const;
+        explicit operator Color3B() const;
+
         Color3F& operator = (const uint32 color)
         {
             this->r = CAST<float>(color >> 24 & 0xFF)  / 255.0f;
@@ -232,6 +250,26 @@ NXS_NAMESPACE
         explicit operator uint32() const
         {
             return ToRGBA();
+        }
+
+        explicit operator glm::vec3() const
+        {
+            return glm::vec3(this->r, this->g, this->b);
+        }
+
+        explicit operator glm::vec4() const
+        {
+            return glm::vec4(this->r, this->g, this->b, 1.0f);
+        }
+
+        explicit operator Color4F() const
+        {
+            return Color4F(this->r / 255.0f, this->g / 255.0f, this->b / 255.0f, this->a / 255.0f);
+        }
+
+        explicit operator Color3F() const
+        {
+            return Color3F(this->r / 255.0f, this->g / 255.0f, this->b / 255.0f);
         }
 
         Color4B& operator = (const uint32 color)
