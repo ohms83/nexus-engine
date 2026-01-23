@@ -42,6 +42,37 @@ NXS_NAMESPACE
          * @param task A `Ref` to the `IRunnable` task to be removed.
          */
         void Remove(Ref<IRunnable> task);
+        /**
+         * @brief Removes the first task that satisfies the given predicate.
+         * This method searches the task list using a linear search. If a match is found,
+         * it is removed from the group, potentially triggering the destruction of the 
+         * task if no other references exist.
+         * @param predicate A callable that takes a @c Ref<IRunnable> and returns true for the target task.
+         */
+        void RemoveIf(std::function<bool(Ref<IRunnable>)> predicate);
+
+        /**
+         * @brief Finds a specific task within the group.
+         * @param task The reference to the task to search for.
+         * @return The @c Ref<IRunnable> if found; otherwise, @c nullptr.
+         */
+        Ref<IRunnable> Find(Ref<IRunnable> task);
+        /**
+         * @brief Finds the first task that satisfies the given predicate.
+         * @param predicate A callable that returns true for the desired task.
+         * @return The first matching @c Ref<IRunnable> found; otherwise, @c nullptr.
+         */
+        Ref<IRunnable> FindIf(std::function<bool(Ref<IRunnable>)> predicate);
+
+        /**
+         * @brief Merges another TaskGroup into this one.
+         * All tasks from the @p other group are appended to the end of this group's 
+         * task list. Following the merge, the @p other group is cleared of all tasks.
+         * @note This operation is efficient as it moves the internal references without 
+         * re-allocating the underlying @c IRunnable objects.
+         * @param other The TaskGroup to be merged and cleared.
+         */
+        void Merge(TaskGroup& other);
 
         /**
          * @brief Updates all tasks within the group.
