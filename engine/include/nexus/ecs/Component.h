@@ -2,19 +2,35 @@
 
 #include "nexus/core/Reflection.h"
 #include "EcsDefine.h"
+#include "Entity.h"
 
 #include <set>
+#include <map>
+#include <string>
 
 #define COMPONENT_HASH(Type) entt::type_id<Type>().hash()
 #define IMPLEMENT_COMPONENT(Type) \
     IMPLEMENT_REFLECTION(Type); \
-    ComponentID GetComponentID() const override { \
+    static ComponentID StaticComponentID() { \
         return COMPONENT_HASH(Type); \
+    } \
+    ComponentID GetComponentID() const override { \
+        return StaticComponentID(); \
+    } \
+    static void Register() { \
+        s_componentTypes.insert(COMPONENT_HASH(Type)); \
+        s_componentFactory[#Type] = [](Entity& entity) { \
+            entity.AddComponent<Type>(); \
+        }; \
     }
 
 NXS_NAMESPACE
 {
     using ComponentID = entt::id_type;
+    /**
+     * @brief A helper function used for self registering a component.
+     */
+    using ComponentRegister = std::function<void(Entity&)>;
 
     class IComponent : public IReflection
     {
@@ -22,7 +38,6 @@ NXS_NAMESPACE
         virtual ~IComponent() = default;
         virtual ComponentID GetComponentID() const = 0;
 
-        // --- Temporary implementation ----
         VariantData Serialize() const override
         {
             auto data = VariantData::Map();
@@ -40,7 +55,6 @@ NXS_NAMESPACE
             }
             return true;
         }
-        // ---------------------------------
         
         template<typename Type>
         static bool HasRegisteredType()
@@ -53,13 +67,29 @@ NXS_NAMESPACE
             return s_componentTypes.find(id) != s_componentTypes.end();
         }
 
-        template<typename Type>
-        static void RegisterComponent()
+        /**
+         * @brief Adds a component to an entity by its registered name.
+         * 
+         * This function looks up the component's name in the component factory.
+         * If a corresponding component registration is found, it is used to
+         * add the component to the specified entity.
+         * 
+         * @param name The registered name of the component to add.
+         * @param entity The entity to which the component will be added.
+         * @return @c true if the component was successfully found and added, @c false otherwise.
+         */
+        MAYBE_UNUSED static bool AddComponent(const std::string& name, Entity& entity)
         {
-            s_componentTypes.insert(COMPONENT_HASH(Type));
+            if (auto itr = s_componentFactory.find(name); itr != s_componentFactory.end())
+            {
+                itr->second(entity);
+                return true;
+            }
+            return false;
         }
     
-    private:
+    protected:
         static std::set<ComponentID> s_componentTypes;
+        static std::map<std::string, ComponentRegister> s_componentFactory;
     };
 }

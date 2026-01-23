@@ -6,6 +6,7 @@
 #include "scene/component/TransformComponent.h"
 #include "scene/component/LightComponent.h"
 #include "scene/component/ModelComponent.h"
+#include "scene/component/CameraComponent.h"
 #include "time/StandardTimeSource.h"
 
 USING_NAMESPACE_NXS;
@@ -62,20 +63,21 @@ void Engine::InitModules()
 {
     // TODO: Create each module as a plugin.
     // Init scene modules
-    IComponent::RegisterComponent<SceneNodeComponent>();
-    IComponent::RegisterComponent<PositionComponent>();
-    IComponent::RegisterComponent<OrientationComponent>();
-    IComponent::RegisterComponent<ScaleComponent>();
-    IComponent::RegisterComponent<MoveComponent>();
-    IComponent::RegisterComponent<TurningComponent>();
-    
-    IComponent::RegisterComponent<AmbientLightComponent>();
-    IComponent::RegisterComponent<LightProperties>();
-    IComponent::RegisterComponent<DirectLightComponent>();
-    IComponent::RegisterComponent<PointLightComponent>();
+    SceneNodeComponent::Register();
+    PositionComponent::Register();
+    OrientationComponent::Register();
+    ScaleComponent::Register();
+    MoveComponent::Register();
+    TurningComponent::Register();
+    CameraComponent::Register();
 
-    IComponent::RegisterComponent<ModelComponent>();
-    IComponent::RegisterComponent<MeshComponent>();
+    AmbientLightComponent::Register();
+    LightProperties::Register();
+    DirectLightComponent::Register();
+    PointLightComponent::Register();
+
+    ModelComponent::Register();
+    MeshComponent::Register();
 
     // Init Graphics module
     DepthPrepass.Resolve(*s_engine->GetRenderingInterface());
