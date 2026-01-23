@@ -12,6 +12,8 @@ DEFINE_LOG(SceneNode);
 
 static Identifier s_runningId = 0;
 
+std::unordered_map<std::string, SceneNode::Creator> SceneNode::s_factoryFunctions;
+
 SceneNode::SceneNode(Ref<entt::registry> registry, std::string name)
     : Entity(registry)
 {
@@ -36,6 +38,25 @@ void SceneNode::Destroy()
     // TODO: With how the scene nodes are passed around as shared pointers, there's no
     // effective way to implement this yet. We need to implement a new memory management first.
     NXS_ASSERT(false);
+}
+
+Ref<SceneNode> SceneNode::Create(Ref<entt::registry> registry, std::string className)
+{
+    if (s_factoryFunctions.find(className) != s_factoryFunctions.end())
+    {
+        return s_factoryFunctions[className](registry);
+    }
+    return nullptr;
+}
+
+Ref<SceneNode> SceneNode::CreateChild(Ref<SceneNode> parent, std::string className)
+{
+    if (auto child = Create(parent->GetRegistry(), className); child != nullptr)
+    {
+        parent->AddChild(child);
+        return child;
+    }
+    return nullptr;
 }
 
 void SceneNode::AcceptReflector(IReflector& reflector)
@@ -153,6 +174,7 @@ void SceneNode::Activate(const bool activate)
 void SceneNode::AddChild(Ref<SceneNode> child)
 {
     child->m_parent = this->GetSelf();
+    child->SetTaskScheduler(m_scheduler);
     m_children.push_back(child);
 }
 
@@ -162,7 +184,10 @@ void SceneNode::RemoveChild(Ref<SceneNode> node)
  
     if (!m_scheduler)
     {
-        LOG_WARNING(LogSceneNode, std::format("Unable to remove the node={}. Reason=The task scheduler is invalid.", node->GetName()));
+        LOG_WARNING(LogSceneNode, std::format(
+            "Unable to remove the node \"{}\" from \"{}\"."
+            "Reason=The task scheduler is invalid.",
+            node->GetName(), GetName()));
         return;
     }
 
@@ -177,6 +202,22 @@ void SceneNode::RemoveChild(Ref<SceneNode> node)
         }
 
         std::erase(m_children, node);
+    }), TaskScheduler::UpdatePhase::PostUpdate);
+}
+
+void SceneNode::RemoveAllChildren()
+{
+    if (IsShuttingDown()) return;
+ 
+    if (!m_scheduler)
+    {
+        LOG_WARNING(LogSceneNode, std::format(
+            "Unable to remove the children of node={}. Reason=The task scheduler is invalid.", GetName()));
+        return;
+    }
+
+    m_scheduler->ScheduleTask(std::make_shared<OneshotTask>([this]() {
+        m_children.clear();
     }), TaskScheduler::UpdatePhase::PostUpdate);
 }
 

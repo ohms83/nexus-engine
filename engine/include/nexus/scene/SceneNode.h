@@ -14,23 +14,34 @@
 
 #include <string>
 #include <memory>
+#include <unordered_map>
+
+#define IMPLEMENT_NODE(Type) \
+    IMPLEMENT_REFLECTION(Type); \
+    static void Register() { \
+        SceneNode::s_factoryFunctions[#Type] = [](Ref<entt::registry> registry) { \
+            return std::make_shared<Type>(registry); \
+        }; \
+    }
 
 NXS_NAMESPACE
 {
-    class Scene;
-
     class SceneNode : public Entity, public IReflection
     // TODO: Consider replacing std::enable_shared_from_this with a custom solution
     , public std::enable_shared_from_this<SceneNode>
     {
     public:
         using ChildList = std::vector<Ref<SceneNode>>;
+        using Creator = std::function<Ref<SceneNode>(Ref<entt::registry>)>;
 
-        IMPLEMENT_REFLECTION(SceneNode);
+        IMPLEMENT_NODE(SceneNode);
 
         SceneNode() = delete;
         explicit SceneNode(Ref<entt::registry> registry, std::string  name = "");
         virtual ~SceneNode();
+
+        static Ref<SceneNode> Create(Ref<entt::registry> registry, std::string className);
+        static Ref<SceneNode> CreateChild(Ref<SceneNode> parent, std::string className);
 
         void AcceptReflector(IReflector& reflector) override;
 
@@ -72,11 +83,14 @@ NXS_NAMESPACE
         {
             auto node = m_children.emplace_back(
                 std::make_shared<T>(GetRegistry(), std::forward<Args>(args)...));
+            node->m_parent = GetSelf();
+            node->SetTaskScheduler(m_scheduler);
             return PTR_CAST<T>(node);
         }
 
         void AddChild(Ref<SceneNode> child);
         void RemoveChild(Ref<SceneNode> child);
+        void RemoveAllChildren();
         /**
          * @brief Get all direct child nodes.
          * 
@@ -133,5 +147,7 @@ NXS_NAMESPACE
             ECS::SimulationSystem system;
         };
         std::vector<Simulation> m_simulations;
+
+        static std::unordered_map<std::string, Creator> s_factoryFunctions;
     };
 }
