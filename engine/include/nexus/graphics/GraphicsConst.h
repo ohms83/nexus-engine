@@ -71,6 +71,19 @@ NXS_NAMESPACE
         Num
     };
 
+    inline std::string ProjectionTypeToString(ProjectionType type)
+    {
+        switch (type)
+        {
+        case ProjectionType::Perspective:
+            return "Perspective";
+        case ProjectionType::Orthographic:
+            return "Orthographic";
+        default: break;
+        }
+        return "Unknown";
+    }
+
     enum class DepthFunction
     {
         //! Disable depth testing.
