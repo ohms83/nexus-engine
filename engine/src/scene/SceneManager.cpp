@@ -70,6 +70,7 @@ bool SceneManager::ChangeScene_Internal(Ref<Scene> scene)
     m_taskScheduler->ScheduleTask(std::make_shared<OneshotTask>([this]() {
         if (m_current) {
             m_current->OnExit();
+            m_current->RemoveAllChildren();
         }
         m_prev = m_current;
         m_current = m_next;
