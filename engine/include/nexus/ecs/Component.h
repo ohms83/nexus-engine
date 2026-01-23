@@ -18,27 +18,28 @@
         return StaticComponentID(); \
     } \
     static void Register() { \
-        s_componentTypes.insert(COMPONENT_HASH(Type)); \
+        s_componentTypes[#Type] = COMPONENT_HASH(Type); \
         s_componentFactory[#Type] = [](Entity& entity) { \
-            entity.AddComponent<Type>(); \
+            return CAST<IComponent*>(entity.AddComponent<Type>()); \
         }; \
     }
 
 NXS_NAMESPACE
 {
     using ComponentID = entt::id_type;
-    /**
-     * @brief A helper function used for self registering a component.
-     */
-    using ComponentRegister = std::function<void(Entity&)>;
 
     class IComponent : public IReflection
     {
     public:
+        /**
+         * @brief A helper function used for self registering a component.
+         */
+        using ComponentRegister = std::function<IComponent*(Entity&)>;
+
         virtual ~IComponent() = default;
         virtual ComponentID GetComponentID() const = 0;
 
-        VariantData Serialize() const override
+        NODISCARD VariantData Serialize() const override
         {
             auto data = VariantData::Map();
             data["__class__"] = ClassName();
@@ -57,14 +58,36 @@ NXS_NAMESPACE
         }
         
         template<typename Type>
-        static bool HasRegisteredType()
+        NODISCARD static bool HasRegisteredType()
         {
-            return s_componentTypes.find(COMPONENT_HASH(Type)) != s_componentTypes.end();
+            return HasRegisteredID(COMPONENT_HASH(Type));
         }
 
-        static bool HasRegisteredID(const ComponentID id)
+        NODISCARD static bool HasRegisteredType(const ComponentID type_id)
         {
-            return s_componentTypes.find(id) != s_componentTypes.end();
+            return std::ranges::any_of(s_componentTypes, [&type_id](const auto& pair) {
+                return pair.second == type_id;
+            });
+        }
+
+        NODISCARD static bool HasRegisteredClassName(const std::string& className)
+        {
+            return s_componentFactory.contains(className);
+        }
+
+        /**
+         * @brief Get the registered ComponentID for a given class name.
+         * 
+         * @param className 
+         * @return A valid ComponentID if found; InvalidID otherwise.
+         */
+        NODISCARD static ComponentID GetRegisteredTypeID(const std::string& className)
+        {
+            if (auto itr = s_componentTypes.find(className); itr != s_componentTypes.end())
+            {
+                return itr->second;
+            }
+            return InvalidID;
         }
 
         /**
@@ -76,20 +99,26 @@ NXS_NAMESPACE
          * 
          * @param name The registered name of the component to add.
          * @param entity The entity to which the component will be added.
-         * @return @c true if the component was successfully found and added, @c false otherwise.
+         * @return A pointer to the added component if successful, @c nullptr otherwise.
          */
-        MAYBE_UNUSED static bool AddComponent(const std::string& name, Entity& entity)
+        MAYBE_UNUSED static IComponent* AddComponent(const std::string& name, Entity& entity)
         {
             if (auto itr = s_componentFactory.find(name); itr != s_componentFactory.end())
             {
-                itr->second(entity);
-                return true;
+                return itr->second(entity);
             }
-            return false;
+            return nullptr;
+        }
+
+        NODISCARD static bool HasRegisteredID(const ComponentID type_id)
+        {
+            return std::ranges::any_of(s_componentTypes, [&type_id](const auto& pair) {
+                return pair.second == type_id;
+            });
         }
     
     protected:
-        static std::set<ComponentID> s_componentTypes;
+        static std::map<std::string, ComponentID> s_componentTypes;
         static std::map<std::string, ComponentRegister> s_componentFactory;
     };
 }

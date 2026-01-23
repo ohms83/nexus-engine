@@ -7,6 +7,8 @@
 
 NXS_NAMESPACE
 {
+    class IComponent;
+
     /**
      * @brief Represents a lightweight wrapper around a single entt entity handle.
      * The Entity class manages the lifetime of a single entity within an entt::registry,
@@ -139,6 +141,21 @@ NXS_NAMESPACE
             }
         }
 
+        NODISCARD decltype(auto) GetComponent(const ComponentID type_id) const
+        {
+            if (!HasComponent(type_id)) {
+                return static_cast<IComponent*>(nullptr);
+            }
+
+            const auto storage = m_registry->storage(type_id);
+            if (storage && storage->contains(m_entity))
+            {
+                auto componentPtr = R_CAST<IComponent*>(storage->value(m_entity));
+                return componentPtr;
+            }
+            return static_cast<IComponent*>(nullptr);
+        }
+
         /**
          * @brief Removes a single component from the entity.
          * 
@@ -161,6 +178,11 @@ NXS_NAMESPACE
         {
             const auto id = entt::type_id<Type>().hash();
             return !m_components.empty() && std::ranges::find(m_components, id) != m_components.end();
+        }
+
+        NODISCARD bool HasComponent(const ComponentID type_id) const
+        {
+            return !m_components.empty() && std::ranges::find(m_components, type_id) != m_components.end();
         }
 
     protected:

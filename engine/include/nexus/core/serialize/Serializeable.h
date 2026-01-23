@@ -20,7 +20,7 @@ NXS_NAMESPACE
          * container is designed to hold various data types, such as integers,
          * strings, or arrays, in a structured format.
          */
-        virtual VariantData Serialize() const = 0;
+        NODISCARD virtual VariantData Serialize() const = 0;
 
         /**
          * @brief Deserializes the object from a given @c VariantData.
