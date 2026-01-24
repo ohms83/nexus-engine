@@ -8,7 +8,7 @@
 
 NXS_NAMESPACE
 {
-    class MsgPackSerializer final : public Serializer
+    class MsgPackSerializer final : public ISerializer
     {
     public:
         ~MsgPackSerializer() override = default;

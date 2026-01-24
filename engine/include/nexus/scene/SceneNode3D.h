@@ -19,7 +19,7 @@ NXS_NAMESPACE
         explicit SceneNode3D(Ref<entt::registry> registry, std::string  name = "");
         ~SceneNode3D() override = default;
 
-        IMPLEMENT_REFLECTION(SceneNode3D);
+        IMPLEMENT_NODE(SceneNode3D);
 
         PositionComponent& Position() { return *GetComponent<PositionComponent>(); }
         const PositionComponent& Position() const { return *GetComponent<PositionComponent>(); }

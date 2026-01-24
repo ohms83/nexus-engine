@@ -11,10 +11,10 @@
 
 NXS_NAMESPACE
 {
-    class Serializer
+    class ISerializer
     {
     public:
-        virtual ~Serializer() = default;
+        virtual ~ISerializer() = default;
         virtual std::ostream& Pack(const VariantData& source, std::ostream& outStream) const = 0;
         virtual VariantData Unpack(std::istream& inStream) const = 0;
     };

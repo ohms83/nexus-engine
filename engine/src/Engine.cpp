@@ -7,6 +7,10 @@
 #include "scene/component/LightComponent.h"
 #include "scene/component/ModelComponent.h"
 #include "scene/component/CameraComponent.h"
+
+#include "scene/Camera.h"
+#include "scene/SceneNode3D.h"
+
 #include "time/StandardTimeSource.h"
 
 USING_NAMESPACE_NXS;
@@ -78,6 +82,10 @@ void Engine::InitModules()
 
     ModelComponent::Register();
     MeshComponent::Register();
+
+    SceneNode::Register();
+    Camera::Register();
+    SceneNode3D::Register();
 
     // Init Graphics module
     DepthPrepass.Resolve(*s_engine->GetRenderingInterface());

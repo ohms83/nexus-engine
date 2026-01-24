@@ -5,7 +5,7 @@
 
 NXS_NAMESPACE
 {
-	class JsonSerializer final : public Serializer
+	class JsonSerializer final : public ISerializer
 	{
 	public:
         MAYBE_UNUSED std::ostream& Pack(const VariantData& source, std::ostream& outStream) const override;
