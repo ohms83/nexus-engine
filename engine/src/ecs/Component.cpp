@@ -2,5 +2,5 @@
 
 USING_NAMESPACE_NXS;
 
-std::set<nxs::ComponentID> IComponent::s_componentTypes;
-std::map<std::string, ComponentRegister> IComponent::s_componentFactory;
+std::map<std::string, ComponentID> IComponent::s_componentTypes;
+std::map<std::string, IComponent::ComponentRegister> IComponent::s_componentFactory;
