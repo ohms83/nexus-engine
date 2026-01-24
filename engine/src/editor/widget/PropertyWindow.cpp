@@ -70,19 +70,17 @@ bool PropertyWindow::VisitInt(const std::string& name, int32_t& value)
 
 bool PropertyWindow::VisitUInt(const std::string& name, uint32_t& value)
 {
-    return ImGui::InputInt(name.c_str(), R_CAST<int*>(&value));
+    return ImGui::InputScalar(name.c_str(), ImGuiDataType_U32, &value);
 }
 
 bool PropertyWindow::VisitInt64(const std::string& name, int64_t& value)
 {
-    NXS_ASSERT_MSG(value > INT32_MAX, std::format("Integer value overflow - {}: {}", name, value));
-    return ImGui::InputInt(name.c_str(), R_CAST<int*>(&value));
+    return ImGui::InputScalar(name.c_str(), ImGuiDataType_S64, &value);
 }
 
 bool PropertyWindow::VisitUInt64(const std::string& name, uint64_t& value)
 {
-    NXS_ASSERT_MSG(value > INT32_MAX, std::format("Integer value overflow - {}: {}", name, value));
-    return ImGui::InputInt(name.c_str(), R_CAST<int*>(&value));
+    return ImGui::InputScalar(name.c_str(), ImGuiDataType_U64, &value);
 }
 
 bool PropertyWindow::VisitFloat(const std::string& name, float& value)
