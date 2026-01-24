@@ -56,6 +56,13 @@ NXS_NAMESPACE
             }
             return true;
         }
+
+        /**
+         * @brief Validate and clamp component properties. This should be performed
+         * after deserialization to ensure data integrity (eg. divide by zero prevention).
+         * @note This function is optional to implement in derived classes.
+         */
+        virtual void Validate() {}
         
         template<typename Type>
         NODISCARD static bool HasRegisteredType()

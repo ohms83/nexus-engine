@@ -59,6 +59,14 @@ Ref<SceneNode> SceneNode::CreateChild(Ref<SceneNode> parent, std::string classNa
     return nullptr;
 }
 
+void SceneNode::GetRegisteredNodeTypes(std::vector<std::string>& outTypes)
+{
+    for (const auto& [key, _] : s_factoryFunctions)
+    {
+        outTypes.push_back(key);
+    }
+}
+
 void SceneNode::AcceptReflector(IReflector& reflector)
 {
     reflector.SetMarker("Properties");
@@ -102,7 +110,7 @@ VariantData SceneNode::Serialize() const
     const auto registry = GetRegistry();
     for (const auto id : GetRegisteredComponentIDs())
     {
-        if (!IComponent::HasRegisteredID(id)) continue;
+        if (!IComponent::HasRegisteredType(id)) continue;
 
         const auto storage = registry->storage(id);
         if (storage && storage->contains(m_entity))
@@ -138,11 +146,54 @@ bool SceneNode::Deserialize(const VariantData &data)
 
     for (const auto child : data["children"].GetArray())
     {
-        if (child["__class__"] == "SceneNode")
+        const auto className = child["__class__"].GetString();
+        if (auto node = CreateChild(GetSelf(), className); node != nullptr)
         {
-            auto childNode = EmplaceChild<SceneNode>();
-            childNode->Deserialize(child);
+            if (!node->Deserialize(child))
+            {
+                LOG_WARNING(LogSerialize, std::format(
+                    "Failed to deserialize child node. Parent={}, ChildClass={}",
+                    GetName(), className));
+            }
         }
+        else
+        {
+            LOG_WARNING(LogSerialize, std::format(
+                "Failed to create child node during deserialization. Parent={}, ChildClass={}",
+                GetName(), className));
+        }
+    }
+
+    for (const auto compData : data["components"].GetArray())
+    {
+        const auto className = compData["__class__"].GetString();
+        if (!IComponent::HasRegisteredClassName(className))
+        {
+            LOG_WARNING(LogSerialize, std::format(
+                "Unknown component class during deserialization. Node={}, ComponentClass={}",
+                GetName(), className));
+            continue;
+        }
+
+        auto componentId = IComponent::GetRegisteredTypeID(className);
+        IComponent* component = nullptr;
+        if (!HasComponent(componentId))
+        {
+            component = IComponent::AddComponent(className, *this);
+        }
+        else
+        {
+            component = GetComponent(componentId);
+        }
+
+        if (!component)
+        {
+            LOG_WARNING(LogSerialize, std::format(
+                "Component not found in the entity during deserialization. Node={}, ComponentClass={}",
+                GetName(), className));
+            continue;
+        }
+        component->Deserialize(compData);
     }
 
     return true;
@@ -156,9 +207,31 @@ void SceneNode::Resolve(RenderingInterface &renderingInterface)
         child->Resolve(renderingInterface);
     }
 
+    Validate();
+
     // Activation callback must be called after all the dependencies are resolved.
     if (IsActive()) OnActivate();
     else OnDeactivate();
+}
+
+void SceneNode::Validate()
+{
+    // Validate all components
+    const auto registry = GetRegistry();
+    std::vector<IComponent*> components;
+    GetAllComponents(components);
+
+    for (auto component : components)
+    {
+        if (!component) continue;
+        component->Validate();
+    }
+
+    // Validate all children
+    for (const auto child : m_children)
+    {
+        child->Validate();
+    }
 }
 
 void SceneNode::Activate(const bool activate)

@@ -20,7 +20,7 @@
     IMPLEMENT_REFLECTION(Type); \
     static void Register() { \
         SceneNode::s_factoryFunctions[#Type] = [](Ref<entt::registry> registry) { \
-            return std::make_shared<Type>(registry); \
+            return std::make_shared<Type>(registry, "New " #Type); \
         }; \
     }
 
@@ -42,6 +42,7 @@ NXS_NAMESPACE
 
         static Ref<SceneNode> Create(Ref<entt::registry> registry, std::string className);
         static Ref<SceneNode> CreateChild(Ref<SceneNode> parent, std::string className);
+        static void GetRegisteredNodeTypes(std::vector<std::string>& outTypes);
 
         void AcceptReflector(IReflector& reflector) override;
 
@@ -133,6 +134,14 @@ NXS_NAMESPACE
         virtual void OnDeactivate() {};
         virtual void OnDestroy() {};
         virtual void OnUpdate(float dt) {}
+
+    private:
+        /**
+         * @brief Validate and clamp component properties. This should be performed
+         * after deserialization to ensure data integrity (eg. divide by zero prevention).
+         * @note This function is optional to implement in derived classes.
+         */
+        virtual void Validate();
 
     protected:
         Ref<SceneNode> m_parent;

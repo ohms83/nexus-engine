@@ -157,6 +157,28 @@ NXS_NAMESPACE
         }
 
         /**
+         * @brief Retrieves all components owned by this entity.
+         * 
+         * @param outComponents A vector to be populated with pointers to all components.
+         * 
+         * @warning DO NOT CACHE THE RETURNED POINTERS. The returned pointers may become invalid if components are removed
+         * or if the entity is destroyed. The pointers might also become invalid if the registry is modified in a way that
+         * affects component storage (eg., component reordering).
+         */
+        void GetAllComponents(std::vector<IComponent*>& outComponents) const
+        {
+            for (const auto id : m_components)
+            {
+                const auto storage = m_registry->storage(id);
+                if (storage && storage->contains(m_entity))
+                {
+                    auto componentPtr = R_CAST<IComponent*>(storage->value(m_entity));
+                    outComponents.push_back(componentPtr);
+                }
+            }
+        }
+
+        /**
          * @brief Removes a single component from the entity.
          * 
          * @tparam Type The type of component to remove.
