@@ -52,7 +52,7 @@ NXS_NAMESPACE
             return true;
         }
 
-        void Validate()
+        void Validate() override
         {
             // Clamp values
             if (projectionType == ProjectionType::Orthographic) {
@@ -72,9 +72,9 @@ NXS_NAMESPACE
          */
         float fov = 45.0f;
         //! Fustrum's width.
-        float width = 0;
+        float width = 1280.0f;
         //! Fustrum's height.
-        float height = 0;
+        float height = 720.0f;
         //! Fustrum's near clipping plane.
         float nearZ = 0.1f;
         //! Fustrum's far clipping plane.

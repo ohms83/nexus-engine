@@ -7,10 +7,14 @@ NXS_NAMESPACE
 {
     struct FileMenuContext
     {
-		WindowContext windowContext = nullptr;
-        std::string defaultExtension;
+        //! The application's window context. This cannot be null.
+        WindowContext windowContext = nullptr;
+        //! The file filters to be used in the dialog.
         std::vector<ExtFilter> filters;
-        FileDialogContext::Mode dialogMode;
+        //! The default file extension (without dot).
+        std::string defaultExtension = "";
+        //! The dialog mode (open or save).
+        FileDialogContext::Mode dialogMode = FileDialogContext::Mode::Open;
     };
 
     class FileMenuItem : public TriggerMenuItem
@@ -24,6 +28,11 @@ NXS_NAMESPACE
             const FileMenuContext& context);
         
         void ShowFileDialog() const;
+
+        FileDialogContext::Mode GetDialogMode() const
+        {
+            return m_context.dialogMode;
+        }
 
     private:
         virtual void OnDialogClosed(const std::string& selectedPath) const = 0;

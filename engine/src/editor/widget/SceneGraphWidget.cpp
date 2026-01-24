@@ -1,8 +1,33 @@
 #include "editor/widget/SceneGraphWidget.h"
+#include "scene/Camera.h"
 
 #include "imgui.h"
 
 USING_NAMESPACE_NXS;
+
+static void ShowNewNodeMenu(Ref<SceneNode> parent)
+{
+    std::vector<std::string> nodeTypes;
+    SceneNode::GetRegisteredNodeTypes(nodeTypes);
+    if (nodeTypes.empty()) return;
+
+    if (ImGui::BeginMenu("Add Child"))
+    {
+        for (const auto& type : nodeTypes)
+        {
+            Ref<SceneNode> child;
+            if (ImGui::MenuItem(type.c_str())) {
+                child = SceneNode::CreateChild(parent, type);
+            }
+
+            if (child && type == "Camera") {
+                child->GetComponent<CameraComponent>()->Validate();
+            }
+        }
+        ImGui::EndMenu();
+    }
+}
+
 SceneGraphWidget::SceneGraphWidget(SceneManager& sceneManager)
     : EditorWidget("Scene Graph")
 {
@@ -102,6 +127,7 @@ void SceneGraphWidget::ShowContextMenu()
 
     if (ImGui::BeginPopupContextWindow(contexMenuID, ImGuiPopupFlags_MouseButtonRight))
     {
+        ShowNewNodeMenu(node);
         if (ImGui::MenuItem("Delete"))
         {
             DeleteNode(node);

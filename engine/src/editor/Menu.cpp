@@ -5,6 +5,7 @@
 #include "editor/menu/TriggerMenuItem.h"
 #include "editor/menu/WidgetMenuItem.h"
 #include "editor/menu/ConsoleMenuItem.h"
+#include "editor/menu/SceneFileMenuItem.h"
 #include "editor/widget/EditorWidget.h"
 #include "editor/widget/ProfilerWidget.h"
 #include "editor/widget/PropertyWindow.h"
@@ -33,94 +34,88 @@ DEFINE_LOG(Menu);
 
 Menu::Menu(IWidgetOwner& widgetOwner)
 {
+    const auto& application = CAST<Editor*>(&widgetOwner)->GetParentApp();
+
+    auto newSceneMenu = std::make_shared<TriggerMenuItem> (
+        FILE_MENU_OPEN_SAVE,
+        "New Scene",
+        "",
+        "Ctrl+N",
+        [&widgetOwner]() {
+            auto& application = CAST<Editor*>(&widgetOwner)->GetParentApp();
+            auto& sceneManager = application.GetSceneManager();
+            sceneManager.EmplaceAndChange<Scene>("New Scene");
+        }
+    );
+    auto importSceneMenu = std::make_shared<SceneFileMenuItem>(
+        application.GetSceneManager(),
+        std::make_shared<JsonSerializer>(),
+        FILE_MENU_OPEN_SAVE,
+        "Import Scene",
+        "Import a 3D model to the currently active scene.",
+        "Ctrl+I",
+        FileMenuContext {
+            .windowContext = application.GetWindowContext(),
+            .filters = { {"3D Model Files (*.obj;*.fbx;*.gltf)", "*.obj;*.fbx;*.gltf"} },
+            .defaultExtension = "",
+            .dialogMode = FileDialogContext::Mode::Open,
+        }
+    );
+    auto openSceneMenu = std::make_shared<SceneFileMenuItem>(
+        application.GetSceneManager(),
+        std::make_shared<JsonSerializer>(),
+        FILE_MENU_OPEN_SAVE,
+        "Open Scene",
+        "Open an existing scene.",
+        "Ctrl+O",
+        FileMenuContext {
+            .windowContext = application.GetWindowContext(),
+            .filters = { {"Nexus scene file (*.nxs)", "*.nxs"} },
+            .defaultExtension = "nxs",
+            .dialogMode = FileDialogContext::Mode::Open,
+        }
+    );
+    auto saveSceneMenu = std::make_shared<SceneFileMenuItem>(
+        application.GetSceneManager(),
+        std::make_shared<JsonSerializer>(),
+        FILE_MENU_OPEN_SAVE,
+        "Save Scene",
+        "Save the currently active scene.",
+        "Ctrl+S",
+        FileMenuContext {
+            .windowContext = application.GetWindowContext(),
+            .filters = { {"Nexus scene file (*.nxs)", "*.nxs"} },
+            .defaultExtension = "nxs",
+            .dialogMode = FileDialogContext::Mode::Save,
+        }
+    );
+    auto quitMenu = std::make_shared<TriggerMenuItem> (
+        FILE_MENU_QUIT_APP,
+        "Quit",
+        "",
+        "Alt+F4",
+        []() {
+            SDL_QuitEvent quitEvent {
+                SDL_EVENT_QUIT,
+                0,
+                SDL_GetTicksNS()
+            };
+            SDL_PushEvent(R_CAST<SDL_Event*>(&quitEvent));
+        }
+    );
     MenuItemList fileMenu = {
         "File",
         {
-            std::make_shared<TriggerMenuItem> (
-                FILE_MENU_OPEN_SAVE,
-                "New Scene",
-                "",
-                "Ctrl+N",
-                [&widgetOwner]() {
-                    auto& application = CAST<Editor*>(&widgetOwner)->GetParentApp();
-                    auto& sceneManager = application.GetSceneManager();
-                    sceneManager.EmplaceAndChange<Scene>("New Scene");
-                }
-            ),
-            std::make_shared<TriggerMenuItem> (
-                FILE_MENU_OPEN_SAVE,
-                "Open Scene",
-                "Open an existing scene.",
-                "Ctrl+O",
-                [&widgetOwner]() {
-                    FileDialogContext context {
-                        .windowContext = widgetOwner.GetWindowContext(),
-                        .filters = { {"Nexus scene file (*.nxs)", "*.nxs"} },
-                        .title = "Open Scene",
-                        .defaultExtension = "nxs",
-                        .mode = FileDialogContext::Mode::Open,
-                    };
-                    // TODO:
-                    (void)FileDialog::ShowFileDialog(context);
-                }
-            ),
-            std::make_shared<TriggerMenuItem> (
-                FILE_MENU_OPEN_SAVE,
-                "Save Scene",
-                "",
-                "Ctrl+S",
-                [&widgetOwner]() {
-                    FileDialogContext context {
-                        .windowContext = widgetOwner.GetWindowContext(),
-                        .filters = { {"Nexus scene file (*.nxs)", "*.nxs"} },
-                        .title = "Save Scene",
-                        .defaultExtension = "nxs",
-                        .mode = FileDialogContext::Mode::Save,
-                    };
-                    // TODO: Move the serialization code to a separate file.
-                    const auto filepath = FileDialog::ShowFileDialog(context);
-                    LOG_INFO(LogTemp, std::format("Filepath={}", filepath));
-                    if (filepath.empty()) return;
-
-                    std::ofstream file(filepath);
-                    if (!file.good()) return;
-
-                    auto serializer = JsonSerializer();
-                    auto& application = CAST<Editor*>(&widgetOwner)->GetParentApp();
-                    auto& sceneManager = application.GetSceneManager();
-                    auto scene = sceneManager.GetCurrentScene();
-                    serializer.Pack(scene->Serialize(), file);
-                }
-            ),
-            std::make_shared<TriggerMenuItem> (
-                FILE_MENU_OPEN_SAVE,
-                "Import",
-                "Import a 3D model to the currently active scene.",
-                "Ctrl+I",
-                [&widgetOwner]() {
-                    FileDialogContext context {
-                        .windowContext = widgetOwner.GetWindowContext(),
-                        .title = "Import Model",
-                        .mode = FileDialogContext::Mode::Open,
-                    };
-                    // TODO:
-                    (void)FileDialog::ShowFileDialog(context);
-                }
-            ),
-            std::make_shared<TriggerMenuItem> (
-                FILE_MENU_QUIT_APP,
-                "Quit",
-                "",
-                "Alt+F4",
-                []() {
-                    SDL_QuitEvent quitEvent {
-                        SDL_EVENT_QUIT,
-                        0,
-                        SDL_GetTicksNS()
-                    };
-                    SDL_PushEvent(R_CAST<SDL_Event*>(&quitEvent));
-                }
-            ),
+            // New Scene
+            newSceneMenu,
+            // Open Scene
+            openSceneMenu,
+            // Save Scene
+            saveSceneMenu,
+            // Import Scene
+            importSceneMenu,
+            // Quit Application
+            quitMenu,
         }
     };
 
