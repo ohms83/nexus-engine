@@ -48,7 +48,7 @@ NXS_NAMESPACE
 
         MAYBE_UNUSED bool Deserialize(const VariantData& data) override
         {
-            if (data["__class__"].GetString() == ClassName())
+            if (data["__class__"].GetString() != ClassName())
             {
                 LOG_ERROR(LogSerialize, std::format("Unexpected object class. Expected={}, Actual={}",
                     ClassName(), data["__class__"].GetString()));
