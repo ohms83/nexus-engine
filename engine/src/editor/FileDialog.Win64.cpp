@@ -55,55 +55,58 @@ namespace nxs
         return numFilter;
     }
 
-    std::string ShowFileDialog(const FileDialogContext& context)
+    namespace FileDialog
     {
-        OPENFILENAME ofn;
-        ZeroMemory(&ofn, sizeof(ofn));
-
-        HWND hwnd = (HWND)SDL_GetPointerProperty(
-            SDL_GetWindowProperties(context.windowContext),
-            SDL_PROP_WINDOW_WIN32_HWND_POINTER,
-            NULL);
-        // Convert the initial filepath to the OS preferred format (replacing "/" with "\" in the case of Windows).
-        std::string defaultDir = std::filesystem::path(context.initalDirectory).make_preferred().string();
-        std::string title = context.title;
-        std::string ext = context.defaultExtension;
-
-        char fileName[MAX_PATH] = ""; // Output file path.
-        char filter[FILTER_MAX] = "";
-        ZeroMemory(&fileName, sizeof(fileName));
-        ZeroMemory(&filter, sizeof(filter));
-
-        const auto numFilter = ConstructFilterList(context.filters, filter, FILTER_MAX);
-        if (numFilter != context.filters.size())
+        std::string ShowFileDialog(const FileDialogContext& context)
         {
-            LOG_WARNING(LogFileDialog, std::format("Filter list is too long. Applied filter {}/{}", numFilter, context.filters.size()));
-        }
+            OPENFILENAME ofn;
+            ZeroMemory(&ofn, sizeof(ofn));
 
-        ofn.lStructSize = sizeof(ofn);
-        ofn.lpstrInitialDir = defaultDir.c_str();
-        ofn.lpstrTitle = title.empty() ? nullptr : title.c_str();
-        ofn.hwndOwner = hwnd;
-        ofn.lpstrFilter = filter;
-        ofn.lpstrFile = fileName;
-        ofn.nMaxFile = MAX_PATH;
-        ofn.Flags = OFN_EXPLORER | OFN_HIDEREADONLY;
-        ofn.lpstrDefExt = ext.empty() ? nullptr : ext.c_str();
+            HWND hwnd = (HWND)SDL_GetPointerProperty(
+                SDL_GetWindowProperties(context.windowContext),
+                SDL_PROP_WINDOW_WIN32_HWND_POINTER,
+                NULL);
+            // Convert the initial filepath to the OS preferred format (replacing "/" with "\" in the case of Windows).
+            std::string defaultDir = std::filesystem::path(context.initalDirectory).make_preferred().string();
+            std::string title = context.title;
+            std::string ext = context.defaultExtension;
 
-        bool success = false;
-        if (context.mode == FileDialogContext::Mode::Open)
-        {
-            ofn.Flags |= OFN_FILEMUSTEXIST;
-            success = GetOpenFileName(&ofn);
-        }
-        else if (context.mode == FileDialogContext::Mode::Save)
-        {
-            ofn.Flags |= OFN_OVERWRITEPROMPT;
-            success = GetSaveFileName(&ofn);
-        }
+            char fileName[MAX_PATH] = ""; // Output file path.
+            char filter[FILTER_MAX] = "";
+            ZeroMemory(&fileName, sizeof(fileName));
+            ZeroMemory(&filter, sizeof(filter));
 
-        std::string result = success ? ofn.lpstrFile : std::string();
-        return result;
+            const auto numFilter = ConstructFilterList(context.filters, filter, FILTER_MAX);
+            if (numFilter != context.filters.size())
+            {
+                LOG_WARNING(LogFileDialog, std::format("Filter list is too long. Applied filter {}/{}", numFilter, context.filters.size()));
+            }
+
+            ofn.lStructSize = sizeof(ofn);
+            ofn.lpstrInitialDir = defaultDir.c_str();
+            ofn.lpstrTitle = title.empty() ? nullptr : title.c_str();
+            ofn.hwndOwner = hwnd;
+            ofn.lpstrFilter = filter;
+            ofn.lpstrFile = fileName;
+            ofn.nMaxFile = MAX_PATH;
+            ofn.Flags = OFN_EXPLORER | OFN_HIDEREADONLY;
+            ofn.lpstrDefExt = ext.empty() ? nullptr : ext.c_str();
+
+            bool success = false;
+            if (context.mode == FileDialogContext::Mode::Open)
+            {
+                ofn.Flags |= OFN_FILEMUSTEXIST;
+                success = GetOpenFileName(&ofn);
+            }
+            else if (context.mode == FileDialogContext::Mode::Save)
+            {
+                ofn.Flags |= OFN_OVERWRITEPROMPT;
+                success = GetSaveFileName(&ofn);
+            }
+
+            std::string result = success ? ofn.lpstrFile : std::string();
+            return result;
+        }
     }
 }
 

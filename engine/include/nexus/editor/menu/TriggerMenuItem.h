@@ -22,8 +22,8 @@ NXS_NAMESPACE
             const std::string& shortcut,
             HandleFunction handler);
 
-        void OnSelected(bool is_selected);
-        bool IsSelected() const { return false; }
+        void OnSelected(bool is_selected) override;
+        bool IsSelected() const override { return false; }
 
     private:
         HandleFunction m_handler;

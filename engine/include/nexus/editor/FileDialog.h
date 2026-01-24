@@ -78,11 +78,14 @@ NXS_NAMESPACE
 		Mode mode = Mode::Open;
 	};
 
-	/**
-	 * @brief Displays a system file dialog based on the provided context.
-	 * @param context The configuration for the file dialog.
-	 * @return The full path to the selected file, or an empty string if the dialog was canceled.
-	 * @note This function is decorated with NODISCARD, indicating the return value should not be ignored.
-	 */
-	NODISCARD std::string ShowFileDialog(const FileDialogContext& context);
+	namespace FileDialog
+	{
+		/**
+		 * @brief Displays a system file dialog based on the provided context.
+		 * @param context The configuration for the file dialog.
+		 * @return The full path to the selected file, or an empty string if the dialog was canceled.
+		 * @note This function is decorated with NODISCARD, indicating the return value should not be ignored.
+		 */
+		NODISCARD std::string ShowFileDialog(const FileDialogContext& context);
+	}
 }

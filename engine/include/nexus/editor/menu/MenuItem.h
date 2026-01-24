@@ -8,6 +8,8 @@
 #include <functional>
 #include <string>
 
+DECLARE_LOG_EXTERN(Menu);
+
 NXS_NAMESPACE
 {
     class MenuItem

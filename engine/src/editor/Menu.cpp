@@ -41,7 +41,10 @@ Menu::Menu(IWidgetOwner& widgetOwner)
                 "New Scene",
                 "",
                 "Ctrl+N",
-                []() {
+                [&widgetOwner]() {
+                    auto& application = CAST<Editor*>(&widgetOwner)->GetParentApp();
+                    auto& sceneManager = application.GetSceneManager();
+                    sceneManager.EmplaceAndChange<Scene>("New Scene");
                 }
             ),
             std::make_shared<TriggerMenuItem> (
@@ -58,7 +61,7 @@ Menu::Menu(IWidgetOwner& widgetOwner)
                         .mode = FileDialogContext::Mode::Open,
                     };
                     // TODO:
-                    (void)ShowFileDialog(context);
+                    (void)FileDialog::ShowFileDialog(context);
                 }
             ),
             std::make_shared<TriggerMenuItem> (
@@ -75,7 +78,7 @@ Menu::Menu(IWidgetOwner& widgetOwner)
                         .mode = FileDialogContext::Mode::Save,
                     };
                     // TODO: Move the serialization code to a separate file.
-                    const auto filepath = ShowFileDialog(context);
+                    const auto filepath = FileDialog::ShowFileDialog(context);
                     LOG_INFO(LogTemp, std::format("Filepath={}", filepath));
                     if (filepath.empty()) return;
 
@@ -101,7 +104,7 @@ Menu::Menu(IWidgetOwner& widgetOwner)
                         .mode = FileDialogContext::Mode::Open,
                     };
                     // TODO:
-                    (void)ShowFileDialog(context);
+                    (void)FileDialog::ShowFileDialog(context);
                 }
             ),
             std::make_shared<TriggerMenuItem> (
