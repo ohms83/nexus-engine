@@ -28,7 +28,7 @@ NXS_NAMESPACE
         VariantData Serialize() const override
         {
             VariantData data = Super::Serialize();
-            data["id"] = INT_CAST(id);
+            data["id"] = INT64_CAST(id);
             data["name"] = name;
             data["active"] = active;
             return data;
