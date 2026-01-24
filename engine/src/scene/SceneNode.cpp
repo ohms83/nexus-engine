@@ -1,10 +1,12 @@
-#include <utility>
-
 #include "scene/SceneNode.h"
 
 #include "core/LogDispatcher.h"
 #include "core/task/OneshotTask.h"
 #include "ecs/Component.h"
+#include "core/Hasher.h"
+
+#include <utility>
+#include <chrono>
 
 USING_NAMESPACE_NXS;
 
@@ -22,8 +24,14 @@ SceneNode::SceneNode(Ref<entt::registry> registry, std::string name)
     {
         name = std::format("SceneNode_{}", s_runningId);
     }
+
+    auto now = std::chrono::system_clock::now();
+    auto duration = now.time_since_epoch();
+    auto milliseconds =
+        std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
+
     auto component = AddComponent<SceneNodeComponent>();
-    component->id = ++s_runningId;
+    component->id = Hasher().Hash32(std::format("{}_{}_{}", name, milliseconds, s_runningId++));
     component->name = std::move(name);
     component->active = true;
 }
@@ -136,13 +144,6 @@ bool SceneNode::Deserialize(const VariantData &data)
             std::format("Unexpected object class. Expected={}, Actual={}", ClassName(), data["__class__"].GetString()));
         return false;
     }
-
-    // SceneComponent
-    const auto& sceneCompData = data["SceneNodeComponent"];
-    auto comp = GetComponent<SceneNodeComponent>();
-    comp->active = sceneCompData["active"].GetBool();
-    comp->name = sceneCompData["name"].GetString();
-    comp->id = UINT_CAST(sceneCompData["id"].GetInt());
 
     for (const auto child : data["children"].GetArray())
     {
