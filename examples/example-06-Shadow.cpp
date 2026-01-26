@@ -5,8 +5,6 @@
 #include "imgui.h"
 #include <glm/gtc/type_ptr.hpp>
 
-#define SHOW_MODEL 1
-
 static const std::vector<std::string> modelPaths = {
     "meshes/apple/3DApple001_SQ-1K-PNG.obj",
     "meshes/armadillo/armadillo.obj",
@@ -44,7 +42,7 @@ public:
     {
         const auto selectedNode = m_sceneGraphWidget->GetSelectedNode();
         m_propertyWindow->SetSceneNode(selectedNode);
-#if SHOW_MODEL
+
         if (m_finishLoading)
         {
             const auto& inputManager = nxs::InputManager::Instance();
@@ -53,57 +51,32 @@ public:
             m_euler.y += euler.y;
 
             auto modelNode = PTR_CAST<nxs::SceneNode3D>(m_scene->FindNodeWithName("Model"));
+            if (!modelNode) return;
+
             modelNode->Orient().quat = glm::mat4_cast(glm::quat(glm::radians(m_euler)));
             modelNode->Scale().value = modelScales[selectedModel] * scale;
             return;
         }
-#endif
+
         for (const auto & m_loadedModel : m_loadedModels)
         {
             if (m_loadedModel->status != nxs::IResourceLoader::LoadResult::Status::Ready) return;
         }
 
-#if SHOW_MODEL
         auto modelComp = m_scene->FindNodeWithName("Model")->GetComponent<nxs::ModelComponent>();
+        if (!modelComp) return;
+
         modelComp->model = PTR_CAST<nxs::Model>(m_loadedModels[selectedModel]->resource);
-#endif
         m_finishLoading = true;
     }
 
     void Render(nxs::RenderSystem& renderSystem) override
     {
-        // auto modelComp = modelNode->TryGetComponent<nxs::ModelComponent>();
-        // if (modelComp)
-        // {
-        //     const auto model = modelComp->model;
-        //     const auto position = modelNode->Position().value;
-        //     const auto orient = modelNode->Orient().quat;
-        //     const auto scale = modelNode->Scale().value;
-        //     const auto transform = nxs::Matrix::CreateModelMatrix(position, orient, scale);
-        //     if (drawSphere)
-        //     {
-        //         auto sphere = model->GetBoundingSphere();
-        //         nxs::Gizmos::DrawOutlineSphere(renderSystem, position + sphere.center, sphere.radius, transform);
-
-        //         for (auto mesh : model->GetMeshes())
-        //         {
-        //             const auto& mesh_sphere = mesh->GetSphere();
-        //             nxs::Gizmos::DrawOutlineSphere(renderSystem, position + mesh_sphere.center, mesh_sphere.radius, transform);
-        //         }
-        //     }
-        //     if (drawBox)
-        //     {
-        //         auto box = model->GetBoundingBox();
-        //         nxs::Gizmos::DrawOutlineBox(renderSystem, position + box.center, box.extent, transform);
-        //     }
-        // }
-
         m_scene->Render(renderSystem);
     }
 
     void DrawUI() override
     {
-#if SHOW_MODEL
         ImGui::Begin("Model Settings");
         {
             ImGui::SeparatorText("Model");
@@ -136,7 +109,6 @@ public:
             ImGui::Checkbox("Draw Box", &drawBox);
         }
         ImGui::End();
-#endif
 
         auto renderSystem = nxs::Engine::Instance().GetRenderSystem();
         m_propertyWindow->Draw(*renderSystem);
@@ -157,10 +129,8 @@ protected:
             engine.GetShaderManager()
         );
 
-        m_scene = std::make_shared<nxs::Scene>("Main Scene");
-
         auto sceneManager = engine.GetSceneManager();
-        sceneManager->ChangeSceneDirect(m_scene);
+        m_scene = sceneManager->EmplaceAndChange<nxs::Scene>("Main Scene");;
 
         InitScene();
         InitLights();
@@ -205,11 +175,9 @@ private:
             m_loadedModels.emplace_back(LoadModel(i));
         }
 
-#if SHOW_MODEL
         auto node = m_scene->EmplaceChild<nxs::SceneNode3D>("Model");
         node->AddComponent<nxs::ModelComponent>();
         node->Scale().value = modelScales[0];
-#endif
 
         auto material = std::make_shared<nxs::Material>("Default Material", 0);
         material->CreateDefaultShader(nxs::Engine::Instance().GetShaderManager());
