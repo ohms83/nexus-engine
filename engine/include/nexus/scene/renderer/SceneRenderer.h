@@ -33,7 +33,7 @@ NXS_NAMESPACE
     {
     public:
         virtual ~SceneRenderer() = default;
-        virtual void Render(RenderSystem& renderSystem, const entt::registry& registry) = 0;
+        virtual void Render(RenderSystem& renderSystem, const Scene& scene) = 0;
 
         void RegisterRenderPass(const RenderPass& renderPass)
         {
@@ -53,9 +53,12 @@ NXS_NAMESPACE
 
     protected:
         static RenderCommand CreateRenderCommand(Ref<const Mesh> mesh, glm::mat4&& modelMtx, const glm::mat4& mvpMtx);
+        static bool RenderInstancedMesh(RenderSystem& renderSystem, const RenderCommand& command, Ref<GpuProgram> gpuProgram);
         static void SetAmbientLightParams(Ref<GpuProgram> gpuProgram, const entt::registry& registry);
         static void SetDirectLightParams(Ref<GpuProgram> gpuProgram, const entt::registry& registry);
         static void SetPointLightParams(Ref<GpuProgram> gpuProgram, const entt::registry& registry);
+
+        static void SetCameraUniforms(Ref<GpuProgram> gpuProgram, const glm::vec3& cameraPos, const glm::mat4& viewMtx, const glm::mat4& projectionMtx);
 
         //! A list of render passes sorted by their priority.
         std::vector<RenderPass> m_renderPasses;

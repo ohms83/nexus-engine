@@ -28,8 +28,9 @@ DummySceneRenderer::DummySceneRenderer()
     RegisterRenderPass(OpaquePass);
 }
 
-void DummySceneRenderer::Render(RenderSystem& renderSystem, const entt::registry& registry)
+void DummySceneRenderer::Render(RenderSystem& renderSystem, const Scene& scene)
 {
+#if 0
     std::vector<RenderCommand> commands;
     commands.reserve(1024);
 
@@ -134,4 +135,5 @@ void DummySceneRenderer::Render(RenderSystem& renderSystem, const entt::registry
             }
         }
     }
+#endif
 }

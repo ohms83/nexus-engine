@@ -56,6 +56,43 @@ RenderCommand SceneRenderer::CreateRenderCommand(Ref<const Mesh> mesh, glm::mat4
     return cmd;
 }
 
+bool SceneRenderer::RenderInstancedMesh(RenderSystem& renderSystem, const RenderCommand& command, Ref<GpuProgram> gpuProgram)
+{
+    rmt_ScopedCPUSample(SceneRenderer_RenderInstancedMesh, 0);
+    if (command.instanceModels.empty()) return false;
+
+    // Build an OwningBuffer holding all model matrices
+    const auto instanceCount = static_cast<uint32>(command.instanceModels.size());
+    const size_t bytes = instanceCount * sizeof(glm::mat4);
+    uint8_t* mem = new uint8_t[bytes];
+    // Copy matrices
+    for (uint32 i = 0; i < instanceCount; ++i)
+    {
+        std::memcpy(&mem[i * sizeof(glm::mat4)], &command.instanceModels[i], sizeof(glm::mat4));
+    }
+    Ref<IBuffer> instanceBuffer = std::make_shared<OwningBuffer>(mem, bytes);
+
+    // Create instance attributes for mat4 as 4 vec4 attributes (layout locations 10..13)
+    std::vector<VertexAttribute> attrs;
+    for (int i = 0; i < 4; ++i)
+    {
+        VertexAttribute a;
+        a.type = VertexAttribute::Type::TexCoord0; // type is unused if attribIndex set
+        a.dataType = DataType::Float;
+        a.numElements = 4;
+        a.attribIndex = 10 + i; // locations 10..13
+        a.divisor = 1;
+        attrs.push_back(a);
+    }
+
+    command.vertexBuffer->AttachInstanceStream(std::static_pointer_cast<IBuffer>(instanceBuffer), attrs, BufferUsage::StaticDraw);
+    renderSystem.DrawIndexedInstanced(command.indexBuffer, instanceCount);
+    command.vertexBuffer->DetachInstanceStreams();
+    // free temporary allocation (OwningBuffer::Take took ownership)
+    // OwningBuffer destructor will free it
+    return true;
+}
+
 void SceneRenderer::SetAmbientLightParams(Ref<GpuProgram> gpuProgram, const entt::registry &registry)
 {
     rmt_ScopedCPUSample(SceneRenderer_SetAmbientLightParams, 0);
@@ -126,6 +163,13 @@ void SceneRenderer::SetPointLightParams(Ref<GpuProgram> gpuProgram, const entt::
         numLight++;
     }
     gpuProgram->SetUniformInt("_NumPointLight", numLight);
+}
+
+void SceneRenderer::SetCameraUniforms(Ref<GpuProgram> gpuProgram, const glm::vec3& cameraPos, const glm::mat4& viewMtx, const glm::mat4& projectionMtx)
+{
+    gpuProgram->SetUniformVector("_CameraPos", cameraPos);
+    gpuProgram->SetUniformMatrix("_View", viewMtx, false);
+    gpuProgram->SetUniformMatrix("_Projection", projectionMtx, false);
 }
 
 bool SceneRenderer::IsSphereInside(const Frustum& viewFustrum, const Sphere& sphere, glm::mat4 modelMtx, const glm::vec3& scale)

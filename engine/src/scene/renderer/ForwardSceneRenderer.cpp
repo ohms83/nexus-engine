@@ -18,6 +18,7 @@
 #include "math/Math.h"
 #include "math/Matrix.h"
 #include "memory/OwningBuffer.h"
+#include "scene/Scene.h"
 #include "scene/component/CameraComponent.h"
 #include "scene/component/LightComponent.h"
 #include "scene/component/ModelComponent.h"
@@ -35,14 +36,14 @@ ForwardSceneRenderer::ForwardSceneRenderer(const RenderSystem& renderSystem)
     RegisterRenderPass(OverlayPass);
 }
 
-void ForwardSceneRenderer::Render(RenderSystem& renderSystem, const entt::registry& registry)
+void ForwardSceneRenderer::Render(RenderSystem& renderSystem, const Scene& scene)
 {
     rmt_ScopedCPUSample(SceneRenderer_Render, 0);
 
     std::vector<RenderCommand> commands;
     commands.reserve(1024);
 
-    // Storing mesh's model matrix for the rendering phase.
+    const auto& registry = *scene.GetRegistry();
     auto renderInterface = renderSystem.GetRenderInterface();
 
     // ReSharper disable once CppTooWideScopeInitStatement
@@ -121,8 +122,7 @@ void ForwardSceneRenderer::Render(RenderSystem& renderSystem, const entt::regist
                     Ref<GpuProgram> usingProgram = nullptr;
                     // Batch commands in-place to reduce allocations and combine adjacents.
                     RenderCommandBatcher::Batch(commands);
-                    const auto &batched = commands;
-                    for (const auto& cmd : batched)
+                    for (const auto& cmd : commands)
                     {
                         if (!cmd.material) continue;
                         if (!pass.IsPassFiltered(cmd)) continue;
@@ -135,49 +135,14 @@ void ForwardSceneRenderer::Render(RenderSystem& renderSystem, const entt::regist
                         {
                             if (!gpuProgram->IsBinding()) gpuProgram->Bind();
 
-                            gpuProgram->SetUniformVector("_CameraPos", cameraPos.value);
-                            gpuProgram->SetUniformMatrix("_View", viewMtx, false);
-                            gpuProgram->SetUniformMatrix("_Projection", projection, false);
-
+                            SetCameraUniforms(gpuProgram, cameraPos.value, viewMtx, projection);
                             SetAmbientLightParams(gpuProgram, registry);
                             SetDirectLightParams(gpuProgram, registry);
                             SetPointLightParams(gpuProgram, registry);
                             usingProgram = gpuProgram;
                         }
 
-                        if (!cmd.instanceModels.empty())
-                        {
-                            // Build an OwningBuffer holding all model matrices
-                            const auto instanceCount = static_cast<uint32>(cmd.instanceModels.size());
-                            const size_t bytes = instanceCount * sizeof(glm::mat4);
-                            uint8_t* mem = new uint8_t[bytes];
-                            // Copy matrices
-                            for (uint32 i = 0; i < instanceCount; ++i)
-                            {
-                                std::memcpy(&mem[i * sizeof(glm::mat4)], &cmd.instanceModels[i], sizeof(glm::mat4));
-                            }
-                            Ref<IBuffer> instanceBuffer = std::make_shared<OwningBuffer>(mem, bytes);
-
-                            // Create instance attributes for mat4 as 4 vec4 attributes (layout locations 10..13)
-                            std::vector<VertexAttribute> attrs;
-                            for (int i = 0; i < 4; ++i)
-                            {
-                                VertexAttribute a;
-                                a.type = VertexAttribute::Type::TexCoord0; // type is unused if attribIndex set
-                                a.dataType = DataType::Float;
-                                a.numElements = 4;
-                                a.attribIndex = 10 + i; // locations 10..13
-                                a.divisor = 1;
-                                attrs.push_back(a);
-                            }
-
-                            cmd.vertexBuffer->AttachInstanceStream(std::static_pointer_cast<IBuffer>(instanceBuffer), attrs, BufferUsage::StaticDraw);
-                            renderSystem.DrawIndexedInstanced(cmd.indexBuffer, instanceCount);
-                            cmd.vertexBuffer->DetachInstanceStreams();
-                            // free temporary allocation (OwningBuffer::Take took ownership)
-                            // OwningBuffer destructor will free it
-                        }
-                        else
+                        if (!RenderInstancedMesh(renderSystem, cmd, gpuProgram))
                         {
                             gpuProgram->SetUniformMatrix("_Model", cmd.modelMatrix, false);
                             cmd.vertexBuffer->Bind();
