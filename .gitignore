@@ -18,3 +18,8 @@ cmake-build-*
 # ImGui
 imgui.ini
 imgui_editor_layout.ini
+
+# Temporary files
+*.tmp
+*.temp
+tmp/
