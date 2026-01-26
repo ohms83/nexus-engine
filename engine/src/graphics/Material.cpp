@@ -3,9 +3,7 @@
 //
 
 #include "graphics/Material.h"
-#include "graphics/ShaderManager.h"
 #include "nexus/core/serialize/Serializer.h"
-#include "nexus/graphics/TextureManager.h"
 #include "core/LogDispatcher.h"
 #include "core/Path.h"
 
@@ -220,25 +218,22 @@ bool Material::Deserialize(const VariantData& data)
     return true;
 }
 
-void Material::Resolve(TextureManager& textureManager, RenderingInterface* renderingInterface)
+void Material::Resolve(ResourceManager& resourceManager)
 {
     // Resolve textures using textureManager
     for (auto& ti : m_textures)
     {
         if (!ti.texture && !ti.path.empty())
         {
-            auto tex = textureManager.Get<Texture>(ti.path);
+            auto tex = resourceManager.Get<Texture>(ti.path);
             if (tex) ti.texture = tex;
         }
     }
 
     // Optional: Resolve shader by compiling it if shader path exists.
-    if (!m_shader && !m_shaderPath.empty() && renderingInterface)
+    if (!m_shader && !m_shaderPath.empty())
     {
-        // A concrete shader loader or manager would be preferred; temporarily create and compile.
-        m_shader = std::make_shared<Shader>(m_shaderPath, 0);
-        // Assume m_shaderPath indicates a shader with VS/FS - just attempt compileFromFile if possible.
-        // The path format is ambiguous; we do not attempt to auto-compile complex shader objects.
+        m_shader = resourceManager.Get<Shader>(m_shaderPath);
     }
 }
 
@@ -260,7 +255,7 @@ TextureType Material::GetTextureType(uint32 slot) const
     return TextureType::Undefined;
 }
 
-void Material::CreateDefaultShader(Ref<ShaderManager> shaderManager)
+void Material::CreateDefaultShader(ResourceManager& resourceManager)
 {
     std::string veretxShaderSource, fragmentShaderSource, geomtryShaderSource;
     std::string shaderPath;
@@ -278,6 +273,6 @@ void Material::CreateDefaultShader(Ref<ShaderManager> shaderManager)
         shaderPath = Path::GetEngineAssetPath(default_shader);
     }
 
-    m_shader = shaderManager->Get<Shader>(shaderPath);
+    m_shader = resourceManager.Get<Shader>(shaderPath);
     NXS_ASSERT(m_shader);
 }

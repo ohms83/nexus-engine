@@ -4,7 +4,21 @@
 
 USING_NAMESPACE_NXS;
 
-TEST(MaterialTest, SerializeDeserialize)
+class MaterialTest : public ::testing::Test {
+protected:
+    ResourceManager resourceManager;
+    void SetUp() override
+    {
+        resourceManager.RegisterLoader(typeid(Texture), std::make_unique<TextureLoader>(std::make_shared<FakeRendering>()));
+    }
+
+    void TearDown() override
+    {
+        resourceManager.EmptyCache();
+    }
+};
+
+TEST_F(MaterialTest, SerializeDeserialize)
 {
     Material m("mat", 1);
     m.ambient = Color3F{0.1f, 0.2f, 0.3f};
@@ -48,13 +62,9 @@ TEST(MaterialTest, SerializeDeserialize)
     EXPECT_EQ(m2.GetTexturePath(0), "assets/tex.png");
 
     // Use test helper FakeRendering to create a TextureManager
-    FakeRendering fakeR;
-
-    auto renderingInterface = std::make_shared<FakeRendering>();
-    TextureManager tm(renderingInterface);
     // Insert a dummy texture into the manager's cache by using Create (no loader needed)
-    tex = tm.Create<Texture>("assets/tex.png");
+    tex = resourceManager.Create<Texture>("assets/tex.png");
     EXPECT_NE(tex, nullptr);
-    m2.Resolve(tm, nullptr);
+    m2.Resolve(resourceManager);
     // Since we did not add material to material manager, resolve will not populate m2 textures via material manager here.
 }

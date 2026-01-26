@@ -79,10 +79,7 @@ NXS_NAMESPACE
         void ComputeBounds();
 
     public:
-        // Resolve a material reference using a MaterialManager and TextureManager. This will set m_material
-        // if the mesh currently only stores a material path (e.g., deserialized state). It will also cause
-        // the material to resolve its textures via the texture manager.
-        void Resolve(class MaterialManager& materialManager, class TextureManager& textureManager);
+        void Resolve(class ResourceManager& resourceManager);
 
         // Mesh stores the material path when deserializing and will attempt to resolve it when Resolve() is called.
         std::string m_materialPath;

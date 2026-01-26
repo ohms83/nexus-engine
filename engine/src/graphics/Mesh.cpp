@@ -1,7 +1,4 @@
 #include "graphics/Mesh.h"
-
-#include "nexus/graphics/MaterialManager.h"
-#include "nexus/graphics/TextureManager.h"
 #include "nexus/core/serialize/Serializer.h"
 
 USING_NAMESPACE_NXS;
@@ -100,13 +97,13 @@ bool Mesh::Deserialize(const VariantData& data)
     return true;
 }
 
-void Mesh::Resolve(MaterialManager& materialManager, TextureManager& textureManager)
+void Mesh::Resolve(class ResourceManager& resourceManager)
 {
     if (m_material) return; // already resolved
     if (m_materialPath.empty()) return;
-    auto mat = materialManager.Get<Material>(m_materialPath);
+    auto mat = resourceManager.Get<Material>(m_materialPath);
     if (!mat) return;
     m_material = mat;
     // Resolve the material's textures
-    mat->Resolve(textureManager, nullptr);
+    mat->Resolve(resourceManager);
 }

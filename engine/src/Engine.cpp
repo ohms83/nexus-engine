@@ -2,7 +2,11 @@
 // Created by nutta on 8/16/2025.
 //
 #include "Engine.h"
-#include "graphics/Model.h"
+#include "graphics/ModelLoader.h"
+#include "graphics/MaterialLoader.h"
+#include "graphics/ShaderLoader.h"
+#include "graphics/TextureLoader.h"
+
 #include "scene/component/TransformComponent.h"
 #include "scene/component/LightComponent.h"
 #include "scene/component/ModelComponent.h"
@@ -33,16 +37,15 @@ Engine& Engine::Initialize(WindowContext window, const GraphicsConfig& graphicsC
 {
     s_engine = std::make_unique<Engine>();
     s_engine->m_renderSystem = std::make_shared<RenderSystem>(window, graphicsConfig);
-    s_engine->m_textureManager = std::make_shared<TextureManager>(s_engine->GetRenderingInterface());
-    s_engine->m_materialManager = std::make_shared<MaterialManager>(s_engine->GetRenderingInterface());
-    s_engine->m_shaderManager= std::make_shared<ShaderManager>(s_engine->GetRenderingInterface());
-    s_engine->m_modelManager = std::make_shared<ModelManager>(
-        s_engine->GetRenderingInterface(),
-        s_engine->m_textureManager,
-        s_engine->m_materialManager,
-        s_engine->m_shaderManager);
     s_engine->m_taskScheduler = std::make_shared<TaskScheduler>(std::make_shared<StandardTimeSource>());
     s_engine->m_sceneManager =  std::make_shared<SceneManager>(s_engine->GetTaskScheduler());
+
+    auto resourceManager = std::make_shared<ResourceManager>();
+    resourceManager->RegisterLoader(typeid(Texture), std::make_unique<TextureLoader>(s_engine->GetRenderingInterface()));
+    resourceManager->RegisterLoader(typeid(Shader), std::make_unique<ShaderLoader>(s_engine->GetRenderingInterface()));
+    resourceManager->RegisterLoader(typeid(Material), std::make_unique<MaterialLoader>(s_engine->GetRenderingInterface(), *resourceManager));
+    resourceManager->RegisterLoader(typeid(Model), std::make_unique<ModelLoader>(s_engine->GetRenderingInterface(), resourceManager));
+    s_engine->m_resourceManager = resourceManager;
 
     InitModules();
     return *s_engine;

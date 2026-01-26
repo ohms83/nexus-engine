@@ -2,24 +2,43 @@
 
 USING_NAMESPACE_NXS;
 
-void ResourceManager::RegisterLoader(Ptr<IResourceLoader> loader)
+void ResourceManager::RegisterLoader(std::type_index type, Ptr<IResourceLoader> loader)
 {
     if (!loader)
     {
         LOG_ERROR(LogResource, "Attempted to register a null loader.");
         return;
     }
-    if (m_loader)
+    if (m_loaders.find(type) != m_loaders.end())
     {
-        LOG_WARNING(LogResource, std::format("Loader for type already registered. Overwriting."));
+        LOG_WARNING(LogResource, std::format("Loader for type '{}' already registered. Overwriting.", type.name()));
     }
-    m_loader = std::move(loader);
+    m_loaders[type] = std::move(loader);
 }
 
-IResourceManager::CacheResult ResourceManager::Cache(const std::string& path)
+IResourceLoader* ResourceManager::GetLoader(std::type_index type)
+{
+    if (auto loader = m_loaders.find(type); loader != m_loaders.end())
+    {
+        return loader->second.get();
+    }
+    return nullptr;
+}
+
+ResourceManager::ResourceMap& ResourceManager::GetResourceMap(std::type_index type)
+{
+    if (auto itr = m_cacheMaps.find(type); itr != m_cacheMaps.end())
+    {
+        return itr->second;
+    }
+    return m_cacheMaps.emplace(type, ResourceMap{}).first->second;
+}
+
+ResourceManager::CacheResult ResourceManager::Cache(std::type_index type, const std::string& path)
 {
     const auto id = m_hasher.Hash32(path);
-    if (auto itr = m_resourceCache.find(id); itr != m_resourceCache.end())
+    auto& resourceMap = GetResourceMap(type);
+    if (auto itr = resourceMap.find(id); itr != resourceMap.end())
     {
         // Resource is already cached.
         return { itr, true };
@@ -27,46 +46,32 @@ IResourceManager::CacheResult ResourceManager::Cache(const std::string& path)
 
     std::lock_guard<std::mutex> lock(m_mutex); // For thread-safety
 
-    if (!m_loader)
+    auto loader = GetLoader(type);
+    if (loader == nullptr)
     {
-        LOG_ERROR(LogResource, std::format("No loader registered to load resource '{}'.", path));
-        return { m_resourceCache.end(), false };
+        LOG_ERROR(LogResource, std::format("No loader registered to load resource type '{}'.", type.name()));
+        return { resourceMap.end(), false };
     }
 
-    const auto new_resource = m_loader->Load(path, id);
+    const auto new_resource = loader->Load(path, id);
     if (!new_resource)
     {
         LOG_ERROR(LogResource, std::format("Failed to load resource '{}'.", path));
-        return { m_resourceCache.end(), false };
+        return { resourceMap.end(), false };
     }
     // Store the newly loaded resource in the cache
-    return { m_resourceCache.insert({ id, new_resource }).first, true };
+    return { resourceMap.insert({ id, new_resource }).first, true };
 }
 
-Ref<Resource> ResourceManager::GetResource(const std::string& path)
-{
-    const auto cached = Cache(path);
-    return cached.first->second;
-}
-
-Ref<Resource> ResourceManager::GetResource(const uint32 id) const
-{
-    std::lock_guard<std::mutex> lock(m_mutex); // For thread-safety
-    if (const auto itr = m_resourceCache.find(id); itr != m_resourceCache.end())
-    {
-        return PTR_CAST<Resource>(itr->second);
-    }
-    return nullptr;
-}
-
-Ref<IResourceLoader::LoadResult> ResourceManager::GetResourceAsync(const std::string& path, TaskScheduler& scheduler)
+Ref<IResourceLoader::LoadResult> ResourceManager::GetResourceAsync(std::type_index type, const std::string& path, TaskScheduler& scheduler)
 {
     const auto id = m_hasher.Hash32(path);
-    if (auto cached_resource = GetResource(id))
+    auto& resourceCache = GetResourceMap(std::type_index(type));
+    if (auto cached_resource = resourceCache.find(id); cached_resource != resourceCache.end())
     {
         const auto result = std::make_shared<IResourceLoader::LoadResult>();
         result->path = path;
-        result->resource = cached_resource;
+        result->resource = cached_resource->second;
         result->status = IResourceLoader::LoadResult::Status::Ready;
         return result;
     }
@@ -81,13 +86,14 @@ Ref<IResourceLoader::LoadResult> ResourceManager::GetResourceAsync(const std::st
         return *loadResult;
     }
 
-    if (!m_loader)
+    auto loader = GetLoader(type);
+    if (loader == nullptr)
     {
-        LOG_ERROR(LogResource, std::format("No loader registered to load resource '{}'.", path));
+        LOG_ERROR(LogResource, std::format("No loader registered to load resource type '{}'.", type.name()));
         return nullptr;
     }
 
-    auto result = m_loader->LoadAsync(path, id, scheduler, [&resourceCache = m_resourceCache, id, path](Ref<Resource> new_resource) {
+    auto result = loader->LoadAsync(path, id, scheduler, [&resourceCache = GetResourceMap(type), id, path](Ref<Resource> new_resource) {
         if (!new_resource)
         {
             LOG_ERROR(LogResource, std::format("Failed to load resource '{}'.", path));
@@ -114,32 +120,34 @@ Ref<IResourceLoader::LoadResult> ResourceManager::GetResourceAsync(const std::st
     return result;
 }
 
-bool ResourceManager::Unload(const std::string& path)
+bool ResourceManager::Unload(std::type_index type, const std::string& path)
 {
     std::lock_guard<std::mutex> lock(m_mutex); // For thread-safety
     const auto id = m_hasher.Hash32(path);
 
-    if (const auto it = m_resourceCache.find(id); it != m_resourceCache.end())
+    auto& resourceMap = GetResourceMap(type);
+    if (const auto it = resourceMap.find(id); it != resourceMap.end())
     {
-        m_resourceCache.erase(it);
+        resourceMap.erase(it);
         return true;
     }
     LOG_WARNING(LogResource, std::format("Attempted to unload unknown resource '{}'.", path));
     return false;
 }
 
-void ResourceManager::PurgeUnused()
+void ResourceManager::PurgeUnused(std::type_index type)
 {
     uint32 count = 0;
-    for (auto itr = m_resourceCache.begin(); itr != m_resourceCache.end();)
+    auto& resourceMap = GetResourceMap(type);
+    for (auto itr = resourceMap.begin(); itr != resourceMap.end();)
     {
         if (auto& resource = itr->second; resource.use_count() <= 1) {
-            itr = m_resourceCache.erase(itr);
+            itr = resourceMap.erase(itr);
             ++count;
         }
         else {
             ++itr;
         }
     }
-    LOG_INFO(LogResource, std::format("Purged all unused resources. Count={}", count));
+    LOG_INFO(LogResource, std::format("Purged unused resources of type '{}'. Count={}", type.name(), count));
 }

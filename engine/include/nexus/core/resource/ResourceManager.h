@@ -20,50 +20,65 @@ NXS_NAMESPACE
      * @brief An abstract base class for resource managers.
      * 
      */
-    class IResourceManager
-    {
-    public:
+    // class IResourceManager
+    // {
+    // public:
         using Iterator = std::unordered_map<uint32, Ref<Resource>>::iterator;
         using CacheResult = std::pair<Iterator, bool>;
 
-        virtual ~IResourceManager() = default;
+    //     virtual ~IResourceManager() = default;
 
-        virtual void RegisterLoader(Ptr<IResourceLoader> loader) = 0;
-        /**
-         * @brief Load and cache a resource from the given path.
-         * 
-         * @param path The path to the resource to load and cache.
-         * 
-         * @return An iterator to the cached resource, or an end iterator if the resource was not found.
-         */
-        MAYBE_UNUSED virtual CacheResult Cache(const std::string& path) = 0;
-        NODISCARD virtual Ref<Resource> GetResource(const std::string& path) = 0;
-        NODISCARD virtual Ref<Resource> GetResource(const uint32 id) const = 0;
-        MAYBE_UNUSED virtual Ref<IResourceLoader::LoadResult> GetResourceAsync(const std::string& path, TaskScheduler& scheduler) = 0;
-        NODISCARD virtual bool IsExist(const std::string& path) const = 0;
-        virtual bool Unload(const std::string& path) = 0;
-        virtual void PurgeUnused() = 0;
-        /**
-         * @brief Remove all cached resources.
-         * 
-         */
-        virtual void EmptyCache() = 0;
-    };
+    //     virtual void RegisterLoader(Ptr<IResourceLoader> loader) = 0;
+    //     /**
+    //      * @brief Load and cache a resource from the given path.
+    //      * 
+    //      * @param path The path to the resource to load and cache.
+    //      * 
+    //      * @return An iterator to the cached resource, or an end iterator if the resource was not found.
+    //      */
+    //     MAYBE_UNUSED virtual CacheResult Cache(const std::string& path) = 0;
+    //     NODISCARD virtual Ref<Resource> GetResource(const std::string& path) = 0;
+    //     NODISCARD virtual Ref<Resource> GetResource(const uint32 id) const = 0;
+    //     MAYBE_UNUSED virtual Ref<IResourceLoader::LoadResult> GetResourceAsync(const std::string& path, TaskScheduler& scheduler) = 0;
+    //     NODISCARD virtual bool IsExist(const std::string& path) const = 0;
+    //     virtual bool Unload(const std::string& path) = 0;
+    //     virtual void PurgeUnused() = 0;
+    //     /**
+    //      * @brief Remove all cached resources.
+    //      * 
+    //      */
+    //     virtual void EmptyCache() = 0;
+    // };
 
-    class ResourceManager : public IResourceManager
+    class ResourceManager
     {
     public:
-        virtual ~ResourceManager() = default;
-
+        /**< A mapping of resource paths to shared pointers of a base IResource type */
+        using ResourceMap = std::unordered_map<uint32_t, Ref<Resource>>;
+        using ResourceMapIterator = ResourceMap::iterator;
+        using ResourceMapConstIterator = ResourceMap::const_iterator;
+        using ResourceMapList = std::map<std::type_index, ResourceMap>;
+        using CacheResult = std::pair<ResourceMapIterator, bool>;
         /**
-         * @brief Registers a resource loader with the manager.
+         * @brief A mapping of resource type to their respective loaders.
+         */
+        using LoaderMap = std::unordered_map<std::type_index, Ptr<IResourceLoader>>;
+
+        virtual ~ResourceManager() = default;
+        /**
+         * @brief Registers a resource loader for a specific resource type.
+         * 
          * Loaders are responsible for knowing how to load specific resource types.
          * Must be called for each resource type before attempting to load it.
-         * @param loader A shared_ptr to the IResourceLoader instance.
+         * 
+         * @param type The std::type_index of the resource type.
+         * @param loader A unique_ptr to the IResourceLoader instance.
          */
-        void RegisterLoader(Ptr<IResourceLoader> loader) override;
+        void RegisterLoader(std::type_index type, Ptr<IResourceLoader> loader);
 
-        MAYBE_UNUSED CacheResult Cache(const std::string& path) override;
+        MAYBE_UNUSED CacheResult Cache(std::type_index type, const std::string& path);
+
+        IResourceLoader* GetLoader(std::type_index type);
 
         /**
          * @brief Create an empty resource.
@@ -76,18 +91,18 @@ NXS_NAMESPACE
         requires std::derived_from<Type, Resource>
         NODISCARD Ref<Type> Create(const std::string& name)
         {
-            const auto id = m_hasher.Hash32(name);
-            if (auto cached_resource = GetResource(id); cached_resource != nullptr)
+            if (auto cached_resource = Get<Type>(name); cached_resource != nullptr)
             {
-                return nullptr;
+                return cached_resource;
             }
 
             std::lock_guard<std::mutex> lock(m_mutex); // For thread-safety
+            const auto id = m_hasher.Hash32(name);
+            auto& cacheMap = GetResourceMap(typeid(Type));
             auto new_resource = std::make_shared<Type>(name, id);
-            m_resourceCache[id] = new_resource;
+            cacheMap[id] = new_resource;
             return new_resource;
         }
-        
 
         /**
          * @brief Retrieves a resource of type T from the manager.
@@ -102,32 +117,33 @@ NXS_NAMESPACE
         requires std::derived_from<Type, Resource>
         NODISCARD Ref<Type> Get(const std::string& path)
         {
-            return PTR_CAST<Type>(GetResource(path));
+            const auto cached = Cache(typeid(Type), path);
+            return cached.second ? PTR_CAST<Type>(cached.first->second) : nullptr;
         }
 
-        /**
-         * @brief Retrieves a cached resource or loads it if not already cached.
-         * 
-         * If the resource is already cached, it's returned immediately.
-         * Otherwise, the registered loader is invoked to load and cache it.
-         *
-         * @param path The unique path (identifier) of the resource.
-         * @return A shared_ptr to the resource of type Type, or nullptr if loading fails.
-         */
-        NODISCARD Ref<Resource> GetResource(const std::string& path) override;
+        Ref<Resource> GetResource(std::type_index type, const std::string& path)
+        {
+            const auto cached = Cache(type, path);
+            return cached.first->second;
+        }
 
-        /**
-         * @brief Retrieves a cached resource by its ID.
-         * 
-         * @param id The unique ID of the resource.
-         * @return A shared_ptr to the resource, or nullptr if not found.
-         */
-        NODISCARD Ref<Resource> GetResource(const uint32 id) const override;
-
-        NODISCARD bool IsExist(const std::string& path) const override
+        ResourceMapConstIterator Find(std::type_index type, const std::string& path) const
         {
             const auto id = m_hasher.Hash32(path);
-            return GetResource(id) != nullptr;
+            if (auto itr = m_cacheMaps.find(type); itr != m_cacheMaps.end())
+            {
+                return itr->second.find(m_hasher.Hash32(path));
+            }
+            return ResourceMapConstIterator{};
+        }
+
+        NODISCARD bool IsExist(std::type_index type, const std::string& path) const
+        {
+            if (auto itr = m_cacheMaps.find(type); itr != m_cacheMaps.end())
+            {
+                return itr->second.contains(m_hasher.Hash32(path));
+            }
+            return false;
         }
 
         /**
@@ -149,7 +165,7 @@ NXS_NAMESPACE
          * @note This function is thread-safe as it uses a mutex to protect access to the list of
          * currently loading resources.
          */
-        MAYBE_UNUSED Ref<IResourceLoader::LoadResult> GetResourceAsync(const std::string& path, TaskScheduler& scheduler) override;
+        MAYBE_UNUSED Ref<IResourceLoader::LoadResult> GetResourceAsync(std::type_index type, const std::string& path, TaskScheduler& scheduler);
 
         /**
          * @brief Unloads a specific resource from the cache.
@@ -157,29 +173,29 @@ NXS_NAMESPACE
          * @param path The path of the resource to unload.
          * @return True if the resource was found and removed from cache, false otherwise.
          */
-        bool Unload(const std::string& path) override;
+        bool Unload(std::type_index type, const std::string& path);
 
         //! Release all the resources that no one else but the manager is holding (ref count = 1).
-        void PurgeUnused() override;
+        void PurgeUnused(std::type_index type);
 
         /**
          * @brief Clears all resources from the cache.
          * All resources will be destroyed when their shared_ptr ref counts drop to zero.
          */
-        void EmptyCache() override
+        void EmptyCache()
         {
-            // Optional: std::lock_guard<std::mutex> lock(m_mutex); // For thread-safety
-            m_resourceCache.clear();
+            std::lock_guard<std::mutex> lock(m_mutex); // For thread-safety
+            m_cacheMaps.clear();
         }
 
     protected:
+        ResourceMap& GetResourceMap(std::type_index type);
+
         Hasher m_hasher;
-        //! The central cache mapping resource paths to shared pointers of a base IResource type
-        std::unordered_map<uint32, Ref<Resource>> m_resourceCache;
+        ResourceMapList m_cacheMaps;
+        LoaderMap m_loaders;
         //! A list of resources that are currently loading.
         std::vector<Ref<IResourceLoader::LoadResult>> m_loadingResources;
-        //! A uniqued_ptr to the concrete loader class.
-        Ptr<IResourceLoader> m_loader;
         //! Mutex for thread-safe access to m_resourceCache
         mutable std::mutex m_mutex;
     };

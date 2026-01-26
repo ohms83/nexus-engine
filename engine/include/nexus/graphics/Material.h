@@ -16,8 +16,7 @@
 
 NXS_NAMESPACE
 {
-    class TextureManager;
-    class ShaderManager;
+    class ResourceManager;
 
     //! A list of enumerations representing commonly used texture types.
     enum class TextureType
@@ -98,7 +97,7 @@ NXS_NAMESPACE
         }
 
         //! Create a default shader based on the material properties.
-        void CreateDefaultShader(Ref<ShaderManager> shaderManager);
+        void CreateDefaultShader(ResourceManager& resourceManager);
 
         size_t TextureCount() const { return m_textures.size(); }
 
@@ -108,8 +107,7 @@ NXS_NAMESPACE
 
         Ref<GpuProgram> Use();
 
-        // Resolve referenced textures and optionally shaders by using resource managers.
-        void Resolve(class TextureManager& textureManager, RenderingInterface* renderingInterface = nullptr);
+        void Resolve(class ResourceManager& resourceManager);
 
         // Accessors for texture metadata
         NODISCARD std::string GetTexturePath(uint32 slot) const;

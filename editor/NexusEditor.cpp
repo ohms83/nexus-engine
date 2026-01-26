@@ -84,10 +84,10 @@ void NexusEditor::InitModel()
 {
     const auto engine = nxs::Engine::Instance();
     const auto taskScheduler = engine.GetTaskScheduler();
-    const auto resourceManager = engine.GetModelManager();
+    const auto resourceManager = engine.GetResourceManager();
     const auto assetPath = GetAssetPath("meshes/sponza/sponza.obj");
     // const auto assetPath = GetAssetPath("meshes/barrel/wine_barrel_01_4k.gltf");
-    auto loadResult = resourceManager->GetResourceAsync(assetPath, *taskScheduler);
+    auto loadResult = resourceManager->GetResourceAsync(typeid(nxs::Model), assetPath, *taskScheduler);
     auto waitingTask = std::make_shared<nxs::IntervalTask>(0, [this, loadResult]() {
         const auto status = loadResult->status;
         if (status == nxs::IResourceLoader::LoadResult::Status::Ready)

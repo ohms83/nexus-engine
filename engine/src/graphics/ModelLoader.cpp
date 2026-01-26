@@ -17,6 +17,7 @@
 #include <queue>
 
 #include "core/task/FutureWaitingTask.h"
+#include "core/resource/ResourceManager.h"
 
 USING_NAMESPACE_NXS;
 
@@ -55,14 +56,16 @@ namespace
  * @param taskScheduler
  * @return A list of asynchronous resource loading results.
  */
-static std::queue<Ref<IResourceLoader::LoadResult>> PreloadTextures(const aiScene& scene, const std::filesystem::path directory, TextureManager& manager, TaskScheduler& taskScheduler)
+static std::queue<Ref<IResourceLoader::LoadResult>> PreloadTextures(const aiScene& scene, const std::filesystem::path directory, ResourceManager* manager, TaskScheduler& taskScheduler)
 {
     std::queue<Ref<IResourceLoader::LoadResult>> result;
     for (int i = 0; i < scene.mNumTextures; i++)
     {
         const aiTexture* texture = scene.mTextures[i];
         auto texturePath = directory / texture->mFilename.C_Str();
-        result.push(manager.GetResourceAsync(texturePath.string(), taskScheduler));
+        auto loadResult = manager->GetResourceAsync(typeid(Texture), texturePath.string(), taskScheduler);
+
+        if (loadResult) result.push(loadResult);
     }
 
     std::vector<aiTextureType> aiTextures = {};
@@ -83,7 +86,9 @@ static std::queue<Ref<IResourceLoader::LoadResult>> PreloadTextures(const aiScen
                 aiString path;
                 material->GetTexture(aiTexture, j, &path);
                 auto texturePath = directory / path.C_Str();
-                result.push(manager.GetResourceAsync(texturePath.string(), taskScheduler));
+                auto loadResult = manager->GetResourceAsync(typeid(Texture), texturePath.string(), taskScheduler);
+
+                if (loadResult) result.push(loadResult);
             }
         }
     }
@@ -92,15 +97,11 @@ static std::queue<Ref<IResourceLoader::LoadResult>> PreloadTextures(const aiScen
 
 ModelLoader::ModelLoader(
     const Ref<RenderingInterface>& renderingInterface,
-    const Ref<TextureManager>& textureManager,
-    const Ref<MaterialManager>& materialManager,
-    const Ref<ShaderManager>& shaderManager)
+    const Ref<ResourceManager>& resourceManager)
     : m_renderingInterface(renderingInterface)
-    , m_textureManager(textureManager)
-    , m_materialManager(materialManager)
-    , m_shaderManager(shaderManager)
+    , m_resourceManager(resourceManager)
 {
-    NXS_ASSERT(renderingInterface && textureManager && materialManager);
+    NXS_ASSERT(renderingInterface && resourceManager);
 }
 
 Ref<Resource> ModelLoader::Load(const std::string &path, uint32 id)
@@ -144,11 +145,11 @@ Ref<IResourceLoader::LoadResult> ModelLoader::LoadAsync(const std::string& path,
     result->path = path;
     result->status = LoadResult::Status::Loading;
 
-    std::future<Ref<aiScene>> future = std::async(std::launch::async, [path, directory, result, &scheduler, textureManager = m_textureManager]
+    std::future<Ref<aiScene>> future = std::async(std::launch::async, [path, directory, result, &scheduler, resourceManager = m_resourceManager.get()]
     {
-        if (!textureManager)
+        if (!resourceManager)
         {
-            result->error = std::format("Failed to load model from file: {}. Reason: Invalid texture manager", path);
+            result->error = std::format("Failed to load model from file: {}. Reason: Invalid resource manager", path);
             result->status = LoadResult::Status::Failed;
             throw std::runtime_error(result->error);
         }
@@ -175,10 +176,17 @@ Ref<IResourceLoader::LoadResult> ModelLoader::LoadAsync(const std::string& path,
             throw std::runtime_error(result->error);
         }
 
-        auto preloadedTextures = PreloadTextures(*scene, directory, *textureManager, scheduler);
+        auto preloadedTextures = PreloadTextures(*scene, directory, resourceManager, scheduler);
         while (!preloadedTextures.empty())
         {
-            switch (const auto loadResult = preloadedTextures.front(); loadResult->status)
+            const auto loadResult = preloadedTextures.front();
+
+            if (!loadResult) {
+                preloadedTextures.pop();
+                continue;
+            }
+
+            switch (loadResult->status)
             {
             case LoadResult::Status::Loading:
                 std::this_thread::sleep_for(std::chrono::milliseconds(10));
@@ -195,7 +203,6 @@ Ref<IResourceLoader::LoadResult> ModelLoader::LoadAsync(const std::string& path,
         }
         return scene;
     });
-
     const auto waitingTask = std::make_shared<FutureWaitingTask<Ref<aiScene>>>(std::move(future), [this, onFinishCallback, path, directory, id, result](Ref<aiScene> scene)
     {
         if (!scene)
@@ -204,7 +211,6 @@ Ref<IResourceLoader::LoadResult> ModelLoader::LoadAsync(const std::string& path,
             onFinishCallback(nullptr);
             return;
         }
-
         // Store the directory path of the model file for texture loading
         const auto model = std::make_shared<Model>(path, id);
 
@@ -218,7 +224,6 @@ Ref<IResourceLoader::LoadResult> ModelLoader::LoadAsync(const std::string& path,
     {
         LOG_ERROR(LogModelLoader, error);
     });
-
     scheduler.ScheduleTask(waitingTask);
     return result;
 }
@@ -324,13 +329,13 @@ void ModelLoader::ProcessMaterial(const Ref<Mesh>& newMesh, const aiMesh* mesh, 
     const aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
     const std::string materialName = material->GetName().C_Str();
 
-    if (m_materialManager->IsExist(materialName))
+    if (m_resourceManager->IsExist(typeid(Material), materialName))
     {
-        newMesh->SetMaterial(m_materialManager->Get<Material>(materialName));
+        newMesh->SetMaterial(m_resourceManager->Get<Material>(materialName));
         return;
     }
 
-    const Ref<Material> newMat = m_materialManager->Create<Material>(materialName);
+    const Ref<Material> newMat = m_resourceManager->Create<Material>(materialName);
 #define READ_BOOL_PROPERTY(key, property) \
     if (int32 value; material->Get(key, value) == AI_SUCCESS) { \
         newMat->property = value; \
@@ -370,7 +375,7 @@ void ModelLoader::ProcessMaterial(const Ref<Mesh>& newMesh, const aiMesh* mesh, 
     ProcessTextures(newMat, material, directory);
 
     if (newMat->GetShader() == nullptr) {
-        newMat->CreateDefaultShader(m_shaderManager);
+        newMat->CreateDefaultShader(*m_resourceManager);
     }
     newMesh->SetMaterial(newMat);
 }
@@ -387,7 +392,7 @@ void ModelLoader::ProcessTextures(const Ref<Material>& newMat, const aiMaterial*
             material->GetTexture(aiType, i, &path);
 
             const std::string texturePath = (directory / path.C_Str()).string();
-            if (const auto texture = m_textureManager->Get<Texture>(texturePath)) {
+            if (const auto texture = m_resourceManager->Get<Texture>(texturePath)) {
                 newMat->AddTexture(texture, textureType);
             }
         }

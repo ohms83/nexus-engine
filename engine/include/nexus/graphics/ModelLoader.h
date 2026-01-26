@@ -11,22 +11,19 @@
 #include "Material.h"
 #include "Model.h"
 #include "Mesh.h"
-#include "TextureManager.h"
-#include "MaterialManager.h"
-#include "ShaderManager.h"
 
 #include <filesystem>
 
 NXS_NAMESPACE
 {
+    class ResourceManager;
+
     class ModelLoader final : public IResourceLoader
     {
     public:
         explicit ModelLoader(
             const Ref<RenderingInterface>& renderingInterface,
-            const Ref<TextureManager>& textureManager,
-            const Ref<MaterialManager>& materialManager,
-            const Ref<ShaderManager>& shaderManager);
+            const Ref<ResourceManager>& resourceManager);
 
         /**
          * @brief Attempts to load a resource from the given path.
@@ -52,8 +49,6 @@ NXS_NAMESPACE
         void ComputeBoundingVolume(const Ref<Model>& model);
 
         Ref<RenderingInterface> m_renderingInterface;
-        Ref<TextureManager> m_textureManager;
-        Ref<MaterialManager> m_materialManager;
-        Ref<ShaderManager> m_shaderManager;
+        Ref<ResourceManager> m_resourceManager;
     };
 }

@@ -9,10 +9,6 @@
 #include "core/task/TaskScheduler.h"
 #include "graphics/GraphicsConfig.h"
 #include "graphics/RenderSystem.h"
-#include "graphics/MaterialManager.h"
-#include "graphics/ModelManager.h"
-#include "graphics/TextureManager.h"
-#include "graphics/ShaderManager.h"
 #include "scene/SceneManager.h"
 
 NXS_NAMESPACE
@@ -44,31 +40,18 @@ NXS_NAMESPACE
             return m_renderSystem->GetRenderInterface();
         }
 
-        NODISCARD Ref<TextureManager> GetTextureManager() const
+        NODISCARD Ref<ResourceManager> GetResourceManager() const
         {
-            NXS_ASSERT_MSG(m_textureManager != nullptr, "TextureManager hasn't been initialized");
-            return m_textureManager;
+            NXS_ASSERT_MSG(m_resourceManager != nullptr, "ResourceManager hasn't been initialized");
+            return m_resourceManager;
         }
-        NODISCARD Ref<ModelManager> GetModelManager() const
-        {
-            NXS_ASSERT_MSG(m_modelManager != nullptr, "ModelManager hasn't been initialized");
-            return m_modelManager;
-        }
-        NODISCARD Ref<MaterialManager> GetMaterialManager() const
-        {
-            NXS_ASSERT_MSG(m_materialManager != nullptr, "MaterialManager hasn't been initialized");
-            return m_materialManager;
-        }
-        NODISCARD Ref<ShaderManager> GetShaderManager() const
-        {
-            NXS_ASSERT_MSG(m_shaderManager != nullptr, "ShaderManager hasn't been initialized");
-            return m_shaderManager;
-        }
+
         NODISCARD Ref<TaskScheduler> GetTaskScheduler() const
         {
             NXS_ASSERT_MSG(m_taskScheduler != nullptr, "TaskScheduler hasn't been initialized");
             return m_taskScheduler;
         }
+
         NODISCARD Ref<SceneManager> GetSceneManager() const
         {
             NXS_ASSERT_MSG(m_sceneManager != nullptr, "SceneManager hasn't been initialized");
@@ -77,12 +60,9 @@ NXS_NAMESPACE
 
     private:
         Ref<RenderSystem> m_renderSystem;
-        Ref<TextureManager> m_textureManager;
-        Ref<ModelManager> m_modelManager;
-        Ref<MaterialManager> m_materialManager;
+        Ref<ResourceManager> m_resourceManager;
         Ref<TaskScheduler> m_taskScheduler;
         Ref<SceneManager> m_sceneManager;
-        Ref<ShaderManager> m_shaderManager;
 
         static void InitModules();
         static void ShutdownModules();

@@ -124,9 +124,7 @@ protected:
         const auto engine = nxs::Engine::Instance();
         m_modelLoader = std::make_unique<nxs::ModelLoader>(
             renderInterface,
-            engine.GetTextureManager(),
-            engine.GetMaterialManager(),
-            engine.GetShaderManager()
+            engine.GetResourceManager()
         );
 
         auto sceneManager = engine.GetSceneManager();
@@ -180,7 +178,7 @@ private:
         node->Scale().value = modelScales[0];
 
         auto material = std::make_shared<nxs::Material>("Default Material", 0);
-        material->CreateDefaultShader(nxs::Engine::Instance().GetShaderManager());
+        material->CreateDefaultShader(*nxs::Engine::Instance().GetResourceManager());
 
         auto groundModel = nxs::Model::CreateFromMesh(
             "Ground Plane",
