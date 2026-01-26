@@ -2,10 +2,11 @@
 
 #include "nexus/NxsDefine.h"
 #include "nexus/core/serialize/Serializeable.h"
+#include "nexus/core/resource/ResourceManager.h"
+#include "nexus/core/task/TaskScheduler.h"
 #include "nexus/core/Reflection.h"
 #include "nexus/ecs/Ecs.h"
 #include "nexus/ecs/Entity.h"
-#include "nexus/core/task/TaskScheduler.h"
 #include "nexus/graphics/RenderingInterface.h"
 
 #include "Transform.h"
@@ -52,9 +53,9 @@ NXS_NAMESPACE
         /**
          * @brief Resolve object's dependencies. This must be called after `Deserialization`.
          * 
-         * @param renderingInterface 
+         * @param resourceManager The resource manager used to resolve resources.
          */
-        virtual void Resolve(RenderingInterface& renderingInterface);
+        virtual void Resolve(IResourceManager& resourceManager);
 
         Ref<SceneNode> GetSelf() { return PTR_CAST<SceneNode>(shared_from_this()); }
 

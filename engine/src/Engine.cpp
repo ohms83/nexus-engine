@@ -10,6 +10,8 @@
 
 #include "scene/Camera.h"
 #include "scene/SceneNode3D.h"
+#include "scene/Light.h"
+#include "scene/ModelNode.h"
 
 #include "time/StandardTimeSource.h"
 
@@ -86,6 +88,9 @@ void Engine::InitModules()
     SceneNode::Register();
     Camera::Register();
     SceneNode3D::Register();
+    DirectionalLight::Register();
+    PointLight::Register();
+    ModelNode::Register();
 
     // Init Graphics module
     DepthPrepass.Resolve(*s_engine->GetRenderingInterface());

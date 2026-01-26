@@ -26,10 +26,10 @@ Scene::~Scene()
     m_simulations.clear();
 }
 
-void Scene::Render(RenderSystem &renderSystem)
+void Scene::Render(RenderSystem &renderSystem) const
 {
     rmt_ScopedCPUSample(Scene_Render, 0)
-    if (m_renderer) m_renderer->Render(renderSystem, *GetRegistry());
+    if (m_renderer) m_renderer->Render(renderSystem, *this);
 }
 
 void Scene::SetRenderer(Ptr<SceneRenderer> renderer)

@@ -7,6 +7,12 @@ USING_NAMESPACE_NXS;
 
 static uint32_t s_numNode = 0;
 
+ModelNode::ModelNode(Ref<entt::registry> registry, std::string name)
+    : SceneNode3D(registry, std::move(name))
+{
+    AddComponent<ModelComponent>();
+}
+
 ModelNode::ModelNode(Ref<entt::registry> registry, Ref<Model> model)
     : SceneNode3D(registry, "")
 {

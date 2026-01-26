@@ -25,7 +25,7 @@ NXS_NAMESPACE
 
         virtual void OnEnter() {}
         virtual void OnExit() {}
-        virtual void Render(RenderSystem& renderSystem);
+        virtual void Render(RenderSystem& renderSystem) const;
 
         void SetRenderer(Ptr<SceneRenderer> renderer);
 

@@ -10,10 +10,11 @@ NXS_NAMESPACE
     class ModelNode : public SceneNode3D
     {
     public:
+        ModelNode(Ref<entt::registry> registry, std::string name = "");
         ModelNode(Ref<entt::registry> registry, Ref<Model> model);
         virtual ~ModelNode() = default;
 
-        IMPLEMENT_REFLECTION(ModelNode);
+        IMPLEMENT_NODE(ModelNode);
 
         bool IsModelReady() const { return GetModel() != nullptr; }
         void SetModel(Ref<Model> model);
@@ -27,5 +28,8 @@ NXS_NAMESPACE
         {
             return GetComponent<ModelComponent>()->model;
         }
+
+    private:
+        Ref<Model> m_model;
     };
 }

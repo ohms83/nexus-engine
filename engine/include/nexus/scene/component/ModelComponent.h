@@ -3,6 +3,8 @@
 #include "nexus/NxsDefine.h"
 #include "nexus/graphics/Model.h"
 #include "nexus/ecs/Component.h"
+#include "nexus/graphics/ModelManager.h"
+
 
 NXS_NAMESPACE
 {
@@ -15,12 +17,8 @@ NXS_NAMESPACE
         
         void AcceptReflector(IReflector& reflector) override
         {
-            if (!model) return;
-
-            auto path = model->GetPath();
-
             reflector.SetMarker("Model");
-            if (reflector.VisitString("Model Path", path)) {
+            if (reflector.VisitString("Model Path", modelPath)) {
                 // TODO:
             };
             reflector.VisitBool("Show Bounding Sphere", showBoundingSphere);
@@ -30,7 +28,7 @@ NXS_NAMESPACE
         VariantData Serialize() const override
         {
             auto data = Super::Serialize();
-            data["modelPath"] = model->GetPath();
+            data["modelPath"] = modelPath;
             data["showBoundingBox"] = showBoundingBox;
             data["showBoundingSphere"] = showBoundingSphere;
             return data;
@@ -39,13 +37,18 @@ NXS_NAMESPACE
         MAYBE_UNUSED bool Deserialize(const VariantData& data) override
         {
             if (!Super::Deserialize(data)) return false;
-            // TODO: Load model
+            modelPath = data["modelPath"].GetString();
             showBoundingBox = data["showBoundingBox"].GetBool();
             showBoundingSphere = data["showBoundingSphere"].GetBool();
             return true;
         }
 
+        void Resolve(IResourceManager& resourceManager) override
+        {
+        }
+
         Ref<Model> model;
+        std::string modelPath;
         bool visible = true;
         bool showBoundingBox = false;
         bool showBoundingSphere = false;
