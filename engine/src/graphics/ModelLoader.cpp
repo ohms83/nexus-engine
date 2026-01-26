@@ -62,7 +62,7 @@ static std::queue<Ref<IResourceLoader::LoadResult>> PreloadTextures(const aiScen
     {
         const aiTexture* texture = scene.mTextures[i];
         auto texturePath = directory / texture->mFilename.C_Str();
-        result.push(manager.RequestResourceAsync(texturePath.string(), taskScheduler));
+        result.push(manager.GetResourceAsync(texturePath.string(), taskScheduler));
     }
 
     std::vector<aiTextureType> aiTextures = {};
@@ -83,7 +83,7 @@ static std::queue<Ref<IResourceLoader::LoadResult>> PreloadTextures(const aiScen
                 aiString path;
                 material->GetTexture(aiTexture, j, &path);
                 auto texturePath = directory / path.C_Str();
-                result.push(manager.RequestResourceAsync(texturePath.string(), taskScheduler));
+                result.push(manager.GetResourceAsync(texturePath.string(), taskScheduler));
             }
         }
     }
@@ -326,12 +326,11 @@ void ModelLoader::ProcessMaterial(const Ref<Mesh>& newMesh, const aiMesh* mesh, 
 
     if (m_materialManager->IsExist(materialName))
     {
-        newMesh->SetMaterial(m_materialManager->Get(materialName));
+        newMesh->SetMaterial(m_materialManager->Get<Material>(materialName));
         return;
     }
 
-    const Ref<Material> newMat = m_materialManager->Create(materialName);
-
+    const Ref<Material> newMat = m_materialManager->Create<Material>(materialName);
 #define READ_BOOL_PROPERTY(key, property) \
     if (int32 value; material->Get(key, value) == AI_SUCCESS) { \
         newMat->property = value; \
@@ -388,7 +387,7 @@ void ModelLoader::ProcessTextures(const Ref<Material>& newMat, const aiMaterial*
             material->GetTexture(aiType, i, &path);
 
             const std::string texturePath = (directory / path.C_Str()).string();
-            if (const auto texture = m_textureManager->Get(texturePath)) {
+            if (const auto texture = m_textureManager->Get<Texture>(texturePath)) {
                 newMat->AddTexture(texture, textureType);
             }
         }

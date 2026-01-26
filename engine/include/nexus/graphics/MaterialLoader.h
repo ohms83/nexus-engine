@@ -4,7 +4,7 @@
 #pragma once
 
 #include "nexus/NxsDefine.h"
-#include "nexus/core/ResourceLoader.h"
+#include "nexus/core/resource/ResourceLoader.h"
 
 #include "Material.h"
 

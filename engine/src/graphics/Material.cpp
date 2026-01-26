@@ -227,7 +227,7 @@ void Material::Resolve(TextureManager& textureManager, RenderingInterface* rende
     {
         if (!ti.texture && !ti.path.empty())
         {
-            auto tex = textureManager.Get(ti.path);
+            auto tex = textureManager.Get<Texture>(ti.path);
             if (tex) ti.texture = tex;
         }
     }
@@ -278,6 +278,6 @@ void Material::CreateDefaultShader(Ref<ShaderManager> shaderManager)
         shaderPath = Path::GetEngineAssetPath(default_shader);
     }
 
-    m_shader = shaderManager->Get(shaderPath);
+    m_shader = shaderManager->Get<Shader>(shaderPath);
     NXS_ASSERT(m_shader);
 }

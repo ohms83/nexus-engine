@@ -9,11 +9,11 @@
 #include "MaterialLoader.h"
 #include "RenderingInterface.h"
 
-#include "nexus/core/ResourceManager.h"
+#include "nexus/core/resource/ResourceManager.h"
 
 NXS_NAMESPACE
 {
-    class MaterialManager final : public ResourceManager<Material>
+    class MaterialManager final : public ResourceManager
     {
     public:
         MaterialManager(Ref<RenderingInterface> renderingInterface);

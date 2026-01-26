@@ -104,7 +104,7 @@ void Mesh::Resolve(MaterialManager& materialManager, TextureManager& textureMana
 {
     if (m_material) return; // already resolved
     if (m_materialPath.empty()) return;
-    auto mat = materialManager.Get(m_materialPath);
+    auto mat = materialManager.Get<Material>(m_materialPath);
     if (!mat) return;
     m_material = mat;
     // Resolve the material's textures

@@ -5,7 +5,7 @@
 #pragma once
 
 #include "nexus/NxsDefine.h"
-#include "nexus/core/ResourceManager.h"
+#include "nexus/core/resource/ResourceManager.h"
 #include "nexus/graphics/RenderingInterface.h"
 #include "Material.h"
 #include "Model.h"
@@ -15,7 +15,7 @@
 
 NXS_NAMESPACE
 {
-    class ModelManager final : public ResourceManager<Model>
+    class ModelManager final : public ResourceManager
     {
     public:
         ModelManager(

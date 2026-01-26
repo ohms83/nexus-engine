@@ -1,14 +1,14 @@
 #pragma once
 
 #include "nexus/NxsDefine.h"
-#include "nexus/core/ResourceManager.h"
+#include "nexus/core/resource/ResourceManager.h"
 
 #include "Shader.h"
 #include "ShaderLoader.h"
 
 NXS_NAMESPACE
 {
-    class ShaderManager : public ResourceManager<Shader>
+    class ShaderManager : public ResourceManager
     {
     public:
         explicit ShaderManager(Ref<RenderingInterface> renderingInterface)

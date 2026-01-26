@@ -23,8 +23,8 @@ TEST(MeshTest, SerializeDeserialize)
     MaterialManager mm(fakeRendering);
     TextureManager tm(fakeRendering);
     // Create placeholder material and texture in managers
-    auto createdMat = mm.Create("path/to/mat");
-    auto tex = tm.Create("assets/tex.png");
+    auto createdMat = mm.Create<Material>("path/to/mat");
+    auto tex = tm.Create<Texture>("assets/tex.png");
     // Set up material's texture to match createdTexture
     createdMat->AddTexture(tex, TextureType::Diffuse);
     // Now resolve the mesh

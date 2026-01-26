@@ -53,7 +53,7 @@ TEST(MaterialTest, SerializeDeserialize)
     auto renderingInterface = std::make_shared<FakeRendering>();
     TextureManager tm(renderingInterface);
     // Insert a dummy texture into the manager's cache by using Create (no loader needed)
-    tex = tm.Create("assets/tex.png");
+    tex = tm.Create<Texture>("assets/tex.png");
     EXPECT_NE(tex, nullptr);
     m2.Resolve(tm, nullptr);
     // Since we did not add material to material manager, resolve will not populate m2 textures via material manager here.

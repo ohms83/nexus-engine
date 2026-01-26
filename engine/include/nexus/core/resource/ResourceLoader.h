@@ -4,7 +4,7 @@
 #include "nexus/memory/Buffer.h"
 #include <string>
 
-#include "task/TaskScheduler.h"
+#include "../task/TaskScheduler.h"
 
 NXS_NAMESPACE
 {
