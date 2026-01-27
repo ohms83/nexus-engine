@@ -10,6 +10,8 @@
 #include "nexus/graphics/Model.h"
 #include "nexus/editor/widget/PropertyWindow.h"
 
+#define LOAD_ASYNC 1
+
 DEFINE_LOG(NexusEditor);
 
 static nxs::Identifier selectedNode = nxs::InvalidID;
@@ -87,6 +89,7 @@ void NexusEditor::InitModel()
     const auto resourceManager = engine.GetResourceManager();
     const auto assetPath = GetAssetPath("meshes/sponza/sponza.obj");
     // const auto assetPath = GetAssetPath("meshes/barrel/wine_barrel_01_4k.gltf");
+#if LOAD_ASYNC
     auto loadResult = resourceManager->GetResourceAsync(typeid(nxs::Model), assetPath, *taskScheduler);
     auto waitingTask = std::make_shared<nxs::IntervalTask>(0, [this, loadResult]() {
         const auto status = loadResult->status;
@@ -96,8 +99,10 @@ void NexusEditor::InitModel()
 
             auto scene = nxs::Engine::Instance().GetSceneManager()->GetCurrentScene();
             auto model = PTR_CAST<nxs::Model>(loadResult->resource);
-            auto path = std::filesystem::path(model->GetPath());
-            auto node = scene->EmplaceChild<nxs::ModelNode>(model);
+            auto filename = std::filesystem::path(model->GetPath()).filename();
+            auto modelNode = scene->EmplaceChild<nxs::ModelNode>(filename.string());
+            NXS_ASSERT(PTR_CAST<nxs::SceneNode>(modelNode));
+            modelNode->SetModel(model);
             return false;
         }
         else if (status == nxs::IResourceLoader::LoadResult::Status::Failed)
@@ -108,6 +113,14 @@ void NexusEditor::InitModel()
         return true;
     });
     taskScheduler->ScheduleTask(waitingTask);
+#else
+    auto scene = nxs::Engine::Instance().GetSceneManager()->GetCurrentScene();
+    auto model = resourceManager->Get<nxs::Model>(assetPath);
+    auto filename = std::filesystem::path(model->GetPath()).filename();
+    auto modelNode = scene->EmplaceChild<nxs::ModelNode>(filename.string());
+    NXS_ASSERT(PTR_CAST<nxs::SceneNode>(modelNode));
+    modelNode->SetModel(model);
+#endif
 }
 
 bool NexusEditor::Init_Internal()
