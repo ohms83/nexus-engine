@@ -21,7 +21,7 @@ NXS_NAMESPACE
         IMPLEMENT_REFLECTION(Scene);
 
         explicit Scene(const std::string& name);
-        virtual ~Scene();
+        virtual ~Scene() override;
 
         virtual void OnEnter() {}
         virtual void OnExit() {}

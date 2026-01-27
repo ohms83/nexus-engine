@@ -11,8 +11,7 @@ NXS_NAMESPACE
     {
     public:
         ModelNode(Ref<entt::registry> registry, std::string name = "");
-        ModelNode(Ref<entt::registry> registry, Ref<Model> model);
-        virtual ~ModelNode() = default;
+        virtual ~ModelNode() override = default;
 
         IMPLEMENT_NODE(ModelNode);
 

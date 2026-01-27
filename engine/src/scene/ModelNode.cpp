@@ -13,16 +13,6 @@ ModelNode::ModelNode(Ref<entt::registry> registry, std::string name)
     AddComponent<ModelComponent>();
 }
 
-ModelNode::ModelNode(Ref<entt::registry> registry, Ref<Model> model)
-    : SceneNode3D(registry, "")
-{
-    AddComponent<ModelComponent>()->model = model;
-
-    auto path = std::filesystem::path(model->GetPath());
-    SetName(path.filename().string());
-    SetModel(model);
-}
-
 void ModelNode::SetModel(Ref<Model> model)
 {
     ModelComponent& modelComp = *GetComponent<ModelComponent>();
