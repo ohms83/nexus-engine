@@ -96,7 +96,8 @@ NXS_NAMESPACE
                 return cached_resource;
             }
 
-            std::lock_guard<std::mutex> lock(m_mutex); // For thread-safety
+            auto& mutex = m_mutexMap[typeid(Type)];
+            std::lock_guard<std::mutex> lock(mutex); // For thread-safety
             const auto id = m_hasher.Hash32(name);
             auto& cacheMap = GetResourceMap(typeid(Type));
             auto new_resource = std::make_shared<Type>(name, id);
@@ -184,7 +185,11 @@ NXS_NAMESPACE
          */
         void EmptyCache()
         {
-            std::lock_guard<std::mutex> lock(m_mutex); // For thread-safety
+            for (auto& [type, cacheMap] : m_cacheMaps)
+            {
+                std::lock_guard<std::mutex> lock(m_mutexMap[type]); // For thread-safety
+                cacheMap.clear();
+            }
             m_cacheMaps.clear();
         }
 
@@ -196,7 +201,7 @@ NXS_NAMESPACE
         LoaderMap m_loaders;
         //! A list of resources that are currently loading.
         std::vector<Ref<IResourceLoader::LoadResult>> m_loadingResources;
-        //! Mutex for thread-safe access to m_resourceCache
-        mutable std::mutex m_mutex;
+        //! Mutex for thread-safe access to the resource mapes
+        mutable std::map<std::type_index, std::mutex> m_mutexMap;
     };
 }

@@ -44,7 +44,7 @@ ResourceManager::CacheResult ResourceManager::Cache(std::type_index type, const 
         return { itr, true };
     }
 
-    std::lock_guard<std::mutex> lock(m_mutex); // For thread-safety
+    std::lock_guard<std::mutex> lock(m_mutexMap[type]); // For thread-safety
 
     auto loader = GetLoader(type);
     if (loader == nullptr)
@@ -76,7 +76,7 @@ Ref<IResourceLoader::LoadResult> ResourceManager::GetResourceAsync(std::type_ind
         return result;
     }
 
-    std::lock_guard<std::mutex> lock(m_mutex); // For thread-safety
+    std::lock_guard<std::mutex> lock(m_mutexMap[type]); // For thread-safety
     if (auto loadResult = std::ranges::find_if(m_loadingResources, [path](Ref<IResourceLoader::LoadResult> loading_resource)
     {
         return loading_resource->path == path;
@@ -108,7 +108,7 @@ Ref<IResourceLoader::LoadResult> ResourceManager::GetResourceAsync(std::type_ind
     }
 
     // Periodically checking for resource loading status.
-    scheduler.ScheduleTask(std::make_shared<OneshotTask>([result, &mutex = m_mutex, &loadingResources = m_loadingResources]()
+    scheduler.ScheduleTask(std::make_shared<OneshotTask>([result, &mutex = m_mutexMap[type], &loadingResources = m_loadingResources]()
     {
         if (result->status == IResourceLoader::LoadResult::Status::Ready)
         {
@@ -122,7 +122,7 @@ Ref<IResourceLoader::LoadResult> ResourceManager::GetResourceAsync(std::type_ind
 
 bool ResourceManager::Unload(std::type_index type, const std::string& path)
 {
-    std::lock_guard<std::mutex> lock(m_mutex); // For thread-safety
+    std::lock_guard<std::mutex> lock(m_mutexMap[type]); // For thread-safety
     const auto id = m_hasher.Hash32(path);
 
     auto& resourceMap = GetResourceMap(type);
