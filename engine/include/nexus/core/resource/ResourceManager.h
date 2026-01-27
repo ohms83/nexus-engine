@@ -16,40 +16,6 @@
 
 NXS_NAMESPACE
 {
-    /**
-     * @brief An abstract base class for resource managers.
-     * 
-     */
-    // class IResourceManager
-    // {
-    // public:
-        using Iterator = std::unordered_map<uint32, Ref<Resource>>::iterator;
-        using CacheResult = std::pair<Iterator, bool>;
-
-    //     virtual ~IResourceManager() = default;
-
-    //     virtual void RegisterLoader(Ptr<IResourceLoader> loader) = 0;
-    //     /**
-    //      * @brief Load and cache a resource from the given path.
-    //      * 
-    //      * @param path The path to the resource to load and cache.
-    //      * 
-    //      * @return An iterator to the cached resource, or an end iterator if the resource was not found.
-    //      */
-    //     MAYBE_UNUSED virtual CacheResult Cache(const std::string& path) = 0;
-    //     NODISCARD virtual Ref<Resource> GetResource(const std::string& path) = 0;
-    //     NODISCARD virtual Ref<Resource> GetResource(const uint32 id) const = 0;
-    //     MAYBE_UNUSED virtual Ref<IResourceLoader::LoadResult> GetResourceAsync(const std::string& path, TaskScheduler& scheduler) = 0;
-    //     NODISCARD virtual bool IsExist(const std::string& path) const = 0;
-    //     virtual bool Unload(const std::string& path) = 0;
-    //     virtual void PurgeUnused() = 0;
-    //     /**
-    //      * @brief Remove all cached resources.
-    //      * 
-    //      */
-    //     virtual void EmptyCache() = 0;
-    // };
-
     class ResourceManager
     {
     public:
