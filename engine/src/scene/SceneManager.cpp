@@ -57,6 +57,13 @@ bool SceneManager::ChangeScene_Internal(Ref<Scene> scene)
 {    
     if (IsShuttingDown()) return false;
 
+    // Change to the requested scene immdediately if there's no scene running.
+    if (!m_current)
+    {
+        PerformChange(scene);
+        return true;
+    }
+
     if (m_next)
     {
         LOG_WARNING(LogSceneManager,
@@ -68,17 +75,22 @@ bool SceneManager::ChangeScene_Internal(Ref<Scene> scene)
 
     // Schedule the scene transitioning task at the begining of the next frame.
     m_taskScheduler->ScheduleTask(std::make_shared<OneshotTask>([this]() {
-        if (m_current) {
-            m_current->OnExit();
-            m_current->RemoveAllChildren();
-        }
-        m_prev = m_current;
-        m_current = m_next;
-        m_current->OnEnter();
-        m_next.reset();
-
-        sceneChangedCallback(m_prev, m_current);
+        PerformChange(m_next);
     }), TaskScheduler::UpdatePhase::PreUpdate);
 
     return true;
+}
+
+void SceneManager::PerformChange(Ref<Scene> next)
+{
+    if (m_current) {
+        m_current->OnExit();
+        m_current->RemoveAllChildren();
+    }
+    m_prev = m_current;
+    m_current = next;
+    m_current->OnEnter();
+    m_next.reset();
+
+    sceneChangedCallback(m_prev, m_current);
 }

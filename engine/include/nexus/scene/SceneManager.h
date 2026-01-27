@@ -62,6 +62,7 @@ NXS_NAMESPACE
 
     private:
         bool ChangeScene_Internal(Ref<Scene> scene);
+        void PerformChange(Ref<Scene> next);
 
         std::vector<Ref<Scene>> m_sceneList;
         Ref<Scene> m_prev;
