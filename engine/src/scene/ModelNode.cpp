@@ -16,8 +16,7 @@ ModelNode::ModelNode(Ref<entt::registry> registry, std::string name)
 void ModelNode::SetModel(Ref<Model> model)
 {
     ModelComponent& modelComp = *GetComponent<ModelComponent>();
-    modelComp.model = model;
-    modelComp.modelPath = model->GetPath();
+    modelComp.SetModel(model);
     for (const auto mesh : model->GetMeshes())
     {
         auto child = EmplaceChild<SceneNode3D>(mesh->GetName());

@@ -32,9 +32,9 @@ void Scene::Render(RenderSystem &renderSystem) const
     if (m_renderer) m_renderer->Render(renderSystem, *this);
 }
 
-void Scene::SetRenderer(Ptr<SceneRenderer> renderer)
+void Scene::SetRenderer(Ref<SceneRenderer> renderer)
 {
-    m_renderer = std::move(renderer);
+    m_renderer = renderer;
 }
 
 Color3F& Scene::Ambient()

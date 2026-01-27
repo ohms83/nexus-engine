@@ -7,15 +7,17 @@
 #include "graphics/ShaderLoader.h"
 #include "graphics/TextureLoader.h"
 
+#include "scene/Camera.h"
+#include "scene/SceneNode3D.h"
+#include "scene/Light.h"
+#include "scene/ModelNode.h"
+
 #include "scene/component/TransformComponent.h"
 #include "scene/component/LightComponent.h"
 #include "scene/component/ModelComponent.h"
 #include "scene/component/CameraComponent.h"
 
-#include "scene/Camera.h"
-#include "scene/SceneNode3D.h"
-#include "scene/Light.h"
-#include "scene/ModelNode.h"
+#include "scene/renderer/ForwardSceneRenderer.h"
 
 #include "time/StandardTimeSource.h"
 
@@ -38,7 +40,10 @@ Engine& Engine::Initialize(WindowContext window, const GraphicsConfig& graphicsC
     s_engine = std::make_unique<Engine>();
     s_engine->m_renderSystem = std::make_shared<RenderSystem>(window, graphicsConfig);
     s_engine->m_taskScheduler = std::make_shared<TaskScheduler>(std::make_shared<StandardTimeSource>());
-    s_engine->m_sceneManager =  std::make_shared<SceneManager>(s_engine->GetTaskScheduler());
+    s_engine->m_sceneManager =  std::make_shared<SceneManager>(
+        s_engine->GetTaskScheduler(),
+        std::make_unique<ForwardSceneRenderer>(*s_engine->GetRenderSystem())
+    );
 
     auto resourceManager = std::make_shared<ResourceManager>();
     resourceManager->RegisterLoader(typeid(Texture), std::make_unique<TextureLoader>(s_engine->GetRenderingInterface()));

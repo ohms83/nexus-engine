@@ -9,8 +9,9 @@
 NXS_NAMESPACE
 {
     // TODO: Deprecate this in favor of MeshComponent
-    struct ModelComponent : public IComponent
+    class ModelComponent : public IComponent
     {
+    public:
         using Super = IComponent;
 
         IMPLEMENT_COMPONENT(ModelComponent);
@@ -45,14 +46,27 @@ NXS_NAMESPACE
 
         void Resolve(ResourceManager& resourceManager) override
         {
-            resourceManager.Cache(typeid(Model), modelPath);
+            m_model = resourceManager.Get<Model>(modelPath);
         }
 
-        Ref<Model> model;
+        Ref<Model> GetModel() const
+        {
+            return m_model;
+        }
+
+        void SetModel(Ref<Model> model)
+        {
+            m_model = model;
+            modelPath = model->GetPath();
+        }
+
         std::string modelPath;
         bool visible = true;
         bool showBoundingBox = false;
         bool showBoundingSphere = false;
+
+    private:
+        Ref<Model> m_model;
     };
 
     struct MeshComponent : public IComponent

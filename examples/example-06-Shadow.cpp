@@ -66,12 +66,13 @@ public:
         auto modelComp = m_scene->FindNodeWithName("Model")->GetComponent<nxs::ModelComponent>();
         if (!modelComp) return;
 
-        modelComp->model = PTR_CAST<nxs::Model>(m_loadedModels[selectedModel]->resource);
+        modelComp->SetModel(PTR_CAST<nxs::Model>(m_loadedModels[selectedModel]->resource));
         m_finishLoading = true;
     }
 
     void Render(nxs::RenderSystem& renderSystem) override
     {
+        if (!m_scene) return;
         m_scene->Render(renderSystem);
     }
 
@@ -93,7 +94,7 @@ public:
                         if (m_loadedModels[n]->status == nxs::IResourceLoader::LoadResult::Status::Ready)
                         {
                             auto modelComp = m_scene->FindNodeWithName("Model")->GetComponent<nxs::ModelComponent>();
-                            modelComp->model = PTR_CAST<nxs::Model>(m_loadedModels[n]->resource);
+                            modelComp->SetModel(PTR_CAST<nxs::Model>(m_loadedModels[n]->resource));
                         }
                     }
 
@@ -128,7 +129,10 @@ protected:
         );
 
         auto sceneManager = engine.GetSceneManager();
-        m_scene = sceneManager->EmplaceAndChange<nxs::Scene>("Main Scene");;
+        m_scene = sceneManager->EmplaceAndChange<nxs::Scene>("Main Scene");
+        sceneManager->sceneChangedCallback.connect([this](nxs::Ref<nxs::Scene> prev, nxs::Ref<nxs::Scene> next) {
+            m_scene = next;
+        });
 
         InitScene();
         InitLights();
@@ -189,7 +193,8 @@ private:
                 material
             )
         );
-        m_scene->EmplaceChild<nxs::SceneNode3D>("Ground")->AddComponent<nxs::ModelComponent>()->model = groundModel;
+        auto modelComp = m_scene->EmplaceChild<nxs::SceneNode3D>("Ground")->AddComponent<nxs::ModelComponent>();
+        modelComp->SetModel(groundModel);
 
         m_scene->SetRenderer(std::make_unique<nxs::ForwardSceneRenderer>(GetRenderSystem()));
     }

@@ -48,7 +48,7 @@ public:
         }
 
         auto modelComp = m_scene->FindNodeWithName("Model")->GetComponent<nxs::ModelComponent>();
-        modelComp->model = PTR_CAST<nxs::Model>(m_loadedModels[selectedModel]->resource);
+        modelComp->SetModel(PTR_CAST<nxs::Model>(m_loadedModels[selectedModel]->resource));
         m_finishLoading = true;
     }
 
@@ -66,7 +66,7 @@ public:
         auto modelComp = modelNode->GetComponent<nxs::ModelComponent>();
         if (modelComp)
         {
-            const auto model = modelComp->model;
+            const auto model = modelComp->GetModel();
             const auto position = modelNode->Position().value;
             const auto orient = modelNode->Orient().quat;
             const auto scale = modelNode->Scale().value;
@@ -110,7 +110,7 @@ public:
                         if (m_loadedModels[n]->status == nxs::IResourceLoader::LoadResult::Status::Ready)
                         {
                             auto modelComp = m_scene->FindNodeWithName("Model")->GetComponent<nxs::ModelComponent>();
-                            modelComp->model = PTR_CAST<nxs::Model>(m_loadedModels[n]->resource);
+                            modelComp->SetModel(PTR_CAST<nxs::Model>(m_loadedModels[n]->resource));
                         }
                     }
 
@@ -176,7 +176,7 @@ protected:
             engine.GetResourceManager()
         );
 
-        m_scene = std::make_unique<nxs::Scene>("Main Scene");
+        m_scene = std::make_shared<nxs::Scene>("Main Scene");
 
         InitScene();
         InitLights();
@@ -278,7 +278,7 @@ private:
     }
 
 protected:
-    nxs::Ptr<nxs::Scene> m_scene;
+    nxs::Ref<nxs::Scene> m_scene;
     nxs::Transform m_cubeTransform;
     nxs::CameraComponent m_camera;
     nxs::Ref<nxs::PointLight> m_pointLights[2] {};

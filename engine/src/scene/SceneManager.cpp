@@ -8,8 +8,9 @@ USING_NAMESPACE_NXS;
 
 DEFINE_LOG(SceneManager);
 
-SceneManager::SceneManager(Ref<TaskScheduler> taskScheduler)
+SceneManager::SceneManager(Ref<TaskScheduler> taskScheduler, Ref<SceneRenderer> renderer)
     : m_taskScheduler(taskScheduler)
+    , m_renderer(renderer)
 {
 }
 

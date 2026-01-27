@@ -35,6 +35,7 @@ DEFINE_LOG(Menu);
 Menu::Menu(IWidgetOwner& widgetOwner)
 {
     const auto& application = CAST<Editor*>(&widgetOwner)->GetParentApp();
+    const auto& engine = Engine::Instance();
 
     auto newSceneMenu = std::make_shared<TriggerMenuItem> (
         FILE_MENU_OPEN_SAVE,

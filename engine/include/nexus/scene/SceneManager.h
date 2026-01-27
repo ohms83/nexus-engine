@@ -12,10 +12,13 @@
 
 NXS_NAMESPACE
 {
+    class SceneRenderer;
+
     class SceneManager
     {
     public:
-        SceneManager(Ref<TaskScheduler> taskScheduler);
+        SceneManager(Ref<TaskScheduler> taskScheduler, Ref<SceneRenderer> renderer);
+        ~SceneManager() = default;
 
         template<typename SceneType, typename... Args>
         requires std::derived_from<SceneType, SceneType>
@@ -24,6 +27,7 @@ NXS_NAMESPACE
             NXS_ASSERT(!name.empty());
             auto scene = std::make_shared<SceneType>(name, std::forward(args)...);
             scene->SetTaskScheduler(m_taskScheduler);
+            scene->SetRenderer(m_renderer);
             m_sceneList.push_back(scene);
             return scene;
         }
@@ -68,6 +72,8 @@ NXS_NAMESPACE
         Ref<Scene> m_prev;
         Ref<Scene> m_next;
         Ref<Scene> m_current;
+
+        Ref<SceneRenderer> m_renderer;
         Ref<TaskScheduler> m_taskScheduler;
     };
 }

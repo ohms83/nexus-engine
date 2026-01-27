@@ -46,7 +46,6 @@ void ForwardSceneRenderer::Render(RenderSystem& renderSystem, const Scene& scene
     const auto& registry = *scene.GetRegistry();
     auto renderInterface = renderSystem.GetRenderInterface();
 
-    // ReSharper disable once CppTooWideScopeInitStatement
     const auto cameraView = registry.view<SceneNodeComponent, CameraComponent, PositionComponent, OrientationComponent>();
     for (const auto& [cameraEntity, cameraNode, camera, cameraPos, cameraOrient] : cameraView.each())
     {
@@ -67,7 +66,7 @@ void ForwardSceneRenderer::Render(RenderSystem& renderSystem, const Scene& scene
         const auto viewFrustum = camera.GetViewFrustum(cameraPos.value, cameraOrient.quat);
         for (const auto view = registry.view<SceneNodeComponent, ModelComponent, PositionComponent, OrientationComponent, ScaleComponent>(); const auto& [entity, sceneNode, modelComp, position, orient, scale] : view.each())
         {
-            auto model = modelComp.model;
+            auto model = modelComp.GetModel();
             if (!sceneNode.active || !model) continue;
 
             glm::mat4 modelMtx = Matrix::CreateModelMatrix(position.value, orient.quat, scale.value);

@@ -27,13 +27,13 @@ NXS_NAMESPACE
         virtual void OnExit() {}
         virtual void Render(RenderSystem& renderSystem) const;
 
-        void SetRenderer(Ptr<SceneRenderer> renderer);
+        void SetRenderer(Ref<SceneRenderer> renderer);
 
         Color3F& Ambient();
         NODISCARD const Color3F& Ambient() const;
 
     protected:
         // --- Rendering ---
-        Ptr<SceneRenderer> m_renderer;
+        Ref<SceneRenderer> m_renderer;
     };
 }

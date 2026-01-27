@@ -1,5 +1,7 @@
 #include "editor/menu/SceneFileMenuItem.h"
 #include "scene/SceneManager.h"
+// TODO:
+#include "Engine.h"
 
 USING_NAMESPACE_NXS;
 
@@ -48,4 +50,7 @@ void SceneFileMenuItem::OpenSceneFromFile(Ref<Scene> scene, const std::string& f
     if (!file.good()) return;
 
     scene->Deserialize(m_serializer->Unpack(file));
+
+    auto& resourceManager = *Engine::Instance().GetResourceManager();
+    scene->Resolve(resourceManager);
 }
