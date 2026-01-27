@@ -20,13 +20,15 @@ NXS_NAMESPACE
 
         Ref<const Model> GetModel() const
         {
-            return GetComponent<ModelComponent>()->model;
+            return m_model;
         }
         
         Ref<Model> GetModel()
         {
-            return GetComponent<ModelComponent>()->model;
+            return m_model;
         }
+
+        void Resolve(ResourceManager& resourceManager) override;
 
     private:
         Ref<Model> m_model;

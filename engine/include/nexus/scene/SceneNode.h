@@ -55,7 +55,7 @@ NXS_NAMESPACE
          * 
          * @param resourceManager The resource manager used to resolve resources.
          */
-        virtual void Resolve(IResourceManager& resourceManager);
+        virtual void Resolve(ResourceManager& resourceManager);
 
         Ref<SceneNode> GetSelf() { return PTR_CAST<SceneNode>(shared_from_this()); }
 

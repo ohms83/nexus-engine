@@ -43,8 +43,9 @@ NXS_NAMESPACE
             return true;
         }
 
-        void Resolve(IResourceManager& resourceManager) override
+        void Resolve(ResourceManager& resourceManager) override
         {
+            resourceManager.Cache(typeid(Model), modelPath);
         }
 
         Ref<Model> model;

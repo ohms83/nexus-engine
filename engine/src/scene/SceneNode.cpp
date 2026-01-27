@@ -200,7 +200,7 @@ bool SceneNode::Deserialize(const VariantData &data)
     return true;
 }
 
-void SceneNode::Resolve(IResourceManager& resourceManager)
+void SceneNode::Resolve(ResourceManager& resourceManager)
 {
     std::vector<IComponent*> components;
     GetAllComponents(components);

@@ -28,7 +28,7 @@ NXS_NAMESPACE
 {
     using ComponentID = entt::id_type;
 
-    class IResourceManager;
+    class ResourceManager;
 
     class IComponent : public IReflection
     {
@@ -72,7 +72,7 @@ NXS_NAMESPACE
          * @param resourceManager The resource manager used to resolve resources.
          * @note This function is optional to implement in derived classes.
          */
-        virtual void Resolve(IResourceManager& resourceManager) {}
+        virtual void Resolve(ResourceManager& resourceManager) {}
         
         template<typename Type>
         NODISCARD static bool HasRegisteredType()
