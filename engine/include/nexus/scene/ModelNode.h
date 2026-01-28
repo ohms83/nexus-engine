@@ -1,7 +1,6 @@
 #pragma once
 
 #include "SceneNode3D.h"
-#include "component/ModelComponent.h"
 
 #include "nexus/graphics/Model.h"
 
@@ -10,6 +9,8 @@ NXS_NAMESPACE
     class ModelNode : public SceneNode3D
     {
     public:
+        using Super = SceneNode3D;
+
         ModelNode(Ref<entt::registry> registry, std::string name = "");
         virtual ~ModelNode() override = default;
 
@@ -28,7 +29,7 @@ NXS_NAMESPACE
             return m_model;
         }
 
-        void Resolve(ResourceManager& resourceManager) override;
+        void Resolve(ResourceManager& resourceManager, const RenderingInterface& renderingInterface) override;
 
     private:
         Ref<Model> m_model;

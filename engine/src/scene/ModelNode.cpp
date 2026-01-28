@@ -1,4 +1,6 @@
 #include "scene/ModelNode.h"
+#include "scene/component/ModelComponent.h"
+#include "scene/component/MeshComponent.h"
 
 #include <format>
 #include <filesystem>
@@ -20,13 +22,13 @@ void ModelNode::SetModel(Ref<Model> model)
     for (const auto mesh : model->GetMeshes())
     {
         auto child = EmplaceChild<SceneNode3D>(mesh->GetName());
-        child->AddComponent<MeshComponent>()->mesh = mesh;
+        child->AddComponent<MeshComponent>()->SetMesh(mesh);
     }
 }
 
-void ModelNode::Resolve(ResourceManager& resourceManager)
+void ModelNode::Resolve(ResourceManager& resourceManager, const RenderingInterface& renderingInterface)
 {
-    SceneNode3D::Resolve(resourceManager);
+    Super::Resolve(resourceManager, renderingInterface);
 
     m_model = resourceManager.Get<Model>(GetComponent<ModelComponent>()->modelPath);
     SetModel(m_model);

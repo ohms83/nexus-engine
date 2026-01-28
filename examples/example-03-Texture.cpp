@@ -89,7 +89,7 @@ protected:
         m_mesh = nxs::PrimitiveMesh::CreateBox(
             "Cube",
             glm::vec3(1.0f),
-            renderInterface
+            *renderInterface
         );
         return true;
     }

@@ -200,7 +200,7 @@ bool SceneNode::Deserialize(const VariantData &data)
     return true;
 }
 
-void SceneNode::Resolve(ResourceManager& resourceManager)
+void SceneNode::Resolve(ResourceManager& resourceManager, const RenderingInterface& renderingInterface)
 {
     std::vector<IComponent*> components;
     GetAllComponents(components);
@@ -208,12 +208,12 @@ void SceneNode::Resolve(ResourceManager& resourceManager)
     for (auto component : components)
     {
         if (!component) continue;
-        component->Resolve(resourceManager);
+        component->Resolve(resourceManager, renderingInterface);
     }
 
     for (const auto child : m_children)
     {
-        child->Resolve(resourceManager);
+        child->Resolve(resourceManager, renderingInterface);
     }
 
     Validate();

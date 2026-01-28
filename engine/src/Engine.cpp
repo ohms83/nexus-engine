@@ -12,10 +12,11 @@
 #include "scene/Light.h"
 #include "scene/ModelNode.h"
 
-#include "scene/component/TransformComponent.h"
+#include "scene/component/CameraComponent.h"
 #include "scene/component/LightComponent.h"
 #include "scene/component/ModelComponent.h"
-#include "scene/component/CameraComponent.h"
+#include "scene/component/MeshComponent.h"
+#include "scene/component/TransformComponent.h"
 
 #include "scene/renderer/ForwardSceneRenderer.h"
 

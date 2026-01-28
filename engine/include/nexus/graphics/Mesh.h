@@ -98,14 +98,14 @@ NXS_NAMESPACE
         static Ref<Mesh> CreatePlane(
             std::string name,
             float width, float height,
-            Ref<RenderingInterface> renderingInterface,
+            const RenderingInterface& renderingInterface,
             Ref<Material> material = nullptr
         );
 
         static Ref<Mesh> CreateBox(
             std::string name,
             const glm::vec3& size,
-            Ref<RenderingInterface> renderingInterface,
+            const RenderingInterface& renderingInterface,
             Ref<Material> material = nullptr
         );
 
@@ -114,7 +114,7 @@ NXS_NAMESPACE
             float radius,
             uint32_t sectorCount,
             uint32_t stackCount,
-            Ref<RenderingInterface> renderingInterface,
+            const RenderingInterface& renderingInterface,
             Ref<Material> material = nullptr
         );
     };

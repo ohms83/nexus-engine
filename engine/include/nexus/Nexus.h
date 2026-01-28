@@ -118,6 +118,7 @@
 #include "scene/component/CameraComponent.h"
 #include "scene/component/GeometryComponent.h"
 #include "scene/component/LightComponent.h"
+#include "scene/component/MeshComponent.h"
 #include "scene/component/ModelComponent.h"
 #include "scene/component/SceneNodeComponent.h"
 #include "scene/component/TransformComponent.h"

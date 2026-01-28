@@ -20,7 +20,7 @@ Ref<Mesh> PrimitiveMesh::CreateSphere(
     float radius,
     uint32_t sectorCount,
     uint32_t stackCount,
-    Ref<RenderingInterface> renderingInterface,
+    const RenderingInterface& renderingInterface,
     Ref<Material> material)
 {
     NXS_ASSERT(sectorCount);
@@ -82,7 +82,7 @@ Ref<Mesh> PrimitiveMesh::CreateSphere(
     Ref<IBuffer> vertexData = std::make_shared<OwningBuffer>(
         (uint8_t*)vertices, sizeof(Vertex) * (sectorCount + 1) * (stackCount + 1));
     Ref<VertexBuffer> vertexBuffer;
-    vertexBuffer.reset(renderingInterface->CreateVertexBuffer());
+    vertexBuffer.reset(renderingInterface.CreateVertexBuffer());
     vertexBuffer->Begin()
         .SetVertices(vertexData)
         .SetUsage(BufferUsage::StaticDraw)
@@ -94,7 +94,7 @@ Ref<Mesh> PrimitiveMesh::CreateSphere(
     Ref<IBuffer> indexData = std::make_shared<OwningBuffer>(
         (uint8_t*)indices, sizeof(uint32_t) * sectorCount * stackCount * 6);
     Ref<IndexBuffer> indexBuffer;
-    indexBuffer.reset(renderingInterface->CreateIndexBuffer());
+    indexBuffer.reset(renderingInterface.CreateIndexBuffer());
     indexBuffer->Begin()
         .SetIndices(indexData, FrontFace::CounterClockWise)
         .SetUsage(BufferUsage::StaticDraw)

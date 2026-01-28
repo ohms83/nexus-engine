@@ -54,8 +54,9 @@ NXS_NAMESPACE
          * @brief Resolve object's dependencies. This must be called after `Deserialization`.
          * 
          * @param resourceManager The resource manager used to resolve resources.
+         * @param renderingInterface The rendering interface used to resolve graphical elements
          */
-        virtual void Resolve(ResourceManager& resourceManager);
+        virtual void Resolve(ResourceManager& resourceManager, const RenderingInterface& renderingInterface);
 
         Ref<SceneNode> GetSelf() { return PTR_CAST<SceneNode>(shared_from_this()); }
 

@@ -28,6 +28,7 @@ NXS_NAMESPACE
 {
     using ComponentID = entt::id_type;
 
+    class RenderingInterface;
     class ResourceManager;
 
     class IComponent : public IReflection
@@ -70,9 +71,10 @@ NXS_NAMESPACE
          * @brief Resolve object's dependencies. This must be called after `Deserialization`.
          * 
          * @param resourceManager The resource manager used to resolve resources.
+         * @param renderingInterface Rendering interface used to resolve graphical components.
          * @note This function is optional to implement in derived classes.
          */
-        virtual void Resolve(ResourceManager& resourceManager) {}
+        virtual void Resolve(ResourceManager& resourceManager, const RenderingInterface& renderingInterface) {}
         
         template<typename Type>
         NODISCARD static bool HasRegisteredType()

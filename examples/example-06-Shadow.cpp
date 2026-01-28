@@ -189,7 +189,7 @@ private:
             nxs::PrimitiveMesh::CreatePlane(
                 "Ground Plane",
                 10, 10,
-                GetRenderSystem().GetRenderInterface(),
+                *GetRenderSystem().GetRenderInterface(),
                 material
             )
         );

@@ -52,5 +52,6 @@ void SceneFileMenuItem::OpenSceneFromFile(Ref<Scene> scene, const std::string& f
     scene->Deserialize(m_serializer->Unpack(file));
 
     auto& resourceManager = *Engine::Instance().GetResourceManager();
-    scene->Resolve(resourceManager);
+    auto& renderingInterface = *Engine::Instance().GetRenderingInterface();
+    scene->Resolve(resourceManager, renderingInterface);
 }

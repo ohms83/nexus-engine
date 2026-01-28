@@ -34,7 +34,7 @@ namespace
 Ref<Mesh> PrimitiveMesh::CreatePlane(
     std::string name,
     float width, float height,
-    Ref<RenderingInterface> renderingInterface,
+    const RenderingInterface& renderingInterface,
     Ref<Material> material)
 {
     std::vector<Vertex>* vertices = new std::vector<Vertex> {
@@ -48,7 +48,7 @@ Ref<Mesh> PrimitiveMesh::CreatePlane(
         (uint8_t*)vertices->data(), sizeof(Vertex) * vertices->size());
 
     Ref<VertexBuffer> vertexBuffer;
-    vertexBuffer.reset(renderingInterface->CreateVertexBuffer());
+    vertexBuffer.reset(renderingInterface.CreateVertexBuffer());
     vertexBuffer->Begin()
         .SetVertices(vertexData)
         .SetUsage(BufferUsage::StaticDraw)
@@ -65,7 +65,7 @@ Ref<Mesh> PrimitiveMesh::CreatePlane(
     Ref<IBuffer> indexData = std::make_shared<OwningBuffer>(
         (uint8_t*)indices->data(), sizeof(uint32_t) * indices->size());
     Ref<IndexBuffer> indexBuffer;
-    indexBuffer.reset(renderingInterface->CreateIndexBuffer());
+    indexBuffer.reset(renderingInterface.CreateIndexBuffer());
     indexBuffer->Begin()
         .SetIndices(indexData, FrontFace::CounterClockWise)
         .SetUsage(BufferUsage::StaticDraw)

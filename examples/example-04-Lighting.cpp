@@ -193,7 +193,7 @@ protected:
         m_cubeMesh = nxs::PrimitiveMesh::CreateBox(
             "Cube",
             glm::vec3(1.0f),
-            renderInterface
+            *renderInterface
         );
         m_cubeTransform.SetPosition({0, 0, 0});
 

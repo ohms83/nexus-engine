@@ -78,7 +78,7 @@ namespace
 Ref<Mesh> PrimitiveMesh::CreateBox(
     std::string name,
     const glm::vec3& size,
-    Ref<RenderingInterface> renderingInterface,
+    const RenderingInterface& renderingInterface,
     Ref<Material> material)
 {
     // Scale the unit cube vertices by the specified size
@@ -97,7 +97,7 @@ Ref<Mesh> PrimitiveMesh::CreateBox(
         (uint8_t*)scaledVertices->data(), sizeof(Vertex) * scaledVertices->size());
 
     Ref<VertexBuffer> vertexBuffer;
-    vertexBuffer.reset(renderingInterface->CreateVertexBuffer());
+    vertexBuffer.reset(renderingInterface.CreateVertexBuffer());
     vertexBuffer->Begin()
         .SetVertices(vertexData)
         .SetUsage(BufferUsage::StaticDraw)
@@ -111,7 +111,7 @@ Ref<Mesh> PrimitiveMesh::CreateBox(
     Ref<IBuffer> indexData = std::make_shared<OwningBuffer>(
         (uint8_t*)indices->data(), sizeof(uint32_t) * indices->size());
     Ref<IndexBuffer> indexBuffer;
-    indexBuffer.reset(renderingInterface->CreateIndexBuffer());
+    indexBuffer.reset(renderingInterface.CreateIndexBuffer());
     indexBuffer->Begin()
         .SetIndices(indexData, FrontFace::CounterClockWise)
         .SetUsage(BufferUsage::StaticDraw)

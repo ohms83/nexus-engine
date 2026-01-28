@@ -44,7 +44,7 @@ NXS_NAMESPACE
             return true;
         }
 
-        void Resolve(ResourceManager& resourceManager) override
+        void Resolve(ResourceManager& resourceManager, const RenderingInterface& renderingInterface) override
         {
             m_model = resourceManager.Get<Model>(modelPath);
         }
@@ -67,22 +67,5 @@ NXS_NAMESPACE
 
     private:
         Ref<Model> m_model;
-    };
-
-    struct MeshComponent : public IComponent
-    {
-        IMPLEMENT_COMPONENT(MeshComponent);
-
-        void AcceptReflector(IReflector& reflector) override
-        {
-            reflector.SetMarker("Mesh");
-            reflector.VisitBool("Show Bounding Sphere", showBoundingSphere);
-            reflector.VisitBool("Show Bounding Box", showBoundingBox);
-        }
-
-        Ref<Mesh> mesh;
-        bool visible = true;
-        bool showBoundingBox = false;
-        bool showBoundingSphere = false;
     };
 }
