@@ -40,16 +40,6 @@ public:
 
     void Update() override
     {
-        if (m_finishLoading) return;
-
-        for (const auto & m_loadedModel : m_loadedModels)
-        {
-            if (m_loadedModel->status != nxs::IResourceLoader::LoadResult::Status::Ready) return;
-        }
-
-        auto modelComp = m_scene->FindNodeWithName("Model")->GetComponent<nxs::ModelComponent>();
-        modelComp->SetModel(PTR_CAST<nxs::Model>(m_loadedModels[selectedModel]->resource));
-        m_finishLoading = true;
     }
 
     void Render(nxs::RenderSystem& renderSystem) override
@@ -109,8 +99,7 @@ public:
 
                         if (m_loadedModels[n]->status == nxs::IResourceLoader::LoadResult::Status::Ready)
                         {
-                            auto modelComp = m_scene->FindNodeWithName("Model")->GetComponent<nxs::ModelComponent>();
-                            modelComp->SetModel(PTR_CAST<nxs::Model>(m_loadedModels[n]->resource));
+                            ChangeModel(n);
                         }
                     }
 
@@ -205,6 +194,13 @@ protected:
         camera->SetProjection(m_camera.fov, m_camera.width, m_camera.height, m_camera.nearZ, m_camera.farZ);
     }
 
+    void ChangeModel(const int index)
+    {
+        auto modelComp = m_scene->FindNodeWithName("Model")->GetComponent<nxs::ModelComponent>();
+        auto model =  PTR_CAST<nxs::Model>(m_loadedModels[selectedModel]->resource);
+        modelComp->SetModel(model);
+    }
+
 private:
     void InitScene()
     {
@@ -217,6 +213,18 @@ private:
             // Preload models
             m_loadedModels.emplace_back(LoadModel(i));
         }
+
+        auto taskScheduler = nxs::Engine::Instance().GetTaskScheduler();
+        taskScheduler->ScheduleTask(std::make_shared<nxs::RepeatTask>(-1, [this]() -> bool
+        {
+            for (const auto & loadedModel : m_loadedModels)
+            {
+                if (loadedModel->status != nxs::IResourceLoader::LoadResult::Status::Ready) return true;
+            }
+
+            ChangeModel(0);
+            return false;
+        }), nxs::TaskScheduler::UpdatePhase::Update);
 
         auto node = m_scene->EmplaceChild<nxs::SceneNode3D>("Model");
         node->AddComponent<nxs::ModelComponent>();
@@ -289,7 +297,6 @@ protected:
     nxs::Ptr<nxs::ModelLoader> m_modelLoader;
     std::vector<nxs::Ref<nxs::IResourceLoader::LoadResult>> m_loadedModels;
     float m_aoFactor = 1;
-    bool m_finishLoading = false;
 };
 
 
