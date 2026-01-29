@@ -259,7 +259,7 @@ void SceneNode::AddChild(Ref<SceneNode> child)
     m_children.push_back(child);
 }
 
-void SceneNode::RemoveChild(Ref<SceneNode> node)
+void SceneNode::RemoveChild(Ref<SceneNode> node, bool removeDescendant)
 {
     if (IsShuttingDown() || !node) return;
  
@@ -272,14 +272,23 @@ void SceneNode::RemoveChild(Ref<SceneNode> node)
         return;
     }
 
-    m_scheduler->ScheduleTask(std::make_shared<OneshotTask>([this, node]() {
-        SceneNode::ChildList nodeList;
-        node->GetAllChildren(nodeList);
-
-        for (auto descendant : nodeList)
+    m_scheduler->ScheduleTask(std::make_shared<OneshotTask>([this, node, removeDescendant]() {
+        if (removeDescendant)
         {
-            descendant->RemoveFromParent();
-            AddChild(descendant);
+            SceneNode::ChildList descendants;
+            node->GetAllDescendants(descendants, true);
+            for (auto descendant : descendants)
+            {
+                descendant->RemoveFromParent();
+            }
+        }
+        else
+        {
+            for (auto descendant : node->m_children)
+            {
+                descendant->RemoveFromParent();
+                AddChild(descendant);
+            }
         }
 
         std::erase(m_children, node);

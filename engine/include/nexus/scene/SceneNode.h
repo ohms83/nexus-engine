@@ -84,15 +84,13 @@ NXS_NAMESPACE
         requires std::derived_from<T, SceneNode>
         MAYBE_UNUSED Ref<T> EmplaceChild(Args&&... args)
         {
-            auto node = m_children.emplace_back(
-                std::make_shared<T>(GetRegistry(), std::forward<Args>(args)...));
-            node->m_parent = GetSelf();
-            node->SetTaskScheduler(m_scheduler);
+            auto node = std::make_shared<T>(GetRegistry(), std::forward<Args>(args)...);
+            AddChild(node);
             return PTR_CAST<T>(node);
         }
 
         void AddChild(Ref<SceneNode> child);
-        void RemoveChild(Ref<SceneNode> child);
+        void RemoveChild(Ref<SceneNode> child, bool removeDescendant = true);
         void RemoveAllChildren();
         /**
          * @brief Get all direct child nodes.
