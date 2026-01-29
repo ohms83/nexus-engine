@@ -27,6 +27,6 @@ NXS_NAMESPACE
         static void ProcessMesh(Ref<SceneNode> sceneNode, const aiMesh* ai_mesh, const aiScene* ai_scene, const std::filesystem::path& directory);
         static void ProcessMaterial(Ref<Mesh> newMesh, const aiMesh* ai_mesh, const aiScene* ai_scene, const std::filesystem::path& directory);
         static void ProcessTextures(Ref<Material> newMat, const aiMaterial* ai_material, const std::filesystem::path& directory);
-        static void ComputeBoundingVolume(Ref<SceneNode> model);
+        static void ComputeBoundingVolume(Ref<SceneNode> rootNode);
     };
 }

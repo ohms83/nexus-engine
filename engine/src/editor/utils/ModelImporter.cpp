@@ -316,4 +316,33 @@ void ModelImporter::ComputeBoundingVolume(Ref<SceneNode> node)
 {
     auto sphere = node->AddComponent<SphereComponent>();
     auto box = node->AddComponent<BoxComponent>();
+
+    SceneNode::ChildList children;
+    node->GetAllChildren(children);
+
+    for (auto child : children)
+    {
+        auto meshComp = child->GetComponent<MeshComponent>();
+        if (!meshComp) continue;
+
+        auto mesh = meshComp->GetMesh();
+        if (!mesh) continue;
+
+        mesh->ComputeBounds();
+
+        ComputeBoundingVolume(child);
+    }
+    
+    // glm::vec3 min{ FLT_MAX }, max{ -FLT_MAX };
+    // for (const auto& mesh : m_meshes)
+    // {
+    //     mesh->ComputeBounds();
+    //     const auto& box = mesh->GetBox();
+    //     min = glm::min(min, box.GetMin());
+    //     max = glm::max(max, box.GetMax());
+    // }
+
+    // glm::vec3 sphereCenter = (max + min) * 0.5f;
+    // glm::vec3 extent = max - sphereCenter;
+    // float sphereRadius = glm::length(extent);
 }
