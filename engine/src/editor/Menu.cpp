@@ -6,6 +6,7 @@
 #include "editor/menu/WidgetMenuItem.h"
 #include "editor/menu/ConsoleMenuItem.h"
 #include "editor/menu/SceneFileMenuItem.h"
+#include "editor/utils/ModelImporter.h"
 #include "editor/widget/EditorWidget.h"
 #include "editor/widget/ProfilerWidget.h"
 #include "editor/widget/PropertyWindow.h"
@@ -48,19 +49,9 @@ Menu::Menu(IWidgetOwner& widgetOwner)
             sceneManager.EmplaceAndChange<Scene>("New Scene");
         }
     );
-    auto importSceneMenu = std::make_shared<SceneFileMenuItem>(
-        application.GetSceneManager(),
-        std::make_shared<JsonSerializer>(),
+    auto importSceneMenu = std::make_shared<SceneImportMenuItem>(
         FILE_MENU_OPEN_SAVE,
-        "Import Scene",
-        "Import a 3D model to the currently active scene.",
-        "Ctrl+I",
-        FileMenuContext {
-            .windowContext = application.GetWindowContext(),
-            .filters = { {"3D Model Files (*.obj;*.fbx;*.gltf)", "*.obj;*.fbx;*.gltf"} },
-            .defaultExtension = "",
-            .dialogMode = FileDialogContext::Mode::Open,
-        }
+        application.GetWindowContext()
     );
     auto openSceneMenu = std::make_shared<SceneFileMenuItem>(
         application.GetSceneManager(),

@@ -30,4 +30,13 @@ NXS_NAMESPACE
         const SceneManager& m_sceneManager;
         Ref<ISerializer> m_serializer;
     };
+
+    class SceneImportMenuItem : public FileMenuItem
+    {
+    public:
+        SceneImportMenuItem(uint32_t group, WindowContext windowContext);
+
+    protected:
+        void OnDialogClosed(const std::string& selectedPath) const override;
+    };
 }
