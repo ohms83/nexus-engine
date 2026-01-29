@@ -42,32 +42,6 @@ public:
     {
         const auto selectedNode = m_sceneGraphWidget->GetSelectedNode();
         m_propertyWindow->SetSceneNode(selectedNode);
-
-        if (m_finishLoading)
-        {
-            const auto& inputManager = nxs::InputManager::Instance();
-            const glm::vec2 euler = inputManager.GetAxisValue("model_rotate") * 90.f * GetDeltaTime();
-            m_euler.x += euler.x;
-            m_euler.y += euler.y;
-
-            auto modelNode = PTR_CAST<nxs::SceneNode3D>(m_scene->FindNodeWithName("Model"));
-            if (!modelNode) return;
-
-            modelNode->Orient().quat = glm::mat4_cast(glm::quat(glm::radians(m_euler)));
-            modelNode->Scale().value = modelScales[selectedModel] * scale;
-            return;
-        }
-
-        for (const auto & m_loadedModel : m_loadedModels)
-        {
-            if (m_loadedModel->status != nxs::IResourceLoader::LoadResult::Status::Ready) return;
-        }
-
-        auto modelComp = m_scene->FindNodeWithName("Model")->GetComponent<nxs::ModelComponent>();
-        if (!modelComp) return;
-
-        modelComp->SetModel(PTR_CAST<nxs::Model>(m_loadedModels[selectedModel]->resource));
-        m_finishLoading = true;
     }
 
     void Render(nxs::RenderSystem& renderSystem) override
@@ -93,8 +67,7 @@ public:
 
                         if (m_loadedModels[n]->status == nxs::IResourceLoader::LoadResult::Status::Ready)
                         {
-                            auto modelComp = m_scene->FindNodeWithName("Model")->GetComponent<nxs::ModelComponent>();
-                            modelComp->SetModel(PTR_CAST<nxs::Model>(m_loadedModels[n]->resource));
+                            SetMesh(n);
                         }
                     }
 
@@ -161,7 +134,23 @@ protected:
         m_camera.height = FLOAT_CAST(screenSize.y);
 
         auto camera = PTR_CAST<nxs::Camera>(m_scene->FindNodeWithName("Camera"));
-        camera->SetProjection(m_camera.fov, m_camera.width, m_camera.height, m_camera.nearZ, m_camera.farZ);
+        if (camera) {
+            camera->SetProjection(m_camera.fov, m_camera.width, m_camera.height, m_camera.nearZ, m_camera.farZ);
+        }
+    }
+
+    void SetMesh(uint32_t index)
+    {
+        auto modelNode = m_scene->FindNodeWithName("Model");
+        if (!modelNode) return;
+
+        auto meshComp = modelNode->GetComponent<nxs::MeshComponent>();
+        if (!meshComp) return;
+
+        auto model = PTR_CAST<nxs::Model>(m_loadedModels[index]->resource);
+        if (!model) return;
+
+        meshComp->SetMesh(model->GetMeshes()[0]);
     }
 
 private:
@@ -178,23 +167,20 @@ private:
         }
 
         auto node = m_scene->EmplaceChild<nxs::SceneNode3D>("Model");
-        node->AddComponent<nxs::ModelComponent>();
+        node->AddComponent<nxs::MeshComponent>();
         node->Scale().value = modelScales[0];
 
         auto material = std::make_shared<nxs::Material>("Default Material", 0);
         material->CreateDefaultShader(*nxs::Engine::Instance().GetResourceManager());
 
-        auto groundModel = nxs::Model::CreateFromMesh(
-            "Ground Plane",
-            nxs::PrimitiveMesh::CreatePlane(
+        auto meshComp = m_scene->EmplaceChild<nxs::SceneNode3D>("Ground")->AddComponent<nxs::MeshComponent>();
+        meshComp->SetMesh(nxs::PrimitiveMesh::CreatePlane(
                 "Ground Plane",
                 10, 10,
                 *GetRenderSystem().GetRenderInterface(),
                 material
             )
         );
-        auto modelComp = m_scene->EmplaceChild<nxs::SceneNode3D>("Ground")->AddComponent<nxs::ModelComponent>();
-        modelComp->SetModel(groundModel);
 
         m_scene->SetRenderer(std::make_unique<nxs::ForwardSceneRenderer>(GetRenderSystem()));
     }
@@ -214,6 +200,21 @@ private:
             }
             return true;
         }));
+        taskScheduler->ScheduleTask(std::make_shared<nxs::RepeatTask>(-1, [this, taskScheduler]() -> bool
+        {
+            for (const auto & m_loadedModel : m_loadedModels)
+            {
+                if (m_loadedModel->status != nxs::IResourceLoader::LoadResult::Status::Ready) return true;
+            }
+
+            taskScheduler->ScheduleTask(std::make_shared<nxs::RepeatTask>(-1, [this]() -> bool
+            {
+                UpdateModel();
+                return true;
+            }));
+
+            return false;
+        }));
         return result;
     }
 
@@ -228,6 +229,22 @@ private:
         }
     }
 
+    void UpdateModel()
+    {
+        const auto& inputManager = nxs::InputManager::Instance();
+        const glm::vec2 euler = inputManager.GetAxisValue("model_rotate") * 90.f * GetDeltaTime();
+        m_euler.x += euler.x;
+        m_euler.y += euler.y;
+
+        auto modelNode = PTR_CAST<nxs::SceneNode3D>(m_scene->FindNodeWithName("Model"));
+        if (!modelNode) return;
+
+        modelNode->Orient().quat = glm::mat4_cast(glm::quat(glm::radians(m_euler)));
+        modelNode->Scale().value = modelScales[selectedModel] * scale;
+
+        SetMesh(selectedModel);
+    }
+
 protected:
     nxs::Ref<nxs::Scene> m_scene;
     nxs::CameraComponent m_camera;
@@ -239,7 +256,6 @@ protected:
     nxs::Ref<nxs::SceneGraphWidget> m_sceneGraphWidget;
     nxs::Ref<nxs::PropertyWindow> m_propertyWindow;
     float m_aoFactor = 1;
-    bool m_finishLoading = false;
 };
 
 
