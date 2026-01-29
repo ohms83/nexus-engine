@@ -21,7 +21,7 @@
 #include "scene/Scene.h"
 #include "scene/component/CameraComponent.h"
 #include "scene/component/LightComponent.h"
-#include "scene/component/ModelComponent.h"
+#include "scene/component/MeshComponent.h"
 #include "scene/component/SceneNodeComponent.h"
 #include "scene/component/TransformComponent.h"
 
@@ -64,28 +64,26 @@ void ForwardSceneRenderer::Render(RenderSystem& renderSystem, const Scene& scene
 
         const auto viewProjMtx = projection * viewMtx;
         const auto viewFrustum = camera.GetViewFrustum(cameraPos.value, cameraOrient.quat);
-        for (const auto view = registry.view<SceneNodeComponent, ModelComponent, PositionComponent, OrientationComponent, ScaleComponent>(); const auto& [entity, sceneNode, modelComp, position, orient, scale] : view.each())
+        for (const auto view = registry.view<SceneNodeComponent, MeshComponent, PositionComponent, OrientationComponent, ScaleComponent>(); const auto& [entity, sceneNode, meshComp, position, orient, scale] : view.each())
         {
-            auto model = modelComp.GetModel();
-            if (!sceneNode.active || !model) continue;
+            if (!sceneNode.active) continue;
 
             glm::mat4 modelMtx = Matrix::CreateModelMatrix(position.value, orient.quat, scale.value);
 
-            if (!IsSphereInside(viewFrustum, model->GetBoundingSphere(), modelMtx, scale.value)) continue;
-
             rmt_BeginCPUSample(SceneRenderer_CreateSortList, 0)
             const auto mvpMtx = projection * viewMtx * modelMtx;
-            for (auto mesh : model->GetMeshes())
+
+            if (auto mesh = meshComp.GetMesh(); mesh != nullptr)
             {
                 if (!IsSphereInside(viewFrustum, mesh->GetSphere(), modelMtx, scale.value)) continue;
                 commands.emplace_back(CreateRenderCommand(mesh, std::move(modelMtx), mvpMtx));
 
-                if (modelComp.showBoundingBox)
+                if (meshComp.showBoundingBox)
                 {
                     const auto& box = mesh->GetBox();
                     Gizmos::DrawOutlineBox(renderSystem, box.center, box.extent, modelMtx);
                 }
-                if (modelComp.showBoundingSphere)
+                if (meshComp.showBoundingSphere)
                 {
                     const auto& sphere = mesh->GetSphere();
                     Gizmos::DrawOutlineSphere(renderSystem, sphere.center, sphere.radius, modelMtx);
