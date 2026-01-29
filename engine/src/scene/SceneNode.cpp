@@ -295,7 +295,7 @@ void SceneNode::RemoveChild(Ref<SceneNode> node, bool removeDescendant)
     }), TaskScheduler::UpdatePhase::PostUpdate);
 }
 
-void SceneNode::RemoveAllChildren()
+void SceneNode::RemoveAllChildren(bool removeDescendant)
 {
     if (IsShuttingDown()) return;
  
@@ -306,7 +306,13 @@ void SceneNode::RemoveAllChildren()
         return;
     }
 
-    m_scheduler->ScheduleTask(std::make_shared<OneshotTask>([this]() {
+    m_scheduler->ScheduleTask(std::make_shared<OneshotTask>([this, removeDescendant]() {
+        if (!removeDescendant && m_parent)
+        {
+            std::ranges::for_each(m_children, [this](Ref<SceneNode> child) {
+                m_parent->AddChild(child);
+            });
+        }
         m_children.clear();
     }), TaskScheduler::UpdatePhase::PostUpdate);
 }

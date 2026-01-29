@@ -57,6 +57,12 @@ NXS_NAMESPACE
          * @param renderingInterface The rendering interface used to resolve graphical elements
          */
         virtual void Resolve(ResourceManager& resourceManager, const RenderingInterface& renderingInterface);
+        /**
+         * @brief Validate and clamp component properties. This should be performed
+         * after deserialization to ensure data integrity (eg. divide by zero prevention).
+         * @note This function is optional to implement in derived classes.
+         */
+        virtual void Validate();
 
         Ref<SceneNode> GetSelf() { return PTR_CAST<SceneNode>(shared_from_this()); }
 
@@ -91,7 +97,7 @@ NXS_NAMESPACE
 
         void AddChild(Ref<SceneNode> child);
         void RemoveChild(Ref<SceneNode> child, bool removeDescendant = true);
-        void RemoveAllChildren();
+        void RemoveAllChildren(bool removeDescendant = true);
         /**
          * @brief Get all direct child nodes.
          * 
@@ -134,14 +140,6 @@ NXS_NAMESPACE
         virtual void OnDeactivate() {};
         virtual void OnDestroy() {};
         virtual void OnUpdate(float dt) {}
-
-    private:
-        /**
-         * @brief Validate and clamp component properties. This should be performed
-         * after deserialization to ensure data integrity (eg. divide by zero prevention).
-         * @note This function is optional to implement in derived classes.
-         */
-        virtual void Validate();
 
     protected:
         Ref<SceneNode> m_parent;

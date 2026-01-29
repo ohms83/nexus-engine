@@ -20,8 +20,8 @@ static void ShowNewNodeMenu(Ref<SceneNode> parent)
                 child = SceneNode::CreateChild(parent, type);
             }
 
-            if (child && type == "Camera") {
-                child->GetComponent<CameraComponent>()->Validate();
+            if (child) {
+                child->Validate();
             }
         }
         ImGui::EndMenu();
@@ -131,6 +131,11 @@ void SceneGraphWidget::ShowContextMenu()
         if (ImGui::MenuItem("Delete"))
         {
             DeleteNode(node);
+            closePopup = true;
+        }
+        if (ImGui::MenuItem("Delete All Children"))
+        {
+            node->RemoveAllChildren();
             closePopup = true;
         }
         if (ImGui::MenuItem("Cancel"))

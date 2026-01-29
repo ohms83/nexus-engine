@@ -52,6 +52,44 @@ TEST_F(SceneNodeTest, RemoveNode)
     EXPECT_EQ(scene->FindNodeWithName(name), nullptr);
 }
 
+TEST_F(SceneNodeTest, RemoveChild_RemovesDescendantsByDefault)
+{
+    auto parent = scene->EmplaceChild<SceneNode>("Parent");
+    auto child = parent->EmplaceChild<SceneNode>("Child");
+    auto grandchild = child->EmplaceChild<SceneNode>("Grandchild");
+
+    EXPECT_NE(parent->FindNodeWithName("Child"), nullptr);
+    EXPECT_NE(parent->FindNodeWithName("Grandchild"), nullptr);
+
+    parent->RemoveChild(child);
+    scheduler->TransferPendingTasks();
+    // Node still present until PostUpdate runs
+    EXPECT_NE(parent->FindNodeWithName("Child"), nullptr);
+    EXPECT_NE(parent->FindNodeWithName("Grandchild"), nullptr);
+
+    scheduler->PostUpdate();
+    // The default behavior removes descendants as well
+    EXPECT_EQ(parent->FindNodeWithName("Child"), nullptr);
+    EXPECT_EQ(parent->FindNodeWithName("Grandchild"), nullptr);
+}
+
+TEST_F(SceneNodeTest, RemoveChild_ReparentsChildrenWhenRequested)
+{
+    auto parent = scene->EmplaceChild<SceneNode>("Parent");
+    auto child = parent->EmplaceChild<SceneNode>("Child");
+    auto grandchild = child->EmplaceChild<SceneNode>("Grandchild");
+
+    parent->RemoveChild(child, false);
+    scheduler->TransferPendingTasks();
+    scheduler->PostUpdate();
+
+    // Child should be removed but the direct child (grandchild) should be reparented to parent
+    EXPECT_EQ(parent->FindNodeWithName("Child"), nullptr);
+    auto foundGrandchild = parent->FindNodeWithName("Grandchild");
+    EXPECT_NE(foundGrandchild, nullptr);
+    EXPECT_EQ(foundGrandchild->GetParent(), parent);
+}
+
 // Testing for a bug where removing a scene node will have side effects on the others
 // due to dangling references.
 TEST_F(SceneNodeTest, DanglingReferences)
