@@ -62,6 +62,11 @@ VariantData Mesh::Serialize() const
         {"center", VariantData::Array{DOUBLE_CAST(m_boundingBox.center.x), DOUBLE_CAST(m_boundingBox.center.y), DOUBLE_CAST(m_boundingBox.center.z)}},
         {"extent", VariantData::Array{DOUBLE_CAST(m_boundingBox.extent.x), DOUBLE_CAST(m_boundingBox.extent.y), DOUBLE_CAST(m_boundingBox.extent.z)}}
     };
+
+    // Vertices
+    data["vertices"] = SerializeVertices();
+    // Indices
+    data["indices"] = SerializeIndices();
     return data;
 }
 
@@ -94,6 +99,82 @@ bool Mesh::Deserialize(const VariantData& data)
         m_boundingBox.extent.z = FLOAT_CAST(earr.at(2).GetDouble());
     }
 
+    return true;
+}
+
+VariantData Mesh::SerializeVertices() const
+{
+    VariantData::Map data;
+
+    if (!m_vertexBuffer) return data;
+
+    data["stride"] = INT64_CAST(m_vertexBuffer->GetStride());
+    data["vertexCount"] = INT64_CAST(m_vertexBuffer->VertexCount());
+    data["usage"] = INT64_CAST(m_vertexBuffer->GetUsage());
+
+    VariantData::Array attributes;
+    for (const auto& attr : m_vertexBuffer->GetAttributes())
+    {
+        VariantData::Map attrData;
+        attrData["type"] = INT64_CAST(attr.type);
+        attrData["dataType"] = INT64_CAST(attr.dataType);
+        attrData["numElements"] = attr.numElements;
+        attrData["attribIndex"] = attr.attribIndex;
+        attrData["divisor"] = attr.divisor;
+
+        attributes.emplace_back(std::move(attrData));
+    }
+
+    data["attributes"] = attributes;
+
+    // Vertex data
+    VariantData::Array vertexData;
+    const auto bufferSize = m_vertexBuffer->GetBufferSize();
+    const auto vertexDataPtr = R_CAST<const float*>(m_vertexBuffer->GetData());
+    const auto elementCount = bufferSize / sizeof(float);
+    for (size_t i = 0; i < elementCount; ++i)
+    {
+        vertexData.emplace_back(vertexDataPtr[i]);
+    }
+    data["vertexData"] = vertexData;
+
+    return data;
+}
+
+VariantData Mesh::SerializeIndices() const
+{
+    VariantData::Map data;
+
+    if (!m_indexBuffer) return data;
+
+    // Index data
+    VariantData::Array indexData;
+    const auto numIndex = m_indexBuffer->NumIndex();
+    const auto indexDataPtr = m_indexBuffer->GetData();
+
+    data["usage"] = INT64_CAST(m_indexBuffer->GetUsage());
+    data["drawMode"] = INT64_CAST(m_indexBuffer->GetDrawMode());
+    data["numIndices"] = INT64_CAST(numIndex);
+    data["numDraw"] = INT64_CAST(m_indexBuffer->GetNumIndexDraw());
+
+    for (size_t i = 0; i < numIndex; ++i)
+    {
+        indexData.emplace_back(INT64_CAST(indexDataPtr[i]));
+    }
+    data["indexData"] = indexData;
+
+    return data;
+}
+
+bool Mesh::DeserializeVertices()
+{
+    if (!m_vertexBuffer) return false;
+    return true;
+}
+
+bool Mesh::DeserializeIndices()
+{
+    if (!m_indexBuffer) return false;
     return true;
 }
 

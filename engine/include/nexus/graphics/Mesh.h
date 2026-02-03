@@ -78,12 +78,21 @@ NXS_NAMESPACE
 
         void ComputeBounds();
 
-    public:
         void Resolve(class ResourceManager& resourceManager);
 
+    private:
+        virtual VariantData SerializeVertices() const;
+        virtual VariantData SerializeIndices() const;
+
+        virtual bool DeserializeVertices();
+        virtual bool DeserializeIndices();
+
+    protected:
         // Mesh stores the material path when deserializing and will attempt to resolve it when Resolve() is called.
         std::string m_materialPath;
         std::string m_name;
+        std::vector<float> m_vertices;
+        std::vector<uint32> m_indices;
         Ref<VertexBuffer> m_vertexBuffer;
         Ref<IndexBuffer> m_indexBuffer;
         Ref<Material> m_material;

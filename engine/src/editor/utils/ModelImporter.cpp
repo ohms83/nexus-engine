@@ -5,6 +5,11 @@
 #include "core/LogDispatcher.h"
 #include "core/task/FutureWaitingTask.h"
 #include "core/resource/ResourceManager.h"
+#include "core/serialize/JsonSerializer.h"
+#include "core/serialize/MsgPackSerializer.h"
+
+#include "geom/Box.h"
+#include "geom/Sphere.h"
 
 #include "graphics/Mesh.h"
 #include "graphics/Material.h"
@@ -130,6 +135,9 @@ Ref<SceneNode> ModelImporter::Import(const std::string& path)
     auto thisScene = Engine::Instance().GetSceneManager()->GetCurrentScene();    
     auto thisNode = thisScene->EmplaceChild<SceneNode3D>(ai_scene->mRootNode->mName.C_Str());
     ProcessNode(thisNode, ai_scene->mRootNode, ai_scene, directory);
+
+    auto sphereComp = thisNode->AddComponent<SphereComponent>();
+    auto boxComp = thisNode->AddComponent<BoxComponent>();
     ComputeBoundingVolume(thisNode);
 
     LOG_INFO(LogModelImporter, "Model loaded successfully!!");
@@ -231,6 +239,7 @@ void ModelImporter::ProcessMesh(Ref<SceneNode> sceneNode, const aiMesh* ai_mesh,
     .Build();
     newMesh->SetIndexBuffer(indexBuffer);
 
+    newMesh->ComputeBounds();
     ProcessMaterial(newMesh, ai_mesh, ai_scene, directory);
 }
 
@@ -314,11 +323,8 @@ void ModelImporter::ProcessTextures(Ref<Material> newMat, const aiMaterial* ai_m
 
 void ModelImporter::ComputeBoundingVolume(Ref<SceneNode> node)
 {
-    auto sphere = node->AddComponent<SphereComponent>();
-    auto box = node->AddComponent<BoxComponent>();
-
     SceneNode::ChildList children;
-    node->GetAllChildren(children);
+    node->GetAllDescendants(children, true);
 
     for (auto child : children)
     {
@@ -329,20 +335,5 @@ void ModelImporter::ComputeBoundingVolume(Ref<SceneNode> node)
         if (!mesh) continue;
 
         mesh->ComputeBounds();
-
-        ComputeBoundingVolume(child);
     }
-    
-    // glm::vec3 min{ FLT_MAX }, max{ -FLT_MAX };
-    // for (const auto& mesh : m_meshes)
-    // {
-    //     mesh->ComputeBounds();
-    //     const auto& box = mesh->GetBox();
-    //     min = glm::min(min, box.GetMin());
-    //     max = glm::max(max, box.GetMax());
-    // }
-
-    // glm::vec3 sphereCenter = (max + min) * 0.5f;
-    // glm::vec3 extent = max - sphereCenter;
-    // float sphereRadius = glm::length(extent);
 }

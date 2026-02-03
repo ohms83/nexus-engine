@@ -34,6 +34,16 @@ NXS_NAMESPACE
         NODISCARD uint32 NumIndex() const;
         NODISCARD uint32 NumPolygons() const;
 
+        NODISCARD const uint32_t* GetData() const
+        {
+            return R_CAST<const uint32_t*>(m_indexData->Data());
+        }
+
+        NODISCARD uint32_t GetBufferSize() const
+        {
+            return m_indexData->Size();
+        }
+
         /**
          * @brief Specify the number of index to be rendered.
          * 

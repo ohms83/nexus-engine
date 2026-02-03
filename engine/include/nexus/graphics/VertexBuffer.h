@@ -2,6 +2,7 @@
 
 #include "nexus/NxsDefine.h"
 #include "nexus/memory/Buffer.h"
+#include "nexus/core/serialize/Serializeable.h"
 
 #include "GPUBuffer.h"
 #include "GpuResource.h"
@@ -142,6 +143,11 @@ NXS_NAMESPACE
         NODISCARD uint32_t GetStride() const
         {
             return m_stride;
+        }
+
+        NODISCARD BufferUsage GetUsage() const
+        {
+            return m_usage;
         }
 
         NODISCARD const std::vector<VertexAttribute>& GetAttributes() const

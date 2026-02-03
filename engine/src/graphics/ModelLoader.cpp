@@ -125,6 +125,8 @@ Ref<Resource> ModelLoader::Load(const std::string &path, uint32 id)
         return nullptr;
     }
 
+    LOG_DEBUG(LogModelLoader, std::format("Finished parsing model: {}", path));
+
     // Store the directory path of the model file for texture loading
     const auto directory = std::filesystem::path(path).parent_path();
     auto model = std::make_shared<Model>(path, id);
@@ -319,6 +321,7 @@ void ModelLoader::ProcessMesh(const Ref<Model>& model, const aiMesh* mesh, const
     ProcessMaterial(newMesh, mesh, scene, directory);
 
     model->AddMesh(newMesh);
+    LOG_DEBUG(LogModelLoader, std::format("Finished processing mesh: {}", mesh->mName.C_Str()));
 }
 
 // ReSharper disable once CppMemberFunctionMayBeStatic

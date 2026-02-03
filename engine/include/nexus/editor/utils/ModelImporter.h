@@ -14,6 +14,8 @@ NXS_NAMESPACE
     class SceneNode;
     class Mesh;
     class Material;
+    struct Sphere;
+    struct Box;
 
     class ModelImporter
     {
