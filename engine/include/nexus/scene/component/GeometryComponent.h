@@ -25,6 +25,7 @@ NXS_NAMESPACE
             auto data = Super::Serialize();
             data["center"] = box.center;
             data["extent"] = box.extent;
+            data["debugDraw"] = debugDraw;
             return data;
         }
 
@@ -33,6 +34,7 @@ NXS_NAMESPACE
             if (!Super::Deserialize(data)) return false;
             box.center = data["center"].GetVec3();
             box.extent = data["extent"].GetVec3();
+            debugDraw = data["debugDraw"].GetBool();
             return true;
         }
 
