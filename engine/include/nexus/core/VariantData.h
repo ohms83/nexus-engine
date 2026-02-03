@@ -313,6 +313,31 @@ NXS_NAMESPACE
             return std::get<Map>(m_value);
         }
 
+        /**
+         @brief Moves the internal array out of this VariantData object.
+         * This function transfers ownership of the underlying std::vector to the caller.
+         * The VariantData object must be of type Array before calling this function.
+         * @return VariantData::Array&& An rvalue reference to the internal vector.
+         * @note Asserts if the internal type is not an Array.
+         */
+        NODISCARD VariantData::Array&& MoveArray() {
+            NXS_ASSERT_MSG(IsArray(), std::format("VariantData: Not an array type. Type={}", NxsGetTypeString(GetType())));
+            return std::move(std::get<std::vector<VariantData>>(m_value));
+        }
+
+        /**
+         * @brief Moves the internal map out of this VariantData object.
+         * This function transfers ownership of the underlying map (std::unordered_map) 
+         * to the caller. The VariantData object must be of type Map before calling 
+         * this function.
+         * @return VariantData::Map&& An rvalue reference to the internal map.
+         * @note Asserts if the internal type is not a Map.
+         */
+        NODISCARD VariantData::Map&& MoveMap() {
+            NXS_ASSERT_MSG(IsMap(), std::format("VariantData: Not a map type. Type={}", NxsGetTypeString(GetType())));
+            return std::move(std::get<Map>(m_value));
+        }
+
         // --- Convenient Accessors for Map type ---
         const VariantData& operator [] (const std::string_view key) const noexcept {
             if (!IsMap()) {
