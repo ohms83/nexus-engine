@@ -9,7 +9,7 @@ FileMenuItem::FileMenuItem(
     const std::string& desc,
     const std::string& shortcut,
     const FileMenuContext& context)
-    : TriggerMenuItem(group, name, desc, shortcut, [this]() {
+    : Super(group, name, desc, shortcut, [this]() {
         ShowFileDialog();
     })
     , m_context(context)

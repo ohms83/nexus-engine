@@ -230,6 +230,24 @@ void Menu::AddMenuItem(const std::string& menu, Ref<MenuItem> menuItem)
     }
 }
 
+Ref<MenuItem> Menu::GetMenuItem(const std::string& menu, const std::string& name)
+{
+    const auto itr = std::ranges::find_if(m_menuItems, [&menu] (const MenuItemList& itemList)
+    {
+        return menu == itemList.menu;
+    });
+
+    if (itr == m_menuItems.end()) return nullptr;
+
+    const auto& items = itr->items;
+    const auto menuItr = std::ranges::find_if(items, [&name] (const Ref<MenuItem>& item)
+    {
+        return item->GetName() == name;
+    });
+
+    return (menuItr == items.end()) ? nullptr : *menuItr;
+}
+
 void Menu::DrawMenu()
 {
     if (ImGui::BeginMainMenuBar())

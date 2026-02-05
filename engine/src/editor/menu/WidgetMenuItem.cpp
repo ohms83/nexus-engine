@@ -10,7 +10,7 @@ WidgetMenuItem::WidgetMenuItem(
     const std::string& shortcut,
     Ref<EditorWidget> widget,
     IWidgetOwner& owner)
-    : MenuItem(group, name, desc, shortcut)
+    : Super(group, name, desc, shortcut)
     , m_widget(widget)
 {
     NXS_ASSERT(widget);
@@ -23,6 +23,8 @@ void WidgetMenuItem::OnSelected(bool is_selected)
 
     if (is_selected) m_widget->Show();
     else m_widget->Hide();
+
+    Super::OnSelected(is_selected);
 }
 
 bool WidgetMenuItem::IsSelected() const

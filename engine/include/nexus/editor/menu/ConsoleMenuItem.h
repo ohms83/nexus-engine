@@ -8,6 +8,8 @@ NXS_NAMESPACE
     class ConsoleMenuItem : public WidgetMenuItem
     {
     public:
+        using Super = WidgetMenuItem;
+
         ConsoleMenuItem(
             uint32 group,
             const std::string& name,

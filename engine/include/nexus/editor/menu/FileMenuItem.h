@@ -20,6 +20,8 @@ NXS_NAMESPACE
     class FileMenuItem : public TriggerMenuItem
     {
     public:
+        using Super = TriggerMenuItem;
+
         FileMenuItem(
             uint32_t group,
             const std::string& name,

@@ -10,6 +10,7 @@ Ref<Camera> CameraUtils::InitCamera(Scene& scene, const std::string& name)
     camera->Position().value = {0, 50, 0};
     camera->LookAt({0, 50, -10}, {0, 1, 0});
     camera->Properties().farZ = 10000.f;
+
     auto moveComp = camera->AddComponent<nxs::MoveComponent>();
     moveComp->speed = 100.f;
     auto turninComp = camera->AddComponent<nxs::TurningComponent>();

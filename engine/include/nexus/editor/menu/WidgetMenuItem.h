@@ -15,6 +15,8 @@ NXS_NAMESPACE
     class WidgetMenuItem : public MenuItem
     {
     public:
+        using Super = MenuItem;
+
         WidgetMenuItem(
             uint32_t group,
             const std::string& name,

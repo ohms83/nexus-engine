@@ -24,6 +24,7 @@ NXS_NAMESPACE
         void Draw(RenderSystem& renderSystem);
 
         void AddMenuItem(const std::string& menu, Ref<MenuItem> menuItem);
+        Ref<MenuItem> GetMenuItem(const std::string& menu, const std::string& name);
 
     private:
         void DrawMenu();

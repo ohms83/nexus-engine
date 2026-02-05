@@ -156,6 +156,20 @@ bool NexusEditor::Init_Internal()
             CAST<nxs::IWidgetOwner&>(*m_editor.get())
         )
     );
+
+    // Attach event hook
+    auto newSceneMenu = menu.GetMenuItem("File", "New Scene");
+    if (!newSceneMenu) return false;
+
+    newSceneMenu->onSelectedEvent.connect([this](bool selected, const std::string_view name) {
+        // Re-init camera
+        auto sceneManager = nxs::Engine::Instance().GetSceneManager();
+        auto scene = sceneManager->GetNextScene();
+        if (!scene) return;
+
+        m_camera = nxs::editor::CameraUtils::InitCamera(*scene);
+    });
+
     return true;
 }
 

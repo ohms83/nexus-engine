@@ -11,6 +11,8 @@ NXS_NAMESPACE
     class SceneFileMenuItem : public FileMenuItem
     {
     public:
+        using Super = FileMenuItem;
+
         SceneFileMenuItem(
             const SceneManager& sceneManager,
             Ref<ISerializer> serializer,
