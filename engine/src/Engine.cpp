@@ -59,13 +59,13 @@ Engine& Engine::Initialize(WindowContext window, const GraphicsConfig& graphicsC
 
 void Engine::Destroy()
 {
+    ShutdownModules();
     s_engine.reset();
 }
 
 void Engine::BeginShutdown()
 {
     s_shuttingDown = true;
-    ShutdownModules();
 }
 
 Engine& Engine::Instance()

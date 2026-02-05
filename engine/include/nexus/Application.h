@@ -25,6 +25,8 @@
     Get##Manager().PurgeUnused(); \
 } while(0);
 
+DECLARE_LOG_EXTERN(Application);
+
 NXS_NAMESPACE
 {
     class Editor;
@@ -157,7 +159,10 @@ NXS_NAMESPACE
     int RunApplication(const ApplicationConfig& initInfo)
     {
         T application = T();
-        application.Init(initInfo);
+        if (!application.Init(initInfo)) {
+            LOG_ERROR(LogApplication, "Failed to initialize application!");
+            return -1;
+        }
         return application.BeginMainLoop();
     }
 }
