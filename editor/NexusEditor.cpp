@@ -10,6 +10,8 @@
 #include "nexus/graphics/Model.h"
 #include "nexus/editor/widget/PropertyWindow.h"
 
+#include "utils/CameraUtils.h"
+
 #define LOAD_ASYNC 1
 
 DEFINE_LOG(NexusEditor);
@@ -136,37 +138,10 @@ bool NexusEditor::Init_Internal()
     auto scene = sceneManager->EmplaceAndChange<nxs::Scene>("Editor Scene");
     scene->SetRenderer(std::make_unique<nxs::ForwardSceneRenderer>(GetRenderSystem()));
 
-    m_camera = InitCamera(*scene);
     InitModel();
     InitLight(*scene);
 
-    auto& inputManager = nxs::InputManager::Instance();
-    nxs::KeyInputMap cameraMovementKeyInput = {
-        {
-            {SDLK_W, nxs::KeyInputMap::AxisMinusZ},
-            {SDLK_S, nxs::KeyInputMap::AxisPlusZ},
-            {SDLK_A, nxs::KeyInputMap::AxisMinusX},
-            {SDLK_D, nxs::KeyInputMap::AxisPlusX},
-            {SDLK_Q, nxs::KeyInputMap::AxisMinusY},
-            {SDLK_E, nxs::KeyInputMap::AxisPlusY},
-        }
-    };
-    nxs::KeyInputMap cameraTurnKeyInput = {
-        {
-            {SDLK_LEFT, nxs::KeyInputMap::AxisPlusX},
-            {SDLK_RIGHT, nxs::KeyInputMap::AxisMinusX},
-            {SDLK_UP, nxs::KeyInputMap::AxisPlusY},
-            {SDLK_DOWN, nxs::KeyInputMap::AxisMinusY},
-        }
-    };
-    nxs::MouseAxisMapping cameraTurnMouseInput = {
-        true,
-        SDL_BUTTON_RIGHT,
-        {5, 5}
-    };
-    inputManager.RegisterAxisInputMap("movement", cameraMovementKeyInput);
-    inputManager.RegisterAxisInputMap("camera_turn", cameraTurnKeyInput);
-    inputManager.RegisterMouseAxisInputMap("camera_turn", cameraTurnMouseInput);
+    m_camera = nxs::editor::CameraUtils::InitCamera(*scene);
 
     m_sceneGraphWidget = std::make_shared<nxs::SceneGraphWidget>(*sceneManager);
     m_propertyWindow = std::make_shared<nxs::PropertyWindow>(*sceneManager);
@@ -232,23 +207,6 @@ void NexusEditor::OnResize(const glm::ivec2& screenSize, const glm::ivec2& actua
 void NexusEditor::Update()
 {
     Application::Update();
-
-    const auto& inputManager = nxs::InputManager::Instance();
-
-    glm::vec3 moveVec = inputManager.GetAxisValue("movement");
-
-    // Transform the translation vector into the camera's local coordinate.
-    auto& cameraOrient = m_camera->Orient();
-    glm::vec2 euler = inputManager.GetMouseAxisValue("camera_turn") * GetDeltaTime();
-    cameraOrient.Rotate(glm::vec3(euler.y, euler.x, 0));
-
-    m_camera->GetComponent<nxs::MoveComponent>()->direction =
-        nxs::Vector::SafeNormalize(cameraOrient.quat * moveVec);
-
-    const auto turninAxis = nxs::Vector::SafeNormalize(inputManager.GetAxisValue("camera_turn"));
-    auto& compAxis = m_camera->GetComponent<nxs::TurningComponent>()->axis;
-    compAxis.x = turninAxis.y;
-    compAxis.y = turninAxis.x;
 
     const auto selectedNode = m_sceneGraphWidget->GetSelectedNode();
     m_propertyWindow->SetSceneNode(selectedNode);

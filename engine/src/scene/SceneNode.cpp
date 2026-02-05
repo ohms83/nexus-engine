@@ -373,6 +373,9 @@ void SceneNode::RemoveFromParent()
 
 void SceneNode::AddScript(Ref<Script> script)
 {
+    if (auto owner = script->GetOwner(); owner != nullptr) owner->RemoveScript(script);
+
+    script->SetOwner(GetSelf());
     m_scripts.push_back(script);
 
     std::ranges::sort(m_scripts, std::ranges::greater{}, &Script::GetPriority);
@@ -380,6 +383,8 @@ void SceneNode::AddScript(Ref<Script> script)
 
 void SceneNode::RemoveScript(Ref<Script> script)
 {
+    if (!script || !script->GetOwner()) return;
+
     std::erase(m_scripts, script);
 }
 
@@ -393,7 +398,7 @@ void SceneNode::Update(float dt)
     std::ranges::for_each(m_simulations, [dt, &registry](Simulation& sim) {
         sim.system(registry, dt);
     });
-    
+
     std::ranges::for_each(m_children, [dt](Ref<SceneNode> node) {
         node->Update(dt);
     });
