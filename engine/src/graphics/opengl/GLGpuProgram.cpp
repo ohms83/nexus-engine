@@ -94,7 +94,6 @@ GLGpuProgram::~GLGpuProgram()
 GpuProgram& GLGpuProgram::BeginCompile()
 {
     GpuProgram::BeginCompile();
-    m_id = Alloc();
     return *this;
 }
 
