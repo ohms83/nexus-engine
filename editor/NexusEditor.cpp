@@ -18,19 +18,6 @@ DEFINE_LOG(NexusEditor);
 
 static nxs::Identifier selectedNode = nxs::InvalidID;
 
-static nxs::Ref<nxs::Camera> InitCamera(nxs::Scene& scene)
-{
-    auto camera = scene.EmplaceChild<nxs::Camera>("Camera Node");
-    camera->Position().value = {0, 50, 0};
-    camera->LookAt({0, 50, -10}, {0, 1, 0});
-    camera->Properties().farZ = 10000.f;
-    auto moveComp = camera->AddComponent<nxs::MoveComponent>();
-    moveComp->speed = 100.f;
-    auto turninComp = camera->AddComponent<nxs::TurningComponent>();
-    turninComp->degree = 30.f;
-    return camera;
-}
-
 static void InitLight(nxs::Scene& scene)
 {
     scene.Ambient() = {0.5, 0.5, 0.5};
