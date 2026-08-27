@@ -5,6 +5,36 @@
 
 USING_NAMESPACE_NXS;
 
+class FakeTexture : public TextureProxy
+{
+public:
+    using Super = TextureProxy;
+
+    FakeTexture() {}
+    ~FakeTexture() override {}
+
+    NODISCARD uint32_t GetHandle() const override { return 1; }
+
+    void Bind() const override {}
+    void Unbind() const override {}
+    bool IsBinding() const override { return false; }
+
+    TextureProxy& Begin(const TextureDescription& info) override
+    { 
+        m_textureID = 1;
+        return *this;
+    }
+
+    TextureProxy& LoadData(const uint8_t* data, uint32_t size) override { return *this; }
+    TextureProxy& LoadMipData(const uint8_t* data, uint32_t size, uint32_t mip) override { return *this; }
+
+    void CopyData(const void* data, size_t bytes, size_t offset) {}
+
+protected:
+    NODISCARD uint32_t Alloc() override { return 1; }
+    void Release() override {}
+};
+
 class FakeGpuProgram : public GpuProgram
 {
 public:
@@ -50,7 +80,7 @@ public:
     VertexBuffer* CreateVertexBuffer() const override { return nullptr; }
     IndexBuffer* CreateIndexBuffer() const override { return nullptr; }
     GpuProgram* CreateGpuProgram() const override { return new FakeGpuProgram(); }
-    TextureProxy* CreateTexture() const override { return nullptr; }
+    TextureProxy* CreateTexture() const override { return new FakeTexture(); }
     void OnResize(uint32_t pixel_w, uint32_t pixel_h) override { }
     void DrawIndexed(const Ref<IndexBuffer> indexBuffer) override { }
     void DrawIndexedInstanced(const Ref<IndexBuffer> indexBuffer, uint32_t instanceCount) override { }
