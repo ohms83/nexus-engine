@@ -6,7 +6,6 @@
 #include "graphics/RenderSystem.h"
 #include "math/Math.h"
 #include "memory/BorrowBuffer.h"
-#include "scene/Camera.h"
 
 #include "Remotery.h"
 
