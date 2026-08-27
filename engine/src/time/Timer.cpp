@@ -3,7 +3,7 @@
 //
 
 #include "time/Timer.h"
-#include "math/Math.h"
+#include "nexus/math/Math.h"
 
 USING_NAMESPACE_NXS;
 

@@ -2,6 +2,7 @@
 get_filename_component(PROJECT_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/.." ABSOLUTE)
 
 set(ENGINE_PUBLIC_HEADER_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
+set(ENGINE_MODULE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/modules)
 set(ENGINE_INSTALL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 
 set(ENGINE_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
@@ -10,6 +11,7 @@ set(ENGINE_3RD_PARTY_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty)
 set(TOOLS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/tools)
 
 add_subdirectory(3rdparty EXCLUDE_FROM_ALL)
+add_subdirectory(modules)
 
 # Third-party sources used by the engine modules.
 set(IMGUI_SOURCE_DIR "${ENGINE_3RD_PARTY_DIR}/imgui" CACHE PATH "Path to Dear ImGui source root")
@@ -45,6 +47,7 @@ function(nexus_target_defaults TARGET_NAME)
     target_include_directories(${TARGET_NAME}
         PUBLIC ${ENGINE_INCLUDE_DIR}
         PRIVATE ${ENGINE_INCLUDE_DIR}/nexus
+        PUBLIC ${ENGINE_3RD_PARTY_DIR}
         PUBLIC ${ENGINE_3RD_PARTY_DIR}/SDL/include
         PUBLIC ${ENGINE_3RD_PARTY_DIR}/glad/include
         PRIVATE ${ENGINE_3RD_PARTY_DIR}/rapidjson/include
@@ -75,13 +78,13 @@ file(GLOB_RECURSE ENGINE_FOUNDATION_SOURCES CONFIGURE_DEPENDS
     src/ecs/*.cpp
     src/geom/*.cpp
     src/io/*.cpp
-    src/math/*.cpp
     src/memory/*.cpp
     src/time/*.cpp
 )
 add_library(nexus-core STATIC ${ENGINE_FOUNDATION_SOURCES})
 nexus_target_defaults(nexus-core)
 target_link_libraries(nexus-core
+    PUBLIC nexus-math
     PUBLIC EnTT
     PRIVATE SDL3::SDL3
     PRIVATE RapidJSON
@@ -121,7 +124,9 @@ add_library(nexus-engine STATIC
     src/Application.cpp
 )
 nexus_target_defaults(nexus-engine)
-target_link_libraries(nexus-engine PUBLIC nexus-editor-module)
+target_link_libraries(nexus-engine
+    PUBLIC nexus-editor-module
+    PUBLIC nexus-math)
 
 message("CMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}")
 

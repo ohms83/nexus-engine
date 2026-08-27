@@ -1,4 +1,4 @@
-#include "math/Random.h"
+#include "nexus/math/Random.h"
 #include <chrono>
 
 USING_NAMESPACE_NXS;

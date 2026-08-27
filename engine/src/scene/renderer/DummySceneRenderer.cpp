@@ -11,8 +11,8 @@
 
 #include "ecs/Ecs.h"
 
-#include "math/Math.h"
-#include "math/Matrix.h"
+#include "nexus/math/Math.h"
+#include "nexus/math/Matrix.h"
 
 #include "scene/Camera.h"
 #include "scene/component/CameraComponent.h"

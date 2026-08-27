@@ -1,4 +1,4 @@
-#include "MathUtil.h"
+#include "nexus/math/MathUtil.h"
 
 USING_NAMESPACE_NXS;
 

@@ -1,6 +1,6 @@
 #include "editor/widget/PropertyWindow.h"
 #include "scene/SceneManager.h"
-#include "math/MathUtil.h"
+#include "nexus/math/MathUtil.h"
 #include "core/Hasher.h"
 
 #include "imgui.h"
