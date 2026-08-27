@@ -89,6 +89,9 @@ NXS_NAMESPACE
     template<typename T>
     using Ptr = std::unique_ptr<T>;
 
+    template<typename T>
+    using WeakRef = std::weak_ptr<T>;
+
     enum class PixelFormat
     {
         None,

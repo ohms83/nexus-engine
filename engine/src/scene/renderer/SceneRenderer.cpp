@@ -5,6 +5,7 @@
 
 #include <format>
 #include <algorithm>
+#include <cstring>
 
 #include "core/Logger.h"
 #include "graphics/debug/Gizmos.h"
@@ -19,7 +20,6 @@
 #include "math/Math.h"
 #include "math/Matrix.h"
 #include "memory/OwningBuffer.h"
-#include <cstring>
 #include "scene/component/CameraComponent.h"
 #include "scene/component/LightComponent.h"
 #include "scene/component/ModelComponent.h"
