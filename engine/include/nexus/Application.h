@@ -5,7 +5,7 @@
 #pragma once
 
 #include "NxsDefine.h"
-#include <SDL3/SDL.h>
+#include "ApplicationContext.h"
 
 #include <concepts>
 #include <string>

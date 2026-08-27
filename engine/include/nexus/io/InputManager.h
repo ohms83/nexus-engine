@@ -4,12 +4,14 @@
 
 #pragma once
 
-#include "nexus/NxsCommon.h"
+#include "nexus/NxsDefine.h"
 
+#include <SDL3/SDL.h>
 #include <unordered_map>
 
 #include "KeyInputMap.h"
 #include "sigslot/signal.hpp"
+#include "glm/glm.hpp"
 
 NXS_NAMESPACE
 {

@@ -7,6 +7,7 @@
 #include <cassert>
 
 #include "nexus/NxsCommon.h"
+#include "nexus/ApplicationContext.h"
 #include "nexus/core/Color.h"
 
 #include "GraphicsConfig.h"

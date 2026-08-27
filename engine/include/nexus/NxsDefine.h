@@ -1,8 +1,8 @@
 #pragma once
 
-#include <SDL3/SDL.h>
 #include <memory>
 #include <cstring>
+#include <functional>
 
 #include "NxsDataType.h"
 
@@ -24,8 +24,6 @@ constexpr char const* NXS_BUILD_CFG = "Unknown";
 
 #define NODISCARD [[nodiscard]]
 #define MAYBE_UNUSED [[maybe_unused]]
-
-#include <functional>
 
 #define NXS_NAMESPACE namespace nxs
 #define USING_NAMESPACE_NXS using namespace nxs
@@ -66,16 +64,9 @@ constexpr char const* NXS_BUILD_CFG = "Unknown";
 
 NXS_NAMESPACE
 {
-    using WindowContext = SDL_Window*;
-
     using Identifier = uint32_t;
     const extern Identifier InvalidID;
     const extern Identifier MaxIdentifier;
-
-    union RenderContext
-    {
-        SDL_GLContext gl_context;
-    };
 
     /**
      * Reference counting type. This is just an alias to @c std::shared_ptr.

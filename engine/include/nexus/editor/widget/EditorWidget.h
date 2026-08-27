@@ -6,7 +6,9 @@
 
 #include <string>
 #include <utility>
-#include <nexus/NxsDefine.h>
+
+#include "nexus/NxsDefine.h"
+#include "nexus/ApplicationContext.h"
 
 NXS_NAMESPACE
 {

@@ -3,6 +3,7 @@
 //
 
 #include "nexus/time/StandardTimeSource.h"
+#include <SDL3/SDL.h>
 
 USING_NAMESPACE_NXS;
 

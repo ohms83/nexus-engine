@@ -4,26 +4,28 @@
 
 #pragma once
 
-#include <unordered_map>
+#include "nexus/NxsDefine.h"
+#include "glm/glm.hpp"
 
-#include "nexus/NxsCommon.h"
+#include <SDL3/SDL.h>
+#include <unordered_map>
 
 NXS_NAMESPACE
 {
     struct KeyInputMap
     {
-        std::unordered_map<SDL_Keycode, int32> keyAxisMap;
-        int32 keyState = 0;
+        std::unordered_map<SDL_Keycode, int32_t> keyAxisMap;
+        int32_t keyState = 0;
 
         void OnKeyDown(SDL_Keycode key);
         void OnKeyUp(SDL_Keycode key);
 
-        static constexpr int32 AxisPlusX  = 0x01;
-        static constexpr int32 AxisMinusX = 0x02;
-        static constexpr int32 AxisPlusY  = 0x04;
-        static constexpr int32 AxisMinusY = 0x08;
-        static constexpr int32 AxisPlusZ  = 0x10;
-        static constexpr int32 AxisMinusZ = 0x20;
+        static constexpr int32_t AxisPlusX  = 0x01;
+        static constexpr int32_t AxisMinusX = 0x02;
+        static constexpr int32_t AxisPlusY  = 0x04;
+        static constexpr int32_t AxisMinusY = 0x08;
+        static constexpr int32_t AxisPlusZ  = 0x10;
+        static constexpr int32_t AxisMinusZ = 0x20;
     };
 
     struct MouseAxisMapping
@@ -43,7 +45,7 @@ NXS_NAMESPACE
          *
          * Note: If @c down is fault, this parameter will be ignored.
          */
-        int32 buttonIndex = 0;
+        int32_t buttonIndex = 0;
         //! Input scaling (sensitivity).
         glm::vec2 scale {1, 1};
     };

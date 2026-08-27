@@ -1,6 +1,7 @@
 #pragma once
 
 #include "nexus/NxsDefine.h"
+#include "nexus/ApplicationContext.h"
 
 NXS_NAMESPACE
 {
