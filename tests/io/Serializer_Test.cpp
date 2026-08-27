@@ -234,6 +234,7 @@ TEST_P(SerializerTestFixture, HandlesEmptyArray) {
     nxs::VariantData decoded_empty_array = RoundTrip(original_empty_array);
 
     ASSERT_TRUE(decoded_empty_array.IsArray());
+    ASSERT_FALSE(decoded_empty_array.IsMap());
     ASSERT_EQ(decoded_empty_array.Size(), 0);
 }
 
@@ -243,5 +244,6 @@ TEST_P(SerializerTestFixture, HandlesEmptyMap) {
     nxs::VariantData decoded_empty_map = RoundTrip(original_empty_map);
 
     ASSERT_TRUE(decoded_empty_map.IsMap());
+    ASSERT_FALSE(decoded_empty_map.IsArray());
     ASSERT_EQ(decoded_empty_map.Size(), 0);
 }

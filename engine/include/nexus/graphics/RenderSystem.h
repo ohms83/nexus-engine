@@ -3,7 +3,7 @@
 #include "nexus/NxsDefine.h"
 #include "nexus/time/Timer.h"
 #include "nexus/core/LogDispatcher.h"
-#include "Color.h"
+#include "nexus/core/Color.h"
 #include "RenderingInterface.h"
 #include "PipelineState.h"
 
@@ -13,6 +13,8 @@ NXS_NAMESPACE
     {
     public:
         explicit RenderSystem(WindowContext window, const GraphicsConfig& config);
+        explicit RenderSystem(Ref<RenderingInterface> renderingInterface);
+
         ~RenderSystem();
 
         void ClearScreen() const;
@@ -105,7 +107,7 @@ NXS_NAMESPACE
         Ref<GpuProgram> m_cachedGlobalShader;
         GraphicsConfig m_config;
         Ref<RenderingInterface> m_renderingInterface;
-        Color4F m_clearColor = Color4F::White;
+        Color4F m_clearColor = Color4F::Grey;
         float m_clearDepth = 1.0f;
 
         uint32 m_frameIndex = 0;

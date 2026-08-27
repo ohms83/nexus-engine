@@ -26,23 +26,23 @@ Scene::~Scene()
     m_simulations.clear();
 }
 
-void Scene::Render(RenderSystem &renderSystem)
+void Scene::Render(RenderSystem &renderSystem) const
 {
     rmt_ScopedCPUSample(Scene_Render, 0)
-    if (m_renderer) m_renderer->Render(renderSystem, *GetRegistry());
+    if (m_renderer) m_renderer->Render(renderSystem, *this);
 }
 
-void Scene::SetRenderer(Ptr<SceneRenderer> renderer)
+void Scene::SetRenderer(Ref<SceneRenderer> renderer)
 {
-    m_renderer = std::move(renderer);
+    m_renderer = renderer;
 }
 
 Color3F& Scene::Ambient()
 {
-    return GetComponent<AmbientLightComponent>().color;
+    return GetComponent<AmbientLightComponent>()->color;
 }
 
 const Color3F& Scene::Ambient() const
 {
-    return GetComponent<AmbientLightComponent>().color;
+    return GetComponent<AmbientLightComponent>()->color;
 }

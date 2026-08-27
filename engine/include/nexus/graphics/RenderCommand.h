@@ -41,10 +41,13 @@ NXS_NAMESPACE
         // Sorting key used by the renderer to order draw calls efficiently.
         SortKey sortKey{};
 
+#ifdef NXS_BUILD_DEBUG
+        std::string debugName; // optional debug name for the command
+#endif
+
         // GPU resources (non-owning references managed by Resource Manager)
         Ref<VertexBuffer> vertexBuffer;
         Ref<IndexBuffer> indexBuffer;
-        Ref<GpuProgram> gpuProgram;
         Ref<Material> material; // optional - used to set uniforms and textures
 
         // Draw parameters
@@ -54,9 +57,9 @@ NXS_NAMESPACE
         uint32 instanceCount = 1;
 
         // Per-instance/model matrix: pointer because many commands share the same matrix
-        const glm::mat4* modelMatrix = nullptr;
-        // For batched commands with multiple instances, store a list of pointers to model matrices.
-        std::vector<const glm::mat4*> instanceModels;
+        glm::mat4 modelMatrix;
+        // For batched commands with multiple instances, store a list of model matrices.
+        std::vector<glm::mat4> instanceModels;
 
         // Bounding volume for frustum culling and sorting
         Sphere bounds;
@@ -66,9 +69,6 @@ NXS_NAMESPACE
         // Optional state overrides for one-shot draws
         PipelineState pipelineOverrides;
         bool hasPipelineOverrides = false;
-
-        // Helper method to check whether the draw uses an override GPU program (global override)
-        NODISCARD bool HasGpuProgram() const { return gpuProgram.operator bool(); }
 
         // Convenience: set the sort key by evaluating translucency/material/depth
         void SetSortKey(bool translucent, uint32 materialId, float depthNormalized)
@@ -82,19 +82,17 @@ NXS_NAMESPACE
             return vertexBuffer.get() == other.vertexBuffer.get()
                 && indexBuffer.get() == other.indexBuffer.get()
                 && material.get() == other.material.get()
-                && gpuProgram.get() == other.gpuProgram.get()
                 && indexCount == other.indexCount
                 && indexOffset == other.indexOffset
                 && vertexOffset == other.vertexOffset
                 && layerMask == other.layerMask;
         }
 
-        void AddInstance(const glm::mat4* model)
+        void AddInstance(const glm::mat4& model)
         {
             if (instanceModels.empty())
             {
-                if (modelMatrix) instanceModels.push_back(modelMatrix);
-                modelMatrix = nullptr;
+                instanceModels.push_back(modelMatrix);
             }
             instanceModels.push_back(model);
             instanceCount = UINT_CAST(instanceModels.size());

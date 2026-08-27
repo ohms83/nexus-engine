@@ -20,6 +20,13 @@ RenderSystem::RenderSystem(const WindowContext window, const GraphicsConfig& con
     m_timer.Start();
 }
 
+RenderSystem::RenderSystem(Ref<RenderingInterface> renderingInterface)
+    : m_renderingInterface(renderingInterface)
+    , m_timer(std::make_shared<HighResTimeSource>())
+{
+    m_timer.Start();
+}
+
 RenderSystem::~RenderSystem()
 {
     m_renderingInterface.reset();

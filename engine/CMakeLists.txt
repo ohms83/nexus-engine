@@ -119,8 +119,11 @@ target_link_libraries(nexus-engine
     PRIVATE assimp::assimp
 )
 
+message("CMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}")
+
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
     target_link_libraries(nexus-engine PRIVATE ws2_32)
+    target_compile_definitions(nexus-engine PUBLIC NXS_PLATFORM_WIN64)
 endif()
 
 target_compile_definitions(nexus-engine
@@ -128,6 +131,10 @@ target_compile_definitions(nexus-engine
     PUBLIC NXS_PROJECT_PATH="${PROJECT_ROOT}"
     PUBLIC NXS_ASSETS_DIR="${PROJECT_ROOT}/assets"
     PUBLIC NXS_ENGINE_ASSETS_DIR="${CMAKE_CURRENT_SOURCE_DIR}/assets"
+    PUBLIC NXS_GENERATED_ASSETS_DIR="${CMAKE_CURRENT_SOURCE_DIR}/gen"
+    PUBLIC $<$<CONFIG:Debug>:NXS_BUILD_DEBUG>
+    PUBLIC $<$<CONFIG:RelWithDebInfo>:NXS_BUILD_RELWITHDEBINFO>
+    PUBLIC $<$<CONFIG:Release>:NXS_BUILD_RELEASE>
     PRIVATE RMT_USE_OPENGL=1
 )
 

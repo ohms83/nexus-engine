@@ -1,5 +1,6 @@
 build/
 lib/
+gen/
 # FetchContent download directory
 _deps/
 
@@ -9,3 +10,16 @@ cmake-build-*
 
 # VS Code
 .vscode/
+
+# Patch files
+*.patch
+*.diff
+
+# ImGui
+imgui.ini
+imgui_editor_layout.ini
+
+# Temporary files
+*.tmp
+*.temp
+tmp/

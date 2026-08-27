@@ -7,16 +7,17 @@
 
 #include "Texture.h"
 #include "GraphicsConst.h"
-#include "Color.h"
 #include "Shader.h"
 #include "RenderingInterface.h"
-#include "nexus/io/Serializable.h"
 
-#include "nexus/core/Resource.h"
+#include "nexus/core/serialize/Serializeable.h"
+#include "nexus/core/resource/Resource.h"
+#include "nexus/core/Color.h"
 
 NXS_NAMESPACE
 {
-    class TextureManager;
+    class ResourceManager;
+
     //! A list of enumerations representing commonly used texture types.
     enum class TextureType
     {
@@ -48,15 +49,15 @@ NXS_NAMESPACE
         LightMap,
     };
 
-    class Material final : public Resource, public ISerializable
+    class Material final : public Resource, public ISerializeable
     {
     public:
         explicit Material(std::string path, uint32 resourceId);
 
-        Color3F ambient {};
-        Color3F diffuse {};
-        Color3F specular {};
-        Color3F emissive {};
+        Color3F ambient {0.2f, 0.2f, 0.2f};
+        Color3F diffuse {0.8f, 0.8f, 0.8f};
+        Color3F specular {Color3F::Black};
+        Color3F emissive {Color3F::Black};
         float shininess = 0;
         bool wireframe = false;
         bool cull = false;
@@ -90,19 +91,23 @@ NXS_NAMESPACE
             return m_shader;
         }
 
+        Ref<GpuProgram> GetGpuProgram() const
+        {
+            return m_shader ? m_shader->GetGpuProgram() : nullptr;
+        }
+
         //! Create a default shader based on the material properties.
-        void CreateDefaultShader(Ref<RenderingInterface> renderingInterface);
+        void CreateDefaultShader(ResourceManager& resourceManager);
 
         size_t TextureCount() const { return m_textures.size(); }
 
         // Serialization
         VariantData Serialize() const override;
-        void Deserialize(const VariantData& data) override;
+        MAYBE_UNUSED bool Deserialize(const VariantData& data) override;
 
-        void Use();
+        Ref<GpuProgram> Use();
 
-        // Resolve referenced textures and optionally shaders by using resource managers.
-        void Resolve(class TextureManager& textureManager, RenderingInterface* renderingInterface = nullptr);
+        void Resolve(class ResourceManager& resourceManager);
 
         // Accessors for texture metadata
         NODISCARD std::string GetTexturePath(uint32 slot) const;
@@ -110,8 +115,6 @@ NXS_NAMESPACE
         NODISCARD TextureType GetTextureType(uint32 slot) const;
 
     private:
-        void DetermineShaderPaths(std::string& vertexShader, std::string& fragmentShader);
-
         Ref<Shader> m_shader;
         std::string m_shaderPath;
 

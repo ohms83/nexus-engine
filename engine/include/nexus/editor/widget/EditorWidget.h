@@ -15,6 +15,8 @@ NXS_NAMESPACE
     class IWidgetOwner
     {
     public:
+        virtual ~IWidgetOwner() = default;
+        virtual WindowContext GetWindowContext() const = 0;
         virtual void AddWidget(Ref<class EditorWidget> widget) = 0;
     
     protected:

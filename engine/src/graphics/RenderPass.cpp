@@ -1,12 +1,89 @@
-#include "nexus/graphics/RenderPass.h"
-#include "nexus/graphics/RenderSystem.h"
-#include "nexus/io/Serializer.h"
+#include "graphics/RenderPass.h"
+#include "graphics/RenderSystem.h"
+#include "core/serialize/Serializer.h"
 
 USING_NAMESPACE_NXS;
 
+// Shader sources
+static const char* s_depthVertexShader = R"(
+#version 330 core
+layout (location = 0) in vec3 aPos;
+
+uniform mat4 _Model;
+uniform mat4 _View;
+uniform mat4 _Projection;
+
+void main()
+{
+    gl_Position = _Projection * _View * _Model * vec4(aPos, 1.0);
+    gl_Position.z += 0.1;
+}
+)";
+
+static const char* s_depthFragmentShader = R"(
+#version 330 core
+void main()
+{
+    // Do nothing. This shader outputs no color (gl_FragColor is not written), 
+    // but the depth value determined by gl_Position is still written to the depth buffer.
+}
+)";
+
+NXS_NAMESPACE
+{
+    RenderPass DepthPrepass = RenderPassBuilder::Begin("Depth Prepass", RENDER_PASS_DEPTH_FILL)
+        .ClearFlags(ClearFlags::Depth)
+        .ClearDepth(1.0f)
+        .DepthTest(true)
+        .DepthWrite(true)
+        .GlobalShaderName("_DepthShader")
+        .GlobalShaderSources({
+            { GpuProgram::Type::Vertex, s_depthVertexShader },
+            { GpuProgram::Type::Fragment, s_depthFragmentShader }
+        })
+        .FilterType("opaque")
+        .Build();
+
+    RenderPass OpaquePass = RenderPassBuilder::Begin("Opaque Pass", RENDER_PASS_OPAQUE)
+        .ClearFlags(ClearFlags::Color | ClearFlags::Depth)
+        .ClearColor(Color3F(0x303030ff))
+        .ClearDepth(1.0f)
+        .DepthTest(true)
+        .DepthWrite(true)
+        .GlobalShader(nullptr) // Use material shaders
+        .FilterType("opaque")
+        .Build();
+
+    RenderPass AlphaPass = RenderPassBuilder::Begin("Alpha Pass", RENDER_PASS_ALPHA)
+        .ClearFlags(ClearFlags::None)
+        .DepthTest(true)
+        .DepthWrite(false)
+        .GlobalShader(nullptr) // Use material shaders
+        .FilterType("alpha")
+        .Build();
+
+    RenderPass OverlayPass = RenderPassBuilder::Begin("Overlay Pass", RENDER_PASS_OVERLAY)
+        .ClearFlags(ClearFlags::None)
+        .DepthTest(false)
+        .DepthWrite(false)
+        .GlobalShader(nullptr) // Use material shaders
+        .FilterType("overlay")
+        .Build();
+}
+
+void RenderPass::ReleaseResources()
+{
+    pipelineState.globalShader = nullptr;
+}
+
 void RenderPass::Begin(RenderSystem& rs) const
 {
+    // Pipeline state using RenderSystem caching to avoid redundant state flips
+    // NOTE: Pipeline state should be applied before anything.
+    rs.ApplyPipelineState(pipelineState);
+
     auto renderInterface = rs.GetRenderInterface();
+    renderInterface->DebugMarker(name);
     // Offscreen target is bound by the caller (SceneRenderer/RenderSystem).
     // Clear
     auto hasFlag = [](ClearFlags flags, ClearFlags f){ return (UINT_CAST(flags) & UINT_CAST(f)) != 0; };
@@ -27,11 +104,8 @@ void RenderPass::Begin(RenderSystem& rs) const
         // Stencil: Not supported yet by the generic interface. Add later if needed.
     }
 
-    // Pipeline state using RenderSystem caching to avoid redundant state flips
-    rs.ApplyPipelineState(pipelineState);
-
     // Set global shader override via RenderSystem to allow caching
-    rs.SetGlobalShader(globalShader ? globalShader->GetGpuProgram() : nullptr);
+    rs.SetGlobalShader(pipelineState.globalShader ? pipelineState.globalShader : nullptr);
 
     // Hook
     if (onBegin) onBegin(rs);
@@ -76,7 +150,12 @@ VariantData RenderPass::Serialize() const
     data["pipelineState"] = pipeline;
 
     // Shader
-    data["globalShader"] = globalShader ? globalShader->GetPath() : std::string();
+    data["globalShaderName"] = globalShaderName;
+    VariantData::Map shaderData;
+    shaderData["vertex"] = globalShaderSources.find(GpuProgram::Type::Vertex) != globalShaderSources.end() ? globalShaderSources.at(GpuProgram::Type::Vertex) : "";
+    shaderData["fragment"] = globalShaderSources.find(GpuProgram::Type::Fragment) != globalShaderSources.end() ? globalShaderSources.at(GpuProgram::Type::Fragment) : "";
+    shaderData["geometry"] = globalShaderSources.find(GpuProgram::Type::Geometry) != globalShaderSources.end() ? globalShaderSources.at(GpuProgram::Type::Geometry) : "";
+    data["globalShader"] = shaderData;
 
     // Attachments
     VariantData::Array attachArr;
@@ -102,7 +181,7 @@ VariantData RenderPass::Serialize() const
     return data;
 }
 
-void RenderPass::Deserialize(const VariantData& data)
+bool RenderPass::Deserialize(const VariantData& data)
 {
     name = data["name"].GetString();
     priority = UINT_CAST(data["priority"].GetInt());
@@ -127,15 +206,13 @@ void RenderPass::Deserialize(const VariantData& data)
     pipelineState.polygonMode = CAST<PolygonMode>(p.at("polygonMode").GetInt());
     pipelineState.cullMode = CAST<PolygonFacing>(p.at("cullMode").GetInt());
     pipelineState.frontFace = CAST<FrontFace>(p.at("frontFace").GetInt());
-
-    // global shader path, do not try to auto-load here (resource managers/callers may handle)
-    const auto shaderPath = data["globalShader"].GetString();
-    if (!shaderPath.empty())
-    {
-        // Defer loading to the user: store path in a temporary shader
-        // For now, we set globalShader to nullptr and leave resolution to the caller.
-        globalShader = nullptr;
-    }
+    
+    // Shader
+    globalShaderName = data["globalShaderName"].GetString();
+    const auto& s = data["globalShader"].GetMap();
+    globalShaderSources[GpuProgram::Type::Vertex] = s.at("vertex").GetString();
+    globalShaderSources[GpuProgram::Type::Fragment] = s.at("fragment").GetString();
+    globalShaderSources[GpuProgram::Type::Geometry] = s.at("geometry").GetString();
 
     // attachments
     attachments.clear();
@@ -168,5 +245,53 @@ void RenderPass::Deserialize(const VariantData& data)
 
     // Restore filter based on filterType preset
     SetFilterType(filterType);
+    return true;
 }
 
+void RenderPass::Resolve(RenderingInterface &renderingInterface)
+{
+    if (IsResolved()) return;
+
+    if (!globalShaderSources.empty())
+    {    
+        Hasher hasher;
+        auto shader = std::make_shared<Shader>(globalShaderName, hasher.Hash32(name));
+        if (shader->CompileFromSource(renderingInterface,
+            globalShaderSources[GpuProgram::Type::Vertex],
+            globalShaderSources[GpuProgram::Type::Fragment],
+            globalShaderSources[GpuProgram::Type::Geometry]))
+        {
+            pipelineState.globalShader = shader->GetGpuProgram();
+        }
+    }
+}
+
+void RenderPass::SetFilterType(std::string type)
+{
+    filterType = std::move(type);
+    if (filterType == "opaque")
+    {
+        filter = [](const RenderCommand& cmd) {
+            return cmd.material && cmd.material->blendMode == BlendMode::None;
+        };
+    }
+    else if (filterType == "alpha")
+    {
+        filter = [](const RenderCommand& cmd) {
+            return cmd.material && cmd.material->blendMode != BlendMode::None;
+        };
+    }
+    else if (filterType == "overlay")
+    {
+        filter = [](const RenderCommand& cmd) {
+            return cmd.material &&
+                   cmd.material->blendMode == BlendMode::None &&
+                   !cmd.material->depthWrite &&
+                   cmd.material->depthFunction == DepthFunction::Always;
+        };
+    }
+    else // "all" or unknown
+    {
+        filter = nullptr;
+    }
+}

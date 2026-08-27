@@ -2,15 +2,12 @@
 // Created by nutta on 8/5/2025.
 //
 #include "gtest/gtest.h"
+#include "nexus/Nexus.h"
+
 #include <fstream>
 #include <filesystem>
 #include <string>
 #include <optional>
-
-// Include your IniParser class and StrUtil
-#include "nexus/core/StdOutLogger.h"
-#include "nexus/io/IniParser.h"
-#include "nexus/core/StringUtil.h"
 
 USING_NAMESPACE_NXS;
 

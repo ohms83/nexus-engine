@@ -17,6 +17,7 @@
 #include <queue>
 
 #include "core/task/FutureWaitingTask.h"
+#include "core/resource/ResourceManager.h"
 
 USING_NAMESPACE_NXS;
 
@@ -55,14 +56,16 @@ namespace
  * @param taskScheduler
  * @return A list of asynchronous resource loading results.
  */
-static std::queue<Ref<IResourceLoader::LoadResult>> PreloadTextures(const aiScene& scene, const std::filesystem::path directory, TextureManager& manager, TaskScheduler& taskScheduler)
+static std::queue<Ref<IResourceLoader::LoadResult>> PreloadTextures(const aiScene& scene, const std::filesystem::path directory, ResourceManager* manager, TaskScheduler& taskScheduler)
 {
     std::queue<Ref<IResourceLoader::LoadResult>> result;
     for (int i = 0; i < scene.mNumTextures; i++)
     {
         const aiTexture* texture = scene.mTextures[i];
         auto texturePath = directory / texture->mFilename.C_Str();
-        result.push(manager.RequestResourceAsync(texturePath.string(), taskScheduler));
+        auto loadResult = manager->GetResourceAsync(typeid(Texture), texturePath.string(), taskScheduler);
+
+        if (loadResult) result.push(loadResult);
     }
 
     std::vector<aiTextureType> aiTextures = {};
@@ -83,7 +86,9 @@ static std::queue<Ref<IResourceLoader::LoadResult>> PreloadTextures(const aiScen
                 aiString path;
                 material->GetTexture(aiTexture, j, &path);
                 auto texturePath = directory / path.C_Str();
-                result.push(manager.RequestResourceAsync(texturePath.string(), taskScheduler));
+                auto loadResult = manager->GetResourceAsync(typeid(Texture), texturePath.string(), taskScheduler);
+
+                if (loadResult) result.push(loadResult);
             }
         }
     }
@@ -92,13 +97,11 @@ static std::queue<Ref<IResourceLoader::LoadResult>> PreloadTextures(const aiScen
 
 ModelLoader::ModelLoader(
     const Ref<RenderingInterface>& renderingInterface,
-    const Ref<TextureManager>& textureManager,
-    const Ref<MaterialManager>& materialManager)
+    const Ref<ResourceManager>& resourceManager)
+    : m_renderingInterface(renderingInterface)
+    , m_resourceManager(resourceManager)
 {
-    NXS_ASSERT(renderingInterface && textureManager && materialManager);
-    m_renderingInterface = renderingInterface;
-    m_textureManager = textureManager;
-    m_materialManager = materialManager;
+    NXS_ASSERT(renderingInterface && resourceManager);
 }
 
 Ref<Resource> ModelLoader::Load(const std::string &path, uint32 id)
@@ -122,13 +125,14 @@ Ref<Resource> ModelLoader::Load(const std::string &path, uint32 id)
         return nullptr;
     }
 
+    LOG_DEBUG(LogModelLoader, std::format("Finished parsing model: {}", path));
+
     // Store the directory path of the model file for texture loading
     const auto directory = std::filesystem::path(path).parent_path();
     auto model = std::make_shared<Model>(path, id);
 
     // Process Assimp's root node recursively
     ProcessNode(model, scene->mRootNode, scene, directory);
-    ComputeBoundingVolume(model);
 
     LOG_INFO(LogModelLoader, "Model loaded successfully!!");
     LOG_INFO(LogModelLoader, model->DumpStats());
@@ -143,11 +147,11 @@ Ref<IResourceLoader::LoadResult> ModelLoader::LoadAsync(const std::string& path,
     result->path = path;
     result->status = LoadResult::Status::Loading;
 
-    std::future<Ref<aiScene>> future = std::async(std::launch::async, [path, directory, result, &scheduler, textureManager = m_textureManager]
+    std::future<Ref<aiScene>> future = std::async(std::launch::async, [path, directory, result, &scheduler, resourceManager = m_resourceManager.get()]
     {
-        if (!textureManager)
+        if (!resourceManager)
         {
-            result->error = std::format("Failed to load model from file: {}. Reason: Invalid texture manager", path);
+            result->error = std::format("Failed to load model from file: {}. Reason: Invalid resource manager", path);
             result->status = LoadResult::Status::Failed;
             throw std::runtime_error(result->error);
         }
@@ -174,10 +178,17 @@ Ref<IResourceLoader::LoadResult> ModelLoader::LoadAsync(const std::string& path,
             throw std::runtime_error(result->error);
         }
 
-        auto preloadedTextures = PreloadTextures(*scene, directory, *textureManager, scheduler);
+        auto preloadedTextures = PreloadTextures(*scene, directory, resourceManager, scheduler);
         while (!preloadedTextures.empty())
         {
-            switch (const auto loadResult = preloadedTextures.front(); loadResult->status)
+            const auto loadResult = preloadedTextures.front();
+
+            if (!loadResult) {
+                preloadedTextures.pop();
+                continue;
+            }
+
+            switch (loadResult->status)
             {
             case LoadResult::Status::Loading:
                 std::this_thread::sleep_for(std::chrono::milliseconds(10));
@@ -194,7 +205,6 @@ Ref<IResourceLoader::LoadResult> ModelLoader::LoadAsync(const std::string& path,
         }
         return scene;
     });
-
     const auto waitingTask = std::make_shared<FutureWaitingTask<Ref<aiScene>>>(std::move(future), [this, onFinishCallback, path, directory, id, result](Ref<aiScene> scene)
     {
         if (!scene)
@@ -203,13 +213,11 @@ Ref<IResourceLoader::LoadResult> ModelLoader::LoadAsync(const std::string& path,
             onFinishCallback(nullptr);
             return;
         }
-
         // Store the directory path of the model file for texture loading
         const auto model = std::make_shared<Model>(path, id);
 
         // Process Assimp's root node recursively
         ProcessNode(model, scene->mRootNode, scene.get(), directory);
-        ComputeBoundingVolume(model);
 
         result->status = LoadResult::Status::Ready;
         result->resource = model;
@@ -218,7 +226,6 @@ Ref<IResourceLoader::LoadResult> ModelLoader::LoadAsync(const std::string& path,
     {
         LOG_ERROR(LogModelLoader, error);
     });
-
     scheduler.ScheduleTask(waitingTask);
     return result;
 }
@@ -234,6 +241,7 @@ void ModelLoader::ProcessNode(const Ref<Model>& model, const aiNode* node, const
     for (unsigned int i = 0; i < node->mNumChildren; i++) {
         ProcessNode(model, node->mChildren[i], scene, directory);
     }
+    model->ComputeBounds();
 }
 
 void ModelLoader::ProcessMesh(const Ref<Model>& model, const aiMesh* mesh, const aiScene* scene, const std::filesystem::path& directory) const
@@ -313,6 +321,7 @@ void ModelLoader::ProcessMesh(const Ref<Model>& model, const aiMesh* mesh, const
     ProcessMaterial(newMesh, mesh, scene, directory);
 
     model->AddMesh(newMesh);
+    LOG_DEBUG(LogModelLoader, std::format("Finished processing mesh: {}", mesh->mName.C_Str()));
 }
 
 // ReSharper disable once CppMemberFunctionMayBeStatic
@@ -323,14 +332,13 @@ void ModelLoader::ProcessMaterial(const Ref<Mesh>& newMesh, const aiMesh* mesh, 
     const aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
     const std::string materialName = material->GetName().C_Str();
 
-    if (m_materialManager->IsExist(materialName))
+    if (m_resourceManager->IsExist(typeid(Material), materialName))
     {
-        newMesh->SetMaterial(m_materialManager->Get(materialName));
+        newMesh->SetMaterial(m_resourceManager->Get<Material>(materialName));
         return;
     }
 
-    const Ref<Material> newMat = m_materialManager->Create(materialName);
-
+    const Ref<Material> newMat = m_resourceManager->Create<Material>(materialName);
 #define READ_BOOL_PROPERTY(key, property) \
     if (int32 value; material->Get(key, value) == AI_SUCCESS) { \
         newMat->property = value; \
@@ -370,7 +378,7 @@ void ModelLoader::ProcessMaterial(const Ref<Mesh>& newMesh, const aiMesh* mesh, 
     ProcessTextures(newMat, material, directory);
 
     if (newMat->GetShader() == nullptr) {
-        newMat->CreateDefaultShader(m_renderingInterface);
+        newMat->CreateDefaultShader(*m_resourceManager);
     }
     newMesh->SetMaterial(newMat);
 }
@@ -387,75 +395,9 @@ void ModelLoader::ProcessTextures(const Ref<Material>& newMat, const aiMaterial*
             material->GetTexture(aiType, i, &path);
 
             const std::string texturePath = (directory / path.C_Str()).string();
-            if (const auto texture = m_textureManager->Get(texturePath)) {
+            if (const auto texture = m_resourceManager->Get<Texture>(texturePath)) {
                 newMat->AddTexture(texture, textureType);
             }
         }
     }
-}
-
-void ModelLoader::ComputeBoundingVolume(const Ref<Model>& model)
-{
-#if 0
-    glm::vec3 min{FLT_MAX}, max{-FLT_MAX};
-    for (auto& mesh : model->GetMeshes())
-    {
-        // Mesh's bounding sphere
-        Sphere sphere;
-        // Mesh's min and max bounding box's extent.
-        glm::vec3 min_v{FLT_MAX}, max_v{-FLT_MAX};
-        const auto vertexBuffer = mesh->GetVertexBuffer();
-        const auto numVertex = vertexBuffer->VertexCount();
-
-        // Find AABB
-        for (auto vertexItr = vertexBuffer->begin<Vertex>(); vertexItr != vertexBuffer->end<Vertex>(); ++vertexItr)
-        {
-            const auto& pos = (*vertexItr).position;
-            min_v = glm::min(min_v, pos);
-            max_v = glm::max(max_v, pos);
-        }
-
-        sphere.center = (max_v + min_v) / 2.f;
-        mesh->SetBox(Box(sphere.center, max_v - sphere.center));
-        
-        // Refine the search by re-iterate every vertex again to find the tighter fit sphere
-        float radius = 0;
-        for (auto vertexItr = vertexBuffer->begin<Vertex>(); vertexItr != vertexBuffer->end<Vertex>(); ++vertexItr)
-        {
-            const auto& vertex = *vertexItr;
-            radius = std::max(radius, glm::length(sphere.center - vertex.position));
-        }
-        sphere.radius = radius;
-        mesh->SetSphere(sphere);
-        
-        LOG_DEBUG(LogModelLoader, std::format("Mesh Name={} Bounding Sphere Center=({}, {}, {}) Radius={}",
-            mesh->GetName(), sphere.center.x, sphere.center.y, sphere.center.z, sphere.radius
-        ));
-
-        min = glm::min(min_v, min);
-        max = glm::max(max_v, max);
-    }
-
-    glm::vec3 center = (max + min) / 2.f;
-    LOG_DEBUG(LogModelLoader, std::format("center({}, {}, {}) max({}, {}, {}) min({}, {}, {})",
-        center.x, center.y, center.z,
-        max.x, max.y, max.z,
-        min.x, min.y, min.z
-    ));
-    model->SetBoundingBox(center, max - center);
-
-    float radius = 0;
-    for (const auto& mesh : model->GetMeshes())
-    {
-        const auto vertexBuffer = mesh->GetVertexBuffer();
-        for (auto vertexItr = vertexBuffer->begin<Vertex>(); vertexItr != vertexBuffer->end<Vertex>(); ++vertexItr)
-        {
-            const auto& vertex = *vertexItr;
-            radius = std::max(radius, glm::length(center - vertex.position));
-        }
-    }
-    model->SetBoundingSphere(center, radius);
-#else
-    model->ComputeBounds();
-#endif
 }

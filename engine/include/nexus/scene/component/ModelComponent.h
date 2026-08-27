@@ -3,45 +3,69 @@
 #include "nexus/NxsDefine.h"
 #include "nexus/graphics/Model.h"
 #include "nexus/ecs/Component.h"
+#include "nexus/core/resource/ResourceManager.h"
+
 
 NXS_NAMESPACE
 {
-    struct ModelComponent : public IComponent
+    // TODO: Deprecate this in favor of MeshComponent
+    class ModelComponent : public IComponent
     {
+    public:
+        using Super = IComponent;
+
         IMPLEMENT_COMPONENT(ModelComponent);
         
         void AcceptReflector(IReflector& reflector) override
         {
-            auto path = model->GetPath();
-
-            reflector.ChangeCategory("Model");
-            reflector.VisitPropertyWithFeedback("Model Path", typeid(std::string), (void*)(path.c_str()), [&path](void* newValue) {
+            reflector.SetMarker("Model");
+            if (reflector.VisitString("Model Path", modelPath)) {
                 // TODO:
-            });
-            reflector.VisitProperty("Show Bounding Sphere", typeid(bool), &showBoundingSphere);
-            reflector.VisitProperty("Show Bounding Box", typeid(bool), &showBoundingBox);
+            };
+            reflector.VisitBool("Show Bounding Sphere", showBoundingSphere);
+            reflector.VisitBool("Show Bounding Box", showBoundingBox);
         };
 
-        Ref<Model> model;
-        bool visible = true;
-        bool showBoundingBox = false;
-        bool showBoundingSphere = false;
-    };
-
-    struct MeshComponent : public IComponent
-    {
-        IMPLEMENT_COMPONENT(MeshComponent);
-
-        void AcceptReflector(IReflector& reflector)
+        VariantData Serialize() const override
         {
-            reflector.ChangeCategory("Mesh");
-            reflector.VisitProperty("Show Bounding Sphere", typeid(bool), &showBoundingSphere);
-            reflector.VisitProperty("Show Bounding Box", typeid(bool), &showBoundingBox);
+            auto data = Super::Serialize();
+            data["modelPath"] = modelPath;
+            data["showBoundingBox"] = showBoundingBox;
+            data["showBoundingSphere"] = showBoundingSphere;
+            return data;
         }
 
-        Ref<Mesh> mesh;
+        MAYBE_UNUSED bool Deserialize(const VariantData& data) override
+        {
+            if (!Super::Deserialize(data)) return false;
+            modelPath = data["modelPath"].GetString();
+            showBoundingBox = data["showBoundingBox"].GetBool();
+            showBoundingSphere = data["showBoundingSphere"].GetBool();
+            return true;
+        }
+
+        void Resolve(ResourceManager& resourceManager, const RenderingInterface& renderingInterface) override
+        {
+            m_model = resourceManager.Get<Model>(modelPath);
+        }
+
+        Ref<Model> GetModel() const
+        {
+            return m_model;
+        }
+
+        void SetModel(Ref<Model> model)
+        {
+            m_model = model;
+            modelPath = model->GetPath();
+        }
+
+        std::string modelPath;
         bool visible = true;
         bool showBoundingBox = false;
         bool showBoundingSphere = false;
+
+    private:
+        Ref<Model> m_model;
     };
 }

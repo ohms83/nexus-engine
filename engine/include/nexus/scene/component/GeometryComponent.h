@@ -8,14 +8,34 @@ NXS_NAMESPACE
 {
     struct BoxComponent : IComponent
     {
+        using Super = IComponent;
+
         IMPLEMENT_COMPONENT(BoxComponent);
 
         void AcceptReflector(IReflector& reflector) override
         {
-            reflector.ChangeCategory("Box Component");
-            reflector.VisitProperty("Center", typeid(glm::vec3), &box.center);
-            reflector.VisitProperty("Extent", typeid(glm::vec3), &box.extent);
-            reflector.VisitProperty("Debug Draw", typeid(float), &debugDraw);
+            reflector.SetMarker("Box Component");
+            reflector.VisitVec3("Center", box.center);
+            reflector.VisitVec3("Extent", box.extent);
+            reflector.VisitBool("Debug Draw", debugDraw);
+        }
+
+        VariantData Serialize() const override
+        {
+            auto data = Super::Serialize();
+            data["center"] = box.center;
+            data["extent"] = box.extent;
+            data["debugDraw"] = debugDraw;
+            return data;
+        }
+
+        MAYBE_UNUSED bool Deserialize(const VariantData& data) override
+        {
+            if (!Super::Deserialize(data)) return false;
+            box.center = data["center"].GetVec3();
+            box.extent = data["extent"].GetVec3();
+            debugDraw = data["debugDraw"].GetBool();
+            return true;
         }
 
         Box box;
@@ -24,14 +44,32 @@ NXS_NAMESPACE
 
     struct SphereComponent : IComponent
     {
+        using Super = IComponent;
+
         IMPLEMENT_COMPONENT(SphereComponent);
 
         void AcceptReflector(IReflector& reflector) override
         {
-            reflector.ChangeCategory("Sphere Component");
-            reflector.VisitProperty("Center", typeid(glm::vec3), &sphere.center);
-            reflector.VisitProperty("Radius", typeid(float), &sphere.radius);
-            reflector.VisitProperty("Debug Draw", typeid(float), &debugDraw);
+            reflector.SetMarker("Sphere Component");
+            reflector.VisitVec3("Center", sphere.center);
+            reflector.VisitFloat("Radius", sphere.radius);
+            reflector.VisitBool("Debug Draw", debugDraw);
+        }
+
+        VariantData Serialize() const override
+        {
+            auto data = Super::Serialize();
+            data["center"] = sphere.center;
+            data["radius"] = sphere.radius;
+            return data;
+        }
+
+        MAYBE_UNUSED bool Deserialize(const VariantData& data) override
+        {
+            if (!Super::Deserialize(data)) return false;
+            sphere.center = data["center"].GetVec3();
+            sphere.radius = data["radius"].GetFloat();
+            return true;
         }
 
         Sphere sphere;

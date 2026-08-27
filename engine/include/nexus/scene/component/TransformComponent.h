@@ -12,12 +12,28 @@ NXS_NAMESPACE
 {
     struct PositionComponent : public IComponent
     {
+        using Super = IComponent;
+
         IMPLEMENT_COMPONENT(PositionComponent);
 
         void AcceptReflector(IReflector& reflector) override
         {
-            reflector.ChangeCategory("Transform");
-            reflector.VisitProperty("Position", typeid(glm::vec3), &value);
+            reflector.SetMarker("Transform");
+            reflector.VisitVec3("Position", value);
+        }
+        
+        VariantData Serialize() const override
+        {
+            auto data = Super::Serialize();
+            data["position"] = value;
+            return data;
+        }
+
+        MAYBE_UNUSED bool Deserialize(const VariantData& data) override
+        {
+            if (!Super::Deserialize(data)) return false;
+            value = data["position"].GetVec3();
+            return true;
         }
 
         glm::vec3 value;
@@ -39,15 +55,32 @@ NXS_NAMESPACE
      */
     struct OrientationComponent : public IComponent
     {
+        using Super = IComponent;
+
         IMPLEMENT_COMPONENT(OrientationComponent);
 
         void AcceptReflector(IReflector& reflector) override
         {
-            reflector.ChangeCategory("Transform");
-            reflector.VisitPropertyWithFeedback("Orient", typeid(glm::vec3), &euler, [this](void* new_value) {
+            reflector.SetMarker("Transform");
+            if (reflector.VisitVec3("Orient", euler)) {
                 const auto radians = glm::radians(euler);
                 quat = glm::quat(radians);
-            });
+            };
+        }
+
+        VariantData Serialize() const override
+        {
+            auto data = Super::Serialize();
+            data["orient"] = euler;
+            return data;
+        }
+
+        MAYBE_UNUSED bool Deserialize(const VariantData& data) override
+        {
+            if (!Super::Deserialize(data)) return false;
+            euler = data["orient"].GetVec3();
+            quat = glm::quat(glm::radians(euler));
+            return true;
         }
 
         /// @brief The Quaternion (main source of truth) used for all transformations.
@@ -125,12 +158,28 @@ NXS_NAMESPACE
 
     struct ScaleComponent : public IComponent
     {
+        using Super = IComponent;
+
         IMPLEMENT_COMPONENT(ScaleComponent);
 
         void AcceptReflector(IReflector& reflector) override
         {
-            reflector.ChangeCategory("Transform");
-            reflector.VisitProperty("Scale", typeid(glm::vec3), &value);
+            reflector.SetMarker("Transform");
+            reflector.VisitVec3("Scale", value);
+        }
+
+        VariantData Serialize() const override
+        {
+            auto data = Super::Serialize();
+            data["scale"] = value;
+            return data;
+        }
+
+        MAYBE_UNUSED bool Deserialize(const VariantData& data) override
+        {
+            if (!Super::Deserialize(data)) return false;
+            value = data["scale"].GetVec3();
+            return true;
         }
 
         glm::vec3 value {1, 1, 1};
@@ -138,13 +187,34 @@ NXS_NAMESPACE
 
     struct MoveComponent : public IComponent
     {
+        using Super = IComponent;
+
         IMPLEMENT_COMPONENT(MoveComponent);
 
         void AcceptReflector(IReflector& reflector) override
         {
-            reflector.ChangeCategory("Movement");
-            reflector.VisitReadOnlyProperty("Direction", typeid(glm::vec3), &direction);
-            reflector.VisitProperty("Speed", typeid(float), &speed);
+            reflector.SetMarker("Movement");
+            reflector.VisitFloat("Speed", speed);
+
+            reflector.SetReadOnlyFlag(true);
+            reflector.VisitVec3("Direction", direction);
+            reflector.SetReadOnlyFlag(false);
+        }
+
+        VariantData Serialize() const override
+        {
+            auto data = Super::Serialize();
+            data["direction"] = direction;
+            data["speed"] = speed;
+            return data;
+        }
+
+        MAYBE_UNUSED bool Deserialize(const VariantData& data) override
+        {
+            if (!Super::Deserialize(data)) return false;
+            direction = data["direction"].GetVec3();
+            speed = data["speed"].GetFloat();
+            return true;
         }
 
         glm::vec3 direction;
@@ -153,13 +223,34 @@ NXS_NAMESPACE
 
     struct TurningComponent : public IComponent
     {
+        using Super = IComponent;
+
         IMPLEMENT_COMPONENT(TurningComponent);
         
         void AcceptReflector(IReflector& reflector) override
         {
-            reflector.ChangeCategory("Turning");
-            reflector.VisitReadOnlyProperty("Axis", typeid(glm::vec3), &axis);
-            reflector.VisitProperty("Degree", typeid(float), &degree);
+            reflector.SetMarker("Turning");
+            reflector.VisitFloat("Degree", degree);
+
+            reflector.SetReadOnlyFlag(true);
+            reflector.VisitVec3("Axis", axis);
+            reflector.SetReadOnlyFlag(false);
+        }
+
+        VariantData Serialize() const override
+        {
+            auto data = Super::Serialize();
+            data["axis"] = axis;
+            data["degree"] = degree;
+            return data;
+        }
+
+        MAYBE_UNUSED bool Deserialize(const VariantData& data) override
+        {
+            if (!Super::Deserialize(data)) return false;
+            axis = data["axis"].GetVec3();
+            degree = data["degree"].GetFloat();
+            return true;
         }
 
         //! Rotation axis

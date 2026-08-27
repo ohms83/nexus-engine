@@ -14,13 +14,16 @@ NXS_NAMESPACE
         extern const float PI;
 
         template <typename T>
-        constexpr bool is_vector = false;
+        struct is_vector : std::false_type {};
+
         template <>
-        constexpr bool is_vector<glm::vec2> = true;
+        struct is_vector<glm::vec2> : std::true_type {};
+
         template <>
-        constexpr bool is_vector<glm::vec3> = true;
+        struct is_vector<glm::vec3> : std::true_type {};
+
         template <>
-        constexpr bool is_vector<glm::vec4> = true;
+        struct is_vector<glm::vec4> : std::true_type {};
 
         template <typename T>
         requires std::is_floating_point_v<T>
@@ -30,7 +33,7 @@ NXS_NAMESPACE
         }
 
         template <typename T>
-        requires is_vector<T> ||
+        requires is_vector<T>::value ||
             std::derived_from<T, glm::vec2> || std::derived_from<T, glm::vec3> ||
             std::derived_from<T, glm::vec4>
         T VLerp(const T& a, const T& b, float t)

@@ -13,7 +13,7 @@ ConsoleMenuItem::ConsoleMenuItem(
     Ref<Console> widget,
     IWidgetOwner& owner,
     class LogDispatcher& logger)
-    : WidgetMenuItem(group, name, desc, shortcut, widget, owner)
+    : Super(group, name, desc, shortcut, widget, owner)
 {
     logger.AddLogger(PTR_CAST<ILogger>(widget));
 }

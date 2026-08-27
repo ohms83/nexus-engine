@@ -8,8 +8,6 @@
 #include "time/TimerManager.h"
 #include "Remotery.h"
 
-static uint32_t s_runningId = 1;
-
 USING_NAMESPACE_NXS;
 
 TaskScheduler::TaskScheduler(const Ref<ITimeSource>& timeSource)
@@ -20,6 +18,7 @@ TaskScheduler::TaskScheduler(const Ref<ITimeSource>& timeSource)
         taskGroup.taskFinishedCallback.connect([this](Ref<IRunnable> task) {
             OnTaskTerminated(task);
         });
+        m_pendingTasks[CAST<UpdatePhase>(i)] = TaskGroup();
     }
 }
 
@@ -27,29 +26,29 @@ TaskID TaskScheduler::ScheduleTask(Ref<IRunnable> task, UpdatePhase phase, TaskQ
 {
     if (IsShuttingDown()) return 0;
 
-    std::lock_guard<std::mutex> lock(m_mutex);
-    const TaskID id = s_runningId++;
-    m_tasks.emplace_back(id, task);
-    m_taskGroups[phase].Add(task);
+    std::lock_guard<std::mutex> lock(m_pendingMutex);
+    const TaskID id = R_CAST<TaskID>(task.get());
+    m_pendingTasks[phase].Add(task);
     return id;
 }
 
 void TaskScheduler::StopTask(TaskID id)
 {
     std::lock_guard<std::mutex> lock(m_mutex);
-    const auto taskItr = std::ranges::find_if(m_tasks, [id](const TaskData& taskData)
-    {
-        return taskData.id == id;
-    });
-    if (taskItr == m_tasks.end()) return;
-
-    auto task = taskItr->action;
+    
     for (auto& keyValue : m_taskGroups)
     {
-        keyValue.second.Remove(taskItr->action);
+        keyValue.second.RemoveIf([id](Ref<IRunnable> task) {
+            return R_CAST<TaskID>(task.get()) == id;
+        });
     }
-
-    m_tasks.erase(taskItr);
+    
+    for (auto& keyValue : m_pendingTasks)
+    {
+        keyValue.second.RemoveIf([id](Ref<IRunnable> task) {
+            return R_CAST<TaskID>(task.get()) == id;
+        });
+    }
 }
 
 void TaskScheduler::PreUpdate()
@@ -70,6 +69,19 @@ void TaskScheduler::PostUpdate()
     UpdateTaskGroup(UpdatePhase::PostUpdate);
 }
 
+void TaskScheduler::TransferPendingTasks()
+{
+    // Lock both mutexes simultaneously without deadlock risk
+    std::scoped_lock lock(m_pendingMutex, m_mutex);
+    
+    // Safely transfer from m_pendingTasks to m_taskGroups
+    for (auto& [phase, tasks] : m_pendingTasks)
+    {
+        m_taskGroups[phase].Merge(tasks);
+        m_pendingTasks[phase].Clear();
+    }
+}
+
 void TaskScheduler::UpdateTaskGroup(UpdatePhase phase)
 {
     std::lock_guard<std::mutex> lock(m_mutex);
@@ -78,23 +90,34 @@ void TaskScheduler::UpdateTaskGroup(UpdatePhase phase)
 
 void TaskScheduler::OnTaskTerminated(Ref<IRunnable> task)
 {
-    const auto taskItr = std::ranges::find_if(m_tasks, [task](const TaskData& taskData)
-    {
-        return taskData.action == task;
-    });
-    if (taskItr == m_tasks.end()) return;
-    m_tasks.erase(taskItr);
 }
 
-TaskList TaskScheduler::GetAllTasks() const
+TaskList TaskScheduler::GetAllTasks(bool includePending) const
 {
     TaskList tasks;
-    for (auto& taskData : m_tasks) tasks.push_back(taskData.action);
+    for (auto& keyValue : m_taskGroups) {
+        tasks.insert(tasks.end(), keyValue.second.GetTasks().begin(), keyValue.second.GetTasks().end());
+    }
+    if (includePending)
+    {
+        for (auto& keyValue : m_pendingTasks) {
+            tasks.insert(tasks.end(), keyValue.second.GetTasks().begin(), keyValue.second.GetTasks().end());
+        }
+    }
     return tasks;
 }
 
-const TaskList& TaskScheduler::GetAllTasksFromGroup(UpdatePhase phase) const
+TaskList TaskScheduler::GetAllTasksFromGroup(UpdatePhase phase, bool includePending) const
 {
+    TaskList tasks;
+
     const auto& itr = m_taskGroups.find(phase);
-    return (*itr).second.GetTasks();
+    tasks.insert(tasks.end(), itr->second.GetTasks().begin(), itr->second.GetTasks().end());
+
+    if (includePending)
+    {
+        const auto& pendingItr = m_pendingTasks.find(phase);
+        tasks.insert(tasks.end(), pendingItr->second.GetTasks().begin(), pendingItr->second.GetTasks().end());
+    }
+    return tasks;
 }

@@ -7,7 +7,6 @@ TEST(RenderCommandBatcher, BatchesAdjacentSameDraw)
 {
     RenderCommand a, b, c;
     // Mock vertex/index buffers and materials
-    auto ri = Engine::Instance().GetRenderSystem()->GetRenderInterface();
     a.vertexBuffer = nullptr; b.vertexBuffer = nullptr; c.vertexBuffer = nullptr;
     a.indexBuffer = nullptr; b.indexBuffer = nullptr; c.indexBuffer = nullptr;
 
@@ -16,11 +15,9 @@ TEST(RenderCommandBatcher, BatchesAdjacentSameDraw)
     a.material = matA; b.material = matA; c.material = std::make_shared<Material>("mC", 2u);
 
     glm::mat4 m1(1.0f), m2(1.0f), m3(1.0f);
-    a.modelMatrix = &m1;
-    b.modelMatrix = &m2;
-    c.modelMatrix = &m3;
-
-    a.gpuProgram = nullptr; b.gpuProgram = nullptr; c.gpuProgram = nullptr;
+    a.modelMatrix = m1;
+    b.modelMatrix = m2;
+    c.modelMatrix = m3;
 
     std::vector<RenderCommand> inputs{a, b, c};
     // Test both batch functions

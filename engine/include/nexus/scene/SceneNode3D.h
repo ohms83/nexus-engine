@@ -2,7 +2,6 @@
 
 #include "nexus/NxsDefine.h"
 
-#include "Entity.h"
 #include "SceneNode.h"
 #include "component/TransformComponent.h"
 
@@ -20,16 +19,15 @@ NXS_NAMESPACE
         explicit SceneNode3D(Ref<entt::registry> registry, std::string  name = "");
         ~SceneNode3D() override = default;
 
-        IMPLEMENT_REFLECTION(SceneNode3D);
+        IMPLEMENT_NODE(SceneNode3D);
 
-        PositionComponent& Position() { return GetComponent<PositionComponent>(); }
-        const PositionComponent& Position() const { return GetComponent<PositionComponent>(); }
+        PositionComponent& Position() { return *GetComponent<PositionComponent>(); }
+        const PositionComponent& Position() const { return *GetComponent<PositionComponent>(); }
 
-        OrientationComponent& Orient() { return GetComponent<OrientationComponent>(); }
-        const OrientationComponent& Orient() const { return GetComponent<OrientationComponent>(); }
-
-        ScaleComponent& Scale() { return GetComponent<ScaleComponent>(); }
-        const ScaleComponent& Scale() const { return GetComponent<ScaleComponent>(); }
+        OrientationComponent& Orient() { return *GetComponent<OrientationComponent>(); }
+        const OrientationComponent& Orient() const { return *GetComponent<OrientationComponent>(); }    
+        ScaleComponent& Scale() { return *GetComponent<ScaleComponent>(); }
+        const ScaleComponent& Scale() const { return *GetComponent<ScaleComponent>(); }
 
         void LookAt(const glm::vec3& center, const glm::vec3& up);
 

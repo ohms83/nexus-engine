@@ -65,6 +65,8 @@ std::atomic<uint32> GLGpuProgram::s_bindingShader(0);
 // Function to compile a shader
 static GLuint CompileShader(const std::string& source, GpuProgram::Type type)
 {
+    if (source.empty()) return 0;
+
     const auto gl_shaderType = GL::NxsShaderTypeToGLShader(type);
     const GLuint shader = glCreateShader(gl_shaderType);
     CHECK_GL_ERROR(glCreateShader);
@@ -92,7 +94,6 @@ GLGpuProgram::~GLGpuProgram()
 GpuProgram& GLGpuProgram::BeginCompile()
 {
     GpuProgram::BeginCompile();
-    m_id = Alloc();
     return *this;
 }
 

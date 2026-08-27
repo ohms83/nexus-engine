@@ -5,25 +5,25 @@
 #pragma once
 
 #include "nexus/NxsDefine.h"
-#include "nexus/core/ResourceLoader.h"
-#include "nexus/graphics/RenderingInterface.h"
+#include "nexus/core/resource/ResourceLoader.h"
+
+#include "RenderingInterface.h"
 #include "Material.h"
 #include "Model.h"
 #include "Mesh.h"
-#include "TextureManager.h"
-#include "MaterialManager.h"
 
 #include <filesystem>
 
 NXS_NAMESPACE
 {
+    class ResourceManager;
+
     class ModelLoader final : public IResourceLoader
     {
     public:
         explicit ModelLoader(
             const Ref<RenderingInterface>& renderingInterface,
-            const Ref<TextureManager>& textureManager,
-            const Ref<MaterialManager>& materialManager);
+            const Ref<ResourceManager>& resourceManager);
 
         /**
          * @brief Attempts to load a resource from the given path.
@@ -49,7 +49,6 @@ NXS_NAMESPACE
         void ComputeBoundingVolume(const Ref<Model>& model);
 
         Ref<RenderingInterface> m_renderingInterface;
-        Ref<TextureManager> m_textureManager;
-        Ref<MaterialManager> m_materialManager;
+        Ref<ResourceManager> m_resourceManager;
     };
 }

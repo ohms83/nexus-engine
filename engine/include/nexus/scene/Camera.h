@@ -18,17 +18,16 @@ NXS_NAMESPACE
     public:
         explicit Camera(Ref<entt::registry> registry, const std::string& name = "");
 
-        IMPLEMENT_REFLECTION(Camera);
-        void AcceptReflector(IReflector& reflector);
+        IMPLEMENT_NODE(Camera);
+        void AcceptReflector(IReflector& reflector) override;
 
-        CameraComponent& Properties() { return GetComponent<CameraComponent>(); }
-        const CameraComponent& Properties() const { return GetComponent<CameraComponent>(); }
+        CameraComponent& Properties() { return *GetComponent<CameraComponent>(); }
+        const CameraComponent& Properties() const { return *GetComponent<CameraComponent>(); }
 
-        NODISCARD PositionComponent& Position() { return GetComponent<PositionComponent>(); }
-        NODISCARD const PositionComponent& Position() const { return GetComponent<PositionComponent>(); }
-
-        NODISCARD OrientationComponent& Orient() { return GetComponent<OrientationComponent>(); }
-        NODISCARD const OrientationComponent& Orient() const { return GetComponent<OrientationComponent>(); }
+        NODISCARD PositionComponent& Position() { return *GetComponent<PositionComponent>(); }
+        NODISCARD const PositionComponent& Position() const { return *GetComponent<PositionComponent>(); }
+        NODISCARD OrientationComponent& Orient() { return *GetComponent<OrientationComponent>(); }
+        NODISCARD const OrientationComponent& Orient() const { return *GetComponent<OrientationComponent>(); }
 
         void LookAt(const glm::vec3& center, const glm::vec3& up);
 

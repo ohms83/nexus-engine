@@ -1,16 +1,20 @@
-#include <utility>
-
 #include "scene/SceneNode.h"
 
 #include "core/LogDispatcher.h"
 #include "core/task/OneshotTask.h"
 #include "ecs/Component.h"
+#include "core/Hasher.h"
+
+#include <utility>
+#include <chrono>
 
 USING_NAMESPACE_NXS;
 
 DEFINE_LOG(SceneNode);
 
 static Identifier s_runningId = 0;
+
+std::unordered_map<std::string, SceneNode::Creator> SceneNode::s_factoryFunctions;
 
 SceneNode::SceneNode(Ref<entt::registry> registry, std::string name)
     : Entity(registry)
@@ -20,9 +24,16 @@ SceneNode::SceneNode(Ref<entt::registry> registry, std::string name)
     {
         name = std::format("SceneNode_{}", s_runningId);
     }
-    AddComponent<SceneNodeComponent>(
-        ++s_runningId, std::move(name), true
-    );
+
+    auto now = std::chrono::system_clock::now();
+    auto duration = now.time_since_epoch();
+    auto milliseconds =
+        std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
+
+    auto component = AddComponent<SceneNodeComponent>();
+    component->id = Hasher().Hash32(std::format("{}_{}_{}", name, milliseconds, s_runningId++));
+    component->name = std::move(name);
+    component->active = true;
 }
 
 SceneNode::~SceneNode()
@@ -37,15 +48,38 @@ void SceneNode::Destroy()
     NXS_ASSERT(false);
 }
 
+Ref<SceneNode> SceneNode::Create(Ref<entt::registry> registry, std::string className)
+{
+    if (s_factoryFunctions.find(className) != s_factoryFunctions.end())
+    {
+        return s_factoryFunctions[className](registry);
+    }
+    return nullptr;
+}
+
+Ref<SceneNode> SceneNode::CreateChild(Ref<SceneNode> parent, std::string className)
+{
+    if (auto child = Create(parent->GetRegistry(), className); child != nullptr)
+    {
+        parent->AddChild(child);
+        return child;
+    }
+    return nullptr;
+}
+
+void SceneNode::GetRegisteredNodeTypes(std::vector<std::string>& outTypes)
+{
+    for (const auto& [key, _] : s_factoryFunctions)
+    {
+        outTypes.push_back(key);
+    }
+}
+
 void SceneNode::AcceptReflector(IReflector& reflector)
 {
-    reflector.ChangeCategory("Properties");
+    reflector.SetMarker("Properties");
 
-    auto& comp = GetComponent<SceneNodeComponent>();
-    reflector.VisitPropertyWithFeedback("Name", typeid(std::string), (void*)(comp.name.c_str()), [&comp](void* newValue) {
-        comp.name = CAST<const char*>(newValue);
-    });
-    reflector.VisitProperty("Active", typeid(bool), (void*)&comp.active);
+    const auto isActive = IsActive();
 
     const auto registry = GetRegistry();
     for (const auto id : GetRegisteredComponentIDs())
@@ -55,9 +89,156 @@ void SceneNode::AcceptReflector(IReflector& reflector)
         const auto storage = registry->storage(id);
         if (storage && storage->contains(m_entity))
         {
-            auto componentPtr = R_CAST<IComponent*>(storage->value(m_entity));
+            auto componentPtr = R_CAST<IReflection*>(storage->value(m_entity));
             componentPtr->AcceptReflector(reflector);
         }
+    }
+
+    if (isActive != IsActive())
+    {
+        if (IsActive()) OnActivate();
+        else OnDeactivate();
+    }
+}
+
+VariantData SceneNode::Serialize() const
+{
+    auto data = VariantData::Map();
+    data["__class__"] = ClassName();
+    // Node data
+    data["children"] = VariantData::Array();
+    for (const auto child : m_children)
+    {
+        data["children"].PushBack(child->Serialize());
+    }
+
+    auto& components = data["components"] = VariantData::Array();
+
+    // Component data
+    const auto registry = GetRegistry();
+    for (const auto id : GetRegisteredComponentIDs())
+    {
+        if (!IComponent::HasRegisteredType(id)) continue;
+
+        const auto storage = registry->storage(id);
+        if (storage && storage->contains(m_entity))
+        {
+            auto componentPtr = R_CAST<ISerializeable*>(storage->value(m_entity));
+            components.PushBack(componentPtr->Serialize());
+        }
+    }
+
+    return data;
+}
+
+bool SceneNode::Deserialize(const VariantData &data)
+{
+    if (!data.IsMap())
+    {
+        LOG_ERROR(LogSerialize, std::format("Invalid data type. Type={}", NxsGetTypeString(data.GetType())));
+        return false;
+    }
+    
+    if (data["__class__"] != ClassName()) {
+        LOG_ERROR(LogSerialize,
+            std::format("Unexpected object class. Expected={}, Actual={}", ClassName(), data["__class__"].GetString()));
+        return false;
+    }
+
+    for (const auto child : data["children"].GetArray())
+    {
+        const auto className = child["__class__"].GetString();
+        if (auto node = CreateChild(GetSelf(), className); node != nullptr)
+        {
+            if (!node->Deserialize(child))
+            {
+                LOG_WARNING(LogSerialize, std::format(
+                    "Failed to deserialize child node. Parent={}, ChildClass={}",
+                    GetName(), className));
+            }
+        }
+        else
+        {
+            LOG_WARNING(LogSerialize, std::format(
+                "Failed to create child node during deserialization. Parent={}, ChildClass={}",
+                GetName(), className));
+        }
+    }
+
+    for (const auto compData : data["components"].GetArray())
+    {
+        const auto className = compData["__class__"].GetString();
+        if (!IComponent::HasRegisteredClassName(className))
+        {
+            LOG_WARNING(LogSerialize, std::format(
+                "Unknown component class during deserialization. Node={}, ComponentClass={}",
+                GetName(), className));
+            continue;
+        }
+
+        auto componentId = IComponent::GetRegisteredTypeID(className);
+        IComponent* component = nullptr;
+        if (!HasComponent(componentId))
+        {
+            component = IComponent::AddComponent(className, *this);
+        }
+        else
+        {
+            component = GetComponent(componentId);
+        }
+
+        if (!component)
+        {
+            LOG_WARNING(LogSerialize, std::format(
+                "Component not found in the entity during deserialization. Node={}, ComponentClass={}",
+                GetName(), className));
+            continue;
+        }
+        component->Deserialize(compData);
+    }
+
+    return true;
+}
+
+void SceneNode::Resolve(ResourceManager& resourceManager, const RenderingInterface& renderingInterface)
+{
+    std::vector<IComponent*> components;
+    GetAllComponents(components);
+
+    for (auto component : components)
+    {
+        if (!component) continue;
+        component->Resolve(resourceManager, renderingInterface);
+    }
+
+    for (const auto child : m_children)
+    {
+        child->Resolve(resourceManager, renderingInterface);
+    }
+
+    Validate();
+
+    // Activation callback must be called after all the dependencies are resolved.
+    if (IsActive()) OnActivate();
+    else OnDeactivate();
+}
+
+void SceneNode::Validate()
+{
+    // Validate all components
+    std::vector<IComponent*> components;
+    GetAllComponents(components);
+
+    for (auto component : components)
+    {
+        if (!component) continue;
+        component->Validate();
+    }
+
+    // Validate all children
+    for (const auto child : m_children)
+    {
+        child->Validate();
     }
 }
 
@@ -65,7 +246,7 @@ void SceneNode::Activate(const bool activate)
 {
     if (IsActive() != activate)
     {
-        GetComponent<SceneNodeComponent>().active = activate;
+        GetComponent<SceneNodeComponent>()->active = activate;
         if (activate) OnActivate();
         else OnDeactivate();
     }
@@ -74,30 +255,65 @@ void SceneNode::Activate(const bool activate)
 void SceneNode::AddChild(Ref<SceneNode> child)
 {
     child->m_parent = this->GetSelf();
+    child->SetTaskScheduler(m_scheduler);
     m_children.push_back(child);
 }
 
-void SceneNode::RemoveChild(Ref<SceneNode> node)
+void SceneNode::RemoveChild(Ref<SceneNode> node, bool removeDescendant)
 {
     if (IsShuttingDown() || !node) return;
  
     if (!m_scheduler)
     {
-        LOG_WARNING(LogSceneNode, std::format("Unable to remove the node={}. Reason=The task scheduler is invalid.", node->GetName()));
+        LOG_WARNING(LogSceneNode, std::format(
+            "Unable to remove the node \"{}\" from \"{}\"."
+            "Reason=The task scheduler is invalid.",
+            node->GetName(), GetName()));
         return;
     }
 
-    m_scheduler->ScheduleTask(std::make_shared<OneshotTask>([this, node]() {
-        SceneNode::ChildList nodeList;
-        node->GetAllChildren(nodeList);
-
-        for (auto descendant : nodeList)
+    m_scheduler->ScheduleTask(std::make_shared<OneshotTask>([this, node, removeDescendant]() {
+        if (removeDescendant)
         {
-            descendant->RemoveFromParent();
-            AddChild(descendant);
+            SceneNode::ChildList descendants;
+            node->GetAllDescendants(descendants, true);
+            for (auto descendant : descendants)
+            {
+                descendant->RemoveFromParent();
+            }
+        }
+        else
+        {
+            for (auto descendant : node->m_children)
+            {
+                descendant->RemoveFromParent();
+                AddChild(descendant);
+            }
         }
 
         std::erase(m_children, node);
+    }), TaskScheduler::UpdatePhase::PostUpdate);
+}
+
+void SceneNode::RemoveAllChildren(bool removeDescendant)
+{
+    if (IsShuttingDown()) return;
+ 
+    if (!m_scheduler)
+    {
+        LOG_WARNING(LogSceneNode, std::format(
+            "Unable to remove the children of node={}. Reason=The task scheduler is invalid.", GetName()));
+        return;
+    }
+
+    m_scheduler->ScheduleTask(std::make_shared<OneshotTask>([this, removeDescendant]() {
+        if (!removeDescendant && m_parent)
+        {
+            std::ranges::for_each(m_children, [this](Ref<SceneNode> child) {
+                m_parent->AddChild(child);
+            });
+        }
+        m_children.clear();
     }), TaskScheduler::UpdatePhase::PostUpdate);
 }
 
@@ -157,6 +373,9 @@ void SceneNode::RemoveFromParent()
 
 void SceneNode::AddScript(Ref<Script> script)
 {
+    if (auto owner = script->GetOwner(); owner != nullptr) owner->RemoveScript(script);
+
+    script->SetOwner(GetSelf());
     m_scripts.push_back(script);
 
     std::ranges::sort(m_scripts, std::ranges::greater{}, &Script::GetPriority);
@@ -164,6 +383,8 @@ void SceneNode::AddScript(Ref<Script> script)
 
 void SceneNode::RemoveScript(Ref<Script> script)
 {
+    if (!script || !script->GetOwner()) return;
+
     std::erase(m_scripts, script);
 }
 
@@ -177,7 +398,7 @@ void SceneNode::Update(float dt)
     std::ranges::for_each(m_simulations, [dt, &registry](Simulation& sim) {
         sim.system(registry, dt);
     });
-    
+
     std::ranges::for_each(m_children, [dt](Ref<SceneNode> node) {
         node->Update(dt);
     });

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "nexus/NxsDefine.h"
-#include "nexus/io/Serializable.h"
+#include "nexus/core/serialize/Serializeable.h"
 
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
@@ -13,7 +13,7 @@ NXS_NAMESPACE
 {
     class MaterialManager;
     class TextureManager;
-    class Mesh : public ISerializable
+    class Mesh : public ISerializeable
     {
     public:
         Mesh();
@@ -54,7 +54,7 @@ NXS_NAMESPACE
 
         // Serialization
         VariantData Serialize() const override;
-        void Deserialize(const VariantData& data) override;
+        MAYBE_UNUSED bool Deserialize(const VariantData& data) override;
 
         void SetSphere(const Sphere& sphere)
         {
@@ -78,15 +78,21 @@ NXS_NAMESPACE
 
         void ComputeBounds();
 
-    public:
-        // Resolve a material reference using a MaterialManager and TextureManager. This will set m_material
-        // if the mesh currently only stores a material path (e.g., deserialized state). It will also cause
-        // the material to resolve its textures via the texture manager.
-        void Resolve(class MaterialManager& materialManager, class TextureManager& textureManager);
+        void Resolve(class ResourceManager& resourceManager);
 
+    private:
+        virtual VariantData SerializeVertices() const;
+        virtual VariantData SerializeIndices() const;
+
+        virtual bool DeserializeVertices();
+        virtual bool DeserializeIndices();
+
+    protected:
         // Mesh stores the material path when deserializing and will attempt to resolve it when Resolve() is called.
         std::string m_materialPath;
         std::string m_name;
+        std::vector<float> m_vertices;
+        std::vector<uint32> m_indices;
         Ref<VertexBuffer> m_vertexBuffer;
         Ref<IndexBuffer> m_indexBuffer;
         Ref<Material> m_material;
@@ -101,7 +107,23 @@ NXS_NAMESPACE
         static Ref<Mesh> CreatePlane(
             std::string name,
             float width, float height,
-            Ref<RenderingInterface> renderingInterface,
+            const RenderingInterface& renderingInterface,
+            Ref<Material> material = nullptr
+        );
+
+        static Ref<Mesh> CreateBox(
+            std::string name,
+            const glm::vec3& size,
+            const RenderingInterface& renderingInterface,
+            Ref<Material> material = nullptr
+        );
+
+        static Ref<Mesh> CreateSphere(
+            std::string name,
+            float radius,
+            uint32_t sectorCount,
+            uint32_t stackCount,
+            const RenderingInterface& renderingInterface,
             Ref<Material> material = nullptr
         );
     };

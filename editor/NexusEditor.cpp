@@ -10,22 +10,13 @@
 #include "nexus/graphics/Model.h"
 #include "nexus/editor/widget/PropertyWindow.h"
 
+#include "utils/CameraUtils.h"
+
+#define LOAD_ASYNC 1
+
 DEFINE_LOG(NexusEditor);
 
 static nxs::Identifier selectedNode = nxs::InvalidID;
-
-static nxs::Ref<nxs::Camera> InitCamera(nxs::Scene& scene)
-{
-    auto camera = scene.EmplaceChild<nxs::Camera>("Camera Node");
-    camera->Position().value = {0, 50, 0};
-    camera->LookAt({0, 50, -10}, {0, 1, 0});
-    camera->Properties().farZ = 10000.f;
-    auto& moveComp = camera->AddComponent<nxs::MoveComponent>();
-    moveComp.speed = 100.f;
-    auto& turninComp = camera->AddComponent<nxs::TurningComponent>();
-    turninComp.degree = 30.f;
-    return camera;
-}
 
 static void InitLight(nxs::Scene& scene)
 {
@@ -84,10 +75,11 @@ void NexusEditor::InitModel()
 {
     const auto engine = nxs::Engine::Instance();
     const auto taskScheduler = engine.GetTaskScheduler();
-    const auto resourceManager = engine.GetModelManager();
+    const auto resourceManager = engine.GetResourceManager();
     const auto assetPath = GetAssetPath("meshes/sponza/sponza.obj");
     // const auto assetPath = GetAssetPath("meshes/barrel/wine_barrel_01_4k.gltf");
-    auto loadResult = resourceManager->RequestResourceAsync(assetPath, *taskScheduler);
+#if LOAD_ASYNC
+    auto loadResult = resourceManager->GetResourceAsync(typeid(nxs::Model), assetPath, *taskScheduler);
     auto waitingTask = std::make_shared<nxs::IntervalTask>(0, [this, loadResult]() {
         const auto status = loadResult->status;
         if (status == nxs::IResourceLoader::LoadResult::Status::Ready)
@@ -96,8 +88,10 @@ void NexusEditor::InitModel()
 
             auto scene = nxs::Engine::Instance().GetSceneManager()->GetCurrentScene();
             auto model = PTR_CAST<nxs::Model>(loadResult->resource);
-            auto path = std::filesystem::path(model->GetPath());
-            auto node = scene->EmplaceChild<nxs::ModelNode>(model);
+            auto filename = std::filesystem::path(model->GetPath()).filename();
+            auto modelNode = scene->EmplaceChild<nxs::ModelNode>(filename.string());
+            NXS_ASSERT(PTR_CAST<nxs::SceneNode>(modelNode));
+            modelNode->SetModel(model);
             return false;
         }
         else if (status == nxs::IResourceLoader::LoadResult::Status::Failed)
@@ -108,6 +102,14 @@ void NexusEditor::InitModel()
         return true;
     });
     taskScheduler->ScheduleTask(waitingTask);
+#else
+    auto scene = nxs::Engine::Instance().GetSceneManager()->GetCurrentScene();
+    auto model = resourceManager->Get<nxs::Model>(assetPath);
+    auto filename = std::filesystem::path(model->GetPath()).filename();
+    auto modelNode = scene->EmplaceChild<nxs::ModelNode>(filename.string());
+    NXS_ASSERT(PTR_CAST<nxs::SceneNode>(modelNode));
+    modelNode->SetModel(model);
+#endif
 }
 
 bool NexusEditor::Init_Internal()
@@ -123,37 +125,10 @@ bool NexusEditor::Init_Internal()
     auto scene = sceneManager->EmplaceAndChange<nxs::Scene>("Editor Scene");
     scene->SetRenderer(std::make_unique<nxs::ForwardSceneRenderer>(GetRenderSystem()));
 
-    m_camera = InitCamera(*scene);
     InitModel();
     InitLight(*scene);
 
-    auto& inputManager = nxs::InputManager::Instance();
-    nxs::KeyInputMap cameraMovementKeyInput = {
-        {
-            {SDLK_W, nxs::KeyInputMap::AxisMinusZ},
-            {SDLK_S, nxs::KeyInputMap::AxisPlusZ},
-            {SDLK_A, nxs::KeyInputMap::AxisMinusX},
-            {SDLK_D, nxs::KeyInputMap::AxisPlusX},
-            {SDLK_Q, nxs::KeyInputMap::AxisMinusY},
-            {SDLK_E, nxs::KeyInputMap::AxisPlusY},
-        }
-    };
-    nxs::KeyInputMap cameraTurnKeyInput = {
-        {
-            {SDLK_LEFT, nxs::KeyInputMap::AxisPlusX},
-            {SDLK_RIGHT, nxs::KeyInputMap::AxisMinusX},
-            {SDLK_UP, nxs::KeyInputMap::AxisPlusY},
-            {SDLK_DOWN, nxs::KeyInputMap::AxisMinusY},
-        }
-    };
-    nxs::MouseAxisMapping cameraTurnMouseInput = {
-        true,
-        SDL_BUTTON_RIGHT,
-        {5, 5}
-    };
-    inputManager.RegisterAxisInputMap("movement", cameraMovementKeyInput);
-    inputManager.RegisterAxisInputMap("camera_turn", cameraTurnKeyInput);
-    inputManager.RegisterMouseAxisInputMap("camera_turn", cameraTurnMouseInput);
+    m_camera = nxs::editor::CameraUtils::InitCamera(*scene);
 
     m_sceneGraphWidget = std::make_shared<nxs::SceneGraphWidget>(*sceneManager);
     m_propertyWindow = std::make_shared<nxs::PropertyWindow>(*sceneManager);
@@ -181,6 +156,20 @@ bool NexusEditor::Init_Internal()
             CAST<nxs::IWidgetOwner&>(*m_editor.get())
         )
     );
+
+    // Attach event hook
+    auto newSceneMenu = menu.GetMenuItem("File", "New Scene");
+    if (!newSceneMenu) return false;
+
+    newSceneMenu->onSelectedEvent.connect([this](bool selected, const std::string_view name) {
+        // Re-init camera
+        auto sceneManager = nxs::Engine::Instance().GetSceneManager();
+        auto scene = sceneManager->GetNextScene();
+        if (!scene) return;
+
+        m_camera = nxs::editor::CameraUtils::InitCamera(*scene);
+    });
+
     return true;
 }
 
@@ -219,23 +208,6 @@ void NexusEditor::OnResize(const glm::ivec2& screenSize, const glm::ivec2& actua
 void NexusEditor::Update()
 {
     Application::Update();
-
-    const auto& inputManager = nxs::InputManager::Instance();
-
-    glm::vec3 moveVec = inputManager.GetAxisValue("movement");
-
-    // Transform the translation vector into the camera's local coordinate.
-    auto& cameraOrient = m_camera->Orient();
-    glm::vec2 euler = inputManager.GetMouseAxisValue("camera_turn") * GetDeltaTime();
-    cameraOrient.Rotate(glm::vec3(euler.y, euler.x, 0));
-
-    m_camera->GetComponent<nxs::MoveComponent>().direction =
-        nxs::Vector::SafeNormalize(cameraOrient.quat * moveVec);
-
-    const auto turninAxis = nxs::Vector::SafeNormalize(inputManager.GetAxisValue("camera_turn"));
-    auto& compAxis = m_camera->GetComponent<nxs::TurningComponent>().axis;
-    compAxis.x = turninAxis.y;
-    compAxis.y = turninAxis.x;
 
     const auto selectedNode = m_sceneGraphWidget->GetSelectedNode();
     m_propertyWindow->SetSceneNode(selectedNode);

@@ -53,19 +53,16 @@ void Camera::LookAt(const glm::vec3 &center, const glm::vec3 &up)
 
 void Camera::AcceptReflector(IReflector& reflector)
 {
+    bool valueChanged = false;
+
+    // reflector.SetMarker("View Fustrum");
+    auto connection = reflector.onValueChangedEvent.connect([&valueChanged](const std::string& name) {
+        valueChanged = true;
+    });
+
     SceneNode::AcceptReflector(reflector);
 
     auto& properties = Properties();
-    bool valueChanged = false;
-    auto valueChangeCallback = [&valueChanged](void*) { valueChanged = true; };
-
-    reflector.ChangeCategory("View Fustrum");
-    reflector.VisitPropertyWithFeedback("FOV", typeid(float), &properties.fov, valueChangeCallback);
-    reflector.VisitPropertyWithFeedback("Near", typeid(float), &properties.nearZ, valueChangeCallback);
-    reflector.VisitPropertyWithFeedback("Far", typeid(float), &properties.farZ, valueChangeCallback);
-    reflector.VisitPropertyWithFeedback("Width", typeid(float), &properties.width, valueChangeCallback);
-    reflector.VisitPropertyWithFeedback("Height", typeid(float), &properties.height, valueChangeCallback);
-
     if (valueChanged)
     {
         if (properties.projectionType == ProjectionType::Perspective)
@@ -77,4 +74,6 @@ void Camera::AcceptReflector(IReflector& reflector)
             SetOrthographic(properties.width, properties.height, properties.nearZ, properties.farZ);
         }
     }
+
+    reflector.onValueChangedEvent.disconnect(connection);
 }

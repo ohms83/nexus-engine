@@ -3,11 +3,9 @@
 //
 
 #include "graphics/Material.h"
-#include "nexus/io/Serializer.h"
-#include "nexus/graphics/TextureManager.h"
+#include "nexus/core/serialize/Serializer.h"
 #include "core/LogDispatcher.h"
 #include "core/Path.h"
-#include "graphics/Material.h"
 
 #include "Remotery.h"
 
@@ -17,12 +15,9 @@ USING_NAMESPACE_NXS;
 
 DEFINE_LOG(Material);
 
-static constexpr auto default_vertex_shader = "shaders/glsl/default_forward_lighting.vert";
-static constexpr auto default_fragment_shader = "shaders/glsl/default_forward_lighting.frag";
-static constexpr auto textured_vertex_shader = "shaders/glsl/textured_forward_lighting.vert";
-static constexpr auto textured_fragment_shader = "shaders/glsl/textured_forward_lighting.frag";
-static constexpr auto normalmap_vertex_shader = "shaders/glsl/normalmap_forward_lighting.vert";
-static constexpr auto normalmap_fragment_shader = "shaders/glsl/normalmap_forward_lighting.frag";
+static constexpr auto default_shader = "shaders/glsl/default_forward_lighting.shader";
+static constexpr auto textured_shader = "shaders/glsl/textured_forward_lighting.shader";
+static constexpr auto normalmap_shader = "shaders/glsl/normalmap_forward_lighting.shader";
 
 static const std::map<TextureType, std::string> s_textureTypeUniformNames = {
     {TextureType::Diffuse, "_DiffuseMap"},
@@ -93,12 +88,12 @@ bool Material::HasTextureType(TextureType type) const
     return itr != m_textures.end();
 }
 
-void Material::Use()
+Ref<GpuProgram> Material::Use()
 {
     if (!m_shader)
     {
         LOG_WARNING(LogMaterial, std::format("Material does not have a shader"));
-        return;
+        return nullptr;
     }
 
     auto gpuProgram = m_shader->GetGpuProgram();
@@ -121,6 +116,8 @@ void Material::Use()
             textureInfo.texture->GetProxy(),
             slot++);
     }
+
+    return gpuProgram;
 }
 
 VariantData Material::Serialize() const
@@ -153,7 +150,7 @@ VariantData Material::Serialize() const
     return data;
 }
 
-void Material::Deserialize(const VariantData& data)
+bool Material::Deserialize(const VariantData& data)
 {
     if (data.HasKey("ambient") && data["ambient"].IsArray())
     {
@@ -217,27 +214,26 @@ void Material::Deserialize(const VariantData& data)
             m_textures.push_back(std::move(ti));
         }
     }
+
+    return true;
 }
 
-void Material::Resolve(TextureManager& textureManager, RenderingInterface* renderingInterface)
+void Material::Resolve(ResourceManager& resourceManager)
 {
     // Resolve textures using textureManager
     for (auto& ti : m_textures)
     {
         if (!ti.texture && !ti.path.empty())
         {
-            auto tex = textureManager.Get(ti.path);
+            auto tex = resourceManager.Get<Texture>(ti.path);
             if (tex) ti.texture = tex;
         }
     }
 
     // Optional: Resolve shader by compiling it if shader path exists.
-    if (!m_shader && !m_shaderPath.empty() && renderingInterface)
+    if (!m_shader && !m_shaderPath.empty())
     {
-        // A concrete shader loader or manager would be preferred; temporarily create and compile.
-        m_shader = std::make_shared<Shader>(m_shaderPath, 0);
-        // Assume m_shaderPath indicates a shader with VS/FS - just attempt compileFromFile if possible.
-        // The path format is ambiguous; we do not attempt to auto-compile complex shader objects.
+        m_shader = resourceManager.Get<Shader>(m_shaderPath);
     }
 }
 
@@ -259,44 +255,24 @@ TextureType Material::GetTextureType(uint32 slot) const
     return TextureType::Undefined;
 }
 
-void Material::DetermineShaderPaths(std::string& vertexShader, std::string& fragmentShader)
+void Material::CreateDefaultShader(ResourceManager& resourceManager)
 {
+    std::string veretxShaderSource, fragmentShaderSource, geomtryShaderSource;
+    std::string shaderPath;
+
     if (HasTextureType(TextureType::Normal))
     {
-        vertexShader = Path::GetEngineAssetPath(normalmap_vertex_shader);
-        fragmentShader = Path::GetEngineAssetPath(normalmap_fragment_shader);
+        shaderPath = Path::GetEngineAssetPath(normalmap_shader);
     }
     else if (HasTextureType(TextureType::Diffuse))
     {
-        vertexShader = Path::GetEngineAssetPath(textured_vertex_shader);
-        fragmentShader = Path::GetEngineAssetPath(textured_fragment_shader);
+        shaderPath = Path::GetEngineAssetPath(textured_shader);
     }
     else
     {
-        vertexShader = Path::GetEngineAssetPath(default_vertex_shader);
-        fragmentShader = Path::GetEngineAssetPath(default_fragment_shader);
-    }
-}
-
-void Material::CreateDefaultShader(Ref<RenderingInterface> renderingInterface)
-{
-    // TODO: Use resource manager.
-    std::string vertexShaderPath, fragmentShaderPath;
-    DetermineShaderPaths(vertexShaderPath, fragmentShaderPath);
-
-    std::fstream vertexShader(vertexShaderPath, std::ios::in);
-    std::fstream fragmentShader(fragmentShaderPath, std::ios::in);
-    if (!vertexShader.is_open() || !fragmentShader.is_open())
-    {
-        LOG_FATAL(LogMaterial,
-            std::format("Failed to load shaders! VS={} FS={}", vertexShaderPath, fragmentShaderPath));
-        return;
+        shaderPath = Path::GetEngineAssetPath(default_shader);
     }
 
-    std::stringstream vertexShaderStream, fragmentShaderStream;
-    vertexShaderStream << vertexShader.rdbuf();
-    fragmentShaderStream << fragmentShader.rdbuf();
-
-    m_shader.reset(new Shader("Default", 0));
-    m_shader->CompileFromSource(*renderingInterface, vertexShaderStream.str(), fragmentShaderStream.str());
+    m_shader = resourceManager.Get<Shader>(shaderPath);
+    NXS_ASSERT(m_shader);
 }

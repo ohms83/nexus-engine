@@ -1,15 +1,25 @@
 #include "editor/Menu.h"
+#include "editor/Editor.h"
+#include "editor/FileDialog.h"
 #include "editor/menu/ToggleMenuItem.h"
 #include "editor/menu/TriggerMenuItem.h"
 #include "editor/menu/WidgetMenuItem.h"
 #include "editor/menu/ConsoleMenuItem.h"
+#include "editor/menu/SceneFileMenuItem.h"
+#include "editor/utils/ModelImporter.h"
 #include "editor/widget/EditorWidget.h"
 #include "editor/widget/ProfilerWidget.h"
 #include "editor/widget/PropertyWindow.h"
+#include "core/LogDispatcher.h"
+#include "core/serialize/JsonSerializer.h"
+
+#include "Application.h"
 
 #include "DebugMenuItem.inl"
 
 #include "imgui.h"
+
+#include <fstream>
 
 USING_NAMESPACE_NXS;
 
@@ -25,50 +35,79 @@ DEFINE_LOG(Menu);
 
 Menu::Menu(IWidgetOwner& widgetOwner)
 {
+    const auto& application = CAST<Editor*>(&widgetOwner)->GetParentApp();
+    const auto& engine = Engine::Instance();
+
+    auto newSceneMenu = std::make_shared<TriggerMenuItem> (
+        FILE_MENU_OPEN_SAVE,
+        "New Scene",
+        "",
+        "Ctrl+N",
+        [&widgetOwner]() {
+            auto& application = CAST<Editor*>(&widgetOwner)->GetParentApp();
+            auto& sceneManager = application.GetSceneManager();
+            sceneManager.EmplaceAndChange<Scene>("New Scene");
+        }
+    );
+    auto importSceneMenu = std::make_shared<SceneImportMenuItem>(
+        FILE_MENU_OPEN_SAVE,
+        application.GetWindowContext()
+    );
+    auto openSceneMenu = std::make_shared<SceneFileMenuItem>(
+        application.GetSceneManager(),
+        std::make_shared<JsonSerializer>(),
+        FILE_MENU_OPEN_SAVE,
+        "Open Scene",
+        "Open an existing scene.",
+        "Ctrl+O",
+        FileMenuContext {
+            .windowContext = application.GetWindowContext(),
+            .filters = { {"Nexus scene file (*.nxs)", "*.nxs"} },
+            .defaultExtension = "nxs",
+            .dialogMode = FileDialogContext::Mode::Open,
+        }
+    );
+    auto saveSceneMenu = std::make_shared<SceneFileMenuItem>(
+        application.GetSceneManager(),
+        std::make_shared<JsonSerializer>(),
+        FILE_MENU_OPEN_SAVE,
+        "Save Scene",
+        "Save the currently active scene.",
+        "Ctrl+S",
+        FileMenuContext {
+            .windowContext = application.GetWindowContext(),
+            .filters = { {"Nexus scene file (*.nxs)", "*.nxs"} },
+            .defaultExtension = "nxs",
+            .dialogMode = FileDialogContext::Mode::Save,
+        }
+    );
+    auto quitMenu = std::make_shared<TriggerMenuItem> (
+        FILE_MENU_QUIT_APP,
+        "Quit",
+        "",
+        "Alt+F4",
+        []() {
+            SDL_QuitEvent quitEvent {
+                SDL_EVENT_QUIT,
+                0,
+                SDL_GetTicksNS()
+            };
+            SDL_PushEvent(R_CAST<SDL_Event*>(&quitEvent));
+        }
+    );
     MenuItemList fileMenu = {
         "File",
         {
-            std::make_shared<TriggerMenuItem> (
-                FILE_MENU_OPEN_SAVE,
-                "New",
-                "",
-                "Ctrl+N",
-                []() {
-
-                }
-            ),
-            std::make_shared<TriggerMenuItem> (
-                FILE_MENU_OPEN_SAVE,
-                "Open...",
-                "",
-                "Ctrl+O",
-                []() {
-
-                }
-            ),
-            std::make_shared<TriggerMenuItem> (
-                FILE_MENU_OPEN_SAVE,
-                "Save",
-                "",
-                "Ctrl+S",
-                []() {
-
-                }
-            ),
-            std::make_shared<TriggerMenuItem> (
-                FILE_MENU_QUIT_APP,
-                "Quit",
-                "",
-                "Alt+F4",
-                []() {
-                    SDL_QuitEvent quitEvent {
-                        SDL_EVENT_QUIT,
-                        0,
-                        SDL_GetTicksNS()
-                    };
-                    SDL_PushEvent(R_CAST<SDL_Event*>(&quitEvent));
-                }
-            ),
+            // New Scene
+            newSceneMenu,
+            // Open Scene
+            openSceneMenu,
+            // Save Scene
+            saveSceneMenu,
+            // Import Scene
+            importSceneMenu,
+            // Quit Application
+            quitMenu,
         }
     };
 
@@ -189,6 +228,24 @@ void Menu::AddMenuItem(const std::string& menu, Ref<MenuItem> menuItem)
     {
         m_widgets.push_back(widgetMenuItem->GetWidget());
     }
+}
+
+Ref<MenuItem> Menu::GetMenuItem(const std::string& menu, const std::string& name)
+{
+    const auto itr = std::ranges::find_if(m_menuItems, [&menu] (const MenuItemList& itemList)
+    {
+        return menu == itemList.menu;
+    });
+
+    if (itr == m_menuItems.end()) return nullptr;
+
+    const auto& items = itr->items;
+    const auto menuItr = std::ranges::find_if(items, [&name] (const Ref<MenuItem>& item)
+    {
+        return item->GetName() == name;
+    });
+
+    return (menuItr == items.end()) ? nullptr : *menuItr;
 }
 
 void Menu::DrawMenu()

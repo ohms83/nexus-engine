@@ -4,11 +4,11 @@
 #include "nexus/Nexus.h"
 
 // A test fixture that can be parameterized by the Serializer type
-class SerializerTestFixture : public testing::TestWithParam<nxs::Serializer*> {
+class SerializerTestFixture : public testing::TestWithParam<nxs::ISerializer*> {
 protected:
     // A pointer to the serializer being tested
     // This will be set by the test framework based on the parameter
-    nxs::Serializer* serializer_to_test;
+    nxs::ISerializer* serializer_to_test;
 
     // Optional: Setup method if common setup is needed before each test
     void SetUp() override {
@@ -39,7 +39,7 @@ INSTANTIATE_TEST_SUITE_P(
         new nxs::MsgPackSerializer() // Instance of MsgPackSerializer
     ),
     // Optional: A custom naming function for the test cases, to make output clearer
-    [](const testing::TestParamInfo<nxs::Serializer*>& info) {
+    [](const testing::TestParamInfo<nxs::ISerializer*>& info) {
         if (dynamic_cast<nxs::JsonSerializer*>(info.param)) {
             return "JsonSerializer";
         }

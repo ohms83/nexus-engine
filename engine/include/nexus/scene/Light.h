@@ -1,9 +1,9 @@
 #pragma once
 
 #include "nexus/NxsDefine.h"
-#include "nexus/graphics/Color.h"
-#include "nexus/math/Math.h"
+#include "nexus/core/Color.h"
 #include "nexus/core/LogDispatcher.h"
+#include "nexus/math/Math.h"
 
 #include "SceneNode.h"
 #include "component/TransformComponent.h"
@@ -25,26 +25,26 @@ NXS_NAMESPACE
         explicit DirectionalLight(Ref<entt::registry> registry, std::string name = "");
         ~DirectionalLight() override = default;
 
-        IMPLEMENT_REFLECTION(DirectionalLight);
+        IMPLEMENT_NODE(DirectionalLight);
 
         LightProperties& Properties() override
         {
-            return GetComponent<DirectLightComponent>().properties;
+            return GetComponent<DirectLightComponent>()->properties;
         }
 
         const LightProperties& Properties() const override
         {
-            return GetComponent<DirectLightComponent>().properties;
+            return GetComponent<DirectLightComponent>()->properties;
         }
 
         glm::vec3& Direction()
         {
-            return GetComponent<DirectLightComponent>().direction;
+            return GetComponent<DirectLightComponent>()->direction;
         }
 
         const glm::vec3& Direction() const
         {
-            return GetComponent<DirectLightComponent>().direction;
+            return GetComponent<DirectLightComponent>()->direction;
         }
     };
 
@@ -54,36 +54,36 @@ NXS_NAMESPACE
         explicit PointLight(Ref<entt::registry> registry, std::string  name = "");
         ~PointLight() override = default;
 
-        IMPLEMENT_REFLECTION(PointLight);
+        IMPLEMENT_NODE(PointLight);
 
         LightProperties& Properties() override
         {
-            return GetComponent<PointLightComponent>().properties;
+            return GetComponent<PointLightComponent>()->properties;
         }
 
         const LightProperties& Properties() const override
         {
-            return GetComponent<PointLightComponent>().properties;
+            return GetComponent<PointLightComponent>()->properties;
         }
 
         PointLightComponent& PointLightProperties()
         {
-            return GetComponent<PointLightComponent>();
+            return *GetComponent<PointLightComponent>();
         }
 
         const PointLightComponent& PointLightProperties() const
         {
-            return GetComponent<PointLightComponent>();
+            return *GetComponent<PointLightComponent>();
         }
 
         glm::vec3& Position()
         {
-            return GetComponent<PositionComponent>().value;
+            return GetComponent<PositionComponent>()->value;
         }
 
         const glm::vec3& Position() const
         {
-            return GetComponent<PositionComponent>().value;
+            return GetComponent<PositionComponent>()->value;
         }
     };
 }

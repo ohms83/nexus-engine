@@ -2,8 +2,19 @@
 
 #include <SDL3/SDL.h>
 #include <memory>
+#include <cstring>
 
 #include "NxsDataType.h"
+
+#ifdef NXS_BUILD_DEBUG
+constexpr char const* NXS_BUILD_CFG = "Debug";
+#elif defined(NXS_BUILD_RELWITHDEBINFO)
+constexpr char const* NXS_BUILD_CFG = "RelWithDebInfo";
+#elif defined(NXS_BUILD_RELEASE)
+constexpr char const* NXS_BUILD_CFG = "Release";
+#else
+constexpr char const* NXS_BUILD_CFG = "Unknown";
+#endif
 
 #if defined(_WIN32)
     #ifndef NXS_PLATFORM_WINDOWS
@@ -47,6 +58,12 @@
 #define DECLARE_LOG_EXTERN(LogCategory) extern const std::string Log##LogCategory
 #define DEFINE_LOG(LogCategory) const std::string Log##LogCategory = #LogCategory
 
+#ifdef NXS_PLATFORM_WIN64
+#define NXS_STRNCPY(dst, dstsize, src, count) strncpy_s(dst, dstsize, src, count)
+#else
+#define NXS_STRNCPY(dst, dstsize, src, count) strncpy(dst, src, count)
+#endif
+
 NXS_NAMESPACE
 {
     using WindowContext = SDL_Window*;
@@ -71,6 +88,9 @@ NXS_NAMESPACE
      */
     template<typename T>
     using Ptr = std::unique_ptr<T>;
+
+    template<typename T>
+    using WeakRef = std::weak_ptr<T>;
 
     enum class PixelFormat
     {

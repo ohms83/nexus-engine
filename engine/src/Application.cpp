@@ -14,6 +14,7 @@
 #include "core/Logger.h"
 #include "core/FileLogger.h"
 #include "core/StdOutLogger.h"
+#include "editor/Editor.h"
 #include "graphics/debug/Gizmos.h"
 #include "io/InputManager.h"
 #include "time/TimerManager.h"
@@ -137,7 +138,7 @@ bool Application::Init(const ApplicationConfig& info)
 
     if (info.editMode)
     {
-        m_editor = std::make_unique<Editor>();
+        m_editor = std::make_unique<Editor>(*this);
     }
 
     Gizmos::Init(*m_renderSystem);
@@ -189,6 +190,7 @@ int Application::BeginMainLoop()
 
             if (m_editor) m_editor->Update();
             taskScheduler->PostUpdate();
+            taskScheduler->TransferPendingTasks();
         }
 
         {

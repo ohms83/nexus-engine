@@ -12,7 +12,7 @@ ToggleMenuItem::ToggleMenuItem(
     const std::string& desc,
     const std::string& shortcut,
     HandleFunction handler)
-    : MenuItem(group, name, desc, shortcut)
+    : Super(group, name, desc, shortcut)
     , m_hander(handler)
 {}
 
@@ -20,4 +20,6 @@ void ToggleMenuItem::OnSelected(const bool is_selected)
 {
     m_selected = is_selected;
     m_hander(is_selected);
+
+    Super::OnSelected(is_selected);
 }
