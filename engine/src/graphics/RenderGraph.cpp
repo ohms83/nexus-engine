@@ -33,7 +33,7 @@ std::vector<RenderPass> RenderGraph::Build(const std::vector<RenderPass>& passes
     }
 
     // Kahn's algorithm: use priority as tie-breaker (lower priority first)
-    struct Node { size_t idx; uint32 prio; };
+    struct Node { size_t idx; uint32_t prio; };
     auto cmp = [](const Node& a, const Node& b) { return a.prio > b.prio; };
     std::priority_queue<Node, std::vector<Node>, decltype(cmp)> zero(cmp);
     for (size_t i = 0; i < n; ++i) if (indeg[i] == 0) zero.push({i, passes[i].priority});

@@ -31,10 +31,10 @@ NXS_NAMESPACE
         //! API specific vertex buffer generation function.
         void Build_Impl() override;
 
-        static std::atomic<uint32> s_bindingBuffer;
+        static std::atomic<uint32_t> s_bindingBuffer;
 
     protected:
-        NODISCARD uint32 Alloc() override;
+        NODISCARD uint32_t Alloc() override;
         void Release() override;
 
     private:

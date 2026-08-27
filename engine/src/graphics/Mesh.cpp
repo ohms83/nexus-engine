@@ -5,7 +5,7 @@ USING_NAMESPACE_NXS;
 
 Mesh::Mesh()
 {
-    static uint64 count = 0;
+    static uint64_t count = 0;
     m_name = std::format("Mesh_{}", count++);
 }
 
@@ -33,7 +33,7 @@ void Mesh::ComputeBounds()
     const size_t vertexSize = m_vertexBuffer->GetStride();
     for (size_t i = 0; i < vertexCount; ++i)
     {
-        const uint8* vertexPtr = CAST<const uint8_t*>(vertexData) + i * vertexSize;
+        const uint8_t* vertexPtr = CAST<const uint8_t*>(vertexData) + i * vertexSize;
         const float* positionPtr = R_CAST<const float*>(vertexPtr + offset);
         glm::vec3 position(positionPtr[0], positionPtr[1], positionPtr[2]);
 

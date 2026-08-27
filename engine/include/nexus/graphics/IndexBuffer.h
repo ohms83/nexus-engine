@@ -20,7 +20,7 @@ NXS_NAMESPACE
     public:
         IndexBuffer() = default;
 
-        uint32 GetHandle() const override
+        uint32_t GetHandle() const override
         {
             return m_handle;
         }
@@ -31,8 +31,8 @@ NXS_NAMESPACE
         virtual IndexBuffer& SetDrawMode(DrawMode mode);
         virtual void Build();
 
-        NODISCARD uint32 NumIndex() const;
-        NODISCARD uint32 NumPolygons() const;
+        NODISCARD uint32_t NumIndex() const;
+        NODISCARD uint32_t NumPolygons() const;
 
         NODISCARD const uint32_t* GetData() const
         {
@@ -69,7 +69,7 @@ NXS_NAMESPACE
 
         void ReArrangeIndex(FrontFace frontFace);
 
-        void CopyIndices(const std::vector<uint32>& indices, size_t offset = 0);
+        void CopyIndices(const std::vector<uint32_t>& indices, size_t offset = 0);
         void CopyData(const void* data, size_t bytes, size_t offset = 0) override;
 
     private:
@@ -77,7 +77,7 @@ NXS_NAMESPACE
         virtual void Build_Impl() = 0;
 
     protected:
-        uint32 m_handle = 0;
+        uint32_t m_handle = 0;
         uint32_t m_numIndex = 0;
         /**
          * @brief The number of index that's will be rendered.

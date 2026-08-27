@@ -43,7 +43,7 @@ NXS_NAMESPACE
             Type type;
         };
 
-        Shader(std::string path, const uint32 id) : Resource(std::move(path), id) {}
+        Shader(std::string path, const uint32_t id) : Resource(std::move(path), id) {}
 
         MAYBE_UNUSED bool CompileFromSource(
             const RenderingInterface& renderingInterface,

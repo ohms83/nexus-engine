@@ -22,8 +22,8 @@ NXS_NAMESPACE
         {
         }
 
-        Ref<Resource> Load(const std::string& path, uint32 id) override;
-        Ref<LoadResult> LoadAsync(const std::string& path, uint32 id, TaskScheduler& scheduler, Callback onFinishCallback) override;
+        Ref<Resource> Load(const std::string& path, uint32_t id) override;
+        Ref<LoadResult> LoadAsync(const std::string& path, uint32_t id, TaskScheduler& scheduler, Callback onFinishCallback) override;
 
     private:
         Ref<RenderingInterface> m_renderingInterface;

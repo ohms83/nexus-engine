@@ -28,7 +28,7 @@ NXS_NAMESPACE
          * @param data A pointer to the data to manage. The object is now responsible for freeing this memory.
          * @param size The data size in bytes.
          */
-        explicit OwningBuffer(uint8* data, size_t size);
+        explicit OwningBuffer(uint8_t* data, size_t size);
 
         /**
          * @brief Deleted copy constructor.
@@ -82,7 +82,7 @@ NXS_NAMESPACE
         template<typename T>
         void Copy(std::vector<T>& dataList)
         {
-            CopyData(R_CAST<uint8*>(dataList.data()), sizeof(T) * dataList.size(), 0);
+            CopyData(R_CAST<uint8_t*>(dataList.data()), sizeof(T) * dataList.size(), 0);
         }
 
         /**
@@ -96,7 +96,7 @@ NXS_NAMESPACE
          * pass a stack-allocated pointer to this function, as OwningBuffer will
          * attempt to destroy it in its destructor, causing undefined behavior.
          */
-        void Take(uint8*& data, uint64 size);
+        void Take(uint8_t*& data, uint64_t size);
 
         /**
          * @brief Returns the ownership of the currently managed buffer to the caller.
@@ -106,19 +106,19 @@ NXS_NAMESPACE
          * @param outSize An output parameter that receives the size of the returned buffer.
          * @return A raw pointer to the managed data.
          */
-        NODISCARD uint8* Give(uint64& outSize);
+        NODISCARD uint8_t* Give(uint64_t& outSize);
 
-        NODISCARD const uint8* Data() const override
+        NODISCARD const uint8_t* Data() const override
         {
             return m_buffer.get();
         }
 
-        NODISCARD uint8* Data() override
+        NODISCARD uint8_t* Data() override
         {
             return m_buffer.get();
         }
 
-        NODISCARD uint64 Size() const override
+        NODISCARD uint64_t Size() const override
         {
             return m_size;
         }
@@ -133,8 +133,8 @@ NXS_NAMESPACE
         }
 
     private:
-        std::unique_ptr<uint8[]> m_buffer;
+        std::unique_ptr<uint8_t[]> m_buffer;
         /// OwningBuffer size in bytes.
-        uint64 m_size = 0;
+        uint64_t m_size = 0;
     };
 }

@@ -163,7 +163,7 @@ namespace
     private:
         DrawMode m_drawMode;
         std::vector<Vertex> m_vertices;
-        std::vector<uint32> m_indices;
+        std::vector<uint32_t> m_indices;
         Ref<VertexBuffer>   m_vertexBuffer;
         Ref<IndexBuffer>    m_indexBuffer;
         size_t m_maxVertex = 0;

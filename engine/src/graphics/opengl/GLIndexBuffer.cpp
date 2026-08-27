@@ -9,7 +9,7 @@
 
 USING_NAMESPACE_NXS;
 
-std::atomic<uint32> GLIndexBuffer::s_bindingBuffer(0);
+std::atomic<uint32_t> GLIndexBuffer::s_bindingBuffer(0);
 
 GLIndexBuffer::~GLIndexBuffer()
 {
@@ -41,7 +41,7 @@ void GLIndexBuffer::CopyData(const void* data, size_t bytes, size_t offset)
     CALL_GL_FUNC(glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, offset, bytes, data));
 }
 
-uint32 GLIndexBuffer::Alloc()
+uint32_t GLIndexBuffer::Alloc()
 {
     CALL_GL_FUNC(glGenBuffers(1, &m_handle));
     return m_handle;

@@ -112,7 +112,7 @@ void GLRenderingInterface::SwapBuffer()
     SDL_GL_SwapWindow(m_window);
 }
 
-void GLRenderingInterface::SetViewport(int32 x, int32 y, int32 w, int32 h)
+void GLRenderingInterface::SetViewport(int32_t x, int32_t y, int32_t w, int32_t h)
 {
     CALL_GL_FUNC(glViewport(x, y, w, h));
 }
@@ -160,7 +160,7 @@ void GLRenderingInterface::DrawIndexed(const Ref<IndexBuffer> indexBuffer)
     }
 }
 
-void GLRenderingInterface::DrawIndexedInstanced(const Ref<IndexBuffer> indexBuffer, const uint32 instanceCount)
+void GLRenderingInterface::DrawIndexedInstanced(const Ref<IndexBuffer> indexBuffer, const uint32_t instanceCount)
 {
     rmt_ScopedCPUSample(GLRendering_DrawIndexedInstanced, 0);
     NXS_ASSERT(indexBuffer != nullptr);

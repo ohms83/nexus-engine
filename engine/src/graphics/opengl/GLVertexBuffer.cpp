@@ -9,7 +9,7 @@
 
 USING_NAMESPACE_NXS;
 
-std::atomic<uint32> GLVertexBuffer::s_bindingBuffer(0);
+std::atomic<uint32_t> GLVertexBuffer::s_bindingBuffer(0);
 
 GLVertexBuffer::~GLVertexBuffer()
 {
@@ -127,7 +127,7 @@ void GLVertexBuffer::Build_Impl()
     // Runtime-attached instance buffers are handled by AttachInstanceStream and immediately registered
 }
 
-uint32 GLVertexBuffer::Alloc()
+uint32_t GLVertexBuffer::Alloc()
 {
     CALL_GL_FUNC(glGenVertexArrays(1, &m_handle));
     return m_handle;

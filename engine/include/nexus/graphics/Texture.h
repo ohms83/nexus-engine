@@ -16,21 +16,21 @@ NXS_NAMESPACE
     class Texture final : public Resource
     {
     public:
-        explicit Texture(std::string path, const uint32 resourceId)
+        explicit Texture(std::string path, const uint32_t resourceId)
             : Resource(std::move(path), resourceId)
         {
         }
 
         ~Texture() override;
 
-        void SetSize(int32 width, int32 height);
-        void SetNumChannels(int32 channels);
+        void SetSize(int32_t width, int32_t height);
+        void SetNumChannels(int32_t channels);
         void SetWrapMode(TextureWrapMode wrapS, TextureWrapMode wrapT);
         void SetFiltering(TextureFilterMode minFilter, TextureFilterMode magFilter);
-        void SetNumMips(int32 numMips);
+        void SetNumMips(int32_t numMips);
         void DescribeTexture(const TextureDescription& desc);
 
-        MAYBE_UNUSED Ref<TextureProxy> AllocateGpuResource(const uint8* pixels, size_t size, Ref<RenderingInterface> renderingInterface);
+        MAYBE_UNUSED Ref<TextureProxy> AllocateGpuResource(const uint8_t* pixels, size_t size, Ref<RenderingInterface> renderingInterface);
 
         NODISCARD Ref<TextureProxy> GetProxy() const
         {

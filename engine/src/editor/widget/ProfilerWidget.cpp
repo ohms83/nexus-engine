@@ -25,7 +25,7 @@ void ProfilerWidget::Draw_Internal(RenderSystem& renderSystem)
 {
     const ImGuiIO& io = ImGui::GetIO(); (void)io;
 
-    const uint32 frameIndex = renderSystem.GetFrameIndex();
+    const uint32_t frameIndex = renderSystem.GetFrameIndex();
     const auto frameTime = 1000.0f / io.Framerate; // Frame update time in seconds.
     const auto& api = GraphicsAPIToString(renderSystem.GetGraphicsConfig().api);
     ImGui::Text("Graphics API: %s", api.c_str());
@@ -43,12 +43,12 @@ void ProfilerWidget::Draw_Internal(RenderSystem& renderSystem)
         ImPlot::SetupAxisLimits(ImAxis_Y1,0,60);
         ImPlot::SetNextFillStyle(ImVec4(1,1,0,1),0.25f);
         m_frameCounters.push_back(frameIndex);
-        m_frameTimes.push_back(CAST<uint32>(frameTime));
+        m_frameTimes.push_back(CAST<uint32_t>(frameTime));
 
         if (m_frameCounters.size() > MAX_PROFILED_FRAMES) m_frameCounters.erase(m_frameCounters.begin());
         if (m_frameTimes.size() > MAX_PROFILED_FRAMES) m_frameTimes.erase(m_frameTimes.begin());
 
-        const int32 dataCount = m_frameTimes.size() < MAX_PROFILED_FRAMES ? m_frameTimes.size() : MAX_PROFILED_FRAMES;
+        const int32_t dataCount = m_frameTimes.size() < MAX_PROFILED_FRAMES ? m_frameTimes.size() : MAX_PROFILED_FRAMES;
         ImPlot::PlotShaded("Frame", m_frameCounters.data(), m_frameTimes.data(), dataCount);
         ImPlot::EndPlot();
     }

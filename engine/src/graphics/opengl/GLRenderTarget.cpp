@@ -7,7 +7,7 @@
 
 USING_NAMESPACE_NXS;
 
-GLRenderTarget::GLRenderTarget(uint32 width, uint32 height, PixelFormat format)
+GLRenderTarget::GLRenderTarget(uint32_t width, uint32_t height, PixelFormat format)
     : m_width(width), m_height(height), m_format(format)
 {
 }
@@ -36,7 +36,7 @@ void GLRenderTarget::Bind(RenderSystem& rs)
         m_colorTexture->Begin(desc);
         // Allocate empty texture
         const size_t bytes = desc.GetBufferSize();
-        std::vector<uint8> empty(bytes, 0);
+        std::vector<uint8_t> empty(bytes, 0);
         m_colorTexture->LoadData(empty.data(), INT_CAST(bytes));
         m_colorTexture->End();
 
@@ -47,7 +47,7 @@ void GLRenderTarget::Bind(RenderSystem& rs)
         dd.format = PixelFormat::Depth;
         m_depthTexture->Begin(dd);
         const size_t db = dd.GetBufferSize();
-        std::vector<uint8> emptyDepth(db, 0);
+        std::vector<uint8_t> emptyDepth(db, 0);
         m_depthTexture->LoadData(emptyDepth.data(), INT_CAST(db));
         m_depthTexture->End();
 

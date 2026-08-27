@@ -9,16 +9,6 @@
 
 namespace nxs
 {
-    typedef int8_t      int8;
-    typedef int16_t     int16;
-    typedef int32_t     int32;
-    typedef int64_t     int64;
-
-    typedef uint8_t     uint8;
-    typedef uint16_t    uint16;
-    typedef uint32_t    uint32;
-    typedef uint64_t    uint64;
-
     enum class DataType
     {
         None,
@@ -45,16 +35,16 @@ namespace nxs
         {
         case DataType::UByte:
         case DataType::Byte:
-            return sizeof(uint8);
+            return sizeof(uint8_t);
         case DataType::UShort:
         case DataType::Short:
-            return sizeof(uint16);
+            return sizeof(uint16_t);
         case DataType::UInt32:
         case DataType::Int32:
-            return sizeof(uint32);
+            return sizeof(uint32_t);
         case DataType::UInt64:
         case DataType::Int64:
-            return sizeof(uint64);
+            return sizeof(uint64_t);
         case DataType::Float:
             return sizeof(float);
         case DataType::Double:

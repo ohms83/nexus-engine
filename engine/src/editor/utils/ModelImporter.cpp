@@ -167,7 +167,7 @@ void ModelImporter::ProcessMesh(Ref<SceneNode> sceneNode, const aiMesh* ai_mesh,
     meshComp->SetMesh(newMesh);
     
     std::vector<Vertex> vertices;
-    std::vector<uint32> indices;
+    std::vector<uint32_t> indices;
     Ref<VertexBuffer> vertexBuffer;
     Ref<IndexBuffer> indexBuffer;
     auto renderingInterface = Engine::Instance().GetRenderingInterface();
@@ -230,7 +230,7 @@ void ModelImporter::ProcessMesh(Ref<SceneNode> sceneNode, const aiMesh* ai_mesh,
     }
 
     auto indexData = std::make_shared<OwningBuffer>();
-    indexData->Copy<uint32>(indices);
+    indexData->Copy<uint32_t>(indices);
 
     indexBuffer->Begin()
         .SetIndices(indexData, FrontFace::CounterClockWise)
@@ -259,11 +259,11 @@ void ModelImporter::ProcessMaterial(Ref<Mesh> newMesh, const aiMesh* ai_mesh, co
 
     const Ref<Material> newMat = resourceManager->Create<Material>(materialName);
 #define READ_BOOL_PROPERTY(key, property) \
-    if (int32 value; material->Get(key, value) == AI_SUCCESS) { \
+    if (int32_t value; material->Get(key, value) == AI_SUCCESS) { \
         newMat->property = value; \
     }
 #define READ_INT_PROPERTY(key, property) \
-    if (int32 value; material->Get(key, value) == AI_SUCCESS) { \
+    if (int32_t value; material->Get(key, value) == AI_SUCCESS) { \
         newMat->property = value; \
     }
 #define READ_FLOAT_PROPERTY(key, property) \
@@ -275,7 +275,7 @@ void ModelImporter::ProcessMaterial(Ref<Mesh> newMesh, const aiMesh* ai_mesh, co
         newMat->property.r = color.r; newMat->property.g = color.g; newMat->property.b = color.b; \
     }
 #define READ_ENUM_PROPERTY(key, property, enumType) \
-    if (int32 value; material->Get(key, value) == AI_SUCCESS) { \
+    if (int32_t value; material->Get(key, value) == AI_SUCCESS) { \
         newMat->property = CAST<enumType>(value); \
     }
 
@@ -308,7 +308,7 @@ void ModelImporter::ProcessTextures(Ref<Material> newMat, const aiMaterial* ai_m
     for (const auto& [ai_type, textureType] : s_textureTypeMap)
     {
         const auto numTexture = ai_material->GetTextureCount(ai_type);
-        for (int32 i = 0; i < numTexture; ++i)
+        for (int32_t i = 0; i < numTexture; ++i)
         {
             aiString path;
             ai_material->GetTexture(ai_type, i, &path);

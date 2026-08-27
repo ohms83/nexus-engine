@@ -13,8 +13,8 @@ NXS_NAMESPACE
     struct GraphicsConfig
     {
         GraphicsAPI api = GraphicsAPI::Undefined;
-        int32 screenWidth = 0;
-        int32 screenHeight = 0;
+        int32_t screenWidth = 0;
+        int32_t screenHeight = 0;
         //! Enable/disable VSync.
         bool vsync = false;
 

@@ -15,13 +15,13 @@ NXS_NAMESPACE
     {
     public:
         Hasher() = default;
-        explicit Hasher(uint32 seed);
+        explicit Hasher(uint32_t seed);
 
-        uint32 Hash32(const void* data, size_t size) const;
-        uint32 Hash32(const std::vector<uint8>& buffer) const;
-        uint32 Hash32(const std::string& str) const;
+        uint32_t Hash32(const void* data, size_t size) const;
+        uint32_t Hash32(const std::vector<uint8_t>& buffer) const;
+        uint32_t Hash32(const std::string& str) const;
 
     private:
-        uint32 m_seed = 0;
+        uint32_t m_seed = 0;
     };
 }

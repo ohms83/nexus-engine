@@ -7,7 +7,7 @@ ToggleMenuItem::ToggleMenuItem()
 }
 
 ToggleMenuItem::ToggleMenuItem(
-    uint32 group,
+    uint32_t group,
     const std::string& name,
     const std::string& desc,
     const std::string& shortcut,

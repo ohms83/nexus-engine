@@ -39,19 +39,19 @@ NXS_NAMESPACE
          * @brief Provides read-only access to the buffer's data.
          * @return A constant pointer to the buffer's data.
          */
-        NODISCARD virtual const uint8* Data() const = 0;
+        NODISCARD virtual const uint8_t* Data() const = 0;
 
         /**
          * @brief Provides read-write access to the buffer's data.
          * @return A non-constant pointer to the buffer's data.
          */
-        NODISCARD virtual uint8* Data() = 0;
+        NODISCARD virtual uint8_t* Data() = 0;
 
         /**
          * @brief Gets the buffer size.
          * @return The buffer size in bytes.
          */
-        NODISCARD virtual uint64 Size() const = 0;
+        NODISCARD virtual uint64_t Size() const = 0;
 
         /**
          * @brief Copies data into the buffer.

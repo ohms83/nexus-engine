@@ -36,16 +36,16 @@ NXS_NAMESPACE
 
     struct TextureDescription
     {
-        int32 width = 0;
-        int32 height = 0;
-        int32 channels = 4;
+        int32_t width = 0;
+        int32_t height = 0;
+        int32_t channels = 4;
         PixelFormat format = PixelFormat::RGBA;
         DataType componentType = DataType::UByte;
         TextureWrapMode wrapModeS = TextureWrapMode::Repeat;
         TextureWrapMode wrapModeT = TextureWrapMode::Repeat;
         TextureFilterMode filterMin = TextureFilterMode::Linear;
         TextureFilterMode filterMag = TextureFilterMode::Linear;
-        uint32 numMips = 0;
+        uint32_t numMips = 0;
 
         size_t GetBufferSize() const;
     };
@@ -59,28 +59,28 @@ NXS_NAMESPACE
         TextureProxy() = default;
         ~TextureProxy() override;
 
-        NODISCARD uint32 GetHandle() const override
+        NODISCARD uint32_t GetHandle() const override
         {
             return m_textureID;
         }
 
         //! Begin building this texture
         virtual TextureProxy& Begin(const TextureDescription& info);
-        virtual TextureProxy& LoadData(const uint8* data, uint32 size);
-        virtual TextureProxy& LoadMipData(const uint8* data, uint32 size, uint32 mip);
+        virtual TextureProxy& LoadData(const uint8_t* data, uint32_t size);
+        virtual TextureProxy& LoadMipData(const uint8_t* data, uint32_t size, uint32_t mip);
         virtual void End();
 
     protected:
-        uint32 m_textureID = 0;
-        int32 m_width = 0;
-        int32 m_height = 0;
-        int32 m_channels = 0;
+        uint32_t m_textureID = 0;
+        int32_t m_width = 0;
+        int32_t m_height = 0;
+        int32_t m_channels = 0;
         PixelFormat m_format = PixelFormat::None;
         DataType m_componentType = DataType::None;
         TextureWrapMode m_wrapModeS = TextureWrapMode::Clamp;
         TextureWrapMode m_wrapModeT = TextureWrapMode::Clamp;
         TextureFilterMode m_filterMin = TextureFilterMode::Linear;
         TextureFilterMode m_filterMag = TextureFilterMode::Linear;
-        uint32 m_numMips = 0;
+        uint32_t m_numMips = 0;
     };
 }

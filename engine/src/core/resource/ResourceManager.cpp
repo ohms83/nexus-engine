@@ -137,7 +137,7 @@ bool ResourceManager::Unload(std::type_index type, const std::string& path)
 
 void ResourceManager::PurgeUnused(std::type_index type)
 {
-    uint32 count = 0;
+    uint32_t count = 0;
     auto& resourceMap = GetResourceMap(type);
     for (auto itr = resourceMap.begin(); itr != resourceMap.end();)
     {

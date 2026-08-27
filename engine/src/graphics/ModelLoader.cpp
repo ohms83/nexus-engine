@@ -104,7 +104,7 @@ ModelLoader::ModelLoader(
     NXS_ASSERT(renderingInterface && resourceManager);
 }
 
-Ref<Resource> ModelLoader::Load(const std::string &path, uint32 id)
+Ref<Resource> ModelLoader::Load(const std::string &path, uint32_t id)
 {
     Assimp::Importer importer;
     // The ReadFile method returns an aiScene object.
@@ -139,7 +139,7 @@ Ref<Resource> ModelLoader::Load(const std::string &path, uint32 id)
     return model;
 }
 
-Ref<IResourceLoader::LoadResult> ModelLoader::LoadAsync(const std::string& path, uint32 id, TaskScheduler& scheduler, Callback onFinishCallback)
+Ref<IResourceLoader::LoadResult> ModelLoader::LoadAsync(const std::string& path, uint32_t id, TaskScheduler& scheduler, Callback onFinishCallback)
 {
     const auto directory = std::filesystem::path(path).parent_path();
 
@@ -248,7 +248,7 @@ void ModelLoader::ProcessMesh(const Ref<Model>& model, const aiMesh* mesh, const
 {
     const auto newMesh = std::make_shared<Mesh>(mesh->mName.C_Str());
     std::vector<Vertex> vertices;
-    std::vector<uint32> indices;
+    std::vector<uint32_t> indices;
     Ref<VertexBuffer> vertexBuffer;
     Ref<IndexBuffer> indexBuffer;
     vertexBuffer.reset(m_renderingInterface->CreateVertexBuffer());
@@ -309,7 +309,7 @@ void ModelLoader::ProcessMesh(const Ref<Model>& model, const aiMesh* mesh, const
     }
 
     auto indexData = std::make_shared<OwningBuffer>();
-    indexData->Copy<uint32>(indices);
+    indexData->Copy<uint32_t>(indices);
 
     indexBuffer->Begin()
         .SetIndices(indexData, FrontFace::CounterClockWise)
@@ -340,11 +340,11 @@ void ModelLoader::ProcessMaterial(const Ref<Mesh>& newMesh, const aiMesh* mesh, 
 
     const Ref<Material> newMat = m_resourceManager->Create<Material>(materialName);
 #define READ_BOOL_PROPERTY(key, property) \
-    if (int32 value; material->Get(key, value) == AI_SUCCESS) { \
+    if (int32_t value; material->Get(key, value) == AI_SUCCESS) { \
         newMat->property = value; \
     }
 #define READ_INT_PROPERTY(key, property) \
-    if (int32 value; material->Get(key, value) == AI_SUCCESS) { \
+    if (int32_t value; material->Get(key, value) == AI_SUCCESS) { \
         newMat->property = value; \
     }
 #define READ_FLOAT_PROPERTY(key, property) \
@@ -356,7 +356,7 @@ void ModelLoader::ProcessMaterial(const Ref<Mesh>& newMesh, const aiMesh* mesh, 
         newMat->property.r = color.r; newMat->property.g = color.g; newMat->property.b = color.b; \
     }
 #define READ_ENUM_PROPERTY(key, property, enumType) \
-    if (int32 value; material->Get(key, value) == AI_SUCCESS) { \
+    if (int32_t value; material->Get(key, value) == AI_SUCCESS) { \
         newMat->property = CAST<enumType>(value); \
     }
 
@@ -389,7 +389,7 @@ void ModelLoader::ProcessTextures(const Ref<Material>& newMat, const aiMaterial*
     for (const auto& [aiType, textureType] : s_textureTypeMap)
     {
         const auto numTexture = material->GetTextureCount(aiType);
-        for (int32 i = 0; i < numTexture; ++i)
+        for (int32_t i = 0; i < numTexture; ++i)
         {
             aiString path;
             material->GetTexture(aiType, i, &path);

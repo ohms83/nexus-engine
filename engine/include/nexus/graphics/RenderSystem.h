@@ -48,7 +48,7 @@ NXS_NAMESPACE
         void BeginDraw();
         void Draw();
         void DrawIndexed(Ref<IndexBuffer> indexBuffer);
-        void DrawIndexedInstanced(Ref<IndexBuffer> indexBuffer, uint32 instanceCount);
+        void DrawIndexedInstanced(Ref<IndexBuffer> indexBuffer, uint32_t instanceCount);
         void EndDraw();
 
         //! An event handler called when the window resize event occured.
@@ -72,19 +72,19 @@ NXS_NAMESPACE
             return m_renderTime;
         }
 
-        NODISCARD uint32 GetFrameIndex() const
+        NODISCARD uint32_t GetFrameIndex() const
         {
             return m_frameIndex;
         }
 
         //! Get the number of draw-calls from the previous frame.
-        NODISCARD uint32 GetDrawCount() const
+        NODISCARD uint32_t GetDrawCount() const
         {
             return m_drawCount;
         }
 
         //! Get the total number of polygons drawn in the previous frame.
-        NODISCARD uint32 GetPolygonCount() const
+        NODISCARD uint32_t GetPolygonCount() const
         {
             return m_polygonCount;
         }
@@ -111,9 +111,9 @@ NXS_NAMESPACE
         Color4F m_clearColor = Color4F::Grey;
         float m_clearDepth = 1.0f;
 
-        uint32 m_frameIndex = 0;
-        uint32 m_drawCount = 0;
-        uint32 m_polygonCount = 0;
+        uint32_t m_frameIndex = 0;
+        uint32_t m_drawCount = 0;
+        uint32_t m_polygonCount = 0;
 
         //! Time spent rendering the last frame in milliseconds. Mainly used for profiling.
         float m_renderTime = 0.0f;

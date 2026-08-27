@@ -40,7 +40,7 @@ NXS_NAMESPACE
         bool editMode = true;
         bool maximize = true;
         bool allowProfile = false;
-        int32 quitKey = SDLK_ESCAPE;
+        int32_t quitKey = SDLK_ESCAPE;
 
         bool LoadConfig(const std::string& filePath);
     };
@@ -118,8 +118,8 @@ NXS_NAMESPACE
         virtual void OnFocusGain();
         virtual void OnKeyDown(SDL_Keycode key);
         virtual void OnKeyUp(SDL_Keycode key);
-        virtual void OnMouseDown(int32 buttonId, float x, float y);
-        virtual void OnMouseUp(int32 buttonId, float x, float y);
+        virtual void OnMouseDown(int32_t buttonId, float x, float y);
+        virtual void OnMouseUp(int32_t buttonId, float x, float y);
         virtual void OnMouseMove(float x, float y);
         virtual void OnResize(const glm::ivec2& screenSize, const glm::ivec2& actualSize);
 

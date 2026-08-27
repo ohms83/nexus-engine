@@ -45,7 +45,7 @@ NXS_NAMESPACE
          * @param id The unique resource ID.
          * @return A Ref to the loaded IResource on success, or nullptr on failure.
          */
-        MAYBE_UNUSED virtual Ref<Resource> Load(const std::string& path, uint32 id) = 0;
+        MAYBE_UNUSED virtual Ref<Resource> Load(const std::string& path, uint32_t id) = 0;
         /**
          * @brief Attempts to load a resource asynchronously from a given path.
          *
@@ -63,7 +63,7 @@ NXS_NAMESPACE
          * @return A Ref to an `IResourceLoader::LoadResult` object that can be used to
          * monitor the loading status.
          */
-        MAYBE_UNUSED virtual Ref<LoadResult> LoadAsync(const std::string& path, uint32 id, TaskScheduler& scheduler, Callback onFinishCallback) = 0;
+        MAYBE_UNUSED virtual Ref<LoadResult> LoadAsync(const std::string& path, uint32_t id, TaskScheduler& scheduler, Callback onFinishCallback) = 0;
     };
 
 } // NXS_NAMESPACE

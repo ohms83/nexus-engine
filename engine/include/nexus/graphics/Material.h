@@ -52,7 +52,7 @@ NXS_NAMESPACE
     class Material final : public Resource, public ISerializeable
     {
     public:
-        explicit Material(std::string path, uint32 resourceId);
+        explicit Material(std::string path, uint32_t resourceId);
 
         Color3F ambient {0.2f, 0.2f, 0.2f};
         Color3F diffuse {0.8f, 0.8f, 0.8f};
@@ -72,15 +72,15 @@ NXS_NAMESPACE
          * @param type Texture type.
          * @return Newly added texture's slot, or -1 if the error occured.
          */
-        MAYBE_UNUSED int32 AddTexture(Ref<Texture> texture, TextureType type);
+        MAYBE_UNUSED int32_t AddTexture(Ref<Texture> texture, TextureType type);
         /**
          * Add the given texture to the texture list.
          * @param texture Texture to add.
          * @param uniform A uniform name of this texture.
          * @return Newly added texture's slot.
          */
-        MAYBE_UNUSED int32 AddTexture(Ref<Texture> texture, std::string uniform);
-        Ref<Texture> GetTexture(uint32 slot);
+        MAYBE_UNUSED int32_t AddTexture(Ref<Texture> texture, std::string uniform);
+        Ref<Texture> GetTexture(uint32_t slot);
 
         //! Check whether a texture of the specified type is used in this material.
         bool HasTextureType(TextureType type) const;
@@ -110,9 +110,9 @@ NXS_NAMESPACE
         void Resolve(class ResourceManager& resourceManager);
 
         // Accessors for texture metadata
-        NODISCARD std::string GetTexturePath(uint32 slot) const;
-        NODISCARD std::string GetTextureUniform(uint32 slot) const;
-        NODISCARD TextureType GetTextureType(uint32 slot) const;
+        NODISCARD std::string GetTexturePath(uint32_t slot) const;
+        NODISCARD std::string GetTextureUniform(uint32_t slot) const;
+        NODISCARD TextureType GetTextureType(uint32_t slot) const;
 
     private:
         Ref<Shader> m_shader;

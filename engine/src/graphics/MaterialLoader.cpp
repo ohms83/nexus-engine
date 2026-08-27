@@ -12,7 +12,7 @@ MaterialLoader::MaterialLoader(const Ref<RenderingInterface>& renderingInterface
 {
 }
 
-Ref<Resource> MaterialLoader::Load(const std::string& path, uint32 id)
+Ref<Resource> MaterialLoader::Load(const std::string& path, uint32_t id)
 {
     return nullptr;
 }

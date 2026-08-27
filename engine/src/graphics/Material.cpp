@@ -32,12 +32,12 @@ static const std::map<TextureType, std::string> s_textureTypeUniformNames = {
     {TextureType::LightMap, "_LightMap"},
 };
 
-Material::Material(std::string path, const uint32 resourceId)
+Material::Material(std::string path, const uint32_t resourceId)
     : Resource(std::move(path), resourceId)
 {
 }
 
-int32 Material::AddTexture(Ref<Texture> texture, TextureType type)
+int32_t Material::AddTexture(Ref<Texture> texture, TextureType type)
 {
     const auto& itr = s_textureTypeUniformNames.find(type);
     if (itr == s_textureTypeUniformNames.end())
@@ -46,7 +46,7 @@ int32 Material::AddTexture(Ref<Texture> texture, TextureType type)
         return -1;
     }
 
-    const int32 slot = INT_CAST(m_textures.size());
+    const int32_t slot = INT_CAST(m_textures.size());
     Material::TextureInfo info;
     info.texture = texture;
     info.type = type;
@@ -56,9 +56,9 @@ int32 Material::AddTexture(Ref<Texture> texture, TextureType type)
     return slot;
 }
 
-int32 Material::AddTexture(Ref<Texture> texture, std::string uniform)
+int32_t Material::AddTexture(Ref<Texture> texture, std::string uniform)
 {
-    const int32 slot = INT_CAST(m_textures.size());
+    const int32_t slot = INT_CAST(m_textures.size());
     Material::TextureInfo info;
     info.texture = texture;
     info.type = TextureType::Undefined;
@@ -68,7 +68,7 @@ int32 Material::AddTexture(Ref<Texture> texture, std::string uniform)
     return slot;
 }
 
-Ref<Texture> Material::GetTexture(uint32 slot)
+Ref<Texture> Material::GetTexture(uint32_t slot)
 {
     if (slot < m_textures.size()) return m_textures[slot].texture;
     LOG_ERROR(LogMaterial, std::format("Invalid slot: {}", slot));
@@ -107,7 +107,7 @@ Ref<GpuProgram> Material::Use()
     gpuProgram->SetUniformVector("_Material.emissive", emissive);
     gpuProgram->SetUniformFloat("_Material.shininess", shininess);
 
-    uint32 slot = 0;
+    uint32_t slot = 0;
     for (const auto& textureInfo : m_textures)
     {
         if (!textureInfo.texture) continue;
@@ -237,19 +237,19 @@ void Material::Resolve(ResourceManager& resourceManager)
     }
 }
 
-std::string Material::GetTexturePath(uint32 slot) const
+std::string Material::GetTexturePath(uint32_t slot) const
 {
     if (slot < m_textures.size()) return m_textures[slot].path;
     return std::string();
 }
 
-std::string Material::GetTextureUniform(uint32 slot) const
+std::string Material::GetTextureUniform(uint32_t slot) const
 {
     if (slot < m_textures.size()) return m_textures[slot].uniformName;
     return std::string();
 }
 
-TextureType Material::GetTextureType(uint32 slot) const
+TextureType Material::GetTextureType(uint32_t slot) const
 {
     if (slot < m_textures.size()) return m_textures[slot].type;
     return TextureType::Undefined;

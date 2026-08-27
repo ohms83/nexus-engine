@@ -44,13 +44,13 @@ TextureProxy& TextureProxy::Begin(const TextureDescription& info)
     return *this;
 }
 
-TextureProxy& TextureProxy::LoadData(const uint8* data, uint32 size)
+TextureProxy& TextureProxy::LoadData(const uint8_t* data, uint32_t size)
 {
     assert(m_textureID != 0);
     return *this;
 }
 
-TextureProxy& TextureProxy::LoadMipData(const uint8* data, uint32 size, uint32 mip)
+TextureProxy& TextureProxy::LoadMipData(const uint8_t* data, uint32_t size, uint32_t mip)
 {
     assert(m_textureID != 0);
     return *this;

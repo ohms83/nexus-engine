@@ -29,7 +29,7 @@ NXS_NAMESPACE
         void ClearKeyStates();
 
         using KeyEventCallback = sigslot::signal<SDL_Keycode>;
-        using MouseButtonEventCallback = sigslot::signal<int32, float, float>;
+        using MouseButtonEventCallback = sigslot::signal<int32_t, float, float>;
         using MouseMotionEventCallback = sigslot::signal<float, float>;
 
         void RegisterAxisInputMap(const std::string& actionName, const KeyInputMap& inputMap);
@@ -41,11 +41,11 @@ NXS_NAMESPACE
         void OnKeyDown(SDL_Keycode key);
         void OnKeyUp(SDL_Keycode key);
 
-        void OnMouseDown(int32 buttonId, float x, float y);
-        void OnMouseUp(int32 buttonId, float x, float y);
+        void OnMouseDown(int32_t buttonId, float x, float y);
+        void OnMouseUp(int32_t buttonId, float x, float y);
         void OnMouseMove(float x, float y);
 
-        bool IsMouseDown(int32 buttonId) const;
+        bool IsMouseDown(int32_t buttonId) const;
 
         KeyEventCallback keyDownEventCallback;
         KeyEventCallback keyUpEventCallback;
@@ -61,7 +61,7 @@ NXS_NAMESPACE
             glm::vec2 prevPos;
         };
         std::unordered_map<SDL_Keycode, bool> m_keys;
-        std::unordered_map<int32, bool> m_mouseButtons;
+        std::unordered_map<int32_t, bool> m_mouseButtons;
         std::unordered_map<std::string, KeyInputMap> m_axisInputMap;
         std::unordered_map<std::string, MovieAxisMapValue> m_mouseAxisMappings;
     };

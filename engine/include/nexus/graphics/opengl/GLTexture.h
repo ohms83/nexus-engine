@@ -21,16 +21,16 @@ NXS_NAMESPACE
         NODISCARD bool IsBinding() const override;
 
         TextureProxy& Begin(const TextureDescription& info) override;
-        TextureProxy& LoadData(const uint8* data, uint32 size) override;
-        TextureProxy& LoadMipData(const uint8* data, uint32 size, uint32 mip) override;
+        TextureProxy& LoadData(const uint8_t* data, uint32_t size) override;
+        TextureProxy& LoadMipData(const uint8_t* data, uint32_t size, uint32_t mip) override;
 
         void CopyData(const void* data, size_t bytes, size_t) override;
 
     protected:
-        NODISCARD uint32 Alloc() override;
+        NODISCARD uint32_t Alloc() override;
         void Release() override;
 
     private:
-        static std::atomic<uint32> s_bindingTexture;
+        static std::atomic<uint32_t> s_bindingTexture;
     };
 }

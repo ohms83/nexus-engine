@@ -3,6 +3,7 @@
 #include <memory>
 #include <cstring>
 #include <functional>
+#include <cstdint>
 
 #include "NxsDataType.h"
 

@@ -33,11 +33,11 @@ NXS_NAMESPACE
          * @param id The unique resource ID.
          * @return A Ref to the loaded IResource on success, or nullptr on failure.
          */
-        MAYBE_UNUSED Ref<Resource> Load(const std::string& path, uint32 id) override;
+        MAYBE_UNUSED Ref<Resource> Load(const std::string& path, uint32_t id) override;
 
         MAYBE_UNUSED Ref<LoadResult> LoadAsync(
             const std::string& path,
-            uint32 id,
+            uint32_t id,
             TaskScheduler& scheduler,
             Callback onFinishCallback) override;
 

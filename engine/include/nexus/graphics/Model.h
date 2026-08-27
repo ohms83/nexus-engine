@@ -20,7 +20,7 @@ NXS_NAMESPACE
     class Model final : public Resource
     {
     public:
-        explicit Model(std::string path, const uint32 resourceId)
+        explicit Model(std::string path, const uint32_t resourceId)
             : Resource(std::move(path), resourceId)
         {
         }

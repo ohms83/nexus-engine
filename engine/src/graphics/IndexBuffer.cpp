@@ -48,7 +48,7 @@ void IndexBuffer::Build()
     Unbind();
 }
 
-uint32 IndexBuffer::NumIndex() const
+uint32_t IndexBuffer::NumIndex() const
 {
     return m_numIndex;
 }
@@ -63,9 +63,9 @@ uint32_t IndexBuffer::GetNumIndexDraw() const
     return m_numIndexDraw;
 }
 
-uint32 IndexBuffer::NumPolygons() const
+uint32_t IndexBuffer::NumPolygons() const
 {
-    const uint32 numIndices = GetNumIndexDraw();
+    const uint32_t numIndices = GetNumIndexDraw();
     switch (m_drawMode)
     {
     case DrawMode::Line:
@@ -107,7 +107,7 @@ void IndexBuffer::ReArrangeIndex(const FrontFace frontFace)
         return;
     }
 
-    auto indexData = R_CAST<uint32*>(m_indexData->Data());
+    auto indexData = R_CAST<uint32_t*>(m_indexData->Data());
     const auto stride = m_drawMode == DrawMode::Triangle ? 3 : 4;
     const auto swapIndex = m_drawMode == DrawMode::Triangle ? 2 : 3;
     for (size_t i = 0; i < NumPolygons(); i++)
@@ -117,13 +117,13 @@ void IndexBuffer::ReArrangeIndex(const FrontFace frontFace)
     }
 }
 
-void IndexBuffer::CopyIndices(const std::vector<uint32>& indices, const size_t offset)
+void IndexBuffer::CopyIndices(const std::vector<uint32_t>& indices, const size_t offset)
 {
-    CopyData(indices.data(), indices.size() * sizeof(uint32), offset);
+    CopyData(indices.data(), indices.size() * sizeof(uint32_t), offset);
 }
 
 void IndexBuffer::CopyData(const void* data, const size_t bytes, const size_t offset)
 {
-    const auto indexData = CAST<uint8*>(C_CAST<void*>(data));
+    const auto indexData = CAST<uint8_t*>(C_CAST<void*>(data));
     m_indexData->CopyData(indexData, bytes, offset);
 }

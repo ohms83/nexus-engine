@@ -22,7 +22,7 @@ NXS_NAMESPACE
 
         void SwapBuffer() override;
 
-        void SetViewport(int32 x, int32 y, int32 w, int32 h) override;
+        void SetViewport(int32_t x, int32_t y, int32_t w, int32_t h) override;
 
         NODISCARD VertexBuffer* CreateVertexBuffer() const override;
         NODISCARD IndexBuffer* CreateIndexBuffer() const override;
@@ -32,7 +32,7 @@ NXS_NAMESPACE
         void OnResize(uint32_t pixel_w, uint32_t pixel_h) override;
 
         void DrawIndexed(const Ref<IndexBuffer> indexBuffer) override;
-        void DrawIndexedInstanced(const Ref<IndexBuffer> indexBuffer, uint32 instanceCount) override;
+        void DrawIndexedInstanced(const Ref<IndexBuffer> indexBuffer, uint32_t instanceCount) override;
 
         void SetColorMask(const glm::bvec4& mask) override;
         void SetDepthMask(bool mask) override;

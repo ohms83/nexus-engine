@@ -55,7 +55,7 @@ void RenderSystem::DrawIndexed(Ref<IndexBuffer> indexBuffer)
     m_polygonCount += indexBuffer->NumPolygons();
 }
 
-void RenderSystem::DrawIndexedInstanced(Ref<IndexBuffer> indexBuffer, uint32 instanceCount)
+void RenderSystem::DrawIndexedInstanced(Ref<IndexBuffer> indexBuffer, uint32_t instanceCount)
 {
     m_renderingInterface->DrawIndexedInstanced(indexBuffer, instanceCount);
     m_drawCount++;
@@ -73,7 +73,7 @@ void RenderSystem::EndDraw()
     m_frameIndex++;
 }
 
-void RenderSystem::OnResize(const uint32 pixel_w, const uint32 pixel_h)
+void RenderSystem::OnResize(const uint32_t pixel_w, const uint32_t pixel_h)
 {
     m_config.screenWidth = CAST<int>(pixel_w);
     m_config.screenHeight = CAST<int>(pixel_h);

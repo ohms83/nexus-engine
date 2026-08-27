@@ -46,14 +46,14 @@ public:
     void ClearDepth(float depth) override { }
     void ClearBuffer(const Color4F& color, float depth) override { }
     void SwapBuffer() override { }
-    void SetViewport(int32 x, int32 y, int32 w, int32 h) override { }
+    void SetViewport(int32_t x, int32_t y, int32_t w, int32_t h) override { }
     VertexBuffer* CreateVertexBuffer() const override { return nullptr; }
     IndexBuffer* CreateIndexBuffer() const override { return nullptr; }
     GpuProgram* CreateGpuProgram() const override { return new FakeGpuProgram(); }
     TextureProxy* CreateTexture() const override { return nullptr; }
     void OnResize(uint32_t pixel_w, uint32_t pixel_h) override { }
     void DrawIndexed(const Ref<IndexBuffer> indexBuffer) override { }
-    void DrawIndexedInstanced(const Ref<IndexBuffer> indexBuffer, uint32 instanceCount) override { }
+    void DrawIndexedInstanced(const Ref<IndexBuffer> indexBuffer, uint32_t instanceCount) override { }
     void SetColorMask(const glm::bvec4& mask) override { }
     void SetDepthMask(bool mask) override { }
     void SetDepthFunction(DepthFunction depthFunction) override { }

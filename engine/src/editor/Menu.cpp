@@ -256,7 +256,7 @@ void Menu::DrawMenu()
         {
             if (ImGui::BeginMenu(menu.c_str()))
             {
-                int32 group = -1;
+                int32_t group = -1;
                 for (const auto item : items)
                 {
                     if (group != -1 && group != item->GetGroup())
@@ -269,7 +269,7 @@ void Menu::DrawMenu()
                     {
                         item->OnSelected(!selected);
                     }
-                    group = CAST<int32>(item->GetGroup());
+                    group = CAST<int32_t>(item->GetGroup());
                 }
                 ImGui::EndMenu();
             }

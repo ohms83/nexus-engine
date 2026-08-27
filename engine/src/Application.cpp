@@ -309,13 +309,13 @@ void Application::OnKeyUp(const SDL_Keycode key)
     InputManager::Instance().OnKeyUp(key);
 }
 
-void Application::OnMouseDown(const int32 buttonId, const float x, const float y)
+void Application::OnMouseDown(const int32_t buttonId, const float x, const float y)
 {
     if (ImGui::GetIO().WantCaptureMouse) return;
     InputManager::Instance().OnMouseDown(buttonId, x, y);
 }
 
-void Application::OnMouseUp(const int32 buttonId, const float x, const float y)
+void Application::OnMouseUp(const int32_t buttonId, const float x, const float y)
 {
     if (ImGui::GetIO().WantCaptureMouse) return;
     InputManager::Instance().OnMouseUp(buttonId, x, y);

@@ -7,7 +7,7 @@ USING_NAMESPACE_NXS;
 
 DEFINE_LOG(ShaderLoader);
 
-Ref<Resource> ShaderLoader::Load(const std::string &path, uint32 id)
+Ref<Resource> ShaderLoader::Load(const std::string &path, uint32_t id)
 {
     const auto shader = std::make_shared<Shader>(path, id);
     std::string veretxShaderSource, fragmentShaderSource, geomtryShaderSource;
@@ -24,7 +24,7 @@ Ref<Resource> ShaderLoader::Load(const std::string &path, uint32 id)
     shader->CompileFromSource(*m_renderingInterface, veretxShaderSource, fragmentShaderSource, "");
     return PTR_CAST<Resource>(shader);
 }
-Ref<IResourceLoader::LoadResult> ShaderLoader::LoadAsync(const std::string& path, uint32 id, TaskScheduler& scheduler, Callback onFinishCallback)
+Ref<IResourceLoader::LoadResult> ShaderLoader::LoadAsync(const std::string& path, uint32_t id, TaskScheduler& scheduler, Callback onFinishCallback)
 {
     return std::make_shared<IResourceLoader::LoadResult>();
 }

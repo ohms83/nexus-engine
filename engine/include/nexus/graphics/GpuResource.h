@@ -14,7 +14,7 @@ NXS_NAMESPACE
         IGpuResource() = default;
         virtual ~IGpuResource() = default;
 
-        NODISCARD virtual uint32 GetHandle() const = 0;
+        NODISCARD virtual uint32_t GetHandle() const = 0;
 
         virtual void Bind() const = 0;
         virtual void Unbind() const = 0;
@@ -28,7 +28,7 @@ NXS_NAMESPACE
          * must provide the implementation of this function.
          * @return The generated resource handle; otherwise 0, if failed.
          */
-        NODISCARD virtual uint32 Alloc() = 0;
+        NODISCARD virtual uint32_t Alloc() = 0;
 
         //! Release the allocated GPU resource.
         virtual void Release() = 0;

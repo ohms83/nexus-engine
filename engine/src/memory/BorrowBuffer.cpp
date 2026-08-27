@@ -8,20 +8,20 @@ BorrowBuffer::~BorrowBuffer()
     Release();
 }
 
-BorrowBuffer::BorrowBuffer(uint8* data, const uint64 size)
+BorrowBuffer::BorrowBuffer(uint8_t* data, const uint64_t size)
     : m_data(data)
     , m_size(size)
 {
 }
 
 
-void BorrowBuffer::Borrow(uint8* data, const uint64 size)
+void BorrowBuffer::Borrow(uint8_t* data, const uint64_t size)
 {
     m_data = data;
     m_size = size;
 }
 
-uint64_t BorrowBuffer::CopyData(uint8* data, const uint64_t bytes, const uint64_t offset)
+uint64_t BorrowBuffer::CopyData(uint8_t* data, const uint64_t bytes, const uint64_t offset)
 {
     if (!data || !bytes || !m_data) return 0;
 

@@ -60,7 +60,7 @@ NXS_NAMESPACE
 
 USING_NAMESPACE_NXS;
 
-std::atomic<uint32> GLGpuProgram::s_bindingShader(0);
+std::atomic<uint32_t> GLGpuProgram::s_bindingShader(0);
 
 // Function to compile a shader
 static GLuint CompileShader(const std::string& source, GpuProgram::Type type)
@@ -135,14 +135,14 @@ bool GLGpuProgram::IsBinding() const
     return GetHandle() == s_bindingShader.load();
 }
 
-int32 GLGpuProgram::FindUniform_Internal(const std::string& name) const
+int32_t GLGpuProgram::FindUniform_Internal(const std::string& name) const
 {
     const auto location = glGetUniformLocation(m_id, name.c_str());
     CHECK_GL_ERROR(glGetUniformLocation);
     return location;
 }
 
-bool GLGpuProgram::SetUniformInt(const std::string& name, const int32 value)
+bool GLGpuProgram::SetUniformInt(const std::string& name, const int32_t value)
 {
     CHECK_IF_BINDING(false);
     const auto location = FindUniform(name);
@@ -205,7 +205,7 @@ bool GLGpuProgram::SetUniformMatrix(const std::string& name, const glm::mat4& ma
     return true;
 }
 
-bool GLGpuProgram::SetUniformTexture2D(const std::string& name, Ref<const TextureProxy> texture, const int32 textureUnit)
+bool GLGpuProgram::SetUniformTexture2D(const std::string& name, Ref<const TextureProxy> texture, const int32_t textureUnit)
 {
     CHECK_IF_BINDING(false);
     const auto location = FindUniform(name);
@@ -229,7 +229,7 @@ void GLGpuProgram::Unbind()
     if (IsBinding()) s_bindingShader.store(0);
 }
 
-uint32 GLGpuProgram::Alloc()
+uint32_t GLGpuProgram::Alloc()
 {
     const auto programHandle = glCreateProgram();
     CHECK_GL_ERROR(glCreateProgram);

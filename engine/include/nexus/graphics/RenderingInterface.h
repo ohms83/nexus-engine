@@ -38,7 +38,7 @@ NXS_NAMESPACE
 
         virtual void SwapBuffer() = 0;
 
-        virtual void SetViewport(int32 x, int32 y, int32 w, int32 h) = 0;
+        virtual void SetViewport(int32_t x, int32_t y, int32_t w, int32_t h) = 0;
 
         NODISCARD virtual VertexBuffer* CreateVertexBuffer() const = 0;
         NODISCARD virtual IndexBuffer* CreateIndexBuffer() const = 0;
@@ -48,7 +48,7 @@ NXS_NAMESPACE
         virtual void OnResize(uint32_t pixel_w, uint32_t pixel_h) = 0;
 
         virtual void DrawIndexed(const Ref<IndexBuffer> indexBuffer) = 0;
-        virtual void DrawIndexedInstanced(const Ref<IndexBuffer> indexBuffer, uint32 instanceCount) = 0;
+        virtual void DrawIndexedInstanced(const Ref<IndexBuffer> indexBuffer, uint32_t instanceCount) = 0;
 
         NODISCARD GraphicsAPI GetAPI() const
         {

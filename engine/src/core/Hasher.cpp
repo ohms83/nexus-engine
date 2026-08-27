@@ -12,21 +12,21 @@
 
 USING_NAMESPACE_NXS;
 
-Hasher::Hasher(const uint32 seed)
+Hasher::Hasher(const uint32_t seed)
     : m_seed(seed)
 {}
 
-uint32 Hasher::Hash32(const void* data, const size_t size) const
+uint32_t Hasher::Hash32(const void* data, const size_t size) const
 {
     return XXH32(data, size, m_seed);
 }
 
-uint32 Hasher::Hash32(const std::vector<uint8>& buffer) const
+uint32_t Hasher::Hash32(const std::vector<uint8_t>& buffer) const
 {
-    return XXH32(buffer.data(), buffer.size() * sizeof(uint8), m_seed);
+    return XXH32(buffer.data(), buffer.size() * sizeof(uint8_t), m_seed);
 }
 
-uint32 Hasher::Hash32(const std::string& str) const
+uint32_t Hasher::Hash32(const std::string& str) const
 {
     return XXH32(str.data(), sizeof(char) * str.size(), m_seed);
 }

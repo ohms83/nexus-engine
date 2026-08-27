@@ -37,7 +37,7 @@ NXS_NAMESPACE
          * Used by the ResourceManager for caching.
          * @return The resource's uinique ID.
          */
-        virtual uint32 GetId() const
+        virtual uint32_t GetId() const
         {
             return m_id;
         }
@@ -45,10 +45,10 @@ NXS_NAMESPACE
     protected:
         // Protected constructor to ensure Resource cannot be instantiated directly,
         // but derived classes can initialize it.
-        explicit Resource(std::string path, const uint32 id) : m_id(id), m_path(std::move(path)) {}
+        explicit Resource(std::string path, const uint32_t id) : m_id(id), m_path(std::move(path)) {}
 
         //! Resource's unique ID.
-        uint32 m_id = 0;
+        uint32_t m_id = 0;
         std::string m_path;
     };
 

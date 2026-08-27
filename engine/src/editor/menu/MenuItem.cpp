@@ -7,7 +7,7 @@ MenuItem::MenuItem()
 
 }
 
-MenuItem::MenuItem(uint32 group, const std::string& name, const std::string& desc, const std::string& shortcut)
+MenuItem::MenuItem(uint32_t group, const std::string& name, const std::string& desc, const std::string& shortcut)
     : m_group(group)
     , m_name(name)
     , m_description(desc)

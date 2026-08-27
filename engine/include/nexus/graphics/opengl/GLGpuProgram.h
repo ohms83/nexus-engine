@@ -28,14 +28,14 @@ NXS_NAMESPACE
         void Unbind() override;
         bool IsBinding() const override;
 
-        MAYBE_UNUSED bool SetUniformInt(const std::string& name, int32 value) override;
+        MAYBE_UNUSED bool SetUniformInt(const std::string& name, int32_t value) override;
         MAYBE_UNUSED bool SetUniformFloat(const std::string& name, float value) override;
         MAYBE_UNUSED bool SetUniformVector(const std::string& name, const glm::vec2& vec) override;
         MAYBE_UNUSED bool SetUniformVector(const std::string& name, const glm::vec3& vec) override;
         MAYBE_UNUSED bool SetUniformVector(const std::string& name, const glm::vec4& vec) override;
         MAYBE_UNUSED bool SetUniformMatrix(const std::string& name, const glm::mat3& matrix, bool tranpose) override;
         MAYBE_UNUSED bool SetUniformMatrix(const std::string& name, const glm::mat4& matrix, bool tranpose) override;
-        MAYBE_UNUSED bool SetUniformTexture2D(const std::string& name, Ref<const TextureProxy> texture, int32 textureUnit) override;
+        MAYBE_UNUSED bool SetUniformTexture2D(const std::string& name, Ref<const TextureProxy> texture, int32_t textureUnit) override;
 
     protected:
         void ClearHandles();
@@ -44,7 +44,7 @@ NXS_NAMESPACE
         void CreateErrorGpuProgram();
 
     private:
-        uint32 Alloc() override;
+        uint32_t Alloc() override;
         void Release() override;
         NODISCARD int32_t FindUniform_Internal(const std::string& name) const override;
 
@@ -52,6 +52,6 @@ NXS_NAMESPACE
         std::vector<GLuint> m_shaderHandles;
 
         //! The ID of the currently binding gpu program.
-        static std::atomic<uint32> s_bindingShader;
+        static std::atomic<uint32_t> s_bindingShader;
     };
 }

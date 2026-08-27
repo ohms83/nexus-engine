@@ -58,7 +58,7 @@ TextureLoader::TextureLoader(const Ref<RenderingInterface>& renderingInterface)
 {
 }
 
-Ref<Resource> TextureLoader::Load(const std::string& path, uint32 id)
+Ref<Resource> TextureLoader::Load(const std::string& path, uint32_t id)
 {
     auto [pixels, desc] = ProcessLoadFile(path);
 
@@ -68,7 +68,7 @@ Ref<Resource> TextureLoader::Load(const std::string& path, uint32 id)
     return PTR_CAST<Resource>(texture);
 }
 
-Ref<IResourceLoader::LoadResult> TextureLoader::LoadAsync(const std::string& path, uint32 id, TaskScheduler& scheduler, Callback onFinishCallback)
+Ref<IResourceLoader::LoadResult> TextureLoader::LoadAsync(const std::string& path, uint32_t id, TaskScheduler& scheduler, Callback onFinishCallback)
 {
     const auto result = std::make_shared<LoadResult>();
     result->path = path;

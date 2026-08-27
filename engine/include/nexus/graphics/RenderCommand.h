@@ -51,10 +51,10 @@ NXS_NAMESPACE
         Ref<Material> material; // optional - used to set uniforms and textures
 
         // Draw parameters
-        uint32 indexCount = 0;
-        uint32 indexOffset = 0; // start index within indexBuffer
-        uint32 vertexOffset = 0; // a base vertex offset
-        uint32 instanceCount = 1;
+        uint32_t indexCount = 0;
+        uint32_t indexOffset = 0; // start index within indexBuffer
+        uint32_t vertexOffset = 0; // a base vertex offset
+        uint32_t instanceCount = 1;
 
         // Per-instance/model matrix: pointer because many commands share the same matrix
         glm::mat4 modelMatrix;
@@ -64,16 +64,16 @@ NXS_NAMESPACE
         // Bounding volume for frustum culling and sorting
         Sphere bounds;
 
-        uint32 layerMask = 0xFFFFFFFFu;
+        uint32_t layerMask = 0xFFFFFFFFu;
 
         // Optional state overrides for one-shot draws
         PipelineState pipelineOverrides;
         bool hasPipelineOverrides = false;
 
         // Convenience: set the sort key by evaluating translucency/material/depth
-        void SetSortKey(bool translucent, uint32 materialId, float depthNormalized)
+        void SetSortKey(bool translucent, uint32_t materialId, float depthNormalized)
         {
-            const uint32 depth = static_cast<uint32>(std::clamp(depthNormalized, 0.0f, 1.0f) * static_cast<float>(UINT32_MAX));
+            const uint32_t depth = static_cast<uint32_t>(std::clamp(depthNormalized, 0.0f, 1.0f) * static_cast<float>(UINT32_MAX));
             sortKey = SortKey::From(translucent, materialId, depth);
         }
 

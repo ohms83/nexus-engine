@@ -20,7 +20,7 @@ NXS_NAMESPACE
         void Draw_Internal(RenderSystem& renderSystem) override;
 
     private:
-        std::vector<uint32> m_frameTimes;
-        std::vector<uint32> m_frameCounters;
+        std::vector<uint32_t> m_frameTimes;
+        std::vector<uint32_t> m_frameCounters;
     };
 }

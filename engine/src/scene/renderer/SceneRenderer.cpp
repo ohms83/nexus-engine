@@ -62,11 +62,11 @@ bool SceneRenderer::RenderInstancedMesh(RenderSystem& renderSystem, const Render
     if (command.instanceModels.empty()) return false;
 
     // Build an OwningBuffer holding all model matrices
-    const auto instanceCount = static_cast<uint32>(command.instanceModels.size());
+    const auto instanceCount = static_cast<uint32_t>(command.instanceModels.size());
     const size_t bytes = instanceCount * sizeof(glm::mat4);
     uint8_t* mem = new uint8_t[bytes];
     // Copy matrices
-    for (uint32 i = 0; i < instanceCount; ++i)
+    for (uint32_t i = 0; i < instanceCount; ++i)
     {
         std::memcpy(&mem[i * sizeof(glm::mat4)], &command.instanceModels[i], sizeof(glm::mat4));
     }
@@ -104,7 +104,7 @@ void SceneRenderer::SetAmbientLightParams(Ref<GpuProgram> gpuProgram, const entt
 void SceneRenderer::SetDirectLightParams(Ref<GpuProgram> gpuProgram, const entt::registry& registry)
 {
     rmt_ScopedCPUSample(SceneRenderer_SetDirectLightParams, 0);
-    int32 numLight = 0;
+    int32_t numLight = 0;
     for (const auto view = registry.view<SceneNodeComponent, DirectLightComponent>(); const auto& [entity, node, light] : view.each())
     {
         if (!node.active) continue;
@@ -131,7 +131,7 @@ void SceneRenderer::SetDirectLightParams(Ref<GpuProgram> gpuProgram, const entt:
 void SceneRenderer::SetPointLightParams(Ref<GpuProgram> gpuProgram, const entt::registry& registry)
 {
     rmt_ScopedCPUSample(SceneRenderer_SetPointLightParams, 0);
-    int32 numLight = 0;
+    int32_t numLight = 0;
     for (const auto view = registry.view<SceneNodeComponent, PointLightComponent, PositionComponent>(); const auto& [entity, node, light, position] : view.each())
     {
         if (!node.active) continue;

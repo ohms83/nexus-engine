@@ -89,7 +89,7 @@ NXS_NAMESPACE
 
 USING_NAMESPACE_NXS;
 
-std::atomic<uint32> GLTexture::s_bindingTexture(0);
+std::atomic<uint32_t> GLTexture::s_bindingTexture(0);
 
 void GLTexture::Bind() const
 {
@@ -125,7 +125,7 @@ TextureProxy& GLTexture::Begin(const TextureDescription& info)
     return *this;
 }
 
-TextureProxy& GLTexture::LoadData(const uint8* data, const uint32 size)
+TextureProxy& GLTexture::LoadData(const uint8_t* data, const uint32_t size)
 {
     TextureProxy::LoadData(data, size);
 
@@ -140,7 +140,7 @@ TextureProxy& GLTexture::LoadData(const uint8* data, const uint32 size)
     return *this;
 }
 
-TextureProxy& GLTexture::LoadMipData(const uint8* data, uint32 size, uint32 mip)
+TextureProxy& GLTexture::LoadMipData(const uint8_t* data, uint32_t size, uint32_t mip)
 {
     return TextureProxy::LoadMipData(data, size, mip);
 }
@@ -155,7 +155,7 @@ void GLTexture::CopyData(const void* data, size_t bytes, const size_t offset)
     CALL_GL_FUNC(glTexSubImage2D(GL_TEXTURE_2D, 0, xOffset, yOffset, m_width, m_height, gl_pixelFormats, gl_dataType, data));
 }
 
-uint32 GLTexture::Alloc()
+uint32_t GLTexture::Alloc()
 {
     CALL_GL_FUNC(glGenTextures(1, &m_textureID));
     return m_textureID;

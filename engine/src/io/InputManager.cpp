@@ -132,7 +132,7 @@ void InputManager::OnKeyUp(const SDL_Keycode key)
     LOG_DEBUG(LogInputManager, std::format("OnKeyUp Key={}", key));
 }
 
-void InputManager::OnMouseDown(const int32 buttonId, const float x, const float y)
+void InputManager::OnMouseDown(const int32_t buttonId, const float x, const float y)
 {
     m_mouseButtons[buttonId] = true;
 
@@ -148,7 +148,7 @@ void InputManager::OnMouseDown(const int32 buttonId, const float x, const float 
     LOG_DEBUG(LogInputManager, std::format("OnMouseDown button={} x={} y={}", buttonId, x, y));
 }
 
-void InputManager::OnMouseUp(const int32 buttonId, const float x, const float y)
+void InputManager::OnMouseUp(const int32_t buttonId, const float x, const float y)
 {
     m_mouseButtons[buttonId] = false;
 
@@ -179,7 +179,7 @@ void InputManager::OnMouseMove(const float x, const float y)
     mouseMotionEventCallback(x, y);
 }
 
-bool InputManager::IsMouseDown(const int32 buttonId) const
+bool InputManager::IsMouseDown(const int32_t buttonId) const
 {
     if (const auto& itr = m_mouseButtons.find(buttonId); itr != m_mouseButtons.end()) return itr->second;
     return false;
