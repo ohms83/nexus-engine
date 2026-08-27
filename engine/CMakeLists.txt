@@ -84,7 +84,6 @@ file(GLOB_RECURSE ENGINE_FOUNDATION_SOURCES CONFIGURE_DEPENDS
 add_library(nexus-core STATIC ${ENGINE_FOUNDATION_SOURCES})
 nexus_target_defaults(nexus-core)
 target_link_libraries(nexus-core
-    PUBLIC nexus-math
     PUBLIC EnTT
     PRIVATE SDL3::SDL3
     PRIVATE RapidJSON
@@ -103,6 +102,7 @@ target_compile_definitions(nexus-graphics
 )
 target_link_libraries(nexus-graphics
     PUBLIC nexus-core
+    PUBLIC nexus-math
     PUBLIC SDL3::SDL3
     PUBLIC glad
     PUBLIC OpenGL::GL

@@ -3,7 +3,6 @@
 //
 
 #include "time/Timer.h"
-#include "nexus/math/Math.h"
 
 USING_NAMESPACE_NXS;
 
@@ -36,7 +35,7 @@ void Timer::Tick()
     if (m_scheduledAction && !m_isExecuted)
     {
         m_countDown -= GetDeltaTime();
-        if (Math::Compare(m_countDown, 0, m_faultTolerance) <= 0)
+        if (std::abs(m_countDown) < m_faultTolerance)
         {
             m_isExecuted = true;
             m_countDown = 0;
