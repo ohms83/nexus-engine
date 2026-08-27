@@ -1,11 +1,11 @@
 #pragma once
 
-#include "nexus/NxsCommon.h"
+#include "glm/glm.hpp"
 
 #include <format>
 #include <string>
 
-NXS_NAMESPACE
+namespace nxs
 {
     namespace Math
     {

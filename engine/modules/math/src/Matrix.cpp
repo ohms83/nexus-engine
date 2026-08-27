@@ -4,7 +4,10 @@
 
 #include "nexus/math/Matrix.h"
 
-USING_NAMESPACE_NXS;
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/quaternion.hpp"
+
+using namespace nxs;
 
 glm::mat4 Matrix::CreateModelMatrix(const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale)
 {

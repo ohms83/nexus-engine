@@ -1,6 +1,6 @@
 #include "nexus/math/MathUtil.h"
 
-USING_NAMESPACE_NXS;
+using namespace nxs;
 
 std::string Math::ToString(glm::vec2 vec)
 {

@@ -6,6 +6,8 @@
 #include "nexus/io/InputManager.h"
 #include "nexus/math/MathUtil.h"
 
+#include <ranges>
+
 #define ENABLE_LOGGING 0
 
 USING_NAMESPACE_NXS;

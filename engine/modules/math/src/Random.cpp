@@ -1,7 +1,7 @@
 #include "nexus/math/Random.h"
 #include <chrono>
 
-USING_NAMESPACE_NXS;
+using namespace nxs;
 
 Random::Random()
 {

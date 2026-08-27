@@ -1,9 +1,9 @@
 #pragma once
 
-#include "nexus/NxsCommon.h"
+#include "glm/glm.hpp"
 #include "Math.h"
 
-NXS_NAMESPACE
+namespace nxs
 {
     namespace Vector
     {

@@ -1,13 +1,13 @@
 #pragma once
 
-#include <nexus/NxsCommon.h>
-
 #include <type_traits>
 #include <float.h>
 
+#include "glm/glm.hpp"
+
 #define NXS_INFINITE 0xFFFFFFFF
 
-NXS_NAMESPACE
+namespace nxs
 {
     namespace Math
     {
@@ -66,7 +66,7 @@ NXS_NAMESPACE
          * Compare the two floating-points
          * @return 0, if both are approximately equal, 1 if a is greater, or -1 if a is lesser.
          */
-        inline int32 Compare(float a, float b, float epsilon = FLT_EPSILON)
+        inline int32_t Compare(float a, float b, float epsilon = FLT_EPSILON)
         {
             if (Approx(a, b, epsilon)) return 0;
             else if (a > b) return 1;
@@ -77,7 +77,7 @@ NXS_NAMESPACE
          * Compare the two double precision floating-points
          * @return 0, if both are approximately equal, 1 if a is greater, or -1 if a is lesser.
          */
-        inline int32 Compare(double a, double b, double epsilon = DBL_EPSILON)
+        inline int32_t Compare(double a, double b, double epsilon = DBL_EPSILON)
         {
             if (Approx(a, b, epsilon)) return 0;
             else if (a > b) return 1;

@@ -4,10 +4,9 @@
 
 #pragma once
 
-#include "nexus/NxsDefine.h"
-#include "nexus/NxsCommon.h"
+#include "glm/glm.hpp"
 
-NXS_NAMESPACE
+namespace nxs
 {
     namespace Matrix
     {

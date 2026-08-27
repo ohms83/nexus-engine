@@ -1,5 +1,10 @@
 #include "nexus/math/Math.h"
+#include "glm/gtc/constants.hpp"
 
-USING_NAMESPACE_NXS;
-
-const float Math::PI = glm::pi<float>();
+namespace nxs
+{
+    namespace Math
+    {
+        const float PI = glm::pi<float>();
+    }
+}

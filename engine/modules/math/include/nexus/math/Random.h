@@ -1,9 +1,9 @@
 #pragma once
 
-#include "nexus/NxsCommon.h"
+#include "glm/glm.hpp"
 #include <random>
 
-NXS_NAMESPACE
+namespace nxs
 {
     class Random
     {
