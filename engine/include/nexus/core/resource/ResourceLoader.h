@@ -3,6 +3,7 @@
 #include "Resource.h"
 #include "nexus/memory/Buffer.h"
 #include <string>
+#include <atomic>
 
 #include "../task/TaskScheduler.h"
 
@@ -31,7 +32,7 @@ NXS_NAMESPACE
             //! Resource path
             std::string path;
             std::string error;
-            Status status = Status::Invalid;
+            std::atomic<Status> status{Status::Invalid};
             Ref<Resource> resource;
         };
 
