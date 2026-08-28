@@ -3,7 +3,6 @@
 //
 
 #include "nexus/time/TimerManager.h"
-#include "nexus/core/LogDispatcher.h"
 #include "nexus/time/StandardTimeSource.h"
 
 #include <algorithm>
@@ -30,7 +29,8 @@ void TimerManager::Destroy()
 
 TimerManager& TimerManager::Instance()
 {
-    NXS_ASSERT_MSG(s_instance, "TimerManager instance is not initialized");
+    // TODO: Decoupling assertion from LogDispatcher to avoid circular dependency
+    // NXS_ASSERT_MSG(s_instance, "TimerManager instance is not initialized");
     return *s_instance;
 }
 
@@ -47,7 +47,7 @@ void TimerManager::RemoveTimer(const Ref<Timer>& timer)
     std::erase(m_timers, timer);
 }
 
-void TimerManager::ScheduleAction(const Action& action, const float delay, Ref<ITimeSource> timeSource)
+void TimerManager::ScheduleAction(const Timer::Action& action, const float delay, Ref<ITimeSource> timeSource)
 {
     const auto timer = std::make_shared<Timer>(timeSource);
     timer->ScheduleAction(action, delay);

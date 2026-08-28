@@ -6,7 +6,7 @@
 
 #include "NxsDefine.h"
 #include "core/LogDispatcher.h"
-#include "core/task/TaskScheduler.h"
+#include "nexus/task/TaskScheduler.h"
 #include "graphics/GraphicsConfig.h"
 #include "graphics/RenderSystem.h"
 #include "scene/SceneManager.h"

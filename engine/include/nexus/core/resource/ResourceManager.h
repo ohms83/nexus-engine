@@ -12,7 +12,7 @@
 
 #include "Resource.h"
 #include "ResourceLoader.h"
-#include "../task/OneshotTask.h"
+#include "nexus/task/OneshotTask.h"
 
 NXS_NAMESPACE
 {

@@ -2,7 +2,7 @@
 
 #include "nexus/NxsDefine.h"
 #include "nexus/graphics/RenderSystem.h"
-#include "nexus/core/task/TaskScheduler.h"
+#include "nexus/task/TaskScheduler.h"
 #include "Scene.h"
 
 #include <vector>

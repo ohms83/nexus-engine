@@ -1,5 +1,4 @@
-#include "core/task/Delay.h"
-#include "core/LogDispatcher.h"
+#include "nexus/task/Delay.h"
 
 USING_NAMESPACE_NXS;
 

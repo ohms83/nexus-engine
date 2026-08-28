@@ -1,4 +1,4 @@
-#include "core/task/SequentialTask.h"
+#include "nexus/task/SequentialTask.h"
 
 USING_NAMESPACE_NXS;
 

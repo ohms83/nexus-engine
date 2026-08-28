@@ -12,7 +12,7 @@
 #include <set>
 
 #include "Logger.h"
-#include "task/TaskScheduler.h"
+#include "nexus/task/TaskScheduler.h"
 
 #if !defined(NO_LOG)
 #define ENABLE_LOG(LogCategory) nxs::LogDispatcher::Instance().EnableCategory(LogCategory, true)

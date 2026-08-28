@@ -5,7 +5,7 @@
 #include <string>
 #include <atomic>
 
-#include "../task/TaskScheduler.h"
+#include "nexus/task/TaskScheduler.h"
 
 NXS_NAMESPACE
 {

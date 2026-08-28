@@ -36,7 +36,7 @@ NXS_NAMESPACE
          * @param timeSource
          */
         void ScheduleAction(
-            const Action& action,
+            const Timer::Action& action,
             float delay,
             Ref<ITimeSource> timeSource = std::make_shared<StandardTimeSource>());
 

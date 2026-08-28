@@ -3,7 +3,7 @@
 #include "Engine.h"
 
 #include "core/LogDispatcher.h"
-#include "core/task/FutureWaitingTask.h"
+#include "nexus/task/FutureWaitingTask.h"
 #include "core/resource/ResourceManager.h"
 #include "core/serialize/JsonSerializer.h"
 #include "core/serialize/MsgPackSerializer.h"

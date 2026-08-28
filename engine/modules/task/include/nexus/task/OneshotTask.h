@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Runnable.h"
-#include "../Function.h"
 
 NXS_NAMESPACE
 {
@@ -16,6 +15,8 @@ NXS_NAMESPACE
     class OneshotTask final : public IRunnable
     {
     public:
+        using Action = std::function<void()>;
+
         /**
          * @brief Constructs a new OneshotTask object.
          * @param task A callable object to be executed once.

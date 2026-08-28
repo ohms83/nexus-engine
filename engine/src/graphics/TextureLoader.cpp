@@ -1,6 +1,6 @@
 #include "graphics/TextureLoader.h"
 #include "memory/OwningBuffer.h"
-#include "core/task/FutureWaitingTask.h"
+#include "nexus/task/FutureWaitingTask.h"
 
 #include <future>
 #include <ostream>

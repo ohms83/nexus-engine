@@ -1,4 +1,4 @@
-#include "core/task/RepeatTask.h"
+#include "nexus/task/RepeatTask.h"
 
 USING_NAMESPACE_NXS;
 

@@ -6,7 +6,7 @@
 #include <format>
 #include <memory>
 
-#include "core/task/IntervalTask.h"
+#include "nexus/task/IntervalTask.h"
 
 USING_NAMESPACE_NXS;
 

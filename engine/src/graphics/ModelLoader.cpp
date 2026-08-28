@@ -17,8 +17,8 @@
 #include <queue>
 #include <ranges>
 
-#include "core/task/FutureWaitingTask.h"
-#include "core/task/RepeatTask.h"
+#include "nexus/task/FutureWaitingTask.h"
+#include "nexus/task/RepeatTask.h"
 #include "core/resource/ResourceManager.h"
 
 USING_NAMESPACE_NXS;

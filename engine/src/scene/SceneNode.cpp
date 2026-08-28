@@ -1,7 +1,7 @@
 #include "scene/SceneNode.h"
 
 #include "core/LogDispatcher.h"
-#include "core/task/OneshotTask.h"
+#include "nexus/task/OneshotTask.h"
 #include "ecs/Component.h"
 #include "core/Hasher.h"
 

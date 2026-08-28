@@ -3,7 +3,7 @@
 #include "nexus/NxsDefine.h"
 #include "nexus/core/serialize/Serializeable.h"
 #include "nexus/core/resource/ResourceManager.h"
-#include "nexus/core/task/TaskScheduler.h"
+#include "nexus/task/TaskScheduler.h"
 #include "nexus/core/Reflection.h"
 #include "nexus/ecs/Ecs.h"
 #include "nexus/ecs/Entity.h"

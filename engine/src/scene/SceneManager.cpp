@@ -1,6 +1,6 @@
 #include "scene/SceneManager.h"
-#include "core/task/TaskScheduler.h"
-#include "core/task/OneshotTask.h"
+#include "nexus/task/TaskScheduler.h"
+#include "nexus/task/OneshotTask.h"
 
 #include "Remotery.h"
 

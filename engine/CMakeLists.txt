@@ -10,7 +10,6 @@ set(ENGINE_3RD_PARTY_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty)
 set(TOOLS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/tools)
 
 add_subdirectory(3rdparty EXCLUDE_FROM_ALL)
-add_subdirectory(modules)
 
 # Third-party sources used by the engine modules.
 set(IMGUI_SOURCE_DIR "${ENGINE_3RD_PARTY_DIR}/imgui" CACHE PATH "Path to Dear ImGui source root")
@@ -71,6 +70,8 @@ function(nexus_target_defaults TARGET_NAME)
     endif()
 endfunction()
 
+add_subdirectory(modules)
+
 file(GLOB_RECURSE ENGINE_FOUNDATION_SOURCES CONFIGURE_DEPENDS
     src/NxsDefine.cpp
     src/core/*.cpp
@@ -83,6 +84,7 @@ add_library(nexus-core STATIC ${ENGINE_FOUNDATION_SOURCES})
 nexus_target_defaults(nexus-core)
 target_link_libraries(nexus-core
     PUBLIC nexus-time
+    PUBLIC nexus-task
     PUBLIC EnTT
     PRIVATE SDL3::SDL3
     PRIVATE RapidJSON

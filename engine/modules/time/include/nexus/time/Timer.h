@@ -5,7 +5,6 @@
 #pragma once
 
 #include "nexus/NxsDefine.h"
-#include "nexus/core/Function.h"
 #include "TimeSource.h"
 #include "sigslot/signal.hpp"
 
@@ -14,6 +13,8 @@ NXS_NAMESPACE
     class Timer final
     {
     public:
+        using Action = std::function<void()>;
+
         explicit Timer(const Ref<ITimeSource>& timeSource);
 
         void Start();

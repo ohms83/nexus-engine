@@ -1,7 +1,7 @@
 //
 // Created by nutta on 9/5/2025.
 //
-#include "nexus/core/task/TaskScheduler.h"
+#include "nexus/task/TaskScheduler.h"
 
 #include <algorithm>
 
