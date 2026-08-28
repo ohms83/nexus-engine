@@ -13,6 +13,8 @@
 #include "Material.h"
 #include "PipelineState.h"
 
+#include <algorithm>
+
 NXS_NAMESPACE
 {
     //! A compact sort key that defines the draw order for command sorting.

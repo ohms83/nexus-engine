@@ -18,7 +18,7 @@
 #include <glm/mat4x3.hpp>
 #include <glm/mat4x4.hpp>
 
-#include "glm/gtc/matrix_access.hpp"
+#include <glm/gtc/matrix_access.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtc/random.hpp>
@@ -26,5 +26,3 @@
 #include "glm/gtx/quaternion.hpp"
 
 #include <glm/ext/matrix_relational.hpp> // For glm::equal (with epsilon)
-
-#include "entt/entt.hpp"

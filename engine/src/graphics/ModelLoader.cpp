@@ -15,6 +15,7 @@
 #include <filesystem>
 #include <future>
 #include <queue>
+#include <ranges>
 
 #include "core/task/FutureWaitingTask.h"
 #include "core/task/RepeatTask.h"
