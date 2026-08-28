@@ -24,7 +24,6 @@ protected:
 private:
     //! Editor camera.
     nxs::Ref<nxs::Camera> m_camera;
-    nxs::Ref<nxs::Model> m_model;
     nxs::Ref<nxs::SceneGraphWidget> m_sceneGraphWidget;
     nxs::Ref<nxs::PropertyWindow> m_propertyWindow;
     glm::vec3 m_cameraMoveDir{};
