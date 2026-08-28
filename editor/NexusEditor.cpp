@@ -77,17 +77,22 @@ void NexusEditor::InitModel()
     const auto taskScheduler = engine.GetTaskScheduler();
     const auto resourceManager = engine.GetResourceManager();
     const auto assetPath = GetAssetPath("meshes/sponza/sponza.obj");
-    // const auto assetPath = GetAssetPath("meshes/barrel/wine_barrel_01_4k.gltf");
 #if LOAD_ASYNC
     auto loadResult = resourceManager->GetResourceAsync(typeid(nxs::Model), assetPath, *taskScheduler);
-    auto waitingTask = std::make_shared<nxs::IntervalTask>(0, [this, loadResult]() {
-        const auto status = loadResult->status;
+    auto waitingTask = std::make_shared<nxs::RepeatTask>(-1, [this, loadResult]() {
+        const auto status = loadResult->status.load();
         if (status == nxs::IResourceLoader::LoadResult::Status::Ready)
         {
             LOG_INFO(LogTemp, std::format("Finished loading model {}", loadResult->path));
 
             auto scene = nxs::Engine::Instance().GetSceneManager()->GetCurrentScene();
             auto model = PTR_CAST<nxs::Model>(loadResult->resource);
+            if (!model)
+            {
+                LOG_ERROR(LogTemp, std::format("Error loading model {}", loadResult->path));
+                return false;
+            }
+
             auto filename = std::filesystem::path(model->GetPath()).filename();
             auto modelNode = scene->EmplaceChild<nxs::ModelNode>(filename.string());
             NXS_ASSERT(PTR_CAST<nxs::SceneNode>(modelNode));
@@ -101,7 +106,10 @@ void NexusEditor::InitModel()
         }
         return true;
     });
-    taskScheduler->ScheduleTask(waitingTask);
+    taskScheduler->ScheduleTask(
+        waitingTask,
+        nxs::TaskScheduler::UpdatePhase::PreUpdate, 
+        nxs::TaskScheduler::TaskQueue::MainThread);
 #else
     auto scene = nxs::Engine::Instance().GetSceneManager()->GetCurrentScene();
     auto model = resourceManager->Get<nxs::Model>(assetPath);

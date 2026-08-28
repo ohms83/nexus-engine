@@ -65,7 +65,7 @@ public:
                         currentLabel = modelLabels[n].c_str();
                         selectedModel = n;
 
-                        if (m_loadedModels[n]->status == nxs::IResourceLoader::LoadResult::Status::Ready)
+                        if (m_loadedModels[n]->status.load() == nxs::IResourceLoader::LoadResult::Status::Ready)
                         {
                             SetMesh(n);
                         }
@@ -193,7 +193,7 @@ private:
 
         taskScheduler->ScheduleTask(std::make_shared<nxs::RepeatTask>(-1, [result]() -> bool
         {
-            if (result->status == nxs::IResourceLoader::LoadResult::Status::Ready)
+            if (result->status.load() == nxs::IResourceLoader::LoadResult::Status::Ready)
             {
                 LOG_INFO(LogTemp, std::format("Finished loading {}", result->path));
                 return false;
@@ -204,7 +204,7 @@ private:
         {
             for (const auto & m_loadedModel : m_loadedModels)
             {
-                if (m_loadedModel->status != nxs::IResourceLoader::LoadResult::Status::Ready) return true;
+                if (m_loadedModel->status.load() != nxs::IResourceLoader::LoadResult::Status::Ready) return true;
             }
 
             taskScheduler->ScheduleTask(std::make_shared<nxs::RepeatTask>(-1, [this]() -> bool
