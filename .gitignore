@@ -46,3 +46,7 @@ imgui_editor_layout.ini
 *.tmp
 *.temp
 tmp/
+
+# CTest artifacts
+Testing/
+Testing/Temporary/
