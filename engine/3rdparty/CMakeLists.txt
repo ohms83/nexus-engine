@@ -32,4 +32,5 @@ FetchContent_Declare(
 
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build static library" FORCE)
 set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "Disable building tests" FORCE)
+set(ASSIMP_WARNINGS_AS_ERRORS OFF CACHE BOOL "Do not treat Assimp warnings as hard errors" FORCE)
 FetchContent_MakeAvailable(assimp_proj)

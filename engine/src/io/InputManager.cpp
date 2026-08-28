@@ -4,7 +4,6 @@
 
 #include "nexus/core/LogDispatcher.h"
 #include "nexus/io/InputManager.h"
-#include "nexus/math/MathUtil.h"
 
 #include <ranges>
 
@@ -96,11 +95,14 @@ glm::vec2 InputManager::GetMouseAxisValue(const std::string& actionName) const
     if (const auto& itr = m_mouseAxisMappings.find(actionName); itr != m_mouseAxisMappings.end())
     {
         const auto& [mapping, pos, prevPos] = itr->second;
+    #if 0
+        // TODO: Remove dependency on Math::ToString()
         LOG_DEBUG(LogInputManager, std::format("actionName={} pos={} prevPos={} diff={}",
             actionName,
             Math::ToString(pos),
             Math::ToString(prevPos),
             Math::ToString(prevPos - pos)));
+    #endif
         return mapping.scale * (prevPos - pos);
     }
     return glm::vec3{0, 0, 0};
@@ -174,7 +176,10 @@ void InputManager::OnMouseMove(const float x, const float y)
 
         prevPos = pos;
         pos = {x, y};
+#if 0
+        // TODO: Remove dependency on Math::ToString()
         LOG_DEBUG(LogInputManager, std::format("OnMouseMove pos={} prevPos={}", Math::ToString(pos), Math::ToString(prevPos)));
+#endif
     }
     mouseMotionEventCallback(x, y);
 }

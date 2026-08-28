@@ -1,5 +1,6 @@
 #pragma once
 
+#include <concepts>
 #include <type_traits>
 #include <float.h>
 
@@ -14,13 +15,13 @@ namespace nxs
         extern const float PI;
 
         template <typename T>
-        constexpr bool is_vector = false;
+        inline constexpr bool is_vector = false;
         template <>
-        constexpr bool is_vector<glm::vec2> = true;
+        inline constexpr bool is_vector<glm::vec2> = true;
         template <>
-        constexpr bool is_vector<glm::vec3> = true;
+        inline constexpr bool is_vector<glm::vec3> = true;
         template <>
-        constexpr bool is_vector<glm::vec4> = true;
+        inline constexpr bool is_vector<glm::vec4> = true;
 
         template <typename T>
         requires std::is_floating_point_v<T>
