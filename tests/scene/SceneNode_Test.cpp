@@ -7,17 +7,12 @@ USING_NAMESPACE_NXS;
 class SceneNodeTest : public ::testing::Test {
 protected:
     Ref<Scene> scene;
-    Ref<TaskScheduler> scheduler;
 
     void SetUp() override {
-        scheduler = std::make_shared<TaskScheduler>(std::make_shared<StandardTimeSource>());
-
         scene = std::make_shared<Scene>("Test Scene");
-        scene->SetTaskScheduler(scheduler);
     }
 
     void TearDown() override {
-        scheduler.reset();
         scene.reset();
     }
 };
@@ -44,11 +39,6 @@ TEST_F(SceneNodeTest, RemoveNode)
     EXPECT_NE(scene->FindNodeWithName(name), nullptr);
 
     scene->RemoveChild(node);
-    scheduler->TransferPendingTasks();
-    // The node shouldn't have been removed yet.
-    EXPECT_NE(scene->FindNodeWithName(name), nullptr);
-
-    scheduler->PostUpdate();
     EXPECT_EQ(scene->FindNodeWithName(name), nullptr);
 }
 
@@ -62,12 +52,6 @@ TEST_F(SceneNodeTest, RemoveChild_RemovesDescendantsByDefault)
     EXPECT_NE(parent->FindNodeWithName("Grandchild"), nullptr);
 
     parent->RemoveChild(child);
-    scheduler->TransferPendingTasks();
-    // Node still present until PostUpdate runs
-    EXPECT_NE(parent->FindNodeWithName("Child"), nullptr);
-    EXPECT_NE(parent->FindNodeWithName("Grandchild"), nullptr);
-
-    scheduler->PostUpdate();
     // The default behavior removes descendants as well
     EXPECT_EQ(parent->FindNodeWithName("Child"), nullptr);
     EXPECT_EQ(parent->FindNodeWithName("Grandchild"), nullptr);
@@ -80,9 +64,6 @@ TEST_F(SceneNodeTest, RemoveChild_ReparentsChildrenWhenRequested)
     auto grandchild = child->EmplaceChild<SceneNode>("Grandchild");
 
     parent->RemoveChild(child, false);
-    scheduler->TransferPendingTasks();
-    scheduler->PostUpdate();
-
     // Child should be removed but the direct child (grandchild) should be reparented to parent
     EXPECT_EQ(parent->FindNodeWithName("Child"), nullptr);
     auto foundGrandchild = parent->FindNodeWithName("Grandchild");
@@ -141,8 +122,6 @@ TEST_F(SceneNodeTest, ParentChildRelationship)
     EXPECT_EQ(parent->GetParent(), PTR_CAST<SceneNode>(scene));
 
     child->RemoveFromParent();
-    scheduler->TransferPendingTasks();
-    scheduler->PostUpdate();
 
     EXPECT_EQ(child->GetParent(), nullptr);
     EXPECT_EQ(parent->GetNumChildren(), 0);
@@ -194,8 +173,6 @@ TEST_F(SceneNodeTest, RemoveAllChildren)
     EXPECT_EQ(parent->GetNumChildren(), 2);
 
     parent->RemoveAllChildren();
-    scheduler->TransferPendingTasks();
-    scheduler->PostUpdate();
 
     EXPECT_EQ(parent->GetNumChildren(), 0);
 }
@@ -211,8 +188,6 @@ TEST_F(SceneNodeTest, HasChildAndGetNumChildren)
     EXPECT_EQ(parent->GetNumChildren(), 1);
 
     parent->RemoveAllChildren();
-    scheduler->TransferPendingTasks();
-    scheduler->PostUpdate();
 
     EXPECT_FALSE(parent->HasChild());
     EXPECT_EQ(parent->GetNumChildren(), 0);

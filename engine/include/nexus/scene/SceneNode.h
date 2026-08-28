@@ -3,7 +3,6 @@
 #include "nexus/NxsDefine.h"
 #include "nexus/core/serialize/Serializeable.h"
 #include "nexus/core/resource/ResourceManager.h"
-#include "nexus/task/TaskScheduler.h"
 #include "nexus/core/Reflection.h"
 #include "nexus/ecs/Ecs.h"
 #include "nexus/ecs/Entity.h"
@@ -96,6 +95,14 @@ NXS_NAMESPACE
         }
 
         void AddChild(Ref<SceneNode> child);
+        void AddChildren(const ChildList& children);
+        /**
+         * @brief Remove a child node from this node.
+         * If @c removeDescendant is true, the child and all its descendants will be destroyed.
+         * 
+         * @param child A reference to the child node to be removed.
+         * @param removeDescendant Whether to remove the child and all its descendants.
+         */
         void RemoveChild(Ref<SceneNode> child, bool removeDescendant = true);
         void RemoveAllChildren(bool removeDescendant = true);
         /**
@@ -126,8 +133,6 @@ NXS_NAMESPACE
         Ref<SceneNode> GetParent() const { return m_parent; }
         void RemoveFromParent();
 
-        void SetTaskScheduler(Ref<TaskScheduler> taskScheduler) { m_scheduler = taskScheduler; }
-
         void AddScript(Ref<Script> script);
         void RemoveScript(Ref<Script> script);
 
@@ -144,7 +149,6 @@ NXS_NAMESPACE
     protected:
         Ref<SceneNode> m_parent;
         ChildList m_children;
-        Ref<TaskScheduler> m_scheduler;
         std::vector<Ref<Script>> m_scripts;
 
         // --- ECS ---

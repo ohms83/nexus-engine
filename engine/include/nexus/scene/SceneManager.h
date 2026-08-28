@@ -26,7 +26,6 @@ NXS_NAMESPACE
         {
             NXS_ASSERT(!name.empty());
             auto scene = std::make_shared<SceneType>(name, std::forward(args)...);
-            scene->SetTaskScheduler(m_taskScheduler);
             scene->SetRenderer(m_renderer);
             m_sceneList.push_back(scene);
             return scene;

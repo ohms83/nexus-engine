@@ -1,7 +1,6 @@
 #include "scene/SceneNode.h"
 
 #include "core/LogDispatcher.h"
-#include "nexus/task/OneshotTask.h"
 #include "ecs/Component.h"
 #include "core/Hasher.h"
 
@@ -255,66 +254,43 @@ void SceneNode::Activate(const bool activate)
 void SceneNode::AddChild(Ref<SceneNode> child)
 {
     child->m_parent = this->GetSelf();
-    child->SetTaskScheduler(m_scheduler);
     m_children.push_back(child);
+}
+
+void SceneNode::AddChildren(const ChildList& children)
+{
+    for (const auto& child : children)
+    {
+        AddChild(child);
+    }
 }
 
 void SceneNode::RemoveChild(Ref<SceneNode> node, bool removeDescendant)
 {
     if (IsShuttingDown() || !node) return;
- 
-    if (!m_scheduler)
+
+    SceneNode::ChildList descendants;
+    node->GetAllDescendants(descendants, true);
+    std::erase(m_children, node);
+
+    // Reparent the children.
+    if (!removeDescendant)
     {
-        LOG_WARNING(LogSceneNode, std::format(
-            "Unable to remove the node \"{}\" from \"{}\"."
-            "Reason=The task scheduler is invalid.",
-            node->GetName(), GetName()));
-        return;
+        AddChildren(descendants);
     }
-
-    m_scheduler->ScheduleTask(std::make_shared<OneshotTask>([this, node, removeDescendant]() {
-        if (removeDescendant)
-        {
-            SceneNode::ChildList descendants;
-            node->GetAllDescendants(descendants, true);
-            for (auto descendant : descendants)
-            {
-                descendant->RemoveFromParent();
-            }
-        }
-        else
-        {
-            for (auto descendant : node->m_children)
-            {
-                descendant->RemoveFromParent();
-                AddChild(descendant);
-            }
-        }
-
-        std::erase(m_children, node);
-    }), TaskScheduler::UpdatePhase::PostUpdate);
 }
 
 void SceneNode::RemoveAllChildren(bool removeDescendant)
 {
     if (IsShuttingDown()) return;
  
-    if (!m_scheduler)
+    if (!removeDescendant && m_parent)
     {
-        LOG_WARNING(LogSceneNode, std::format(
-            "Unable to remove the children of node={}. Reason=The task scheduler is invalid.", GetName()));
-        return;
+        std::ranges::for_each(m_children, [this](Ref<SceneNode> child) {
+            m_parent->AddChild(child);
+        });
     }
-
-    m_scheduler->ScheduleTask(std::make_shared<OneshotTask>([this, removeDescendant]() {
-        if (!removeDescendant && m_parent)
-        {
-            std::ranges::for_each(m_children, [this](Ref<SceneNode> child) {
-                m_parent->AddChild(child);
-            });
-        }
-        m_children.clear();
-    }), TaskScheduler::UpdatePhase::PostUpdate);
+    m_children.clear();
 }
 
 void SceneNode::GetAllChildren(ChildList& childrenList) const
