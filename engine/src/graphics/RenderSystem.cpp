@@ -3,8 +3,8 @@
 #include "graphics/RenderSystem.h"
 #include "graphics/Shader.h"
 #include "core/LogDispatcher.h"
-#include "time/HighResTimeSource.h"
-#include "time/StandardTimeSource.h"
+#include "nexus/time/HighResTimeSource.h"
+#include "nexus/time/StandardTimeSource.h"
 
 #include "Remotery.h"
 

@@ -17,7 +17,7 @@
 #include "editor/Editor.h"
 #include "graphics/debug/Gizmos.h"
 #include "io/InputManager.h"
-#include "time/TimerManager.h"
+#include "nexus/time/TimerManager.h"
 #include "Remotery.h"
 
 USING_NAMESPACE_NXS;

@@ -28,7 +28,7 @@ public:
     TextureProxy& LoadData(const uint8_t* data, uint32_t size) override { return *this; }
     TextureProxy& LoadMipData(const uint8_t* data, uint32_t size, uint32_t mip) override { return *this; }
 
-    void CopyData(const void* data, size_t bytes, size_t offset) {}
+    void CopyData(const void* data, size_t bytes, size_t offset) override {}
 
 protected:
     NODISCARD uint32_t Alloc() override { return 1; }

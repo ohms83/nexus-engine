@@ -14,7 +14,7 @@
 
 #include <glm/glm.hpp>
 
-#include "time/Timer.h"
+#include "nexus/time/Timer.h"
 #include "graphics/Mesh.h"
 #include "graphics/Texture.h"
 #include "graphics/RenderSystem.h"

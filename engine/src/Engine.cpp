@@ -20,7 +20,7 @@
 
 #include "scene/renderer/ForwardSceneRenderer.h"
 
-#include "time/StandardTimeSource.h"
+#include "nexus/time/StandardTimeSource.h"
 
 USING_NAMESPACE_NXS;
 

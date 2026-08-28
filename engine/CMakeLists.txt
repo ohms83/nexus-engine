@@ -1,11 +1,10 @@
 # Use cmake_path to get the absolute path
 get_filename_component(PROJECT_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/.." ABSOLUTE)
 
-set(ENGINE_PUBLIC_HEADER_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
+set(ENGINE_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 set(ENGINE_MODULE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/modules)
 set(ENGINE_INSTALL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 
-set(ENGINE_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 set(ENGINE_3RD_PARTY_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty)
 
 set(TOOLS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/tools)
@@ -79,11 +78,11 @@ file(GLOB_RECURSE ENGINE_FOUNDATION_SOURCES CONFIGURE_DEPENDS
     src/geom/*.cpp
     src/io/*.cpp
     src/memory/*.cpp
-    src/time/*.cpp
 )
 add_library(nexus-core STATIC ${ENGINE_FOUNDATION_SOURCES})
 nexus_target_defaults(nexus-core)
 target_link_libraries(nexus-core
+    PUBLIC nexus-time
     PUBLIC EnTT
     PRIVATE SDL3::SDL3
     PRIVATE RapidJSON
@@ -101,12 +100,16 @@ target_compile_definitions(nexus-graphics
     PRIVATE RMT_USE_OPENGL=1
 )
 target_link_libraries(nexus-graphics
+    # Public libraries that other modules can use
     PUBLIC nexus-core
     PUBLIC nexus-math
     PUBLIC SDL3::SDL3
     PUBLIC glad
     PUBLIC OpenGL::GL
     PUBLIC assimp::assimp
+
+    # Private libraries that are only used internally
+    PRIVATE nexus-time
 )
 
 file(GLOB_RECURSE ENGINE_SCENE_SOURCES CONFIGURE_DEPENDS src/scene/*.cpp)

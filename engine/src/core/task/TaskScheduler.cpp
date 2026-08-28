@@ -5,7 +5,7 @@
 
 #include <algorithm>
 
-#include "time/TimerManager.h"
+#include "nexus/time/TimerManager.h"
 #include "Remotery.h"
 
 USING_NAMESPACE_NXS;
