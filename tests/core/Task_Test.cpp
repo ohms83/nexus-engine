@@ -201,7 +201,7 @@ TEST(SequentialTaskTest, InitializerList) {
 }
 
 // ============================================================================
-// Task Scheduler
+// Interval Task
 // ============================================================================
 TEST(IntervalTaskTest, ExecutesWhenIntervalHasElapsed) {
     auto mockTimeSource = std::make_shared<MockTimeSource>();
@@ -244,7 +244,7 @@ TEST(IntervalTaskTest, ExecutesWhenIntervalHasElapsed) {
     EXPECT_EQ(callCount, 3);
 }
 
-// Test that the IntervalTask executes its action even if the interval is set to zero,
+// Test that the IntervalTask executes its action even if the interval is set to zero or negative,
 // meaning it should execute on every update call.
 TEST(IntervalTaskTest, AlwaysExecutes) {
     auto mockTimeSource = std::make_shared<MockTimeSource>();
@@ -270,6 +270,9 @@ TEST(IntervalTaskTest, AlwaysExecutes) {
     }
 }
 
+// ============================================================================
+// Task Scheduler
+// ============================================================================
 TEST_F(TaskSchedulerTest, ScheduleAndStopTask) {
     bool taskExecuted = false;
     auto task = std::make_shared<OneshotTask>([&]() {
