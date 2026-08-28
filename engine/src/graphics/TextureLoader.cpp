@@ -72,7 +72,7 @@ Ref<IResourceLoader::LoadResult> TextureLoader::LoadAsync(const std::string& pat
 {
     const auto result = std::make_shared<LoadResult>();
     result->path = path;
-    result->status = LoadResult::Status::Loading;
+    result->status.store(LoadResult::Status::Loading);
 
     std::future<TextureLoadedData> future = std::async(std::launch::async, [path]
     {
@@ -83,7 +83,7 @@ Ref<IResourceLoader::LoadResult> TextureLoader::LoadAsync(const std::string& pat
     {
         if (!loadedData.pixels)
         {
-            result->status = LoadResult::Status::Failed;
+            result->status.store(LoadResult::Status::Failed);
             onFinishCallback(nullptr);
             return;
         }
@@ -92,7 +92,7 @@ Ref<IResourceLoader::LoadResult> TextureLoader::LoadAsync(const std::string& pat
         texture->DescribeTexture(loadedData.desc);
         texture->AllocateGpuResource(loadedData.pixels.get(), loadedData.desc.GetBufferSize(), renderInterface);
 
-        result->status = LoadResult::Status::Ready;
+        result->status.store(LoadResult::Status::Ready);
         result->resource = texture;
         onFinishCallback(texture);
     });

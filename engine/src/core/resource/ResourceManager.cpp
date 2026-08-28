@@ -65,6 +65,7 @@ ResourceManager::CacheResult ResourceManager::Cache(std::type_index type, const 
 
 Ref<IResourceLoader::LoadResult> ResourceManager::GetResourceAsync(std::type_index type, const std::string& path, TaskScheduler& scheduler)
 {
+    // LOG_DEBUG(LogResource, std::format("Loading resource: '{}'...", path));
     const auto id = m_hasher.Hash32(path);
     auto& resourceCache = GetResourceMap(std::type_index(type));
     if (auto cached_resource = resourceCache.find(id); cached_resource != resourceCache.end())
@@ -72,7 +73,7 @@ Ref<IResourceLoader::LoadResult> ResourceManager::GetResourceAsync(std::type_ind
         const auto result = std::make_shared<IResourceLoader::LoadResult>();
         result->path = path;
         result->resource = cached_resource->second;
-        result->status = IResourceLoader::LoadResult::Status::Ready;
+        result->status.store(IResourceLoader::LoadResult::Status::Ready);
         return result;
     }
 
@@ -99,18 +100,18 @@ Ref<IResourceLoader::LoadResult> ResourceManager::GetResourceAsync(std::type_ind
             LOG_ERROR(LogResource, std::format("Failed to load resource '{}'.", path));
             return;
         }
+        LOG_DEBUG(LogResource, std::format("Loaded resource success: '{}'.", path));
         resourceCache[id] = new_resource;
-        // LOG_DEBUG(LogResource, std::format("Loaded resource success: '{}'.", path));
     });
 
-    if (result->status == IResourceLoader::LoadResult::Status::Loading) {
+    if (result->status.load() == IResourceLoader::LoadResult::Status::Loading) {
         m_loadingResources.push_back(result);
     }
 
     // Periodically checking for resource loading status.
     scheduler.ScheduleTask(std::make_shared<OneshotTask>([result, &mutex = m_mutexMap[type], &loadingResources = m_loadingResources]()
     {
-        if (result->status == IResourceLoader::LoadResult::Status::Ready)
+        if (result->status.load() == IResourceLoader::LoadResult::Status::Ready)
         {
             loadingResources.erase(std::ranges::find(loadingResources, result));
             return false;
