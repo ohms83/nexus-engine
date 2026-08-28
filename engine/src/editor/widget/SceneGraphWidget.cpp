@@ -104,6 +104,7 @@ void SceneGraphWidget::DrawSceneNode(Ref<SceneNode> node)
 void SceneGraphWidget::DeleteNode(Ref<SceneNode> node)
 {
     if (!node) return;
+    m_selectedNode = InvalidID;
     m_scene->RemoveChild(node);
 }
 
