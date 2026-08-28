@@ -17,6 +17,7 @@
 #include <queue>
 
 #include "core/task/FutureWaitingTask.h"
+#include "core/task/RepeatTask.h"
 #include "core/resource/ResourceManager.h"
 
 USING_NAMESPACE_NXS;
@@ -56,16 +57,16 @@ namespace
  * @param taskScheduler
  * @return A list of asynchronous resource loading results.
  */
-static std::queue<Ref<IResourceLoader::LoadResult>> PreloadTextures(const aiScene& scene, const std::filesystem::path directory, ResourceManager* manager, TaskScheduler& taskScheduler)
+static std::vector<Ref<IResourceLoader::LoadResult>> PreloadTextures(const aiScene& scene, const std::filesystem::path directory, ResourceManager* manager, TaskScheduler& taskScheduler)
 {
-    std::queue<Ref<IResourceLoader::LoadResult>> result;
+    std::vector<Ref<IResourceLoader::LoadResult>> result;
     for (int i = 0; i < scene.mNumTextures; i++)
     {
         const aiTexture* texture = scene.mTextures[i];
         auto texturePath = directory / texture->mFilename.C_Str();
         auto loadResult = manager->GetResourceAsync(typeid(Texture), texturePath.string(), taskScheduler);
 
-        if (loadResult) result.push(loadResult);
+        if (loadResult) result.push_back(loadResult);
     }
 
     std::vector<aiTextureType> aiTextures = {};
@@ -88,7 +89,7 @@ static std::queue<Ref<IResourceLoader::LoadResult>> PreloadTextures(const aiScen
                 auto texturePath = directory / path.C_Str();
                 auto loadResult = manager->GetResourceAsync(typeid(Texture), texturePath.string(), taskScheduler);
 
-                if (loadResult) result.push(loadResult);
+                if (loadResult) result.push_back(loadResult);
             }
         }
     }
@@ -141,13 +142,14 @@ Ref<Resource> ModelLoader::Load(const std::string &path, uint32_t id)
 
 Ref<IResourceLoader::LoadResult> ModelLoader::LoadAsync(const std::string& path, uint32_t id, TaskScheduler& scheduler, Callback onFinishCallback)
 {
+    LOG_DEBUG(LogModelLoader, std::format("Beging loading model: {}", path));
     const auto directory = std::filesystem::path(path).parent_path();
 
     const auto result = std::make_shared<LoadResult>();
     result->path = path;
-    result->status = LoadResult::Status::Loading;
+    result->status.store(LoadResult::Status::Loading);
 
-    std::future<Ref<aiScene>> future = std::async(std::launch::async, [path, directory, result, &scheduler, resourceManager = m_resourceManager.get()]
+    std::future<Ref<aiScene>> future = std::async(std::launch::async, [path, directory, result, resourceManager = m_resourceManager.get()]
     {
         if (!resourceManager)
         {
@@ -156,6 +158,7 @@ Ref<IResourceLoader::LoadResult> ModelLoader::LoadAsync(const std::string& path,
             throw std::runtime_error(result->error);
         }
 
+        LOG_DEBUG(LogModelLoader, std::format("Parsing resource file: {}...", path));
         Assimp::Importer importer;
         // The ReadFile method returns an aiScene object.
         // It's crucial to specify post-processing flags for desired data.
@@ -174,54 +177,71 @@ Ref<IResourceLoader::LoadResult> ModelLoader::LoadAsync(const std::string& path,
         if (!scene)
         {
             result->error = std::format("Failed to load model from file: {}.", path);
-            result->status = LoadResult::Status::Failed;
+            result->status.store(LoadResult::Status::Failed);
             throw std::runtime_error(result->error);
         }
 
-        auto preloadedTextures = PreloadTextures(*scene, directory, resourceManager, scheduler);
-        while (!preloadedTextures.empty())
-        {
-            const auto loadResult = preloadedTextures.front();
-
-            if (!loadResult) {
-                preloadedTextures.pop();
-                continue;
-            }
-
-            switch (loadResult->status)
-            {
-            case LoadResult::Status::Loading:
-                std::this_thread::sleep_for(std::chrono::milliseconds(10));
-                break;
-            case LoadResult::Status::Invalid:
-            case LoadResult::Status::Failed:
-                result->error = std::format("Failed to load model from file: {}. Reason: Texture loading error {}", path, loadResult->path);
-                result->status = LoadResult::Status::Failed;
-                throw std::runtime_error(result->error);
-            case LoadResult::Status::Ready:
-                preloadedTextures.pop();
-                break;
-            }
-        }
         return scene;
     });
-    const auto waitingTask = std::make_shared<FutureWaitingTask<Ref<aiScene>>>(std::move(future), [this, onFinishCallback, path, directory, id, result](Ref<aiScene> scene)
+    const auto waitingTask = std::make_shared<FutureWaitingTask<Ref<aiScene>>>(std::move(future), [this, onFinishCallback, path, directory, id, result, &scheduler](Ref<aiScene> scene)
     {
         if (!scene)
         {
-            result->status = LoadResult::Status::Failed;
+            result->status.store(LoadResult::Status::Failed);
             onFinishCallback(nullptr);
             return;
         }
         // Store the directory path of the model file for texture loading
         const auto model = std::make_shared<Model>(path, id);
 
-        // Process Assimp's root node recursively
-        ProcessNode(model, scene->mRootNode, scene.get(), directory);
+        // Kick off texture preloads on the scheduler thread and wait for them using scheduler tasks
+        LOG_DEBUG(LogModelLoader, std::format("Loading textures..."));
+        const auto preloaded = PreloadTextures(*scene, directory, m_resourceManager.get(), scheduler);
 
-        result->status = LoadResult::Status::Ready;
-        result->resource = model;
-        onFinishCallback(model);
+        if (preloaded.empty())
+        {
+            // No textures to wait for, proceed immediately
+            ProcessNode(model, scene->mRootNode, scene.get(), directory);
+            result->status.store(LoadResult::Status::Ready);
+            result->resource = model;
+            onFinishCallback(model);
+            return;
+        }
+
+        // Create a shared check task that re-schedules itself until all textures are ready
+        std::shared_ptr<RepeatTask> textureCheckingTask;
+        textureCheckingTask = std::make_shared<RepeatTask>(-1, [preloaded, model, scene, directory, result, onFinishCallback, &scheduler, this]() mutable
+        {
+            bool allReady = true;
+            for (const auto& lr : preloaded)
+            {
+                if (!lr) continue;
+                if (lr->status.load() == IResourceLoader::LoadResult::Status::Invalid || lr->status.load() == IResourceLoader::LoadResult::Status::Failed)
+                {
+                    result->status.store(IResourceLoader::LoadResult::Status::Failed);
+                    result->error = std::format("Failed to load model from file: {}. Reason: Texture loading error {}", result->path, lr->path);
+                    onFinishCallback(nullptr);
+                    return false;
+                }
+                if (lr->status.load() != IResourceLoader::LoadResult::Status::Ready)
+                {
+                    allReady = false;
+                    break;
+                }
+            }
+            if (!allReady) {
+                return true;
+            }
+
+            // All textures ready — continue processing
+            ProcessNode(model, scene->mRootNode, scene.get(), directory);
+            result->status.store(IResourceLoader::LoadResult::Status::Ready);
+            result->resource = model;
+            onFinishCallback(model);
+            return false;
+        });
+
+        scheduler.ScheduleTask(textureCheckingTask);
     }, [](const std::string& error)
     {
         LOG_ERROR(LogModelLoader, error);
