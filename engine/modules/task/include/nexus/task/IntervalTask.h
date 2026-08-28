@@ -2,7 +2,7 @@
 
 #include "Runnable.h"
 #include "nexus/time/StandardTimeSource.h"
-#include "nexus/time/Timer.h"
+#include "nexus/time/TimeSource.h"
 
 NXS_NAMESPACE
 {
@@ -21,6 +21,7 @@ NXS_NAMESPACE
          * @brief Constructs a new IntervalTask object.
          *
          * @param interval The time interval (in seconds) between each task execution.
+         * Zero or negative values will cause the task to execute on every update.
          * @param task The callable function to be executed.
          * @param timeSource An optional time source for the timer. Defaults to a
          * standard system time source if not provided.
@@ -35,27 +36,28 @@ NXS_NAMESPACE
         /**
          * @brief Performs one step of the task.
          *
-         * This method checks the internal timer. If the specified interval has
-         * passed, it executes the wrapped task. The task will continue to
-         * run as long as the wrapped function returns `true`.
+         * This method checks the elapsed time since the last invocation. If the
+         * specified interval has passed, it executes the wrapped task. The task will
+         * continue to run as long as the wrapped function returns `true`.
          *
          * @return @c true if the task is still active and should continue;
          * @c false if the task function returns `false`, signaling it is complete.
          */
         MAYBE_UNUSED bool Update() override;
 
+        /// @brief Checks whether the task is currently active.
+        NODISCARD bool IsActive() const { return m_isActive; }
+
     private:
-        /// @brief The internal timer used to track the interval.
-        Ptr<Timer> m_timer;
+        /// @brief Time source used to measure interval timing.
+        Ref<ITimeSource> m_timeSource;
         /// @brief The callable function to be executed.
         TaskFunc m_task;
         /// @brief The time interval in seconds.
         double m_interval = 0;
-        /**
-         * @brief A flag used to synchronize with the timer's scheduled action.
-         * The task will not execute the wrapped function until the scheduled action
-         * has been called by the timer.
-         */
-        bool m_deferred = false;
+        /// @brief The last time the task was executed.
+        double m_lastTick = 0.0;
+        /// @brief Indicates whether the task is currently active.
+        bool m_isActive = true;
     };
 }

@@ -3,20 +3,24 @@
 USING_NAMESPACE_NXS;
 
 IntervalTask::IntervalTask(double interval, TaskFunc task, Ref<ITimeSource> timeSource)
-    : m_task(task)
+    : m_timeSource(timeSource)
+    , m_task(task)
     , m_interval(interval)
-    , m_deferred(false)
+    , m_lastTick(timeSource ? timeSource->Now() : 0.0)
 {
-    m_timer = std::make_unique<Timer>(timeSource);
-    m_timer->Start();
 }
 
 bool IntervalTask::Update()
 {
-    m_timer->Tick();
-    if (m_deferred) return true;
+    if (!m_isActive || !m_task || !m_timeSource) return false;
 
-    m_timer->ScheduleAction([this]() { m_deferred = false; }, m_interval);
-    m_deferred = true;
-    return m_task();
+    const double now = m_timeSource ? m_timeSource->Now() : 0.0;
+    if (now - m_lastTick < m_interval)
+    {
+        return true;
+    }
+
+    m_lastTick = now;
+    m_isActive = m_task();
+    return m_isActive;
 }

@@ -82,6 +82,20 @@ TEST(DelayTest, FinishesAfterSpecifiedTime) {
     ASSERT_FALSE(delayTask.Update());
 }
 
+TEST(DelayTest, RemainsActiveUntilTheDelayDeadline) {
+    auto mockTimeSource = std::make_shared<MockTimeSource>();
+    mockTimeSource->SetTime(0.0);
+    Delay delayTask(1.0, mockTimeSource);
+
+    ASSERT_TRUE(delayTask.Update());
+
+    mockTimeSource->SetTime(0.99);
+    ASSERT_TRUE(delayTask.Update());
+
+    mockTimeSource->SetTime(1.0);
+    ASSERT_FALSE(delayTask.Update());
+}
+
 // ============================================================================
 // Repeat Task
 // ============================================================================
@@ -124,6 +138,17 @@ TEST(RepeatTaskTest, IndefiniteRepeatStopsWhenTaskReturnsFalse) {
     ASSERT_EQ(counter, 5);
 }
 
+TEST(RepeatTaskTest, ZeroRepeatTerminatesImmediately) {
+    int counter = 0;
+    RepeatTask repeatTask(0, [&]() {
+        ++counter;
+        return true;
+    });
+
+    ASSERT_FALSE(repeatTask.Update());
+    ASSERT_EQ(counter, 0);
+}
+
 // ============================================================================
 // Sequential Task
 // ============================================================================
@@ -149,6 +174,12 @@ TEST(SequentialTaskTest, ExecutesTasksInOrder) {
     ASSERT_EQ(counter, 2);
 }
 
+TEST(SequentialTaskTest, EmptySequenceTerminatesImmediately) {
+    SequentialTask sequentialTask;
+
+    ASSERT_FALSE(sequentialTask.Update());
+}
+
 TEST(SequentialTaskTest, InitializerList) {
     int counter = 0;
     auto task1 = std::make_shared<OneshotTask>([&]() { counter = 1; });
@@ -172,6 +203,73 @@ TEST(SequentialTaskTest, InitializerList) {
 // ============================================================================
 // Task Scheduler
 // ============================================================================
+TEST(IntervalTaskTest, ExecutesWhenIntervalHasElapsed) {
+    auto mockTimeSource = std::make_shared<MockTimeSource>();
+    mockTimeSource->SetTime(0.0);
+
+    int callCount = 0;
+    IntervalTask intervalTask(1.0, [&]() {
+        ++callCount;
+        return callCount < 3;
+    }, mockTimeSource);
+
+    ASSERT_TRUE(intervalTask.IsActive());
+    ASSERT_TRUE(intervalTask.Update());
+    EXPECT_EQ(callCount, 0);
+
+    mockTimeSource->SetTime(0.5);
+    ASSERT_TRUE(intervalTask.Update());
+    EXPECT_EQ(callCount, 0);
+
+    mockTimeSource->SetTime(1.0);
+    ASSERT_TRUE(intervalTask.Update());
+    EXPECT_EQ(callCount, 1);
+
+    mockTimeSource->SetTime(1.5);
+    ASSERT_TRUE(intervalTask.Update());
+    EXPECT_EQ(callCount, 1);
+
+    mockTimeSource->SetTime(2.0);
+    ASSERT_TRUE(intervalTask.Update());
+    EXPECT_EQ(callCount, 2);
+
+    mockTimeSource->SetTime(3.0);
+    ASSERT_FALSE(intervalTask.Update());
+    ASSERT_FALSE(intervalTask.IsActive());
+    EXPECT_EQ(callCount, 3);
+
+    mockTimeSource->SetTime(4.0);
+    ASSERT_FALSE(intervalTask.Update());
+    ASSERT_FALSE(intervalTask.IsActive());
+    EXPECT_EQ(callCount, 3);
+}
+
+// Test that the IntervalTask executes its action even if the interval is set to zero,
+// meaning it should execute on every update call.
+TEST(IntervalTaskTest, AlwaysExecutes) {
+    auto mockTimeSource = std::make_shared<MockTimeSource>();
+    mockTimeSource->SetTime(0.0);
+
+    std::array<double, 2> testIntervals = { 0.0, -1.0 }; // Test both zero and negative intervals
+    for (const auto interval : testIntervals)
+    {
+        int callCount = 0;
+        IntervalTask intervalTask(interval, [&]() {
+            ++callCount;
+            return true; // Always returns true, so it should keep executing
+        }, mockTimeSource);
+        
+        ASSERT_TRUE(intervalTask.Update());
+        EXPECT_EQ(callCount, 1);
+
+        ASSERT_TRUE(intervalTask.Update());
+        EXPECT_EQ(callCount, 2);
+
+        ASSERT_TRUE(intervalTask.Update());
+        EXPECT_EQ(callCount, 3);
+    }
+}
+
 TEST_F(TaskSchedulerTest, ScheduleAndStopTask) {
     bool taskExecuted = false;
     auto task = std::make_shared<OneshotTask>([&]() {
