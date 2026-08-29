@@ -5,7 +5,7 @@
 #pragma once
 
 #include "NxsDefine.h"
-#include "core/LogDispatcher.h"
+#include "nexus/debug/LogDispatcher.h"
 #include "nexus/task/TaskScheduler.h"
 #include "graphics/GraphicsConfig.h"
 #include "graphics/RenderSystem.h"

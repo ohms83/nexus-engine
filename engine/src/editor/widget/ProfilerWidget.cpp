@@ -6,7 +6,7 @@
 
 #include "imgui.h"
 #include "implot.h"
-#include "core/Logger.h"
+#include "nexus/debug/Logger.h"
 #include "nexus/graphics/GraphicsConst.h"
 #include "nexus/graphics/RenderSystem.h"
 

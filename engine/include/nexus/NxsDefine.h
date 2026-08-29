@@ -54,9 +54,6 @@ constexpr char const* NXS_BUILD_CFG = "Unknown";
 
 #define SINGLETON(Type) static Type& Instance() { static Type instance; return instance; }
 
-#define DECLARE_LOG_EXTERN(LogCategory) extern const std::string Log##LogCategory
-#define DEFINE_LOG(LogCategory) const std::string Log##LogCategory = #LogCategory
-
 #ifdef NXS_PLATFORM_WIN64
 #define NXS_STRNCPY(dst, dstsize, src, count) strncpy_s(dst, dstsize, src, count)
 #else

@@ -4,16 +4,14 @@
 
 #pragma once
 
-#include "nexus/NxsDefine.h"
-
 #include <fstream>
 #include <format>
 #include <string>
 #include <set>
 
+#include "nexus/NxsDefine.h"
+#include "Assert.h"
 #include "Logger.h"
-#include "nexus/debug/Assert.h"
-#include "nexus/task/TaskScheduler.h"
 
 #if !defined(NXS_NO_LOG)
 #define ENABLE_LOG(LogCategory) nxs::LogDispatcher::Instance().EnableCategory(LogCategory, true)
@@ -44,10 +42,13 @@
 #define LOG_FATAL(Category, Message)
 #endif // !defined(NXS_NO_LOG)
 
+#define DECLARE_LOG_EXTERN(LogCategory) extern const std::string Log##LogCategory
+#define DEFINE_LOG(LogCategory) const std::string Log##LogCategory = #LogCategory
+
 //! Uncategorized logs.
 DECLARE_LOG_EXTERN(Temp);
 
-NXS_NAMESPACE
+namespace nxs
 {
     class LogDispatcher final
     {
@@ -62,7 +63,6 @@ NXS_NAMESPACE
         void AddLogger(Ref<ILogger> logger);
         void AddLoggers(std::initializer_list<Ref<ILogger>> loggers);
         void Flush() const;
-        void ScheduleAutoFlush(TaskScheduler& scheduler, double interval = 1.0);
 
         void Log(LogLevel level, const std::string& category, const std::string& message);
 
@@ -96,9 +96,8 @@ NXS_NAMESPACE
         LogLevel m_minimumLogLevel = LogLevel::Debug;
         //! A set of disabled log categories.
         std::set<std::string> m_disableLogs;
-
-        TaskID m_flushTask{};
-
+        /// @brief A connection to the assertion failure signal.
+        /// This is used to capture assertion failures and log them appropriately.
         sigslot::connection m_assertConnection;
     };
 }

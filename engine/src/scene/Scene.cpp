@@ -2,7 +2,7 @@
 #include "scene/component/LightComponent.h"
 #include "scene/system/SceneNodeTransformSystem.h"
 
-#include "core/LogDispatcher.h"
+#include "nexus/debug/LogDispatcher.h"
 #include "graphics/RenderSystem.h"
 
 #include "Remotery.h"

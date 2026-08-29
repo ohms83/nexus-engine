@@ -1,7 +1,7 @@
 #include "graphics/Mesh.h"
 #include "graphics/RenderingInterface.h"
 #include "memory/OwningBuffer.h"
-#include "core/LogDispatcher.h"
+#include "nexus/debug/LogDispatcher.h"
 
 USING_NAMESPACE_NXS;
 

@@ -1,5 +1,5 @@
 #include "graphics/ShaderLoader.h"
-#include "core/LogDispatcher.h"
+#include "nexus/debug/LogDispatcher.h"
 
 #include <format>
 

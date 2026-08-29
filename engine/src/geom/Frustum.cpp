@@ -1,5 +1,5 @@
 #include "geom/Frustum.h"
-#include "core/LogDispatcher.h"
+#include "nexus/debug/LogDispatcher.h"
 
 #include "glm/gtc/matrix_access.hpp"
 #include "glm/gtx/quaternion.hpp"

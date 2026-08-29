@@ -6,7 +6,7 @@
 
 #include "graphics/RenderingInterface.h"
 #include "graphics/opengl/GLRenderingInterface.h"
-#include "core/Logger.h"
+#include "nexus/debug/Logger.h"
 
 #include "Remotery.h"
 

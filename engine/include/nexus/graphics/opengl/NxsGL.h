@@ -6,7 +6,7 @@
 #include <format>
 
 #include "nexus/NxsDefine.h"
-#include "nexus/core/LogDispatcher.h"
+#include "nexus/debug/LogDispatcher.h"
 #include "nexus/graphics/GraphicsConst.h"
 
 #define GL_STRICT_CHECK

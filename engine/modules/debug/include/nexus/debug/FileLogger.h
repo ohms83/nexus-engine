@@ -6,7 +6,7 @@
 #include "Logger.h"
 #include <fstream>
 
-NXS_NAMESPACE
+namespace nxs
 {
     class FileLogger final : public ILogger
     {

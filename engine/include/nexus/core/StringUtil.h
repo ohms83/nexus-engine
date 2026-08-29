@@ -8,7 +8,7 @@
 #include <vector>
 #include <optional>
 
-#include "nexus/core/LogDispatcher.h"
+#include "nexus/debug/LogDispatcher.h"
 
 DECLARE_LOG_EXTERN(IniParser);
 

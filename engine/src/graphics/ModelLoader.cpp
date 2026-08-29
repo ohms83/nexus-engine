@@ -2,7 +2,7 @@
 // Created by nutta on 8/18/2025.
 //
 #include "graphics/ModelLoader.h"
-#include "core/LogDispatcher.h"
+#include "nexus/debug/LogDispatcher.h"
 #include "memory/OwningBuffer.h"
 
 #include "assimp/Importer.hpp"

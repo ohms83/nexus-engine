@@ -134,6 +134,7 @@ NXS_NAMESPACE
         void BeginDrawUI() const;
         void EndDrawUI() const;
         void DestroyImGui();
+        void ScheduleLogFlushTask();
 
     protected:
         WindowContext m_window = nullptr;
@@ -152,6 +153,8 @@ NXS_NAMESPACE
         float m_deltaTime = 0.0f;
 
         Ref<SceneManager> m_sceneManager;
+        /// @brief Task ID for the scheduled task to flush logs automatically. This is used to ensure that logs are flushed at regular intervals during the application's runtime.
+        TaskID m_flushTask{};
     };
 
     template<typename T>

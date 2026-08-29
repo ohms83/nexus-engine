@@ -3,7 +3,7 @@
 #include "nexus/NxsDefine.h"
 #include "nexus/ApplicationContext.h"
 #include "nexus/time/Timer.h"
-#include "nexus/core/LogDispatcher.h"
+#include "nexus/debug/LogDispatcher.h"
 #include "nexus/core/Color.h"
 #include "RenderingInterface.h"
 #include "PipelineState.h"

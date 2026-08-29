@@ -7,7 +7,7 @@
 #include <algorithm>
 #include <cstring>
 
-#include "core/Logger.h"
+#include "nexus/debug/Logger.h"
 #include "graphics/debug/Gizmos.h"
 #include "graphics/RenderSystem.h"
 #include "graphics/RenderCommand.h"

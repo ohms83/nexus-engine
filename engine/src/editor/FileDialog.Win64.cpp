@@ -1,7 +1,7 @@
 #ifdef NXS_PLATFORM_WIN64
 
 #include "nexus/editor/FileDialog.h"
-#include "nexus/core/LogDispatcher.h"
+#include "nexus/debug/LogDispatcher.h"
 
 #include <filesystem>
 #include <windows.h>

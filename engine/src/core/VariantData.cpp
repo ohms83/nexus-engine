@@ -5,7 +5,7 @@
 //
 
 #include "core/VariantData.h"
-#include "core/LogDispatcher.h"
+#include "nexus/debug/LogDispatcher.h"
 
 USING_NAMESPACE_NXS;
 

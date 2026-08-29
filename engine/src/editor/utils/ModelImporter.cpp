@@ -2,7 +2,7 @@
 
 #include "Engine.h"
 
-#include "core/LogDispatcher.h"
+#include "nexus/debug/LogDispatcher.h"
 #include "nexus/task/FutureWaitingTask.h"
 #include "core/resource/ResourceManager.h"
 #include "core/serialize/JsonSerializer.h"

@@ -7,8 +7,8 @@
 #include <ranges>
 #include <sstream>
 
-#include "core/LogDispatcher.h"
-#include "core/Logger.h"
+#include "nexus/debug/LogDispatcher.h"
+#include "nexus/debug/Logger.h"
 
 USING_NAMESPACE_NXS;
 

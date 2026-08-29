@@ -2,7 +2,7 @@
 // Created by nutta on 8/5/2025.
 //
 #include "core/serialize/IniParser.h"
-#include "core/LogDispatcher.h"
+#include "nexus/debug/LogDispatcher.h"
 #include "core/StringUtil.h"
 
 #include <concepts>

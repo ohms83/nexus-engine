@@ -1,5 +1,5 @@
 #include "graphics/ShaderGenerator.h"
-#include "core/LogDispatcher.h"
+#include "nexus/debug/LogDispatcher.h"
 #include "core/StringUtil.h"
 
 #include <fstream>

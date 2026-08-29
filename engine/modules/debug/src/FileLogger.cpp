@@ -1,12 +1,12 @@
 //
 // Created by nutta on 8/2/2025.
 //
-#include "nexus/core/FileLogger.h"
+#include "nexus/debug/FileLogger.h"
 
 #include <format>
 #include <iostream>
 
-USING_NAMESPACE_NXS;
+using namespace nxs;
 
 FileLogger::FileLogger(const std::string& fileName)
 {

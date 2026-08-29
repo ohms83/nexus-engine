@@ -3,7 +3,7 @@
 //
 
 #include "editor/widget/EditorWidget.h"
-#include "core/LogDispatcher.h"
+#include "nexus/debug/LogDispatcher.h"
 #include "imgui.h"
 
 USING_NAMESPACE_NXS;

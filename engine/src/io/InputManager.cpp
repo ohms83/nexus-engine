@@ -2,7 +2,7 @@
 // Created by nutta on 7/28/2025.
 //
 
-#include "nexus/core/LogDispatcher.h"
+#include "nexus/debug/LogDispatcher.h"
 #include "nexus/io/InputManager.h"
 
 #include <ranges>

@@ -1,7 +1,7 @@
 #include "editor/menu/ConsoleMenuItem.h"
 #include "editor/widget/Console.h"
 
-#include "core/LogDispatcher.h"
+#include "nexus/debug/LogDispatcher.h"
 
 USING_NAMESPACE_NXS;
 

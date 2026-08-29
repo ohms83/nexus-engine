@@ -6,7 +6,7 @@
 
 #include "Logger.h"
 
-NXS_NAMESPACE
+namespace nxs
 {
     class StdOutLogger final : public ILogger
     {

@@ -2,7 +2,7 @@
 #include <iostream>
 #include "graphics/RenderSystem.h"
 #include "graphics/Shader.h"
-#include "core/LogDispatcher.h"
+#include "nexus/debug/LogDispatcher.h"
 #include "nexus/time/HighResTimeSource.h"
 #include "nexus/time/StandardTimeSource.h"
 

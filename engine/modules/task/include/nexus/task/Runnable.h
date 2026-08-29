@@ -7,8 +7,6 @@
 #include "nexus/NxsDefine.h"
 #include "sigslot/signal.hpp"
 
-DECLARE_LOG_EXTERN(Runnable);
-
 NXS_NAMESPACE
 {
     /**

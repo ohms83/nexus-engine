@@ -10,7 +10,7 @@
 #include "editor/widget/EditorWidget.h"
 #include "editor/widget/ProfilerWidget.h"
 #include "editor/widget/PropertyWindow.h"
-#include "core/LogDispatcher.h"
+#include "nexus/debug/LogDispatcher.h"
 #include "core/serialize/JsonSerializer.h"
 
 #include "Application.h"

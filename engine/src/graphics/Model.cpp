@@ -1,5 +1,5 @@
 #include "nexus/graphics/Model.h"
-#include "nexus/core/LogDispatcher.h"
+#include "nexus/debug/LogDispatcher.h"
 
 #include "Remotery.h"
 

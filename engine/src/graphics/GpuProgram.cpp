@@ -1,7 +1,7 @@
 
 
 #include "graphics/GpuProgram.h"
-#include "core/LogDispatcher.h"
+#include "nexus/debug/LogDispatcher.h"
 
 #include <ranges>
 

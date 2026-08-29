@@ -1,7 +1,7 @@
 #pragma once
 
 #include "MenuItem.h"
-#include "nexus/core/LogDispatcher.h"
+#include "nexus/debug/LogDispatcher.h"
 
 NXS_NAMESPACE
 {

@@ -3,21 +3,26 @@
 //
 #include "Application.h"
 
+// Standard headers
 #include <format>
 #include <iostream>
 
+// Nexus headers
 #include "Engine.h"
-#include "imgui.h"
-#include "imgui_impl_opengl3.h"
-#include "imgui_impl_sdl3.h"
-#include "implot.h"
-#include "core/Logger.h"
-#include "core/FileLogger.h"
-#include "core/StdOutLogger.h"
+#include "nexus/debug/Logger.h"
+#include "nexus/debug/FileLogger.h"
+#include "nexus/debug/StdOutLogger.h"
 #include "editor/Editor.h"
 #include "graphics/debug/Gizmos.h"
 #include "io/InputManager.h"
 #include "nexus/time/TimerManager.h"
+#include "nexus/task/IntervalTask.h"
+
+// Third-party headers
+#include "imgui.h"
+#include "imgui_impl_opengl3.h"
+#include "imgui_impl_sdl3.h"
+#include "implot.h"
 #include "Remotery.h"
 
 USING_NAMESPACE_NXS;
@@ -146,6 +151,7 @@ bool Application::Init(const ApplicationConfig& info)
     TimerManager::Init();
 
     InitImGui();
+    ScheduleLogFlushTask();
 
     return Init_Internal();
 }
@@ -163,8 +169,6 @@ int Application::BeginMainLoop()
     auto& inputManager = InputManager::Instance();
     auto& timerManager = TimerManager::Instance();
     const auto taskScheduler = engine.GetTaskScheduler();
-
-    LogDispatcher::Instance().ScheduleAutoFlush(*taskScheduler);
 
     // Main loop.
     m_quit = false;
@@ -449,4 +453,16 @@ void Application::DestroyImGui()
 
     ImGui_ImplSDL3_Shutdown();
     ImGui::DestroyContext();
+}
+
+void Application::ScheduleLogFlushTask()
+{
+    const double intervalSeconds = 1.0; // Flush logs every 1 second
+    const auto task = std::make_shared<IntervalTask>(intervalSeconds, [&] {
+        LogDispatcher::Instance().Flush();
+        return true;
+    });
+    auto taskScheduler = Engine::Instance().GetTaskScheduler();
+    NXS_ASSERT_MSG(taskScheduler != nullptr, "TaskScheduler is not initialized");
+    m_flushTask = taskScheduler->ScheduleTask(task);
 }

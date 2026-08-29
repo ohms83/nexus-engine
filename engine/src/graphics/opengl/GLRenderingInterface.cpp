@@ -6,7 +6,7 @@
 
 #include <sstream>
 
-#include "core/Logger.h"
+#include "nexus/debug/Logger.h"
 #include "graphics/opengl/GLIndexBuffer.h"
 #include "graphics/opengl/GLGpuProgram.h"
 #include "graphics/opengl/GLTexture.h"

@@ -4,9 +4,9 @@
 
 #pragma once
 
-#include <nexus/NxsDefine.h>
+#include <string>
 
-NXS_NAMESPACE
+namespace nxs
 {
     enum class LogLevel
     {

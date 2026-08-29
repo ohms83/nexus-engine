@@ -4,7 +4,7 @@
 
 #include "graphics/Material.h"
 #include "nexus/core/serialize/Serializer.h"
-#include "core/LogDispatcher.h"
+#include "nexus/debug/LogDispatcher.h"
 #include "core/Path.h"
 
 #include "Remotery.h"

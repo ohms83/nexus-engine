@@ -1,10 +1,10 @@
 //
 // Created by nutta on 8/2/2025.
 //
-#include "nexus/core/StdOutLogger.h"
+#include "nexus/debug/StdOutLogger.h"
 #include <iostream>
 
-USING_NAMESPACE_NXS;
+using namespace nxs;
 
 void StdOutLogger::Log(LogLevel level, const std::string& message)
 {

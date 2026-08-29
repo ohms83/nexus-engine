@@ -4,7 +4,9 @@
 
 #pragma once
 
-#include <nexus/NxsDefine.h>
+#include "nexus/NxsDefine.h"
+#include "nexus/debug/LogDispatcher.h"
+
 #include <functional>
 #include <string>
 #include <string_view>

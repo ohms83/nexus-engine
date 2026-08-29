@@ -1,5 +1,5 @@
 #include "nexus/core/StringUtil.h"
-#include "nexus/core/LogDispatcher.h"
+#include "nexus/debug/LogDispatcher.h"
 
 #include <locale>     // For std::tolower, std::toupper with locale
 #include <algorithm>  // For std::transform, std::find_if, std::find_if_not

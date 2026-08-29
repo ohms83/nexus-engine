@@ -1,14 +1,12 @@
 //
 // Created by nutta on 8/2/2025.
 //
-#include "nexus/core/LogDispatcher.h"
+#include "nexus/debug/LogDispatcher.h"
 
 #include <format>
 #include <memory>
 
-#include "nexus/task/IntervalTask.h"
-
-USING_NAMESPACE_NXS;
+using namespace nxs;
 
 DEFINE_LOG(LogDispatcher);
 DEFINE_LOG(Temp);
@@ -63,15 +61,6 @@ void LogDispatcher::AddLoggers(const std::initializer_list<Ref<ILogger>> loggers
 void LogDispatcher::Flush() const
 {
     for (const auto& logger : m_loggers) logger->Flush();
-}
-
-void LogDispatcher::ScheduleAutoFlush(TaskScheduler& scheduler, const double interval)
-{
-    const auto task = std::make_shared<IntervalTask>(interval, [&] {
-        Flush();
-        return true;
-    });
-    m_flushTask = scheduler.ScheduleTask(task);
 }
 
 void LogDispatcher::Log(const LogLevel level, const std::string& category, const std::string& message)
