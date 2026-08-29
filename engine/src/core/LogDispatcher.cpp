@@ -17,6 +17,20 @@ DEFINE_LOG(Temp);
 
 static Ptr<LogDispatcher> s_instance;
 
+LogDispatcher::LogDispatcher()
+{
+    m_assertConnection = Assert::onAssertionFailedEvent.connect([this](const std::string& message) {
+        Log(LogLevel::Fatal, "Assert", message);
+        Destroy();
+    });
+}
+
+LogDispatcher::~LogDispatcher()
+{
+    m_assertConnection.disconnect();
+    m_loggers.clear();
+}
+
 void LogDispatcher::Init()
 {
     s_instance = std::make_unique<LogDispatcher>();

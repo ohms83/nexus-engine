@@ -1,0 +1,3 @@
+# Keep the engine debug module tracked
+!debug/
+!debug/**

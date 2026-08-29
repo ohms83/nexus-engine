@@ -12,9 +12,10 @@
 #include <set>
 
 #include "Logger.h"
+#include "nexus/debug/Assert.h"
 #include "nexus/task/TaskScheduler.h"
 
-#if !defined(NO_LOG)
+#if !defined(NXS_NO_LOG)
 #define ENABLE_LOG(LogCategory) nxs::LogDispatcher::Instance().EnableCategory(LogCategory, true)
 #define DISABLE_LOG(LogCategory) nxs::LogDispatcher::Instance().EnableCategory(LogCategory, false)
 
@@ -32,26 +33,6 @@
         const auto formatted = std::format("({}:{}) {}", __FILE__, __LINE__, Message); \
         nxs::LogDispatcher::Instance().Fatal(Category, formatted); \
     } while(0);
-
-#define NXS_ASSERT(Condition) \
-    do { \
-        if (!(Condition)) { \
-            const auto formatted = std::format("Assertion Failed! ({}:{}) {}", __FILE__, __LINE__, #Condition); \
-            nxs::LogDispatcher::Instance().Log(nxs::LogLevel::Fatal, "Assert", formatted); \
-            nxs::LogDispatcher::Destroy(); \
-        } \
-        assert(Condition); \
-    } while(0);
-
-#define NXS_ASSERT_MSG(Condition, Message) \
-    do { \
-        if (!(Condition)) { \
-            const auto formatted = std::format("Assertion Failed! ({}:{}) {}. {}", __FILE__, __LINE__, #Condition, Message); \
-            nxs::LogDispatcher::Instance().Log(nxs::LogLevel::Fatal, "Assert", formatted); \
-            nxs::LogDispatcher::Destroy(); \
-        } \
-        assert(Condition); \
-    } while(0);
 #else
 #define ENABLE_LOG(LogCategory)
 #define DISABLE_LOG(LogCategory)
@@ -61,9 +42,7 @@
 #define LOG_WARNING(Category, Message)
 #define LOG_ERROR(Category, Message)
 #define LOG_FATAL(Category, Message)
-#define NXS_ASSERT(Condition)
-#define NXS_ASSERT_MSG(Condition, Message)
-#endif // !defined(NO_LOG)
+#endif // !defined(NXS_NO_LOG)
 
 //! Uncategorized logs.
 DECLARE_LOG_EXTERN(Temp);
@@ -73,8 +52,8 @@ NXS_NAMESPACE
     class LogDispatcher final
     {
     public:
-        LogDispatcher() = default;
-        ~LogDispatcher() = default;
+        LogDispatcher();
+        ~LogDispatcher();
 
         static void Init();
         static void Destroy();
@@ -119,5 +98,7 @@ NXS_NAMESPACE
         std::set<std::string> m_disableLogs;
 
         TaskID m_flushTask{};
+
+        sigslot::connection m_assertConnection;
     };
 }

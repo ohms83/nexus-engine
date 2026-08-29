@@ -83,6 +83,7 @@ file(GLOB_RECURSE ENGINE_FOUNDATION_SOURCES CONFIGURE_DEPENDS
 add_library(nexus-core STATIC ${ENGINE_FOUNDATION_SOURCES})
 nexus_target_defaults(nexus-core)
 target_link_libraries(nexus-core
+    PUBLIC nexus-debug
     PUBLIC nexus-time
     PUBLIC nexus-task
     PUBLIC EnTT

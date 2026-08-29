@@ -4,6 +4,7 @@
 
 #include "nexus/time/TimerManager.h"
 #include "nexus/time/StandardTimeSource.h"
+#include "nexus/debug/Assert.h"
 
 #include <algorithm>
 
@@ -30,7 +31,7 @@ void TimerManager::Destroy()
 TimerManager& TimerManager::Instance()
 {
     // TODO: Decoupling assertion from LogDispatcher to avoid circular dependency
-    // NXS_ASSERT_MSG(s_instance, "TimerManager instance is not initialized");
+    NXS_ASSERT_MSG(s_instance, "TimerManager instance is not initialized");
     return *s_instance;
 }
 

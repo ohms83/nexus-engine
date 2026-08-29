@@ -1,7 +1,7 @@
 //
 // Created by nutta on 8/4/2025.
 //
-#define NO_LOG // Turn off logging
+#define NXS_NO_LOG // Turn off logging
 
 #include "gtest/gtest.h"
 #include "nexus/Nexus.h"
