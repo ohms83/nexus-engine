@@ -16,24 +16,24 @@ NXS_NAMESPACE
             , direction(dir)
         {}
 
-        bool Intersect(const Sphere& sphere)
+        NODISCARD bool Intersect(const Sphere& sphere)
         {
             float tmpOut;
             return  glm::intersectRaySphere(origin, direction, sphere.center, sphere.RadiusSquare(), tmpOut);
         }
 
-        bool Intersect(const Sphere& sphere, float& outDistance)
+        NODISCARD bool Intersect(const Sphere& sphere, float& outDistance)
         {
             return  glm::intersectRaySphere(origin, direction, sphere.center, sphere.RadiusSquare(), outDistance);
         }
 
-        bool Intersect(const Plane& plane)
+        NODISCARD bool Intersect(const Plane& plane)
         {
             float tmpOut;
             return glm::intersectRayPlane(origin, direction, plane.distance * plane.normal, plane.normal, tmpOut);
         }
 
-        bool Intersect(const Plane& plane, float& outDistance)
+        NODISCARD bool Intersect(const Plane& plane, float& outDistance)
         {
             return glm::intersectRayPlane(origin, direction, plane.distance * plane.normal, plane.normal, outDistance);
         }

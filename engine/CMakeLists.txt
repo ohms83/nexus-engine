@@ -76,7 +76,6 @@ file(GLOB_RECURSE ENGINE_FOUNDATION_SOURCES CONFIGURE_DEPENDS
     src/NxsDefine.cpp
     src/core/*.cpp
     src/ecs/*.cpp
-    src/geom/*.cpp
 )
 add_library(nexus-core STATIC ${ENGINE_FOUNDATION_SOURCES})
 nexus_target_defaults(nexus-core)
@@ -105,6 +104,7 @@ target_link_libraries(nexus-graphics
     # Public libraries that other modules can use
     PUBLIC nexus-core
     PUBLIC nexus-math
+    PUBLIC nexus-geom
     PUBLIC SDL3::SDL3
     PUBLIC glad
     PUBLIC OpenGL::GL
@@ -117,7 +117,10 @@ target_link_libraries(nexus-graphics
 file(GLOB_RECURSE ENGINE_SCENE_SOURCES CONFIGURE_DEPENDS src/scene/*.cpp)
 add_library(nexus-scene STATIC ${ENGINE_SCENE_SOURCES})
 nexus_target_defaults(nexus-scene)
-target_link_libraries(nexus-scene PUBLIC nexus-graphics)
+target_link_libraries(nexus-scene
+    PUBLIC nexus-graphics
+    PUBLIC nexus-geom
+)
 
 file(GLOB_RECURSE ENGINE_EDITOR_MODULE_SOURCES CONFIGURE_DEPENDS src/editor/*.cpp)
 add_library(nexus-editor-module STATIC ${ENGINE_EDITOR_MODULE_SOURCES})
@@ -133,7 +136,11 @@ target_link_libraries(nexus-engine
     PUBLIC nexus-editor-module
     PUBLIC nexus-math
     PUBLIC nexus-core
-    PUBLIC nexus-io)
+    PUBLIC nexus-io
+    PUBLIC nexus-geom
+    PUBLIC nexus-graphics
+    PUBLIC nexus-scene
+)
 
 message("CMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}")
 

@@ -8,8 +8,8 @@
 #include "core/serialize/JsonSerializer.h"
 #include "core/serialize/MsgPackSerializer.h"
 
-#include "geom/Box.h"
-#include "geom/Sphere.h"
+#include "nexus/geom/Box.h"
+#include "nexus/geom/Sphere.h"
 
 #include "graphics/Mesh.h"
 #include "graphics/Material.h"

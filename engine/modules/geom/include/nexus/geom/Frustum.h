@@ -14,7 +14,7 @@ NXS_NAMESPACE
         
         std::array<Plane, 6> planes;
 
-        bool IsPointInside(const glm::vec3& point) const;
-        bool IsSphereInside(const glm::vec3& center, float radius) const;
+        NODISCARD bool IsPointInside(const glm::vec3& point) const;
+        NODISCARD bool IsSphereInside(const glm::vec3& center, float radius) const;
     };
 }
