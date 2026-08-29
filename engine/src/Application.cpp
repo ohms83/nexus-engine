@@ -14,7 +14,7 @@
 #include "nexus/debug/StdOutLogger.h"
 #include "editor/Editor.h"
 #include "graphics/debug/Gizmos.h"
-#include "io/InputManager.h"
+#include "nexus/io/InputManager.h"
 #include "nexus/time/TimerManager.h"
 #include "nexus/task/IntervalTask.h"
 

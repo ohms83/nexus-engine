@@ -77,8 +77,6 @@ file(GLOB_RECURSE ENGINE_FOUNDATION_SOURCES CONFIGURE_DEPENDS
     src/core/*.cpp
     src/ecs/*.cpp
     src/geom/*.cpp
-    src/io/*.cpp
-    src/memory/*.cpp
 )
 add_library(nexus-core STATIC ${ENGINE_FOUNDATION_SOURCES})
 nexus_target_defaults(nexus-core)
@@ -133,7 +131,9 @@ add_library(nexus-engine STATIC
 nexus_target_defaults(nexus-engine)
 target_link_libraries(nexus-engine
     PUBLIC nexus-editor-module
-    PUBLIC nexus-math)
+    PUBLIC nexus-math
+    PUBLIC nexus-core
+    PUBLIC nexus-io)
 
 message("CMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}")
 

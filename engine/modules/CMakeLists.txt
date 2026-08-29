@@ -1,4 +1,5 @@
 add_subdirectory(debug)
+add_subdirectory(io)
 add_subdirectory(math)
 add_subdirectory(memory)
 add_subdirectory(task)
