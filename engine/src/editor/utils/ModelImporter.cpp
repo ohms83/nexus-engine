@@ -20,7 +20,7 @@
 #include "scene/component/MeshComponent.h"
 #include "scene/component/GeometryComponent.h"
 
-#include "memory/OwningBuffer.h"
+#include "nexus/memory/OwningBuffer.h"
 
 #include "assimp/Importer.hpp"
 #include "assimp/scene.h"

@@ -4,7 +4,7 @@
 
 #include "graphics/Mesh.h"
 #include "graphics/RenderingInterface.h"
-#include "memory/OwningBuffer.h"
+#include "nexus/memory/OwningBuffer.h"
 
 USING_NAMESPACE_NXS;
 

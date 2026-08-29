@@ -17,7 +17,7 @@
 #include "ecs/Ecs.h"
 #include "nexus/math/Math.h"
 #include "nexus/math/Matrix.h"
-#include "memory/OwningBuffer.h"
+#include "nexus/memory/OwningBuffer.h"
 #include "scene/Scene.h"
 #include "scene/component/CameraComponent.h"
 #include "scene/component/LightComponent.h"

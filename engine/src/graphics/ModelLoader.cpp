@@ -3,7 +3,7 @@
 //
 #include "graphics/ModelLoader.h"
 #include "nexus/debug/LogDispatcher.h"
-#include "memory/OwningBuffer.h"
+#include "nexus/memory/OwningBuffer.h"
 
 #include "assimp/Importer.hpp"
 #include "assimp/scene.h"

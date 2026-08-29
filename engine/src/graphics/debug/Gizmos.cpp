@@ -5,7 +5,7 @@
 #include "graphics/debug/Gizmos.h"
 #include "graphics/RenderSystem.h"
 #include "nexus/math/Math.h"
-#include "memory/BorrowBuffer.h"
+#include "nexus/memory/BorrowBuffer.h"
 
 #include "Remotery.h"
 

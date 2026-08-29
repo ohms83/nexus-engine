@@ -1,6 +1,6 @@
 #include "graphics/Mesh.h"
 #include "graphics/RenderingInterface.h"
-#include "memory/OwningBuffer.h"
+#include "nexus/memory/OwningBuffer.h"
 #include "nexus/debug/LogDispatcher.h"
 
 USING_NAMESPACE_NXS;

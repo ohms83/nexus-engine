@@ -1,4 +1,4 @@
-#include "memory/BorrowBuffer.h"
+#include "nexus/memory/BorrowBuffer.h"
 #include <cstring> // For memcpy
 
 USING_NAMESPACE_NXS;
