@@ -8,7 +8,7 @@
 #include <typeindex>
 
 #include "nexus/NxsCommon.h"
-#include "nexus/core/serialize/Serializeable.h"
+#include "nexus/serialize/Serializeable.h"
 #include "Color.h"
 
 #include "sigslot/signal.hpp"

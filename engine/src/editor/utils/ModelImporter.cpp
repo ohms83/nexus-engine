@@ -5,8 +5,8 @@
 #include "nexus/debug/LogDispatcher.h"
 #include "nexus/task/FutureWaitingTask.h"
 #include "core/resource/ResourceManager.h"
-#include "core/serialize/JsonSerializer.h"
-#include "core/serialize/MsgPackSerializer.h"
+#include "nexus/serialize/JsonSerializer.h"
+#include "nexus/serialize/MsgPackSerializer.h"
 
 #include "nexus/geom/Box.h"
 #include "nexus/geom/Sphere.h"

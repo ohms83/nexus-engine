@@ -3,9 +3,9 @@
 //
 
 #include "graphics/Material.h"
-#include "nexus/core/serialize/Serializer.h"
+#include "nexus/serialize/Serializer.h"
 #include "nexus/debug/LogDispatcher.h"
-#include "core/Path.h"
+#include "nexus/core/Path.h"
 
 #include "Remotery.h"
 

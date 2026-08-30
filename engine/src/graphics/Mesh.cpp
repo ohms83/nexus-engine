@@ -1,5 +1,5 @@
 #include "graphics/Mesh.h"
-#include "nexus/core/serialize/Serializer.h"
+#include "nexus/serialize/Serializer.h"
 
 USING_NAMESPACE_NXS;
 

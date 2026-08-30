@@ -1,6 +1,6 @@
 #include "graphics/ShaderGenerator.h"
 #include "nexus/debug/LogDispatcher.h"
-#include "core/StringUtil.h"
+#include "nexus/core/StringUtil.h"
 
 #include <fstream>
 #include <filesystem>

@@ -2,7 +2,7 @@
 // Created by nutta on 8/5/2025.
 //
 #include "nexus/graphics/GraphicsConfig.h"
-#include "nexus/core/serialize/IniParser.h"
+#include "nexus/serialize/IniParser.h"
 
 USING_NAMESPACE_NXS;
 

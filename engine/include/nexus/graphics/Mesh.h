@@ -1,7 +1,7 @@
 #pragma once
 
 #include "nexus/NxsDefine.h"
-#include "nexus/core/serialize/Serializeable.h"
+#include "nexus/serialize/Serializeable.h"
 
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"

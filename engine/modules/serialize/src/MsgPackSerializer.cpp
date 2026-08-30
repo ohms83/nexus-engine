@@ -1,7 +1,7 @@
 //
 // Created by nutta on 8/1/2025.
 //
-#include "core/serialize/MsgPackSerializer.h"
+#include "nexus/serialize/MsgPackSerializer.h"
 #include <msgpack.hpp>
 
 USING_NAMESPACE_NXS;

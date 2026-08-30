@@ -7,7 +7,7 @@
 #include "RenderCommand.h"
 
 #include "nexus/core/Color.h"
-#include "nexus/core/serialize/Serializeable.h"
+#include "nexus/serialize/Serializeable.h"
 
 #include <functional>
 #include <string>

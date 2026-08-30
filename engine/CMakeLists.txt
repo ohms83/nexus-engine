@@ -84,6 +84,7 @@ target_link_libraries(nexus-core
     PUBLIC nexus-time
     PUBLIC nexus-task
     PUBLIC nexus-memory
+    PUBLIC nexus-serialize
     PUBLIC EnTT
     PRIVATE SDL3::SDL3
     PRIVATE RapidJSON
@@ -112,6 +113,7 @@ target_link_libraries(nexus-graphics
 
     # Private libraries that are only used internally
     PRIVATE nexus-time
+    PRIVATE nexus-serialize
 )
 
 file(GLOB_RECURSE ENGINE_SCENE_SOURCES CONFIGURE_DEPENDS src/scene/*.cpp)
@@ -139,6 +141,7 @@ target_link_libraries(nexus-engine
     PUBLIC nexus-io
     PUBLIC nexus-geom
     PUBLIC nexus-graphics
+    PUBLIC nexus-serialize
     PUBLIC nexus-scene
 )
 

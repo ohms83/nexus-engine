@@ -1,9 +1,9 @@
 //
 // Created by nutta on 8/5/2025.
 //
-#include "core/serialize/IniParser.h"
+#include "nexus/serialize/IniParser.h"
 #include "nexus/debug/LogDispatcher.h"
-#include "core/StringUtil.h"
+#include "nexus/core/StringUtil.h"
 
 #include <concepts>
 

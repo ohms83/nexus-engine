@@ -2,7 +2,7 @@
 
 #include "FileMenuItem.h"
 #include "nexus/scene/Scene.h"
-#include "nexus/core/serialize/Serializer.h"
+#include "nexus/serialize/Serializer.h"
 
 NXS_NAMESPACE
 {

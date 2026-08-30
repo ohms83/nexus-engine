@@ -1,4 +1,4 @@
-#include "core/serialize/JsonSerializer.h"
+#include "nexus/serialize/JsonSerializer.h"
 #include "rapidjson/document.h"
 #include "rapidjson/writer.h"
 #include "rapidjson/stringbuffer.h"

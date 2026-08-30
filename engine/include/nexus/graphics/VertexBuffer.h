@@ -2,7 +2,7 @@
 
 #include "nexus/NxsDefine.h"
 #include "nexus/memory/Buffer.h"
-#include "nexus/core/serialize/Serializeable.h"
+#include "nexus/serialize/Serializeable.h"
 
 #include "GPUBuffer.h"
 #include "GpuResource.h"
