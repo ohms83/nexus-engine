@@ -45,7 +45,7 @@ SceneGraphWidget::~SceneGraphWidget()
 void SceneGraphWidget::SetCurrentScene(Ref<Scene> scene)
 {
     m_scene = scene;
-    m_selectedNode = m_scene ? m_scene->GetId() : InvalidID;
+    m_selectedNode = m_scene ? m_scene->GetId() : NXS_INVALID_ID;
 }
 
 Identifier SceneGraphWidget::GetSelectedNode() const
@@ -104,7 +104,7 @@ void SceneGraphWidget::DrawSceneNode(Ref<SceneNode> node)
 void SceneGraphWidget::DeleteNode(Ref<SceneNode> node)
 {
     if (!node) return;
-    m_selectedNode = InvalidID;
+    m_selectedNode = NXS_INVALID_ID;
     m_scene->RemoveChild(node);
 }
 
@@ -118,7 +118,7 @@ void SceneGraphWidget::HandleInput(Ref<SceneNode> node)
 
 void SceneGraphWidget::ShowContextMenu()
 {
-    if (m_selectedNode == InvalidID) return;
+    if (m_selectedNode == NXS_INVALID_ID) return;
     static const char* contexMenuID = "Scene Graph Context Menu";
 
     auto node = m_scene->FindNode(m_selectedNode);
@@ -148,6 +148,6 @@ void SceneGraphWidget::ShowContextMenu()
     
     if (closePopup)
     {
-        m_selectedNode = InvalidID;
+        m_selectedNode = NXS_INVALID_ID;
     }
 }

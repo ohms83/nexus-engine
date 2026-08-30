@@ -18,7 +18,7 @@ std::unordered_map<std::string, SceneNode::Creator> SceneNode::s_factoryFunction
 SceneNode::SceneNode(Ref<entt::registry> registry, std::string name)
     : Entity(registry)
 {
-    NXS_ASSERT(s_runningId < MaxIdentifier);
+    NXS_ASSERT(s_runningId < NXS_MAX_IDENTIFIER);
     if (name.empty())
     {
         name = std::format("SceneNode_{}", s_runningId);

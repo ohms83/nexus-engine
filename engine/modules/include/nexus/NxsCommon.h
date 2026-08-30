@@ -1,6 +1,6 @@
 #pragma once
 
-#include "NxsDefine.h"
+#include "nexus/NxsDefine.h"
 
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>

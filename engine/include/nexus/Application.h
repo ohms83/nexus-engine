@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "NxsDefine.h"
+#include "nexus/NxsDefine.h"
 #include "ApplicationContext.h"
 
 #include <concepts>

@@ -60,11 +60,12 @@ constexpr char const* NXS_BUILD_CFG = "Unknown";
 #define NXS_STRNCPY(dst, dstsize, src, count) strncpy(dst, src, count)
 #endif
 
+#define NXS_INVALID_ID 0
+#define NXS_MAX_IDENTIFIER UINT32_MAX
+
 NXS_NAMESPACE
 {
     using Identifier = uint32_t;
-    const extern Identifier InvalidID;
-    const extern Identifier MaxIdentifier;
 
     /**
      * Reference counting type. This is just an alias to @c std::shared_ptr.

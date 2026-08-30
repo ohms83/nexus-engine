@@ -1,3 +1,6 @@
+# A public include directory shared by every modules
+set(NXS_PUBLIC_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
 add_subdirectory(debug)
 add_subdirectory(geom)
 add_subdirectory(io)

@@ -2,11 +2,11 @@
 
 #pragma once
 
-#include "NxsCommon.h"
+#include "nexus/NxsCommon.h"
+#include "nexus/NxsDataType.h"
 
 #include "Application.h"
 #include "Engine.h"
-#include "NxsDataType.h"
 #include "core/Color.h"
 #include "nexus/debug/FileLogger.h"
 #include "core/Hasher.h"

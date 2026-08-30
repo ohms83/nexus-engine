@@ -98,7 +98,7 @@ NXS_NAMESPACE
          * @brief Get the registered ComponentID for a given class name.
          * 
          * @param className 
-         * @return A valid ComponentID if found; InvalidID otherwise.
+         * @return A valid ComponentID if found; NXS_INVALID_ID otherwise.
          */
         NODISCARD static ComponentID GetRegisteredTypeID(const std::string& className)
         {
@@ -106,7 +106,7 @@ NXS_NAMESPACE
             {
                 return itr->second;
             }
-            return InvalidID;
+            return NXS_INVALID_ID;
         }
 
         /**

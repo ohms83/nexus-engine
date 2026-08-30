@@ -21,7 +21,7 @@ PropertyWindow::PropertyWindow(SceneManager& sceneManager)
 void PropertyWindow::ChangeCurrentScene(Ref<Scene> scene)
 {
     m_currentScene = scene;
-    m_sceneNodeId = m_currentScene ? m_currentScene->GetId() : InvalidID;
+    m_sceneNodeId = m_currentScene ? m_currentScene->GetId() : NXS_INVALID_ID;
 }
 
 void PropertyWindow::SetSceneNode(Identifier sceneNodeId)
@@ -31,12 +31,12 @@ void PropertyWindow::SetSceneNode(Identifier sceneNodeId)
 
 void PropertyWindow::Draw_Internal(RenderSystem& renderSystem)
 {
-    if (m_sceneNodeId == InvalidID || !m_currentScene) return;
+    if (m_sceneNodeId == NXS_INVALID_ID || !m_currentScene) return;
 
     auto selectedNode = m_currentScene->GetId() == m_sceneNodeId ? m_currentScene : m_currentScene->FindNode(m_sceneNodeId);
     if (!selectedNode)
     {
-        m_sceneNodeId = InvalidID;
+        m_sceneNodeId = NXS_INVALID_ID;
         return;
     }
 

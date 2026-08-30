@@ -43,7 +43,7 @@ NXS_NAMESPACE
         void ChangeCurrentScene(Ref<Scene> scene);
 
     private:
-        Identifier m_sceneNodeId = InvalidID;
+        Identifier m_sceneNodeId = NXS_INVALID_ID;
         Ref<Scene> m_currentScene;
         uint32_t m_currentCategory = 0;
     };

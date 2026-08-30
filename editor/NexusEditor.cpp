@@ -16,7 +16,7 @@
 
 DEFINE_LOG(NexusEditor);
 
-static nxs::Identifier selectedNode = nxs::InvalidID;
+static nxs::Identifier selectedNode = NXS_INVALID_ID;
 
 static void InitLight(nxs::Scene& scene)
 {
