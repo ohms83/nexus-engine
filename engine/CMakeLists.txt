@@ -75,7 +75,6 @@ add_subdirectory(modules)
 file(GLOB_RECURSE ENGINE_FOUNDATION_SOURCES CONFIGURE_DEPENDS
     src/NxsDefine.cpp
     src/core/*.cpp
-    src/ecs/*.cpp
 )
 add_library(nexus-core STATIC ${ENGINE_FOUNDATION_SOURCES})
 nexus_target_defaults(nexus-core)
@@ -121,6 +120,7 @@ file(GLOB_RECURSE ENGINE_SCENE_SOURCES CONFIGURE_DEPENDS src/scene/*.cpp)
 add_library(nexus-scene STATIC ${ENGINE_SCENE_SOURCES})
 nexus_target_defaults(nexus-scene)
 target_link_libraries(nexus-scene
+    PUBLIC nexus-ecs
     PUBLIC nexus-graphics
     PUBLIC nexus-geom
 )

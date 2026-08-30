@@ -9,7 +9,7 @@
 #include "graphics/RenderPass.h"
 #include "nexus/geom/Frustum.h"
 
-#include "ecs/Ecs.h"
+#include "nexus/ecs/Ecs.h"
 
 #include "nexus/math/Math.h"
 #include "nexus/math/Matrix.h"

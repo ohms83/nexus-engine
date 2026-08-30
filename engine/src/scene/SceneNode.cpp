@@ -1,7 +1,7 @@
 #include "scene/SceneNode.h"
 
 #include "nexus/debug/LogDispatcher.h"
-#include "ecs/Component.h"
+#include "nexus/ecs/Component.h"
 #include "core/Hasher.h"
 
 #include <utility>

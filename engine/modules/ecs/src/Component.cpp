@@ -1,4 +1,4 @@
-#include "ecs/Component.h"
+#include "nexus/ecs/Component.h"
 
 USING_NAMESPACE_NXS;
 
