@@ -7,17 +7,11 @@ file(GLOB_RECURSE NXS_GEOM_SOURCES CONFIGURE_DEPENDS
 
 add_library(${TARGET_NAME} STATIC ${NXS_GEOM_SOURCES})
 
-target_compile_definitions(${TARGET_NAME}
-    PUBLIC NXS_PROJECT_PATH="${PROJECT_ROOT}"
-)
-
 target_include_directories(${TARGET_NAME}
     PUBLIC ${NXS_GEOM_PUBLIC_HEADER_DIR}
-    PUBLIC ${ENGINE_INCLUDE_DIR}
-    PUBLIC ${ENGINE_3RD_PARTY_DIR}
 )
 
 target_link_libraries(${TARGET_NAME}
+    PUBLIC nexus-config
     PRIVATE nexus-debug
-    PRIVATE SDL3::SDL3
 )

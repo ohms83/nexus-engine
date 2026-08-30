@@ -9,13 +9,12 @@ add_library(${TARGET_NAME} STATIC ${NXS_ECS_SOURCES})
 
 target_include_directories(${TARGET_NAME}
     PUBLIC ${NXS_ECS_PUBLIC_HEADER_DIR}
-    PUBLIC ${NXS_PUBLIC_HEADER_DIR}
-    PUBLIC ${ENGINE_INCLUDE_DIR}
-    PUBLIC ${ENGINE_3RD_PARTY_DIR}
 )
 
 target_link_libraries(${TARGET_NAME}
     PRIVATE nexus-debug
+
+    PUBLIC nexus-config
     PUBLIC nexus-reflection
     PUBLIC EnTT
 )
