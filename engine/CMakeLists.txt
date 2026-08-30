@@ -80,14 +80,6 @@ add_library(nexus-core STATIC ${ENGINE_FOUNDATION_SOURCES})
 nexus_target_defaults(nexus-core)
 target_link_libraries(nexus-core
     PUBLIC nexus-debug
-    PUBLIC nexus-time
-    PUBLIC nexus-task
-    PUBLIC nexus-memory
-    PUBLIC nexus-reflection
-    PUBLIC EnTT
-    PRIVATE SDL3::SDL3
-    PRIVATE RapidJSON
-    PRIVATE msgpack-cxx
 )
 
 file(GLOB_RECURSE ENGINE_GRAPHICS_SOURCES CONFIGURE_DEPENDS src/graphics/*.cpp)
@@ -104,6 +96,7 @@ target_link_libraries(nexus-graphics
     # Public libraries that other modules can use
     PUBLIC nexus-core
     PUBLIC nexus-math
+    PUBLIC nexus-memory
     PUBLIC nexus-geom
     PUBLIC nexus-resource
     PUBLIC SDL3::SDL3
