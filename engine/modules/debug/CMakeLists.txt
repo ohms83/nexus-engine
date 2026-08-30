@@ -17,7 +17,9 @@ endif()
 
 target_include_directories(${TARGET_NAME}
     PUBLIC ${NXS_DEBUG_PUBLIC_HEADER_DIR}
-    PUBLIC ${NXS_PUBLIC_INCLUDE_DIR}
-    PUBLIC ${ENGINE_INCLUDE_DIR}
-    PUBLIC ${ENGINE_3RD_PARTY_DIR}
 )
+
+target_link_libraries(${TARGET_NAME}
+    PUBLIC nexus-config
+)
+

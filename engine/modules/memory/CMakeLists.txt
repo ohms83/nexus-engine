@@ -9,6 +9,8 @@ add_library(${TARGET_NAME} STATIC ${NXS_MEMORY_SOURCES})
 
 target_include_directories(${TARGET_NAME}
     PUBLIC ${NXS_MEMORY_PUBLIC_HEADER_DIR}
-    PUBLIC ${NXS_PUBLIC_INCLUDE_DIR}
-    PUBLIC ${ENGINE_INCLUDE_DIR}
+)
+
+target_link_libraries(${TARGET_NAME}
+    PUBLIC nexus-config
 )

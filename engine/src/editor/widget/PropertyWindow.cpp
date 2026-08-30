@@ -1,7 +1,7 @@
 #include "editor/widget/PropertyWindow.h"
 #include "scene/SceneManager.h"
 #include "nexus/math/MathUtil.h"
-#include "core/Hasher.h"
+#include "nexus/core/Hasher.h"
 
 #include "imgui.h"
 

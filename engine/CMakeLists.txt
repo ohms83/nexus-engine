@@ -56,31 +56,32 @@ function(nexus_target_defaults TARGET_NAME)
         PRIVATE "${STB_SOURCE_DIR}"
         PRIVATE "${REMOTERY_SOURCE_DIR}"
     )
-    target_compile_definitions(${TARGET_NAME}
-        PUBLIC NXS_PROJECT_PATH="${PROJECT_ROOT}"
-        PUBLIC NXS_ASSETS_DIR="${PROJECT_ROOT}/assets"
-        PUBLIC NXS_ENGINE_ASSETS_DIR="${CMAKE_CURRENT_SOURCE_DIR}/assets"
-        PUBLIC NXS_GENERATED_ASSETS_DIR="${CMAKE_CURRENT_SOURCE_DIR}/gen"
-        PUBLIC $<$<CONFIG:Debug>:NXS_BUILD_DEBUG>
-        PUBLIC $<$<CONFIG:RelWithDebInfo>:NXS_BUILD_RELWITHDEBINFO>
-        PUBLIC $<$<CONFIG:Release>:NXS_BUILD_RELEASE>
-    )
-    if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
-        target_compile_definitions(${TARGET_NAME} PUBLIC NXS_PLATFORM_WIN64)
-    endif()
+    # Link a single INTERFACE target that provides common compile definitions
+    # and include directories to all engine targets.
+    target_link_libraries(${TARGET_NAME} PUBLIC nexus-config)
+    # Platform-specific defines are provided by the nexus-config INTERFACE target.
 endfunction()
 
-add_subdirectory(modules)
+# Shared compile definitions / include dirs for all engine modules.
+add_library(nexus-config INTERFACE)
+target_compile_definitions(nexus-config INTERFACE
+    NXS_PROJECT_PATH="${PROJECT_ROOT}"
+    NXS_ASSETS_DIR="${PROJECT_ROOT}/assets"
+    NXS_ENGINE_ASSETS_DIR="${CMAKE_CURRENT_SOURCE_DIR}/assets"
+    NXS_GENERATED_ASSETS_DIR="${CMAKE_CURRENT_SOURCE_DIR}/gen"
+    $<$<CONFIG:Debug>:NXS_BUILD_DEBUG>
+    $<$<CONFIG:RelWithDebInfo>:NXS_BUILD_RELWITHDEBINFO>
+    $<$<CONFIG:Release>:NXS_BUILD_RELEASE>
+)
+target_include_directories(nexus-config INTERFACE
+    ${ENGINE_INCLUDE_DIR}
+    ${ENGINE_3RD_PARTY_DIR}
+)
+if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    target_compile_definitions(nexus-config INTERFACE NXS_PLATFORM_WIN64)
+endif()
 
-file(GLOB_RECURSE ENGINE_FOUNDATION_SOURCES CONFIGURE_DEPENDS
-    src/NxsDefine.cpp
-    src/core/*.cpp
-)
-add_library(nexus-core STATIC ${ENGINE_FOUNDATION_SOURCES})
-nexus_target_defaults(nexus-core)
-target_link_libraries(nexus-core
-    PUBLIC nexus-debug
-)
+add_subdirectory(modules)
 
 file(GLOB_RECURSE ENGINE_GRAPHICS_SOURCES CONFIGURE_DEPENDS src/graphics/*.cpp)
 add_library(nexus-graphics STATIC

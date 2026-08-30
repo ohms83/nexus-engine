@@ -1,7 +1,7 @@
 //
 // Created by nutta on 8/5/2025.
 //
-#include "core/Color.h"
+#include "nexus/core/Color.h"
 
 USING_NAMESPACE_NXS;
 

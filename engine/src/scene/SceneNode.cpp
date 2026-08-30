@@ -2,7 +2,7 @@
 
 #include "nexus/debug/LogDispatcher.h"
 #include "nexus/ecs/Component.h"
-#include "core/Hasher.h"
+#include "nexus/core/Hasher.h"
 
 #include <utility>
 #include <chrono>
