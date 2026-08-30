@@ -17,7 +17,7 @@
 #include "nexus/debug/StdOutLogger.h"
 #include "nexus/core/StringUtil.h"
 #include "core/UniqueID.h"
-#include "core/VariantData.h"
+#include "nexus/serialize/VariantData.h"
 #include "core/resource/Resource.h"
 #include "core/resource/ResourceLoader.h"
 #include "core/resource/ResourceManager.h"

@@ -4,7 +4,7 @@
 //  Created by nuttachai on 23/10/19.
 //
 
-#include "core/VariantData.h"
+#include "nexus/serialize/VariantData.h"
 #include "nexus/debug/LogDispatcher.h"
 
 USING_NAMESPACE_NXS;
