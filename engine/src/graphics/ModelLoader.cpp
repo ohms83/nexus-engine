@@ -19,7 +19,7 @@
 
 #include "nexus/task/FutureWaitingTask.h"
 #include "nexus/task/RepeatTask.h"
-#include "core/resource/ResourceManager.h"
+#include "nexus/resource/ResourceManager.h"
 
 USING_NAMESPACE_NXS;
 

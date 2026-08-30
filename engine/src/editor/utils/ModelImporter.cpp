@@ -4,7 +4,7 @@
 
 #include "nexus/debug/LogDispatcher.h"
 #include "nexus/task/FutureWaitingTask.h"
-#include "core/resource/ResourceManager.h"
+#include "nexus/resource/ResourceManager.h"
 #include "nexus/serialize/JsonSerializer.h"
 #include "nexus/serialize/MsgPackSerializer.h"
 

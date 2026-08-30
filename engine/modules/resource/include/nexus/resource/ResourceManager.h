@@ -7,6 +7,8 @@
 #include <string>
 #include <unordered_map>
 #include <typeindex>
+#include <type_traits>
+#include <concepts>
 
 #include "nexus/NxsDefine.h"
 #include "nexus/core/Hasher.h"

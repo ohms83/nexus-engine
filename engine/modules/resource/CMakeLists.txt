@@ -1,0 +1,18 @@
+set(TARGET_NAME nexus-resource)
+set(NXS_RESOURCE_PUBLIC_HEADER_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+file(GLOB_RECURSE NXS_RESOURCE_SOURCES CONFIGURE_DEPENDS
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
+)
+
+add_library(${TARGET_NAME} STATIC ${NXS_RESOURCE_SOURCES})
+target_include_directories(${TARGET_NAME}
+    PUBLIC ${NXS_RESOURCE_PUBLIC_HEADER_DIR}
+    PUBLIC ${ENGINE_INCLUDE_DIR}
+    PUBLIC ${ENGINE_3RD_PARTY_DIR}
+)
+
+target_link_libraries(${TARGET_NAME}
+    PUBLIC nexus-core
+    PUBLIC nexus-task
+)

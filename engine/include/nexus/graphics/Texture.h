@@ -5,9 +5,9 @@
 #pragma once
 
 #include "nexus/NxsDefine.h"
-#include "nexus/core/resource/Resource.h"
-#include "nexus/core/resource/ResourceLoader.h"
-#include "nexus/core/resource/ResourceManager.h"
+#include "nexus/resource/Resource.h"
+#include "nexus/resource/ResourceLoader.h"
+#include "nexus/resource/ResourceManager.h"
 #include "TextureProxy.h"
 #include "RenderingInterface.h"
 

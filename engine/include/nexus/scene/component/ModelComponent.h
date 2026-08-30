@@ -3,7 +3,7 @@
 #include "nexus/NxsDefine.h"
 #include "nexus/graphics/Model.h"
 #include "nexus/ecs/Component.h"
-#include "nexus/core/resource/ResourceManager.h"
+#include "nexus/resource/ResourceManager.h"
 
 
 NXS_NAMESPACE

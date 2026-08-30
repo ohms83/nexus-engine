@@ -1,6 +1,6 @@
 #pragma once
 
-#include "nexus/core/resource/ResourceLoader.h"
+#include "nexus/resource/ResourceLoader.h"
 #include "RenderingInterface.h"
 #include "Texture.h"
 

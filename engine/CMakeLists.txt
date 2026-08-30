@@ -84,7 +84,6 @@ target_link_libraries(nexus-core
     PUBLIC nexus-time
     PUBLIC nexus-task
     PUBLIC nexus-memory
-    PUBLIC nexus-serialize
     PUBLIC nexus-reflection
     PUBLIC EnTT
     PRIVATE SDL3::SDL3
@@ -107,6 +106,7 @@ target_link_libraries(nexus-graphics
     PUBLIC nexus-core
     PUBLIC nexus-math
     PUBLIC nexus-geom
+    PUBLIC nexus-resource
     PUBLIC SDL3::SDL3
     PUBLIC glad
     PUBLIC OpenGL::GL

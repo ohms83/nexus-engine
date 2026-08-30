@@ -11,7 +11,7 @@
 #include "RenderingInterface.h"
 
 #include "nexus/serialize/Serializeable.h"
-#include "nexus/core/resource/Resource.h"
+#include "nexus/resource/Resource.h"
 #include "nexus/core/Color.h"
 
 NXS_NAMESPACE

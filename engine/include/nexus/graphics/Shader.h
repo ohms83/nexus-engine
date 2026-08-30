@@ -6,7 +6,7 @@
 
 #include "nexus/NxsCommon.h"
 
-#include "nexus/core/resource/Resource.h"
+#include "nexus/resource/Resource.h"
 #include "nexus/serialize/Serializeable.h"
 
 #include "GpuProgram.h"

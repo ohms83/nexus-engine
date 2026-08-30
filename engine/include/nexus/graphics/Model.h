@@ -1,7 +1,7 @@
 #pragma once
 
 #include "nexus/NxsCommon.h"
-#include "nexus/core/resource/Resource.h"
+#include "nexus/resource/Resource.h"
 #include "nexus/geom/Box.h"
 #include "nexus/geom/Sphere.h"
 #include "Mesh.h"
