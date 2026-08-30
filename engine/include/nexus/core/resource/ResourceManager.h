@@ -7,8 +7,9 @@
 #include <string>
 #include <unordered_map>
 #include <typeindex>
-#include <nexus/NxsDefine.h>
-#include <nexus/core/Hasher.h>
+
+#include "nexus/NxsDefine.h"
+#include "nexus/core/Hasher.h"
 
 #include "Resource.h"
 #include "ResourceLoader.h"

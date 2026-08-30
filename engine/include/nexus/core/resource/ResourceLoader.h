@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Resource.h"
-#include "nexus/memory/Buffer.h"
 #include <string>
 #include <atomic>
 
