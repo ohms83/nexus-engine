@@ -85,6 +85,7 @@ target_link_libraries(nexus-core
     PUBLIC nexus-task
     PUBLIC nexus-memory
     PUBLIC nexus-serialize
+    PUBLIC nexus-reflection
     PUBLIC EnTT
     PRIVATE SDL3::SDL3
     PRIVATE RapidJSON

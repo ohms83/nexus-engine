@@ -13,7 +13,7 @@
 #include "nexus/debug/LogDispatcher.h"
 #include "nexus/debug/Logger.h"
 #include "core/Path.h"
-#include "core/Reflection.h"
+#include "nexus/reflection/Reflection.h"
 #include "nexus/debug/StdOutLogger.h"
 #include "nexus/core/StringUtil.h"
 #include "core/UniqueID.h"

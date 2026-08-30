@@ -2,7 +2,7 @@
 
 #include "EditorWidget.h"
 #include "nexus/scene/SceneNode.h"
-#include "nexus/core/Reflection.h"
+#include "nexus/reflection/Reflection.h"
 
 NXS_NAMESPACE
 {

@@ -6,10 +6,12 @@
 
 #include <string>
 #include <typeindex>
+#include <type_traits>
+#include <concepts>
 
 #include "nexus/NxsCommon.h"
 #include "nexus/serialize/Serializeable.h"
-#include "Color.h"
+#include "nexus/core/Color.h"
 
 #include "sigslot/signal.hpp"
 
@@ -39,23 +41,23 @@ NXS_NAMESPACE
          */
         virtual void SetReadOnlyFlag(bool value) = 0;
 
-        virtual bool VisitBool(const std::string& name, bool& value) = 0;
-        virtual bool VisitInt(const std::string& name, int32_t& value) = 0;
-        virtual bool VisitUInt(const std::string& name, uint32_t& value) = 0;
-        virtual bool VisitInt64(const std::string& name, int64_t& value) = 0;
-        virtual bool VisitUInt64(const std::string& name, uint64_t& value) = 0;
-        virtual bool VisitFloat(const std::string& name, float& value) = 0;
-        virtual bool VisitDouble(const std::string& name, double& value) = 0;
-        virtual bool VisitString(const std::string& name, std::string& value) = 0;
-        virtual bool VisitVec2(const std::string& name, glm::vec2& value) = 0;
-        virtual bool VisitVec3(const std::string& name, glm::vec3& value) = 0;
-        virtual bool VisitVec4(const std::string& name, glm::vec4& value) = 0;
-        virtual bool VisitColor3(const std::string& name, Color3F& value) = 0;
-        virtual bool VisitColor4(const std::string& name, Color4F& value) = 0;
-        virtual bool VisitObject(const std::string& name, IReflector& value) = 0;
+        MAYBE_UNUSED virtual bool VisitBool(const std::string& name, bool& value) = 0;
+        MAYBE_UNUSED virtual bool VisitInt(const std::string& name, int32_t& value) = 0;
+        MAYBE_UNUSED virtual bool VisitUInt(const std::string& name, uint32_t& value) = 0;
+        MAYBE_UNUSED virtual bool VisitInt64(const std::string& name, int64_t& value) = 0;
+        MAYBE_UNUSED virtual bool VisitUInt64(const std::string& name, uint64_t& value) = 0;
+        MAYBE_UNUSED virtual bool VisitFloat(const std::string& name, float& value) = 0;
+        MAYBE_UNUSED virtual bool VisitDouble(const std::string& name, double& value) = 0;
+        MAYBE_UNUSED virtual bool VisitString(const std::string& name, std::string& value) = 0;
+        MAYBE_UNUSED virtual bool VisitVec2(const std::string& name, glm::vec2& value) = 0;
+        MAYBE_UNUSED virtual bool VisitVec3(const std::string& name, glm::vec3& value) = 0;
+        MAYBE_UNUSED virtual bool VisitVec4(const std::string& name, glm::vec4& value) = 0;
+        MAYBE_UNUSED virtual bool VisitColor3(const std::string& name, Color3F& value) = 0;
+        MAYBE_UNUSED virtual bool VisitColor4(const std::string& name, Color4F& value) = 0;
+        MAYBE_UNUSED virtual bool VisitObject(const std::string& name, IReflector& value) = 0;
 
         template<typename T>
-        bool Visit(const std::string& name, T& value)
+        MAYBE_UNUSED bool Visit(const std::string& name, T& value)
         {
             #define VISIT(Type) if (Visit##Type(name, value)) { onValueChangedEvent(name); return true; }
 
@@ -128,8 +130,8 @@ NXS_NAMESPACE
     class IReflection : public ISerializeable
     {
     public:
-        virtual ~IReflection() {}
-        virtual const std::string& ClassName() const = 0;
+        virtual ~IReflection() = default;
+        NODISCARD virtual const std::string& ClassName() const = 0;
 
         virtual void AcceptReflector(IReflector& reflector) = 0;
     };

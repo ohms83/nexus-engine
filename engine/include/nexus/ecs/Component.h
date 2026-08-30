@@ -1,6 +1,6 @@
 #pragma once
 
-#include "nexus/core/Reflection.h"
+#include "nexus/reflection/Reflection.h"
 #include "EcsDefine.h"
 #include "Entity.h"
 
