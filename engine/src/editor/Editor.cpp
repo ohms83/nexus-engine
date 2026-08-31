@@ -3,7 +3,7 @@
 //
 
 #include "editor/Editor.h"
-#include "graphics/RenderSystem.h"
+#include "nexus/graphics/RenderSystem.h"
 #include "Application.h"
 
 #include "Remotery.h"

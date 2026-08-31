@@ -15,9 +15,9 @@
 #include <glm/glm.hpp>
 
 #include "nexus/time/Timer.h"
-#include "graphics/Mesh.h"
-#include "graphics/Texture.h"
-#include "graphics/RenderSystem.h"
+#include "nexus/graphics/Mesh.h"
+#include "nexus/graphics/Texture.h"
+#include "nexus/graphics/RenderSystem.h"
 #include "scene/SceneManager.h"
 
 #define PURGE_UNUSED_RESOURCES(Manager) do { \

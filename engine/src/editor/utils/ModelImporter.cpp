@@ -11,8 +11,8 @@
 #include "nexus/geom/Box.h"
 #include "nexus/geom/Sphere.h"
 
-#include "graphics/Mesh.h"
-#include "graphics/Material.h"
+#include "nexus/graphics/Mesh.h"
+#include "nexus/graphics/Material.h"
 
 #include "scene/Scene.h"
 #include "scene/SceneNode.h"

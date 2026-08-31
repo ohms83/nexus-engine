@@ -9,34 +9,14 @@ set(ENGINE_3RD_PARTY_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty)
 
 set(TOOLS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/tools)
 
-add_subdirectory(3rdparty EXCLUDE_FROM_ALL)
-
 # Third-party sources used by the engine modules.
 set(IMGUI_SOURCE_DIR "${ENGINE_3RD_PARTY_DIR}/imgui" CACHE PATH "Path to Dear ImGui source root")
-set(IMGUI_SOURCES
-    "${IMGUI_SOURCE_DIR}/imgui.cpp"
-    "${IMGUI_SOURCE_DIR}/imgui_draw.cpp"
-    "${IMGUI_SOURCE_DIR}/imgui_widgets.cpp"
-    "${IMGUI_SOURCE_DIR}/imgui_tables.cpp"
-    "${IMGUI_SOURCE_DIR}/imgui_demo.cpp"
-    "${IMGUI_SOURCE_DIR}/backends/imgui_impl_sdl3.cpp"
-    "${IMGUI_SOURCE_DIR}/backends/imgui_impl_opengl3.cpp"
-)
 set(IMPLOT_SOURCE_DIR "${ENGINE_3RD_PARTY_DIR}/implot" CACHE PATH "Path to ImPlot source root")
-set(IMPLOT_SOURCES
-    "${IMPLOT_SOURCE_DIR}/implot.cpp"
-    "${IMPLOT_SOURCE_DIR}/implot_demo.cpp"
-    "${IMPLOT_SOURCE_DIR}/implot_items.cpp"
-)
 set(XXHASH_SOURCE_DIR "${ENGINE_3RD_PARTY_DIR}/xxHash" CACHE PATH "Path to xxHash source root")
 set(STB_SOURCE_DIR "${ENGINE_3RD_PARTY_DIR}/stb" CACHE PATH "Path to stb_image source root")
 set(REMOTERY_SOURCE_DIR ${ENGINE_3RD_PARTY_DIR}/Remotery/lib)
-set(ENGINE_THIRD_PARTY_SOURCES
-    ${IMGUI_SOURCES}
-    ${IMPLOT_SOURCES}
-    "${STB_SOURCE_DIR}/stb_image.cpp"
-    "${REMOTERY_SOURCE_DIR}/Remotery.c"
-)
+
+add_subdirectory(3rdparty EXCLUDE_FROM_ALL)
 
 find_package(Python3 COMPONENTS Interpreter REQUIRED)
 find_package(OpenGL REQUIRED)
@@ -83,33 +63,6 @@ endif()
 
 add_subdirectory(modules)
 
-file(GLOB_RECURSE ENGINE_GRAPHICS_SOURCES CONFIGURE_DEPENDS src/graphics/*.cpp)
-add_library(nexus-graphics STATIC
-    ${ENGINE_GRAPHICS_SOURCES}
-    ${ENGINE_THIRD_PARTY_SOURCES}
-)
-nexus_target_defaults(nexus-graphics)
-target_compile_definitions(nexus-graphics
-    PUBLIC IMGUI_IMPL_OPENGL_LOADER_GLAD
-    PRIVATE RMT_USE_OPENGL=1
-)
-target_link_libraries(nexus-graphics
-    # Public libraries that other modules can use
-    PUBLIC nexus-core
-    PUBLIC nexus-math
-    PUBLIC nexus-memory
-    PUBLIC nexus-geom
-    PUBLIC nexus-resource
-    PUBLIC SDL3::SDL3
-    PUBLIC glad
-    PUBLIC OpenGL::GL
-    PUBLIC assimp::assimp
-
-    # Private libraries that are only used internally
-    PRIVATE nexus-time
-    PRIVATE nexus-serialize
-)
-
 file(GLOB_RECURSE ENGINE_SCENE_SOURCES CONFIGURE_DEPENDS src/scene/*.cpp)
 add_library(nexus-scene STATIC ${ENGINE_SCENE_SOURCES})
 nexus_target_defaults(nexus-scene)
@@ -122,7 +75,11 @@ target_link_libraries(nexus-scene
 file(GLOB_RECURSE ENGINE_EDITOR_MODULE_SOURCES CONFIGURE_DEPENDS src/editor/*.cpp)
 add_library(nexus-editor-module STATIC ${ENGINE_EDITOR_MODULE_SOURCES})
 nexus_target_defaults(nexus-editor-module)
-target_link_libraries(nexus-editor-module PUBLIC nexus-scene)
+target_link_libraries(nexus-editor-module
+    PUBLIC nexus-scene
+    PUBLIC nexus-3rdparty
+    PRIVATE assimp::assimp
+)
 
 add_library(nexus-engine STATIC
     src/Engine.cpp
@@ -138,6 +95,7 @@ target_link_libraries(nexus-engine
     PUBLIC nexus-graphics
     PUBLIC nexus-serialize
     PUBLIC nexus-scene
+    PUBLIC nexus-3rdparty
 )
 
 message("CMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}")

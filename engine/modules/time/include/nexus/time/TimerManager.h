@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <nexus/NxsDefine.h>
+#include "nexus/NxsDefine.h"
 
 #include "StandardTimeSource.h"
 #include "Timer.h"

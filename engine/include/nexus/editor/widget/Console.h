@@ -7,7 +7,7 @@
 #include <functional>
 #include <map>
 #include <string>
-#include <nexus/NxsDefine.h>
+#include "nexus/NxsDefine.h"
 
 #include "EditorWidget.h"
 #include "imgui.h"

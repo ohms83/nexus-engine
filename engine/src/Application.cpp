@@ -13,10 +13,11 @@
 #include "nexus/debug/FileLogger.h"
 #include "nexus/debug/StdOutLogger.h"
 #include "editor/Editor.h"
-#include "graphics/debug/Gizmos.h"
+#include "nexus/graphics/debug/Gizmos.h"
 #include "nexus/io/InputManager.h"
 #include "nexus/time/TimerManager.h"
 #include "nexus/task/IntervalTask.h"
+#include "nexus/serialize/IniParser.h"
 
 // Third-party headers
 #include "imgui.h"

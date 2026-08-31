@@ -1,6 +1,6 @@
 #pragma once
 
-#include <nexus/NxsDefine.h>
+#include "nexus/NxsDefine.h"
 #include <glm/glm.hpp>
 
 NXS_NAMESPACE

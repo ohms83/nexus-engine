@@ -7,8 +7,8 @@
 #include "nexus/NxsDefine.h"
 #include "nexus/debug/LogDispatcher.h"
 #include "nexus/task/TaskScheduler.h"
-#include "graphics/GraphicsConfig.h"
-#include "graphics/RenderSystem.h"
+#include "nexus/graphics/GraphicsConfig.h"
+#include "nexus/graphics/RenderSystem.h"
 #include "scene/SceneManager.h"
 
 NXS_NAMESPACE

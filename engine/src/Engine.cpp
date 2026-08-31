@@ -2,10 +2,10 @@
 // Created by nutta on 8/16/2025.
 //
 #include "Engine.h"
-#include "graphics/ModelLoader.h"
-#include "graphics/MaterialLoader.h"
-#include "graphics/ShaderLoader.h"
-#include "graphics/TextureLoader.h"
+#include "nexus/graphics/ModelLoader.h"
+#include "nexus/graphics/MaterialLoader.h"
+#include "nexus/graphics/ShaderLoader.h"
+#include "nexus/graphics/TextureLoader.h"
 
 #include "scene/Camera.h"
 #include "scene/SceneNode3D.h"

@@ -3,7 +3,7 @@
 #include "scene/system/SceneNodeTransformSystem.h"
 
 #include "nexus/debug/LogDispatcher.h"
-#include "graphics/RenderSystem.h"
+#include "nexus/graphics/RenderSystem.h"
 
 #include "Remotery.h"
 
