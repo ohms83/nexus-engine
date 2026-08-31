@@ -56,15 +56,15 @@ set(ENGINE_THIRD_PARTY_SOURCES
     "${REMOTERY_SOURCE_DIR}/Remotery.c"
 )
 
+# A static library containing sources from third-party libraries that don't have
+# their own CMake build system. This library is linked to engine modules that need it.
 add_library(nexus-3rdparty STATIC ${ENGINE_THIRD_PARTY_SOURCES})
 
-# Each module that links to the nexus-3rdparty needs manually include its requires header by itself
+# Each module that links to the nexus-3rdparty needs to manually include its required header by itself
 # This is to avoid unnecessary includes for modules that don't need them,
 # and to avoid polluting the global namespace with third-party headers.
 target_include_directories(nexus-3rdparty
-    PRIVATE ${ENGINE_3RD_PARTY_DIR}/SDL/include
-    PRIVATE ${ENGINE_3RD_PARTY_DIR}/glad/include
-    PRIVATE ${ENGINE_3RD_PARTY_DIR}/rapidjson/include
+    PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/SDL/include"
     PRIVATE "${IMGUI_SOURCE_DIR}"
     PRIVATE "${IMGUI_SOURCE_DIR}/backends"
     PRIVATE "${IMPLOT_SOURCE_DIR}"
