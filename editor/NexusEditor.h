@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <nexus/Nexus.h>
+#include "nexus/Nexus.h"
 
 class NexusEditor final : public nxs::Application
 {

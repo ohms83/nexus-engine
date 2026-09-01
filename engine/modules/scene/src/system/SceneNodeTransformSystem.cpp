@@ -1,9 +1,9 @@
 //
 // Created by nutta on 7/26/2025.
 //
-#include "scene/system/SceneNodeTransformSystem.h"
-#include "scene/component/SceneNodeComponent.h"
-#include "scene/component/TransformComponent.h"
+#include "nexus/scene/system/SceneNodeTransformSystem.h"
+#include "nexus/scene/component/SceneNodeComponent.h"
+#include "nexus/scene/component/TransformComponent.h"
 
 namespace nxs
 {

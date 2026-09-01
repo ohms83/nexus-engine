@@ -9,7 +9,7 @@
 #include "nexus/task/TaskScheduler.h"
 #include "nexus/graphics/GraphicsConfig.h"
 #include "nexus/graphics/RenderSystem.h"
-#include "scene/SceneManager.h"
+#include "nexus/scene/SceneManager.h"
 
 NXS_NAMESPACE
 {

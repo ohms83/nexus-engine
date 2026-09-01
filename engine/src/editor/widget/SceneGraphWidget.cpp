@@ -1,5 +1,5 @@
 #include "editor/widget/SceneGraphWidget.h"
-#include "scene/Camera.h"
+#include "nexus/scene/Camera.h"
 
 #include "imgui.h"
 

@@ -1,6 +1,6 @@
-#include "scene/Scene.h"
-#include "scene/component/LightComponent.h"
-#include "scene/system/SceneNodeTransformSystem.h"
+#include "nexus/scene/Scene.h"
+#include "nexus/scene/component/LightComponent.h"
+#include "nexus/scene/system/SceneNodeTransformSystem.h"
 
 #include "nexus/debug/LogDispatcher.h"
 #include "nexus/graphics/RenderSystem.h"

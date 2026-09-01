@@ -1,5 +1,5 @@
 #include <iostream>
-#include <nexus/Nexus.h>
+#include "nexus/Nexus.h"
 
 // Define Vertex structure
 struct Vertex {

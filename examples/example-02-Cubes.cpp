@@ -1,7 +1,7 @@
 //
 // Created by nutta on 6/23/2025.
 //
-#include <nexus/Nexus.h>
+#include "nexus/Nexus.h"
 
 #include "nexus/scene/Transform.h"
 #include <glm/gtc/type_ptr.hpp>

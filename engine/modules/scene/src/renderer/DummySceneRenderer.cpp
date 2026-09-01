@@ -1,11 +1,5 @@
-#include "scene/renderer/ForwardSceneRenderer.h"
+#include "nexus/scene/renderer/DummySceneRenderer.h"
 
-#include <format>
-#include <algorithm>
-#include <cstring>
-
-#include "nexus/debug/Logger.h"
-#include "nexus/graphics/debug/Gizmos.h"
 #include "nexus/graphics/RenderSystem.h"
 #include "nexus/graphics/RenderCommand.h"
 #include "nexus/graphics/RenderTarget.h"
@@ -14,38 +8,37 @@
 #include "nexus/graphics/RenderGraph.h"
 #include "nexus/graphics/RenderPass.h"
 #include "nexus/geom/Frustum.h"
+
 #include "nexus/ecs/Ecs.h"
+
 #include "nexus/math/Math.h"
 #include "nexus/math/Matrix.h"
-#include "nexus/memory/OwningBuffer.h"
-#include "scene/Scene.h"
-#include "scene/component/CameraComponent.h"
-#include "scene/component/LightComponent.h"
-#include "scene/component/MeshComponent.h"
-#include "scene/component/SceneNodeComponent.h"
-#include "scene/component/TransformComponent.h"
 
-#include "Remotery.h"
+#include "nexus/scene/Camera.h"
+#include "nexus/scene/component/CameraComponent.h"
+#include "nexus/scene/component/LightComponent.h"
+#include "nexus/scene/component/ModelComponent.h"
+#include "nexus/scene/component/SceneNodeComponent.h"
+#include "nexus/scene/component/TransformComponent.h"
 
 USING_NAMESPACE_NXS;
 
-ForwardSceneRenderer::ForwardSceneRenderer(const RenderSystem& renderSystem)
+DummySceneRenderer::DummySceneRenderer()
 {
     RegisterRenderPass(OpaquePass);
-    RegisterRenderPass(AlphaPass);
-    RegisterRenderPass(OverlayPass);
 }
 
-void ForwardSceneRenderer::Render(RenderSystem& renderSystem, const Scene& scene)
+void DummySceneRenderer::Render(RenderSystem& renderSystem, const Scene& scene)
 {
-    rmt_ScopedCPUSample(SceneRenderer_Render, 0);
-
+#if 0
     std::vector<RenderCommand> commands;
     commands.reserve(1024);
 
-    const auto& registry = *scene.GetRegistry();
+    // Storing mesh's model matrix for the rendering phase.
+    std::vector<glm::mat4> modelMatrices;
     auto renderInterface = renderSystem.GetRenderInterface();
-
+    
+    // ReSharper disable once CppTooWideScopeInitStatement
     const auto cameraView = registry.view<SceneNodeComponent, CameraComponent, PositionComponent, OrientationComponent>();
     for (const auto& [cameraEntity, cameraNode, camera, cameraPos, cameraOrient] : cameraView.each())
     {
@@ -54,55 +47,37 @@ void ForwardSceneRenderer::Render(RenderSystem& renderSystem, const Scene& scene
         glm::mat4 viewMtx = Matrix::CreateViewMatrix(cameraPos.value, cameraOrient.quat);
         glm::mat4 projection;
         if (camera.projectionType == ProjectionType::Perspective) {
-            NXS_ASSERT(!Math::AlmostZero(camera.nearZ) && !Math::AlmostZero(camera.farZ) && !Math::AlmostZero(camera.height));
             projection = glm::perspective(glm::radians(camera.fov), camera.width / camera.height, camera.nearZ, camera.farZ);
         }
         else {
-            NXS_ASSERT(!Math::AlmostZero(camera.nearZ));
             projection = glm::ortho(-camera.width/2, camera.width/2, -camera.height/2, camera.height/2, camera.nearZ, camera.farZ);
         }
 
         const auto viewProjMtx = projection * viewMtx;
         const auto viewFrustum = camera.GetViewFrustum(cameraPos.value, cameraOrient.quat);
-        for (const auto view = registry.view<SceneNodeComponent, MeshComponent, PositionComponent, OrientationComponent, ScaleComponent>(); const auto& [entity, sceneNode, meshComp, position, orient, scale] : view.each())
+        for (const auto view = registry.view<SceneNodeComponent, ModelComponent, PositionComponent, OrientationComponent, ScaleComponent>(); const auto& [entity, sceneNode, modelComp, position, orient, scale] : view.each())
         {
-            if (!sceneNode.active) continue;
+            auto model = modelComp.model;
+            if (!sceneNode.active || !model) continue;
 
             glm::mat4 modelMtx = Matrix::CreateModelMatrix(position.value, orient.quat, scale.value);
 
-            rmt_BeginCPUSample(SceneRenderer_CreateSortList, 0)
-            const auto mvpMtx = projection * viewMtx * modelMtx;
+            if (!IsSphereInside(viewFrustum, model->GetBoundingSphere(), modelMtx, scale.value)) continue;
 
-            if (auto mesh = meshComp.GetMesh(); mesh != nullptr)
+            const auto mvpMtx = projection * viewMtx * modelMtx;
+            for (auto mesh : model->GetMeshes())
             {
                 if (!IsSphereInside(viewFrustum, mesh->GetSphere(), modelMtx, scale.value)) continue;
                 commands.emplace_back(CreateRenderCommand(mesh, std::move(modelMtx), mvpMtx));
-
-                if (meshComp.showBoundingBox)
-                {
-                    const auto& box = mesh->GetBox();
-                    Gizmos::DrawOutlineBox(renderSystem, box.center, box.extent, modelMtx);
-                }
-                if (meshComp.showBoundingSphere)
-                {
-                    const auto& sphere = mesh->GetSphere();
-                    Gizmos::DrawOutlineSphere(renderSystem, sphere.center, sphere.radius, modelMtx);
-                }
             }
-            rmt_EndCPUSample();
         }
 
-        Gizmos::CreateRenderCommands(commands, renderSystem);
-
         {
-            rmt_ScopedCPUSample(SceneRenderer_SortMeshes, 0)
             std::ranges::sort(commands, [](const RenderCommand& a, const RenderCommand& b) {
                 return a.sortKey < b.sortKey;
             });
         }
         {
-            rmt_ScopedCPUSample(SceneRenderer_RenderMeshes, 0)
-
             if (!m_renderPasses.empty())
             {
                 auto ordered = nxs::RenderGraph::Build(m_renderPasses);
@@ -119,7 +94,8 @@ void ForwardSceneRenderer::Render(RenderSystem& renderSystem, const Scene& scene
                     Ref<GpuProgram> usingProgram = nullptr;
                     // Batch commands in-place to reduce allocations and combine adjacents.
                     RenderCommandBatcher::Batch(commands);
-                    for (const auto& cmd : commands)
+                    const auto &batched = commands;
+                    for (const auto& cmd : batched)
                     {
                         if (!cmd.material) continue;
                         if (!pass.IsPassFiltered(cmd)) continue;
@@ -132,14 +108,15 @@ void ForwardSceneRenderer::Render(RenderSystem& renderSystem, const Scene& scene
                         {
                             if (!gpuProgram->IsBinding()) gpuProgram->Bind();
 
-                            SetCameraUniforms(gpuProgram, cameraPos.value, viewMtx, projection);
+                            gpuProgram->SetUniformVector("_CameraPos", cameraPos.value);
+                            gpuProgram->SetUniformMatrix("_View", viewMtx, false);
+                            gpuProgram->SetUniformMatrix("_Projection", projection, false);
+
                             SetAmbientLightParams(gpuProgram, registry);
                             SetDirectLightParams(gpuProgram, registry);
                             SetPointLightParams(gpuProgram, registry);
                             usingProgram = gpuProgram;
                         }
-
-                        if (!RenderInstancedMesh(renderSystem, cmd, gpuProgram))
                         {
                             gpuProgram->SetUniformMatrix("_Model", cmd.modelMatrix, false);
                             cmd.vertexBuffer->Bind();
@@ -157,9 +134,6 @@ void ForwardSceneRenderer::Render(RenderSystem& renderSystem, const Scene& scene
                 }
             }
         }
-
-        // Only render from the first active camera POV.
-        // TODO: Support render to offscreen targets from multiple cameras.
-        break;
     }
+#endif
 }

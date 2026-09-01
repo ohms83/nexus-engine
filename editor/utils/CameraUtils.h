@@ -1,6 +1,6 @@
 #pragma once
 
-#include <nexus/Nexus.h>
+#include "nexus/Nexus.h"
 
 NXS_NAMESPACE
 {

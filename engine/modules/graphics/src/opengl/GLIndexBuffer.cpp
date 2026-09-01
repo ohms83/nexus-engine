@@ -2,7 +2,7 @@
 // Created by nutta on 7/6/2025.
 //
 
-#include <nexus/graphics/opengl/GLIndexBuffer.h>
+#include "nexus/graphics/opengl/GLIndexBuffer.h"
 
 #include "nexus/graphics/opengl/GLGpuBuffer.h"
 #include "nexus/graphics/opengl/NxsGL.h"

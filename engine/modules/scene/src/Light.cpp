@@ -1,7 +1,7 @@
 //
 // Created by nutta on 8/17/2025.
 //
-#include "scene/Light.h"
+#include "nexus/scene/Light.h"
 
 USING_NAMESPACE_NXS;
 

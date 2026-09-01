@@ -3,7 +3,7 @@
 //
 
 #include <format>
-#include <nexus/graphics/opengl/GLVertexBuffer.h>
+#include "nexus/graphics/opengl/GLVertexBuffer.h"
 
 #include "nexus/graphics/opengl/GLGpuBuffer.h"
 

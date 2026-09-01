@@ -1,4 +1,4 @@
-#include "scene/component/CameraComponent.h"
+#include "nexus/scene/component/CameraComponent.h"
 #include "nexus/geom/Frustum.h"
 
 USING_NAMESPACE_NXS;

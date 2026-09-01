@@ -1,4 +1,4 @@
-#include "scene/SceneNode.h"
+#include "nexus/scene/SceneNode.h"
 
 #include "nexus/debug/LogDispatcher.h"
 #include "nexus/ecs/Component.h"

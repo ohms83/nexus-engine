@@ -7,18 +7,18 @@
 #include "nexus/graphics/ShaderLoader.h"
 #include "nexus/graphics/TextureLoader.h"
 
-#include "scene/Camera.h"
-#include "scene/SceneNode3D.h"
-#include "scene/Light.h"
-#include "scene/ModelNode.h"
+#include "nexus/scene/Camera.h"
+#include "nexus/scene/SceneNode3D.h"
+#include "nexus/scene/Light.h"
+#include "nexus/scene/ModelNode.h"
 
-#include "scene/component/CameraComponent.h"
-#include "scene/component/LightComponent.h"
-#include "scene/component/ModelComponent.h"
-#include "scene/component/MeshComponent.h"
-#include "scene/component/TransformComponent.h"
+#include "nexus/scene/component/CameraComponent.h"
+#include "nexus/scene/component/LightComponent.h"
+#include "nexus/scene/component/ModelComponent.h"
+#include "nexus/scene/component/MeshComponent.h"
+#include "nexus/scene/component/TransformComponent.h"
 
-#include "scene/renderer/ForwardSceneRenderer.h"
+#include "nexus/scene/renderer/ForwardSceneRenderer.h"
 
 #include "nexus/time/StandardTimeSource.h"
 

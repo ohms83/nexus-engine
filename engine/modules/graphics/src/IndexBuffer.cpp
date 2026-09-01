@@ -1,8 +1,7 @@
 //
 // Created by nutta on 7/7/2025.
 //
-#include <nexus/graphics/IndexBuffer.h>
-
+#include "nexus/graphics/IndexBuffer.h"
 #include "nexus/debug/LogDispatcher.h"
 
 USING_NAMESPACE_NXS;

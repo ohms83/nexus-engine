@@ -5,7 +5,7 @@
 #pragma once
 
 #include <vector>
-#include <nexus/NxsCommon.h>
+#include "nexus/NxsCommon.h"
 
 NXS_NAMESPACE
 {

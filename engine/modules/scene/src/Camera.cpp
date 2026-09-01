@@ -2,7 +2,7 @@
 // Created by nutta on 7/8/2025.
 //
 
-#include "scene/Camera.h"
+#include "nexus/scene/Camera.h"
 
 USING_NAMESPACE_NXS;
 

@@ -1,6 +1,6 @@
 #include "editor/menu/SceneFileMenuItem.h"
 #include "editor/utils/ModelImporter.h"
-#include "scene/SceneManager.h"
+#include "nexus/scene/SceneManager.h"
 
 // TODO:
 #include "Engine.h"

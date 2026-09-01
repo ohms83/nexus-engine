@@ -2,7 +2,7 @@
 // Created by nutta on 7/10/2025.
 //
 
-#include <nexus/graphics/opengl/GLTexture.h>
+#include "nexus/graphics/opengl/GLTexture.h"
 
 NXS_NAMESPACE
 {

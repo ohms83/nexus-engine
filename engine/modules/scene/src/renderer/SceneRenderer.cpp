@@ -1,7 +1,7 @@
 //
 // Created by nutta on 7/25/2025.
 //
-#include "scene/renderer/SceneRenderer.h"
+#include "nexus/scene/renderer/SceneRenderer.h"
 
 #include <format>
 #include <algorithm>
@@ -20,11 +20,11 @@
 #include "nexus/math/Math.h"
 #include "nexus/math/Matrix.h"
 #include "nexus/memory/OwningBuffer.h"
-#include "scene/component/CameraComponent.h"
-#include "scene/component/LightComponent.h"
-#include "scene/component/ModelComponent.h"
-#include "scene/component/SceneNodeComponent.h"
-#include "scene/component/TransformComponent.h"
+#include "nexus/scene/component/CameraComponent.h"
+#include "nexus/scene/component/LightComponent.h"
+#include "nexus/scene/component/ModelComponent.h"
+#include "nexus/scene/component/SceneNodeComponent.h"
+#include "nexus/scene/component/TransformComponent.h"
 
 #include "Remotery.h"
 

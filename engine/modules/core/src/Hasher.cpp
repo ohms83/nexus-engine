@@ -1,7 +1,7 @@
 //
 // Created by nutta on 7/10/2025.
 //
-#include <nexus/core/Hasher.h>
+#include "nexus/core/Hasher.h"
 
 // Important: tells xxHash you're building it directly into your executable
 #define XXH_INLINE_ALL

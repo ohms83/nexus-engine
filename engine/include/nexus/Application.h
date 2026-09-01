@@ -18,7 +18,7 @@
 #include "nexus/graphics/Mesh.h"
 #include "nexus/graphics/Texture.h"
 #include "nexus/graphics/RenderSystem.h"
-#include "scene/SceneManager.h"
+#include "nexus/scene/SceneManager.h"
 
 #define PURGE_UNUSED_RESOURCES(Manager) do { \
     LOG_INFO(LogResource, "Purge unused resources. Class="#Manager); \

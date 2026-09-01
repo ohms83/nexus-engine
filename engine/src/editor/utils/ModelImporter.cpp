@@ -14,11 +14,11 @@
 #include "nexus/graphics/Mesh.h"
 #include "nexus/graphics/Material.h"
 
-#include "scene/Scene.h"
-#include "scene/SceneNode.h"
-#include "scene/SceneNode3D.h"
-#include "scene/component/MeshComponent.h"
-#include "scene/component/GeometryComponent.h"
+#include "nexus/scene/Scene.h"
+#include "nexus/scene/SceneNode.h"
+#include "nexus/scene/SceneNode3D.h"
+#include "nexus/scene/component/MeshComponent.h"
+#include "nexus/scene/component/GeometryComponent.h"
 
 #include "nexus/memory/OwningBuffer.h"
 

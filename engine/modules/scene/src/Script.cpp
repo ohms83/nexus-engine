@@ -1,4 +1,4 @@
-#include "scene/Script.h"
+#include "nexus/scene/Script.h"
 
 USING_NAMESPACE_NXS;
 

@@ -1,5 +1,5 @@
 #include "editor/widget/PropertyWindow.h"
-#include "scene/SceneManager.h"
+#include "nexus/scene/SceneManager.h"
 #include "nexus/math/MathUtil.h"
 #include "nexus/core/Hasher.h"
 

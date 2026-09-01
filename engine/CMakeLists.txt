@@ -63,15 +63,6 @@ endif()
 
 add_subdirectory(modules)
 
-file(GLOB_RECURSE ENGINE_SCENE_SOURCES CONFIGURE_DEPENDS src/scene/*.cpp)
-add_library(nexus-scene STATIC ${ENGINE_SCENE_SOURCES})
-nexus_target_defaults(nexus-scene)
-target_link_libraries(nexus-scene
-    PUBLIC nexus-ecs
-    PUBLIC nexus-graphics
-    PUBLIC nexus-geom
-)
-
 file(GLOB_RECURSE ENGINE_EDITOR_MODULE_SOURCES CONFIGURE_DEPENDS src/editor/*.cpp)
 add_library(nexus-editor-module STATIC ${ENGINE_EDITOR_MODULE_SOURCES})
 nexus_target_defaults(nexus-editor-module)

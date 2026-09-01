@@ -5,7 +5,7 @@
 #pragma once
 
 #include <array>
-#include <nexus/graphics/GPUBuffer.h>
+#include "nexus/graphics/GPUBuffer.h"
 #include "NxsGL.h"
 
 NXS_NAMESPACE

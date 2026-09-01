@@ -17,6 +17,7 @@ target_link_libraries(${TARGET_NAME}
     PRIVATE nexus-config
     PRIVATE nexus-core
     PRIVATE nexus-debug
+
     PRIVATE RapidJSON
     PRIVATE msgpack-cxx
 )

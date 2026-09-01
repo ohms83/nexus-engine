@@ -1,6 +1,6 @@
-#include "scene/ModelNode.h"
-#include "scene/component/ModelComponent.h"
-#include "scene/component/MeshComponent.h"
+#include "nexus/scene/ModelNode.h"
+#include "nexus/scene/component/ModelComponent.h"
+#include "nexus/scene/component/MeshComponent.h"
 
 #include <format>
 #include <filesystem>
