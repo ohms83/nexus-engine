@@ -18,6 +18,7 @@ DEFINE_LOG(Material);
 static constexpr auto default_shader = "shaders/glsl/default_forward_lighting.shader";
 static constexpr auto textured_shader = "shaders/glsl/textured_forward_lighting.shader";
 static constexpr auto normalmap_shader = "shaders/glsl/normalmap_forward_lighting.shader";
+static constexpr auto textured_alpha_shader = "shaders/glsl/textured_alpha_forward_lighting.shader";
 
 static const std::map<TextureType, std::string> s_textureTypeUniformNames = {
     {TextureType::Diffuse, "_DiffuseMap"},
@@ -39,6 +40,12 @@ Material::Material(std::string path, const uint32_t resourceId)
 
 int32_t Material::AddTexture(Ref<Texture> texture, TextureType type)
 {
+    if (!texture)
+    {
+        LOG_WARNING(LogMaterial, "Cannot add null texture");
+        return -1;
+    }
+
     const auto& itr = s_textureTypeUniformNames.find(type);
     if (itr == s_textureTypeUniformNames.end())
     {
@@ -53,6 +60,12 @@ int32_t Material::AddTexture(Ref<Texture> texture, TextureType type)
     info.uniformName = itr->second;
     info.path = texture ? texture->GetPath() : std::string();
     m_textures.push_back(std::move(info));
+
+    if (type == TextureType::Diffuse && texture->GetDescription().format == PixelFormat::RGBA)
+    {
+        blendMode = BlendMode::Alpha;
+    }
+
     return slot;
 }
 
@@ -266,7 +279,8 @@ void Material::CreateDefaultShader(ResourceManager& resourceManager)
     }
     else if (HasTextureType(TextureType::Diffuse))
     {
-        shaderPath = Path::GetEngineAssetPath(textured_shader);
+        const auto texturePath = blendMode == BlendMode::Alpha ? textured_alpha_shader : textured_shader;
+        shaderPath = Path::GetEngineAssetPath(texturePath);
     }
     else
     {

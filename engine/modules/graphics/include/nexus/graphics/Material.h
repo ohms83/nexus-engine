@@ -66,6 +66,11 @@ NXS_NAMESPACE
         BlendMode blendMode = BlendMode::None;
         DepthFunction depthFunction = DepthFunction::Lesser;
 
+        NODISCARD bool IsBlendable() const
+        {
+            return blendMode != BlendMode::None;
+        }
+
         /**
          * Add the given texture to the texture list.
          * @param texture Texture to add.

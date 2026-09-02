@@ -60,6 +60,8 @@ NXS_NAMESPACE
 
         virtual void SetDepthFunction(DepthFunction depthFunction) = 0;
 
+        virtual void SetBlendMode(BlendMode blendMode) = 0;
+
         virtual void SetLineWidth(float width) = 0;
 
         virtual void SetPolygonMode(PolygonMode mode) { m_polygonMode = mode; }

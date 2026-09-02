@@ -87,6 +87,7 @@ public:
     void SetColorMask(const glm::bvec4& mask) override { }
     void SetDepthMask(bool mask) override { }
     void SetDepthFunction(DepthFunction depthFunction) override { }
+    void SetBlendMode(BlendMode blendMode) override { }
     void SetLineWidth(float width) override { }
     void EnableDrawBuffer(DrawBuffer buffer) override { }
     void DebugMarker(const std::string& message) override { }

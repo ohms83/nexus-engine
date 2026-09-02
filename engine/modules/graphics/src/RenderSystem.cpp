@@ -102,6 +102,12 @@ void RenderSystem::ApplyPipelineState(const PipelineState& state)
         m_cachedDepthMask = state.depthWrite;
     }
 
+    if (m_cachedBlendMode != state.overrideBlendMode)
+    {
+        m_renderingInterface->SetBlendMode(state.overrideBlendMode);
+        m_cachedBlendMode = state.overrideBlendMode;
+    }
+
     if (m_cachedPolygonMode != state.polygonMode)
     {
         m_renderingInterface->SetPolygonMode(state.polygonMode);

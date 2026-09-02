@@ -28,7 +28,12 @@ NXS_NAMESPACE
         void SetWrapMode(TextureWrapMode wrapS, TextureWrapMode wrapT);
         void SetFiltering(TextureFilterMode minFilter, TextureFilterMode magFilter);
         void SetNumMips(int32_t numMips);
+
         void DescribeTexture(const TextureDescription& desc);
+        const TextureDescription& GetDescription() const
+        {
+            return m_desc;
+        }
 
         MAYBE_UNUSED Ref<TextureProxy> AllocateGpuResource(const uint8_t* pixels, size_t size, Ref<RenderingInterface> renderingInterface);
 

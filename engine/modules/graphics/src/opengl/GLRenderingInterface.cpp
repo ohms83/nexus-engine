@@ -237,6 +237,31 @@ void GLRenderingInterface::SetDepthFunction(const DepthFunction depthFunction)
     m_depthFunction = depthFunction;
 }
 
+void GLRenderingInterface::SetBlendMode(BlendMode blendMode)
+{
+    // Implementation for setting blend mode
+    if (blendMode == BlendMode::None)
+    {
+        CALL_GL_FUNC(glDisable(GL_BLEND));
+    }
+    else
+    {
+        CALL_GL_FUNC(glEnable(GL_BLEND));
+        switch (blendMode)
+        {
+        case BlendMode::Alpha:
+            CALL_GL_FUNC(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+            break;
+        case BlendMode::Additive:
+            CALL_GL_FUNC(glBlendFunc(GL_SRC_ALPHA, GL_ONE));
+            break;
+        default:
+            NXS_ASSERT(false);
+            break;
+        }
+    }
+}
+
 void GLRenderingInterface::SetLineWidth(float width)
 {
     CALL_GL_FUNC(glLineWidth(width));

@@ -57,7 +57,8 @@ NXS_NAMESPACE
     RenderPass AlphaPass = RenderPassBuilder::Begin("Alpha Pass", RENDER_PASS_ALPHA)
         .ClearFlags(ClearFlags::None)
         .DepthTest(true)
-        .DepthWrite(false)
+        .DepthWrite(true)
+        .BlendMode(BlendMode::Alpha)
         .GlobalShader(nullptr) // Use material shaders
         .FilterType("alpha")
         .Build();
@@ -285,7 +286,7 @@ void RenderPass::SetFilterType(std::string type)
     {
         filter = [](const RenderCommand& cmd) {
             return cmd.material &&
-                   cmd.material->blendMode == BlendMode::None &&
+                   cmd.material->blendMode != BlendMode::None &&
                    !cmd.material->depthWrite &&
                    cmd.material->depthFunction == DepthFunction::Always;
         };

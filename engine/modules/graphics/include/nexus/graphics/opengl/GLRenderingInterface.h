@@ -38,6 +38,7 @@ NXS_NAMESPACE
         void SetDepthMask(bool mask) override;
 
         void SetDepthFunction(DepthFunction depthFunction) override;
+        void SetBlendMode(BlendMode blendMode) override;
         void SetLineWidth(float width) override;
         void SetPolygonMode(PolygonMode mode) override;
         void SetCullMode(PolygonFacing face) override;

@@ -34,6 +34,7 @@ ForwardSceneRenderer::ForwardSceneRenderer(const RenderSystem& renderSystem)
     RegisterRenderPass(OpaquePass);
     RegisterRenderPass(AlphaPass);
     RegisterRenderPass(OverlayPass);
+    SortRenderPasses();
 }
 
 void ForwardSceneRenderer::Render(RenderSystem& renderSystem, const Scene& scene)

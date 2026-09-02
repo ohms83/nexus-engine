@@ -101,6 +101,7 @@ NXS_NAMESPACE
     protected:
         // State cache to reduce redundant calls to the rendering backend
         DepthFunction m_cachedDepthFunction = DepthFunction::None;
+        BlendMode m_cachedBlendMode = BlendMode::None;
         bool m_cachedDepthMask = true;
         PolygonMode m_cachedPolygonMode = PolygonMode::Fill;
         PolygonFacing m_cachedCullMode = PolygonFacing::Back;

@@ -179,6 +179,7 @@ NXS_NAMESPACE
         RenderPassBuilder& OffscreenTargetName(const std::string& name) { pass.offscreenTargetName = name; return *this; }
         RenderPassBuilder& ReadTargets(const std::vector<std::string>& targets) { pass.readTargets = targets; return *this; }
         RenderPassBuilder& LayerMask(uint32_t mask) { pass.layerMask = mask; return *this; }
+        RenderPassBuilder& BlendMode(BlendMode mode) { pass.pipelineState.overrideBlendMode = mode; return *this; }
         /**
          * @brief Finalize and build the render pass.
          * @note If the render pass has global shader sources set, the caller must

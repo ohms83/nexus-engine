@@ -38,6 +38,10 @@ NXS_NAMESPACE
         void RegisterRenderPass(const RenderPass& renderPass)
         {
             m_renderPasses.push_back(renderPass);
+        }
+
+        void SortRenderPasses()
+        {
             std::ranges::sort(m_renderPasses, std::ranges::less{}, &RenderPass::priority);
         }
 
