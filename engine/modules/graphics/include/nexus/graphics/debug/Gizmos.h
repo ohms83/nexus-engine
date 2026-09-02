@@ -22,29 +22,24 @@ NXS_NAMESPACE
         static void ProcessDraw(RenderSystem& renderSystem, const glm::mat4& cameraMtx);
         static void CreateRenderCommands(std::vector<RenderCommand>& outCommands, RenderSystem& renderSystem);
         static void DrawPoint(
-            RenderSystem& renderSystem,
             const glm::vec3& position,
             const Color3F& color,
             float size = 10);
         static void DrawLine(
-            RenderSystem& renderSystem,
             const glm::vec3& start,
             const glm::vec3& end,
             const Color3F& color);
         static void DrawLocalAxes(
-            RenderSystem& renderSystem,
             const glm::vec3& position,
             const glm::quat& rotation = glm::quat(1, 0, 0, 0),
             float axisLength = 1,
             const std::array<Color3F, 3>& axisColors = {Color3F::Red, Color3F::Green, Color3F::Blue});
         static void DrawOutlineBox(
-            RenderSystem& renderSystem,
             const glm::vec3& center,
             const glm::vec3& extent,
             const glm::mat4& transform = glm::mat4(1),
             const Color3F& color = Color3F::Red);
         static void DrawOutlineSphere(
-            RenderSystem& renderSystem,
             const glm::vec3& position,
             float radius,
             const glm::mat4& transform = glm::mat4(1),

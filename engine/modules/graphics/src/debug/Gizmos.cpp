@@ -300,14 +300,12 @@ void Gizmos::CreateRenderCommands(std::vector<RenderCommand>& outCommands, Rende
         command.pipelineOverrides.depthFunction = DepthFunction::Always;
         command.pipelineOverrides.depthWrite = false;
         command.pipelineOverrides.depthTest = false;
-        // vertexData->DrawIndexed(renderInterface);
 
         outCommands.push_back(command);
     }
 }
 
 void Gizmos::DrawPoint(
-    RenderSystem& renderSystem,
     const glm::vec3& position,
     const Color3F& color,
     float size)
@@ -318,7 +316,6 @@ void Gizmos::DrawPoint(
 }
 
 void Gizmos::DrawLine(
-    RenderSystem& renderSystem,
     const glm::vec3& start,
     const glm::vec3& end,
     const Color3F& color)
@@ -331,7 +328,6 @@ void Gizmos::DrawLine(
 }
 
 void Gizmos::DrawLocalAxes(
-    RenderSystem& renderSystem,
     const glm::vec3& position,
     const glm::quat& rotation,
     float axisLength,
@@ -345,12 +341,11 @@ void Gizmos::DrawLocalAxes(
 
     for (int i = 0; i < 3; ++i)
     {
-        DrawLine(renderSystem, position, position + (rotation * axes[i]), axisColors[i]);
+        DrawLine(position, position + (rotation * axes[i]), axisColors[i]);
     }
 }
 
 void Gizmos::DrawOutlineBox(
-    RenderSystem& renderSystem,
     const glm::vec3& center,
     const glm::vec3& extent,
     const glm::mat4& transform,
@@ -400,7 +395,6 @@ void Gizmos::DrawOutlineBox(
 }
 
 void Gizmos::DrawOutlineSphere(
-    RenderSystem& renderSystem,
     const glm::vec3& position,
     const float radius,
     const glm::mat4& transform,

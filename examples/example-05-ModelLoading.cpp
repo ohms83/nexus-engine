@@ -64,18 +64,18 @@ public:
             if (drawSphere)
             {
                 auto sphere = model->GetBoundingSphere();
-                nxs::Gizmos::DrawOutlineSphere(renderSystem, position + sphere.center, sphere.radius, transform);
+                nxs::Gizmos::DrawOutlineSphere(position + sphere.center, sphere.radius, transform);
 
                 for (auto mesh : model->GetMeshes())
                 {
                     const auto& mesh_sphere = mesh->GetSphere();
-                    nxs::Gizmos::DrawOutlineSphere(renderSystem, position + mesh_sphere.center, mesh_sphere.radius, transform);
+                    nxs::Gizmos::DrawOutlineSphere(position + mesh_sphere.center, mesh_sphere.radius, transform);
                 }
             }
             if (drawBox)
             {
                 auto box = model->GetBoundingBox();
-                nxs::Gizmos::DrawOutlineBox(renderSystem, position + box.center, box.extent, transform);
+                nxs::Gizmos::DrawOutlineBox(position + box.center, box.extent, transform);
             }
         }
 

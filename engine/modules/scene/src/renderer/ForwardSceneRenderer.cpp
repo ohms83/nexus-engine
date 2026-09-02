@@ -82,12 +82,12 @@ void ForwardSceneRenderer::Render(RenderSystem& renderSystem, const Scene& scene
                 if (meshComp.showBoundingBox)
                 {
                     const auto& box = mesh->GetBox();
-                    Gizmos::DrawOutlineBox(renderSystem, box.center, box.extent, modelMtx);
+                    Gizmos::DrawOutlineBox(box.center, box.extent, modelMtx);
                 }
                 if (meshComp.showBoundingSphere)
                 {
                     const auto& sphere = mesh->GetSphere();
-                    Gizmos::DrawOutlineSphere(renderSystem, sphere.center, sphere.radius, modelMtx);
+                    Gizmos::DrawOutlineSphere(sphere.center, sphere.radius, modelMtx);
                 }
             }
             rmt_EndCPUSample();
