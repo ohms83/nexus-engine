@@ -1,13 +1,16 @@
 #pragma once
 
-#include "GraphicsConst.h"
-#include "Material.h"
-#include "PipelineState.h"
-#include "RenderingInterface.h"
-#include "RenderCommand.h"
+#include "nexus/graphics/GraphicsConst.h"
+#include "nexus/graphics/Material.h"
+#include "nexus/graphics/PipelineState.h"
+#include "nexus/graphics/RenderingInterface.h"
+#include "nexus/graphics/RenderCommand.h"
+#include "nexus/graphics/Mesh.h"
 
 #include "nexus/core/Color.h"
 #include "nexus/serialize/Serializeable.h"
+
+#include "nexus/scene/SceneView.h"
 
 #include <functional>
 #include <string>
@@ -23,6 +26,7 @@ NXS_NAMESPACE
 {
     class RenderSystem;
     class RenderTarget;
+    class SceneNode;
 
     enum class RenderTargetType
     {
@@ -44,6 +48,12 @@ NXS_NAMESPACE
         Stencil = 1 << 2
     };
 
+    enum class CommandSortType : uint32_t
+    {
+        BackToFront,
+        FrontToBack,
+    };
+
     NODISCARD inline ClearFlags operator|(ClearFlags a, ClearFlags b) { return ClearFlags(uint32_t(a) | uint32_t(b)); }
 
     struct AttachmentDesc
@@ -59,14 +69,16 @@ NXS_NAMESPACE
      * @brief Represents a single render pass in the rendering pipeline.
      * 
      */
-    struct RenderPass : public ISerializeable
+    class RenderPass : public ISerializeable
     {
+    public:
         //! Pass name. Mainly used for debugging purposes.
         std::string name;
         //! Priority of the render pass. Lower values are rendered first.
         uint32_t priority = 0u;
         //! Whether this pass is enabled.
         bool enabled = true;
+        CommandSortType commandSortType = CommandSortType::FrontToBack;
 
         /**
          * @brief Type of the render target for this pass.
@@ -147,6 +159,11 @@ NXS_NAMESPACE
         {
             return !filter || filter(cmd);
         }
+
+        virtual void PopulateSceneView(const SceneNode& scene, std::vector<Ref<SceneView>>& outViews) const {}
+        virtual void PrepareRenderCommands(const SceneNode& scene, const SceneView& view, std::vector<RenderCommand>& outCommands) const {}
+
+        RenderCommand CreateRenderCommand(Ref<const Mesh> mesh, const glm::mat4 &modelMtx, const glm::mat4& mvpMtx) const;
     };
 
     struct RenderPassBuilder
@@ -192,7 +209,6 @@ NXS_NAMESPACE
 
     // Global predefined render passes
     extern RenderPass DepthPrepass;
-    extern RenderPass OpaquePass;
     extern RenderPass AlphaPass;
     extern RenderPass OverlayPass;
 }

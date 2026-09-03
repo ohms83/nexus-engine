@@ -11,8 +11,9 @@
 #include "nexus/graphics/RenderTarget.h"
 #include "nexus/graphics/RenderCommandBatcher.h"
 #include "nexus/graphics/RenderCommand.h"
-#include "nexus/graphics/RenderGraph.h"
-#include "nexus/graphics/RenderPass.h"
+#include "nexus/scene/RenderGraph.h"
+#include "nexus/scene/RenderPass.h"
+#include "nexus/scene/renderpass/OpaquePass.h"
 #include "nexus/geom/Frustum.h"
 #include "nexus/ecs/Ecs.h"
 #include "nexus/math/Math.h"
@@ -31,7 +32,7 @@ USING_NAMESPACE_NXS;
 
 ForwardSceneRenderer::ForwardSceneRenderer(const RenderSystem& renderSystem)
 {
-    RegisterRenderPass(OpaquePass);
+    RegisterRenderPass(OpaquePass());
     RegisterRenderPass(AlphaPass);
     RegisterRenderPass(OverlayPass);
     SortRenderPasses();
@@ -72,7 +73,7 @@ void ForwardSceneRenderer::Render(RenderSystem& renderSystem, const Scene& scene
             glm::mat4 modelMtx = Matrix::CreateModelMatrix(position.value, orient.quat, scale.value);
 
             rmt_BeginCPUSample(SceneRenderer_CreateSortList, 0)
-            const auto mvpMtx = projection * viewMtx * modelMtx;
+            const auto mvpMtx = viewProjMtx * modelMtx;
 
             if (auto mesh = meshComp.GetMesh(); mesh != nullptr)
             {

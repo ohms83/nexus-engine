@@ -1,4 +1,6 @@
-#include "nexus/graphics/RenderPass.h"
+#include "nexus/scene/RenderPass.h"
+#include "nexus/scene/renderpass/OpaquePass.h"
+
 #include "nexus/graphics/RenderSystem.h"
 #include "nexus/serialize/Serializer.h"
 
@@ -44,15 +46,15 @@ NXS_NAMESPACE
         .FilterType("opaque")
         .Build();
 
-    RenderPass OpaquePass = RenderPassBuilder::Begin("Opaque Pass", RENDER_PASS_OPAQUE)
-        .ClearFlags(ClearFlags::Color | ClearFlags::Depth)
-        .ClearColor(Color3F(0x303030ff))
-        .ClearDepth(1.0f)
-        .DepthTest(true)
-        .DepthWrite(true)
-        .GlobalShader(nullptr) // Use material shaders
-        .FilterType("opaque")
-        .Build();
+    // RenderPass OpaquePass = RenderPassBuilder::Begin("Opaque Pass", RENDER_PASS_OPAQUE)
+    //     .ClearFlags(ClearFlags::Color | ClearFlags::Depth)
+    //     .ClearColor(Color3F(0x303030ff))
+    //     .ClearDepth(1.0f)
+    //     .DepthTest(true)
+    //     .DepthWrite(true)
+    //     .GlobalShader(nullptr) // Use material shaders
+    //     .FilterType("opaque")
+    //     .Build();
 
     RenderPass AlphaPass = RenderPassBuilder::Begin("Alpha Pass", RENDER_PASS_ALPHA)
         .ClearFlags(ClearFlags::None)
@@ -295,4 +297,31 @@ void RenderPass::SetFilterType(std::string type)
     {
         filter = nullptr;
     }
+}
+
+RenderCommand RenderPass::CreateRenderCommand(Ref<const Mesh> mesh, const glm::mat4 &modelMtx, const glm::mat4 &mvpMtx) const
+{
+    const auto material = mesh->GetMaterial();
+    const auto meshSphere = mesh->GetSphere();
+    const auto pos = mvpMtx * glm::vec4(meshSphere.center, 1);
+    const auto clipZ = pos.z / pos.w;
+    const bool translucent = (material->blendMode != BlendMode::None);
+    const uint32_t materialId = 0x7FFFFFFF & material->GetId();
+    const float depthN = clipZ; // normalized in -1..1
+    const float depthNormalized = (depthN + 1.0f) * 0.5f;
+    RenderCommand cmd;
+    cmd.vertexBuffer = mesh->GetVertexBuffer();
+    cmd.indexBuffer = mesh->GetIndexBuffer();
+    cmd.indexCount = mesh->GetIndexBuffer()->GetNumIndexDraw();
+    cmd.indexOffset = 0;
+    cmd.vertexOffset = 0;
+    cmd.modelMatrix = modelMtx;
+    cmd.bounds = mesh->GetSphere();
+    cmd.layerMask = 0xFFFFFFFFu;
+    cmd.material = material;
+    cmd.SetSortKey(
+        translucent,
+        materialId,
+        commandSortType == CommandSortType::FrontToBack ? depthNormalized : 1.0f - depthNormalized);
+    return cmd;
 }

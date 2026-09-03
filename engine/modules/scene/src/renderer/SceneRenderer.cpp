@@ -14,12 +14,13 @@
 #include "nexus/graphics/RenderTarget.h"
 #include "nexus/graphics/RenderCommandBatcher.h"
 #include "nexus/graphics/RenderCommand.h"
-#include "nexus/graphics/RenderGraph.h"
 #include "nexus/geom/Frustum.h"
 #include "nexus/ecs/Ecs.h"
 #include "nexus/math/Math.h"
 #include "nexus/math/Matrix.h"
 #include "nexus/memory/OwningBuffer.h"
+#include "nexus/scene/RenderGraph.h"
+#include "nexus/scene/Scene.h"
 #include "nexus/scene/component/CameraComponent.h"
 #include "nexus/scene/component/LightComponent.h"
 #include "nexus/scene/component/ModelComponent.h"
@@ -172,7 +173,29 @@ void SceneRenderer::SetCameraUniforms(Ref<GpuProgram> gpuProgram, const glm::vec
     gpuProgram->SetUniformMatrix("_Projection", projectionMtx, false);
 }
 
-bool SceneRenderer::IsSphereInside(const Frustum& viewFustrum, const Sphere& sphere, glm::mat4 modelMtx, const glm::vec3& scale)
+void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
+{
+    rmt_ScopedCPUSample(SceneRenderer_Render, 0);
+
+    std::vector<RenderCommand> commands;
+    commands.reserve(1024);
+
+    const auto& registry = *scene.GetRegistry();
+    auto renderInterface = renderSystem.GetRenderInterface();
+
+    for (const auto& pass : m_renderPasses)
+    {
+        std::vector<Ref<SceneView>> viewPoints;
+        pass.PopulateSceneView(scene, viewPoints);
+
+        for (const auto& view : viewPoints)
+        {
+
+        }
+    }
+}
+
+bool SceneRenderer::IsSphereInside(const Frustum &viewFustrum, const Sphere &sphere, glm::mat4 modelMtx, const glm::vec3 &scale)
 {
     const glm::vec3 pos = modelMtx * glm::vec4(sphere.center, 1);
     const float maxScale = std::max(std::max(scale.x, scale.y), scale.z);

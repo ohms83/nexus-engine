@@ -6,7 +6,7 @@
 
 #include "nexus/NxsDefine.h"
 #include "nexus/graphics/RenderCommand.h"
-#include "nexus/graphics/RenderPass.h"
+#include "nexus/scene/RenderPass.h"
 #include "nexus/geom/Frustum.h"
 
 #include "entt/entity/registry.hpp"
@@ -33,7 +33,7 @@ NXS_NAMESPACE
     {
     public:
         virtual ~SceneRenderer() = default;
-        virtual void Render(RenderSystem& renderSystem, const Scene& scene) = 0;
+        virtual void Render(RenderSystem& renderSystem, const Scene& scene);
 
         void RegisterRenderPass(const RenderPass& renderPass)
         {

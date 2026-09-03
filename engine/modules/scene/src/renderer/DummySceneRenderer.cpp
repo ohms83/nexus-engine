@@ -5,8 +5,9 @@
 #include "nexus/graphics/RenderTarget.h"
 #include "nexus/graphics/RenderCommandBatcher.h"
 #include "nexus/graphics/RenderCommand.h"
-#include "nexus/graphics/RenderGraph.h"
-#include "nexus/graphics/RenderPass.h"
+#include "nexus/scene/RenderGraph.h"
+#include "nexus/scene/RenderPass.h"
+#include "nexus/scene/renderpass/OpaquePass.h"
 #include "nexus/geom/Frustum.h"
 
 #include "nexus/ecs/Ecs.h"
@@ -25,7 +26,7 @@ USING_NAMESPACE_NXS;
 
 DummySceneRenderer::DummySceneRenderer()
 {
-    RegisterRenderPass(OpaquePass);
+    RegisterRenderPass(OpaquePass());
 }
 
 void DummySceneRenderer::Render(RenderSystem& renderSystem, const Scene& scene)

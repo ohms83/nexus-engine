@@ -1,4 +1,5 @@
-#include "nexus/graphics/RenderGraph.h"
+#include "nexus/scene/RenderGraph.h"
+
 USING_NAMESPACE_NXS;
 
 std::vector<RenderPass> RenderGraph::Build(const std::vector<RenderPass>& passes)
