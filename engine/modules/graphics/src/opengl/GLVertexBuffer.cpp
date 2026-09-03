@@ -31,6 +31,8 @@ VertexBuffer& GLVertexBuffer::Begin()
 
 void GLVertexBuffer::Bind() const
 {
+    if (IsBinding()) return;
+
     CALL_GL_FUNC(glBindVertexArray(m_handle));
     CALL_GL_FUNC(glBindBuffer(GL_ARRAY_BUFFER, m_vbo));
     s_bindingBuffer.store(m_handle);

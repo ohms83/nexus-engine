@@ -93,6 +93,8 @@ std::atomic<uint32_t> GLTexture::s_bindingTexture(0);
 
 void GLTexture::Bind() const
 {
+    if (IsBinding()) return;
+
     CALL_GL_FUNC(glBindTexture(GL_TEXTURE_2D, m_textureID));
     s_bindingTexture.store(m_textureID);
 }

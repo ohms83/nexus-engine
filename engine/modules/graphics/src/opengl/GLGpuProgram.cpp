@@ -219,6 +219,8 @@ bool GLGpuProgram::SetUniformTexture2D(const std::string& name, Ref<const Textur
 
 void GLGpuProgram::Bind()
 {
+    if (IsBinding()) return;
+
     CALL_GL_FUNC(glUseProgram(m_id));
     s_bindingShader.store(GetHandle());
 }

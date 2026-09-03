@@ -19,6 +19,8 @@ GLIndexBuffer::~GLIndexBuffer()
 
 void GLIndexBuffer::Bind() const
 {
+    if (IsBinding()) return;
+
     CALL_GL_FUNC(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_handle));
     s_bindingBuffer.store(m_handle);
 }
