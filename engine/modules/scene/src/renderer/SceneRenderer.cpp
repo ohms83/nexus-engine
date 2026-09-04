@@ -169,6 +169,7 @@ void SceneRenderer::SetPointLightParams(Ref<GpuProgram> gpuProgram, const entt::
 
 void SceneRenderer::SetCameraUniforms(Ref<GpuProgram> gpuProgram, const glm::vec3& cameraPos, const glm::mat4& viewMtx, const glm::mat4& projectionMtx)
 {
+    rmt_ScopedCPUSample(SceneRenderer_SetCameraUniforms, 0);
     gpuProgram->SetUniformVector("_CameraPos", cameraPos);
     gpuProgram->SetUniformMatrix("_View", viewMtx, false);
     gpuProgram->SetUniformMatrix("_Projection", projectionMtx, false);
@@ -228,18 +229,27 @@ void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
             }
             
             pass->Begin(renderSystem);
+            Ref<GpuProgram> globalShader = pass->pipelineState.globalShader;
             {
                 rmt_ScopedCPUSample(SceneRenderer_RenderMeshes, 0)
 
                 Ref<GpuProgram> usingProgram = nullptr;
+                Ref<Material> usingMaterial = nullptr;
                 for (const auto& cmd : commands)
                 {
                     if (!cmd.material) continue;
+                    auto material = cmd.material;
 
-                    Ref<GpuProgram> gpuProgram = pass->pipelineState.globalShader;
-                    if (!gpuProgram) {
-                        gpuProgram = cmd.material->Use();
+                    Ref<GpuProgram> gpuProgram = nullptr;
+                    if (globalShader) {
+                        gpuProgram = globalShader;
                     }
+                    else {
+                        gpuProgram = usingMaterial != material ? material->Use() : material->GetGpuProgram();
+                        usingMaterial = material;
+                    }
+                    NXS_ASSERT_MSG(gpuProgram, "No shader program available for rendering");
+
                     if (gpuProgram != usingProgram)
                     {
                         if (!gpuProgram->IsBinding()) gpuProgram->Bind();

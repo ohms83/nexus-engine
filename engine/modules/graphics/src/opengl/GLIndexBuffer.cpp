@@ -7,6 +7,8 @@
 #include "nexus/graphics/opengl/GLGpuBuffer.h"
 #include "nexus/graphics/opengl/NxsGL.h"
 
+#include "Remotery.h"
+
 USING_NAMESPACE_NXS;
 
 std::atomic<uint32_t> GLIndexBuffer::s_bindingBuffer(0);
@@ -19,6 +21,7 @@ GLIndexBuffer::~GLIndexBuffer()
 
 void GLIndexBuffer::Bind() const
 {
+    rmt_ScopedCPUSample(GLIndexBuffer_Bind, 0);
     if (IsBinding()) return;
 
     CALL_GL_FUNC(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_handle));
@@ -27,6 +30,7 @@ void GLIndexBuffer::Bind() const
 
 void GLIndexBuffer::Unbind() const
 {
+    rmt_ScopedCPUSample(GLIndexBuffer_Unbind, 0);
     CALL_GL_FUNC(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
     if (IsBinding()) s_bindingBuffer.store(0);
 }

@@ -4,6 +4,8 @@
 
 #include "nexus/graphics/opengl/GLTexture.h"
 
+#include "Remotery.h"
+
 NXS_NAMESPACE
 {
     namespace GL
@@ -93,6 +95,7 @@ std::atomic<uint32_t> GLTexture::s_bindingTexture(0);
 
 void GLTexture::Bind() const
 {
+    rmt_ScopedCPUSample(GLTexture_Bind, 0);
     if (IsBinding()) return;
 
     CALL_GL_FUNC(glBindTexture(GL_TEXTURE_2D, m_textureID));
@@ -101,6 +104,7 @@ void GLTexture::Bind() const
 
 void GLTexture::Unbind() const
 {
+    rmt_ScopedCPUSample(GLTexture_Unbind, 0);
     CALL_GL_FUNC(glBindTexture(GL_TEXTURE_2D, 0));
     if (IsBinding()) s_bindingTexture.store(0);
 }

@@ -103,6 +103,7 @@ bool Material::HasTextureType(TextureType type) const
 
 Ref<GpuProgram> Material::Use()
 {
+    rmt_ScopedCPUSample(Material_Use, 0)
     if (!m_shader)
     {
         LOG_WARNING(LogMaterial, std::format("Material does not have a shader"));

@@ -2,10 +2,10 @@
 // Created by nutta on 7/4/2025.
 //
 
-#include <format>
 #include "nexus/graphics/opengl/GLVertexBuffer.h"
-
 #include "nexus/graphics/opengl/GLGpuBuffer.h"
+
+#include "Remotery.h"
 
 USING_NAMESPACE_NXS;
 
@@ -31,6 +31,7 @@ VertexBuffer& GLVertexBuffer::Begin()
 
 void GLVertexBuffer::Bind() const
 {
+    rmt_ScopedCPUSample(GLVertexBuffer_Bind, 0);
     if (IsBinding()) return;
 
     CALL_GL_FUNC(glBindVertexArray(m_handle));
@@ -40,6 +41,7 @@ void GLVertexBuffer::Bind() const
 
 void GLVertexBuffer::Unbind() const
 {
+    rmt_ScopedCPUSample(GLVertexBuffer_Unbind, 0);
     CALL_GL_FUNC(glBindVertexArray(0));
     if (IsBinding()) s_bindingBuffer.store(0);
 }
