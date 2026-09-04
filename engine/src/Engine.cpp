@@ -102,10 +102,8 @@ void Engine::InitModules()
     ModelNode::Register();
 
     // Init Graphics module
-    DepthPrepass.Resolve(*s_engine->GetRenderingInterface());
 }
 
 void Engine::ShutdownModules()
 {
-    DepthPrepass.ReleaseResources();
 }

@@ -12,7 +12,5 @@ NXS_NAMESPACE
     public:
         DummySceneRenderer();
         ~DummySceneRenderer() override = default;
-
-        void Render(RenderSystem& renderSystem, const Scene& scene) override;
     };
 }

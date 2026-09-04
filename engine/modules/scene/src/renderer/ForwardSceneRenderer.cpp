@@ -5,21 +5,24 @@
 #include <cstring>
 
 #include "nexus/debug/Logger.h"
+#include "nexus/ecs/Ecs.h"
+#include "nexus/geom/Frustum.h"
 #include "nexus/graphics/debug/Gizmos.h"
 #include "nexus/graphics/RenderSystem.h"
 #include "nexus/graphics/RenderCommand.h"
 #include "nexus/graphics/RenderTarget.h"
 #include "nexus/graphics/RenderCommandBatcher.h"
 #include "nexus/graphics/RenderCommand.h"
-#include "nexus/scene/RenderGraph.h"
-#include "nexus/scene/RenderPass.h"
-#include "nexus/scene/renderpass/OpaquePass.h"
-#include "nexus/geom/Frustum.h"
-#include "nexus/ecs/Ecs.h"
 #include "nexus/math/Math.h"
 #include "nexus/math/Matrix.h"
 #include "nexus/memory/OwningBuffer.h"
 #include "nexus/scene/Scene.h"
+#include "nexus/scene/RenderGraph.h"
+#include "nexus/scene/renderpass/RenderPass.h"
+#include "nexus/scene/renderpass/DepthPrePass.h"
+#include "nexus/scene/renderpass/OpaquePass.h"
+#include "nexus/scene/renderpass/AlphaPass.h"
+#include "nexus/scene/renderpass/OverlayPass.h"
 #include "nexus/scene/component/CameraComponent.h"
 #include "nexus/scene/component/LightComponent.h"
 #include "nexus/scene/component/MeshComponent.h"
@@ -32,14 +35,17 @@ USING_NAMESPACE_NXS;
 
 ForwardSceneRenderer::ForwardSceneRenderer(const RenderSystem& renderSystem)
 {
-    RegisterRenderPass(OpaquePass());
-    RegisterRenderPass(AlphaPass);
-    RegisterRenderPass(OverlayPass);
+    // RegisterRenderPass(std::make_shared<DepthPrePass>());
+    RegisterRenderPass(std::make_shared<OpaquePass>());
+    RegisterRenderPass(std::make_shared<AlphaPass>());
+    RegisterRenderPass(std::make_shared<OverlayPass>());
     SortRenderPasses();
 }
 
 void ForwardSceneRenderer::Render(RenderSystem& renderSystem, const Scene& scene)
 {
+    SceneRenderer::Render(renderSystem, scene);
+#if 0
     rmt_ScopedCPUSample(SceneRenderer_Render, 0);
 
     std::vector<RenderCommand> commands;
@@ -164,4 +170,5 @@ void ForwardSceneRenderer::Render(RenderSystem& renderSystem, const Scene& scene
         // TODO: Support render to offscreen targets from multiple cameras.
         break;
     }
+#endif
 }

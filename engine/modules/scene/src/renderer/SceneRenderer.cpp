@@ -26,6 +26,7 @@
 #include "nexus/scene/component/ModelComponent.h"
 #include "nexus/scene/component/SceneNodeComponent.h"
 #include "nexus/scene/component/TransformComponent.h"
+#include "nexus/scene/component/MeshComponent.h"
 
 #include "Remotery.h"
 
@@ -183,14 +184,83 @@ void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
     const auto& registry = *scene.GetRegistry();
     auto renderInterface = renderSystem.GetRenderInterface();
 
-    for (const auto& pass : m_renderPasses)
+    for (auto pass : m_renderPasses)
     {
+        if (!pass->enabled) continue;
+
+        commands.clear();
+
         std::vector<Ref<SceneView>> viewPoints;
-        pass.PopulateSceneView(scene, viewPoints);
+        pass->PopulateSceneView(scene, viewPoints);
 
-        for (const auto& view : viewPoints)
+        for (const auto view : viewPoints)
         {
+            if (!view) continue;
 
+            rmt_BeginCPUSample(SceneRenderer_CreateSortList, 0)
+            const glm::vec3& cameraPos = view->GetViewPos();
+            const glm::mat4& viewMtx = view->GetViewMatrix();
+            const glm::mat4& projectionMtx = view->GetProjectionMatrix();
+            const glm::mat4& viewProjMtx = view->GetViewProjectionMatrix();
+            for (const auto entities = registry.view<SceneNodeComponent, MeshComponent, PositionComponent, OrientationComponent, ScaleComponent>();
+                 const auto& [entity, sceneNode, meshComp, position, orient, scale] : entities.each())
+            {
+                if (!sceneNode.active) continue;
+
+                glm::mat4 modelMtx = Matrix::CreateModelMatrix(position.value, orient.quat, scale.value);
+                const auto mvpMtx = viewProjMtx * modelMtx;
+
+                if (auto mesh = meshComp.GetMesh(); mesh != nullptr)
+                {
+                    if (!pass->IsPassFiltered(mesh)) continue;
+                    if (!view->IsObjectVisible(mesh->GetSphere(), modelMtx, scale.value)) continue;
+
+                    commands.push_back(pass->CreateRenderCommand(mesh, modelMtx, mvpMtx));
+                }
+            }
+            rmt_EndCPUSample();
+
+            {
+                rmt_ScopedCPUSample(SceneRenderer_SortMeshes, 0)
+                std::ranges::sort(commands, [](const RenderCommand& a, const RenderCommand& b) {
+                    return a.sortKey < b.sortKey;
+                });
+            }
+            
+            pass->Begin(renderSystem);
+            {
+                rmt_ScopedCPUSample(SceneRenderer_RenderMeshes, 0)
+
+                Ref<GpuProgram> usingProgram = nullptr;
+                for (const auto& cmd : commands)
+                {
+                    if (!cmd.material) continue;
+
+                    Ref<GpuProgram> gpuProgram = pass->pipelineState.globalShader;
+                    if (!gpuProgram) {
+                        gpuProgram = cmd.material->Use();
+                    }
+                    if (gpuProgram != usingProgram)
+                    {
+                        if (!gpuProgram->IsBinding()) gpuProgram->Bind();
+
+                        SetCameraUniforms(gpuProgram, cameraPos, viewMtx, projectionMtx);
+                        SetAmbientLightParams(gpuProgram, registry);
+                        SetDirectLightParams(gpuProgram, registry);
+                        SetPointLightParams(gpuProgram, registry);
+                        usingProgram = gpuProgram;
+                    }
+
+                    if (!RenderInstancedMesh(renderSystem, cmd, gpuProgram))
+                    {
+                        gpuProgram->SetUniformMatrix("_Model", cmd.modelMatrix, false);
+                        cmd.vertexBuffer->Bind();
+                        cmd.indexBuffer->Bind();
+                        renderSystem.DrawIndexed(cmd.indexBuffer);
+                    }
+                }
+            }
+            pass->End(renderSystem);
         }
     }
 }

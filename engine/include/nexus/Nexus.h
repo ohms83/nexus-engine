@@ -75,7 +75,7 @@
 #include "nexus/graphics/RenderCommandBatcher.h"
 #include "nexus/scene/RenderGraph.h"
 #include "nexus/graphics/RenderingInterface.h"
-#include "nexus/scene/RenderPass.h"
+#include "nexus/scene/renderpass/RenderPass.h"
 #include "nexus/graphics/RenderSystem.h"
 #include "nexus/graphics/RenderTarget.h"
 #include "nexus/graphics/Shader.h"

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "nexus/NxsCommon.h"
-#include "nexus/scene/RenderPass.h"
+#include "nexus/scene/renderpass/RenderPass.h"
 
 #include <vector>
 #include <unordered_map>

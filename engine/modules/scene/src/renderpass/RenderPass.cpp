@@ -1,77 +1,25 @@
-#include "nexus/scene/RenderPass.h"
-#include "nexus/scene/renderpass/OpaquePass.h"
+#include "nexus/scene/renderpass/RenderPass.h"
 
 #include "nexus/graphics/RenderSystem.h"
 #include "nexus/serialize/Serializer.h"
 
+#include "nexus/scene/SceneNode.h"
+#include "nexus/scene/component/CameraComponent.h"
+#include "nexus/scene/component/SceneNodeComponent.h"
+#include "nexus/scene/component/TransformComponent.h"
+#include "nexus/scene/component/MeshComponent.h"
+
+#include "nexus/math/Matrix.h"
+
+#include "nexus/debug/Assert.h"
+
+#include "Remotery.h"
+
 USING_NAMESPACE_NXS;
 
-// Shader sources
-static const char* s_depthVertexShader = R"(
-#version 330 core
-layout (location = 0) in vec3 aPos;
-
-uniform mat4 _Model;
-uniform mat4 _View;
-uniform mat4 _Projection;
-
-void main()
+RenderPass::~RenderPass()
 {
-    gl_Position = _Projection * _View * _Model * vec4(aPos, 1.0);
-    gl_Position.z += 0.1;
-}
-)";
-
-static const char* s_depthFragmentShader = R"(
-#version 330 core
-void main()
-{
-    // Do nothing. This shader outputs no color (gl_FragColor is not written), 
-    // but the depth value determined by gl_Position is still written to the depth buffer.
-}
-)";
-
-NXS_NAMESPACE
-{
-    RenderPass DepthPrepass = RenderPassBuilder::Begin("Depth Prepass", RENDER_PASS_DEPTH_FILL)
-        .ClearFlags(ClearFlags::Depth)
-        .ClearDepth(1.0f)
-        .DepthTest(true)
-        .DepthWrite(true)
-        .GlobalShaderName("_DepthShader")
-        .GlobalShaderSources({
-            { GpuProgram::Type::Vertex, s_depthVertexShader },
-            { GpuProgram::Type::Fragment, s_depthFragmentShader }
-        })
-        .FilterType("opaque")
-        .Build();
-
-    // RenderPass OpaquePass = RenderPassBuilder::Begin("Opaque Pass", RENDER_PASS_OPAQUE)
-    //     .ClearFlags(ClearFlags::Color | ClearFlags::Depth)
-    //     .ClearColor(Color3F(0x303030ff))
-    //     .ClearDepth(1.0f)
-    //     .DepthTest(true)
-    //     .DepthWrite(true)
-    //     .GlobalShader(nullptr) // Use material shaders
-    //     .FilterType("opaque")
-    //     .Build();
-
-    RenderPass AlphaPass = RenderPassBuilder::Begin("Alpha Pass", RENDER_PASS_ALPHA)
-        .ClearFlags(ClearFlags::None)
-        .DepthTest(true)
-        .DepthWrite(true)
-        .BlendMode(BlendMode::Alpha)
-        .GlobalShader(nullptr) // Use material shaders
-        .FilterType("alpha")
-        .Build();
-
-    RenderPass OverlayPass = RenderPassBuilder::Begin("Overlay Pass", RENDER_PASS_OVERLAY)
-        .ClearFlags(ClearFlags::None)
-        .DepthTest(false)
-        .DepthWrite(false)
-        .GlobalShader(nullptr) // Use material shaders
-        .FilterType("overlay")
-        .Build();
+    ReleaseResources();
 }
 
 void RenderPass::ReleaseResources()
@@ -324,4 +272,38 @@ RenderCommand RenderPass::CreateRenderCommand(Ref<const Mesh> mesh, const glm::m
         materialId,
         commandSortType == CommandSortType::FrontToBack ? depthNormalized : 1.0f - depthNormalized);
     return cmd;
+}
+
+void RenderPass::PopulateSceneView(const SceneNode& scene, std::vector<Ref<SceneView>>& outViews) const
+{
+    rmt_ScopedCPUSample(RenderPass_PopulateSceneView, 0);
+    const auto& registry = *scene.GetRegistry();
+    const auto cameraEntities = registry.view<SceneNodeComponent, CameraComponent, PositionComponent, OrientationComponent>();
+
+    for (const auto& [cameraEntity, cameraNode, camera, cameraPos, cameraOrient] : cameraEntities.each())
+    {
+        if (!cameraNode.active) continue;
+        outViews.push_back(std::make_shared<CameraView>(camera, cameraPos, cameraOrient));
+    }
+}
+
+void RenderPass::PrepareRenderCommands(const SceneNode &scene, const SceneView &view, std::vector<RenderCommand>& outCommands) const
+{
+    rmt_ScopedCPUSample(RenderPass_PrepareRenderCommands, 0);
+    const auto& registry = *scene.GetRegistry();
+    const glm::mat4& viewProjMtx = view.GetViewProjectionMatrix();
+
+    for (const auto entities = registry.view<SceneNodeComponent, MeshComponent, PositionComponent, OrientationComponent, ScaleComponent>(); const auto& [entity, sceneNode, meshComp, position, orient, scale] : entities.each())
+    {
+        if (!sceneNode.active) continue;
+
+        glm::mat4 modelMtx = Matrix::CreateModelMatrix(position.value, orient.quat, scale.value);
+        const auto mvpMtx = viewProjMtx * modelMtx;
+
+        if (auto mesh = meshComp.GetMesh(); mesh != nullptr)
+        {
+            if (!view.IsObjectVisible(mesh->GetSphere(), modelMtx, scale.value)) continue;
+            outCommands.push_back(CreateRenderCommand(mesh, modelMtx, mvpMtx));
+        }
+    }
 }

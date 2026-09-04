@@ -6,7 +6,7 @@
 
 #include "nexus/NxsDefine.h"
 #include "nexus/graphics/RenderCommand.h"
-#include "nexus/scene/RenderPass.h"
+#include "nexus/scene/renderpass/RenderPass.h"
 #include "nexus/geom/Frustum.h"
 
 #include "entt/entity/registry.hpp"
@@ -35,17 +35,17 @@ NXS_NAMESPACE
         virtual ~SceneRenderer() = default;
         virtual void Render(RenderSystem& renderSystem, const Scene& scene);
 
-        void RegisterRenderPass(const RenderPass& renderPass)
+        void RegisterRenderPass(Ref<const RenderPass> renderPass)
         {
             m_renderPasses.push_back(renderPass);
         }
 
         void SortRenderPasses()
         {
-            std::ranges::sort(m_renderPasses, std::ranges::less{}, &RenderPass::priority);
+            std::ranges::sort(m_renderPasses, [this](const Ref<const RenderPass>& a, const Ref<const RenderPass>& b) {
+                return a->priority < b->priority;
+            });
         }
-
-        NODISCARD const std::vector<RenderPass>& GetRenderPasses() const { return m_renderPasses; }
 
         //! Register an offscreen render target which can be referenced by renderpasses.
         void RegisterRenderTarget(const std::string& name, const Ref<RenderTarget>& target)
@@ -65,7 +65,7 @@ NXS_NAMESPACE
         static void SetCameraUniforms(Ref<GpuProgram> gpuProgram, const glm::vec3& cameraPos, const glm::mat4& viewMtx, const glm::mat4& projectionMtx);
 
         //! A list of render passes sorted by their priority.
-        std::vector<RenderPass> m_renderPasses;
+        std::vector<Ref<const RenderPass>> m_renderPasses;
         std::unordered_map<std::string, Ref<RenderTarget>> m_renderTargets;
     };
 }

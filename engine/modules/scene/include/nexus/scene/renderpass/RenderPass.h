@@ -72,6 +72,9 @@ NXS_NAMESPACE
     class RenderPass : public ISerializeable
     {
     public:
+        RenderPass() = default;
+        virtual ~RenderPass();
+
         //! Pass name. Mainly used for debugging purposes.
         std::string name;
         //! Priority of the render pass. Lower values are rendered first.
@@ -160,8 +163,9 @@ NXS_NAMESPACE
             return !filter || filter(cmd);
         }
 
-        virtual void PopulateSceneView(const SceneNode& scene, std::vector<Ref<SceneView>>& outViews) const {}
-        virtual void PrepareRenderCommands(const SceneNode& scene, const SceneView& view, std::vector<RenderCommand>& outCommands) const {}
+        virtual void PopulateSceneView(const SceneNode& scene, std::vector<Ref<SceneView>>& outViews) const;
+        virtual void PrepareRenderCommands(const SceneNode& scene, const SceneView& view, std::vector<RenderCommand>& outCommands) const;
+        virtual bool IsPassFiltered(Ref<const Mesh> mesh) const { return false; }
 
         RenderCommand CreateRenderCommand(Ref<const Mesh> mesh, const glm::mat4 &modelMtx, const glm::mat4& mvpMtx) const;
     };
@@ -206,9 +210,4 @@ NXS_NAMESPACE
          */
         RenderPass&& Build() { return std::move(pass); }
     };
-
-    // Global predefined render passes
-    extern RenderPass DepthPrepass;
-    extern RenderPass AlphaPass;
-    extern RenderPass OverlayPass;
 }

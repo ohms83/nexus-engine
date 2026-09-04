@@ -18,8 +18,14 @@ CameraView::CameraView(const CameraComponent &camera, const PositionComponent &p
         m_projectionMatrix = glm::ortho(-camera.width/2, camera.width/2, -camera.height/2, camera.height/2, camera.nearZ, camera.farZ);
     }
 
+    m_viewPos = pos.value;
     m_viewProjectionMatrix = m_projectionMatrix * m_viewMatrix;
     m_viewFrustum = camera.GetViewFrustum(pos.value, orient.quat);
+}
+
+const glm::vec3& CameraView::GetViewPos() const
+{
+    return m_viewPos;
 }
 
 bool CameraView::IsObjectVisible(const Sphere &boundingSphere, const glm::mat4 &modelMtx, const glm::vec3 &scale) const
