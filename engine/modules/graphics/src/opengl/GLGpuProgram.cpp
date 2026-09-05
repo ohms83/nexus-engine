@@ -6,6 +6,7 @@
 #include "glm/gtc/type_ptr.inl"
 
 #include "Remotery.h"
+#include "nexus/graphics/GraphicsProfiler.h"
 
 // GpuProgram sources
 const char* error_vertexShaderSource = R"(
@@ -227,6 +228,7 @@ bool GLGpuProgram::SetUniformTexture2D(const std::string& name, Ref<const Textur
     const GLint gl_textureUnit = GL_TEXTURE0 + textureUnit;
     CALL_GL_FUNC(glActiveTexture(gl_textureUnit));
     CALL_GL_FUNC(glBindTexture(GL_TEXTURE_2D, texture->GetHandle()));
+    GraphicsProfiler::RecordTextureBind(texture->GetHandle());
     CALL_GL_FUNC(glUniform1i(location, textureUnit));
     return true;
 }
@@ -238,6 +240,8 @@ void GLGpuProgram::Bind()
 
     CALL_GL_FUNC(glUseProgram(m_id));
     s_bindingShader.store(GetHandle());
+    // Record program bind for composition analysis
+    GraphicsProfiler::RecordProgramBind(m_id);
 }
 
 void GLGpuProgram::Unbind()

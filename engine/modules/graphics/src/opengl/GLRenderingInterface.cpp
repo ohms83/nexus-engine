@@ -14,6 +14,7 @@
 #include "SDL3/SDL_error.h"
 
 #include "Remotery.h"
+#include "nexus/graphics/GraphicsProfiler.h"
 
 USING_NAMESPACE_NXS;
 
@@ -158,6 +159,8 @@ void GLRenderingInterface::DrawIndexed(const Ref<IndexBuffer> indexBuffer)
             R_CAST<void*>(0)           // element array buffer offset
         ));
     }
+    // Record draw call for composition analysis
+    GraphicsProfiler::RecordDrawCall(indexBuffer->GetNumIndexDraw(), 1);
 }
 
 void GLRenderingInterface::DrawIndexedInstanced(const Ref<IndexBuffer> indexBuffer, const uint32_t instanceCount)
@@ -180,6 +183,7 @@ void GLRenderingInterface::DrawIndexedInstanced(const Ref<IndexBuffer> indexBuff
             CAST<GLsizei>(instanceCount)
         ));
     }
+    GraphicsProfiler::RecordDrawCall(indexBuffer->GetNumIndexDraw(), instanceCount);
 }
 
 void GLRenderingInterface::OnResize(const uint32_t pixel_w, const uint32_t pixel_h)

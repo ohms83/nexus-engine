@@ -111,6 +111,7 @@ void SceneRenderer::SetDirectLightParams(Ref<GpuProgram> gpuProgram, const entt:
     {
         if (!node.active) continue;
 
+        rmt_BeginCPUSample(CreateUniformNames, 0);
         // TODO: Cache the uniform names.
         const auto uniformLocation = std::format("_DirectLights[{}]", numLight);
         const auto uniformLocationColor = std::format("{}.properties.color", uniformLocation);
@@ -118,12 +119,15 @@ void SceneRenderer::SetDirectLightParams(Ref<GpuProgram> gpuProgram, const entt:
         const auto uniformLocationSpecular = std::format("{}.properties.specularIntensity", uniformLocation);
         const auto uniformLocationCutoff = std::format("{}.properties.cutoff", uniformLocation);
         const auto uniformLocationDirection = std::format("{}.direction", uniformLocation);
+        rmt_EndCPUSample();
 
+        rmt_BeginCPUSample(EmplaceUniformValues, 0);
         gpuProgram->SetUniformVector(uniformLocationColor, light.properties.color);
         gpuProgram->SetUniformVector(uniformLocationDirection, glm::normalize(light.direction));
         gpuProgram->SetUniformFloat(uniformLocationDiffuse, light.properties.diffuseIntensity);
         gpuProgram->SetUniformFloat(uniformLocationSpecular, light.properties.specularIntensity);
         gpuProgram->SetUniformFloat(uniformLocationCutoff, light.properties.cutoffRange);
+        rmt_EndCPUSample();
 
         numLight++;
     }
@@ -190,6 +194,10 @@ void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
         if (!pass->enabled) continue;
 
         commands.clear();
+
+        // Begin per-pass CPU and GPU (OpenGL) samples using dynamic names
+        rmt_BeginCPUSampleDynamic(pass->name.c_str(), 0);
+        rmt_BeginOpenGLSampleDynamic(pass->name.c_str());
 
         std::vector<Ref<SceneView>> viewPoints;
         pass->PopulateSceneView(scene, viewPoints);
@@ -271,6 +279,10 @@ void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
                 }
             }
             pass->End(renderSystem);
+
+            // End per-pass GPU and CPU samples
+            rmt_EndOpenGLSample();
+            rmt_EndCPUSample();
         }
     }
 }
