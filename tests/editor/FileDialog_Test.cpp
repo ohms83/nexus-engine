@@ -4,7 +4,7 @@
 
 // To test the non-exported function ConstructFilterList, we include the implementation file.
 // This is a common testing technique for private/static functions.
-#if defined(NXS_PLATFORM_WIN64)
+#if defined(NXS_PLATFORM_WINDOWS)
 #include "engine/src/editor/FileDialog.Win64.cpp"
 #endif
 
@@ -24,7 +24,7 @@ static bool CompareFilterStrings(const char* actual, const char* expected, size_
 
 TEST(FileDialog, ConstructFilterList_Empty)
 {
-#if defined(NXS_PLATFORM_WIN64)
+#if defined(NXS_PLATFORM_WINDOWS)
     std::vector<nxs::ExtFilter> filters = {};
     char filterStr[100] = {'x'}; // Initialize with non-zero to check null termination
     size_t count = ConstructFilterList(filters, filterStr, 100);
@@ -38,7 +38,7 @@ TEST(FileDialog, ConstructFilterList_Empty)
 
 TEST(FileDialog, ConstructFilterList_SingleFilter)
 {
-#if defined(NXS_PLATFORM_WIN64)
+#if defined(NXS_PLATFORM_WINDOWS)
     std::vector<nxs::ExtFilter> filters = {
         {"Image Files", "*.png;*.jpg"}
     };
@@ -62,7 +62,7 @@ TEST(FileDialog, ConstructFilterList_SingleFilter)
 
 TEST(FileDialog, ConstructFilterList_MultipleFilters)
 {
-#if defined(NXS_PLATFORM_WIN64)
+#if defined(NXS_PLATFORM_WINDOWS)
     std::vector<nxs::ExtFilter> filters = {
         {"Image Files", "*.png;*.jpg"},
         {"Text Files", "*.txt"}
@@ -89,7 +89,7 @@ TEST(FileDialog, ConstructFilterList_MultipleFilters)
 // Test buffer size limit. The function must stop adding filters when the buffer is full.
 TEST(FileDialog, ConstructFilterList_BufferTooSmall)
 {
-#if defined(NXS_PLATFORM_WIN64)
+#if defined(NXS_PLATFORM_WINDOWS)
     std::vector<nxs::ExtFilter> filters = {
         {"Image Files", "*.png;*.jpg"},
         {"Text Files", "*.txt"}

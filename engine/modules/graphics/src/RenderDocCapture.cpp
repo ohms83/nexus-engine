@@ -2,7 +2,9 @@
 #include "nexus/graphics/RenderDocCapture.h"
 #include "nexus/debug/LogDispatcher.h"
 
-#include <Windows.h>
+#if defined(NXS_PLATFORM_WINDOWS)
+    #include <Windows.h>
+#endif
 
 USING_NAMESPACE_NXS;
 
@@ -15,7 +17,7 @@ namespace
     HMODULE g_rdoc_lib = nullptr;
 }
 
-namespace NXS_NAMESPACE::RenderDocCapture
+namespace nxs::RenderDocCapture
 {
     static std::atomic<bool> s_initialized{false};
     static std::atomic<bool> s_captureNextFrame{false};
@@ -24,7 +26,7 @@ namespace NXS_NAMESPACE::RenderDocCapture
     void Initialize()
     {
         if (s_initialized.load()) return;
-
+#if defined(NXS_PLATFORM_WINDOWS)
         g_rdoc_lib = LoadLibraryA("renderdoc.dll");
         if (!g_rdoc_lib)
         {
@@ -57,6 +59,10 @@ namespace NXS_NAMESPACE::RenderDocCapture
 
         s_initialized.store(true);
         LOG_INFO(LogRenderDocCapture, "RenderDoc API initialized.");
+    #else
+        LOG_WARNING(LogRenderDocCapture, "RenderDoc capture is only supported on Windows.");
+        s_initialized.store(false);
+    #endif
     }
 
     void TriggerCaptureNextFrame()
@@ -72,6 +78,7 @@ namespace NXS_NAMESPACE::RenderDocCapture
         if (!s_initialized.load()) return;
         if (!s_captureNextFrame.exchange(false)) return;
 
+    #if defined(NXS_PLATFORM_WINDOWS)
         // Call StartFrameCapture via API - function pointer in g_rdoc_api
         using StartFn = int(*)(void*, void*);
         auto start = reinterpret_cast<StartFn>(reinterpret_cast<char*>(g_rdoc_api) + 0); // we will lookup via exported function pointer via dlsym equivalent not available; use documented API struct
@@ -108,6 +115,9 @@ namespace NXS_NAMESPACE::RenderDocCapture
         startFn(NULL, NULL);
         s_captureActive.store(true);
         LOG_INFO(LogRenderDocCapture, "RenderDoc: started frame capture (DLL functions).");
+#else
+        LOG_WARNING(LogRenderDocCapture, "RenderDoc capture is only supported on Windows.");
+#endif
     }
 
     void EndCaptureIfActive()
@@ -115,6 +125,7 @@ namespace NXS_NAMESPACE::RenderDocCapture
         if (!s_initialized.load()) return;
         if (!s_captureActive.exchange(false)) return;
 
+#if defined(NXS_PLATFORM_WINDOWS)
         auto endFn = reinterpret_cast<int(*)(void*, void*)>(GetProcAddress(g_rdoc_lib, "RENDERDOC_EndFrameCapture"));
         if (endFn)
         {
@@ -140,6 +151,9 @@ namespace NXS_NAMESPACE::RenderDocCapture
         }
 
         LOG_WARNING(LogRenderDocCapture, "Unable to end frame capture - RenderDoc API unavailable.");
+#else
+        LOG_WARNING(LogRenderDocCapture, "RenderDoc capture is only supported on Windows.");
+#endif
     }
 
     bool IsInitialized()

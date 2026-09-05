@@ -58,7 +58,7 @@ target_include_directories(nexus-config INTERFACE
     ${ENGINE_3RD_PARTY_DIR}
 )
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    target_compile_definitions(nexus-config INTERFACE NXS_PLATFORM_WIN64)
+    target_compile_definitions(nexus-config INTERFACE NXS_PLATFORM_WINDOWS)
 endif()
 
 add_subdirectory(modules)
@@ -93,7 +93,7 @@ message("CMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}")
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
     target_link_libraries(nexus-engine PRIVATE ws2_32)
-    target_compile_definitions(nexus-engine PUBLIC NXS_PLATFORM_WIN64)
+    target_compile_definitions(nexus-engine PUBLIC NXS_PLATFORM_WINDOWS)
 endif()
 
 install(TARGETS nexus-engine

@@ -189,7 +189,7 @@ Menu::Menu(IWidgetOwner& widgetOwner)
                 "",
                 "",
                 []() {
-                    NXS_NAMESPACE::RenderDocCapture::TriggerCaptureNextFrame();
+                    nxs::RenderDocCapture::TriggerCaptureNextFrame();
                 }
             ),
         }

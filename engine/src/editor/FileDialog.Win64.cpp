@@ -1,4 +1,4 @@
-#ifdef NXS_PLATFORM_WIN64
+#ifdef NXS_PLATFORM_WINDOWS
 
 #include "nexus/editor/FileDialog.h"
 #include "nexus/debug/LogDispatcher.h"
@@ -110,4 +110,4 @@ namespace nxs
     }
 }
 
-#endif // NXS_PLATFORM_WIN64
+#endif // NXS_PLATFORM_WINDOWS

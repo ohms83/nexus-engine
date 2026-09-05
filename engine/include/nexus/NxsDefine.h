@@ -54,7 +54,7 @@ constexpr char const* NXS_BUILD_CFG = "Unknown";
 
 #define SINGLETON(Type) static Type& Instance() { static Type instance; return instance; }
 
-#ifdef NXS_PLATFORM_WIN64
+#ifdef NXS_PLATFORM_WINDOWS
 #define NXS_STRNCPY(dst, dstsize, src, count) strncpy_s(dst, dstsize, src, count)
 #else
 #define NXS_STRNCPY(dst, dstsize, src, count) strncpy(dst, src, count)

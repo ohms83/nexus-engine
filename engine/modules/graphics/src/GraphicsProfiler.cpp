@@ -27,7 +27,7 @@ NXS_NAMESPACE
     };
 
     static thread_local FrameData s_frame;
-    static thread_local bool s_isEnabled = true;
+    static thread_local bool s_isEnabled = false;
 
     void BeginFrame()
     {

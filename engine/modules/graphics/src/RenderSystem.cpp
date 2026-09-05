@@ -5,9 +5,10 @@
 #include "nexus/debug/LogDispatcher.h"
 #include "nexus/time/HighResTimeSource.h"
 #include "nexus/time/StandardTimeSource.h"
+#include "nexus/graphics/GraphicsProfiler.h"
+#include "nexus/graphics/RenderDocCapture.h"
 
 #include "Remotery.h"
-#include "nexus/graphics/GraphicsProfiler.h"
 
 USING_NAMESPACE_NXS;
 

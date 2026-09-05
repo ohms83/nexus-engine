@@ -1,5 +1,6 @@
 #pragma once
 
+#include "nexus/NxsDefine.h"
 #include <atomic>
 
 NXS_NAMESPACE
