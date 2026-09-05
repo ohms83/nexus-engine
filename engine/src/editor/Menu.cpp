@@ -18,6 +18,7 @@
 #include "DebugMenuItem.inl"
 
 #include "imgui.h"
+#include "nexus/graphics/RenderDocCapture.h"
 
 #include <fstream>
 
@@ -181,6 +182,15 @@ Menu::Menu(IWidgetOwner& widgetOwner)
                 "",
                 std::make_shared<ProfilerWidget>(),
                 widgetOwner
+            ),
+            std::make_shared<TriggerMenuItem> (
+                DEVELOPER_TOOLS,
+                "Capture Frame (RenderDoc)",
+                "",
+                "",
+                []() {
+                    NXS_NAMESPACE::RenderDocCapture::TriggerCaptureNextFrame();
+                }
             ),
         }
     };

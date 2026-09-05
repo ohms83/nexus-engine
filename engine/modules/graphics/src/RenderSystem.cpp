@@ -44,6 +44,9 @@ void RenderSystem::BeginDraw()
     rmt_ScopedCPUSample(RenderSystem_BeginDraw, 0);
     // Mark the start of a frame for Remotery with a dynamic name
     rmt_BeginCPUSampleDynamic("Frame", 0);
+    // Initialize RenderDoc capture helper and begin capture if requested
+    RenderDocCapture::Initialize();
+    RenderDocCapture::BeginCaptureIfRequested();
     GraphicsProfiler::BeginFrame();
     m_timer.Tick();
     ClearScreen();
@@ -73,6 +76,8 @@ void RenderSystem::EndDraw()
         rmt_ScopedCPUSample(SwapBuffer, 0);
         m_renderingInterface->SwapBuffer();
     }
+    // End RenderDoc capture if it was active for this frame
+    RenderDocCapture::EndCaptureIfActive();
     // Let Remotery gather GPU timestamps for the frame
     rmt_MarkFrame();
     // Report and end frame sampling
