@@ -18,6 +18,7 @@
 #include "nexus/time/TimerManager.h"
 #include "nexus/task/IntervalTask.h"
 #include "nexus/serialize/IniParser.h"
+#include "nexus/graphics/RenderDocCapture.h"
 
 // Third-party headers
 #include "imgui.h"
@@ -153,6 +154,9 @@ bool Application::Init(const ApplicationConfig& info)
 
     InitImGui();
     ScheduleLogFlushTask();
+
+    // Initialize RenderDoc, if available, for graphics debugging and capture.
+    RenderDocCapture::Initialize();
 
     return Init_Internal();
 }
