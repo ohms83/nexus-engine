@@ -54,7 +54,7 @@ NXS_NAMESPACE
             case GpuProgram::Type::Geometry:
                 return GL_GEOMETRY_SHADER;
             default:
-                assert(false);
+                NXS_ASSERT(false);
                 return GL_NONE;
             }
         }
