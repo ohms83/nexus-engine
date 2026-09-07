@@ -4,7 +4,7 @@
 #include "nexus/debug/LogDispatcher.h"
 
 #include <filesystem>
-#include <windows.h>
+#include <Windows.h>
 #include <commdlg.h>
 
 #define FILTER_MAX 512

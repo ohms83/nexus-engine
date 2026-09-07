@@ -21,10 +21,15 @@ NXS_NAMESPACE
         void OnSelected(bool is_selected) override;
         bool IsSelected() const override { return m_selected; }
 
+        const std::string& GetName() const override;
+
     private:
         bool m_selected = false;
         HandleFunction m_hander;
 
         virtual bool* SelectedFlag() { return &m_selected; }
+        
+        /// @brief [OPTIONAL] The name of this menu item when it is toggled.
+        std::string m_toggledName;
     };
 }
