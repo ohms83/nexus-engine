@@ -29,6 +29,7 @@
 #include "nexus/scene/component/MeshComponent.h"
 
 #include "Remotery.h"
+#include "nexus/graphics/GraphicsProfiler.h"
 
 USING_NAMESPACE_NXS;
 
@@ -88,6 +89,9 @@ bool SceneRenderer::RenderInstancedMesh(RenderSystem& renderSystem, const Render
     }
 
     command.vertexBuffer->AttachInstanceStream(std::static_pointer_cast<IBuffer>(instanceBuffer), attrs, BufferUsage::StaticDraw);
+    // Record composition stats for instanced draw
+    GraphicsProfiler::RecordProgramDraw(gpuProgram ? gpuProgram->GetHandle() : 0, command.indexCount, instanceCount);
+    GraphicsProfiler::RecordMaterialDraw(command.material ? command.material->GetId() : 0, command.indexCount, instanceCount);
     renderSystem.DrawIndexedInstanced(command.indexBuffer, instanceCount);
     command.vertexBuffer->DetachInstanceStreams();
     // free temporary allocation (OwningBuffer::Take took ownership)
@@ -253,8 +257,16 @@ void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
                         gpuProgram = globalShader;
                     }
                     else {
-                        gpuProgram = usingMaterial != material ? material->Use() : material->GetGpuProgram();
-                        usingMaterial = material;
+                        if (usingMaterial != material)
+                        {
+                            gpuProgram = material->Use();
+                            usingMaterial = material;
+                            GraphicsProfiler::RecordMaterialDraw(material ? material->GetId() : 0, cmd.indexCount, cmd.instanceCount);
+                        }
+                        else
+                        {
+                            gpuProgram = material->GetGpuProgram();
+                        }
                     }
                     NXS_ASSERT_MSG(gpuProgram, "No shader program available for rendering");
 
@@ -274,6 +286,8 @@ void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
                         gpuProgram->SetUniformMatrix("_Model", cmd.modelMatrix, false);
                         cmd.vertexBuffer->Bind();
                         cmd.indexBuffer->Bind();
+                        // Record composition stats
+                        GraphicsProfiler::RecordProgramDraw(gpuProgram ? gpuProgram->GetHandle() : 0, cmd.indexCount, cmd.instanceCount);
                         renderSystem.DrawIndexed(cmd.indexBuffer);
                     }
                 }
