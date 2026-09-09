@@ -260,8 +260,8 @@ void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
                         if (usingMaterial != material)
                         {
                             gpuProgram = material->Use();
+                            GraphicsProfiler::RecordMaterialSwitching(material->GetId());
                             usingMaterial = material;
-                            GraphicsProfiler::RecordMaterialDraw(material ? material->GetId() : 0, cmd.indexCount, cmd.instanceCount);
                         }
                         else
                         {
@@ -287,6 +287,7 @@ void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
                         cmd.vertexBuffer->Bind();
                         cmd.indexBuffer->Bind();
                         // Record composition stats
+                        GraphicsProfiler::RecordMaterialDraw(material ? material->GetId() : 0, cmd.indexCount, cmd.instanceCount);
                         GraphicsProfiler::RecordProgramDraw(gpuProgram ? gpuProgram->GetHandle() : 0, cmd.indexCount, cmd.instanceCount);
                         renderSystem.DrawIndexed(cmd.indexBuffer);
                     }
