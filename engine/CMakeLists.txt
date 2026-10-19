@@ -15,6 +15,7 @@ set(IMPLOT_SOURCE_DIR "${ENGINE_3RD_PARTY_DIR}/implot" CACHE PATH "Path to ImPlo
 set(XXHASH_SOURCE_DIR "${ENGINE_3RD_PARTY_DIR}/xxHash" CACHE PATH "Path to xxHash source root")
 set(STB_SOURCE_DIR "${ENGINE_3RD_PARTY_DIR}/stb" CACHE PATH "Path to stb_image source root")
 set(REMOTERY_SOURCE_DIR ${ENGINE_3RD_PARTY_DIR}/Remotery/lib)
+set(MIMALLOC_SOURCE_DIR ${ENGINE_3RD_PARTY_DIR}/mimalloc)
 
 add_subdirectory(3rdparty EXCLUDE_FROM_ALL)
 
