@@ -163,8 +163,8 @@ NXS_NAMESPACE
             return !filter || filter(cmd);
         }
 
-        virtual void PopulateSceneView(const SceneNode& scene, std::vector<Ref<SceneView>>& outViews) const;
-        virtual void PrepareRenderCommands(const SceneNode& scene, const SceneView& view, std::vector<RenderCommand>& outCommands) const;
+        virtual void PopulateSceneView(const SceneNode& scene, std::vector<Ref<ISceneView>>& outViews) const;
+        virtual void PrepareRenderCommands(const SceneNode& scene, const ISceneView& view, std::vector<RenderCommand>& outCommands) const;
         virtual bool IsPassFiltered(Ref<const Mesh> mesh) const { return false; }
 
         RenderCommand CreateRenderCommand(Ref<const Mesh> mesh, const glm::mat4 &modelMtx, const glm::mat4& mvpMtx) const;

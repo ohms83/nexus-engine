@@ -20,10 +20,10 @@ NXS_NAMESPACE
      * view frustum. Derived classes should implement specific types of views,
      * such as camera views.
      */
-    class SceneView
+    class ISceneView
     {
     public:
-        virtual ~SceneView() = default;
+        virtual ~ISceneView() = default;
 
         NODISCARD virtual bool IsObjectVisible(const Sphere& boundingSphere, const glm::mat4& modelMtx, const glm::vec3& scale) const = 0;
         NODISCARD virtual const glm::vec3& GetViewPos() const = 0;
@@ -32,7 +32,7 @@ NXS_NAMESPACE
         NODISCARD virtual const glm::mat4& GetViewProjectionMatrix() const = 0;
     };
 
-    class CameraView : public SceneView
+    class CameraView : public ISceneView
     {
     public:
         explicit CameraView(const CameraComponent& camera, const PositionComponent& pos, const OrientationComponent& orient);

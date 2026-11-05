@@ -274,7 +274,7 @@ RenderCommand RenderPass::CreateRenderCommand(Ref<const Mesh> mesh, const glm::m
     return cmd;
 }
 
-void RenderPass::PopulateSceneView(const SceneNode& scene, std::vector<Ref<SceneView>>& outViews) const
+void RenderPass::PopulateSceneView(const SceneNode& scene, std::vector<Ref<ISceneView>>& outViews) const
 {
     rmt_ScopedCPUSample(RenderPass_PopulateSceneView, 0);
     const auto& registry = *scene.GetRegistry();
@@ -287,7 +287,7 @@ void RenderPass::PopulateSceneView(const SceneNode& scene, std::vector<Ref<Scene
     }
 }
 
-void RenderPass::PrepareRenderCommands(const SceneNode &scene, const SceneView &view, std::vector<RenderCommand>& outCommands) const
+void RenderPass::PrepareRenderCommands(const SceneNode &scene, const ISceneView &view, std::vector<RenderCommand>& outCommands) const
 {
     rmt_ScopedCPUSample(RenderPass_PrepareRenderCommands, 0);
     const auto& registry = *scene.GetRegistry();

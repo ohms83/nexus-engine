@@ -199,7 +199,7 @@ void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
         rmt_BeginCPUSampleDynamic(pass->name.c_str(), 0);
         rmt_BeginOpenGLSampleDynamic(pass->name.c_str());
 
-        std::vector<Ref<SceneView>> viewPoints;
+        std::vector<Ref<ISceneView>> viewPoints;
         pass->PopulateSceneView(scene, viewPoints);
 
         for (const auto view : viewPoints)
