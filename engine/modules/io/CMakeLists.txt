@@ -13,6 +13,7 @@ target_include_directories(${TARGET_NAME}
 
 target_link_libraries(${TARGET_NAME}
     PUBLIC nexus-config
+    PUBLIC mimalloc-static
 
     PRIVATE nexus-debug
     PRIVATE SDL3::SDL3

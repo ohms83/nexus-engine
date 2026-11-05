@@ -5,9 +5,9 @@
 #pragma once
 
 #include "nexus/NxsDefine.h"
+#include "nexus/Container.h"
 
 #include <SDL3/SDL.h>
-#include <unordered_map>
 
 #include "KeyInputMap.h"
 #include "sigslot/signal.hpp"
@@ -60,9 +60,9 @@ NXS_NAMESPACE
             glm::vec2 pos;
             glm::vec2 prevPos;
         };
-        std::unordered_map<SDL_Keycode, bool> m_keys;
-        std::unordered_map<int32_t, bool> m_mouseButtons;
-        std::unordered_map<std::string, KeyInputMap> m_axisInputMap;
-        std::unordered_map<std::string, MovieAxisMapValue> m_mouseAxisMappings;
+        HashMap<SDL_Keycode, bool> m_keys;
+        HashMap<int32_t, bool> m_mouseButtons;
+        HashMap<std::string, KeyInputMap> m_axisInputMap;
+        HashMap<std::string, MovieAxisMapValue> m_mouseAxisMappings;
     };
 }

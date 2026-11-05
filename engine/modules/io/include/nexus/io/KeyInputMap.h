@@ -5,16 +5,16 @@
 #pragma once
 
 #include "nexus/NxsDefine.h"
+#include "nexus/Container.h"
 #include "glm/glm.hpp"
 
 #include <SDL3/SDL.h>
-#include <unordered_map>
 
 NXS_NAMESPACE
 {
     struct KeyInputMap
     {
-        std::unordered_map<SDL_Keycode, int32_t> keyAxisMap;
+        HashMap<SDL_Keycode, int32_t> keyAxisMap;
         int32_t keyState = 0;
 
         void OnKeyDown(SDL_Keycode key);
