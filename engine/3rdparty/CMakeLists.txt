@@ -4,6 +4,7 @@ add_subdirectory(SDL)
 
 add_subdirectory(glad EXCLUDE_FROM_ALL)
 add_subdirectory(entt EXCLUDE_FROM_ALL)
+add_subdirectory(mimalloc EXCLUDE_FROM_ALL)
 
 set(RAPIDJSON_BUILD_EXAMPLES OFF CACHE BOOL "Do not build rapidjson examples" FORCE)
 set(RAPIDJSON_BUILD_CXX20 ON CACHE BOOL "Build rapidjson with C++20" FORCE)
@@ -71,6 +72,10 @@ target_include_directories(nexus-3rdparty
     PRIVATE "${XXHASH_SOURCE_DIR}"
     PRIVATE "${STB_SOURCE_DIR}"
     PRIVATE "${REMOTERY_SOURCE_DIR}"
+)
+
+target_link_libraries(nexus-3rdparty
+    PUBLIC mimalloc-static
 )
 
 target_compile_definitions(nexus-3rdparty

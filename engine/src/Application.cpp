@@ -7,6 +7,10 @@
 #include <format>
 #include <iostream>
 
+#ifdef NXS_BUILD_DEBUG
+    #include <mimalloc.h>
+#endif
+
 // Nexus headers
 #include "Engine.h"
 #include "nexus/debug/Logger.h"
@@ -49,6 +53,16 @@ bool ApplicationConfig::LoadConfig(const std::string& filePath)
 
     graphicsConfig.LoadConfig(filePath);
     return true;
+}
+
+Application::Application()
+{
+#ifdef NXS_BUILD_DEBUG
+    // mimalloc integration test
+    void* ptr = mi_malloc(64);
+    NXS_ASSERT(ptr != nullptr && mi_usable_size(ptr) >= 64);
+    mi_free(ptr);
+#endif
 }
 
 Application::~Application()

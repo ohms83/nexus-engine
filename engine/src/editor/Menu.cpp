@@ -12,13 +12,15 @@
 #include "editor/widget/PropertyWindow.h"
 #include "nexus/debug/LogDispatcher.h"
 #include "nexus/serialize/JsonSerializer.h"
+#include "nexus/graphics/RenderDocCapture.h"
+#include "nexus/graphics/GraphicsProfiler.h"
+#include "nexus/task/OneshotTask.h"
 
 #include "Application.h"
 
 #include "DebugMenuItem.inl"
 
 #include "imgui.h"
-#include "nexus/graphics/RenderDocCapture.h"
 
 #include <fstream>
 
@@ -31,6 +33,7 @@ USING_NAMESPACE_NXS;
 #define EDIT_COPY_PASTE 1
 
 #define DEVELOPER_TOOLS 0
+#define PROFILER_TOOLS 1
 
 DEFINE_LOG(Menu);
 
@@ -163,7 +166,7 @@ Menu::Menu(IWidgetOwner& widgetOwner)
         }
     };
 
-    MenuItemList toolsMenuItems = {
+    MenuItemList windowMenuItems = {
         "Window",
         {
             std::make_shared<ConsoleMenuItem> (
@@ -183,13 +186,45 @@ Menu::Menu(IWidgetOwner& widgetOwner)
                 std::make_shared<ProfilerWidget>(),
                 widgetOwner
             ),
+        }
+    };
+
+    MenuItemList toolsMenuItems = {
+        "Tools",
+        {
             std::make_shared<TriggerMenuItem> (
-                DEVELOPER_TOOLS,
-                "Capture Frame (RenderDoc)",
-                "",
+                PROFILER_TOOLS,
+                "GPU Capture",
+                "Capture the next frame for GPU profiling.",
                 "",
                 []() {
-                    nxs::RenderDocCapture::TriggerCaptureNextFrame();
+                    auto profileEnableTask = std::make_shared<OneshotTask>([&]() {
+                        GraphicsProfiler::Enable(true);
+
+                        Engine::Instance().GetTaskScheduler()->ScheduleTask(
+                            std::make_shared<OneshotTask>([&]() {
+                                GraphicsProfiler::Enable(false);
+                            }),
+                            TaskScheduler::UpdatePhase::PostUpdate,
+                            TaskScheduler::TaskQueue::MainThread
+                        );
+                    });
+
+                    auto taskScheduler = Engine::Instance().GetTaskScheduler();
+                    taskScheduler->ScheduleTask(
+                        profileEnableTask,
+                        TaskScheduler::UpdatePhase::PostUpdate,
+                        TaskScheduler::TaskQueue::MainThread
+                    );
+                }
+            ),
+            std::make_shared<TriggerMenuItem> (
+                PROFILER_TOOLS,
+                "Capture Frame (RenderDoc)",
+                "Capture the next frame for GPU profiling using RenderDoc.",
+                "",
+                []() {
+                    RenderDocCapture::TriggerCaptureNextFrame();
                 }
             ),
         }
@@ -198,6 +233,7 @@ Menu::Menu(IWidgetOwner& widgetOwner)
     m_menuItems.emplace_back(fileMenu);
     m_menuItems.emplace_back(editMenu);
     m_menuItems.emplace_back(toolsMenuItems);
+    m_menuItems.emplace_back(windowMenuItems);
     m_menuItems.emplace_back(s_debugMenuItems);
 }
 

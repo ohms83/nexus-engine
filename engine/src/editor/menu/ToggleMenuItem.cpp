@@ -23,3 +23,12 @@ void ToggleMenuItem::OnSelected(const bool is_selected)
 
     Super::OnSelected(is_selected);
 }
+
+const std::string& ToggleMenuItem::GetName() const
+{
+    if (m_selected && !m_toggledName.empty())
+    {
+        return m_toggledName;
+    }
+    return m_name;
+}

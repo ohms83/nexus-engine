@@ -19,13 +19,13 @@ GpuProgram& GpuProgram::BeginCompile()
 
 GpuProgram& GpuProgram::AddSource(const std::string& source, Type GpuProgramType)
 {
-    assert(m_compiling);
+    NXS_ASSERT(m_compiling);
     return *this;
 }
 
 void GpuProgram::Compile()
 {
-    assert(m_compiling);
+    NXS_ASSERT(m_compiling);
     m_compiling = false;
 }
 

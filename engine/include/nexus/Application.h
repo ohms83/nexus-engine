@@ -48,7 +48,7 @@ NXS_NAMESPACE
     class Application
     {
     public:
-        Application() = default;
+        Application();
         virtual ~Application();
 
         bool Init(const ApplicationConfig& info);

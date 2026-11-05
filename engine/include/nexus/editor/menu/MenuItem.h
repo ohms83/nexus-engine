@@ -27,10 +27,10 @@ NXS_NAMESPACE
         virtual void OnSelected(bool is_selected) { onSelectedEvent(is_selected, m_name); }
         virtual bool IsSelected() const = 0;
 
-        uint32_t GetGroup() const { return m_group; }
-        const std::string& GetName() const { return m_name; }
-        const std::string& GetDescription() const { return m_description; }
-        const std::string& GetShortcut() const { return m_shortcut; }
+        virtual uint32_t GetGroup() const { return m_group; }
+        virtual const std::string& GetName() const { return m_name; }
+        virtual const std::string& GetDescription() const { return m_description; }
+        virtual const std::string& GetShortcut() const { return m_shortcut; }
 
         sigslot::signal<bool, const std::string_view> onSelectedEvent;
 
