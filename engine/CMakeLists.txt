@@ -85,6 +85,7 @@ target_link_libraries(nexus-engine
     PUBLIC nexus-editor-module
     PUBLIC nexus-math
     PUBLIC nexus-core
+    PUBLIC nexus-container
     PUBLIC nexus-io
     PUBLIC nexus-geom
     PUBLIC nexus-graphics

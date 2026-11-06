@@ -5,7 +5,7 @@
 #pragma once
 
 #include "nexus/NxsDefine.h"
-#include "nexus/Container.h"
+#include "nexus/container/HashMap.h"
 
 #include <SDL3/SDL.h>
 

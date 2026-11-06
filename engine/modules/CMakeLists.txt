@@ -1,3 +1,4 @@
+add_subdirectory(container)
 add_subdirectory(core)
 add_subdirectory(ecs)
 add_subdirectory(debug)
