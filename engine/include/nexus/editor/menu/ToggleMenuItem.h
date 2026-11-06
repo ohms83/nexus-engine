@@ -7,7 +7,7 @@ NXS_NAMESPACE
     class ToggleMenuItem : public MenuItem
     {
     public:
-        using Super = MenuItem;
+        using Base = MenuItem;
         using HandleFunction = std::function<void(bool)>;
 
         ToggleMenuItem();

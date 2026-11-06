@@ -8,7 +8,7 @@ NXS_NAMESPACE
     class ConsoleMenuItem : public WidgetMenuItem
     {
     public:
-        using Super = WidgetMenuItem;
+        using Base = WidgetMenuItem;
 
         ConsoleMenuItem(
             uint32_t group,

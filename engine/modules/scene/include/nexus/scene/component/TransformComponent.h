@@ -12,7 +12,7 @@ NXS_NAMESPACE
 {
     struct PositionComponent : public IComponent
     {
-        using Super = IComponent;
+        using Base = IComponent;
 
         IMPLEMENT_COMPONENT(PositionComponent);
 
@@ -24,14 +24,14 @@ NXS_NAMESPACE
         
         VariantData Serialize() const override
         {
-            auto data = Super::Serialize();
+            auto data = Base::Serialize();
             data["position"] = value;
             return data;
         }
 
         MAYBE_UNUSED bool Deserialize(const VariantData& data) override
         {
-            if (!Super::Deserialize(data)) return false;
+            if (!Base::Deserialize(data)) return false;
             value = data["position"].GetVec3();
             return true;
         }
@@ -55,7 +55,7 @@ NXS_NAMESPACE
      */
     struct OrientationComponent : public IComponent
     {
-        using Super = IComponent;
+        using Base = IComponent;
 
         IMPLEMENT_COMPONENT(OrientationComponent);
 
@@ -70,14 +70,14 @@ NXS_NAMESPACE
 
         VariantData Serialize() const override
         {
-            auto data = Super::Serialize();
+            auto data = Base::Serialize();
             data["orient"] = euler;
             return data;
         }
 
         MAYBE_UNUSED bool Deserialize(const VariantData& data) override
         {
-            if (!Super::Deserialize(data)) return false;
+            if (!Base::Deserialize(data)) return false;
             euler = data["orient"].GetVec3();
             quat = glm::quat(glm::radians(euler));
             return true;
@@ -158,7 +158,7 @@ NXS_NAMESPACE
 
     struct ScaleComponent : public IComponent
     {
-        using Super = IComponent;
+        using Base = IComponent;
 
         IMPLEMENT_COMPONENT(ScaleComponent);
 
@@ -170,14 +170,14 @@ NXS_NAMESPACE
 
         VariantData Serialize() const override
         {
-            auto data = Super::Serialize();
+            auto data = Base::Serialize();
             data["scale"] = value;
             return data;
         }
 
         MAYBE_UNUSED bool Deserialize(const VariantData& data) override
         {
-            if (!Super::Deserialize(data)) return false;
+            if (!Base::Deserialize(data)) return false;
             value = data["scale"].GetVec3();
             return true;
         }
@@ -187,7 +187,7 @@ NXS_NAMESPACE
 
     struct MoveComponent : public IComponent
     {
-        using Super = IComponent;
+        using Base = IComponent;
 
         IMPLEMENT_COMPONENT(MoveComponent);
 
@@ -203,7 +203,7 @@ NXS_NAMESPACE
 
         VariantData Serialize() const override
         {
-            auto data = Super::Serialize();
+            auto data = Base::Serialize();
             data["direction"] = direction;
             data["speed"] = speed;
             return data;
@@ -211,7 +211,7 @@ NXS_NAMESPACE
 
         MAYBE_UNUSED bool Deserialize(const VariantData& data) override
         {
-            if (!Super::Deserialize(data)) return false;
+            if (!Base::Deserialize(data)) return false;
             direction = data["direction"].GetVec3();
             speed = data["speed"].GetFloat();
             return true;
@@ -223,7 +223,7 @@ NXS_NAMESPACE
 
     struct TurningComponent : public IComponent
     {
-        using Super = IComponent;
+        using Base = IComponent;
 
         IMPLEMENT_COMPONENT(TurningComponent);
         
@@ -239,7 +239,7 @@ NXS_NAMESPACE
 
         VariantData Serialize() const override
         {
-            auto data = Super::Serialize();
+            auto data = Base::Serialize();
             data["axis"] = axis;
             data["degree"] = degree;
             return data;
@@ -247,7 +247,7 @@ NXS_NAMESPACE
 
         MAYBE_UNUSED bool Deserialize(const VariantData& data) override
         {
-            if (!Super::Deserialize(data)) return false;
+            if (!Base::Deserialize(data)) return false;
             axis = data["axis"].GetVec3();
             degree = data["degree"].GetFloat();
             return true;

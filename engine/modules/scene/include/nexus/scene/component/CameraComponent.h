@@ -10,7 +10,7 @@ NXS_NAMESPACE
 
     struct CameraComponent : public IComponent
     {
-        using Super = IComponent;
+        using Base = IComponent;
 
         IMPLEMENT_COMPONENT(CameraComponent);
 
@@ -29,7 +29,7 @@ NXS_NAMESPACE
 
         VariantData Serialize() const override
         {
-            auto data = Super::Serialize();
+            auto data = Base::Serialize();
             data["projection"] = INT_CAST(projectionType);
             data["fov"] = fov;
             data["near"] = nearZ;
@@ -41,7 +41,7 @@ NXS_NAMESPACE
 
         bool Deserialize(const VariantData& data) override
         {
-            if (!Super::Deserialize(data)) return false;
+            if (!Base::Deserialize(data)) return false;
             projectionType = CAST<ProjectionType>(data["projection"].GetInt());
             fov = data["fov"].GetFloat();
             nearZ = data["near"].GetFloat();

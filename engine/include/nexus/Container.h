@@ -13,12 +13,12 @@ NXS_NAMESPACE
     class Array : public std::vector<T, mi_stl_allocator<T>>
     {
     public:
-        using Super = std::vector<T, mi_stl_allocator<T>>;
-        using Super::Super;
+        using Base = std::vector<T, mi_stl_allocator<T>>;
+        using Base::Base;
 
         Array() = default;
         Array(std::initializer_list<T> init)
-            : Super(init, mi_stl_allocator<T>())
+            : Base(init, mi_stl_allocator<T>())
         {
         }
     };
@@ -27,12 +27,12 @@ NXS_NAMESPACE
     class Dict : public std::map<TKey, TValue, std::less<TKey>, mi_stl_allocator<std::pair<const TKey, TValue>>>
     {
     public:
-        using Super = std::map<TKey, TValue, std::less<TKey>, mi_stl_allocator<std::pair<const TKey, TValue>>>;
-        using Super::Super;
+        using Base = std::map<TKey, TValue, std::less<TKey>, mi_stl_allocator<std::pair<const TKey, TValue>>>;
+        using Base::Base;
 
         Dict() = default;
-        Dict(std::initializer_list<typename Super::value_type> init)
-            : Super(init)
+        Dict(std::initializer_list<typename Base::value_type> init)
+            : Base(init)
         {
         }
     };
@@ -41,12 +41,12 @@ NXS_NAMESPACE
     class HashMap : public std::unordered_map<TKey, TValue, std::hash<TKey>, std::equal_to<TKey>, mi_stl_allocator<std::pair<const TKey, TValue>>>
     {
     public:
-        using Super = std::unordered_map<TKey, TValue, std::hash<TKey>, std::equal_to<TKey>, mi_stl_allocator<std::pair<const TKey, TValue>>>;
-        using Super::Super;
+        using Base = std::unordered_map<TKey, TValue, std::hash<TKey>, std::equal_to<TKey>, mi_stl_allocator<std::pair<const TKey, TValue>>>;
+        using Base::Base;
 
         HashMap() = default;
-        HashMap(std::initializer_list<typename Super::value_type> init)
-            : Super(init)
+        HashMap(std::initializer_list<typename Base::value_type> init)
+            : Base(init)
         {
         }
     };

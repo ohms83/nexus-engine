@@ -9,7 +9,7 @@ NXS_NAMESPACE
     class MeshComponent : public IComponent
     {
     public:
-        using Super = IComponent;
+        using Base = IComponent;
 
         IMPLEMENT_COMPONENT(MeshComponent);
 
@@ -22,7 +22,7 @@ NXS_NAMESPACE
 
         VariantData Serialize() const override
         {
-            auto data = Super::Serialize();
+            auto data = Base::Serialize();
             data["meshPath"] = meshPath;
             data["showBoundingBox"] = showBoundingBox;
             data["showBoundingSphere"] = showBoundingSphere;
@@ -31,7 +31,7 @@ NXS_NAMESPACE
 
         MAYBE_UNUSED bool Deserialize(const VariantData& data) override
         {
-            if (!Super::Deserialize(data)) return false;
+            if (!Base::Deserialize(data)) return false;
             meshPath = data["meshPath"].GetString();
             showBoundingBox = data["showBoundingBox"].GetBool();
             showBoundingSphere = data["showBoundingSphere"].GetBool();
@@ -65,13 +65,13 @@ NXS_NAMESPACE
     class PlaneMeshComponent : public MeshComponent
     {
     public:
-        using Super = MeshComponent;
+        using Base = MeshComponent;
 
         IMPLEMENT_COMPONENT(PlaneMeshComponent);
 
         VariantData Serialize() const override
         {
-            auto data = Super::Serialize();
+            auto data = Base::Serialize();
             data["width"] = width;
             data["height"] = height;
             return data;
@@ -79,7 +79,7 @@ NXS_NAMESPACE
 
         MAYBE_UNUSED bool Deserialize(const VariantData& data) override
         {
-            if (!Super::Deserialize(data)) return false;
+            if (!Base::Deserialize(data)) return false;
             width = data["width"].GetFloat();
             height = data["height"].GetFloat();
             return true;
@@ -100,7 +100,7 @@ NXS_NAMESPACE
     class BoxMeshComponent : public MeshComponent
     {
     public:
-        using Super = MeshComponent;
+        using Base = MeshComponent;
 
         IMPLEMENT_COMPONENT(BoxMeshComponent);
     };

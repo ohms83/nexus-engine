@@ -11,7 +11,7 @@ NXS_NAMESPACE
     class SceneFileMenuItem : public FileMenuItem
     {
     public:
-        using Super = FileMenuItem;
+        using Base = FileMenuItem;
 
         SceneFileMenuItem(
             const SceneManager& sceneManager,

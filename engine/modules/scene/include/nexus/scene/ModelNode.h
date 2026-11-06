@@ -9,7 +9,7 @@ NXS_NAMESPACE
     class ModelNode : public SceneNode3D
     {
     public:
-        using Super = SceneNode3D;
+        using Base = SceneNode3D;
 
         ModelNode(Ref<entt::registry> registry, std::string name = "");
         virtual ~ModelNode() override = default;

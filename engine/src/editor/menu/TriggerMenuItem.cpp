@@ -13,7 +13,7 @@ TriggerMenuItem::TriggerMenuItem(
     const std::string& desc,
     const std::string& shortcut,
     HandleFunction handler)
-    : Super(group, name, desc, shortcut)
+    : Base(group, name, desc, shortcut)
     , m_handler(handler)
 {
     
@@ -22,5 +22,5 @@ TriggerMenuItem::TriggerMenuItem(
 void TriggerMenuItem::OnSelected(bool is_selected)
 {
     m_handler();
-    Super::OnSelected(is_selected);
+    Base::OnSelected(is_selected);
 }

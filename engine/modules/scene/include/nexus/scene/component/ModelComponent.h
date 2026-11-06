@@ -12,7 +12,7 @@ NXS_NAMESPACE
     class ModelComponent : public IComponent
     {
     public:
-        using Super = IComponent;
+        using Base = IComponent;
 
         IMPLEMENT_COMPONENT(ModelComponent);
         
@@ -28,7 +28,7 @@ NXS_NAMESPACE
 
         VariantData Serialize() const override
         {
-            auto data = Super::Serialize();
+            auto data = Base::Serialize();
             data["modelPath"] = modelPath;
             data["showBoundingBox"] = showBoundingBox;
             data["showBoundingSphere"] = showBoundingSphere;
@@ -37,7 +37,7 @@ NXS_NAMESPACE
 
         MAYBE_UNUSED bool Deserialize(const VariantData& data) override
         {
-            if (!Super::Deserialize(data)) return false;
+            if (!Base::Deserialize(data)) return false;
             modelPath = data["modelPath"].GetString();
             showBoundingBox = data["showBoundingBox"].GetBool();
             showBoundingSphere = data["showBoundingSphere"].GetBool();

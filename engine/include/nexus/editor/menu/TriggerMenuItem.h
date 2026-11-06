@@ -12,7 +12,7 @@ NXS_NAMESPACE
     class TriggerMenuItem : public MenuItem
     {
     public:
-        using Super = MenuItem;
+        using Base = MenuItem;
         using HandleFunction = std::function<void()>;
 
         TriggerMenuItem();

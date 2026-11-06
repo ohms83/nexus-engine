@@ -12,7 +12,7 @@ NXS_NAMESPACE
 {
     struct AmbientLightComponent : public IComponent
     {
-        using Super = IComponent;
+        using Base = IComponent;
 
         IMPLEMENT_COMPONENT(AmbientLightComponent);
 
@@ -24,14 +24,14 @@ NXS_NAMESPACE
 
         VariantData Serialize() const override
         {
-            auto data = Super::Serialize();
+            auto data = Base::Serialize();
             data["color"] = color;
             return data;
         }
 
         MAYBE_UNUSED bool Deserialize(const VariantData& data) override
         {
-            if (!Super::Deserialize(data)) return false;
+            if (!Base::Deserialize(data)) return false;
             color = CAST<Color3F>(data["color"].GetVec3());
             return true;
         }
@@ -41,7 +41,7 @@ NXS_NAMESPACE
 
     struct LightProperties : public IComponent
     {
-        using Super = IComponent;
+        using Base = IComponent;
 
         IMPLEMENT_COMPONENT(LightProperties);
 
@@ -55,7 +55,7 @@ NXS_NAMESPACE
 
         VariantData Serialize() const override
         {
-            auto data = Super::Serialize();
+            auto data = Base::Serialize();
             data["color"] = color;
             data["diffuseIntensity"] = diffuseIntensity;
             data["specularIntensity"] = specularIntensity;
@@ -65,7 +65,7 @@ NXS_NAMESPACE
 
         MAYBE_UNUSED bool Deserialize(const VariantData& data) override
         {
-            if (!Super::Deserialize(data)) return false;
+            if (!Base::Deserialize(data)) return false;
             color = CAST<Color3F>(data["color"].GetVec3());
             diffuseIntensity = data["diffuseIntensity"].GetFloat();
             specularIntensity = data["specularIntensity"].GetFloat();
@@ -91,7 +91,7 @@ NXS_NAMESPACE
 
     struct DirectLightComponent : public IComponent
     {
-        using Super = IComponent;
+        using Base = IComponent;
 
         IMPLEMENT_COMPONENT(DirectLightComponent);
 
@@ -105,7 +105,7 @@ NXS_NAMESPACE
 
         VariantData Serialize() const override
         {
-            auto data = Super::Serialize();
+            auto data = Base::Serialize();
             data["properties"] = properties.Serialize();
             data["direction"] = direction;
             return data;
@@ -113,7 +113,7 @@ NXS_NAMESPACE
 
         MAYBE_UNUSED bool Deserialize(const VariantData& data) override
         {
-            if (!Super::Deserialize(data)) return false;
+            if (!Base::Deserialize(data)) return false;
             direction = data["direction"].GetVec3();
             properties.Deserialize(data["properties"]);
             return true;
@@ -125,7 +125,7 @@ NXS_NAMESPACE
 
     struct PointLightComponent : public IComponent
     {
-        using Super = IComponent;
+        using Base = IComponent;
 
         IMPLEMENT_COMPONENT(PointLightComponent);
 
@@ -142,7 +142,7 @@ NXS_NAMESPACE
         VariantData Serialize() const override
         {
             
-            auto data = Super::Serialize();
+            auto data = Base::Serialize();
             data["properties"] = properties.Serialize();
             data["constant"] = constant;
             data["linear"] = linear;
@@ -152,7 +152,7 @@ NXS_NAMESPACE
 
         MAYBE_UNUSED bool Deserialize(const VariantData& data) override
         {
-            if (!Super::Deserialize(data)) return false;
+            if (!Base::Deserialize(data)) return false;
             constant = data["constant"].GetFloat();
             linear = data["linear"].GetFloat();
             quadratic = data["quadratic"].GetFloat();

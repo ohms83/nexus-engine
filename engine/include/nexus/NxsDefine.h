@@ -29,7 +29,7 @@ constexpr char const* NXS_BUILD_CFG = "Unknown";
 #define NXS_NAMESPACE namespace nxs
 #define USING_NAMESPACE_NXS using namespace nxs
 
-#define NXS_INHERIT(Parent) private: using Super = Parent;
+#define NXS_INHERIT(Parent) private: using Base = Parent;
 
 //! A shorthand definition for static_cast<>
 #define CAST static_cast

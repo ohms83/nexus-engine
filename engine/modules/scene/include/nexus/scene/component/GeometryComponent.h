@@ -8,7 +8,7 @@ NXS_NAMESPACE
 {
     struct BoxComponent : IComponent
     {
-        using Super = IComponent;
+        using Base = IComponent;
 
         IMPLEMENT_COMPONENT(BoxComponent);
 
@@ -22,7 +22,7 @@ NXS_NAMESPACE
 
         VariantData Serialize() const override
         {
-            auto data = Super::Serialize();
+            auto data = Base::Serialize();
             data["center"] = box.center;
             data["extent"] = box.extent;
             data["debugDraw"] = debugDraw;
@@ -31,7 +31,7 @@ NXS_NAMESPACE
 
         MAYBE_UNUSED bool Deserialize(const VariantData& data) override
         {
-            if (!Super::Deserialize(data)) return false;
+            if (!Base::Deserialize(data)) return false;
             box.center = data["center"].GetVec3();
             box.extent = data["extent"].GetVec3();
             debugDraw = data["debugDraw"].GetBool();
@@ -44,7 +44,7 @@ NXS_NAMESPACE
 
     struct SphereComponent : IComponent
     {
-        using Super = IComponent;
+        using Base = IComponent;
 
         IMPLEMENT_COMPONENT(SphereComponent);
 
@@ -58,7 +58,7 @@ NXS_NAMESPACE
 
         VariantData Serialize() const override
         {
-            auto data = Super::Serialize();
+            auto data = Base::Serialize();
             data["center"] = sphere.center;
             data["radius"] = sphere.radius;
             return data;
@@ -66,7 +66,7 @@ NXS_NAMESPACE
 
         MAYBE_UNUSED bool Deserialize(const VariantData& data) override
         {
-            if (!Super::Deserialize(data)) return false;
+            if (!Base::Deserialize(data)) return false;
             sphere.center = data["center"].GetVec3();
             sphere.radius = data["radius"].GetFloat();
             return true;

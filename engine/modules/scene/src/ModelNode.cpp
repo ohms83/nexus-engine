@@ -28,7 +28,7 @@ void ModelNode::SetModel(Ref<Model> model)
 
 void ModelNode::Resolve(ResourceManager& resourceManager, const RenderingInterface& renderingInterface)
 {
-    Super::Resolve(resourceManager, renderingInterface);
+    Base::Resolve(resourceManager, renderingInterface);
 
     m_model = resourceManager.Get<Model>(GetComponent<ModelComponent>()->modelPath);
     SetModel(m_model);

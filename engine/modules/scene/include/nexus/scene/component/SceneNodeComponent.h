@@ -11,7 +11,7 @@ NXS_NAMESPACE
 {
     struct SceneNodeComponent : public IComponent
     {
-        using Super = IComponent;
+        using Base = IComponent;
 
         IMPLEMENT_COMPONENT(SceneNodeComponent);
 
@@ -27,7 +27,7 @@ NXS_NAMESPACE
 
         VariantData Serialize() const override
         {
-            VariantData data = Super::Serialize();
+            VariantData data = Base::Serialize();
             data["id"] = INT64_CAST(id);
             data["name"] = name;
             data["active"] = active;
@@ -36,7 +36,7 @@ NXS_NAMESPACE
 
         MAYBE_UNUSED bool Deserialize(const VariantData& data) override
         {
-            if (!Super::Deserialize(data)) return false;
+            if (!Base::Deserialize(data)) return false;
 
             id = CAST<Identifier>(data["id"].GetInt());
             name = data["name"].GetString();

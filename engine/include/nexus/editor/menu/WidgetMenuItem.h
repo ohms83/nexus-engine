@@ -15,7 +15,7 @@ NXS_NAMESPACE
     class WidgetMenuItem : public MenuItem
     {
     public:
-        using Super = MenuItem;
+        using Base = MenuItem;
 
         WidgetMenuItem(
             uint32_t group,

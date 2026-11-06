@@ -15,7 +15,7 @@ SceneFileMenuItem::SceneFileMenuItem(
     const std::string& desc,
     const std::string& shortcut,
     const FileMenuContext& context)
-    : Super(group, name, desc, shortcut, context)
+    : Base(group, name, desc, shortcut, context)
     , m_sceneManager(sceneManager)
     , m_serializer(serializer)
 {

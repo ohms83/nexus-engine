@@ -20,7 +20,7 @@ NXS_NAMESPACE
     class FileMenuItem : public TriggerMenuItem
     {
     public:
-        using Super = TriggerMenuItem;
+        using Base = TriggerMenuItem;
 
         FileMenuItem(
             uint32_t group,

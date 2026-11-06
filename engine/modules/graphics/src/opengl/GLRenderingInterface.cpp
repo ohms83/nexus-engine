@@ -273,7 +273,7 @@ void GLRenderingInterface::SetLineWidth(float width)
 
 void GLRenderingInterface::SetPolygonMode(PolygonMode mode)
 {
-    Super::SetPolygonMode(mode);
+    Base::SetPolygonMode(mode);
 
     const auto gl_mode = GL::NxsPolygonModeToGL(mode);
     CALL_GL_FUNC(glPolygonMode(GL_FRONT_AND_BACK, gl_mode));
@@ -281,7 +281,7 @@ void GLRenderingInterface::SetPolygonMode(PolygonMode mode)
 
 void GLRenderingInterface::SetCullMode(PolygonFacing mode)
 {
-    Super::SetCullMode(mode);
+    Base::SetCullMode(mode);
 
     if (mode == PolygonFacing::None)
     {
@@ -297,7 +297,7 @@ void GLRenderingInterface::SetCullMode(PolygonFacing mode)
 
 void GLRenderingInterface::SetFrontFace(FrontFace face)
 {
-    Super::SetFrontFace(face);
+    Base::SetFrontFace(face);
     const auto gl_face = GL::NxsFrontFaceToGL(face);
     CALL_GL_FUNC(glFrontFace(gl_face));
 }
