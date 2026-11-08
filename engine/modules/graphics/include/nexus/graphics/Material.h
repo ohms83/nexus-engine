@@ -50,16 +50,25 @@ NXS_NAMESPACE
         LightMap,
     };
 
+    enum class MaterialShadingModel
+    {
+        BlinnPhong,
+        MetallicRoughness,
+    };
+
     class Material final : public Resource, public ISerializeable
     {
     public:
         explicit Material(std::string path, uint32_t resourceId);
 
+        MaterialShadingModel shadingModel = MaterialShadingModel::BlinnPhong;
         Color3F ambient {0.2f, 0.2f, 0.2f};
         Color3F diffuse {0.8f, 0.8f, 0.8f};
         Color3F specular {Color3F::Black};
         Color3F emissive {Color3F::Black};
         float shininess = 0;
+        float metalness = 0.0f;
+        float roughness = 1.0f;
         bool wireframe = false;
         bool cull = false;
         bool depthTest = false;

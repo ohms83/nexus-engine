@@ -68,3 +68,29 @@ TEST_F(MaterialTest, SerializeDeserialize)
     m2.Resolve(resourceManager);
     // Since we did not add material to material manager, resolve will not populate m2 textures via material manager here.
 }
+
+TEST_F(MaterialTest, MetallicRoughnessPropertiesSerialize)
+{
+    Material material("pbr", 1);
+    material.shadingModel = MaterialShadingModel::MetallicRoughness;
+    material.metalness = 0.65f;
+    material.roughness = 0.3f;
+
+    VariantData serialized = material.Serialize();
+    Material restored("restored", 2);
+    ASSERT_TRUE(restored.Deserialize(serialized));
+
+    EXPECT_EQ(restored.shadingModel, MaterialShadingModel::MetallicRoughness);
+    EXPECT_FLOAT_EQ(restored.metalness, 0.65f);
+    EXPECT_FLOAT_EQ(restored.roughness, 0.3f);
+}
+
+TEST_F(MaterialTest, MetallicOrRoughnessTextureEnablesPbr)
+{
+    Material material("pbr", 1);
+    auto texture = std::make_shared<Texture>("assets/metalness.png", 10);
+
+    ASSERT_GE(material.AddTexture(texture, TextureType::Metalness), 0);
+
+    EXPECT_EQ(material.shadingModel, MaterialShadingModel::MetallicRoughness);
+}

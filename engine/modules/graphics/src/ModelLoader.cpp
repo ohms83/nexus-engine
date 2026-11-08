@@ -387,6 +387,16 @@ void ModelLoader::ProcessMaterial(const Ref<Mesh>& newMesh, const aiMesh* mesh, 
     READ_COLOR_PROPERTY(AI_MATKEY_COLOR_SPECULAR, specular);
     READ_COLOR_PROPERTY(AI_MATKEY_COLOR_EMISSIVE, emissive);
     READ_FLOAT_PROPERTY(AI_MATKEY_SHININESS, shininess);
+    if (float value; material->Get(AI_MATKEY_METALLIC_FACTOR, value) == AI_SUCCESS)
+    {
+        newMat->metalness = value;
+        newMat->shadingModel = MaterialShadingModel::MetallicRoughness;
+    }
+    if (float value; material->Get(AI_MATKEY_ROUGHNESS_FACTOR, value) == AI_SUCCESS)
+    {
+        newMat->roughness = value;
+        newMat->shadingModel = MaterialShadingModel::MetallicRoughness;
+    }
     READ_ENUM_PROPERTY(AI_MATKEY_BLEND_FUNC, blendMode, BlendMode);
     READ_BOOL_PROPERTY(AI_MATKEY_TWOSIDED, cull);
     READ_BOOL_PROPERTY(AI_MATKEY_ENABLE_WIREFRAME, wireframe);

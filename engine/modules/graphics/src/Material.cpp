@@ -19,6 +19,7 @@ static constexpr auto default_shader = "shaders/glsl/default_forward_lighting.sh
 static constexpr auto textured_shader = "shaders/glsl/textured_forward_lighting.shader";
 static constexpr auto normalmap_shader = "shaders/glsl/normalmap_forward_lighting.shader";
 static constexpr auto textured_alpha_shader = "shaders/glsl/textured_alpha_forward_lighting.shader";
+static constexpr auto pbr_shader = "shaders/glsl/pbr_forward_lighting.shader";
 
 static const std::map<TextureType, std::string> s_textureTypeUniformNames = {
     {TextureType::Diffuse, "_DiffuseMap"},
@@ -60,6 +61,11 @@ int32_t Material::AddTexture(Ref<Texture> texture, TextureType type)
     info.uniformName = itr->second;
     info.path = texture ? texture->GetPath() : std::string();
     m_textures.push_back(std::move(info));
+
+    if (type == TextureType::Metalness || type == TextureType::Roughness)
+    {
+        shadingModel = MaterialShadingModel::MetallicRoughness;
+    }
 
     if (type == TextureType::Diffuse && texture->GetDescription().format == PixelFormat::RGBA)
     {
@@ -120,6 +126,22 @@ Ref<GpuProgram> Material::Use()
     gpuProgram->SetUniformVector("_Material.specular", specular);
     gpuProgram->SetUniformVector("_Material.emissive", emissive);
     gpuProgram->SetUniformFloat("_Material.shininess", shininess);
+    gpuProgram->SetUniformFloat("_Material.metalness", metalness);
+    gpuProgram->SetUniformFloat("_Material.roughness", roughness);
+
+    const auto hasResolvedTexture = [this](const TextureType type)
+    {
+        return std::ranges::any_of(m_textures, [type](const TextureInfo& textureInfo)
+        {
+            return textureInfo.type == type && textureInfo.texture != nullptr;
+        });
+    };
+    gpuProgram->SetUniformInt("_HasDiffuseMap", hasResolvedTexture(TextureType::Diffuse));
+    gpuProgram->SetUniformInt("_HasNormalMap", hasResolvedTexture(TextureType::Normal));
+    gpuProgram->SetUniformInt("_HasMetalnessMap", hasResolvedTexture(TextureType::Metalness));
+    gpuProgram->SetUniformInt("_HasRoughnessMap", hasResolvedTexture(TextureType::Roughness));
+    gpuProgram->SetUniformInt("_HasOcclusionMap", hasResolvedTexture(TextureType::Ambient));
+    gpuProgram->SetUniformInt("_HasEmissiveMap", hasResolvedTexture(TextureType::Emissive));
 
     uint32_t slot = 0;
     for (const auto& textureInfo : m_textures)
@@ -137,11 +159,14 @@ Ref<GpuProgram> Material::Use()
 VariantData Material::Serialize() const
 {
     VariantData::Map data;
+    data["shadingModel"] = INT_CAST(shadingModel);
     data["ambient"] = VariantData::Array{ ambient.r, ambient.g, ambient.b };
     data["diffuse"] = VariantData::Array{ diffuse.r, diffuse.g, diffuse.b };
     data["specular"] = VariantData::Array{ specular.r, specular.g, specular.b };
     data["emissive"] = VariantData::Array{ emissive.r, emissive.g, emissive.b };
     data["shininess"] = DOUBLE_CAST(shininess);
+    data["metalness"] = DOUBLE_CAST(metalness);
+    data["roughness"] = DOUBLE_CAST(roughness);
     data["wireframe"] = wireframe;
     data["cull"] = cull;
     data["depthTest"] = depthTest;
@@ -166,6 +191,7 @@ VariantData Material::Serialize() const
 
 bool Material::Deserialize(const VariantData& data)
 {
+    if (data.HasKey("shadingModel")) shadingModel = CAST<MaterialShadingModel>(data["shadingModel"].GetInt());
     if (data.HasKey("ambient") && data["ambient"].IsArray())
     {
         const auto& arr = data["ambient"].GetArray();
@@ -195,6 +221,8 @@ bool Material::Deserialize(const VariantData& data)
         emissive.b = FLOAT_CAST(arr.at(2).GetDouble());
     }
     if (data.HasKey("shininess")) shininess = FLOAT_CAST(data["shininess"].GetDouble());
+    if (data.HasKey("metalness")) metalness = FLOAT_CAST(data["metalness"].GetDouble());
+    if (data.HasKey("roughness")) roughness = FLOAT_CAST(data["roughness"].GetDouble());
     if (data.HasKey("wireframe")) wireframe = data["wireframe"].GetBool();
     if (data.HasKey("cull")) cull = data["cull"].GetBool();
     if (data.HasKey("depthTest")) depthTest = data["depthTest"].GetBool();
@@ -274,7 +302,11 @@ void Material::CreateDefaultShader(ResourceManager& resourceManager)
     std::string veretxShaderSource, fragmentShaderSource, geomtryShaderSource;
     std::string shaderPath;
 
-    if (HasTextureType(TextureType::Normal))
+    if (shadingModel == MaterialShadingModel::MetallicRoughness)
+    {
+        shaderPath = Path::GetEngineAssetPath(pbr_shader);
+    }
+    else if (HasTextureType(TextureType::Normal))
     {
         shaderPath = Path::GetEngineAssetPath(normalmap_shader);
     }

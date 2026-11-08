@@ -260,6 +260,19 @@ TEST_F(ShaderGeneratorTest, BasicVertexFragmentGeneration) {
     EXPECT_EQ(gs, "");
 }
 
+TEST_F(ShaderGeneratorTest, GeneratesPbrForwardLightingShader) {
+    const auto path = (std::filesystem::path(NXS_ENGINE_ASSETS_DIR) /
+        "shaders/glsl/pbr_forward_lighting.shader").string();
+
+    std::string vs, fs, gs;
+    ASSERT_TRUE(shaderGen.GenerateShaderSource(path, vs, fs, gs));
+
+    EXPECT_NE(vs.find("GetTBNMatrix"), std::string::npos);
+    EXPECT_NE(fs.find("DistributionGGX"), std::string::npos);
+    EXPECT_NE(fs.find("EvaluateLight"), std::string::npos);
+    EXPECT_EQ(gs, "");
+}
+
 TEST_F(ShaderGeneratorTest, HandlesInvalidIncludePath) {
     CreateFile("main.shader", 
         "@glsl_version 330\n"
