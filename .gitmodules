@@ -19,3 +19,6 @@
 [submodule "engine/3rdparty/Remotery"]
 	path = engine/3rdparty/Remotery
 	url = https://github.com/Celtoys/Remotery.git
+[submodule "engine/3rdparty/SDL"]
+	path = engine/3rdparty/SDL
+	url = https://github.com/libsdl-org/SDL.git
