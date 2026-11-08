@@ -11,6 +11,10 @@ NXS_NAMESPACE
      */
     struct PipelineState
     {
+        //! Clear color for the framebuffer.
+        Color4F clearColor = Color4F::Grey;
+        //! Clear depth value for the depth buffer.
+        float clearDepth = 1.0f;
         //! Whether depth testing is enabled.
         bool depthTest = false;
         //! Whether depth writing is enabled.

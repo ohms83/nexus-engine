@@ -37,7 +37,10 @@ RenderSystem::~RenderSystem()
 void RenderSystem::ClearScreen() const
 {
     rmt_ScopedCPUSample(RenderSystem_ClearScreen, 0);
-    m_renderingInterface->ClearBuffer(m_clearColor, m_clearDepth);
+    m_renderingInterface->ClearBuffer(
+        m_cachedPipelineState.clearColor,
+        m_cachedPipelineState.clearDepth
+    );
 }
 
 void RenderSystem::BeginDraw()
@@ -97,62 +100,55 @@ void RenderSystem::OnResize(const uint32_t pixel_w, const uint32_t pixel_h)
 
 void RenderSystem::ApplyPipelineState(const PipelineState& state)
 {
-    if (state.depthTest)
+    const DepthFunction depthFunction = state.depthTest ? state.depthFunction : DepthFunction::None;
+    if (m_cachedPipelineState.depthFunction != depthFunction)
     {
-        if (m_cachedDepthFunction != state.depthFunction)
-        {
-            m_renderingInterface->SetDepthFunction(state.depthFunction);
-            m_cachedDepthFunction = state.depthFunction;
-        }
-    }
-    else if (m_cachedDepthFunction != DepthFunction::None)
-    {
-        m_renderingInterface->SetDepthFunction(DepthFunction::None);
-        m_cachedDepthFunction = DepthFunction::None;
+        m_renderingInterface->SetDepthFunction(depthFunction);
+        m_cachedPipelineState.depthFunction = depthFunction;
     }
 
-    if (m_cachedDepthMask != state.depthWrite)
+    if (m_cachedPipelineState.depthWrite != state.depthWrite)
     {
         m_renderingInterface->SetDepthMask(state.depthWrite);
-        m_cachedDepthMask = state.depthWrite;
+        m_cachedPipelineState.depthWrite = state.depthWrite;
     }
 
-    if (m_cachedBlendMode != state.overrideBlendMode)
+    if (m_cachedPipelineState.overrideBlendMode != state.overrideBlendMode)
     {
         m_renderingInterface->SetBlendMode(state.overrideBlendMode);
-        m_cachedBlendMode = state.overrideBlendMode;
+        m_cachedPipelineState.overrideBlendMode = state.overrideBlendMode;
     }
 
-    if (m_cachedPolygonMode != state.polygonMode)
+    if (m_cachedPipelineState.polygonMode != state.polygonMode)
     {
         m_renderingInterface->SetPolygonMode(state.polygonMode);
-        m_cachedPolygonMode = state.polygonMode;
+        m_cachedPipelineState.polygonMode = state.polygonMode;
     }
 
-    if (m_cachedCullMode != state.cullMode)
+    if (m_cachedPipelineState.cullMode != state.cullMode)
     {
         m_renderingInterface->SetCullMode(state.cullMode);
-        m_cachedCullMode = state.cullMode;
+        m_cachedPipelineState.cullMode = state.cullMode;
     }
 
-    if (m_cachedFrontFace != state.frontFace)
+    if (m_cachedPipelineState.frontFace != state.frontFace)
     {
         m_renderingInterface->SetFrontFace(state.frontFace);
-        m_cachedFrontFace = state.frontFace;
+        m_cachedPipelineState.frontFace = state.frontFace;
     }
 
-    if (m_cachedGlobalShader != state.globalShader)
+    if (m_cachedPipelineState.globalShader != state.globalShader)
     {
         m_renderingInterface->SetGlobalShader(state.globalShader);
-        m_cachedGlobalShader = state.globalShader;
+        m_cachedPipelineState.globalShader = state.globalShader;
     }
 }
 
 void RenderSystem::SetGlobalShader(Ref<GpuProgram> shader)
 {
-    if (m_cachedGlobalShader != shader)
+    if (m_cachedPipelineState.globalShader != shader)
     {
         m_renderingInterface->SetGlobalShader(shader);
-        m_cachedGlobalShader = shader;
+        m_cachedPipelineState.globalShader = shader;
     }
 }

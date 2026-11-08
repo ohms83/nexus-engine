@@ -22,27 +22,27 @@ NXS_NAMESPACE
 
         void SetClearColor(const Color4F& color)
         {
-            m_clearColor = color;
+            m_cachedPipelineState.clearColor = color;
         }
 
         void SetClearColor(const uint32_t rgba)
         {
-            m_clearColor = rgba;
+            m_cachedPipelineState.clearColor = rgba;
         }
 
         NODISCARD const Color4F& GetClearColor() const
         {
-            return m_clearColor;
+            return m_cachedPipelineState.clearColor;
         }
 
         void SetClearDepth(const float depth)
         {
-            m_clearDepth = depth;
+            m_cachedPipelineState.clearDepth = depth;
         }
 
         NODISCARD float GetClearDepth() const
         {
-            return m_clearDepth;
+            return m_cachedPipelineState.clearDepth;
         }
 
         void BeginDraw();
@@ -99,18 +99,15 @@ NXS_NAMESPACE
         void SetGlobalShader(Ref<GpuProgram> shader);
 
     protected:
-        // State cache to reduce redundant calls to the rendering backend
-        DepthFunction m_cachedDepthFunction = DepthFunction::None;
-        BlendMode m_cachedBlendMode = BlendMode::None;
-        bool m_cachedDepthMask = true;
-        PolygonMode m_cachedPolygonMode = PolygonMode::Fill;
-        PolygonFacing m_cachedCullMode = PolygonFacing::Back;
-        FrontFace m_cachedFrontFace = FrontFace::CounterClockWise;
-        Ref<GpuProgram> m_cachedGlobalShader;
+        //! Graphics configuration used to initialize the rendering interface.
         GraphicsConfig m_config;
         Ref<RenderingInterface> m_renderingInterface;
-        Color4F m_clearColor = Color4F::Grey;
-        float m_clearDepth = 1.0f;
+
+        // State cache to reduce redundant calls to the rendering backend
+        PipelineState m_cachedPipelineState{
+            .depthWrite = true,
+            .depthFunction = DepthFunction::None,
+        };
 
         uint32_t m_frameIndex = 0;
         uint32_t m_drawCount = 0;

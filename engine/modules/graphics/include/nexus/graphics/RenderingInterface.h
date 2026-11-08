@@ -19,6 +19,12 @@
 
 NXS_NAMESPACE
 {
+    /**
+     * @brief A wrapper interface for the underlying graphics API.
+     * This class provides a unified interface for rendering operations,
+     * allowing the engine to support multiple graphics APIs (e.g., OpenGL, Vulkan, Direct3D)
+     * without changing the higher-level rendering code.
+     */
     class RenderingInterface
     {
     public:
