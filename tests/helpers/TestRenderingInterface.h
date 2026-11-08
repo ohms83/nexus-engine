@@ -37,33 +37,8 @@ protected:
 
 class FakeGpuProgram : public GpuProgram
 {
-public:
-    using Super = GpuProgram;
-
-    FakeGpuProgram() {}
-    ~FakeGpuProgram() override {}
-
-    GpuProgram& BeginCompile() override { Super::BeginCompile(); return *this; }
-    GpuProgram& AddSource(const std::string& source, Type shaderType) override { Super::AddSource(source, shaderType); return *this; }
-    void Compile() override { Super::Compile(); }
-    void Bind() override {}
-    void Unbind() override {}
-    bool IsBinding() const override { return false; }
-
-    bool SetUniformInt(const std::string& name, int32_t value) override { return true; }
-    bool SetUniformFloat(const std::string& name, float value) override { return true; }
-    bool SetUniformVector(const std::string& name, const glm::vec2& vec) override { return true; }
-    bool SetUniformVector(const std::string& name, const glm::vec3& vec) override { return true; }
-    bool SetUniformVector(const std::string& name, const glm::vec4& vec) override { return true; }
-    bool SetUniformMatrix(const std::string& name, const glm::mat3& matrix, bool tranpose) override { return true; }
-    bool SetUniformMatrix(const std::string& name, const glm::mat4& matrix, bool tranpose) override { return true; }
-    bool SetUniformTexture2D(const std::string& name, Ref<const TextureProxy> texture, int32_t textureUnit) override { return true; }
-
 private:
     NODISCARD uint32_t Alloc() override { return 1; }
-    void Release() override {}
-
-    int32_t FindUniform_Internal(const std::string& name) const override { return 0; }
 };
 
 class FakeRendering : public RenderingInterface
@@ -76,11 +51,8 @@ public:
     TextureProxy* CreateTexture() const override { return new FakeTexture(); }
 };
 
-class BadGpuProgram : public FakeGpuProgram
+class BadGpuProgram : public GpuProgram
 {
-public:
-    using Super = FakeGpuProgram;
-
 private:
     uint32_t Alloc() override { return 0; }
 };
