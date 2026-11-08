@@ -65,6 +65,7 @@ GLRenderingInterface::GLRenderingInterface(WindowContext window, const GraphicsC
     // Enable depth test
     SetDepthFunction(DepthFunction::Lesser);
 
+    SetStencilOperation(m_pipelineState.stencilOp);
     SetCullMode(PolygonFacing::Back);
     SetFrontFace(FrontFace::CounterClockWise);
 
@@ -193,17 +194,54 @@ void GLRenderingInterface::OnResize(const uint32_t pixel_w, const uint32_t pixel
 
 void GLRenderingInterface::SetColorMask(const glm::bvec4& mask)
 {
+    Base::SetColorMask(mask);
     CALL_GL_FUNC(glColorMask((GLboolean)mask.r, (GLboolean)mask.g, (GLboolean)mask.b, (GLboolean)mask.a));
 }
 
-void GLRenderingInterface::SetDepthMask(bool mask)
+void GLRenderingInterface::SetDepthWrite(bool mask)
 {
+    Base::SetDepthWrite(mask);
     CALL_GL_FUNC(glDepthMask((GLboolean)mask));
+}
+
+void GLRenderingInterface::SetStencilTest(bool enabled)
+{
+    Base::SetStencilTest(enabled);
+    if (enabled)
+    {
+        CALL_GL_FUNC(glEnable(GL_STENCIL_TEST));
+    }
+    else
+    {
+        CALL_GL_FUNC(glDisable(GL_STENCIL_TEST));
+    }
+}
+
+void GLRenderingInterface::SetStencilOperation(const StencilOperation operation)
+{
+    Base::SetStencilOperation(operation);
+
+    GLenum glOperation = GL_KEEP;
+    switch (operation)
+    {
+    case StencilOperation::Keep: glOperation = GL_KEEP; break;
+    case StencilOperation::Zero: glOperation = GL_ZERO; break;
+    case StencilOperation::Replace: glOperation = GL_REPLACE; break;
+    case StencilOperation::Increment: glOperation = GL_INCR; break;
+    case StencilOperation::IncrementWrap: glOperation = GL_INCR_WRAP; break;
+    case StencilOperation::Decrement: glOperation = GL_DECR; break;
+    case StencilOperation::DecrementWrap: glOperation = GL_DECR_WRAP; break;
+    case StencilOperation::Invert: glOperation = GL_INVERT; break;
+    default:
+        NXS_ASSERT(false);
+        return;
+    }
+    CALL_GL_FUNC(glStencilOp(glOperation, glOperation, glOperation));
 }
 
 void GLRenderingInterface::SetDepthFunction(const DepthFunction depthFunction)
 {
-    if (m_depthFunction == depthFunction) return;
+    Base::SetDepthFunction(depthFunction);
 
     if (depthFunction == DepthFunction::None)
     {
@@ -238,11 +276,12 @@ void GLRenderingInterface::SetDepthFunction(const DepthFunction depthFunction)
         NXS_ASSERT(false);
         break;
     }
-    m_depthFunction = depthFunction;
 }
 
 void GLRenderingInterface::SetBlendMode(BlendMode blendMode)
 {
+    Base::SetBlendMode(blendMode);
+
     // Implementation for setting blend mode
     if (blendMode == BlendMode::None)
     {
@@ -268,6 +307,7 @@ void GLRenderingInterface::SetBlendMode(BlendMode blendMode)
 
 void GLRenderingInterface::SetLineWidth(float width)
 {
+    Base::SetLineWidth(width);
     CALL_GL_FUNC(glLineWidth(width));
 }
 

@@ -35,7 +35,9 @@ NXS_NAMESPACE
         void DrawIndexedInstanced(const Ref<IndexBuffer> indexBuffer, uint32_t instanceCount) override;
 
         void SetColorMask(const glm::bvec4& mask) override;
-        void SetDepthMask(bool mask) override;
+        void SetDepthWrite(bool mask) override;
+        void SetStencilTest(bool enabled) override;
+        void SetStencilOperation(StencilOperation operation) override;
 
         void SetDepthFunction(DepthFunction depthFunction) override;
         void SetBlendMode(BlendMode blendMode) override;

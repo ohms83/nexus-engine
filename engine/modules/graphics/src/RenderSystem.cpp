@@ -109,7 +109,7 @@ void RenderSystem::ApplyPipelineState(const PipelineState& state)
 
     if (m_cachedPipelineState.depthWrite != state.depthWrite)
     {
-        m_renderingInterface->SetDepthMask(state.depthWrite);
+        m_renderingInterface->SetDepthWrite(state.depthWrite);
         m_cachedPipelineState.depthWrite = state.depthWrite;
     }
 

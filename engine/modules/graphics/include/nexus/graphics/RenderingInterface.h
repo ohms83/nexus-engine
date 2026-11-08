@@ -16,6 +16,7 @@
 #include "GpuProgram.h"
 #include "TextureProxy.h"
 #include "VertexBuffer.h"
+#include "PipelineState.h"
 
 NXS_NAMESPACE
 {
@@ -37,6 +38,10 @@ NXS_NAMESPACE
         {
             return m_renderContext;
         }
+
+        //! Apply pipeline state with minimal redundant state transitions.
+        void ApplyPipelineState(const PipelineState& state);
+        const PipelineState& GetPipelineState() const { return m_pipelineState; }
 
         virtual void ClearColor(const Color4F& color) = 0;
         virtual void ClearDepth(float depth) = 0;
@@ -61,26 +66,39 @@ NXS_NAMESPACE
             return m_graphicsAPI;
         }
 
-        virtual void SetColorMask(const glm::bvec4& mask) = 0;
-        virtual void SetDepthMask(bool mask) = 0;
+        virtual void SetColorMask(const glm::bvec4& mask) { m_pipelineState.colorMask = mask; }
+        NODISCARD const glm::bvec4& GetColorMask() const { return m_pipelineState.colorMask; }
 
-        virtual void SetDepthFunction(DepthFunction depthFunction) = 0;
+        virtual void SetDepthWrite(bool write) { m_pipelineState.depthWrite = write; }
+        NODISCARD bool GetDepthWrite() const { return m_pipelineState.depthWrite; }
+        NODISCARD bool GetDepthTest() const { return m_pipelineState.depthTest; }
 
-        virtual void SetBlendMode(BlendMode blendMode) = 0;
+        virtual void SetDepthFunction(DepthFunction depthFunction);
+        NODISCARD DepthFunction GetDepthFunction() const { return m_pipelineState.depthFunction; }
 
-        virtual void SetLineWidth(float width) = 0;
+        virtual void SetBlendMode(BlendMode blendMode) { m_pipelineState.overrideBlendMode = blendMode; }
+        NODISCARD BlendMode GetBlendMode() const { return m_pipelineState.overrideBlendMode; }
 
-        virtual void SetPolygonMode(PolygonMode mode) { m_polygonMode = mode; }
-        NODISCARD virtual PolygonMode GetPolygonMode() const { return m_polygonMode; }
+        virtual void SetLineWidth(float width) { m_pipelineState.lineWidth = width; }
+        NODISCARD float GetLineWidth() const { return m_pipelineState.lineWidth; }
 
-        virtual void SetCullMode(PolygonFacing face) { m_cullMode = face; }
-        NODISCARD PolygonFacing GetCullMode() const { return m_cullMode; }
+        virtual void SetStencilTest(bool enabled) { m_pipelineState.stencilTest = enabled; }
+        NODISCARD bool GetStencilTest() const { return m_pipelineState.stencilTest; }
 
-        virtual void SetFrontFace(FrontFace face) { m_frontFace = face; }
-        NODISCARD FrontFace GetFrontFace() const { return m_frontFace; }
+        virtual void SetStencilOperation(StencilOperation operation) { m_pipelineState.stencilOp = operation; }
+        NODISCARD StencilOperation GetStencilOperation() const { return m_pipelineState.stencilOp; }
 
-        NODISCARD Ref<GpuProgram> GetGlobalShader() const { return m_globalShader; }
-        void SetGlobalShader(Ref<GpuProgram> shader) { m_globalShader = shader; }
+        virtual void SetPolygonMode(PolygonMode mode) { m_pipelineState.polygonMode = mode; }
+        NODISCARD virtual PolygonMode GetPolygonMode() const { return m_pipelineState.polygonMode; }
+
+        virtual void SetCullMode(PolygonFacing face) { m_pipelineState.cullMode = face; }
+        NODISCARD PolygonFacing GetCullMode() const { return m_pipelineState.cullMode; }
+
+        virtual void SetFrontFace(FrontFace face);
+        NODISCARD FrontFace GetFrontFace() const { return m_pipelineState.frontFace; }
+
+        NODISCARD Ref<GpuProgram> GetGlobalShader() const { return m_pipelineState.globalShader; }
+        void SetGlobalShader(Ref<GpuProgram> shader) { m_pipelineState.globalShader = std::move(shader); }
 
         virtual void EnableDrawBuffer(DrawBuffer buffer) = 0;
 
@@ -93,10 +111,8 @@ NXS_NAMESPACE
     protected:
         RenderContext m_renderContext{};
         GraphicsAPI m_graphicsAPI = GraphicsAPI::Undefined;
-        DepthFunction m_depthFunction = DepthFunction::None;
-        PolygonMode m_polygonMode = PolygonMode::Fill;
-        PolygonFacing m_cullMode = PolygonFacing::Back;
-        FrontFace m_frontFace = FrontFace::CounterClockWise;
-        Ref<GpuProgram> m_globalShader;
+        PipelineState m_pipelineState{
+            .depthFunction = DepthFunction::None,
+        };
     };
 }

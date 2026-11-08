@@ -104,10 +104,7 @@ NXS_NAMESPACE
         Ref<RenderingInterface> m_renderingInterface;
 
         // State cache to reduce redundant calls to the rendering backend
-        PipelineState m_cachedPipelineState{
-            .depthWrite = true,
-            .depthFunction = DepthFunction::None,
-        };
+        PipelineState m_cachedPipelineState{};
 
         uint32_t m_frameIndex = 0;
         uint32_t m_drawCount = 0;

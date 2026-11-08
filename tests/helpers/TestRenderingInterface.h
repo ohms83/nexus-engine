@@ -85,7 +85,7 @@ public:
     void DrawIndexed(const Ref<IndexBuffer> indexBuffer) override { }
     void DrawIndexedInstanced(const Ref<IndexBuffer> indexBuffer, uint32_t instanceCount) override { }
     void SetColorMask(const glm::bvec4& mask) override { }
-    void SetDepthMask(bool mask) override { }
+    void SetDepthWrite(bool mask) override { }
     void SetDepthFunction(DepthFunction depthFunction) override { }
     void SetBlendMode(BlendMode blendMode) override { }
     void SetLineWidth(float width) override { }
