@@ -1,4 +1,5 @@
 #include "editor/widget/SceneGraphWidget.h"
+#include "nexus/container/Array.h"
 #include "nexus/scene/Camera.h"
 
 #include "imgui.h"
@@ -7,7 +8,7 @@ USING_NAMESPACE_NXS;
 
 static void ShowNewNodeMenu(Ref<SceneNode> parent)
 {
-    std::vector<std::string> nodeTypes;
+    Array<std::string> nodeTypes;
     SceneNode::GetRegisteredNodeTypes(nodeTypes);
     if (nodeTypes.empty()) return;
 

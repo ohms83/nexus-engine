@@ -11,7 +11,7 @@
 
 #include "widget/EditorWidget.h"
 
-#include <vector>
+#include "nexus/container/Array.h"
 
 NXS_NAMESPACE
 {
@@ -51,6 +51,6 @@ NXS_NAMESPACE
         Application& m_parentApp;
         WindowContext m_windowContext {};
         Ptr<Menu> m_menu;
-        std::vector<Ref<EditorWidget>> m_widgets;
+        Array<Ref<EditorWidget>> m_widgets;
     };
 }

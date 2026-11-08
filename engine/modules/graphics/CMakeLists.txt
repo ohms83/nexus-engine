@@ -20,6 +20,7 @@ target_include_directories(${TARGET_NAME}
 target_link_libraries(${TARGET_NAME}
     # Public libraries that other modules can use
     PUBLIC nexus-config
+    PUBLIC nexus-container
     PUBLIC nexus-core
     PUBLIC nexus-math
     PUBLIC nexus-memory

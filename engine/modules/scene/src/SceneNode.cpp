@@ -1,4 +1,5 @@
 #include "nexus/scene/SceneNode.h"
+#include "nexus/container/Array.h"
 
 #include "nexus/debug/LogDispatcher.h"
 #include "nexus/ecs/Component.h"
@@ -66,7 +67,7 @@ Ref<SceneNode> SceneNode::CreateChild(Ref<SceneNode> parent, std::string classNa
     return nullptr;
 }
 
-void SceneNode::GetRegisteredNodeTypes(std::vector<std::string>& outTypes)
+void SceneNode::GetRegisteredNodeTypes(Array<std::string>& outTypes)
 {
     for (const auto& [key, _] : s_factoryFunctions)
     {
@@ -201,7 +202,7 @@ bool SceneNode::Deserialize(const VariantData &data)
 
 void SceneNode::Resolve(ResourceManager& resourceManager, const RenderingInterface& renderingInterface)
 {
-    std::vector<IComponent*> components;
+    Array<IComponent*> components;
     GetAllComponents(components);
 
     for (auto component : components)
@@ -225,7 +226,7 @@ void SceneNode::Resolve(ResourceManager& resourceManager, const RenderingInterfa
 void SceneNode::Validate()
 {
     // Validate all components
-    std::vector<IComponent*> components;
+    Array<IComponent*> components;
     GetAllComponents(components);
 
     for (auto component : components)

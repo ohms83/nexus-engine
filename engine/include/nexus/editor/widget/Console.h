@@ -5,6 +5,7 @@
 #pragma once
 
 #include <functional>
+#include "nexus/container/Array.h"
 #include <map>
 #include <string>
 #include "nexus/NxsDefine.h"
@@ -25,7 +26,7 @@ NXS_NAMESPACE
     {
     public:
         // A command handler function type
-        using CommandHandler = std::function<void(const std::vector<std::string>&)>;
+        using CommandHandler = std::function<void(const Array<std::string>&)>;
 
         Console();
         ~Console() override;
@@ -41,7 +42,7 @@ NXS_NAMESPACE
 
     private:
         //! A simple parser for the command input string
-        static std::vector<std::string> ParseCommand(const std::string& input);
+        static Array<std::string> ParseCommand(const std::string& input);
         //! Command handling logic
         void HandleCommand();
         int InputCallback(ImGuiInputTextCallbackData* data);
@@ -50,8 +51,8 @@ NXS_NAMESPACE
 
     private:
         char m_inputBuffer[CONSOLE_INPUT_BUFFER_SIZE] = {};
-        std::vector<std::string> m_history;
-        std::vector<std::string> m_messages;
+        Array<std::string> m_history;
+        Array<std::string> m_messages;
         std::map<std::string, CommandHandler> m_commands;
         sigslot::connection m_logConnection;
         bool m_scrollToBottom = false;

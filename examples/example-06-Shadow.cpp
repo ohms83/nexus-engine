@@ -2,24 +2,25 @@
 // Created by nutta on 6/23/2025.
 //
 #include "nexus/Nexus.h"
+#include "nexus/container/Array.h"
 #include "imgui.h"
 #include <glm/gtc/type_ptr.hpp>
 
-static const std::vector<std::string> modelPaths = {
+static const nxs::Array<std::string> modelPaths = {
     "meshes/apple/3DApple001_SQ-1K-PNG.obj",
     "meshes/armadillo/armadillo.obj",
     "meshes/bunny/stanford-bunny.obj",
     "meshes/cube/cube_textured.obj",
     "meshes/barrel/wine_barrel_01_4k.gltf",
 };
-static const std::vector<std::string> modelLabels = {
+static const nxs::Array<std::string> modelLabels = {
     "Apple",
     "Armadillo",
     "Bunny",
     "Crate",
     "Wine Barrel",
 };
-static const std::vector<glm::vec3> modelScales = {
+static const nxs::Array<glm::vec3> modelScales = {
     glm::vec3(3),
     glm::vec3(0.01),
     glm::vec3(3),
@@ -252,7 +253,7 @@ protected:
     glm::vec3 m_euler {};
     glm::vec3 m_cameraPos {0, 5, 5};
     nxs::Ptr<nxs::ModelLoader> m_modelLoader;
-    std::vector<nxs::Ref<nxs::IResourceLoader::LoadResult>> m_loadedModels;
+    nxs::Array<nxs::Ref<nxs::IResourceLoader::LoadResult>> m_loadedModels;
     nxs::Ref<nxs::SceneGraphWidget> m_sceneGraphWidget;
     nxs::Ref<nxs::PropertyWindow> m_propertyWindow;
     float m_aoFactor = 1;

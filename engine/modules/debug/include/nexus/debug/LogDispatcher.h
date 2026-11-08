@@ -5,6 +5,7 @@
 #pragma once
 
 #include <fstream>
+#include "nexus/container/Array.h"
 #include <format>
 #include <string>
 #include <set>
@@ -90,7 +91,7 @@ namespace nxs
             return m_message;
         }
     private:
-        std::vector<Ref<ILogger>> m_loggers;
+        Array<Ref<ILogger>> m_loggers;
         std::string m_message;
 
         LogLevel m_minimumLogLevel = LogLevel::Debug;

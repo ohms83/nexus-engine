@@ -3,7 +3,7 @@
 #include "nexus/NxsCommon.h"
 #include "nexus/scene/renderpass/RenderPass.h"
 
-#include <vector>
+#include "nexus/container/Array.h"
 #include <unordered_map>
 #include <queue>
 
@@ -18,6 +18,6 @@ NXS_NAMESPACE
     public:
         //! Build a topologically sorted list of render passes considering offscreen dependencies.
         //! If cycles are present, they will be ignored and priority order will be used as fallback.
-        static std::vector<RenderPass> Build(const std::vector<RenderPass>& passes);
+        static Array<RenderPass> Build(const Array<RenderPass>& passes);
     };
 }

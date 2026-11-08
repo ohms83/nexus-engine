@@ -5,7 +5,7 @@
 #include "nexus/task/TaskScheduler.h"
 #include "Scene.h"
 
-#include <vector>
+#include "nexus/container/Array.h"
 #include <concepts>
 
 #include "sigslot/signal.hpp"
@@ -67,7 +67,7 @@ NXS_NAMESPACE
         bool ChangeScene_Internal(Ref<Scene> scene);
         void PerformChange(Ref<Scene> next);
 
-        std::vector<Ref<Scene>> m_sceneList;
+        Array<Ref<Scene>> m_sceneList;
         Ref<Scene> m_prev;
         Ref<Scene> m_next;
         Ref<Scene> m_current;

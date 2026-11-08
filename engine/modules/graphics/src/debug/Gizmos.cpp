@@ -3,6 +3,7 @@
 //
 
 #include "nexus/graphics/debug/Gizmos.h"
+#include "nexus/container/Array.h"
 #include "nexus/graphics/RenderSystem.h"
 #include "nexus/math/Math.h"
 #include "nexus/memory/BorrowBuffer.h"
@@ -162,8 +163,8 @@ namespace
 
     private:
         DrawMode m_drawMode;
-        std::vector<Vertex> m_vertices;
-        std::vector<uint32_t> m_indices;
+        Array<Vertex> m_vertices;
+        Array<uint32_t> m_indices;
         Ref<VertexBuffer>   m_vertexBuffer;
         Ref<IndexBuffer>    m_indexBuffer;
         size_t m_maxVertex = 0;
@@ -274,7 +275,7 @@ void Gizmos::ProcessDraw(RenderSystem& renderSystem, const glm::mat4& cameraMtx)
 #endif
 }
 
-void Gizmos::CreateRenderCommands(std::vector<RenderCommand>& outCommands, RenderSystem& renderSystem)
+void Gizmos::CreateRenderCommands(Array<RenderCommand>& outCommands, RenderSystem& renderSystem)
 {
     static const Sphere boundingSphere { glm::vec3(0), FLT_MAX };
 

@@ -2,6 +2,7 @@
 // Created by nutta on 6/23/2025.
 //
 #include "nexus/Nexus.h"
+#include "nexus/container/Array.h"
 
 #include "nexus/scene/Transform.h"
 #include <glm/gtc/type_ptr.hpp>
@@ -13,7 +14,7 @@ struct Vertex
 };
 
 // Vertices for a standard cube (24 vertices for 6 faces * 4 vertices/face)
-std::vector<Vertex> cubeVertices = {
+nxs::Array<Vertex> cubeVertices = {
     // Front face (red)
     {{-0.5f, -0.5f,  0.5f}, {1.0f, 0.0f, 0.0f}}, // 0
     {{ 0.5f, -0.5f,  0.5f}, {1.0f, 0.0f, 0.0f}}, // 1
@@ -51,7 +52,7 @@ std::vector<Vertex> cubeVertices = {
     {{-0.5f,  0.5f,  0.5f}, {1.0f, 0.0f, 1.0f}}  // 23
 };
 
-std::vector<uint32_t> cubeIndices = {
+nxs::Array<uint32_t> cubeIndices = {
     // Front face (Z+): Vertices 0, 1, 2, 3. View from +Z. (BL, BR, TR, TL)
     0, 3, 2,  // Triangle 1: Bottom-Left, Top-Left, Top-Right (CCW)
     0, 2, 1,  // Triangle 2: Bottom-Left, Top-Right, Bottom-Right (CCW)

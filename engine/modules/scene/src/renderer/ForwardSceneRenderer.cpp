@@ -1,4 +1,5 @@
 #include "nexus/scene/renderer/ForwardSceneRenderer.h"
+#include "nexus/container/Array.h"
 
 #include <format>
 #include <algorithm>
@@ -48,7 +49,7 @@ void ForwardSceneRenderer::Render(RenderSystem& renderSystem, const Scene& scene
 #if 0
     rmt_ScopedCPUSample(SceneRenderer_Render, 0);
 
-    std::vector<RenderCommand> commands;
+    Array<RenderCommand> commands;
     commands.reserve(1024);
 
     const auto& registry = *scene.GetRegistry();

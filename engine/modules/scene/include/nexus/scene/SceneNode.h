@@ -1,6 +1,7 @@
 #pragma once
 
 #include "nexus/NxsDefine.h"
+#include "nexus/container/Array.h"
 #include "nexus/serialize/Serializeable.h"
 #include "nexus/resource/ResourceManager.h"
 #include "nexus/reflection/Reflection.h"
@@ -31,7 +32,7 @@ NXS_NAMESPACE
     , public std::enable_shared_from_this<SceneNode>
     {
     public:
-        using ChildList = std::vector<Ref<SceneNode>>;
+        using ChildList = Array<Ref<SceneNode>>;
         using Creator = std::function<Ref<SceneNode>(Ref<entt::registry>)>;
 
         IMPLEMENT_NODE(SceneNode);
@@ -42,7 +43,7 @@ NXS_NAMESPACE
 
         static Ref<SceneNode> Create(Ref<entt::registry> registry, std::string className);
         static Ref<SceneNode> CreateChild(Ref<SceneNode> parent, std::string className);
-        static void GetRegisteredNodeTypes(std::vector<std::string>& outTypes);
+        static void GetRegisteredNodeTypes(Array<std::string>& outTypes);
 
         void AcceptReflector(IReflector& reflector) override;
 
@@ -149,7 +150,7 @@ NXS_NAMESPACE
     protected:
         Ref<SceneNode> m_parent;
         ChildList m_children;
-        std::vector<Ref<Script>> m_scripts;
+        Array<Ref<Script>> m_scripts;
 
         // --- ECS ---
         struct Simulation
@@ -157,7 +158,7 @@ NXS_NAMESPACE
             uint32_t id;
             ECS::SimulationSystem system;
         };
-        std::vector<Simulation> m_simulations;
+        Array<Simulation> m_simulations;
 
         static std::unordered_map<std::string, Creator> s_factoryFunctions;
     };

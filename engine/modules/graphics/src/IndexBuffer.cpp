@@ -2,6 +2,7 @@
 // Created by nutta on 7/7/2025.
 //
 #include "nexus/graphics/IndexBuffer.h"
+#include "nexus/container/Array.h"
 #include "nexus/debug/LogDispatcher.h"
 
 USING_NAMESPACE_NXS;
@@ -116,7 +117,7 @@ void IndexBuffer::ReArrangeIndex(const FrontFace frontFace)
     }
 }
 
-void IndexBuffer::CopyIndices(const std::vector<uint32_t>& indices, const size_t offset)
+void IndexBuffer::CopyIndices(const Array<uint32_t>& indices, const size_t offset)
 {
     CopyData(indices.data(), indices.size() * sizeof(uint32_t), offset);
 }

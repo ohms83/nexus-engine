@@ -2,6 +2,7 @@
 // Created by nutta on 8/18/2025.
 //
 #include "nexus/graphics/ModelLoader.h"
+#include "nexus/container/Array.h"
 #include "nexus/debug/LogDispatcher.h"
 #include "nexus/memory/OwningBuffer.h"
 
@@ -58,9 +59,9 @@ namespace
  * @param taskScheduler
  * @return A list of asynchronous resource loading results.
  */
-static std::vector<Ref<IResourceLoader::LoadResult>> PreloadTextures(const aiScene& scene, const std::filesystem::path directory, ResourceManager* manager, TaskScheduler& taskScheduler)
+static Array<Ref<IResourceLoader::LoadResult>> PreloadTextures(const aiScene& scene, const std::filesystem::path directory, ResourceManager* manager, TaskScheduler& taskScheduler)
 {
-    std::vector<Ref<IResourceLoader::LoadResult>> result;
+    Array<Ref<IResourceLoader::LoadResult>> result;
     for (int i = 0; i < scene.mNumTextures; i++)
     {
         const aiTexture* texture = scene.mTextures[i];
@@ -70,7 +71,7 @@ static std::vector<Ref<IResourceLoader::LoadResult>> PreloadTextures(const aiSce
         if (loadResult) result.push_back(loadResult);
     }
 
-    std::vector<aiTextureType> aiTextures = {};
+    Array<aiTextureType> aiTextures = {};
     for (const auto& aitTexture : s_textureTypeMap | std::views::keys)
     {
         aiTextures.push_back(aitTexture);
@@ -268,8 +269,8 @@ void ModelLoader::ProcessNode(const Ref<Model>& model, const aiNode* node, const
 void ModelLoader::ProcessMesh(const Ref<Model>& model, const aiMesh* mesh, const aiScene* scene, const std::filesystem::path& directory) const
 {
     const auto newMesh = std::make_shared<Mesh>(mesh->mName.C_Str());
-    std::vector<Vertex> vertices;
-    std::vector<uint32_t> indices;
+    Array<Vertex> vertices;
+    Array<uint32_t> indices;
     Ref<VertexBuffer> vertexBuffer;
     Ref<IndexBuffer> indexBuffer;
     vertexBuffer.reset(m_renderingInterface->CreateVertexBuffer());

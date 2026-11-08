@@ -1,9 +1,10 @@
 #include "nexus/graphics/RenderCommandBatcher.h"
+#include <span>
 USING_NAMESPACE_NXS;
 
-void RenderCommandBatcher::Batch(std::vector<RenderCommand>& commands)
+size_t RenderCommandBatcher::BatchImpl(std::span<RenderCommand> commands)
 {
-    if (commands.empty()) return;
+    if (commands.empty()) return 0;
     size_t write = 0;
     for (size_t read = 0; read < commands.size(); ++read)
     {
@@ -23,5 +24,5 @@ void RenderCommandBatcher::Batch(std::vector<RenderCommand>& commands)
             commands[write++] = std::move(commands[read]);
         }
     }
-    commands.resize(write);
+    return write;
 }

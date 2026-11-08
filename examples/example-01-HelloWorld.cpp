@@ -1,4 +1,5 @@
 #include <iostream>
+#include "nexus/container/Array.h"
 #include "nexus/Nexus.h"
 
 // Define Vertex structure
@@ -8,7 +9,7 @@ struct Vertex {
 };
 
 // Vertices for a square
-std::vector<Vertex> squareVertices = {
+nxs::Array<Vertex> squareVertices = {
     {{-0.5f,  0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}}, // Top-left       - Index 0
     {{ 0.5f,  0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}}, // Top-right      - Index 1
     {{ 0.5f, -0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}}, // Bottom-right   - Index 2
@@ -16,7 +17,7 @@ std::vector<Vertex> squareVertices = {
 };
 
 // Indices for the square (two triangles)
-std::vector<unsigned int> squareIndices = {
+nxs::Array<unsigned int> squareIndices = {
     0, 1, 2, // First triangle
     2, 3, 0  // Second triangle
 };

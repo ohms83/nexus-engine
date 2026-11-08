@@ -5,10 +5,10 @@
 
 #include "nexus/NxsDefine.h"
 #include "nexus/debug/LogDispatcher.h"
+#include "nexus/container/Array.h"
 
 #include <variant>
 #include <string>
-#include <vector>
 #include <map>
 #include <string_view> // For robust accessors
 
@@ -44,7 +44,7 @@ NXS_NAMESPACE
      *     to query the current type.
      *
      * 4.  **Recursive Structure: ** @c VariantData is designed to contain itself
-     *     (i.e., @c std::vector<VariantData> for arrays and @c std::map<std::string, VariantData>
+     *     (i.e., @c Array<VariantData> for arrays and @c std::map<std::string, VariantData>
      *     for maps). This enables the creation of complex, nested data hierarchies.
      *
      * 5.  **Convenient Accessors: ** Overloaded @c operator[] for both string keys (for maps)
@@ -78,7 +78,7 @@ NXS_NAMESPACE
     {
     public:
         // Define the types that a VariantData object can hold
-        // Using std::string for map keys and std::vector<VariantData> for arrays
+        // Using std::string for map keys and Array<VariantData> for arrays
         // Using std::map<std::string, VariantData> for objects
         using Value = std::variant<
             std::monostate, // Represents null
@@ -86,12 +86,12 @@ NXS_NAMESPACE
             int64_t,        // Use int64_t for a general integer type
             double,
             std::string,
-            std::vector<VariantData>,  // Array type
+            nxs::Array<VariantData>,  // Array type
             std::map<std::string, VariantData, std::less<>> // Map/Object type with transparent comparator
         >;
 
         using Map = std::map<std::string, VariantData, std::less<>>;
-        using Array = std::vector<VariantData>;
+        using Array = nxs::Array<VariantData>;
 
         // --- Constructors ---
         VariantData() : m_value(std::monostate{}) {} // Default to Null
@@ -107,10 +107,10 @@ NXS_NAMESPACE
         VariantData(std::string&& value) : m_value(std::move(value)) {}
 
         // For Array type (initializer list)
-        VariantData(const std::vector<VariantData>& values)
+        VariantData(const Array& values)
             : m_value(values) {}
         VariantData(const std::initializer_list<VariantData> list)
-            : m_value(std::vector(list)) {}
+            : m_value(Array(list)) {}
 
         // For Map type (initializer list of pairs)
         VariantData(const Map& list)
@@ -127,21 +127,21 @@ NXS_NAMESPACE
          * @param value The glm::vec2 to construct from.
          */
         VariantData(const glm::vec2& value)
-            : m_value(std::vector<VariantData>{value.x, value.y}) {}
+            : m_value(Array{value.x, value.y}) {}
         /**
          * @brief Constructs a VariantData from a glm::vec3.
          * The vector is stored as an array of three floating-point numbers.
          * @param value The glm::vec3 to construct from.
          */
         VariantData(const glm::vec3& value)
-            : m_value(std::vector<VariantData>{value.x, value.y, value.z}) {}
+            : m_value(Array{value.x, value.y, value.z}) {}
         /**
          * @brief Constructs a VariantData from a glm::vec4.
          * The vector is stored as an array of four floating-point numbers.
          * @param value The glm::vec4 to construct from.
          */
         VariantData(const glm::vec4& value)
-            : m_value(std::vector<VariantData>{value.x, value.y, value.z, value.w}) {}
+            : m_value(Array{value.x, value.y, value.z, value.w}) {}
 
         // Copy and Move Constructors/Assignment Operators (handled by std::variant implicitly)
         VariantData(const VariantData&) = default;
@@ -157,7 +157,7 @@ NXS_NAMESPACE
         NODISCARD bool IsInt() const { return std::holds_alternative<int64_t>(m_value); }
         NODISCARD bool IsDouble() const { return std::holds_alternative<double>(m_value); }
         NODISCARD bool IsString() const { return std::holds_alternative<std::string>(m_value); }
-        NODISCARD bool IsArray() const { return std::holds_alternative<std::vector<VariantData>>(m_value); }
+        NODISCARD bool IsArray() const { return std::holds_alternative<Array>(m_value); }
         NODISCARD bool IsMap() const { return std::holds_alternative<Map>(m_value); }
         NODISCARD bool IsNumeric() const { return IsInt() || IsDouble(); }
         NODISCARD bool IsPrimitive() const {
@@ -218,13 +218,13 @@ NXS_NAMESPACE
             }
             return std::get<std::string>(m_value);
         }
-        NODISCARD const std::vector<VariantData>& GetArray() const noexcept {
+        NODISCARD const Array& GetArray() const noexcept {
             if (!IsArray())
             {
                 LOG_ERROR(LogSerialize, std::format("Not an array type. Type={}", NxsGetTypeString(GetType())));
                 return s_emptyArray;
             }
-            return std::get<std::vector<VariantData>>(m_value);
+            return std::get<Array>(m_value);
         }
         NODISCARD const Map& GetMap() const noexcept {
             if (!IsMap())
@@ -300,11 +300,11 @@ NXS_NAMESPACE
             NXS_ASSERT_MSG(IsString(), std::format("VariantData: Not a string type. Type={}", NxsGetTypeString(GetType())));
             return std::get<std::string>(m_value);
         }
-        NODISCARD std::vector<VariantData>& GetArray() {
+        NODISCARD Array& GetArray() {
             if (!IsArray()) {
-                m_value.emplace<std::vector<VariantData>>();
+                m_value.emplace<Array>();
             }
-            return std::get<std::vector<VariantData>>(m_value);
+            return std::get<Array>(m_value);
         }
         NODISCARD Map& GetMap() {
             if (!IsMap()) {
@@ -315,14 +315,14 @@ NXS_NAMESPACE
 
         /**
          @brief Moves the internal array out of this VariantData object.
-         * This function transfers ownership of the underlying std::vector to the caller.
+         * This function transfers ownership of the underlying Array to the caller.
          * The VariantData object must be of type Array before calling this function.
          * @return VariantData::Array&& An rvalue reference to the internal vector.
          * @note Asserts if the internal type is not an Array.
          */
         NODISCARD VariantData::Array&& MoveArray() {
             NXS_ASSERT_MSG(IsArray(), std::format("VariantData: Not an array type. Type={}", NxsGetTypeString(GetType())));
-            return std::move(std::get<std::vector<VariantData>>(m_value));
+            return std::move(std::get<Array>(m_value));
         }
 
         /**
@@ -392,7 +392,7 @@ NXS_NAMESPACE
         VariantData& operator [] (const size_t index) noexcept {
             // This will create an Array if it's not already one, or if it's Null
             // If it's another type (e.g., Map, Bool), it will replace it with an Array.
-            std::vector<VariantData>& arr = GetArray(); // GetArray handles type change/creation
+            Array& arr = GetArray(); // GetArray handles type change/creation
             if (index >= arr.size()) {
                 // Extend the array with default-constructed (Null) elements
                 arr.resize(index + 1);
@@ -407,7 +407,7 @@ NXS_NAMESPACE
                 return None;
             }
             const auto& arr = GetArray();
-            return arr.at(index); // std::vector::at() throws std::out_of_range
+            return arr.at(index); // Array::at() throws std::out_of_range
         }
 
 
@@ -477,7 +477,7 @@ NXS_NAMESPACE
         Value m_value;
 
         static const std::string s_emptyStr;
-        static const std::vector<VariantData> s_emptyArray;
+        static const Array s_emptyArray;
         static const Map s_emptyMap;
     };
 }

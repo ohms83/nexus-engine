@@ -6,7 +6,7 @@
 
 #include "nexus/NxsDefine.h"
 #include "entt/entt.hpp"
-#include <vector>
+#include "nexus/container/Array.h"
 
 NXS_NAMESPACE
 {
@@ -16,9 +16,9 @@ NXS_NAMESPACE
 
         //! Find all components of the specified type in the given @c registry
         template <typename T>
-        std::vector<const T*> FindAllComponents(const entt::registry& registry)
+        Array<const T*> FindAllComponents(const entt::registry& registry)
         {
-            std::vector<const T*> results;
+            Array<const T*> results;
             for (const auto view = registry.view<T>(); auto [entity, component] : view.each())
             {
                 results.push_back(&component);

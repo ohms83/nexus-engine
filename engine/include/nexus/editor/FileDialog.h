@@ -1,6 +1,7 @@
 #pragma once
 
 #include "nexus/NxsDefine.h"
+#include "nexus/container/Array.h"
 #include "nexus/ApplicationContext.h"
 
 NXS_NAMESPACE
@@ -62,7 +63,7 @@ NXS_NAMESPACE
 		 * @brief A list of extension filters to apply.
 		 * Defines the file types that will be shown in the dialog.
 		 */
-		std::vector<ExtFilter> filters;
+		Array<ExtFilter> filters;
 		/**
 		 * @brief The title of the file dialog window.
 		 */

@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <vector>
+#include "nexus/container/Array.h"
 
 #include "NxsGL.h"
 #include "../GpuProgram.h"
@@ -49,7 +49,7 @@ NXS_NAMESPACE
         NODISCARD int32_t FindUniform_Internal(const std::string& name) const override;
 
         //! A list of the handles of vertex, fragment, etc. shaders binding to this gpu program.
-        std::vector<GLuint> m_shaderHandles;
+        Array<GLuint> m_shaderHandles;
 
         //! The ID of the currently binding gpu program.
         static std::atomic<uint32_t> s_bindingShader;

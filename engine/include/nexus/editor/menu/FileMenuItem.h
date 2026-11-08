@@ -1,6 +1,7 @@
 #pragma once
 
 #include "TriggerMenuItem.h"
+#include "nexus/container/Array.h"
 #include "../FileDialog.h"
 
 NXS_NAMESPACE
@@ -10,7 +11,7 @@ NXS_NAMESPACE
         //! The application's window context. This cannot be null.
         WindowContext windowContext = nullptr;
         //! The file filters to be used in the dialog.
-        std::vector<ExtFilter> filters;
+        Array<ExtFilter> filters;
         //! The default file extension (without dot).
         std::string defaultExtension = "";
         //! The dialog mode (open or save).

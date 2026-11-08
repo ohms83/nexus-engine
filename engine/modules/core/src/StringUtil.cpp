@@ -4,7 +4,7 @@
 #include <locale>     // For std::tolower, std::toupper with locale
 #include <algorithm>  // For std::transform, std::find_if, std::find_if_not
 #include <string>
-#include <vector>
+#include "nexus/container/Array.h"
 #include <map>
 #include <string_view>
 #include <format>
@@ -150,9 +150,9 @@ std::string StrUtil::ToUpper(const std::string_view str)
     return copy;
 }
 
-std::vector<std::string> StrUtil::Split(const std::string_view str, const std::string_view delimiters)
+Array<std::string> StrUtil::Split(const std::string_view str, const std::string_view delimiters)
 {
-    std::vector<std::string> tokens;
+    Array<std::string> tokens;
     if (str.empty()) {
         return tokens;
     }
@@ -182,9 +182,9 @@ std::vector<std::string> StrUtil::Split(const std::string_view str, const std::s
     return tokens;
 }
 
-std::vector<std::string> StrUtil::Split(std::string_view str, char delimiter)
+Array<std::string> StrUtil::Split(std::string_view str, char delimiter)
 {
-    std::vector<std::string> tokens;
+    Array<std::string> tokens;
     if (str.empty())
     {
         return tokens;
@@ -199,10 +199,10 @@ std::vector<std::string> StrUtil::Split(std::string_view str, char delimiter)
 
 std::optional<bool> StrUtil::ParseBool(const std::string_view str)
 {
-    const std::vector<std::string> trueStrings = {
+    const Array<std::string> trueStrings = {
         "true", "on", "yes", "1"
     };
-    const std::vector<std::string> falseStrings = {
+    const Array<std::string> falseStrings = {
         "false", "off", "no", "0"
     };
     const std::string normalizedStr = ToLower(str);

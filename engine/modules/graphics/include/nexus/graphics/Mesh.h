@@ -1,6 +1,7 @@
 #pragma once
 
 #include "nexus/NxsDefine.h"
+#include "nexus/container/Array.h"
 #include "nexus/serialize/Serializeable.h"
 
 #include "VertexBuffer.h"
@@ -91,8 +92,8 @@ NXS_NAMESPACE
         // Mesh stores the material path when deserializing and will attempt to resolve it when Resolve() is called.
         std::string m_materialPath;
         std::string m_name;
-        std::vector<float> m_vertices;
-        std::vector<uint32_t> m_indices;
+        Array<float> m_vertices;
+        Array<uint32_t> m_indices;
         Ref<VertexBuffer> m_vertexBuffer;
         Ref<IndexBuffer> m_indexBuffer;
         Ref<Material> m_material;

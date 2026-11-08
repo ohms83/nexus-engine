@@ -5,6 +5,7 @@
 #pragma once
 
 #include "nexus/NxsCommon.h"
+#include "nexus/container/Array.h"
 
 #include "nexus/resource/Resource.h"
 #include "nexus/serialize/Serializeable.h"
@@ -103,7 +104,7 @@ NXS_NAMESPACE
          */
         MAYBE_UNUSED bool Deserialize(const VariantData& data) override;
 
-        const std::vector<Uniform>& GetUniforms() const
+        const Array<Uniform>& GetUniforms() const
         {
             return m_uniforms;
         }
@@ -131,6 +132,6 @@ NXS_NAMESPACE
 
         Ref<GpuProgram> m_gpuProgram;
         std::map<GpuProgram::Type, std::string> m_sources;
-        std::vector<Uniform> m_uniforms;
+        Array<Uniform> m_uniforms;
     };
 }

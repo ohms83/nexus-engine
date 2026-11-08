@@ -7,7 +7,7 @@
 #include "nexus/NxsDefine.h"
 #include "nexus/memory/Buffer.h"
 
-#include <vector>
+#include "nexus/container/Array.h"
 
 #include "GPUBuffer.h"
 #include "GpuResource.h"
@@ -69,7 +69,7 @@ NXS_NAMESPACE
 
         void ReArrangeIndex(FrontFace frontFace);
 
-        void CopyIndices(const std::vector<uint32_t>& indices, size_t offset = 0);
+        void CopyIndices(const Array<uint32_t>& indices, size_t offset = 0);
         void CopyData(const void* data, size_t bytes, size_t offset = 0) override;
 
     private:

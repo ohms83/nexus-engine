@@ -1,4 +1,5 @@
 #include "nexus/task/TaskGroup.h"
+#include "nexus/container/Array.h"
 
 #include <ranges>
 
@@ -42,7 +43,7 @@ void TaskGroup::Merge(TaskGroup& other)
 
 bool TaskGroup::Update()
 {
-    std::vector<Ref<IRunnable>> terminatedTasks;
+    Array<Ref<IRunnable>> terminatedTasks;
     for (auto task : m_tasks)
     {
         if (!task->Update())

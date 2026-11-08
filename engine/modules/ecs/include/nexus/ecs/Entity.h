@@ -2,7 +2,7 @@
 
 #include "nexus/ecs/EcsDefine.h"
 
-#include <vector>
+#include "nexus/container/Array.h"
 #include <ranges>
 
 NXS_NAMESPACE
@@ -159,13 +159,13 @@ NXS_NAMESPACE
         /**
          * @brief Retrieves all components owned by this entity.
          * 
-         * @param outComponents A vector to be populated with pointers to all components.
+         * @param outComponents An Array to be populated with pointers to all components.
          * 
          * @warning DO NOT CACHE THE RETURNED POINTERS. The returned pointers may become invalid if components are removed
          * or if the entity is destroyed. The pointers might also become invalid if the registry is modified in a way that
          * affects component storage (eg., component reordering).
          */
-        void GetAllComponents(std::vector<IComponent*>& outComponents) const
+        void GetAllComponents(Array<IComponent*>& outComponents) const
         {
             for (const auto id : m_components)
             {
@@ -213,7 +213,7 @@ NXS_NAMESPACE
          */
         entt::entity m_entity{};
 
-        const std::vector<ComponentID>& GetRegisteredComponentIDs() const
+        const Array<ComponentID>& GetRegisteredComponentIDs() const
         {
             return m_components;
         }
@@ -227,6 +227,6 @@ NXS_NAMESPACE
          * @brief A list of registered components.
          * The list ensures uniqueness and there will be no component of the same type.
          */
-        std::vector<ComponentID> m_components;
+        Array<ComponentID> m_components;
     };
 }

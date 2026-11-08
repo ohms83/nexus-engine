@@ -5,6 +5,7 @@
 #pragma once
 
 #include "nexus/NxsCommon.h"
+#include "nexus/container/Array.h"
 #include "nexus/core/Color.h"
 #include "nexus/graphics/RenderCommand.h"
 
@@ -20,7 +21,7 @@ NXS_NAMESPACE
         //! Clear gizmos data from the last frame.
         static void Clear();
         static void ProcessDraw(RenderSystem& renderSystem, const glm::mat4& cameraMtx);
-        static void CreateRenderCommands(std::vector<RenderCommand>& outCommands, RenderSystem& renderSystem);
+        static void CreateRenderCommands(Array<RenderCommand>& outCommands, RenderSystem& renderSystem);
         static void DrawPoint(
             const glm::vec3& position,
             const Color3F& color,

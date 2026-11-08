@@ -1,6 +1,7 @@
 #pragma once
 
 #include "nexus/NxsDefine.h"
+#include "nexus/container/Array.h"
 #include "nexus/memory/Buffer.h"
 #include "nexus/serialize/Serializeable.h"
 
@@ -58,7 +59,7 @@ NXS_NAMESPACE
     struct VertexInstanceStream
     {
         Ref<IBuffer> buffer;
-        std::vector<VertexAttribute> attributes;
+        Array<VertexAttribute> attributes;
         BufferUsage usage;
         uint32_t stride;
     };
@@ -133,12 +134,12 @@ NXS_NAMESPACE
         virtual VertexBuffer& SetUsage(BufferUsage usage);
         virtual VertexBuffer& AddAttribute(const VertexAttribute& attribute);
         //! Add an instance data stream with its attributes. The buffer holds per-instance data.
-        virtual VertexBuffer& AddInstanceStream(Ref<IBuffer> instanceData, const std::vector<VertexAttribute>& attributes, BufferUsage usage = BufferUsage::StaticDraw);
-        virtual VertexBuffer& AttachInstanceStream(Ref<IBuffer> instanceData, const std::vector<VertexAttribute>& attributes, BufferUsage usage = BufferUsage::StaticDraw);
+        virtual VertexBuffer& AddInstanceStream(Ref<IBuffer> instanceData, const Array<VertexAttribute>& attributes, BufferUsage usage = BufferUsage::StaticDraw);
+        virtual VertexBuffer& AttachInstanceStream(Ref<IBuffer> instanceData, const Array<VertexAttribute>& attributes, BufferUsage usage = BufferUsage::StaticDraw);
         virtual void DetachInstanceStreams();
         void Build();
 
-        NODISCARD const std::vector<VertexInstanceStream>& GetInstanceStreams() const { return m_instanceStreams; }
+        NODISCARD const Array<VertexInstanceStream>& GetInstanceStreams() const { return m_instanceStreams; }
 
         NODISCARD uint32_t GetStride() const
         {
@@ -150,7 +151,7 @@ NXS_NAMESPACE
             return m_usage;
         }
 
-        NODISCARD const std::vector<VertexAttribute>& GetAttributes() const
+        NODISCARD const Array<VertexAttribute>& GetAttributes() const
         {
             return m_attributes;
         }
@@ -170,11 +171,11 @@ NXS_NAMESPACE
         NODISCARD uint32_t GetAttributeOffset(VertexAttribute::Type type) const;
 
         template<typename T>
-        std::vector<T> GetVertices() const
+        Array<T> GetVertices() const
         {
             static_assert(sizeof(T) == m_stride);
 
-            std::vector<T> result;
+            Array<T> result;
             T* vertex = reinterpret_cast<T*>(m_vertices->Data());
             for (uint32_t index = 0; index < m_vertexCount; index++)
             {
@@ -236,7 +237,7 @@ NXS_NAMESPACE
         uint32_t m_vertexCount = 0;
         Ref<IBuffer> m_vertices;
         BufferUsage m_usage = BufferUsage::StaticDraw;
-        std::vector<VertexAttribute> m_attributes;
-        std::vector<VertexInstanceStream> m_instanceStreams;
+        Array<VertexAttribute> m_attributes;
+        Array<VertexInstanceStream> m_instanceStreams;
     };
 }

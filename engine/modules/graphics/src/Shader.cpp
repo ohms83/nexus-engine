@@ -3,6 +3,7 @@
 //
 
 #include "nexus/graphics/Shader.h"
+#include "nexus/container/Array.h"
 #include "nexus/debug/LogDispatcher.h"
 #include "nexus/core/StringUtil.h"
 
@@ -177,7 +178,7 @@ void Shader::ExtractUniform(std::string_view source)
         if (type == Uniform::Type::Unknown) continue;
 
         // Handle multiple uniform declarations in a single line.
-        std::vector<std::string> names(tokens.begin() + 2, tokens.end());
+        Array<std::string> names(tokens.begin() + 2, tokens.end());
         for (const auto& name : names)
         {
             auto uniformName = name;

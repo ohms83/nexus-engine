@@ -6,6 +6,8 @@
 
 #include "Buffer.h"
 
+#include <type_traits>
+
 NXS_NAMESPACE
 {
     /**
@@ -33,14 +35,14 @@ NXS_NAMESPACE
         explicit BorrowBuffer(uint8_t* data, uint64_t size);
 
         /**
-        * @brief Constructs a borrowing buffer from a std::vector.
-        * @tparam T The element type of the vector.
-        * @param dataList The vector to borrow from.
+        * @brief Constructs a borrowing buffer from a contiguous container.
+        * @tparam Container A container with contiguous storage.
+        * @param dataList The container to borrow from.
         */
-        template<typename T>
-        explicit BorrowBuffer(std::vector<T>& dataList)
+        template<typename Container>
+        explicit BorrowBuffer(Container& dataList)
         {
-            Borrow<T>(dataList);
+            Borrow(dataList);
         }
 
         /**
@@ -56,14 +58,22 @@ NXS_NAMESPACE
         void Borrow(uint8_t* data, uint64_t size);
 
         /**
-        * @brief Sets the buffer to borrow from a std::vector.
-        * @tparam T The element type of the vector.
-        * @param dataList The vector to borrow from.
+        * @brief Sets the buffer to borrow from a contiguous container.
+        * @tparam Container A container with contiguous storage.
+        * @param dataList The container to borrow from.
         */
-        template<typename T>
-        void Borrow(std::vector<T>& dataList)
+        template<typename Container>
+        void Borrow(Container& dataList)
         {
+            using T = typename Container::value_type;
             Borrow(R_CAST<uint8_t*>(dataList.data()), sizeof(T) * dataList.size());
+        }
+
+        template<typename T, typename Container>
+        void Borrow(Container& dataList)
+        {
+            static_assert(std::is_same_v<T, typename Container::value_type>);
+            Borrow(dataList);
         }
 
         NODISCARD bool IsValid() const override

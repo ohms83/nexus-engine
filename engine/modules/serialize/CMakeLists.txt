@@ -15,6 +15,7 @@ target_include_directories(${TARGET_NAME}
 
 target_link_libraries(${TARGET_NAME}
     PRIVATE nexus-config
+    PUBLIC nexus-container
     PRIVATE nexus-core
     PRIVATE nexus-debug
 

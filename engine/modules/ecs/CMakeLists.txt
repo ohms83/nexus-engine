@@ -15,6 +15,7 @@ target_link_libraries(${TARGET_NAME}
     PRIVATE nexus-debug
 
     PUBLIC nexus-config
+    PUBLIC nexus-container
     PUBLIC nexus-reflection
     PUBLIC EnTT
 )

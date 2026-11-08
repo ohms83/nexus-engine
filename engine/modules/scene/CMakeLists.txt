@@ -17,6 +17,7 @@ target_link_libraries(${TARGET_NAME}
     PRIVATE nexus-debug
     PRIVATE nexus-3rdparty
 
+    PUBLIC nexus-container
     PUBLIC nexus-ecs
     PUBLIC nexus-graphics
     PUBLIC nexus-geom

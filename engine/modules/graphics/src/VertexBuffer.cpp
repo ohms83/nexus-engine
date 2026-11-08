@@ -2,6 +2,7 @@
 // Created by nutta on 6/27/2025.
 //
 #include "nexus/graphics/VertexBuffer.h"
+#include "nexus/container/Array.h"
 #include <cstring>
 
 USING_NAMESPACE_NXS;
@@ -83,7 +84,7 @@ VertexBuffer& VertexBuffer::AddAttribute(const VertexAttribute& attribute)
     return *this;
 }
 
-VertexBuffer& VertexBuffer::AddInstanceStream(Ref<IBuffer> instanceData, const std::vector<VertexAttribute>& attributes, BufferUsage usage)
+VertexBuffer& VertexBuffer::AddInstanceStream(Ref<IBuffer> instanceData, const Array<VertexAttribute>& attributes, BufferUsage usage)
 {
     assert(m_hasBuilt);
     VertexInstanceStream s;
@@ -100,7 +101,7 @@ VertexBuffer& VertexBuffer::AddInstanceStream(Ref<IBuffer> instanceData, const s
     return *this;
 }
 
-VertexBuffer& VertexBuffer::AttachInstanceStream(Ref<IBuffer> instanceData, const std::vector<VertexAttribute>& attributes, BufferUsage usage)
+VertexBuffer& VertexBuffer::AttachInstanceStream(Ref<IBuffer> instanceData, const Array<VertexAttribute>& attributes, BufferUsage usage)
 {
     assert(m_hasBuilt);
     VertexInstanceStream s;

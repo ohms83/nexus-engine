@@ -1,6 +1,7 @@
 #pragma once
 
 #include "nexus/NxsDefine.h"
+#include "nexus/container/Array.h"
 #include "nexus/graphics/RenderSystem.h"
 
 NXS_NAMESPACE
@@ -12,7 +13,7 @@ NXS_NAMESPACE
     struct MenuItemList
     {
         std::string menu;
-        std::vector<Ref<MenuItem>> items;
+        Array<Ref<MenuItem>> items;
     };
 
     class Menu
@@ -29,7 +30,7 @@ NXS_NAMESPACE
     private:
         void DrawMenu();
 
-        std::vector<MenuItemList> m_menuItems;
-        std::vector<Ref<EditorWidget>> m_widgets;
+        Array<MenuItemList> m_menuItems;
+        Array<Ref<EditorWidget>> m_widgets;
     };
 }

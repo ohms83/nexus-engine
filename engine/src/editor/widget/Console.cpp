@@ -2,6 +2,7 @@
 // Created by nutta on 7/16/2025.
 //
 #include "editor/widget/Console.h"
+#include "nexus/container/Array.h"
 
 #include <algorithm>
 #include <ranges>
@@ -19,19 +20,19 @@ Console::Console()
     m_scrollToBottom = true;
 
     // Register built-in commands
-    RegisterCommand("help", [this](const std::vector<std::string>& args) {
+    RegisterCommand("help", [this](const Array<std::string>& args) {
         AddMessage("Available commands:");
         for (const auto& key : m_commands | std::views::keys) {
             AddMessage("- " + key);
         }
     });
 
-    RegisterCommand("clear", [this](const std::vector<std::string>& args) {
+    RegisterCommand("clear", [this](const Array<std::string>& args) {
         m_messages.clear();
     });
 
     // Example of a custom command
-    RegisterCommand("echo", [this](const std::vector<std::string>& args) {
+    RegisterCommand("echo", [this](const Array<std::string>& args) {
         if (args.size() > 1) {
             std::string message;
             for (size_t i = 1; i < args.size(); ++i) {
@@ -110,9 +111,9 @@ void Console::RegisterCommand(const std::string& commandName, const CommandHandl
     m_commands[commandName] = handler;
 }
 
-std::vector<std::string> Console::ParseCommand(const std::string& input)
+Array<std::string> Console::ParseCommand(const std::string& input)
 {
-    std::vector<std::string> tokens;
+    Array<std::string> tokens;
     std::stringstream ss(input);
     std::string token;
     while (ss >> token) {
@@ -126,7 +127,7 @@ void Console::HandleCommand()
     const std::string input = m_inputBuffer;
     m_messages.emplace_back("> " + input); // Echo the command
 
-    if (const std::vector<std::string> args = ParseCommand(input); !args.empty())
+    if (const Array<std::string> args = ParseCommand(input); !args.empty())
     {
         std::string commandName = args[0];
         // Convert to lowercase for case-insensitive lookup

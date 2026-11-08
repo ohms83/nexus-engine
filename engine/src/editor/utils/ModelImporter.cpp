@@ -1,4 +1,5 @@
 #include "editor/utils/ModelImporter.h"
+#include "nexus/container/Array.h"
 
 #include "Engine.h"
 
@@ -82,7 +83,7 @@ static std::queue<Ref<IResourceLoader::LoadResult>> PreloadTextures(const aiScen
         if (loadResult) result.push(loadResult);
     }
 
-    std::vector<aiTextureType> aiTextures = {};
+    Array<aiTextureType> aiTextures = {};
     for (const auto& aitTexture : s_textureTypeMap | std::views::keys)
     {
         aiTextures.push_back(aitTexture);
@@ -166,8 +167,8 @@ void ModelImporter::ProcessMesh(Ref<SceneNode> sceneNode, const aiMesh* ai_mesh,
     auto meshComp = sceneNode->AddComponent<MeshComponent>();
     meshComp->SetMesh(newMesh);
     
-    std::vector<Vertex> vertices;
-    std::vector<uint32_t> indices;
+    Array<Vertex> vertices;
+    Array<uint32_t> indices;
     Ref<VertexBuffer> vertexBuffer;
     Ref<IndexBuffer> indexBuffer;
     auto renderingInterface = Engine::Instance().GetRenderingInterface();

@@ -3,6 +3,7 @@
 //
 
 #include "nexus/graphics/Mesh.h"
+#include "nexus/container/Array.h"
 #include "nexus/graphics/RenderingInterface.h"
 #include "nexus/memory/OwningBuffer.h"
 
@@ -17,7 +18,7 @@ namespace
         glm::vec2 texCoord;
     };
 
-    std::vector<Vertex> s_vertices = {
+    Array<Vertex> s_vertices = {
         // Position          Normal             Texcoord0
         {{-0.5f, 0.0f, -0.5f}, { 0.0f, 1.0f, 0.0f }, { 0.0f, 0.0f }},
         {{-0.5f, 0.0f,  0.5f}, { 0.0f, 1.0f, 0.0f }, { 0.0f, 1.0f }},
@@ -25,7 +26,7 @@ namespace
         {{ 0.5f, 0.0f, -0.5f}, { 0.0f, 1.0f, 0.0f }, { 1.0f, 0.0f }},
     };
 
-    std::vector<uint32_t> s_indices = {
+    Array<uint32_t> s_indices = {
         0, 1, 2,
         0, 2, 3,
     };
@@ -37,7 +38,7 @@ Ref<Mesh> PrimitiveMesh::CreatePlane(
     const RenderingInterface& renderingInterface,
     Ref<Material> material)
 {
-    std::vector<Vertex>* vertices = new std::vector<Vertex> {
+    Array<Vertex>* vertices = new Array<Vertex> {
         // Position                             Normal                Texcoord0
         {{-0.5f * width, 0.0f, -0.5f * height}, { 0.0f, 1.0f, 0.0f }, { 0.0f, 0.0f }},
         {{-0.5f * width, 0.0f,  0.5f * height}, { 0.0f, 1.0f, 0.0f }, { 0.0f, 1.0f }},
@@ -57,7 +58,7 @@ Ref<Mesh> PrimitiveMesh::CreatePlane(
         .AddAttribute(VertexAttribute {VertexAttribute::Type::TexCoord0, DataType::Float, 2})
     .Build();
 
-    std::vector<uint32_t>* indices = new std::vector<uint32_t> {
+    Array<uint32_t>* indices = new Array<uint32_t> {
         0, 1, 2,
         0, 2, 3,
     };

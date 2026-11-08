@@ -4,6 +4,7 @@
 #pragma once
 
 #include "nexus/NxsDefine.h"
+#include "nexus/container/Array.h"
 
 #include "Texture.h"
 #include "GraphicsConst.h"
@@ -130,6 +131,6 @@ NXS_NAMESPACE
             std::string uniformName;
             std::string path;
         };
-        std::vector<TextureInfo> m_textures;
+        Array<TextureInfo> m_textures;
     };
 }

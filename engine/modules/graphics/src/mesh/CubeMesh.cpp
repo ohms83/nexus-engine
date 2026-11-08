@@ -1,4 +1,5 @@
 #include "nexus/graphics/Mesh.h"
+#include "nexus/container/Array.h"
 #include "nexus/graphics/RenderingInterface.h"
 #include "nexus/memory/OwningBuffer.h"
 
@@ -14,7 +15,7 @@ namespace
     };
 
     // Vertices for a standard cube (24 vertices for 6 faces * 4 vertices/face)
-    std::vector<Vertex> s_vertices = {
+    Array<Vertex> s_vertices = {
         // Front face (Z+)
         // Position             Normal                 TexCoord
         {{-0.5f, -0.5f,  0.5f}, { 0.0f,  0.0f,  1.0f}, {0.0f, 0.0f}}, // 0
@@ -48,7 +49,7 @@ namespace
         {{-0.5f,  0.5f,  0.5f}, {-1.0f,  0.0f,  0.0f}, {1.0f, 1.0f}}
     };
 
-    std::vector<uint32_t> s_indices = {
+    Array<uint32_t> s_indices = {
         // Front face (Z+): CCW when viewed from +Z
         0, 1, 2,
         0, 2, 3,
@@ -82,7 +83,7 @@ Ref<Mesh> PrimitiveMesh::CreateBox(
     Ref<Material> material)
 {
     // Scale the unit cube vertices by the specified size
-    std::vector<Vertex>* scaledVertices = new std::vector<Vertex>();
+    Array<Vertex>* scaledVertices = new Array<Vertex>();
     scaledVertices->reserve(s_vertices.size());
     for (const auto& v : s_vertices)
     {
@@ -106,7 +107,7 @@ Ref<Mesh> PrimitiveMesh::CreateBox(
         .AddAttribute(VertexAttribute {VertexAttribute::Type::TexCoord0, DataType::Float, 2})
     .Build();
 
-    std::vector<uint32_t>* indices = new std::vector<uint32_t>(s_indices);
+    Array<uint32_t>* indices = new Array<uint32_t>(s_indices);
 
     Ref<IBuffer> indexData = std::make_shared<OwningBuffer>(
         (uint8_t*)indices->data(), sizeof(uint32_t) * indices->size());

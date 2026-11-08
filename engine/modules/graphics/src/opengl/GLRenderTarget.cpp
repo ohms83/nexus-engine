@@ -3,7 +3,7 @@
 #include "nexus/graphics/opengl/GLTexture.h"
 #include "nexus/graphics/opengl/GLRenderingInterface.h"
 #include "nexus/graphics/RenderSystem.h"
-#include <vector>
+#include "nexus/container/Array.h"
 
 USING_NAMESPACE_NXS;
 
@@ -36,7 +36,7 @@ void GLRenderTarget::Bind(RenderSystem& rs)
         m_colorTexture->Begin(desc);
         // Allocate empty texture
         const size_t bytes = desc.GetBufferSize();
-        std::vector<uint8_t> empty(bytes, 0);
+        Array<uint8_t> empty(bytes, 0);
         m_colorTexture->LoadData(empty.data(), INT_CAST(bytes));
         m_colorTexture->End();
 
@@ -47,7 +47,7 @@ void GLRenderTarget::Bind(RenderSystem& rs)
         dd.format = PixelFormat::Depth;
         m_depthTexture->Begin(dd);
         const size_t db = dd.GetBufferSize();
-        std::vector<uint8_t> emptyDepth(db, 0);
+        Array<uint8_t> emptyDepth(db, 0);
         m_depthTexture->LoadData(emptyDepth.data(), INT_CAST(db));
         m_depthTexture->End();
 

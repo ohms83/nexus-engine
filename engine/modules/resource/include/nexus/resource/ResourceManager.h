@@ -4,6 +4,7 @@
 #pragma once
 
 #include <memory>
+#include "nexus/container/Array.h"
 #include <string>
 #include <unordered_map>
 #include <typeindex>
@@ -169,7 +170,7 @@ NXS_NAMESPACE
         ResourceMapList m_cacheMaps;
         LoaderMap m_loaders;
         //! A list of resources that are currently loading.
-        std::vector<Ref<IResourceLoader::LoadResult>> m_loadingResources;
+        Array<Ref<IResourceLoader::LoadResult>> m_loadingResources;
         //! Mutex for thread-safe access to the resource mapes
         mutable std::map<std::type_index, std::mutex> m_mutexMap;
     };

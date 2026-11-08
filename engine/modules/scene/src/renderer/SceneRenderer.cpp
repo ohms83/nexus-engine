@@ -2,6 +2,7 @@
 // Created by nutta on 7/25/2025.
 //
 #include "nexus/scene/renderer/SceneRenderer.h"
+#include "nexus/container/Array.h"
 
 #include <format>
 #include <algorithm>
@@ -76,7 +77,7 @@ bool SceneRenderer::RenderInstancedMesh(RenderSystem& renderSystem, const Render
     Ref<IBuffer> instanceBuffer = std::make_shared<OwningBuffer>(mem, bytes);
 
     // Create instance attributes for mat4 as 4 vec4 attributes (layout locations 10..13)
-    std::vector<VertexAttribute> attrs;
+    Array<VertexAttribute> attrs;
     for (int i = 0; i < 4; ++i)
     {
         VertexAttribute a;
@@ -187,7 +188,7 @@ void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
 {
     rmt_ScopedCPUSample(SceneRenderer_Render, 0);
 
-    std::vector<RenderCommand> commands;
+    Array<RenderCommand> commands;
     commands.reserve(1024);
 
     const auto& registry = *scene.GetRegistry();
@@ -203,7 +204,7 @@ void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
         rmt_BeginCPUSampleDynamic(pass->name.c_str(), 0);
         rmt_BeginOpenGLSampleDynamic(pass->name.c_str());
 
-        std::vector<Ref<ISceneView>> viewPoints;
+        Array<Ref<ISceneView>> viewPoints;
         pass->PopulateSceneView(scene, viewPoints);
 
         for (const auto view : viewPoints)

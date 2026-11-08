@@ -1,6 +1,7 @@
 #ifdef NXS_PLATFORM_WINDOWS
 
 #include "nexus/editor/FileDialog.h"
+#include "nexus/container/Array.h"
 #include "nexus/debug/LogDispatcher.h"
 
 #include <filesystem>
@@ -16,20 +17,21 @@ namespace nxs
     /**
      * @brief Constructs a filter string for the Windows OPENFILENAME structure.
      *
-     * This function takes a vector of ExtFilter objects and creates a single,
+     * This function takes a range of ExtFilter objects and creates a single,
      * double-null-terminated string that is required by the `lpstrFilter` member of
      * the OPENFILENAME structure. The format consists of pairs of null-terminated
      * strings, with the first string in the pair being the display name (e.g., "Image Files")
      * and the second being the filter pattern (e.g., "*.jpg;*.png"). The entire
      * list is terminated by an additional null character.
      *
-     * @param filters A vector of ExtFilter objects to be converted.
+     * @param filters A range of ExtFilter objects to be converted.
      * @param filter A character buffer to write the formatted filter string into.
      * @param filterSize The total size of the `filter` buffer.
      * @return The number of filters successfully added to the string. This might be
      *         less than the input count if the buffer size is insufficient.
      */
-    MAYBE_UNUSED size_t ConstructFilterList(const std::vector<ExtFilter>& filters, char* filter, size_t filterSize)
+    template <typename FilterRange>
+    MAYBE_UNUSED size_t ConstructFilterList(const FilterRange& filters, char* filter, size_t filterSize)
     {
         size_t index = 0;
         size_t numFilter = 0;

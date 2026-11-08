@@ -5,6 +5,7 @@
 //
 
 #include "nexus/serialize/VariantData.h"
+#include "nexus/container/Array.h"
 #include "nexus/debug/LogDispatcher.h"
 
 USING_NAMESPACE_NXS;
@@ -13,12 +14,12 @@ DEFINE_LOG(Serialize);
 
 const VariantData VariantData::None;
 const std::string VariantData::s_emptyStr;
-const std::vector<VariantData> VariantData::s_emptyArray;
+const VariantData::Array VariantData::s_emptyArray;
 const std::map<std::string, VariantData, std::less<>> VariantData::s_emptyMap;
 
 DataType VariantData::GetType() const
 {
-    const std::vector typeMap = {
+    const nxs::Array<DataType> typeMap = {
         // std::monostate
         DataType::None,
         // bool
@@ -29,7 +30,7 @@ DataType VariantData::GetType() const
         DataType::Double,
         // std::string
         DataType::String,
-        // std::vector<VariantData>
+        // Array<VariantData>
         DataType::Array,
         // std::map<std::string, VariantData, std::less<>>
         DataType::Map,

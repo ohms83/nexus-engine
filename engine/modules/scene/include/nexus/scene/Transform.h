@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <vector>
+#include "nexus/container/Array.h"
 #include "nexus/NxsCommon.h"
 
 NXS_NAMESPACE
@@ -86,7 +86,7 @@ NXS_NAMESPACE
 
     private:
         Transform* m_parent = nullptr;
-        std::vector<Transform*> m_children;
+        Array<Transform*> m_children;
 
         glm::vec3 m_position{};
         glm::quat m_orientation{ 1, 0, 0, 0 };

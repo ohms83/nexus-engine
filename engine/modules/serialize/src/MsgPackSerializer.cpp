@@ -2,6 +2,7 @@
 // Created by nutta on 8/1/2025.
 //
 #include "nexus/serialize/MsgPackSerializer.h"
+#include "nexus/container/Array.h"
 #include <msgpack.hpp>
 
 USING_NAMESPACE_NXS;
@@ -37,8 +38,16 @@ namespace adaptor {// Place class template specialization here
                 data = VariantData(o.as<std::string>());
                 break;
             case msgpack::type::ARRAY:
-                data = VariantData(o.as<VariantData::Array>());
+            {
+                VariantData::Array array;
+                array.reserve(o.via.array.size);
+                for (uint32_t i = 0; i < o.via.array.size; ++i)
+                {
+                    array.emplace_back(o.via.array.ptr[i].as<nxs::VariantData>());
+                }
+                data = VariantData(std::move(array));
                 break;
+            }
             case msgpack::type::MAP:
                 data = VariantData(o.as<VariantData::Map>());
                 break;
@@ -99,8 +108,15 @@ namespace adaptor {// Place class template specialization here
                 o.pack(data.GetString());
                 break;
             case DataType::Array:
-                o.pack(data.GetArray());
+            {
+                const auto& array = data.GetArray();
+                o.pack_array(array.size());
+                for (const auto& value : array)
+                {
+                    o.pack(value);
+                }
                 break;
+            }
             case DataType::Map:
                 o.pack(data.GetMap());
                 break;
@@ -124,7 +140,7 @@ std::ostream& MsgPackSerializer::Pack(const VariantData& source, std::ostream& o
 VariantData MsgPackSerializer::Unpack(std::istream& inStream) const
 {
     // copies all data into buffer
-    const std::vector buffer(std::istreambuf_iterator<char>(inStream), {});
+    const Array<char> buffer(std::istreambuf_iterator<char>(inStream), {});
     const char* data = buffer.data();
     const size_t size = buffer.size();
     return msgpack::unpack(data, size).get().as<VariantData>();

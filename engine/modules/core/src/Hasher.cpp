@@ -2,6 +2,7 @@
 // Created by nutta on 7/10/2025.
 //
 #include "nexus/core/Hasher.h"
+#include "nexus/container/Array.h"
 
 // Important: tells xxHash you're building it directly into your executable
 #define XXH_INLINE_ALL
@@ -21,7 +22,7 @@ uint32_t Hasher::Hash32(const void* data, const size_t size) const
     return XXH32(data, size, m_seed);
 }
 
-uint32_t Hasher::Hash32(const std::vector<uint8_t>& buffer) const
+uint32_t Hasher::Hash32(const Array<uint8_t>& buffer) const
 {
     return XXH32(buffer.data(), buffer.size() * sizeof(uint8_t), m_seed);
 }

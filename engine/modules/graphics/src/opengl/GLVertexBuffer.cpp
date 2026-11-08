@@ -3,6 +3,7 @@
 //
 
 #include "nexus/graphics/opengl/GLVertexBuffer.h"
+#include "nexus/container/Array.h"
 #include "nexus/graphics/opengl/GLGpuBuffer.h"
 
 #include "Remotery.h"
@@ -152,7 +153,7 @@ void GLVertexBuffer::Release()
     m_instanceVBOs.clear();
 }
 
-VertexBuffer& GLVertexBuffer::AttachInstanceStream(Ref<IBuffer> instanceData, const std::vector<VertexAttribute>& attributes, BufferUsage usage)
+VertexBuffer& GLVertexBuffer::AttachInstanceStream(Ref<IBuffer> instanceData, const Array<VertexAttribute>& attributes, BufferUsage usage)
 {
     VertexInstanceStream s; s.buffer = instanceData; s.attributes = attributes; s.usage = usage; s.stride = 0; for (const auto &a : attributes) s.stride += NxsDataTypeSize(a.dataType) * a.numElements;
     m_instanceStreamsLocal.push_back(std::move(s));

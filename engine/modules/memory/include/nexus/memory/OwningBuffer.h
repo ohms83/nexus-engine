@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <type_traits>
 #include "Buffer.h"
 
 NXS_NAMESPACE
@@ -75,14 +76,22 @@ NXS_NAMESPACE
         uint64_t CopyData(uint8_t* data, uint64_t bytes, uint64_t offset = 0) override;
 
         /**
-         * @brief Copies the content of a std::vector into the buffer.
-         * @tparam T The element type of the vector.
-         * @param dataList The vector containing the data to copy.
+         * @brief Copies the content of a contiguous container into the buffer.
+         * @tparam Container A container with contiguous storage.
+         * @param dataList The container containing the data to copy.
          */
-        template<typename T>
-        void Copy(std::vector<T>& dataList)
+        template<typename Container>
+        void Copy(Container& dataList)
         {
+            using T = typename Container::value_type;
             CopyData(R_CAST<uint8_t*>(dataList.data()), sizeof(T) * dataList.size(), 0);
+        }
+
+        template<typename T, typename Container>
+        void Copy(Container& dataList)
+        {
+            static_assert(std::is_same_v<T, typename Container::value_type>);
+            Copy(dataList);
         }
 
         /**

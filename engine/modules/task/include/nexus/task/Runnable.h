@@ -5,6 +5,7 @@
 #pragma once
 
 #include "nexus/NxsDefine.h"
+#include "nexus/container/Array.h"
 #include "sigslot/signal.hpp"
 
 NXS_NAMESPACE
@@ -59,5 +60,5 @@ NXS_NAMESPACE
      */
     using TaskCallback = sigslot::signal<Ref<IRunnable>>;
 
-    using TaskList = std::vector<Ref<IRunnable>>;
+    using TaskList = Array<Ref<IRunnable>>;
 }

@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <vector>
+#include "nexus/container/Array.h"
 
 #include "nexus/NxsDefine.h"
 #include "EditorWidget.h"
@@ -20,7 +20,7 @@ NXS_NAMESPACE
         void Draw_Internal(RenderSystem& renderSystem) override;
 
     private:
-        std::vector<uint32_t> m_frameTimes;
-        std::vector<uint32_t> m_frameCounters;
+        Array<uint32_t> m_frameTimes;
+        Array<uint32_t> m_frameCounters;
     };
 }

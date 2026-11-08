@@ -1,4 +1,5 @@
 #include "nexus/serialize/JsonSerializer.h"
+#include "nexus/container/Array.h"
 #include "rapidjson/document.h"
 #include "rapidjson/writer.h"
 #include "rapidjson/stringbuffer.h"
@@ -43,7 +44,7 @@ namespace
             for( const auto& elem : value.GetArray() ) {
                 serializeArray.emplace_back(FromJson(elem));
             }
-            return serializeArray; // Use std::vector<VariantData> constructor
+            return serializeArray; // Use Array<VariantData> constructor
         }
         if(value.IsObject()) {
             VariantData::Map serializeMap;

@@ -14,7 +14,7 @@
 
 #include <functional>
 #include <string>
-#include <vector>
+#include "nexus/container/Array.h"
 #include <cstdint>
 
 #define RENDER_PASS_DEPTH_FILL  0
@@ -94,7 +94,7 @@ NXS_NAMESPACE
          */
         std::string offscreenTargetName;
         //! A list of offscreen render targets that this pass reads/samples from
-        std::vector<std::string> readTargets;
+        Array<std::string> readTargets;
 
         // Clear
         ClearFlags clearFlags = ClearFlags::None;
@@ -120,7 +120,7 @@ NXS_NAMESPACE
         std::function<void(RenderSystem&)> onEnd = nullptr;
 
         // Attachments and other advanced settings
-        std::vector<AttachmentDesc> attachments;
+        Array<AttachmentDesc> attachments;
 
         // Optional layer mask filtering. 0 => all layers.
         uint32_t layerMask = 0;
@@ -163,8 +163,8 @@ NXS_NAMESPACE
             return !filter || filter(cmd);
         }
 
-        virtual void PopulateSceneView(const SceneNode& scene, std::vector<Ref<ISceneView>>& outViews) const;
-        virtual void PrepareRenderCommands(const SceneNode& scene, const ISceneView& view, std::vector<RenderCommand>& outCommands) const;
+        virtual void PopulateSceneView(const SceneNode& scene, Array<Ref<ISceneView>>& outViews) const;
+        virtual void PrepareRenderCommands(const SceneNode& scene, const ISceneView& view, Array<RenderCommand>& outCommands) const;
         virtual bool IsPassFiltered(Ref<const Mesh> mesh) const { return false; }
 
         RenderCommand CreateRenderCommand(Ref<const Mesh> mesh, const glm::mat4 &modelMtx, const glm::mat4& mvpMtx) const;
@@ -198,7 +198,7 @@ NXS_NAMESPACE
         RenderPassBuilder& FilterType(const std::string& t) { pass.SetFilterType(t); return *this; }
         RenderPassBuilder& TargetType(RenderTargetType t) { pass.targetType = t; return *this; }
         RenderPassBuilder& OffscreenTargetName(const std::string& name) { pass.offscreenTargetName = name; return *this; }
-        RenderPassBuilder& ReadTargets(const std::vector<std::string>& targets) { pass.readTargets = targets; return *this; }
+        RenderPassBuilder& ReadTargets(const Array<std::string>& targets) { pass.readTargets = targets; return *this; }
         RenderPassBuilder& LayerMask(uint32_t mask) { pass.layerMask = mask; return *this; }
         RenderPassBuilder& BlendMode(BlendMode mode) { pass.pipelineState.overrideBlendMode = mode; return *this; }
         /**

@@ -5,7 +5,7 @@
 #include <map>
 #include <string>
 #include <sstream>
-#include <vector>
+#include "nexus/container/Array.h"
 #include <optional>
 
 #include "nexus/debug/LogDispatcher.h"
@@ -211,15 +211,15 @@ NXS_NAMESPACE
          * @brief Splits a string into a vector of substrings based on multiple delimiters.
          * @param str The input string_view to split.
          * @param delimiters A string_view containing characters that act as delimiters.
-         * @return A @c std::vector of @c std::string objects, where each string is a token
+         * @return A @c Array of @c std::string objects, where each string is a token
          * separated by any of the specified delimiters.
          * @code
          * std::string_view data = "alpha,beta;gamma,delta";
-         * std::vector<std::string> tokens = nxs::StrUtil::Split(data, ",;");
+         * Array<std::string> tokens = nxs::StrUtil::Split(data, ",;");
          * // tokens will contain {"alpha", "beta", "gamma", "delta"}
          * @endcode
          */
-        static std::vector<std::string> Split(std::string_view str, std::string_view delimiters);
+        static Array<std::string> Split(std::string_view str, std::string_view delimiters);
 
         /**
          * @brief Splits a string into a vector of substrings based on a single character delimiter.
@@ -227,15 +227,15 @@ NXS_NAMESPACE
          * Leverages C++20's @c <ranges> library.
          * @param str The input string_view to split.
          * @param delimiter The single character to use as a delimiter.
-         * @return A @c std::vector of @c std::string objects, where each string is a token
+         * @return A @c Array of @c std::string objects, where each string is a token
          * separated by the delimiter.
          * @code
          * std::string_view csv = "header1,header2,header3";
-         * std::vector<std::string> headers = nxs::StrUtil::Split(csv, ',');
+         * Array<std::string> headers = nxs::StrUtil::Split(csv, ',');
          * // headers will contain {"header1", "header2", "header3"}
          * @endcode
          */
-        static std::vector<std::string> Split(std::string_view str, char delimiter);
+        static Array<std::string> Split(std::string_view str, char delimiter);
 
         /**
          * @brief Parses a string into a specified type using @c std::istringstream.

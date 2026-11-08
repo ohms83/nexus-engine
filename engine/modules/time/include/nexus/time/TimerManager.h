@@ -5,6 +5,7 @@
 #pragma once
 
 #include "nexus/NxsDefine.h"
+#include "nexus/container/Array.h"
 
 #include "StandardTimeSource.h"
 #include "Timer.h"
@@ -49,9 +50,9 @@ NXS_NAMESPACE
         double GetDeltaTime() const { return m_globalTimer->GetDeltaTime(); }
 
     private:
-        std::vector<Ref<Timer>> m_timers;
+        Array<Ref<Timer>> m_timers;
         //! A list of one-shot timers.
-        std::vector<Ref<Timer>> m_oneShotTimers;
+        Array<Ref<Timer>> m_oneShotTimers;
         Ref<Timer> m_globalTimer;
     };
 }

@@ -6,7 +6,7 @@
 #include <unordered_map>
 #include <atomic>
 #include <format>
-#include <vector>
+#include "nexus/container/Array.h"
 #include <algorithm>
 #include <string>
 
@@ -69,17 +69,17 @@ NXS_NAMESPACE
         if (!s_isEnabled) return;
 
         // Create top-N lists for programs and materials
-        std::vector<std::pair<uint32_t, uint32_t>> progList;
+        Array<std::pair<uint32_t, uint32_t>> progList;
         progList.reserve(s_frame.programDraws.size());
         for (auto &p : s_frame.programDraws) progList.emplace_back(p.first, p.second);
         std::sort(progList.begin(), progList.end(), [](auto &a, auto &b){ return a.second > b.second; });
 
-        std::vector<std::pair<uint32_t, MaterialDrawData>> matList;
+        Array<std::pair<uint32_t, MaterialDrawData>> matList;
         matList.reserve(s_frame.materialDraws.size());
         for (auto &m : s_frame.materialDraws) matList.emplace_back(m.first, m.second);
         std::sort(matList.begin(), matList.end(), [](auto &a, auto &b){ return a.second.useCount > b.second.useCount; });
 
-        std::vector<std::pair<uint32_t, uint32_t>> matSwitchingList;
+        Array<std::pair<uint32_t, uint32_t>> matSwitchingList;
         matSwitchingList.reserve(s_frame.materialSwitch.size());
         for (auto &p : s_frame.materialSwitch) matSwitchingList.emplace_back(p.first, p.second);
         std::sort(matSwitchingList.begin(), matSwitchingList.end(), [](auto &a, auto &b){ return a.second > b.second; });

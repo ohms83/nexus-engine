@@ -7,7 +7,7 @@
 #include "Mesh.h"
 #include "RenderSystem.h"
 
-#include <vector>
+#include "nexus/container/Array.h"
 
 struct aiMaterial;
 struct aiMesh;
@@ -36,7 +36,7 @@ NXS_NAMESPACE
 
         void AddMesh(const Ref<Mesh>& mesh);
 
-        const std::vector<Ref<Mesh>>& GetMeshes() const
+        const Array<Ref<Mesh>>& GetMeshes() const
         {
             return m_meshes;
         }
@@ -60,7 +60,7 @@ NXS_NAMESPACE
         std::string DumpStats() const;
 
     private:
-        std::vector<Ref<Mesh>> m_meshes;
+        Array<Ref<Mesh>> m_meshes;
         //! The smallest bounding sphere that can cover the entire model.
         Sphere m_sphere {};
         //! The smallest bounding-box's that can cover the entire model.

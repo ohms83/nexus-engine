@@ -5,6 +5,7 @@
 #pragma once
 
 #include "nexus/NxsCommon.h"
+#include "nexus/container/Array.h"
 #include "nexus/geom/Sphere.h"
 
 #include "IndexBuffer.h"
@@ -61,7 +62,7 @@ NXS_NAMESPACE
         // Per-instance/model matrix: pointer because many commands share the same matrix
         glm::mat4 modelMatrix;
         // For batched commands with multiple instances, store a list of model matrices.
-        std::vector<glm::mat4> instanceModels;
+        Array<glm::mat4> instanceModels;
 
         // Bounding volume for frustum culling and sorting
         Sphere bounds;

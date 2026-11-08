@@ -1,4 +1,5 @@
 #include "nexus/scene/renderpass/RenderPass.h"
+#include "nexus/container/Array.h"
 
 #include "nexus/graphics/RenderSystem.h"
 #include "nexus/serialize/Serializer.h"
@@ -274,7 +275,7 @@ RenderCommand RenderPass::CreateRenderCommand(Ref<const Mesh> mesh, const glm::m
     return cmd;
 }
 
-void RenderPass::PopulateSceneView(const SceneNode& scene, std::vector<Ref<ISceneView>>& outViews) const
+void RenderPass::PopulateSceneView(const SceneNode& scene, Array<Ref<ISceneView>>& outViews) const
 {
     rmt_ScopedCPUSample(RenderPass_PopulateSceneView, 0);
     const auto& registry = *scene.GetRegistry();
@@ -287,7 +288,7 @@ void RenderPass::PopulateSceneView(const SceneNode& scene, std::vector<Ref<IScen
     }
 }
 
-void RenderPass::PrepareRenderCommands(const SceneNode &scene, const ISceneView &view, std::vector<RenderCommand>& outCommands) const
+void RenderPass::PrepareRenderCommands(const SceneNode &scene, const ISceneView &view, Array<RenderCommand>& outCommands) const
 {
     rmt_ScopedCPUSample(RenderPass_PrepareRenderCommands, 0);
     const auto& registry = *scene.GetRegistry();
