@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include <cassert>
-
 #include "nexus/NxsCommon.h"
 #include "nexus/ApplicationContext.h"
 #include "nexus/core/Color.h"
@@ -50,23 +48,69 @@ NXS_NAMESPACE
         void SetClearDepth(float depth) { m_pipelineState.clearDepth = depth; }
         NODISCARD float GetClearDepth() const { return m_pipelineState.clearDepth; }
 
-        virtual void ClearColor(const Color4F& color) = 0;
-        virtual void ClearDepth(float depth) = 0;
-        virtual void ClearBuffer(const Color4F& color, float depth) = 0;
+        virtual void ClearColor(const Color4F& color)
+        {
+            NXS_ASSERT_MSG(false, "ClearColor not implemented for this graphics API.");
+        }
 
-        virtual void SwapBuffer() = 0;
+        virtual void ClearDepth(float depth)
+        {
+            NXS_ASSERT_MSG(false, "ClearDepth not implemented for this graphics API.");
+        }
 
-        virtual void SetViewport(int32_t x, int32_t y, int32_t w, int32_t h) = 0;
+        virtual void ClearBuffer(const Color4F& color, float depth)
+        {
+            NXS_ASSERT_MSG(false, "ClearBuffer not implemented for this graphics API.");
+        }
 
-        NODISCARD virtual VertexBuffer* CreateVertexBuffer() const = 0;
-        NODISCARD virtual IndexBuffer* CreateIndexBuffer() const = 0;
-        NODISCARD virtual GpuProgram* CreateGpuProgram() const = 0;
-        NODISCARD virtual TextureProxy* CreateTexture() const = 0;
+        virtual void SwapBuffer()
+        {
+            NXS_ASSERT_MSG(false, "SwapBuffer not implemented for this graphics API.");
+        }
 
-        virtual void OnResize(uint32_t pixel_w, uint32_t pixel_h) = 0;
+        virtual void SetViewport(int32_t x, int32_t y, int32_t w, int32_t h)
+        {
+            NXS_ASSERT_MSG(false, "SetViewport not implemented for this graphics API.");
+        }
 
-        virtual void DrawIndexed(const Ref<IndexBuffer> indexBuffer) = 0;
-        virtual void DrawIndexedInstanced(const Ref<IndexBuffer> indexBuffer, uint32_t instanceCount) = 0;
+        NODISCARD virtual VertexBuffer* CreateVertexBuffer() const
+        {
+            NXS_ASSERT_MSG(false, "CreateVertexBuffer not implemented for this graphics API.");
+            return nullptr;
+        }
+
+        NODISCARD virtual IndexBuffer* CreateIndexBuffer() const
+        {
+            NXS_ASSERT_MSG(false, "CreateIndexBuffer not implemented for this graphics API.");
+            return nullptr;
+        }
+
+        NODISCARD virtual GpuProgram* CreateGpuProgram() const
+        {
+            NXS_ASSERT_MSG(false, "CreateGpuProgram not implemented for this graphics API.");
+            return nullptr;
+        }
+
+        NODISCARD virtual TextureProxy* CreateTexture() const
+        {
+            NXS_ASSERT_MSG(false, "CreateTexture not implemented for this graphics API.");
+            return nullptr;
+        }
+
+        virtual void OnResize(uint32_t pixel_w, uint32_t pixel_h)
+        {
+            NXS_ASSERT_MSG(false, "OnResize not implemented for this graphics API.");
+        }
+
+        virtual void DrawIndexed(const Ref<IndexBuffer> indexBuffer)
+        {
+            NXS_ASSERT_MSG(false, "DrawIndexed not implemented for this graphics API.");
+        }
+
+        virtual void DrawIndexedInstanced(const Ref<IndexBuffer> indexBuffer, uint32_t instanceCount)
+        {
+            NXS_ASSERT_MSG(false, "DrawIndexedInstanced not implemented for this graphics API.");
+        }
 
         NODISCARD GraphicsAPI GetAPI() const
         {
@@ -107,18 +151,24 @@ NXS_NAMESPACE
         NODISCARD Ref<GpuProgram> GetGlobalShader() const { return m_pipelineState.globalShader; }
         void SetGlobalShader(Ref<GpuProgram> shader) { m_pipelineState.globalShader = std::move(shader); }
 
-        virtual void EnableDrawBuffer(DrawBuffer buffer) = 0;
+        virtual void EnableDrawBuffer(DrawBuffer buffer)
+        {
+            NXS_ASSERT_MSG(false, "EnableDrawBuffer not implemented for this graphics API.");
+        }
 
-        virtual void DebugMarker(const std::string& message) = 0;
+        virtual void DebugMarker(const std::string& message)
+        {
+            NXS_ASSERT_MSG(false, "DebugMarker not implemented for this graphics API.");
+        }
 
     protected:
         RenderingInterface() = default;
         virtual ~RenderingInterface();
 
     protected:
-        RenderContext m_renderContext{};
+        RenderContext m_renderContext {};
         GraphicsAPI m_graphicsAPI = GraphicsAPI::Undefined;
-        PipelineState m_pipelineState{
+        PipelineState m_pipelineState {
             .depthFunction = DepthFunction::None,
         };
     };
