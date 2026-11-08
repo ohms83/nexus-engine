@@ -43,6 +43,13 @@ NXS_NAMESPACE
         void ApplyPipelineState(const PipelineState& state);
         const PipelineState& GetPipelineState() const { return m_pipelineState; }
 
+        void SetClearColor(const Color4F& color) { m_pipelineState.clearColor = color; }
+        void SetClearColor(uint32_t rgba) { m_pipelineState.clearColor = rgba; }
+        NODISCARD const Color4F& GetClearColor() const { return m_pipelineState.clearColor; }
+
+        void SetClearDepth(float depth) { m_pipelineState.clearDepth = depth; }
+        NODISCARD float GetClearDepth() const { return m_pipelineState.clearDepth; }
+
         virtual void ClearColor(const Color4F& color) = 0;
         virtual void ClearDepth(float depth) = 0;
         virtual void ClearBuffer(const Color4F& color, float depth) = 0;

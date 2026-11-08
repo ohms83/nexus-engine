@@ -177,7 +177,7 @@ protected:
     {
         auto& renderSystem = GetRenderSystem();
         const auto renderInterface = renderSystem.GetRenderInterface();
-        renderSystem.SetClearColor(0x303030ff);
+        renderSystem.GetRenderInterface()->SetClearColor(0x303030ff);
 
         m_gpuProgram.reset(renderInterface->CreateGpuProgram());
         m_gpuProgram->BeginCompile()

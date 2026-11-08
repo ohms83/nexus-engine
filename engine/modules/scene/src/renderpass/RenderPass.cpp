@@ -30,11 +30,10 @@ void RenderPass::ReleaseResources()
 
 void RenderPass::Begin(RenderSystem& rs) const
 {
-    // Pipeline state using RenderSystem caching to avoid redundant state flips
-    // NOTE: Pipeline state should be applied before anything.
-    rs.ApplyPipelineState(pipelineState);
-
     auto renderInterface = rs.GetRenderInterface();
+    // NOTE: Pipeline state should be applied before anything.
+    renderInterface->ApplyPipelineState(pipelineState);
+
     renderInterface->DebugMarker(name);
     // Offscreen target is bound by the caller (SceneRenderer/RenderSystem).
     // Clear
@@ -56,8 +55,7 @@ void RenderPass::Begin(RenderSystem& rs) const
         // Stencil: Not supported yet by the generic interface. Add later if needed.
     }
 
-    // Set global shader override via RenderSystem to allow caching
-    rs.SetGlobalShader(pipelineState.globalShader ? pipelineState.globalShader : nullptr);
+    renderInterface->SetGlobalShader(pipelineState.globalShader);
 
     // Hook
     if (onBegin) onBegin(rs);
@@ -66,7 +64,7 @@ void RenderPass::Begin(RenderSystem& rs) const
 void RenderPass::End(RenderSystem& rs) const
 {
     // Reset the global shader.
-    rs.SetGlobalShader(nullptr);
+    rs.GetRenderInterface()->SetGlobalShader(nullptr);
     // Offscreen target is unbound by the caller (SceneRenderer/RenderSystem).
     // Hook
     if (onEnd) onEnd(rs);

@@ -127,7 +127,7 @@ bool NexusEditor::Init_Internal()
     auto& engine = nxs::Engine::Instance();
 
     auto& renderSystem = GetRenderSystem();
-    renderSystem.SetClearColor(0x303030ff);
+    renderSystem.GetRenderInterface()->SetClearColor(0x303030ff);
 
     auto sceneManager = engine.GetSceneManager();
     auto scene = sceneManager->EmplaceAndChange<nxs::Scene>("Editor Scene");

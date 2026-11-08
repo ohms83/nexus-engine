@@ -147,7 +147,7 @@ protected:
     {
         auto& renderSystem = GetRenderSystem();
         const auto renderInterface = renderSystem.GetRenderInterface();
-        renderSystem.SetClearColor(0x303030ff);
+        renderSystem.GetRenderInterface()->SetClearColor(0x303030ff);
 
         const auto vertexData = std::make_shared<nxs::BorrowBuffer>(cubeVertices);
         m_vertexBuffer.reset(renderInterface->CreateVertexBuffer());

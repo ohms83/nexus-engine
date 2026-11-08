@@ -6,7 +6,6 @@
 #include "nexus/debug/LogDispatcher.h"
 #include "nexus/core/Color.h"
 #include "RenderingInterface.h"
-#include "PipelineState.h"
 
 NXS_NAMESPACE
 {
@@ -19,31 +18,6 @@ NXS_NAMESPACE
         ~RenderSystem();
 
         void ClearScreen() const;
-
-        void SetClearColor(const Color4F& color)
-        {
-            m_cachedPipelineState.clearColor = color;
-        }
-
-        void SetClearColor(const uint32_t rgba)
-        {
-            m_cachedPipelineState.clearColor = rgba;
-        }
-
-        NODISCARD const Color4F& GetClearColor() const
-        {
-            return m_cachedPipelineState.clearColor;
-        }
-
-        void SetClearDepth(const float depth)
-        {
-            m_cachedPipelineState.clearDepth = depth;
-        }
-
-        NODISCARD float GetClearDepth() const
-        {
-            return m_cachedPipelineState.clearDepth;
-        }
 
         void BeginDraw();
         void Draw();
@@ -94,17 +68,10 @@ NXS_NAMESPACE
             return m_config;
         }
 
-        //! Apply pipeline state with minimal redundant state transitions.
-        void ApplyPipelineState(const PipelineState& state);
-        void SetGlobalShader(Ref<GpuProgram> shader);
-
     protected:
         //! Graphics configuration used to initialize the rendering interface.
         GraphicsConfig m_config;
         Ref<RenderingInterface> m_renderingInterface;
-
-        // State cache to reduce redundant calls to the rendering backend
-        PipelineState m_cachedPipelineState{};
 
         uint32_t m_frameIndex = 0;
         uint32_t m_drawCount = 0;

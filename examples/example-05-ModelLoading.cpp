@@ -158,7 +158,7 @@ protected:
     {
         auto& renderSystem = GetRenderSystem();
         const auto renderInterface = renderSystem.GetRenderInterface();
-        renderSystem.SetClearColor(0x303030ff);
+        renderSystem.GetRenderInterface()->SetClearColor(0x303030ff);
 
         const auto engine = nxs::Engine::Instance();
         m_modelLoader = std::make_unique<nxs::ModelLoader>(

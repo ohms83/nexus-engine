@@ -77,7 +77,7 @@ protected:
     {
         auto& renderSystem = GetRenderSystem();
         const auto renderInterface = renderSystem.GetRenderInterface();
-        renderSystem.SetClearColor({0.2f, 0.3f, 0.3f, 1.0f});
+        renderSystem.GetRenderInterface()->SetClearColor({0.2f, 0.3f, 0.3f, 1.0f});
 
         const auto vertexData = std::make_shared<nxs::BorrowBuffer>(squareVertices);
         m_vertexBuffer.reset(renderInterface->CreateVertexBuffer());

@@ -38,8 +38,8 @@ void RenderSystem::ClearScreen() const
 {
     rmt_ScopedCPUSample(RenderSystem_ClearScreen, 0);
     m_renderingInterface->ClearBuffer(
-        m_cachedPipelineState.clearColor,
-        m_cachedPipelineState.clearDepth
+        m_renderingInterface->GetClearColor(),
+        m_renderingInterface->GetClearDepth()
     );
 }
 
@@ -96,59 +96,4 @@ void RenderSystem::OnResize(const uint32_t pixel_w, const uint32_t pixel_h)
     m_config.screenWidth = CAST<int>(pixel_w);
     m_config.screenHeight = CAST<int>(pixel_h);
     m_renderingInterface->OnResize(pixel_w, pixel_h);
-}
-
-void RenderSystem::ApplyPipelineState(const PipelineState& state)
-{
-    const DepthFunction depthFunction = state.depthTest ? state.depthFunction : DepthFunction::None;
-    if (m_cachedPipelineState.depthFunction != depthFunction)
-    {
-        m_renderingInterface->SetDepthFunction(depthFunction);
-        m_cachedPipelineState.depthFunction = depthFunction;
-    }
-
-    if (m_cachedPipelineState.depthWrite != state.depthWrite)
-    {
-        m_renderingInterface->SetDepthWrite(state.depthWrite);
-        m_cachedPipelineState.depthWrite = state.depthWrite;
-    }
-
-    if (m_cachedPipelineState.overrideBlendMode != state.overrideBlendMode)
-    {
-        m_renderingInterface->SetBlendMode(state.overrideBlendMode);
-        m_cachedPipelineState.overrideBlendMode = state.overrideBlendMode;
-    }
-
-    if (m_cachedPipelineState.polygonMode != state.polygonMode)
-    {
-        m_renderingInterface->SetPolygonMode(state.polygonMode);
-        m_cachedPipelineState.polygonMode = state.polygonMode;
-    }
-
-    if (m_cachedPipelineState.cullMode != state.cullMode)
-    {
-        m_renderingInterface->SetCullMode(state.cullMode);
-        m_cachedPipelineState.cullMode = state.cullMode;
-    }
-
-    if (m_cachedPipelineState.frontFace != state.frontFace)
-    {
-        m_renderingInterface->SetFrontFace(state.frontFace);
-        m_cachedPipelineState.frontFace = state.frontFace;
-    }
-
-    if (m_cachedPipelineState.globalShader != state.globalShader)
-    {
-        m_renderingInterface->SetGlobalShader(state.globalShader);
-        m_cachedPipelineState.globalShader = state.globalShader;
-    }
-}
-
-void RenderSystem::SetGlobalShader(Ref<GpuProgram> shader)
-{
-    if (m_cachedPipelineState.globalShader != shader)
-    {
-        m_renderingInterface->SetGlobalShader(shader);
-        m_cachedPipelineState.globalShader = shader;
-    }
 }
