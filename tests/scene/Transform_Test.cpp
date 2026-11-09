@@ -5,6 +5,27 @@
 #include <string>
 #include <iomanip>
 
+TEST(TransformComponentTest, DefaultsAreNeutralAndValid)
+{
+    const nxs::PositionComponent position;
+    EXPECT_EQ(position.value, glm::vec3(0.0f));
+
+    const nxs::OrientationComponent orientation;
+    EXPECT_EQ(orientation.quat, glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
+    EXPECT_EQ(orientation.euler, glm::vec3(0.0f));
+
+    const nxs::ScaleComponent scale;
+    EXPECT_EQ(scale.value, glm::vec3(1.0f));
+
+    const nxs::MoveComponent move;
+    EXPECT_EQ(move.direction, glm::vec3(0.0f));
+    EXPECT_FLOAT_EQ(move.speed, 0.0f);
+
+    const nxs::TurningComponent turning;
+    EXPECT_EQ(turning.axis, glm::vec3(0.0f, 1.0f, 0.0f));
+    EXPECT_FLOAT_EQ(turning.degree, 0.0f);
+}
+
 std::string FormatVector(const glm::vec3& vec)
 {
     return std::format("({}, {}, {}) Length={}", vec.x, vec.y, vec.z, glm::length(vec));

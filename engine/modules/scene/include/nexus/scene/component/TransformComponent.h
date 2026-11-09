@@ -36,7 +36,7 @@ NXS_NAMESPACE
             return true;
         }
 
-        glm::vec3 value;
+        glm::vec3 value {0, 0, 0};
 
         void Translate(const glm::vec3& translation)
         {
@@ -84,7 +84,7 @@ NXS_NAMESPACE
         }
 
         /// @brief The Quaternion (main source of truth) used for all transformations.
-        glm::quat quat;
+        glm::quat quat = glm::quat(1, 0, 0, 0);
 
         /**
          * @brief Euler angles in Pitch, Yaw, Roll order (in degrees).
@@ -93,7 +93,7 @@ NXS_NAMESPACE
          * will create a desync with the primary @c quat and lead to errors.
          * Use @c FromEuler, @c Rotate, or @c LookAt to safely update the orientation.
          */
-        glm::vec3 euler;
+        glm::vec3 euler {0, 0, 0};
 
         /**
          * @brief Initializes the orientation from the specified Euler angles.
@@ -217,7 +217,7 @@ NXS_NAMESPACE
             return true;
         }
 
-        glm::vec3 direction;
+        glm::vec3 direction {0, 0, 0};
         float speed = 0;
     };
 
@@ -254,7 +254,7 @@ NXS_NAMESPACE
         }
 
         //! Rotation axis
-        glm::vec3 axis;
+        glm::vec3 axis {0, 1, 0};
         //! Rotation speed in degree per second
         float degree = 0;
     };
