@@ -46,8 +46,27 @@ NXS_NAMESPACE
          */
         void RegisterLoader(std::type_index type, Ptr<IResourceLoader> loader);
 
+        /**
+         * @brief Retrieves a resource from the cache, loading and caching it if necessary.
+         *
+         * The resource is identified by its type and the hash of its path. If it is not already
+         * cached, the loader registered for @p type is used to load it.
+         *
+         * @param type The resource type used to select the cache and registered loader.
+         * @param path The resource path used as its cache key and passed to the loader.
+         * @return A pair containing an iterator to the resource and a flag indicating success.
+         * The flag is true when the resource was already cached or was loaded successfully;
+         * it is false if no loader is registered or loading fails.
+         */
         MAYBE_UNUSED CacheResult Cache(std::type_index type, const std::string& path);
 
+        /**
+         * @brief Retrieves the loader registered for a resource type.
+         *
+         * @param type The resource type whose loader to retrieve.
+         * @return A non-owning pointer to the registered loader, or @c nullptr if no loader
+         * is registered for @p type.
+         */
         IResourceLoader* GetLoader(std::type_index type);
 
         /**
@@ -61,9 +80,9 @@ NXS_NAMESPACE
         requires std::derived_from<Type, Resource>
         NODISCARD Ref<Type> Create(const std::string& name)
         {
-            if (auto cached_resource = Get<Type>(name); cached_resource != nullptr)
+            if (auto cached_resource = Find(typeid(Type), name); cached_resource != ResourceMapEnd)
             {
-                return cached_resource;
+                return PTR_CAST<Type>(cached_resource->second);
             }
 
             auto& mutex = m_mutexMap[typeid(Type)];
@@ -92,22 +111,33 @@ NXS_NAMESPACE
             return cached.second ? PTR_CAST<Type>(cached.first->second) : nullptr;
         }
 
-        Ref<Resource> GetResource(std::type_index type, const std::string& path)
-        {
-            const auto cached = Cache(type, path);
-            return cached.first->second;
-        }
+        /**
+         * @brief Retrieves a resource of the specified type from the manager.
+         * If the resource is already cached, it's returned immediately.
+         * Otherwise, the appropriate loader is invoked to load it.
+         * 
+         * @param type The type of resource to retrieve (must derive from IResource).
+         * @param path The unique path (identifier) of the resource.
+         * @return A std::shared_ptr to the loaded resource, or nullptr if loading fails or type mismatches.
+         */
+        Ref<Resource> GetResource(std::type_index type, const std::string& path);
 
-        ResourceMapConstIterator Find(std::type_index type, const std::string& path) const
-        {
-            const auto id = m_hasher.Hash32(path);
-            if (auto itr = m_cacheMaps.find(type); itr != m_cacheMaps.end())
-            {
-                return itr->second.find(m_hasher.Hash32(path));
-            }
-            return ResourceMapConstIterator{};
-        }
+        /**
+         * @brief Find a resource of the specified type from the manager.
+         * 
+         * @param type The type of resource to find (must derive from IResource).
+         * @param path The unique path (identifier) of the resource.
+         * @return A resource iterator pointing to the found resource, or @c ResourceMapEnd if not found. 
+         */
+        ResourceMapConstIterator Find(std::type_index type, const std::string& path) const;
 
+        /**
+         * @brief Check whether a resource of the specified type exists in the manager.
+         * 
+         * @param type The type of resource to check (must derive from IResource).
+         * @param path The unique path (identifier) of the resource.
+         * @return True if the resource exists in the cache, false otherwise.
+         */
         NODISCARD bool IsExist(std::type_index type, const std::string& path) const
         {
             if (auto itr = m_cacheMaps.find(type); itr != m_cacheMaps.end())
@@ -162,6 +192,13 @@ NXS_NAMESPACE
             }
             m_cacheMaps.clear();
         }
+
+        /**
+         * @brief Sentinel iterator used to indicate that a resource was not found.
+         *
+         * Resource lookup functions return this value when the requested resource is absent.
+         */
+        static const ResourceMapIterator ResourceMapEnd;
 
     protected:
         ResourceMap& GetResourceMap(std::type_index type);

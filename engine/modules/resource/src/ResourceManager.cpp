@@ -2,6 +2,8 @@
 
 USING_NAMESPACE_NXS;
 
+const ResourceManager::ResourceMapIterator ResourceManager::ResourceMapEnd {};
+
 void ResourceManager::RegisterLoader(std::type_index type, Ptr<IResourceLoader> loader)
 {
     if (!loader)
@@ -23,6 +25,26 @@ IResourceLoader* ResourceManager::GetLoader(std::type_index type)
         return loader->second.get();
     }
     return nullptr;
+}
+
+Ref<Resource> ResourceManager::GetResource(std::type_index type, const std::string& path)
+{
+    const auto cached = Cache(type, path);
+    return cached.first->second;
+}
+
+ResourceManager::ResourceMapConstIterator ResourceManager::Find(std::type_index type, const std::string& path) const
+{
+    const auto id = m_hasher.Hash32(path);
+    if (auto itr = m_cacheMaps.find(type); itr != m_cacheMaps.end())
+    {
+        const auto& cacheMap = itr->second;
+        if (cacheMap.find(id) != cacheMap.end())
+        {
+            return cacheMap.find(id);
+        }
+    }
+    return ResourceMapEnd;
 }
 
 ResourceManager::ResourceMap& ResourceManager::GetResourceMap(std::type_index type)
