@@ -29,6 +29,7 @@ void main()
 @endprogram vertex
 
 @program fragment
+@include "include/color.glsl"
 @include "include/material.glsl"
 @include "include/light_types.glsl"
 
@@ -64,6 +65,6 @@ void main()
     vec3 ambientColor = CalcAmbientLight(material, _AmbientLight);
     vec3 result = ambientColor + AccumulateLighting(material, FragPos, normal, viewDir);
 
-    FragColor = vec4(result, 1.0);
+    FragColor = vec4(LinearToSRGB(result), 1.0);
 }
 @endprogram fragment

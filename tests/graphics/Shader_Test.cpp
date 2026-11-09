@@ -270,7 +270,28 @@ TEST_F(ShaderGeneratorTest, GeneratesPbrForwardLightingShader) {
     EXPECT_NE(vs.find("GetTBNMatrix"), std::string::npos);
     EXPECT_NE(fs.find("DistributionGGX"), std::string::npos);
     EXPECT_NE(fs.find("EvaluateLight"), std::string::npos);
+    EXPECT_NE(fs.find("LinearToSRGB"), std::string::npos);
+    EXPECT_NE(fs.find("FragColor = vec4(LinearToSRGB(color), baseColor.a)"), std::string::npos);
     EXPECT_EQ(gs, "");
+}
+
+TEST_F(ShaderGeneratorTest, ForwardLightingShadersEncodeLinearOutput)
+{
+    const auto shaderDir = std::filesystem::path(NXS_ENGINE_ASSETS_DIR) / "shaders/glsl";
+    for (const auto* shaderName : {
+        "default_forward_lighting.shader",
+        "textured_forward_lighting.shader",
+        "textured_alpha_forward_lighting.shader",
+        "normalmap_forward_lighting.shader",
+        "normalmap_alpha_forward_lighting.shader",
+        "pbr_forward_lighting.shader"})
+    {
+        std::string vs, fs, gs;
+        const auto path = (shaderDir / shaderName).string();
+        ASSERT_TRUE(shaderGen.GenerateShaderSource(path, vs, fs, gs)) << shaderName;
+        EXPECT_NE(fs.find("LinearToSRGB"), std::string::npos) << shaderName;
+        EXPECT_NE(fs.find("FragColor = vec4(LinearToSRGB("), std::string::npos) << shaderName;
+    }
 }
 
 TEST_F(ShaderGeneratorTest, HandlesInvalidIncludePath) {

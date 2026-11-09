@@ -32,6 +32,7 @@ void main()
 
 @program fragment
 @include "include/common.glsl"
+@include "include/color.glsl"
 @include "include/material.glsl"
 @include "include/light_types.glsl"
 
@@ -87,6 +88,6 @@ void main()
     // so that the object's details will show on the shaded surface.
     vec3 finalColor = (ambientBase + lightingAccumulator) * albedo;
 
-    FragColor = vec4(finalColor, 1.0);
+    FragColor = vec4(LinearToSRGB(finalColor), 1.0);
 }
 @endprogram fragment

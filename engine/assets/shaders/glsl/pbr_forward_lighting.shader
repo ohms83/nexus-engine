@@ -30,6 +30,7 @@ void main()
 @endprogram vertex
 
 @program fragment
+@include "include/color.glsl"
 @include "include/material.glsl"
 @include "include/light_types.glsl"
 
@@ -209,6 +210,6 @@ void main()
     }
     color += emissive;
 
-    FragColor = vec4(color, baseColor.a);
+    FragColor = vec4(LinearToSRGB(color), baseColor.a);
 }
 @endprogram fragment
