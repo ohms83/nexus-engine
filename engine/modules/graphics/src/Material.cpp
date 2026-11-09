@@ -31,6 +31,7 @@ static const std::map<TextureType, std::string> s_textureTypeUniformNames = {
     {TextureType::Opacity, "_OpacityMap"},
     {TextureType::Metalness, "_MetalnessMap"},
     {TextureType::Roughness, "_RoughnessMap"},
+    {TextureType::MetalnessRoughnessOcclusion, "_MraMap"},
     {TextureType::LightMap, "_LightMap"},
 };
 
@@ -62,7 +63,9 @@ int32_t Material::AddTexture(Ref<Texture> texture, TextureType type)
     info.path = texture ? texture->GetPath() : std::string();
     m_textures.push_back(std::move(info));
 
-    if (type == TextureType::Metalness || type == TextureType::Roughness)
+    if (type == TextureType::Metalness ||
+        type == TextureType::Roughness ||
+        type == TextureType::MetalnessRoughnessOcclusion)
     {
         shadingModel = MaterialShadingModel::MetallicRoughness;
     }
@@ -140,6 +143,7 @@ Ref<GpuProgram> Material::Use()
     gpuProgram->SetUniformInt("_HasNormalMap", hasResolvedTexture(TextureType::Normal));
     gpuProgram->SetUniformInt("_HasMetalnessMap", hasResolvedTexture(TextureType::Metalness));
     gpuProgram->SetUniformInt("_HasRoughnessMap", hasResolvedTexture(TextureType::Roughness));
+    gpuProgram->SetUniformInt("_HasMraMap", hasResolvedTexture(TextureType::MetalnessRoughnessOcclusion));
     gpuProgram->SetUniformInt("_HasOcclusionMap", hasResolvedTexture(TextureType::Ambient));
     gpuProgram->SetUniformInt("_HasEmissiveMap", hasResolvedTexture(TextureType::Emissive));
 

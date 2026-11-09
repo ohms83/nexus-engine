@@ -1,0 +1,307 @@
+#include "nexus/Nexus.h"
+#include "nexus/container/Array.h"
+#include "imgui.h"
+#include <glm/gtc/type_ptr.hpp>
+#include <unordered_set>
+
+static const nxs::Array<std::string> modelPaths = {
+    "meshes/oldcar/old_car_new.glb",
+};
+static const nxs::Array<std::string> modelLabels = {
+    "Old Car",
+};
+static const nxs::Array<glm::vec3> modelScales = {
+    glm::vec3(0.01f),
+};
+
+static const char* currentLabel = modelLabels[0].c_str();
+static int selectedModel = 0;
+static float scale = 1.0f;
+static bool drawBox = false;
+static bool drawSphere = false;
+
+class Example_07 final : public nxs::Application
+{
+public:
+    ~Example_07() override = default;
+
+    void Update() override
+    {
+        const auto selectedNode = m_sceneGraphWidget->GetSelectedNode();
+        m_propertyWindow->SetSceneNode(selectedNode);
+    }
+
+    void Render(nxs::RenderSystem& renderSystem) override
+    {
+        if (!m_scene) return;
+        m_scene->Render(renderSystem);
+    }
+
+    void DrawUI() override
+    {
+        ImGui::Begin("Model Settings");
+        {
+            ImGui::SeparatorText("Model");
+            if (ImGui::BeginCombo("Select Model", currentLabel))
+            {
+                for (size_t n = 0; n < modelLabels.size(); n++)
+                {
+                    const bool isSelected = (selectedModel == n);
+                    if (ImGui::Selectable(modelLabels[n].c_str(), isSelected) && !isSelected)
+                    {
+                        currentLabel = modelLabels[n].c_str();
+                        selectedModel = n;
+
+                        if (m_loadedModels[n]->status.load() == nxs::IResourceLoader::LoadResult::Status::Ready)
+                        {
+                            SetMesh(n);
+                        }
+                    }
+
+                    // Set the initial focus when the combo box is first opened
+                    if (isSelected) {
+                        ImGui::SetItemDefaultFocus();
+                    }
+                }
+                ImGui::EndCombo();
+            }
+            ImGui::Checkbox("Draw Sphere", &drawSphere);
+            ImGui::Checkbox("Draw Box", &drawBox);
+        }
+        ImGui::End();
+
+        auto renderSystem = nxs::Engine::Instance().GetRenderSystem();
+        m_propertyWindow->Draw(*renderSystem);
+        m_sceneGraphWidget->Draw(*renderSystem);
+    }
+
+protected:
+    bool Init_Internal() override
+    {
+        auto& renderSystem = GetRenderSystem();
+        const auto renderInterface = renderSystem.GetRenderInterface();
+
+        const auto engine = nxs::Engine::Instance();
+        m_modelLoader = std::make_unique<nxs::ModelLoader>(
+            renderInterface,
+            engine.GetResourceManager()
+        );
+
+        auto sceneManager = engine.GetSceneManager();
+        m_scene = sceneManager->EmplaceAndChange<nxs::Scene>("Main Scene");
+        sceneManager->sceneChangedCallback.connect([this](nxs::Ref<nxs::Scene> prev, nxs::Ref<nxs::Scene> next) {
+            m_scene = next;
+        });
+
+        InitScene();
+        InitLights();
+
+        m_sceneGraphWidget = std::make_shared<nxs::SceneGraphWidget>(*sceneManager);
+        m_propertyWindow = std::make_shared<nxs::PropertyWindow>(*sceneManager);
+
+        const nxs::KeyInputMap modelRotationInput = {
+            {
+                {SDLK_LEFT, nxs::KeyInputMap::AxisPlusY},
+                {SDLK_RIGHT, nxs::KeyInputMap::AxisMinusY},
+                {SDLK_UP, nxs::KeyInputMap::AxisPlusX},
+                {SDLK_DOWN, nxs::KeyInputMap::AxisMinusX},
+            }
+        };
+
+        auto& inputManager = nxs::InputManager::Instance();
+        inputManager.RegisterAxisInputMap("model_rotate", modelRotationInput);
+        return true;
+    }
+
+    void OnResize(const glm::ivec2& screenSize, const glm::ivec2& actualSize) override
+    {
+        Application::OnResize(screenSize, actualSize);
+        m_camera.width = FLOAT_CAST(screenSize.x);
+        m_camera.height = FLOAT_CAST(screenSize.y);
+
+        auto camera = PTR_CAST<nxs::Camera>(m_scene->FindNodeWithName("Camera"));
+        if (camera) {
+            camera->SetProjection(m_camera.fov, m_camera.width, m_camera.height, m_camera.nearZ, m_camera.farZ);
+        }
+    }
+
+    void SetMesh(uint32_t index)
+    {
+        auto modelNode = m_scene->FindNodeWithName("Model");
+        if (!modelNode) return;
+
+        auto meshComp = modelNode->GetComponent<nxs::MeshComponent>();
+        if (!meshComp) return;
+
+        auto model = PTR_CAST<nxs::Model>(m_loadedModels[index]->resource);
+        if (!model) return;
+
+        meshComp->SetMesh(model->GetMeshes()[0]);
+    }
+
+    void ApplyPbrTextures(const nxs::Ref<nxs::Model>& model)
+    {
+        auto resourceManager = nxs::Engine::Instance().GetResourceManager();
+        const auto diffuse = resourceManager->Get<nxs::Texture>(GetAssetPath("meshes/oldcar/old_car_d.png"));
+        const auto normal = resourceManager->Get<nxs::Texture>(GetAssetPath("meshes/oldcar/old_car_n.png"));
+        const auto mra = resourceManager->Get<nxs::Texture>(GetAssetPath("meshes/oldcar/old_car_mra.png"));
+        const auto emissive = resourceManager->Get<nxs::Texture>(GetAssetPath("meshes/oldcar/old_car_e.png"));
+
+        if (!diffuse || !normal || !mra || !emissive)
+        {
+            LOG_ERROR(LogTemp, "Failed to load one or more old-car PBR textures.");
+            return;
+        }
+
+        std::unordered_set<nxs::Material*> processedMaterials;
+        for (const auto& mesh : model->GetMeshes())
+        {
+            const auto material = mesh->GetMaterial();
+            if (!material || !processedMaterials.insert(material.get()).second) continue;
+
+            material->AddTexture(diffuse, nxs::TextureType::Diffuse);
+            material->AddTexture(normal, nxs::TextureType::Normal);
+            material->AddTexture(mra, nxs::TextureType::MetalnessRoughnessOcclusion);
+            material->AddTexture(emissive, nxs::TextureType::Emissive);
+            material->CreateDefaultShader(*resourceManager);
+        }
+    }
+
+private:
+    void InitScene()
+    {
+        auto camera = m_scene->EmplaceChild<nxs::Camera>("Camera");
+        camera->Position().value = {5, 5, 5};
+        camera->LookAt(glm::vec3(0), glm::vec3(0, 1, 0));
+
+        if (m_loadModel)
+        {
+            for (int i = 0; i < modelPaths.size(); i++)
+            {
+                // Preload models
+                m_loadedModels.emplace_back(LoadModel(i));
+            }
+
+            auto node = m_scene->EmplaceChild<nxs::SceneNode3D>("Model");
+            node->AddComponent<nxs::MeshComponent>();
+            node->Scale().value = modelScales[0];
+        }
+
+        auto material = std::make_shared<nxs::Material>("Default Material", 0);
+        material->CreateDefaultShader(*nxs::Engine::Instance().GetResourceManager());
+
+#if 0
+        auto meshComp = m_scene->EmplaceChild<nxs::SceneNode3D>("Ground")->AddComponent<nxs::MeshComponent>();
+        meshComp->SetMesh(nxs::PrimitiveMesh::CreatePlane(
+                "Ground Plane",
+                10, 10,
+                *GetRenderSystem().GetRenderInterface(),
+                material
+            )
+        );
+#endif
+
+        m_scene->SetRenderer(std::make_unique<nxs::ForwardSceneRenderer>(GetRenderSystem()));
+    }
+
+    MAYBE_UNUSED nxs::Ref<nxs::IResourceLoader::LoadResult> LoadModel(const int index)
+    {
+        const auto taskScheduler = nxs::Engine::Instance().GetTaskScheduler();
+        const auto assetPath = GetAssetPath(modelPaths[index]);
+        auto result = m_modelLoader->LoadAsync(assetPath, index, *taskScheduler, [this](nxs::Ref<nxs::Resource> resource)
+        {
+            const auto model = PTR_CAST<nxs::Model>(resource);
+            if (model) ApplyPbrTextures(model);
+        });
+
+        taskScheduler->ScheduleTask(std::make_shared<nxs::RepeatTask>(-1, [result]() -> bool
+        {
+            if (result->status.load() == nxs::IResourceLoader::LoadResult::Status::Ready)
+            {
+                LOG_INFO(LogTemp, std::format("Finished loading {}", result->path));
+                return false;
+            }
+            return true;
+        }));
+        taskScheduler->ScheduleTask(std::make_shared<nxs::RepeatTask>(-1, [this, taskScheduler]() -> bool
+        {
+            for (const auto & m_loadedModel : m_loadedModels)
+            {
+                if (m_loadedModel->status.load() != nxs::IResourceLoader::LoadResult::Status::Ready) return true;
+            }
+
+            taskScheduler->ScheduleTask(std::make_shared<nxs::RepeatTask>(-1, [this]() -> bool
+            {
+                UpdateModel();
+                return true;
+            }));
+
+            return false;
+        }));
+        return result;
+    }
+
+    void InitLights()
+    {
+        m_scene->Ambient() = {0.5f, 0.5f, 0.5f};
+
+        {
+            auto light = m_scene->EmplaceChild<nxs::DirectionalLight>("Direct Light");
+            light->Properties().color =  {1, 1, 1};
+            light->Direction() = {10, -10, 0};
+        }
+    }
+
+    void UpdateModel()
+    {
+        if (!m_loadModel) return;
+
+        const auto& inputManager = nxs::InputManager::Instance();
+        const glm::vec2 euler = inputManager.GetAxisValue("model_rotate") * 90.f * GetDeltaTime();
+        m_euler.x += euler.x;
+        m_euler.y += euler.y;
+
+        auto modelNode = PTR_CAST<nxs::SceneNode3D>(m_scene->FindNodeWithName("Model"));
+        if (!modelNode) return;
+
+        modelNode->Orient().quat = glm::mat4_cast(glm::quat(glm::radians(m_euler)));
+        SetMesh(selectedModel);
+    }
+
+protected:
+    nxs::Ref<nxs::Scene> m_scene;
+    nxs::CameraComponent m_camera;
+    nxs::Color3F m_ambient {0.5, 0.5, 0.5};
+    glm::vec3 m_euler {};
+    glm::vec3 m_cameraPos {0, 5, 5};
+    nxs::Ptr<nxs::ModelLoader> m_modelLoader;
+    nxs::Array<nxs::Ref<nxs::IResourceLoader::LoadResult>> m_loadedModels;
+    nxs::Ref<nxs::SceneGraphWidget> m_sceneGraphWidget;
+    nxs::Ref<nxs::PropertyWindow> m_propertyWindow;
+    float m_aoFactor = 1;
+    bool m_loadModel = true;
+};
+
+
+int main()
+{
+    constexpr auto vsync = true;
+    constexpr auto fullscreen = false;
+    nxs::GraphicsConfig graphicsConfig {
+        nxs::GraphicsAPI::OpenGL,
+        1280, 960,
+        vsync,
+    };
+    return nxs::RunApplication<Example_07>({
+        "Example 06 - Shadow Mapping",
+        graphicsConfig,
+        fullscreen,
+        true,
+        // editMode
+        true,
+        // maximize
+        true,
+        // allowProfile
+        false,
+    });
+}

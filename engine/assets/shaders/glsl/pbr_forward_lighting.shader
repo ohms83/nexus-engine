@@ -45,12 +45,14 @@ uniform sampler2D _DiffuseMap;
 uniform sampler2D _NormalMap;
 uniform sampler2D _MetalnessMap;
 uniform sampler2D _RoughnessMap;
+uniform sampler2D _MraMap;
 uniform sampler2D _OcclusionMap;
 uniform sampler2D _EmissiveMap;
 uniform int _HasDiffuseMap;
 uniform int _HasNormalMap;
 uniform int _HasMetalnessMap;
 uniform int _HasRoughnessMap;
+uniform int _HasMraMap;
 uniform int _HasOcclusionMap;
 uniform int _HasEmissiveMap;
 uniform Material _Material;
@@ -142,11 +144,20 @@ void main()
     {
         roughness = texture(_RoughnessMap, TexCoord0).r;
     }
-    roughness = clamp(roughness, 0.04, 1.0);
 
     float occlusion = _HasOcclusionMap != 0
         ? texture(_OcclusionMap, TexCoord0).r
         : 1.0;
+    if (_HasMraMap != 0)
+    {
+        vec3 mra = texture(_MraMap, TexCoord0).rgb;
+        metalness = mra.r;
+        roughness = mra.g;
+        occlusion = mra.b;
+    }
+    metalness = clamp(metalness, 0.0, 1.0);
+    roughness = clamp(roughness, 0.04, 1.0);
+
     vec3 viewDir = normalize(_CameraPos - FragPos);
     vec3 color = _AmbientLight * baseColor.rgb * (1.0 - metalness) * occlusion;
 

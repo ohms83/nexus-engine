@@ -48,6 +48,8 @@ NXS_NAMESPACE
         Roughness,
         //! @brief Light map, for pre-baked global illumination.
         LightMap,
+        //! @brief Packed metallic (R), roughness (G), and ambient occlusion (B) map.
+        MetalnessRoughnessOcclusion,
     };
 
     enum class MaterialShadingModel
