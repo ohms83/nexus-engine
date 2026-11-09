@@ -27,15 +27,18 @@ IResourceLoader* ResourceManager::GetLoader(std::type_index type)
     return nullptr;
 }
 
-Ref<Resource> ResourceManager::GetResource(std::type_index type, const std::string& path)
+Ref<Resource> ResourceManager::GetResource(std::type_index type, const std::string& path, const uint32_t loaderVariant)
 {
-    const auto cached = Cache(type, path);
-    return cached.first->second;
+    const auto cached = Cache(type, path, loaderVariant);
+    return cached.second ? cached.first->second : nullptr;
 }
 
-ResourceManager::ResourceMapConstIterator ResourceManager::Find(std::type_index type, const std::string& path) const
+ResourceManager::ResourceMapConstIterator ResourceManager::Find(
+    std::type_index type,
+    const std::string& path,
+    const uint32_t loaderVariant) const
 {
-    const auto id = m_hasher.Hash32(path);
+    const auto id = GetResourceId(path, loaderVariant);
     if (auto itr = m_cacheMaps.find(type); itr != m_cacheMaps.end())
     {
         const auto& cacheMap = itr->second;
@@ -56,9 +59,18 @@ ResourceManager::ResourceMap& ResourceManager::GetResourceMap(std::type_index ty
     return m_cacheMaps.emplace(type, ResourceMap{}).first->second;
 }
 
-ResourceManager::CacheResult ResourceManager::Cache(std::type_index type, const std::string& path)
+uint32_t ResourceManager::GetResourceId(const std::string& path, const uint32_t loaderVariant) const
 {
-    const auto id = m_hasher.Hash32(path);
+    if (loaderVariant == 0) return m_hasher.Hash32(path);
+    return m_hasher.Hash32(std::format("{}#{}", path, loaderVariant));
+}
+
+ResourceManager::CacheResult ResourceManager::Cache(
+    std::type_index type,
+    const std::string& path,
+    const uint32_t loaderVariant)
+{
+    const auto id = GetResourceId(path, loaderVariant);
     auto& resourceMap = GetResourceMap(type);
     if (auto itr = resourceMap.find(id); itr != resourceMap.end())
     {
@@ -75,7 +87,7 @@ ResourceManager::CacheResult ResourceManager::Cache(std::type_index type, const 
         return { resourceMap.end(), false };
     }
 
-    const auto new_resource = loader->Load(path, id);
+    const auto new_resource = loader->Load(path, id, loaderVariant);
     if (!new_resource)
     {
         LOG_ERROR(LogResource, std::format("Failed to load resource '{}'.", path));
@@ -85,10 +97,14 @@ ResourceManager::CacheResult ResourceManager::Cache(std::type_index type, const 
     return { resourceMap.insert({ id, new_resource }).first, true };
 }
 
-Ref<IResourceLoader::LoadResult> ResourceManager::GetResourceAsync(std::type_index type, const std::string& path, TaskScheduler& scheduler)
+Ref<IResourceLoader::LoadResult> ResourceManager::GetResourceAsync(
+    std::type_index type,
+    const std::string& path,
+    TaskScheduler& scheduler,
+    const uint32_t loaderVariant)
 {
     // LOG_DEBUG(LogResource, std::format("Loading resource: '{}'...", path));
-    const auto id = m_hasher.Hash32(path);
+    const auto id = GetResourceId(path, loaderVariant);
     auto& resourceCache = GetResourceMap(std::type_index(type));
     if (auto cached_resource = resourceCache.find(id); cached_resource != resourceCache.end())
     {
@@ -100,9 +116,9 @@ Ref<IResourceLoader::LoadResult> ResourceManager::GetResourceAsync(std::type_ind
     }
 
     std::lock_guard<std::mutex> lock(m_mutexMap[type]); // For thread-safety
-    if (auto loadResult = std::ranges::find_if(m_loadingResources, [path](Ref<IResourceLoader::LoadResult> loading_resource)
+    if (auto loadResult = std::ranges::find_if(m_loadingResources, [id](Ref<IResourceLoader::LoadResult> loading_resource)
     {
-        return loading_resource->path == path;
+        return loading_resource->cacheId == id;
     }); loadResult != m_loadingResources.end())
     {
         // The requested resource is currently loading.
@@ -116,7 +132,7 @@ Ref<IResourceLoader::LoadResult> ResourceManager::GetResourceAsync(std::type_ind
         return nullptr;
     }
 
-    auto result = loader->LoadAsync(path, id, scheduler, [&resourceCache = GetResourceMap(type), id, path](Ref<Resource> new_resource) {
+    auto result = loader->LoadAsync(path, id, scheduler, loaderVariant, [&resourceCache = GetResourceMap(type), id, path](Ref<Resource> new_resource) {
         if (!new_resource)
         {
             LOG_ERROR(LogResource, std::format("Failed to load resource '{}'.", path));
@@ -125,6 +141,7 @@ Ref<IResourceLoader::LoadResult> ResourceManager::GetResourceAsync(std::type_ind
         LOG_DEBUG(LogResource, std::format("Loaded resource success: '{}'.", path));
         resourceCache[id] = new_resource;
     });
+    result->cacheId = id;
 
     if (result->status.load() == IResourceLoader::LoadResult::Status::Loading) {
         m_loadingResources.push_back(result);
@@ -133,8 +150,12 @@ Ref<IResourceLoader::LoadResult> ResourceManager::GetResourceAsync(std::type_ind
     // Periodically checking for resource loading status.
     scheduler.ScheduleTask(std::make_shared<OneshotTask>([result, &mutex = m_mutexMap[type], &loadingResources = m_loadingResources]()
     {
-        if (result->status.load() == IResourceLoader::LoadResult::Status::Ready)
+        const auto status = result->status.load();
+        if (status == IResourceLoader::LoadResult::Status::Ready ||
+            status == IResourceLoader::LoadResult::Status::Failed ||
+            status == IResourceLoader::LoadResult::Status::Invalid)
         {
+            std::lock_guard lock(mutex);
             loadingResources.erase(std::ranges::find(loadingResources, result));
             return false;
         }
@@ -143,10 +164,10 @@ Ref<IResourceLoader::LoadResult> ResourceManager::GetResourceAsync(std::type_ind
     return result;
 }
 
-bool ResourceManager::Unload(std::type_index type, const std::string& path)
+bool ResourceManager::Unload(std::type_index type, const std::string& path, const uint32_t loaderVariant)
 {
     std::lock_guard<std::mutex> lock(m_mutexMap[type]); // For thread-safety
-    const auto id = m_hasher.Hash32(path);
+    const auto id = GetResourceId(path, loaderVariant);
 
     auto& resourceMap = GetResourceMap(type);
     if (const auto it = resourceMap.find(id); it != resourceMap.end())

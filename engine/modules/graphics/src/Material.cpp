@@ -271,7 +271,10 @@ void Material::Resolve(ResourceManager& resourceManager)
     {
         if (!ti.texture && !ti.path.empty())
         {
-            auto tex = resourceManager.Get<Texture>(ti.path);
+            const auto colorSpace = ti.type == TextureType::Diffuse || ti.type == TextureType::Emissive
+                ? TextureColorSpace::SRgb
+                : TextureColorSpace::Linear;
+            auto tex = resourceManager.Get<Texture>(ti.path, UINT_CAST(colorSpace));
             if (tex) ti.texture = tex;
         }
     }

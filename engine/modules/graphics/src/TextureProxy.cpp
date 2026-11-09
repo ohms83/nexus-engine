@@ -34,6 +34,7 @@ TextureProxy& TextureProxy::Begin(const TextureDescription& info)
     m_format = info.format;
     m_channels = info.channels;
     m_componentType = info.componentType;
+    m_colorSpace = info.colorSpace;
     m_filterMin = info.filterMin;
     m_filterMag = info.filterMag;
     m_wrapModeS = info.wrapModeS;

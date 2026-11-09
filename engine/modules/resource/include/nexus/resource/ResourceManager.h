@@ -54,11 +54,12 @@ NXS_NAMESPACE
          *
          * @param type The resource type used to select the cache and registered loader.
          * @param path The resource path used as its cache key and passed to the loader.
+         * @param loaderVariant An optional loader-specific variant included in the cache identity.
          * @return A pair containing an iterator to the resource and a flag indicating success.
          * The flag is true when the resource was already cached or was loaded successfully;
          * it is false if no loader is registered or loading fails.
          */
-        MAYBE_UNUSED CacheResult Cache(std::type_index type, const std::string& path);
+        MAYBE_UNUSED CacheResult Cache(std::type_index type, const std::string& path, uint32_t loaderVariant = 0);
 
         /**
          * @brief Retrieves the loader registered for a resource type.
@@ -101,13 +102,14 @@ NXS_NAMESPACE
          *
          * @tparam T The type of resource to retrieve (must derive from IResource).
          * @param path The unique path (identifier) of the resource.
+         * @param loaderVariant An optional loader-specific variant included in the cache identity.
          * @return A std::shared_ptr to the loaded resource, or nullptr if loading fails or type mismatches.
          */
         template<typename Type>
         requires std::derived_from<Type, Resource>
-        NODISCARD Ref<Type> Get(const std::string& path)
+        NODISCARD Ref<Type> Get(const std::string& path, uint32_t loaderVariant = 0)
         {
-            const auto cached = Cache(typeid(Type), path);
+            const auto cached = Cache(typeid(Type), path, loaderVariant);
             return cached.second ? PTR_CAST<Type>(cached.first->second) : nullptr;
         }
 
@@ -118,9 +120,10 @@ NXS_NAMESPACE
          * 
          * @param type The type of resource to retrieve (must derive from IResource).
          * @param path The unique path (identifier) of the resource.
+         * @param loaderVariant An optional loader-specific variant included in the cache identity.
          * @return A std::shared_ptr to the loaded resource, or nullptr if loading fails or type mismatches.
          */
-        Ref<Resource> GetResource(std::type_index type, const std::string& path);
+        Ref<Resource> GetResource(std::type_index type, const std::string& path, uint32_t loaderVariant = 0);
 
         /**
          * @brief Find a resource of the specified type from the manager.
@@ -129,7 +132,7 @@ NXS_NAMESPACE
          * @param path The unique path (identifier) of the resource.
          * @return A resource iterator pointing to the found resource, or @c ResourceMapEnd if not found. 
          */
-        ResourceMapConstIterator Find(std::type_index type, const std::string& path) const;
+        ResourceMapConstIterator Find(std::type_index type, const std::string& path, uint32_t loaderVariant = 0) const;
 
         /**
          * @brief Check whether a resource of the specified type exists in the manager.
@@ -138,11 +141,11 @@ NXS_NAMESPACE
          * @param path The unique path (identifier) of the resource.
          * @return True if the resource exists in the cache, false otherwise.
          */
-        NODISCARD bool IsExist(std::type_index type, const std::string& path) const
+        NODISCARD bool IsExist(std::type_index type, const std::string& path, uint32_t loaderVariant = 0) const
         {
             if (auto itr = m_cacheMaps.find(type); itr != m_cacheMaps.end())
             {
-                return itr->second.contains(m_hasher.Hash32(path));
+                return itr->second.contains(GetResourceId(path, loaderVariant));
             }
             return false;
         }
@@ -160,13 +163,18 @@ NXS_NAMESPACE
          * @tparam Type The type of the resource to be loaded.
          * @param path The file path to the resource.
          * @param scheduler A reference to the TaskScheduler to manage the asynchronous task.
+         * @param loaderVariant An optional loader-specific variant included in the cache identity.
          * @return A Ref to an @c IResourceLoader::LoadResult object that can be used to monitor the
          * loading status of the requested resource. Returns @c nullptr if no loader is
          * registered for the specified resource type.
          * @note This function is thread-safe as it uses a mutex to protect access to the list of
          * currently loading resources.
          */
-        MAYBE_UNUSED Ref<IResourceLoader::LoadResult> GetResourceAsync(std::type_index type, const std::string& path, TaskScheduler& scheduler);
+        MAYBE_UNUSED Ref<IResourceLoader::LoadResult> GetResourceAsync(
+            std::type_index type,
+            const std::string& path,
+            TaskScheduler& scheduler,
+            uint32_t loaderVariant = 0);
 
         /**
          * @brief Unloads a specific resource from the cache.
@@ -174,7 +182,7 @@ NXS_NAMESPACE
          * @param path The path of the resource to unload.
          * @return True if the resource was found and removed from cache, false otherwise.
          */
-        bool Unload(std::type_index type, const std::string& path);
+        bool Unload(std::type_index type, const std::string& path, uint32_t loaderVariant = 0);
 
         //! Release all the resources that no one else but the manager is holding (ref count = 1).
         void PurgeUnused(std::type_index type);
@@ -202,6 +210,8 @@ NXS_NAMESPACE
 
     protected:
         ResourceMap& GetResourceMap(std::type_index type);
+
+        uint32_t GetResourceId(const std::string& path, uint32_t loaderVariant) const;
 
         Hasher m_hasher;
         ResourceMapList m_cacheMaps;

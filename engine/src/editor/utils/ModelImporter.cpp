@@ -62,6 +62,13 @@ namespace
         {aiTextureType_DIFFUSE_ROUGHNESS, TextureType::Roughness},
         {aiTextureType_LIGHTMAP, TextureType::LightMap},
     };
+
+    uint32_t GetTextureColorSpaceVariant(const TextureType type)
+    {
+        return UINT_CAST(type == TextureType::Diffuse || type == TextureType::Emissive
+            ? TextureColorSpace::SRgb
+            : TextureColorSpace::Linear);
+    }
 }
 
 /**
@@ -84,9 +91,9 @@ static std::queue<Ref<IResourceLoader::LoadResult>> PreloadTextures(const aiScen
     }
 
     Array<aiTextureType> aiTextures = {};
-    for (const auto& aitTexture : s_textureTypeMap | std::views::keys)
+    for (const auto aiTexture : s_textureTypeMap | std::views::keys)
     {
-        aiTextures.push_back(aitTexture);
+        aiTextures.push_back(aiTexture);
     }
 
     for (unsigned int i = 0; i < scene.mNumMaterials; i++)
@@ -101,7 +108,12 @@ static std::queue<Ref<IResourceLoader::LoadResult>> PreloadTextures(const aiScen
                 aiString path;
                 material->GetTexture(aiTexture, j, &path);
                 auto texturePath = directory / path.C_Str();
-                auto loadResult = manager->GetResourceAsync(typeid(Texture), texturePath.string(), taskScheduler);
+                const auto textureType = s_textureTypeMap.at(aiTexture);
+                auto loadResult = manager->GetResourceAsync(
+                    typeid(Texture),
+                    texturePath.string(),
+                    taskScheduler,
+                    GetTextureColorSpaceVariant(textureType));
 
                 if (loadResult) result.push(loadResult);
             }
@@ -315,7 +327,7 @@ void ModelImporter::ProcessTextures(Ref<Material> newMat, const aiMaterial* ai_m
             ai_material->GetTexture(ai_type, i, &path);
 
             const std::string texturePath = (directory / path.C_Str()).string();
-            if (const auto texture = resourceManager->Get<Texture>(texturePath)) {
+            if (const auto texture = resourceManager->Get<Texture>(texturePath, GetTextureColorSpaceVariant(textureType))) {
                 newMat->AddTexture(texture, textureType);
             }
         }

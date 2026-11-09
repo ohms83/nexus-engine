@@ -142,10 +142,14 @@ protected:
     void ApplyPbrTextures(const nxs::Ref<nxs::Model>& model)
     {
         auto resourceManager = nxs::Engine::Instance().GetResourceManager();
-        const auto diffuse = resourceManager->Get<nxs::Texture>(GetAssetPath("meshes/oldcar/old_car_d.png"));
-        const auto normal = resourceManager->Get<nxs::Texture>(GetAssetPath("meshes/oldcar/old_car_n.png"));
-        const auto mra = resourceManager->Get<nxs::Texture>(GetAssetPath("meshes/oldcar/old_car_mra.png"));
-        const auto emissive = resourceManager->Get<nxs::Texture>(GetAssetPath("meshes/oldcar/old_car_e.png"));
+        const auto diffuse = resourceManager->Get<nxs::Texture>(
+            GetAssetPath("meshes/oldcar/old_car_d.png"), UINT_CAST(nxs::TextureColorSpace::SRgb));
+        const auto normal = resourceManager->Get<nxs::Texture>(
+            GetAssetPath("meshes/oldcar/old_car_n.png"), UINT_CAST(nxs::TextureColorSpace::Linear));
+        const auto mra = resourceManager->Get<nxs::Texture>(
+            GetAssetPath("meshes/oldcar/old_car_mra.png"), UINT_CAST(nxs::TextureColorSpace::Linear));
+        const auto emissive = resourceManager->Get<nxs::Texture>(
+            GetAssetPath("meshes/oldcar/old_car_e.png"), UINT_CAST(nxs::TextureColorSpace::SRgb));
 
         if (!diffuse || !normal || !mra || !emissive)
         {
@@ -189,9 +193,12 @@ private:
         }
 
         auto resourceManager = nxs::Engine::Instance().GetResourceManager();
-        const auto roadAlbedo = resourceManager->Get<nxs::Texture>(GetAssetPath("textures/road/road_a.png"));
-        const auto roadNormal = resourceManager->Get<nxs::Texture>(GetAssetPath("textures/road/road_n.png"));
-        const auto roadMra = resourceManager->Get<nxs::Texture>(GetAssetPath("textures/road/road_mra.png"));
+        const auto roadAlbedo = resourceManager->Get<nxs::Texture>(
+            GetAssetPath("textures/road/road_a.png"), UINT_CAST(nxs::TextureColorSpace::SRgb));
+        const auto roadNormal = resourceManager->Get<nxs::Texture>(
+            GetAssetPath("textures/road/road_n.png"), UINT_CAST(nxs::TextureColorSpace::Linear));
+        const auto roadMra = resourceManager->Get<nxs::Texture>(
+            GetAssetPath("textures/road/road_mra.png"), UINT_CAST(nxs::TextureColorSpace::Linear));
 
         auto material = std::make_shared<nxs::Material>("Road Material", 0);
         if (roadAlbedo && roadNormal && roadMra)

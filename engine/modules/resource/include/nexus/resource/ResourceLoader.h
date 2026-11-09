@@ -31,6 +31,8 @@ NXS_NAMESPACE
 
             //! Resource path
             std::string path;
+            //! Cache identity used by ResourceManager to distinguish load variants.
+            uint32_t cacheId = 0;
             std::string error;
             std::atomic<Status> status{Status::Invalid};
             Ref<Resource> resource;
@@ -47,6 +49,11 @@ NXS_NAMESPACE
          * @return A Ref to the loaded IResource on success, or nullptr on failure.
          */
         MAYBE_UNUSED virtual Ref<Resource> Load(const std::string& path, uint32_t id) = 0;
+        MAYBE_UNUSED virtual Ref<Resource> Load(const std::string& path, uint32_t id, uint32_t variant)
+        {
+            (void)variant;
+            return Load(path, id);
+        }
         /**
          * @brief Attempts to load a resource asynchronously from a given path.
          *
@@ -65,6 +72,16 @@ NXS_NAMESPACE
          * monitor the loading status.
          */
         MAYBE_UNUSED virtual Ref<LoadResult> LoadAsync(const std::string& path, uint32_t id, TaskScheduler& scheduler, Callback onFinishCallback) = 0;
+        MAYBE_UNUSED virtual Ref<LoadResult> LoadAsync(
+            const std::string& path,
+            uint32_t id,
+            TaskScheduler& scheduler,
+            uint32_t variant,
+            Callback onFinishCallback)
+        {
+            (void)variant;
+            return LoadAsync(path, id, scheduler, std::move(onFinishCallback));
+        }
     };
 
 } // NXS_NAMESPACE

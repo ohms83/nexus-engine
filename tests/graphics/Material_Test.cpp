@@ -4,6 +4,44 @@
 
 USING_NAMESPACE_NXS;
 
+namespace
+{
+    class VariantResource final : public Resource
+    {
+    public:
+        VariantResource(std::string path, const uint32_t id, const uint32_t variant)
+            : Resource(std::move(path), id)
+            , variant(variant)
+        {
+        }
+
+        uint32_t variant;
+    };
+
+    class VariantResourceLoader final : public IResourceLoader
+    {
+    public:
+        Ref<Resource> Load(const std::string& path, const uint32_t id) override
+        {
+            return Load(path, id, 0);
+        }
+
+        Ref<Resource> Load(const std::string& path, const uint32_t id, const uint32_t variant) override
+        {
+            return std::make_shared<VariantResource>(path, id, variant);
+        }
+
+        Ref<LoadResult> LoadAsync(
+            const std::string&,
+            uint32_t,
+            TaskScheduler&,
+            Callback) override
+        {
+            return nullptr;
+        }
+    };
+}
+
 class MaterialTest : public ::testing::Test {
 protected:
     ResourceManager resourceManager;
@@ -93,4 +131,23 @@ TEST_F(MaterialTest, MetallicOrRoughnessTextureEnablesPbr)
     ASSERT_GE(material.AddTexture(texture, TextureType::Metalness), 0);
 
     EXPECT_EQ(material.shadingModel, MaterialShadingModel::MetallicRoughness);
+}
+
+TEST_F(MaterialTest, ResourceManagerSeparatesLoaderVariants)
+{
+    resourceManager.RegisterLoader(typeid(VariantResource), std::make_unique<VariantResourceLoader>());
+
+    const auto linear = resourceManager.Get<VariantResource>("shared-resource");
+    const auto srgb = resourceManager.Get<VariantResource>("shared-resource", 1);
+
+    ASSERT_NE(linear, nullptr);
+    ASSERT_NE(srgb, nullptr);
+    EXPECT_NE(linear, srgb);
+    EXPECT_EQ(linear->variant, 0u);
+    EXPECT_EQ(srgb->variant, 1u);
+    EXPECT_EQ(resourceManager.Get<VariantResource>("shared-resource", 1), srgb);
+    EXPECT_TRUE(resourceManager.IsExist(typeid(VariantResource), "shared-resource", 1));
+    EXPECT_TRUE(resourceManager.Unload(typeid(VariantResource), "shared-resource", 1));
+    EXPECT_FALSE(resourceManager.IsExist(typeid(VariantResource), "shared-resource", 1));
+    EXPECT_TRUE(resourceManager.IsExist(typeid(VariantResource), "shared-resource"));
 }

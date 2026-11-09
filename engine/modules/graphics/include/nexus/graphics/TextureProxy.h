@@ -34,6 +34,18 @@ NXS_NAMESPACE
         Num
     };
 
+    /**
+     * @brief Color encoding used when sampling a texture.
+     *
+     * sRGB textures are decoded to linear color values by the graphics API when sampled.
+     * Data maps such as normal, roughness, metallic, and occlusion maps should remain linear.
+     */
+    enum class TextureColorSpace : uint32_t
+    {
+        Linear,
+        SRgb,
+    };
+
     struct TextureDescription
     {
         int32_t width = 0;
@@ -41,6 +53,8 @@ NXS_NAMESPACE
         int32_t channels = 4;
         PixelFormat format = PixelFormat::RGBA;
         DataType componentType = DataType::UByte;
+        //! Color interpretation for RGB/RGBA texture data.
+        TextureColorSpace colorSpace = TextureColorSpace::Linear;
         TextureWrapMode wrapModeS = TextureWrapMode::Repeat;
         TextureWrapMode wrapModeT = TextureWrapMode::Repeat;
         TextureFilterMode filterMin = TextureFilterMode::Linear;
@@ -77,6 +91,7 @@ NXS_NAMESPACE
         int32_t m_channels = 0;
         PixelFormat m_format = PixelFormat::None;
         DataType m_componentType = DataType::None;
+        TextureColorSpace m_colorSpace = TextureColorSpace::Linear;
         TextureWrapMode m_wrapModeS = TextureWrapMode::Clamp;
         TextureWrapMode m_wrapModeT = TextureWrapMode::Clamp;
         TextureFilterMode m_filterMin = TextureFilterMode::Linear;
