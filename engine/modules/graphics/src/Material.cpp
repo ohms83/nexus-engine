@@ -141,6 +141,7 @@ Ref<GpuProgram> Material::Use()
     };
     gpuProgram->SetUniformInt("_HasDiffuseMap", hasResolvedTexture(TextureType::Diffuse));
     gpuProgram->SetUniformInt("_HasNormalMap", hasResolvedTexture(TextureType::Normal));
+    gpuProgram->SetUniformInt("_HasSpecularMap", hasResolvedTexture(TextureType::Specular));
     gpuProgram->SetUniformInt("_HasMetalnessMap", hasResolvedTexture(TextureType::Metalness));
     gpuProgram->SetUniformInt("_HasRoughnessMap", hasResolvedTexture(TextureType::Roughness));
     gpuProgram->SetUniformInt("_HasMraMap", hasResolvedTexture(TextureType::MetalnessRoughnessOcclusion));

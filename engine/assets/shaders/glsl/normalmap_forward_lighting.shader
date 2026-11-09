@@ -46,9 +46,9 @@ in mat3 TBN;
 uniform vec3 _CameraPos;
 
 uniform sampler2D _DiffuseMap;
-uniform sampler2D _OcclusionMap;
+uniform sampler2D _SpecularMap;
+uniform int _HasSpecularMap;
 uniform sampler2D _NormalMap;
-uniform float _AOFactor;
 
 uniform Material _Material;
 uniform vec3 _AmbientLight;
@@ -73,10 +73,15 @@ void main()
     // If this is a textured shader, sample albedo now.
     // If it's a basic shader, albedo is effectively vec3(1.0).
     vec3 albedo = texture(_DiffuseMap, TexCoord0).rgb; 
+    Material material = _Material;
+    if (_HasSpecularMap != 0)
+    {
+        material.specular *= texture(_SpecularMap, TexCoord0).rgb;
+    }
 
     // Caculate lighting
-    vec3 ambientBase = CalcAmbientLight(_Material, _AmbientLight);
-    vec3 lightingAccumulator = AccumulateLighting(_Material, FragPos, normal, viewDir);
+    vec3 ambientBase = CalcAmbientLight(material, _AmbientLight);
+    vec3 lightingAccumulator = AccumulateLighting(material, FragPos, normal, viewDir);
 
     // Lighting is multiplied by albedo. Ambient color is also multiplied by albedo
     // so that the object's details will show on the shaded surface.

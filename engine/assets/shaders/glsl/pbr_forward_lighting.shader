@@ -43,6 +43,7 @@ in mat3 TBN;
 uniform vec3 _CameraPos;
 uniform sampler2D _DiffuseMap;
 uniform sampler2D _NormalMap;
+uniform sampler2D _SpecularMap;
 uniform sampler2D _MetalnessMap;
 uniform sampler2D _RoughnessMap;
 uniform sampler2D _MraMap;
@@ -50,6 +51,7 @@ uniform sampler2D _OcclusionMap;
 uniform sampler2D _EmissiveMap;
 uniform int _HasDiffuseMap;
 uniform int _HasNormalMap;
+uniform int _HasSpecularMap;
 uniform int _HasMetalnessMap;
 uniform int _HasRoughnessMap;
 uniform int _HasMraMap;
@@ -97,7 +99,9 @@ vec3 EvaluateLight(
     vec3 lightDir,
     vec3 albedo,
     float metalness,
-    float roughness)
+    float roughness,
+    vec3 specularColor,
+    bool hasSpecularMap)
 {
     vec3 halfVector = normalize(viewDir + lightDir);
     float nDotL = max(dot(normal, lightDir), 0.0);
@@ -106,6 +110,10 @@ vec3 EvaluateLight(
     float hDotV = max(dot(halfVector, viewDir), 0.0);
 
     vec3 f0 = mix(vec3(0.04), albedo, metalness);
+    if (hasSpecularMap)
+    {
+        f0 = mix(specularColor, albedo, metalness);
+    }
     vec3 fresnel = FresnelSchlick(hDotV, f0);
     float distribution = DistributionGGX(nDotH, roughness);
     float geometry = GeometrySmith(nDotV, nDotL, roughness);
@@ -159,6 +167,9 @@ void main()
     roughness = clamp(roughness, 0.04, 1.0);
 
     vec3 viewDir = normalize(_CameraPos - FragPos);
+    vec3 specularColor = _HasSpecularMap != 0
+        ? texture(_SpecularMap, TexCoord0).rgb
+        : vec3(0.04);
     vec3 color = _AmbientLight * baseColor.rgb * (1.0 - metalness) * occlusion;
 
     for (int i = 0; i < _NumDirectLight; ++i)
@@ -169,7 +180,7 @@ void main()
         vec3 specularRadiance = _DirectLights[i].properties.color *
             _DirectLights[i].properties.specularIntensity;
         color += EvaluateLight(diffuseRadiance, specularRadiance, normal, viewDir, lightDir,
-            baseColor.rgb, metalness, roughness);
+            baseColor.rgb, metalness, roughness, specularColor, _HasSpecularMap != 0);
     }
 
     for (int i = 0; i < _NumPointLight; ++i)
@@ -188,7 +199,7 @@ void main()
         vec3 specularRadiance = _PointLights[i].properties.color * attenuation *
             _PointLights[i].properties.specularIntensity;
         color += EvaluateLight(diffuseRadiance, specularRadiance, normal, viewDir, lightDir,
-            baseColor.rgb, metalness, roughness);
+            baseColor.rgb, metalness, roughness, specularColor, _HasSpecularMap != 0);
     }
 
     vec3 emissive = _Material.emissive;
