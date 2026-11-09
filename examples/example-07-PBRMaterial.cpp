@@ -171,7 +171,7 @@ private:
     void InitScene()
     {
         auto camera = m_scene->EmplaceChild<nxs::Camera>("Camera");
-        camera->Position().value = {5, 5, 5};
+        camera->Position().value = {8, 8, 8};
         camera->LookAt(glm::vec3(0), glm::vec3(0, 1, 0));
 
         if (m_loadModel)
@@ -185,10 +185,26 @@ private:
             auto node = m_scene->EmplaceChild<nxs::SceneNode3D>("Model");
             node->AddComponent<nxs::MeshComponent>();
             node->Scale().value = modelScales[0];
+            node->Position().value = {0, 0.2f, 0};
         }
 
-        auto material = std::make_shared<nxs::Material>("Default Material", 0);
-        material->CreateDefaultShader(*nxs::Engine::Instance().GetResourceManager());
+        auto resourceManager = nxs::Engine::Instance().GetResourceManager();
+        const auto roadAlbedo = resourceManager->Get<nxs::Texture>(GetAssetPath("textures/road/road_a.png"));
+        const auto roadNormal = resourceManager->Get<nxs::Texture>(GetAssetPath("textures/road/road_n.png"));
+        const auto roadMra = resourceManager->Get<nxs::Texture>(GetAssetPath("textures/road/road_mra.png"));
+
+        auto material = std::make_shared<nxs::Material>("Road Material", 0);
+        if (roadAlbedo && roadNormal && roadMra)
+        {
+            material->AddTexture(roadAlbedo, nxs::TextureType::Diffuse);
+            material->AddTexture(roadNormal, nxs::TextureType::Normal);
+            material->AddTexture(roadMra, nxs::TextureType::MetalnessRoughnessOcclusion);
+        }
+        else
+        {
+            LOG_ERROR(LogTemp, "Failed to load one or more road PBR textures.");
+        }
+        material->CreateDefaultShader(*resourceManager);
 
         auto meshComp = m_scene->EmplaceChild<nxs::SceneNode3D>("Ground")->AddComponent<nxs::MeshComponent>();
         meshComp->SetMesh(nxs::PrimitiveMesh::CreatePlane(
