@@ -10,8 +10,6 @@
 
 USING_NAMESPACE_NXS;
 
-std::atomic<uint32_t> GLVertexBuffer::s_bindingBuffer(0);
-
 GLVertexBuffer::~GLVertexBuffer()
 {
     if (IsBinding()) Unbind();
@@ -37,19 +35,21 @@ void GLVertexBuffer::Bind() const
 
     CALL_GL_FUNC(glBindVertexArray(m_handle));
     CALL_GL_FUNC(glBindBuffer(GL_ARRAY_BUFFER, m_vbo));
-    s_bindingBuffer.store(m_handle);
 }
 
 void GLVertexBuffer::Unbind() const
 {
     rmt_ScopedCPUSample(GLVertexBuffer_Unbind, 0);
+    if (!IsBinding()) return;
+
     CALL_GL_FUNC(glBindVertexArray(0));
-    if (IsBinding()) s_bindingBuffer.store(0);
 }
 
 bool GLVertexBuffer::IsBinding() const
 {
-    return m_handle != 0 && s_bindingBuffer.load() == m_handle;
+    GLint binding = 0;
+    CALL_GL_FUNC(glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &binding));
+    return m_handle != 0 && CAST<uint32_t>(binding) == m_handle;
 }
 
 void GLVertexBuffer::CopyData(const void* data, size_t bytes, size_t offset)

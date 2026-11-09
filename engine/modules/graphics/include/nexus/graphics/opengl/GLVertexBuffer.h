@@ -8,8 +8,6 @@
 #include "nexus/container/Array.h"
 #include "../VertexBuffer.h"
 
-#include <atomic>
-
 NXS_NAMESPACE
 {
     class GLVertexBuffer final : public VertexBuffer
@@ -31,8 +29,6 @@ NXS_NAMESPACE
     private:
         //! API specific vertex buffer generation function.
         void Build_Impl() override;
-
-        static std::atomic<uint32_t> s_bindingBuffer;
 
     protected:
         NODISCARD uint32_t Alloc() override;

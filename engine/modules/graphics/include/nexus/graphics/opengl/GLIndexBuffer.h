@@ -7,8 +7,6 @@
 #include "NxsGL.h"
 #include "../IndexBuffer.h"
 
-#include <atomic>
-
 NXS_NAMESPACE
 {
     class GLIndexBuffer final : public IndexBuffer
@@ -17,6 +15,7 @@ NXS_NAMESPACE
         GLIndexBuffer() = default;
         ~GLIndexBuffer() override;
 
+        IndexBuffer& Begin() override;
         void Bind() const override;
         void Unbind() const override;
         bool IsBinding() const override;
@@ -25,8 +24,6 @@ NXS_NAMESPACE
 
     private:
         void Build_Impl() override;
-
-        static std::atomic<uint32_t> s_bindingBuffer;
 
     protected:
         uint32_t Alloc() override;

@@ -190,7 +190,6 @@ private:
         auto material = std::make_shared<nxs::Material>("Default Material", 0);
         material->CreateDefaultShader(*nxs::Engine::Instance().GetResourceManager());
 
-#if 0
         auto meshComp = m_scene->EmplaceChild<nxs::SceneNode3D>("Ground")->AddComponent<nxs::MeshComponent>();
         meshComp->SetMesh(nxs::PrimitiveMesh::CreatePlane(
                 "Ground Plane",
@@ -199,7 +198,6 @@ private:
                 material
             )
         );
-#endif
 
         m_scene->SetRenderer(std::make_unique<nxs::ForwardSceneRenderer>(GetRenderSystem()));
     }
