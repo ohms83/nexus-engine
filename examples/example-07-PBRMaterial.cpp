@@ -29,6 +29,9 @@ public:
     {
         const auto selectedNode = m_sceneGraphWidget->GetSelectedNode();
         m_propertyWindow->SetSceneNode(selectedNode);
+
+        const float dt = GetDeltaTime();
+        m_lightRoot->Orient().Rotate(30.f * dt, glm::vec3(0, 1, 0));
     }
 
     void Render(nxs::RenderSystem& renderSystem) override
@@ -266,10 +269,33 @@ private:
     {
         m_scene->Ambient() = {0.5f, 0.5f, 0.5f};
 
+        m_lightRoot = m_scene->EmplaceChild<nxs::SceneNode3D>("Light Root");
+
         {
             auto light = m_scene->EmplaceChild<nxs::DirectionalLight>("Direct Light");
             light->Properties().color =  {1, 1, 1};
             light->Direction() = {10, -10, 0};
+        }
+
+        nxs::Array<glm::vec3> lightPositions = {
+            {5, 5, 5},
+            {-5, 5, 5},
+            {5, 5, -5},
+            {-5, 5, -5},
+        };
+        nxs::Array<nxs::Color3F> lightColors = {
+            {1, 0, 0},
+            {0, 1, 0},
+            {0, 0, 1},
+            {1, 1, 0},
+        };
+
+        for (size_t i = 0; i < lightPositions.size(); i++)
+        {
+            auto light = m_lightRoot->EmplaceChild<nxs::PointLight>(std::format("Point Light {}", i));
+            light->Properties().color = lightColors[i];
+            light->Position() = lightPositions[i];
+            light->Properties().diffuseIntensity = 400.0f;
         }
     }
 
@@ -291,6 +317,7 @@ private:
 
 protected:
     nxs::Ref<nxs::Scene> m_scene;
+    nxs::Ref<nxs::SceneNode3D> m_lightRoot;
     nxs::CameraComponent m_camera;
     nxs::Color3F m_ambient {0.5, 0.5, 0.5};
     glm::vec3 m_euler {};
@@ -314,7 +341,7 @@ int main()
         vsync,
     };
     return nxs::RunApplication<Example_07>({
-        "Example 06 - Shadow Mapping",
+        "Example 07 - PBR Material",
         graphicsConfig,
         fullscreen,
         true,
