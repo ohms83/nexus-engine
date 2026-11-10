@@ -2,7 +2,7 @@
 // Created by nutta on 7/25/2025.
 //
 #include "nexus/scene/renderer/SceneRenderer.h"
-#include "nexus/container/Array.h"
+#include "nexus/Container.h"
 
 #include <format>
 #include <algorithm>
@@ -194,31 +194,31 @@ void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
     Array<RenderCommand> commands;
     commands.reserve(1024);
 
+    Dict<const ISceneView*, Array<SceneNode*>> visibilitySets;
+    {
+        rmt_ScopedCPUSample(SceneRenderer_BuildVisibilityCache, 0)
+        visibilitySets = scene.GetVisibilitySets();
+    }
+
     for (auto pass : m_renderPasses)
     {
         if (!pass->enabled) continue;
 
-        commands.clear();
-
-        // Begin per-pass CPU and GPU (OpenGL) samples using dynamic names
-        rmt_BeginCPUSampleDynamic(pass->name.c_str(), 0);
-        rmt_BeginOpenGLSampleDynamic(pass->name.c_str());
-
-        Array<Ref<ISceneView>> viewPoints;
-        pass->PopulateSceneView(scene, viewPoints);
-
-        for (const auto view : viewPoints)
+        for (const auto& [view, visibleNodes] : visibilitySets)
         {
-            if (!view) continue;
+            if (!view || visibleNodes.empty() || !pass->FilterSceneView(view)) continue;
 
-            rmt_BeginCPUSample(SceneRenderer_CreateSortList, 0)
-            const glm::vec3& cameraPos = view->GetViewPos();
+            commands.clear();
+
+            rmt_BeginCPUSampleDynamic(pass->name.c_str(), 0);
+            rmt_BeginOpenGLSampleDynamic(pass->name.c_str());
+
+            rmt_BeginCPUSample(SceneRenderer_BuildCommandsFromVisibleNodes, 0)
+            const glm::vec3& cameraPos = view->GetPosition();
             const glm::mat4& viewMtx = view->GetViewMatrix();
             const glm::mat4& projectionMtx = view->GetProjectionMatrix();
             const glm::mat4& viewProjMtx = view->GetViewProjectionMatrix();
-            Array<Ref<SceneNode>> nodes;
-            scene.GetAllDescendants(nodes, true);
-            for (const auto& node : nodes)
+            for (const auto node : visibleNodes)
             {
                 if (!node->IsActive()) continue;
                 const auto meshComp = node->GetComponent<MeshComponent>();
@@ -230,7 +230,6 @@ void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
                 if (auto mesh = meshComp->GetMesh(); mesh != nullptr)
                 {
                     if (!pass->IsPassFiltered(mesh)) continue;
-                    if (!view->IsObjectVisible(mesh->GetSphere(), modelMtx, node->GetGlobalScale())) continue;
 
                     commands.push_back(pass->CreateRenderCommand(mesh, modelMtx, mvpMtx));
                 }

@@ -163,6 +163,7 @@ NXS_NAMESPACE
             return !filter || filter(cmd);
         }
 
+        virtual bool FilterSceneView(const ISceneView* view) const;
         virtual void PopulateSceneView(const SceneNode& scene, Array<Ref<ISceneView>>& outViews) const;
         virtual void PrepareRenderCommands(const SceneNode& scene, const ISceneView& view, Array<RenderCommand>& outCommands) const;
         virtual bool IsPassFiltered(Ref<const Mesh> mesh) const { return false; }

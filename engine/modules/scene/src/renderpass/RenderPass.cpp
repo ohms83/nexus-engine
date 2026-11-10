@@ -9,7 +9,6 @@
 #include "nexus/scene/component/SceneNodeComponent.h"
 #include "nexus/scene/component/TransformComponent.h"
 #include "nexus/scene/component/MeshComponent.h"
-#include "nexus/scene/CameraView.h"
 
 #include "nexus/math/Matrix.h"
 
@@ -274,8 +273,18 @@ RenderCommand RenderPass::CreateRenderCommand(Ref<const Mesh> mesh, const glm::m
     return cmd;
 }
 
+bool RenderPass::FilterSceneView(const ISceneView* view) const
+{
+    const SceneNode* sceneNode = D_CAST<const SceneNode*>(view);
+    if (!sceneNode || !sceneNode->IsActive()) return false;
+
+    const auto camera = sceneNode->GetComponent<CameraComponent>();
+    return camera != nullptr;
+}
+
 void RenderPass::PopulateSceneView(const SceneNode& scene, Array<Ref<ISceneView>>& outViews) const
 {
+#if 0
     rmt_ScopedCPUSample(RenderPass_PopulateSceneView, 0);
     Array<Ref<SceneNode>> nodes;
     scene.GetAllDescendants(nodes, true);
@@ -289,6 +298,7 @@ void RenderPass::PopulateSceneView(const SceneNode& scene, Array<Ref<ISceneView>
             node->GetGlobalPosition(),
             node->GetGlobalOrientation()));
     }
+#endif
 }
 
 void RenderPass::PrepareRenderCommands(const SceneNode &scene, const ISceneView &view, Array<RenderCommand>& outCommands) const

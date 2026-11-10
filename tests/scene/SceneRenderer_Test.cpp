@@ -5,6 +5,31 @@
 
 using namespace nxs;
 
+class CountingSceneView final : public SceneNode, public ISceneView
+{
+public:
+    explicit CountingSceneView(Ref<entt::registry> registry, std::string name)
+        : SceneNode(std::move(registry), std::move(name))
+    {
+    }
+
+    NODISCARD const glm::vec3& GetPosition() const override { return m_position; }
+    NODISCARD glm::mat4 GetViewMatrix() const override { return glm::mat4(1.0f); }
+    NODISCARD glm::mat4 GetProjectionMatrix() const override { return glm::mat4(1.0f); }
+    NODISCARD glm::mat4 GetViewProjectionMatrix() const override { return glm::mat4(1.0f); }
+
+    NODISCARD Array<SceneNode*> GetVisibleNodes(const Scene&) const override
+    {
+        ++visibilityCalls;
+        return {};
+    }
+
+    mutable uint32_t visibilityCalls = 0;
+
+private:
+    glm::vec3 m_position{0.0f};
+};
+
 TEST(SceneRenderer, RegisterRenderPass_SortsByPriority)
 {
     // FakeRenderer renderer;
@@ -24,6 +49,21 @@ TEST(SceneRenderer, RegisterRenderPass_SortsByPriority)
     // EXPECT_EQ(passes[0].name, std::string("p2"));
     // EXPECT_EQ(passes[1].name, std::string("p3"));
     // EXPECT_EQ(passes[2].name, std::string("p1"));
+}
+
+TEST(SceneRenderer, ComputesVisibilityOnceForMultiplePasses)
+{
+    auto scene = std::make_shared<Scene>("test");
+    const auto view = scene->EmplaceChild<CountingSceneView>("view");
+
+    SceneRenderer renderer;
+    renderer.RegisterRenderPass(std::make_shared<RenderPass>());
+    renderer.RegisterRenderPass(std::make_shared<RenderPass>());
+
+    RenderSystem renderSystem(std::make_shared<FakeRendering>());
+    renderer.Render(renderSystem, *scene);
+
+    EXPECT_EQ(view->visibilityCalls, 1u);
 }
 
 static Frustum MakeUnitCubeFrustum()

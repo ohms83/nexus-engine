@@ -8,12 +8,15 @@
 #include "nexus/geom/Frustum.h"
 
 #include "SceneNode.h"
+#include "SceneView.h"
 #include "component/CameraComponent.h"
 #include "component/TransformComponent.h"
 
 NXS_NAMESPACE
 {
-    class Camera : public SceneNode
+    struct Sphere;
+
+    class Camera : public SceneNode, public ISceneView
     {
     public:
         explicit Camera(Ref<entt::registry> registry, const std::string& name = "");
@@ -26,7 +29,7 @@ NXS_NAMESPACE
 
         NODISCARD PositionComponent& Position() { return *GetComponent<PositionComponent>(); }
         NODISCARD const PositionComponent& Position() const { return *GetComponent<PositionComponent>(); }
-        NODISCARD const glm::vec3& GetPosition() const { return GetComponent<PositionComponent>()->value; }
+        NODISCARD const glm::vec3& GetPosition() const override { return GetComponent<PositionComponent>()->value; }
         void SetPosition(const glm::vec3& position) { GetComponent<PositionComponent>()->value = position; }
 
         NODISCARD OrientationComponent& Orient() { return *GetComponent<OrientationComponent>(); }
@@ -49,11 +52,19 @@ NXS_NAMESPACE
         void SetProjection(float fov, float width, float height, float nearZ, float farZ);
         void SetOrthographic(float width, float height, float nearZ, float farZ);
 
-        NODISCARD glm::mat4 GetViewMtx() const;
-        NODISCARD const glm::mat4& GetProjectionMtx() const
+        NODISCARD glm::mat4 GetViewMatrix() const override;
+
+        NODISCARD glm::mat4 GetProjectionMatrix() const override
         {
             return m_projMtx;
         }
+
+        NODISCARD glm::mat4 GetViewProjectionMatrix() const override;
+
+        // NODISCARD bool IsObjectVisible(const Sphere &boundingSphere, const glm::mat4 &modelMtx, const glm::vec3 &scale) const override;
+        NODISCARD Array<SceneNode*> GetVisibleNodes(const Scene& scene) const override;
+
+        NODISCARD Frustum GetViewFrustum() const;
 
     protected:
         //! Projection matrix.

@@ -5,7 +5,7 @@
 #pragma once
 
 #include "nexus/NxsDefine.h"
-#include "nexus/container/Array.h"
+#include "nexus/Container.h"
 #include "nexus/graphics/RenderCommand.h"
 #include "nexus/scene/renderpass/RenderPass.h"
 #include "nexus/geom/Frustum.h"

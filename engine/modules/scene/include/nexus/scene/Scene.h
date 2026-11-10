@@ -32,6 +32,8 @@ NXS_NAMESPACE
         Color3F& Ambient();
         NODISCARD const Color3F& Ambient() const;
 
+        Dict<const ISceneView*, Array<SceneNode*>> GetVisibilitySets() const;
+
     protected:
         // --- Rendering ---
         Ref<SceneRenderer> m_renderer;

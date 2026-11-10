@@ -117,6 +117,14 @@ NXS_NAMESPACE
          */
         void GetAllDescendants(ChildList& childrenList, bool parentFirst) const;
 
+        template<typename T>
+        NODISCARD Array<T*> GetAllDescendantsOfType(bool parentFirst) const
+        {
+            Array<T*> children;
+            AppendAllDescendantsOfType<T>(children, parentFirst);
+            return children;
+        }
+
         NODISCARD Ref<SceneNode> FindNode(Identifier id);
 
         /**
@@ -152,6 +160,27 @@ NXS_NAMESPACE
         virtual void OnDeactivate() {};
         virtual void OnDestroy() {};
         virtual void OnUpdate(float dt) {}
+
+    private:
+        template<typename T>
+        void AppendAllDescendantsOfType(Array<T*>& children, bool parentFirst) const
+        {
+            for (const auto& child : m_children)
+            {
+                auto tChild = D_CAST<T*>(child.get());
+                if (parentFirst && tChild)
+                {
+                    children.push_back(tChild);
+                }
+
+                child->AppendAllDescendantsOfType<T>(children, parentFirst);
+
+                if (!parentFirst && tChild)
+                {
+                    children.push_back(tChild);
+                }
+            }
+        }
 
     protected:
         WeakRef<SceneNode> m_parent;

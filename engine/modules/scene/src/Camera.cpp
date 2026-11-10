@@ -4,6 +4,11 @@
 
 #include "nexus/scene/Camera.h"
 #include "nexus/math/Matrix.h"
+#include "nexus/geom/Sphere.h"
+#include "nexus/scene/Scene.h"
+#include "nexus/scene/component/MeshComponent.h"
+
+#include "Remotery.h"
 
 USING_NAMESPACE_NXS;
 
@@ -45,13 +50,56 @@ void Camera::SetOrthographic(const float width, const float height, const float 
     m_projMtx = glm::ortho(-width/2, width/2, -height/2, height/2, nearZ, farZ);
 }
 
-glm::mat4 Camera::GetViewMtx() const
+glm::mat4 Camera::GetViewMatrix() const
 {
     const auto worldOrientation = GetGlobalOrientation();
     const auto worldPosition = GetGlobalPosition();
     auto viewMatrix = glm::mat4(worldOrientation);
     viewMatrix[3] = glm::vec4(worldPosition, 1);
     return glm::inverse(viewMatrix);
+}
+
+glm::mat4 Camera::GetViewProjectionMatrix() const
+{
+    return GetProjectionMatrix() * GetViewMatrix();
+}
+
+Array<SceneNode*> Camera::GetVisibleNodes(const Scene& scene) const
+{
+    rmt_ScopedCPUSample(Camera_GetVisibleNodes, 0)
+    // Implementation for getting visible nodes
+    Array<SceneNode*> visibleNodes;
+    Frustum viewFrustum = GetViewFrustum(); // Ensure the view frustum is up to date
+
+    rmt_ScopedCPUSample(Camera_CullSceneNodes, 0)
+    for (const auto& node : scene.GetAllDescendantsOfType<SceneNode>(true))
+    {
+        if (!node->IsActive()) continue;
+        // TODO: Replace the MeshComponent dependency with a more generic visibility check if needed
+        const auto meshComp = node->GetComponent<MeshComponent>();
+        if (!meshComp) continue;
+
+        const auto modelMtx = node->GetGlobalTransform();
+        if (auto mesh = meshComp->GetMesh(); mesh != nullptr)
+        {
+            const auto boundingSphere = mesh->GetSphere();
+            const glm::vec3 pos = modelMtx * glm::vec4(boundingSphere.center, 1);
+            const auto globalScale = node->GetGlobalScale();
+            const float scaledRadius = boundingSphere.radius * std::max({ globalScale.x, globalScale.y, globalScale.z });
+            const bool isVisible = viewFrustum.IsSphereInside(pos, scaledRadius);
+
+            if (isVisible)
+            {
+                visibleNodes.push_back(node);
+            }
+        }
+    }
+    return visibleNodes;
+}
+
+Frustum Camera::GetViewFrustum() const
+{
+    return Properties().GetViewFrustum(GetGlobalPosition(), GetGlobalOrientation());
 }
 
 void Camera::LookAt(const glm::vec3 &center, const glm::vec3 &up)

@@ -239,6 +239,26 @@ TEST_F(SceneNodeTest, GetAllDescendants)
     EXPECT_TRUE(std::find(descendants.begin(), descendants.end(), grandchild) != descendants.end());
 }
 
+TEST_F(SceneNodeTest, GetAllDescendantsOfTypeReturnsOrderedMatches)
+{
+    auto first = scene->EmplaceChild<SceneNode3D>("First");
+    auto plain = first->EmplaceChild<SceneNode>("Plain");
+    auto nested = plain->EmplaceChild<SceneNode3D>("Nested");
+    auto second = scene->EmplaceChild<SceneNode3D>("Second");
+
+    const auto parentFirst = scene->GetAllDescendantsOfType<SceneNode3D>(true);
+    ASSERT_EQ(parentFirst.size(), 3u);
+    EXPECT_EQ(parentFirst[0], first.get());
+    EXPECT_EQ(parentFirst[1], nested.get());
+    EXPECT_EQ(parentFirst[2], second.get());
+
+    const auto childFirst = scene->GetAllDescendantsOfType<SceneNode3D>(false);
+    ASSERT_EQ(childFirst.size(), 3u);
+    EXPECT_EQ(childFirst[0], nested.get());
+    EXPECT_EQ(childFirst[1], first.get());
+    EXPECT_EQ(childFirst[2], second.get());
+}
+
 TEST_F(SceneNodeTest, FindNodeById)
 {
     auto node = scene->EmplaceChild<SceneNode>("Test Node");
