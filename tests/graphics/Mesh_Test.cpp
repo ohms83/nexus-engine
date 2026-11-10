@@ -50,3 +50,76 @@ TEST_F(MeshTest, SerializeDeserialize)
     EXPECT_FLOAT_EQ(mesh2.GetSphere().radius, 5.0f);
     EXPECT_FLOAT_EQ(mesh2.GetBox().center.x, 0.0f);
 }
+
+TEST_F(MeshTest, PrimitiveCreatePlane)
+{
+    auto fakeRendering = std::make_shared<FakeRendering>();
+    auto material = resourceManager.Create<Material>("path/to/mat");
+    auto planeMesh = PrimitiveMesh::CreatePlane("plane", 2.0f, 3.0f, *fakeRendering, material);
+    ASSERT_NE(planeMesh, nullptr);
+    EXPECT_EQ(planeMesh->GetName(), "plane");
+    ASSERT_NE(planeMesh->GetVertexBuffer(), nullptr);
+    ASSERT_NE(planeMesh->GetIndexBuffer(), nullptr);
+    EXPECT_EQ(planeMesh->GetMaterial(), material);
+    EXPECT_EQ(planeMesh->GetVertexBuffer()->VertexCount(), 4u);
+    EXPECT_EQ(planeMesh->GetIndexBuffer()->NumIndex(), 6u);
+    EXPECT_EQ(planeMesh->GetIndexBuffer()->GetBufferSize(), 6u * sizeof(uint32_t));
+
+    for (uint32_t i = 0; i < planeMesh->GetIndexBuffer()->NumIndex(); ++i)
+    {
+        EXPECT_LT(planeMesh->GetIndexBuffer()->GetData()[i], planeMesh->GetVertexBuffer()->VertexCount());
+    }
+
+    planeMesh.reset();
+}
+
+TEST_F(MeshTest, PrimitiveCreateBox)
+{
+    FakeRendering fakeRendering;
+    auto boxMesh = PrimitiveMesh::CreateBox("box", {2.0f, 3.0f, 4.0f}, fakeRendering);
+
+    ASSERT_NE(boxMesh, nullptr);
+    ASSERT_NE(boxMesh->GetVertexBuffer(), nullptr);
+    ASSERT_NE(boxMesh->GetIndexBuffer(), nullptr);
+    EXPECT_EQ(boxMesh->GetName(), "box");
+    EXPECT_EQ(boxMesh->GetVertexBuffer()->VertexCount(), 24u);
+    EXPECT_EQ(boxMesh->GetIndexBuffer()->NumIndex(), 36u);
+    EXPECT_EQ(boxMesh->GetIndexBuffer()->GetBufferSize(), 36u * sizeof(uint32_t));
+
+    for (uint32_t i = 0; i < boxMesh->GetIndexBuffer()->NumIndex(); ++i)
+    {
+        EXPECT_LT(boxMesh->GetIndexBuffer()->GetData()[i], boxMesh->GetVertexBuffer()->VertexCount());
+    }
+
+    boxMesh.reset();
+}
+
+TEST_F(MeshTest, PrimitiveCreateSphere)
+{
+    constexpr uint32_t sectorCount = 8;
+    constexpr uint32_t stackCount = 4;
+    FakeRendering fakeRendering;
+    auto sphereMesh = PrimitiveMesh::CreateSphere(
+        "sphere",
+        2.0f,
+        sectorCount,
+        stackCount,
+        fakeRendering);
+
+    ASSERT_NE(sphereMesh, nullptr);
+    ASSERT_NE(sphereMesh->GetVertexBuffer(), nullptr);
+    ASSERT_NE(sphereMesh->GetIndexBuffer(), nullptr);
+    EXPECT_EQ(sphereMesh->GetName(), "sphere");
+    EXPECT_EQ(sphereMesh->GetVertexBuffer()->VertexCount(), (sectorCount + 1) * (stackCount + 1));
+    EXPECT_EQ(sphereMesh->GetIndexBuffer()->NumIndex(), sectorCount * (stackCount - 1) * 6);
+    EXPECT_EQ(
+        sphereMesh->GetIndexBuffer()->GetBufferSize(),
+        sectorCount * (stackCount - 1) * 6 * sizeof(uint32_t));
+
+    for (uint32_t i = 0; i < sphereMesh->GetIndexBuffer()->NumIndex(); ++i)
+    {
+        EXPECT_LT(sphereMesh->GetIndexBuffer()->GetData()[i], sphereMesh->GetVertexBuffer()->VertexCount());
+    }
+
+    sphereMesh.reset();
+}

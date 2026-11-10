@@ -26,10 +26,10 @@ Ref<Mesh> PrimitiveMesh::CreateSphere(
     NXS_ASSERT(sectorCount);
     NXS_ASSERT(stackCount);
 
-    auto vertices = new Vertex[ (sectorCount + 1) * (stackCount + 1) ];
-    auto indices = new uint32_t[ sectorCount * stackCount * 6 ];
+    Array<Vertex> vertices((sectorCount + 1) * (stackCount + 1));
+    Array<uint32_t> indices;
+    indices.reserve(sectorCount * stackCount * 6);
     uint32_t vertexIndex = 0;
-    uint32_t indexIndex = 0;
 
     for (uint32_t i = 0; i <= stackCount; ++i)
     {
@@ -65,22 +65,24 @@ Ref<Mesh> PrimitiveMesh::CreateSphere(
         {
             if (i != 0)
             {
-                indices[indexIndex++] = k1;
-                indices[indexIndex++] = k2;
-                indices[indexIndex++] = k1 + 1;
+                indices.push_back(k1);
+                indices.push_back(k2);
+                indices.push_back(k1 + 1);
             }
 
             if (i != (stackCount - 1))
             {
-                indices[indexIndex++] = k1 + 1;
-                indices[indexIndex++] = k2;
-                indices[indexIndex++] = k2 + 1;
+                indices.push_back(k1 + 1);
+                indices.push_back(k2);
+                indices.push_back(k2 + 1);
             }
         }
     }
 
-    Ref<IBuffer> vertexData = std::make_shared<OwningBuffer>(
-        (uint8_t*)vertices, sizeof(Vertex) * (sectorCount + 1) * (stackCount + 1));
+    auto vertexData = std::make_shared<OwningBuffer>();
+    vertexData->CopyData(
+        R_CAST<uint8_t*>(vertices.data()),
+        sizeof(Vertex) * vertices.size());
     Ref<VertexBuffer> vertexBuffer;
     vertexBuffer.reset(renderingInterface.CreateVertexBuffer());
     vertexBuffer->Begin()
@@ -91,8 +93,10 @@ Ref<Mesh> PrimitiveMesh::CreateSphere(
         .AddAttribute(VertexAttribute {VertexAttribute::Type::TexCoord0, DataType::Float, 2})
     .Build();
 
-    Ref<IBuffer> indexData = std::make_shared<OwningBuffer>(
-        (uint8_t*)indices, sizeof(uint32_t) * sectorCount * stackCount * 6);
+    auto indexData = std::make_shared<OwningBuffer>();
+    indexData->CopyData(
+        R_CAST<uint8_t*>(indices.data()),
+        sizeof(uint32_t) * indices.size());
     Ref<IndexBuffer> indexBuffer;
     indexBuffer.reset(renderingInterface.CreateIndexBuffer());
     indexBuffer->Begin()

@@ -83,19 +83,21 @@ Ref<Mesh> PrimitiveMesh::CreateBox(
     Ref<Material> material)
 {
     // Scale the unit cube vertices by the specified size
-    Array<Vertex>* scaledVertices = new Array<Vertex>();
-    scaledVertices->reserve(s_vertices.size());
+    Array<Vertex> scaledVertices;
+    scaledVertices.reserve(s_vertices.size());
     for (const auto& v : s_vertices)
     {
         Vertex sv;
         sv.position = v.position * size;
         sv.normal = v.normal;
         sv.texCoord0 = v.texCoord0;
-        scaledVertices->push_back(sv);
+        scaledVertices.push_back(sv);
     }
 
-    Ref<IBuffer> vertexData = std::make_shared<OwningBuffer>(
-        (uint8_t*)scaledVertices->data(), sizeof(Vertex) * scaledVertices->size());
+    auto vertexData = std::make_shared<OwningBuffer>();
+    vertexData->CopyData(
+        R_CAST<uint8_t*>(scaledVertices.data()),
+        sizeof(Vertex) * scaledVertices.size());
 
     Ref<VertexBuffer> vertexBuffer;
     vertexBuffer.reset(renderingInterface.CreateVertexBuffer());
@@ -107,10 +109,12 @@ Ref<Mesh> PrimitiveMesh::CreateBox(
         .AddAttribute(VertexAttribute {VertexAttribute::Type::TexCoord0, DataType::Float, 2})
     .Build();
 
-    Array<uint32_t>* indices = new Array<uint32_t>(s_indices);
+    Array<uint32_t> indices = s_indices;
 
-    Ref<IBuffer> indexData = std::make_shared<OwningBuffer>(
-        (uint8_t*)indices->data(), sizeof(uint32_t) * indices->size());
+    auto indexData = std::make_shared<OwningBuffer>();
+    indexData->CopyData(
+        R_CAST<uint8_t*>(indices.data()),
+        sizeof(uint32_t) * indices.size());
     Ref<IndexBuffer> indexBuffer;
     indexBuffer.reset(renderingInterface.CreateIndexBuffer());
     indexBuffer->Begin()

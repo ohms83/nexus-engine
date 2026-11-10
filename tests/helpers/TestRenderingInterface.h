@@ -5,6 +5,50 @@
 
 USING_NAMESPACE_NXS;
 
+class FakdeVertexBuffer : public VertexBuffer
+{
+public:
+    using Super = VertexBuffer;
+
+    FakdeVertexBuffer() {}
+    ~FakdeVertexBuffer() override {}
+
+    NODISCARD uint32_t GetHandle() const override { return 1; }
+
+    void Bind() const override {}
+    void Unbind() const override {}
+    bool IsBinding() const override { return false; }
+
+    void CopyData(const void* data, size_t bytes, size_t offset) override {}
+
+protected:
+    void Build_Impl() override {}
+
+    NODISCARD uint32_t Alloc() override { return 1; }
+    void Release() override {}
+};
+
+class FakeIndexBuffer : public IndexBuffer
+{
+public:
+    using Super = IndexBuffer;
+
+    FakeIndexBuffer() {}
+    ~FakeIndexBuffer() override {}
+
+    NODISCARD uint32_t GetHandle() const override { return 1; }
+
+    void Bind() const override {}
+    void Unbind() const override {}
+    bool IsBinding() const override { return false; }
+
+protected:
+    void Build_Impl() override {}
+
+    NODISCARD uint32_t Alloc() override { return 1; }
+    void Release() override {}
+};
+
 class FakeTexture : public TextureProxy
 {
 public:
@@ -49,6 +93,8 @@ public:
 
     GpuProgram* CreateGpuProgram() const override { return new FakeGpuProgram(); }
     TextureProxy* CreateTexture() const override { return new FakeTexture(); }
+    IndexBuffer* CreateIndexBuffer() const override { return new FakeIndexBuffer(); }
+    VertexBuffer* CreateVertexBuffer() const override { return new FakdeVertexBuffer(); }
 };
 
 class BadGpuProgram : public GpuProgram
