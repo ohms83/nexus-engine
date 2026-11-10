@@ -28,7 +28,6 @@
 NXS_NAMESPACE
 {
     class SceneNode : public Entity, public IReflection
-    // TODO: Consider replacing std::enable_shared_from_this with a custom solution
     , public std::enable_shared_from_this<SceneNode>
     {
     public:

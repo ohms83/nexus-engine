@@ -9,6 +9,7 @@
 #include "nexus/scene/component/SceneNodeComponent.h"
 #include "nexus/scene/component/TransformComponent.h"
 #include "nexus/scene/component/MeshComponent.h"
+#include "nexus/scene/CameraView.h"
 
 #include "nexus/math/Matrix.h"
 
