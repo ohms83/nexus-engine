@@ -47,7 +47,7 @@ public:
     {
         // Calculate matrices for a rotating cube
         const auto dt = GetDeltaTime();
-        m_cubeTransform.Rotate(90.f * dt, glm::vec3(0.5f, 1.0f, 0.0f));
+        m_cubeOrientation.Rotate(90.f * dt, glm::normalize(glm::vec3(0.5f, 1.0f, 0.0f)));
 
         glm::mat4 view = glm::lookAt(glm::vec3(0.0f, 0.0f, 3.0f), // Camera position
                                      glm::vec3(0.0f, 0.0f, 0.0f), // Look at origin
@@ -57,7 +57,10 @@ public:
         glm::mat4 projection = glm::perspective(glm::radians(m_camera.fov), m_camera.width / m_camera.height, m_camera.nearZ, m_camera.farZ);
 
         m_gpuProgram->Bind();
-        m_gpuProgram->SetUniformMatrix("model", m_cubeTransform.GetMatrix(), false);
+        m_gpuProgram->SetUniformMatrix(
+            "model",
+            nxs::Matrix::CreateModelMatrix(glm::vec3(0.0f), m_cubeOrientation.quat, glm::vec3(1.0f)),
+            false);
         m_gpuProgram->SetUniformMatrix("view", view, false);
         m_gpuProgram->SetUniformMatrix("projection", projection, false);
         m_gpuProgram->SetUniformTexture2D("ourTexture", m_texture->GetProxy(), 0);
@@ -104,7 +107,7 @@ protected:
     nxs::Ref<nxs::GpuProgram> m_gpuProgram;
     nxs::Ref<nxs::Texture> m_texture;
     nxs::Ref<nxs::Mesh> m_mesh;
-    nxs::Transform m_cubeTransform;
+    nxs::OrientationComponent m_cubeOrientation;
     nxs::CameraComponent m_camera;
 };
 

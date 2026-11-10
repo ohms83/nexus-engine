@@ -101,8 +101,11 @@ public:
     {
         // Calculate matrices for a rotating cube
         const auto dt = GetDeltaTime();
-        m_cubeTransform.Rotate(90.f * dt, glm::vec3(5.0f, 1.0f, 0.0f));
-        auto model = m_cubeTransform.GetMatrix();
+        m_cubeOrientation.Rotate(90.f * dt, glm::normalize(glm::vec3(5.0f, 1.0f, 0.0f)));
+        const auto model = nxs::Matrix::CreateModelMatrix(
+            glm::vec3(0.0f),
+            m_cubeOrientation.quat,
+            glm::vec3(1.0f));
         glm::mat4 view = glm::lookAt(glm::vec3(0.0f, 0.0f, 5.0f), // Camera position
                                      glm::vec3(0.0f, 0.0f, 0.0f), // Look at origin
                                      glm::vec3(0.0f, 1.0f, 0.0f)  // Up direction
@@ -195,8 +198,6 @@ protected:
             glm::vec3(1.0f),
             *renderInterface
         );
-        m_cubeTransform.SetPosition({0, 0, 0});
-
         InitLights();
         return true;
     }
@@ -227,7 +228,7 @@ protected:
     nxs::Ref<nxs::GpuProgram> m_gpuProgram;
     nxs::Ref<nxs::Texture> m_texture;
     nxs::Ref<nxs::Mesh> m_cubeMesh;
-    nxs::Transform m_cubeTransform;
+    nxs::OrientationComponent m_cubeOrientation;
     nxs::CameraComponent m_camera;
     nxs::DirectLightComponent m_directionalLight {};
     nxs::PointLightComponent m_pointLights[2] {};

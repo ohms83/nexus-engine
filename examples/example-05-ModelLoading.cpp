@@ -288,7 +288,6 @@ private:
 
 protected:
     nxs::Ref<nxs::Scene> m_scene;
-    nxs::Transform m_cubeTransform;
     nxs::CameraComponent m_camera;
     nxs::Ref<nxs::PointLight> m_pointLights[2] {};
     nxs::Ref<nxs::DirectionalLight> m_directionalLight;

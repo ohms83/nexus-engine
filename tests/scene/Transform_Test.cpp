@@ -31,7 +31,7 @@ std::string FormatVector(const glm::vec3& vec)
     return std::format("({}, {}, {}) Length={}", vec.x, vec.y, vec.z, glm::length(vec));
 }
 
-TEST(TransformTest, ForwardVector) {
+TEST(SceneNode3DTest, ForwardVector) {
     constexpr int iteration = 10; // Try testing with the 10 random data.
 
     for (int i = 0; i < iteration; ++i)
@@ -41,12 +41,12 @@ TEST(TransformTest, ForwardVector) {
         const glm::vec3 randTarget = glm::ballRand(100.f);
         constexpr glm::vec3 up {0, 1, 0};
 
-        nxs::Transform transform;
-        transform.SetPosition(randPos);
-        transform.LookAt(randTarget, up);
+        nxs::SceneNode3D node(std::make_shared<entt::registry>());
+        node.SetPosition(randPos);
+        node.LookAt(randTarget, up);
 
         const glm::vec3 forward1 = glm::normalize(randTarget - randPos);
-        const glm::vec3 forward2 = transform.Forward();
+        const glm::vec3 forward2 = node.Forward();
         const glm::vec3 diff = glm::abs(forward1 - forward2);
         const auto results = glm::equal(forward1, forward2, epsilon);
 
@@ -56,7 +56,7 @@ TEST(TransformTest, ForwardVector) {
     }
 }
 
-TEST(TransformTest, RightVector) {
+TEST(SceneNode3DTest, RightVector) {
     constexpr int iteration = 10; // Try testing with the 10 random data.
 
     for (int i = 0; i < iteration; ++i)
@@ -66,13 +66,13 @@ TEST(TransformTest, RightVector) {
         const glm::vec3 randTarget = glm::ballRand(100.f);
         constexpr glm::vec3 up {0, 1, 0};
         
-        nxs::Transform transform;
-        transform.SetPosition(randPos);
-        transform.LookAt(randTarget, up);
+        nxs::SceneNode3D node(std::make_shared<entt::registry>());
+        node.SetPosition(randPos);
+        node.LookAt(randTarget, up);
 
         const glm::vec3 f = glm::normalize(randTarget - randPos);
         const glm::vec3 right1 = glm::normalize(glm::cross(f, up));
-        const glm::vec3 right2 = transform.Right();
+        const glm::vec3 right2 = node.Right();
         const glm::vec3 diff = glm::abs(right1 - right2);
         const auto results = glm::equal(right1, right2, epsilon);
 
@@ -82,7 +82,7 @@ TEST(TransformTest, RightVector) {
     }
 }
 
-TEST(TransformTest, UpVector) {
+TEST(SceneNode3DTest, UpVector) {
     constexpr int iteration = 10; // Try testing with the 10 random data.
     
     for (int i = 0; i < iteration; ++i)
@@ -92,14 +92,14 @@ TEST(TransformTest, UpVector) {
         const glm::vec3 randTarget = glm::ballRand(100.f);
         constexpr glm::vec3 up {0, 1, 0};
         
-        nxs::Transform transform;
-        transform.SetPosition(randPos);
-        transform.LookAt(randTarget, up);
+        nxs::SceneNode3D node(std::make_shared<entt::registry>());
+        node.SetPosition(randPos);
+        node.LookAt(randTarget, up);
 
         const glm::vec3 f = glm::normalize(randTarget - randPos);
         const glm::vec3 s = glm::normalize(glm::cross(f, up));
         const glm::vec3 up1 = glm::normalize(glm::cross(s, f));
-        const glm::vec3 up2 = transform.Up();
+        const glm::vec3 up2 = node.Up();
         const glm::vec3 diff = glm::abs(up1 - up2);
         const auto results = glm::equal(up1, up2, epsilon);
 

@@ -4,7 +4,6 @@
 #include "nexus/Nexus.h"
 #include "nexus/container/Array.h"
 
-#include "nexus/scene/Transform.h"
 #include <glm/gtc/type_ptr.hpp>
 
 struct Vertex
@@ -123,7 +122,7 @@ public:
     {
         // Calculate matrices for a rotating cube
         const auto dt = GetDeltaTime();
-        m_cubeTransform.Rotate(90.f * dt, glm::vec3(0.5f, 1.0f, 0.0f));
+        m_cubeOrientation.Rotate(90.f * dt, glm::normalize(glm::vec3(0.5f, 1.0f, 0.0f)));
 
         glm::mat4 view = glm::lookAt(glm::vec3(0.0f, 0.0f, 3.0f), // Camera position
                                      glm::vec3(0.0f, 0.0f, 0.0f), // Look at origin
@@ -133,7 +132,10 @@ public:
         glm::mat4 projection = glm::perspective(glm::radians(m_camera.fov), m_camera.width / m_camera.height, m_camera.nearZ, m_camera.farZ);
 
         m_gpuProgram->Bind();
-        m_gpuProgram->SetUniformMatrix("model", m_cubeTransform.GetMatrix(), false);
+        m_gpuProgram->SetUniformMatrix(
+            "model",
+            nxs::Matrix::CreateModelMatrix(glm::vec3(0.0f), m_cubeOrientation.quat, glm::vec3(1.0f)),
+            false);
         m_gpuProgram->SetUniformMatrix("view", view, false);
         m_gpuProgram->SetUniformMatrix("projection", projection, false);
 
@@ -184,7 +186,7 @@ protected:
     nxs::Ref<nxs::VertexBuffer> m_vertexBuffer;
     nxs::Ref<nxs::IndexBuffer> m_indexBuffer;
     nxs::Ref<nxs::GpuProgram> m_gpuProgram;
-    nxs::Transform m_cubeTransform;
+    nxs::OrientationComponent m_cubeOrientation;
     nxs::CameraComponent m_camera;
 };
 

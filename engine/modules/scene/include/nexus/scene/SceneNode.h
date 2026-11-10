@@ -9,7 +9,6 @@
 #include "nexus/ecs/Entity.h"
 #include "nexus/graphics/RenderingInterface.h"
 
-#include "Transform.h"
 #include "Script.h"
 #include "component/SceneNodeComponent.h"
 
