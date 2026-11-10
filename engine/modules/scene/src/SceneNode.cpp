@@ -257,7 +257,8 @@ void SceneNode::AddChild(Ref<SceneNode> child)
 {
     if (!child) return;
 
-    for (auto ancestor = GetSelf(); ancestor; ancestor = ancestor->m_parent)
+    const auto self = GetSelf();
+    for (auto ancestor = self; ancestor; ancestor = ancestor->m_parent.lock())
     {
         if (ancestor == child)
         {
@@ -266,13 +267,14 @@ void SceneNode::AddChild(Ref<SceneNode> child)
         }
     }
 
-    if (child->m_parent == GetSelf()) return;
-    if (child->m_parent)
+    const auto previousParent = child->m_parent.lock();
+    if (previousParent == self) return;
+    if (previousParent)
     {
-        std::erase(child->m_parent->m_children, child);
+        std::erase(previousParent->m_children, child);
     }
 
-    child->m_parent = this->GetSelf();
+    child->m_parent = self;
     m_children.push_back(child);
 }
 
@@ -284,7 +286,8 @@ glm::mat4 SceneNode::GetLocalTransform() const
 glm::mat4 SceneNode::GetGlobalTransform() const
 {
     const auto localTransform = GetLocalTransform();
-    return m_parent ? m_parent->GetGlobalTransform() * localTransform : localTransform;
+    const auto parent = m_parent.lock();
+    return parent ? parent->GetGlobalTransform() * localTransform : localTransform;
 }
 
 glm::vec3 SceneNode::GetGlobalPosition() const
@@ -298,7 +301,8 @@ glm::quat SceneNode::GetGlobalOrientation() const
     const auto localOrientation = orientation
         ? orientation->quat
         : glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
-    return m_parent ? m_parent->GetGlobalOrientation() * localOrientation : localOrientation;
+    const auto parent = m_parent.lock();
+    return parent ? parent->GetGlobalOrientation() * localOrientation : localOrientation;
 }
 
 glm::vec3 SceneNode::GetGlobalScale() const
@@ -342,12 +346,13 @@ void SceneNode::RemoveAllChildren(bool removeDescendant)
 {
     if (IsShuttingDown()) return;
 
+    const auto parent = m_parent.lock();
     auto children = std::move(m_children);
     m_children.clear();
-    if (!removeDescendant && m_parent)
+    if (!removeDescendant && parent)
     {
-        std::ranges::for_each(children, [this](Ref<SceneNode> child) {
-            m_parent->AddChild(child);
+        std::ranges::for_each(children, [&parent](Ref<SceneNode> child) {
+            parent->AddChild(child);
         });
     }
     else
@@ -405,12 +410,13 @@ Ref<SceneNode> SceneNode::FindNodeWithName(const std::string& name)
 
 void SceneNode::RemoveFromParent()
 {
-    if (!m_parent) return;
-
-    std::erase_if(m_parent->m_children, [&](Ref<SceneNode> child) {
-        return child.get() == this;
-    });
-    m_parent = nullptr;
+    if (const auto parent = m_parent.lock())
+    {
+        std::erase_if(parent->m_children, [&](const Ref<SceneNode>& child) {
+            return child.get() == this;
+        });
+    }
+    m_parent.reset();
 }
 
 void SceneNode::AddScript(Ref<Script> script)

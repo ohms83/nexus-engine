@@ -127,6 +127,20 @@ TEST_F(SceneNodeTest, ParentChildRelationship)
     EXPECT_EQ(parent->GetNumChildren(), 0);
 }
 
+TEST_F(SceneNodeTest, ParentReferenceDoesNotKeepParentAlive)
+{
+    auto registry = std::make_shared<entt::registry>();
+    auto parent = std::make_shared<SceneNode>(registry, "Parent");
+    auto child = std::make_shared<SceneNode>(registry, "Child");
+    std::weak_ptr<SceneNode> weakParent = parent;
+    parent->AddChild(child);
+
+    parent.reset();
+
+    EXPECT_TRUE(weakParent.expired());
+    EXPECT_EQ(child->GetParent(), nullptr);
+}
+
 TEST_F(SceneNodeTest, LocalAndGlobalTransformsComposeFromRootToLeaf)
 {
     auto parent = scene->EmplaceChild<SceneNode3D>("Transform Parent");

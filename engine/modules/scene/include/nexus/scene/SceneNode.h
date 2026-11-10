@@ -131,7 +131,7 @@ NXS_NAMESPACE
         bool HasChild() const { return m_children.size() > 0; }
         size_t GetNumChildren() const { return m_children.size(); }
 
-        Ref<SceneNode> GetParent() const { return m_parent; }
+        Ref<SceneNode> GetParent() const { return m_parent.lock(); }
         void RemoveFromParent();
 
         //! Returns this node's transform relative to its parent.
@@ -156,7 +156,7 @@ NXS_NAMESPACE
         virtual void OnUpdate(float dt) {}
 
     protected:
-        Ref<SceneNode> m_parent;
+        WeakRef<SceneNode> m_parent;
         ChildList m_children;
         Array<Ref<Script>> m_scripts;
 
