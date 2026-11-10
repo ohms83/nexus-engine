@@ -276,32 +276,39 @@ RenderCommand RenderPass::CreateRenderCommand(Ref<const Mesh> mesh, const glm::m
 void RenderPass::PopulateSceneView(const SceneNode& scene, Array<Ref<ISceneView>>& outViews) const
 {
     rmt_ScopedCPUSample(RenderPass_PopulateSceneView, 0);
-    const auto& registry = *scene.GetRegistry();
-    const auto cameraEntities = registry.view<SceneNodeComponent, CameraComponent, PositionComponent, OrientationComponent>();
-
-    for (const auto& [cameraEntity, cameraNode, camera, cameraPos, cameraOrient] : cameraEntities.each())
+    Array<Ref<SceneNode>> nodes;
+    scene.GetAllDescendants(nodes, true);
+    for (const auto& node : nodes)
     {
-        if (!cameraNode.active) continue;
-        outViews.push_back(std::make_shared<CameraView>(camera, cameraPos, cameraOrient));
+        if (!node->IsActive()) continue;
+        const auto camera = node->GetComponent<CameraComponent>();
+        if (!camera) continue;
+        outViews.push_back(std::make_shared<CameraView>(
+            *camera,
+            node->GetGlobalPosition(),
+            node->GetGlobalOrientation()));
     }
 }
 
 void RenderPass::PrepareRenderCommands(const SceneNode &scene, const ISceneView &view, Array<RenderCommand>& outCommands) const
 {
     rmt_ScopedCPUSample(RenderPass_PrepareRenderCommands, 0);
-    const auto& registry = *scene.GetRegistry();
     const glm::mat4& viewProjMtx = view.GetViewProjectionMatrix();
 
-    for (const auto entities = registry.view<SceneNodeComponent, MeshComponent, PositionComponent, OrientationComponent, ScaleComponent>(); const auto& [entity, sceneNode, meshComp, position, orient, scale] : entities.each())
+    Array<Ref<SceneNode>> nodes;
+    scene.GetAllDescendants(nodes, true);
+    for (const auto& node : nodes)
     {
-        if (!sceneNode.active) continue;
+        if (!node->IsActive()) continue;
+        const auto meshComp = node->GetComponent<MeshComponent>();
+        if (!meshComp) continue;
 
-        glm::mat4 modelMtx = Matrix::CreateModelMatrix(position.value, orient.quat, scale.value);
+        const auto modelMtx = node->GetGlobalTransform();
         const auto mvpMtx = viewProjMtx * modelMtx;
 
-        if (auto mesh = meshComp.GetMesh(); mesh != nullptr)
+        if (auto mesh = meshComp->GetMesh(); mesh != nullptr)
         {
-            if (!view.IsObjectVisible(mesh->GetSphere(), modelMtx, scale.value)) continue;
+            if (!view.IsObjectVisible(mesh->GetSphere(), modelMtx, node->GetGlobalScale())) continue;
             outCommands.push_back(CreateRenderCommand(mesh, modelMtx, mvpMtx));
         }
     }

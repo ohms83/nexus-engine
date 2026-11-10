@@ -29,6 +29,8 @@ NXS_NAMESPACE
         NODISCARD OrientationComponent& Orient() { return *GetComponent<OrientationComponent>(); }
         NODISCARD const OrientationComponent& Orient() const { return *GetComponent<OrientationComponent>(); }
 
+        NODISCARD glm::mat4 GetLocalTransform() const override;
+
         void LookAt(const glm::vec3& center, const glm::vec3& up);
 
         /**

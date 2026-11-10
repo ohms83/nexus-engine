@@ -3,6 +3,7 @@
 //
 
 #include "nexus/scene/Camera.h"
+#include "nexus/math/Matrix.h"
 
 USING_NAMESPACE_NXS;
 
@@ -10,6 +11,14 @@ Camera::Camera(Ref<entt::registry>  registry, const std::string& name)
     : SceneNode(registry, name)
 {
     AddComponents<CameraComponent, PositionComponent, OrientationComponent>();
+}
+
+glm::mat4 Camera::GetLocalTransform() const
+{
+    return Matrix::CreateModelMatrix(
+        Position().value,
+        Orient().quat,
+        glm::vec3(1.0f));
 }
 
 void Camera::SetProjection(const float fov, const float width, const float height, const float nearZ, const float farZ)
@@ -38,9 +47,8 @@ void Camera::SetOrthographic(const float width, const float height, const float 
 
 glm::mat4 Camera::GetViewMtx() const
 {
-    // TODO: Handle transform heirachy.
-    const auto worldOrientation = Orient().quat;
-    const auto worldPosition = Position().value;
+    const auto worldOrientation = GetGlobalOrientation();
+    const auto worldPosition = GetGlobalPosition();
     auto viewMatrix = glm::mat4(worldOrientation);
     viewMatrix[3] = glm::vec4(worldPosition, 1);
     return glm::inverse(viewMatrix);

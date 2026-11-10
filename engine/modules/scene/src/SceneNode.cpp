@@ -4,6 +4,7 @@
 #include "nexus/debug/LogDispatcher.h"
 #include "nexus/ecs/Component.h"
 #include "nexus/core/Hasher.h"
+#include "nexus/scene/component/TransformComponent.h"
 
 #include <utility>
 #include <chrono>
@@ -254,8 +255,60 @@ void SceneNode::Activate(const bool activate)
 
 void SceneNode::AddChild(Ref<SceneNode> child)
 {
+    if (!child) return;
+
+    for (auto ancestor = GetSelf(); ancestor; ancestor = ancestor->m_parent)
+    {
+        if (ancestor == child)
+        {
+            LOG_WARNING(LogSceneNode, "Cannot add a scene node as its own ancestor.");
+            return;
+        }
+    }
+
+    if (child->m_parent == GetSelf()) return;
+    if (child->m_parent)
+    {
+        std::erase(child->m_parent->m_children, child);
+    }
+
     child->m_parent = this->GetSelf();
     m_children.push_back(child);
+}
+
+glm::mat4 SceneNode::GetLocalTransform() const
+{
+    return glm::mat4(1.0f);
+}
+
+glm::mat4 SceneNode::GetGlobalTransform() const
+{
+    const auto localTransform = GetLocalTransform();
+    return m_parent ? m_parent->GetGlobalTransform() * localTransform : localTransform;
+}
+
+glm::vec3 SceneNode::GetGlobalPosition() const
+{
+    return glm::vec3(GetGlobalTransform() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+}
+
+glm::quat SceneNode::GetGlobalOrientation() const
+{
+    const auto orientation = GetComponent<OrientationComponent>();
+    const auto localOrientation = orientation
+        ? orientation->quat
+        : glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+    return m_parent ? m_parent->GetGlobalOrientation() * localOrientation : localOrientation;
+}
+
+glm::vec3 SceneNode::GetGlobalScale() const
+{
+    const auto globalTransform = GetGlobalTransform();
+    return {
+        glm::length(glm::vec3(globalTransform[0])),
+        glm::length(glm::vec3(globalTransform[1])),
+        glm::length(glm::vec3(globalTransform[2]))
+    };
 }
 
 void SceneNode::AddChildren(const ChildList& children)
@@ -270,28 +323,40 @@ void SceneNode::RemoveChild(Ref<SceneNode> node, bool removeDescendant)
 {
     if (IsShuttingDown() || !node) return;
 
-    SceneNode::ChildList descendants;
-    node->GetAllDescendants(descendants, true);
+    const auto child = std::ranges::find(m_children, node);
+    if (child == m_children.end()) return;
+
+    SceneNode::ChildList children;
+    if (!removeDescendant) node->GetAllChildren(children);
     std::erase(m_children, node);
+    node->m_parent.reset();
 
     // Reparent the children.
     if (!removeDescendant)
     {
-        AddChildren(descendants);
+        AddChildren(children);
     }
 }
 
 void SceneNode::RemoveAllChildren(bool removeDescendant)
 {
     if (IsShuttingDown()) return;
- 
+
+    auto children = std::move(m_children);
+    m_children.clear();
     if (!removeDescendant && m_parent)
     {
-        std::ranges::for_each(m_children, [this](Ref<SceneNode> child) {
+        std::ranges::for_each(children, [this](Ref<SceneNode> child) {
             m_parent->AddChild(child);
         });
     }
-    m_children.clear();
+    else
+    {
+        for (const auto& child : children)
+        {
+            child->m_parent.reset();
+        }
+    }
 }
 
 void SceneNode::GetAllChildren(ChildList& childrenList) const

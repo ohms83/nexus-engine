@@ -85,5 +85,7 @@ NXS_NAMESPACE
         {
             return GetComponent<PositionComponent>()->value;
         }
+
+        NODISCARD glm::mat4 GetLocalTransform() const override;
     };
 }

@@ -143,8 +143,8 @@ void ForwardSceneRenderer::Render(RenderSystem& renderSystem, const Scene& scene
 
                             SetCameraUniforms(gpuProgram, cameraPos.value, viewMtx, projection);
                             SetAmbientLightParams(gpuProgram, registry);
-                            SetDirectLightParams(gpuProgram, registry);
-                            SetPointLightParams(gpuProgram, registry);
+                            SetDirectLightParams(gpuProgram, scene);
+                            SetPointLightParams(gpuProgram, scene);
                             usingProgram = gpuProgram;
                         }
 

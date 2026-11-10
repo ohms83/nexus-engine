@@ -29,6 +29,8 @@ NXS_NAMESPACE
         ScaleComponent& Scale() { return *GetComponent<ScaleComponent>(); }
         const ScaleComponent& Scale() const { return *GetComponent<ScaleComponent>(); }
 
+        NODISCARD glm::mat4 GetLocalTransform() const override;
+
         void LookAt(const glm::vec3& center, const glm::vec3& up);
 
         glm::vec3 Right() const;

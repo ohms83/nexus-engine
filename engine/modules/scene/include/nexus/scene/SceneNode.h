@@ -134,6 +134,14 @@ NXS_NAMESPACE
         Ref<SceneNode> GetParent() const { return m_parent; }
         void RemoveFromParent();
 
+        //! Returns this node's transform relative to its parent.
+        NODISCARD virtual glm::mat4 GetLocalTransform() const;
+        //! Returns this node's transform composed with all its ancestors.
+        NODISCARD glm::mat4 GetGlobalTransform() const;
+        NODISCARD glm::vec3 GetGlobalPosition() const;
+        NODISCARD glm::quat GetGlobalOrientation() const;
+        NODISCARD glm::vec3 GetGlobalScale() const;
+
         void AddScript(Ref<Script> script);
         void RemoveScript(Ref<Script> script);
 

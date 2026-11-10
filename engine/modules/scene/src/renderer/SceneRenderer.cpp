@@ -17,16 +17,10 @@
 #include "nexus/graphics/RenderCommand.h"
 #include "nexus/geom/Frustum.h"
 #include "nexus/ecs/Ecs.h"
-#include "nexus/math/Math.h"
-#include "nexus/math/Matrix.h"
 #include "nexus/memory/OwningBuffer.h"
 #include "nexus/scene/RenderGraph.h"
 #include "nexus/scene/Scene.h"
-#include "nexus/scene/component/CameraComponent.h"
 #include "nexus/scene/component/LightComponent.h"
-#include "nexus/scene/component/ModelComponent.h"
-#include "nexus/scene/component/SceneNodeComponent.h"
-#include "nexus/scene/component/TransformComponent.h"
 #include "nexus/scene/component/MeshComponent.h"
 
 #include "Remotery.h"
@@ -108,13 +102,17 @@ void SceneRenderer::SetAmbientLightParams(Ref<GpuProgram> gpuProgram, const entt
     gpuProgram->SetUniformVector("_AmbientLight", color);
 }
 
-void SceneRenderer::SetDirectLightParams(Ref<GpuProgram> gpuProgram, const entt::registry& registry)
+void SceneRenderer::SetDirectLightParams(Ref<GpuProgram> gpuProgram, const SceneNode& scene)
 {
     rmt_ScopedCPUSample(SceneRenderer_SetDirectLightParams, 0);
     int32_t numLight = 0;
-    for (const auto view = registry.view<SceneNodeComponent, DirectLightComponent>(); const auto& [entity, node, light] : view.each())
+    Array<Ref<SceneNode>> nodes;
+    scene.GetAllDescendants(nodes, true);
+    for (const auto& node : nodes)
     {
-        if (!node.active) continue;
+        if (!node->IsActive()) continue;
+        const auto light = node->GetComponent<DirectLightComponent>();
+        if (!light) continue;
 
         rmt_BeginCPUSample(CreateUniformNames, 0);
         // TODO: Cache the uniform names.
@@ -127,11 +125,12 @@ void SceneRenderer::SetDirectLightParams(Ref<GpuProgram> gpuProgram, const entt:
         rmt_EndCPUSample();
 
         rmt_BeginCPUSample(EmplaceUniformValues, 0);
-        gpuProgram->SetUniformVector(uniformLocationColor, light.properties.color);
-        gpuProgram->SetUniformVector(uniformLocationDirection, glm::normalize(light.direction));
-        gpuProgram->SetUniformFloat(uniformLocationDiffuse, light.properties.diffuseIntensity);
-        gpuProgram->SetUniformFloat(uniformLocationSpecular, light.properties.specularIntensity);
-        gpuProgram->SetUniformFloat(uniformLocationCutoff, light.properties.cutoffRange);
+        const auto direction = node->GetGlobalOrientation() * light->direction;
+        gpuProgram->SetUniformVector(uniformLocationColor, light->properties.color);
+        gpuProgram->SetUniformVector(uniformLocationDirection, glm::normalize(direction));
+        gpuProgram->SetUniformFloat(uniformLocationDiffuse, light->properties.diffuseIntensity);
+        gpuProgram->SetUniformFloat(uniformLocationSpecular, light->properties.specularIntensity);
+        gpuProgram->SetUniformFloat(uniformLocationCutoff, light->properties.cutoffRange);
         rmt_EndCPUSample();
 
         numLight++;
@@ -139,13 +138,17 @@ void SceneRenderer::SetDirectLightParams(Ref<GpuProgram> gpuProgram, const entt:
     gpuProgram->SetUniformInt("_NumDirectLight", numLight);
 }
 
-void SceneRenderer::SetPointLightParams(Ref<GpuProgram> gpuProgram, const entt::registry& registry)
+void SceneRenderer::SetPointLightParams(Ref<GpuProgram> gpuProgram, const SceneNode& scene)
 {
     rmt_ScopedCPUSample(SceneRenderer_SetPointLightParams, 0);
     int32_t numLight = 0;
-    for (const auto view = registry.view<SceneNodeComponent, PointLightComponent, PositionComponent>(); const auto& [entity, node, light, position] : view.each())
+    Array<Ref<SceneNode>> nodes;
+    scene.GetAllDescendants(nodes, true);
+    for (const auto& node : nodes)
     {
-        if (!node.active) continue;
+        if (!node->IsActive()) continue;
+        const auto light = node->GetComponent<PointLightComponent>();
+        if (!light) continue;
 
         rmt_BeginCPUSample(CreateUniformNames, 0);
         // TODO: Cache the uniform names.
@@ -161,14 +164,14 @@ void SceneRenderer::SetPointLightParams(Ref<GpuProgram> gpuProgram, const entt::
         rmt_EndCPUSample();
 
         rmt_BeginCPUSample(EmplaceUniformValues, 0);
-        gpuProgram->SetUniformVector(uniformLocationPosition, position.value);
-        gpuProgram->SetUniformVector(uniformLocationColor, light.properties.color);
-        gpuProgram->SetUniformFloat(uniformLocationDiffuse, light.properties.diffuseIntensity);
-        gpuProgram->SetUniformFloat(uniformLocationSpecular, light.properties.specularIntensity);
-        gpuProgram->SetUniformFloat(uniformLocationCutOff, light.properties.cutoffRange);
-        gpuProgram->SetUniformFloat(uniformLocationConst, light.constant);
-        gpuProgram->SetUniformFloat(uniformLocationLinear, light.linear);
-        gpuProgram->SetUniformFloat(uniformLocationQuad, light.quadratic);
+        gpuProgram->SetUniformVector(uniformLocationPosition, node->GetGlobalPosition());
+        gpuProgram->SetUniformVector(uniformLocationColor, light->properties.color);
+        gpuProgram->SetUniformFloat(uniformLocationDiffuse, light->properties.diffuseIntensity);
+        gpuProgram->SetUniformFloat(uniformLocationSpecular, light->properties.specularIntensity);
+        gpuProgram->SetUniformFloat(uniformLocationCutOff, light->properties.cutoffRange);
+        gpuProgram->SetUniformFloat(uniformLocationConst, light->constant);
+        gpuProgram->SetUniformFloat(uniformLocationLinear, light->linear);
+        gpuProgram->SetUniformFloat(uniformLocationQuad, light->quadratic);
         rmt_EndCPUSample();
 
         numLight++;
@@ -190,9 +193,6 @@ void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
 
     Array<RenderCommand> commands;
     commands.reserve(1024);
-
-    const auto& registry = *scene.GetRegistry();
-    auto renderInterface = renderSystem.GetRenderInterface();
 
     for (auto pass : m_renderPasses)
     {
@@ -216,18 +216,21 @@ void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
             const glm::mat4& viewMtx = view->GetViewMatrix();
             const glm::mat4& projectionMtx = view->GetProjectionMatrix();
             const glm::mat4& viewProjMtx = view->GetViewProjectionMatrix();
-            for (const auto entities = registry.view<SceneNodeComponent, MeshComponent, PositionComponent, OrientationComponent, ScaleComponent>();
-                 const auto& [entity, sceneNode, meshComp, position, orient, scale] : entities.each())
+            Array<Ref<SceneNode>> nodes;
+            scene.GetAllDescendants(nodes, true);
+            for (const auto& node : nodes)
             {
-                if (!sceneNode.active) continue;
+                if (!node->IsActive()) continue;
+                const auto meshComp = node->GetComponent<MeshComponent>();
+                if (!meshComp) continue;
 
-                glm::mat4 modelMtx = Matrix::CreateModelMatrix(position.value, orient.quat, scale.value);
+                const auto modelMtx = node->GetGlobalTransform();
                 const auto mvpMtx = viewProjMtx * modelMtx;
 
-                if (auto mesh = meshComp.GetMesh(); mesh != nullptr)
+                if (auto mesh = meshComp->GetMesh(); mesh != nullptr)
                 {
                     if (!pass->IsPassFiltered(mesh)) continue;
-                    if (!view->IsObjectVisible(mesh->GetSphere(), modelMtx, scale.value)) continue;
+                    if (!view->IsObjectVisible(mesh->GetSphere(), modelMtx, node->GetGlobalScale())) continue;
 
                     commands.push_back(pass->CreateRenderCommand(mesh, modelMtx, mvpMtx));
                 }
@@ -276,9 +279,9 @@ void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
                         if (!gpuProgram->IsBinding()) gpuProgram->Bind();
 
                         SetCameraUniforms(gpuProgram, cameraPos, viewMtx, projectionMtx);
-                        SetAmbientLightParams(gpuProgram, registry);
-                        SetDirectLightParams(gpuProgram, registry);
-                        SetPointLightParams(gpuProgram, registry);
+                        SetAmbientLightParams(gpuProgram, *scene.GetRegistry());
+                        SetDirectLightParams(gpuProgram, scene);
+                        SetPointLightParams(gpuProgram, scene);
                         usingProgram = gpuProgram;
                     }
 

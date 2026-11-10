@@ -2,6 +2,7 @@
 // Created by nutta on 8/17/2025.
 //
 #include "nexus/scene/Light.h"
+#include "nexus/math/Matrix.h"
 
 USING_NAMESPACE_NXS;
 
@@ -31,4 +32,12 @@ PointLight::PointLight(Ref<entt::registry>  registry, std::string name)
 
     auto [lightComp, position] = AddComponents<PointLightComponent, PositionComponent>();
     lightComp->properties.cutoffRange = DEFAULT_CUTOFF;
+}
+
+glm::mat4 PointLight::GetLocalTransform() const
+{
+    return Matrix::CreateModelMatrix(
+        Position(),
+        glm::quat(1.0f, 0.0f, 0.0f, 0.0f),
+        glm::vec3(1.0f));
 }

@@ -35,7 +35,8 @@ NXS_NAMESPACE
     class CameraView : public ISceneView
     {
     public:
-        explicit CameraView(const CameraComponent& camera, const PositionComponent& pos, const OrientationComponent& orient);
+        explicit CameraView(const CameraComponent& camera, const PositionComponent& position, const OrientationComponent& orientation);
+        explicit CameraView(const CameraComponent& camera, const glm::vec3& position, const glm::quat& orientation);
 
         NODISCARD bool IsObjectVisible(const Sphere& boundingSphere, const glm::mat4& modelMtx, const glm::vec3& scale) const override;
         NODISCARD const glm::vec3& GetViewPos() const override;

@@ -127,6 +127,74 @@ TEST_F(SceneNodeTest, ParentChildRelationship)
     EXPECT_EQ(parent->GetNumChildren(), 0);
 }
 
+TEST_F(SceneNodeTest, LocalAndGlobalTransformsComposeFromRootToLeaf)
+{
+    auto parent = scene->EmplaceChild<SceneNode3D>("Transform Parent");
+    parent->Position().value = {2.0f, 0.0f, 0.0f};
+    parent->Orient().FromEuler({0.0f, 90.0f, 0.0f});
+    parent->Scale().value = {2.0f, 2.0f, 2.0f};
+
+    auto child = parent->EmplaceChild<SceneNode3D>("Transform Child");
+    child->Position().value = {1.0f, 0.0f, 0.0f};
+    child->Scale().value = {0.5f, 1.0f, 1.0f};
+
+    const auto localPosition = child->GetLocalTransform() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+    EXPECT_EQ(glm::vec3(localPosition), glm::vec3(1.0f, 0.0f, 0.0f));
+
+    const auto globalPosition = child->GetGlobalPosition();
+    EXPECT_NEAR(globalPosition.x, 2.0f, 0.0001f);
+    EXPECT_NEAR(globalPosition.y, 0.0f, 0.0001f);
+    EXPECT_NEAR(globalPosition.z, -2.0f, 0.0001f);
+
+    const auto globalScale = child->GetGlobalScale();
+    EXPECT_NEAR(globalScale.x, 1.0f, 0.0001f);
+    EXPECT_NEAR(globalScale.y, 2.0f, 0.0001f);
+    EXPECT_NEAR(globalScale.z, 2.0f, 0.0001f);
+}
+
+TEST_F(SceneNodeTest, LocalTransformUsesOnlyComponentsPresentOnNodeType)
+{
+    auto plainNode = scene->EmplaceChild<SceneNode>("Plain Node");
+    EXPECT_EQ(plainNode->GetLocalTransform(), glm::mat4(1.0f));
+
+    auto parent = plainNode->EmplaceChild<SceneNode3D>("Transformed Parent");
+    parent->Position().value = {10.0f, 0.0f, 0.0f};
+    parent->Orient().FromEuler({0.0f, 90.0f, 0.0f});
+    auto light = parent->EmplaceChild<PointLight>("Point Light");
+    light->Position() = {1.0f, 2.0f, 3.0f};
+    const auto lightLocalPosition = light->GetLocalTransform() * glm::vec4(0, 0, 0, 1);
+    EXPECT_EQ(glm::vec3(lightLocalPosition), glm::vec3(1.0f, 2.0f, 3.0f));
+    const auto lightGlobalPosition = light->GetGlobalPosition();
+    EXPECT_NEAR(lightGlobalPosition.x, 13.0f, 0.0001f);
+    EXPECT_NEAR(lightGlobalPosition.y, 2.0f, 0.0001f);
+    EXPECT_NEAR(lightGlobalPosition.z, -1.0f, 0.0001f);
+
+    auto camera = parent->EmplaceChild<Camera>("Camera");
+    camera->Position().value = {4.0f, 5.0f, 6.0f};
+    const auto cameraLocalPosition = camera->GetLocalTransform() * glm::vec4(0, 0, 0, 1);
+    EXPECT_EQ(glm::vec3(cameraLocalPosition), glm::vec3(4.0f, 5.0f, 6.0f));
+}
+
+TEST_F(SceneNodeTest, ReparentingAndDetachingUpdatesGlobalTransform)
+{
+    auto firstParent = scene->EmplaceChild<SceneNode3D>("First Parent");
+    firstParent->Position().value = {10.0f, 0.0f, 0.0f};
+    auto secondParent = scene->EmplaceChild<SceneNode3D>("Second Parent");
+    secondParent->Position().value = {20.0f, 0.0f, 0.0f};
+    auto child = firstParent->EmplaceChild<SceneNode3D>("Child");
+    child->Position().value = {1.0f, 0.0f, 0.0f};
+
+    EXPECT_NEAR(child->GetGlobalPosition().x, 11.0f, 0.0001f);
+
+    secondParent->AddChild(child);
+    EXPECT_EQ(firstParent->GetNumChildren(), 0u);
+    EXPECT_NEAR(child->GetGlobalPosition().x, 21.0f, 0.0001f);
+
+    secondParent->RemoveChild(child);
+    EXPECT_EQ(child->GetParent(), nullptr);
+    EXPECT_NEAR(child->GetGlobalPosition().x, 1.0f, 0.0001f);
+}
+
 TEST_F(SceneNodeTest, GetAllChildren)
 {
     auto parent = scene->EmplaceChild<SceneNode>("Parent");
