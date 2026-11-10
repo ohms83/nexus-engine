@@ -285,6 +285,7 @@ glm::mat4 SceneNode::GetLocalTransform() const
 
 glm::mat4 SceneNode::GetGlobalTransform() const
 {
+    rmt_ScopedCPUSample(SceneNode_GetGlobalTransform, 0);
     const auto localTransform = GetLocalTransform();
     const auto parent = m_parent.lock();
     return parent ? parent->GetGlobalTransform() * localTransform : localTransform;
@@ -292,11 +293,13 @@ glm::mat4 SceneNode::GetGlobalTransform() const
 
 glm::vec3 SceneNode::GetGlobalPosition() const
 {
+    rmt_ScopedCPUSample(SceneNode_GetGlobalPosition, 0);
     return glm::vec3(GetGlobalTransform() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
 }
 
 glm::quat SceneNode::GetGlobalOrientation() const
 {
+    rmt_ScopedCPUSample(SceneNode_GetGlobalOrientation, 0);
     const auto orientation = GetComponent<OrientationComponent>();
     const auto localOrientation = orientation
         ? orientation->quat
@@ -307,6 +310,7 @@ glm::quat SceneNode::GetGlobalOrientation() const
 
 glm::vec3 SceneNode::GetGlobalScale() const
 {
+    rmt_ScopedCPUSample(SceneNode_GetGlobalScale, 0);
     const auto globalTransform = GetGlobalTransform();
     return {
         glm::length(glm::vec3(globalTransform[0])),

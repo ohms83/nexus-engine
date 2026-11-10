@@ -16,6 +16,8 @@
 #include <memory>
 #include <unordered_map>
 
+#include "Remotery.h"
+
 #define IMPLEMENT_NODE(Type) \
     IMPLEMENT_REFLECTION(Type); \
     static void Register() { \
@@ -120,9 +122,17 @@ NXS_NAMESPACE
         template<typename T>
         NODISCARD Array<T*> GetAllDescendantsOfType(bool parentFirst) const
         {
+            rmt_ScopedCPUSample(SceneNode_GetAllDescendantsOfType, 0)
             Array<T*> children;
             AppendAllDescendantsOfType<T>(children, parentFirst);
             return children;
+        }
+
+        template<typename TVisitor>
+        void VisitDescendants(TVisitor&& visitor) const
+        {
+            rmt_ScopedCPUSample(SceneNode_VisitDescendants, 0)
+            VisitDescendantsImpl(visitor);
         }
 
         NODISCARD Ref<SceneNode> FindNode(Identifier id);
@@ -162,9 +172,21 @@ NXS_NAMESPACE
         virtual void OnUpdate(float dt) {}
 
     private:
+        template<typename TVisitor>
+        void VisitDescendantsImpl(TVisitor& visitor) const
+        {
+            for (const auto& child : m_children)
+            {
+                rmt_ScopedCPUSample(SceneNode_VisitDescendants_Visitor, 0)
+                visitor(*child);
+                child->VisitDescendantsImpl(visitor);
+            }
+        }
+
         template<typename T>
         void AppendAllDescendantsOfType(Array<T*>& children, bool parentFirst) const
         {
+            rmt_ScopedCPUSample(SceneNode_AppendAllDescendantsOfType, 0)
             for (const auto& child : m_children)
             {
                 auto tChild = D_CAST<T*>(child.get());
