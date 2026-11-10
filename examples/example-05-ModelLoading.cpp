@@ -264,7 +264,7 @@ private:
         }
         {
             auto light = m_scene->EmplaceChild<nxs::PointLight>("Point Light 1");
-            light->Position() = {5, 0, 0};
+            light->SetPosition({5, 0, 0});
             light->PointLightProperties().constant = 0.01f;
             
             auto& properties = light->Properties();
@@ -275,7 +275,7 @@ private:
         }
         {
             auto light = m_scene->EmplaceChild<nxs::PointLight>("Point Light 2");
-            light->Position() = {-5, 0, 0};
+            light->SetPosition({-5, 0, 0});
             light->PointLightProperties().constant = 0.01f;
             
             auto& properties = light->Properties();

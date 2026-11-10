@@ -294,7 +294,7 @@ private:
         {
             auto light = m_lightRoot->EmplaceChild<nxs::PointLight>(std::format("Point Light {}", i));
             light->Properties().color = lightColors[i];
-            light->Position() = lightPositions[i];
+            light->SetPosition(lightPositions[i]);
             light->Properties().diffuseIntensity = 400.0f;
         }
     }

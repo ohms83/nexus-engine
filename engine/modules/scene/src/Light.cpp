@@ -37,7 +37,7 @@ PointLight::PointLight(Ref<entt::registry>  registry, std::string name)
 glm::mat4 PointLight::GetLocalTransform() const
 {
     return Matrix::CreateModelMatrix(
-        Position(),
+        GetPosition(),
         glm::quat(1.0f, 0.0f, 0.0f, 0.0f),
         glm::vec3(1.0f));
 }

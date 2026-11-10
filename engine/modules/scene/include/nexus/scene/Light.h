@@ -15,8 +15,8 @@ NXS_NAMESPACE
     {
     public:
         virtual ~ILight() = default;
-        virtual LightProperties& Properties() = 0;
-        virtual const LightProperties& Properties() const = 0;
+        NODISCARD virtual LightProperties& Properties() = 0;
+        NODISCARD virtual const LightProperties& Properties() const = 0;
     };
 
     class DirectionalLight final : public ILight, public SceneNode
@@ -27,22 +27,22 @@ NXS_NAMESPACE
 
         IMPLEMENT_NODE(DirectionalLight);
 
-        LightProperties& Properties() override
+        NODISCARD LightProperties& Properties() override
         {
             return GetComponent<DirectLightComponent>()->properties;
         }
 
-        const LightProperties& Properties() const override
+        NODISCARD const LightProperties& Properties() const override
         {
             return GetComponent<DirectLightComponent>()->properties;
         }
 
-        glm::vec3& Direction()
+        NODISCARD glm::vec3& Direction()
         {
             return GetComponent<DirectLightComponent>()->direction;
         }
 
-        const glm::vec3& Direction() const
+        NODISCARD const glm::vec3& Direction() const
         {
             return GetComponent<DirectLightComponent>()->direction;
         }
@@ -56,32 +56,32 @@ NXS_NAMESPACE
 
         IMPLEMENT_NODE(PointLight);
 
-        LightProperties& Properties() override
+        NODISCARD LightProperties& Properties() override
         {
             return GetComponent<PointLightComponent>()->properties;
         }
 
-        const LightProperties& Properties() const override
+        NODISCARD const LightProperties& Properties() const override
         {
             return GetComponent<PointLightComponent>()->properties;
         }
 
-        PointLightComponent& PointLightProperties()
+        NODISCARD PointLightComponent& PointLightProperties()
         {
             return *GetComponent<PointLightComponent>();
         }
 
-        const PointLightComponent& PointLightProperties() const
+        NODISCARD const PointLightComponent& PointLightProperties() const
         {
             return *GetComponent<PointLightComponent>();
         }
 
-        glm::vec3& Position()
+        void SetPosition(const glm::vec3& position)
         {
-            return GetComponent<PositionComponent>()->value;
+            GetComponent<PositionComponent>()->value = position;
         }
 
-        const glm::vec3& Position() const
+        NODISCARD const glm::vec3& GetPosition() const
         {
             return GetComponent<PositionComponent>()->value;
         }

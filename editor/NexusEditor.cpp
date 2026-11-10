@@ -29,7 +29,7 @@ static void InitLight(nxs::Scene& scene)
     }
     {
         auto light = scene.EmplaceChild<nxs::PointLight>("Red Light");
-        light->Position() = {50, 50, 0};
+        light->SetPosition({50, 50, 0});
 
         auto& pointLight = light->PointLightProperties();
         pointLight.constant = 0.01f;
@@ -42,7 +42,7 @@ static void InitLight(nxs::Scene& scene)
     }
     {
         auto light = scene.EmplaceChild<nxs::PointLight>("Green Light");
-        light->Position() = {-50, 50, 0};
+        light->SetPosition({-50, 50, 0});
 
         auto& pointLight = light->PointLightProperties();
         pointLight.constant = 0.01f;

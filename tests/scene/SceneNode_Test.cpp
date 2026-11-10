@@ -172,10 +172,10 @@ TEST_F(SceneNodeTest, LocalTransformUsesOnlyComponentsPresentOnNodeType)
     EXPECT_EQ(plainNode->GetLocalTransform(), glm::mat4(1.0f));
 
     auto parent = plainNode->EmplaceChild<SceneNode3D>("Transformed Parent");
-    parent->Position().value = {10.0f, 0.0f, 0.0f};
-    parent->Orient().FromEuler({0.0f, 90.0f, 0.0f});
+    parent->SetPosition({10.0f, 0.0f, 0.0f});
+    parent->SetOrientation(glm::quat(glm::radians(glm::vec3(0.0f, 90.0f, 0.0f))));
     auto light = parent->EmplaceChild<PointLight>("Point Light");
-    light->Position() = {1.0f, 2.0f, 3.0f};
+    light->SetPosition({1.0f, 2.0f, 3.0f});
     const auto lightLocalPosition = light->GetLocalTransform() * glm::vec4(0, 0, 0, 1);
     EXPECT_EQ(glm::vec3(lightLocalPosition), glm::vec3(1.0f, 2.0f, 3.0f));
     const auto lightGlobalPosition = light->GetGlobalPosition();
