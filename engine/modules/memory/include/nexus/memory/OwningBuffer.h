@@ -9,7 +9,7 @@ NXS_NAMESPACE
     /**
      * @class OwningBuffer
      * @brief A buffer implementation that takes ownership of a dynamically allocated buffer.
-     * * @OwningBuffer is a buffer type that manages the lifetime of its underlying
+     * @c OwningBuffer is a buffer type that manages the lifetime of its underlying
      * memory. It uses a @c std::unique_ptr internally to ensure that the
      * memory is automatically freed when the buffer object is destroyed,
      * preventing memory leaks. It also supports dynamic resizing.

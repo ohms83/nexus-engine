@@ -8,7 +8,8 @@ USING_NAMESPACE_NXS;
 
 OwningBuffer::OwningBuffer(uint8_t* data, size_t size)
 {
-    m_buffer = std::unique_ptr<uint8_t[]>(data);
+    m_buffer = std::unique_ptr<uint8_t[]>(new uint8_t[size]);
+    memcpy(m_buffer.get(), data, size);
     m_size = size;
 }
 
