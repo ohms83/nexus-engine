@@ -51,18 +51,18 @@ Dict<const ISceneView*, Array<SceneNode*>> Scene::GetVisibilitySets() const
 {
     rmt_ScopedCPUSample(Scene_BuildVisibilitySets, 0)
     Dict<const ISceneView*, Array<SceneNode*>> visibilitySets;
-    const auto viewNodes = GetAllDescendantsOfType<ISceneView>(true);
-    for (const auto viewNode : viewNodes)
-    {
-        const auto sceneNode = D_CAST<const SceneNode*>(viewNode);
-        if (!sceneNode || !sceneNode->IsActive()) continue;
+    VisitDescendants([&](const SceneNode& sceneNode) {
+        if (!sceneNode.IsActive()) return;
+
+        const auto view = D_CAST<const ISceneView*>(&sceneNode);
+        if (!view) return;
 
         Array<SceneNode*> visibleNodes;
         {
             rmt_ScopedCPUSample(Scene_ComputeViewVisibility, 0)
-            visibleNodes = viewNode->GetVisibleNodes(*this);
+            visibleNodes = view->GetVisibleNodes(*this);
         }
-        visibilitySets.insert_or_assign(viewNode, std::move(visibleNodes));
-    }
+        visibilitySets.insert_or_assign(view, std::move(visibleNodes));
+    });
     return visibilitySets;
 }

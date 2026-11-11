@@ -106,13 +106,10 @@ void SceneRenderer::SetDirectLightParams(Ref<GpuProgram> gpuProgram, const Scene
 {
     rmt_ScopedCPUSample(SceneRenderer_SetDirectLightParams, 0);
     int32_t numLight = 0;
-    Array<Ref<SceneNode>> nodes;
-    scene.GetAllDescendants(nodes, true);
-    for (const auto& node : nodes)
+    const auto registry = scene.GetRegistry();
+    for (const auto view = registry->view<SceneNodeComponent, DirectLightComponent>(); const auto& [entity, node, light] : view.each())
     {
-        if (!node->IsActive()) continue;
-        const auto light = node->GetComponent<DirectLightComponent>();
-        if (!light) continue;
+        if (!node.active) continue;
 
         rmt_BeginCPUSample(CreateUniformNames, 0);
         // TODO: Cache the uniform names.
@@ -125,12 +122,19 @@ void SceneRenderer::SetDirectLightParams(Ref<GpuProgram> gpuProgram, const Scene
         rmt_EndCPUSample();
 
         rmt_BeginCPUSample(EmplaceUniformValues, 0);
-        const auto direction = node->GetGlobalOrientation() * light->direction;
-        gpuProgram->SetUniformVector(uniformLocationColor, light->properties.color);
+        SceneNode* nodePtr = SceneNode::FindNode(node.id);
+        if (!nodePtr)
+        {
+            LOG_ERROR(LogSceneRenderer, std::format("SceneRenderer::SetDirectLightParams: SceneNode with ID {} not found.", node.id));
+            rmt_EndCPUSample();
+            continue;
+        }
+        const auto direction = nodePtr->GetGlobalOrientation() * light.direction;
+        gpuProgram->SetUniformVector(uniformLocationColor, light.properties.color);
         gpuProgram->SetUniformVector(uniformLocationDirection, glm::normalize(direction));
-        gpuProgram->SetUniformFloat(uniformLocationDiffuse, light->properties.diffuseIntensity);
-        gpuProgram->SetUniformFloat(uniformLocationSpecular, light->properties.specularIntensity);
-        gpuProgram->SetUniformFloat(uniformLocationCutoff, light->properties.cutoffRange);
+        gpuProgram->SetUniformFloat(uniformLocationDiffuse, light.properties.diffuseIntensity);
+        gpuProgram->SetUniformFloat(uniformLocationSpecular, light.properties.specularIntensity);
+        gpuProgram->SetUniformFloat(uniformLocationCutoff, light.properties.cutoffRange);
         rmt_EndCPUSample();
 
         numLight++;
@@ -142,13 +146,10 @@ void SceneRenderer::SetPointLightParams(Ref<GpuProgram> gpuProgram, const SceneN
 {
     rmt_ScopedCPUSample(SceneRenderer_SetPointLightParams, 0);
     int32_t numLight = 0;
-    Array<Ref<SceneNode>> nodes;
-    scene.GetAllDescendants(nodes, true);
-    for (const auto& node : nodes)
+    const auto registry = scene.GetRegistry();
+    for (const auto view = registry->view<SceneNodeComponent, PointLightComponent>(); const auto& [entity, node, light] : view.each())
     {
-        if (!node->IsActive()) continue;
-        const auto light = node->GetComponent<PointLightComponent>();
-        if (!light) continue;
+        if (!node.active) continue;
 
         rmt_BeginCPUSample(CreateUniformNames, 0);
         // TODO: Cache the uniform names.
@@ -164,14 +165,20 @@ void SceneRenderer::SetPointLightParams(Ref<GpuProgram> gpuProgram, const SceneN
         rmt_EndCPUSample();
 
         rmt_BeginCPUSample(EmplaceUniformValues, 0);
-        gpuProgram->SetUniformVector(uniformLocationPosition, node->GetGlobalPosition());
-        gpuProgram->SetUniformVector(uniformLocationColor, light->properties.color);
-        gpuProgram->SetUniformFloat(uniformLocationDiffuse, light->properties.diffuseIntensity);
-        gpuProgram->SetUniformFloat(uniformLocationSpecular, light->properties.specularIntensity);
-        gpuProgram->SetUniformFloat(uniformLocationCutOff, light->properties.cutoffRange);
-        gpuProgram->SetUniformFloat(uniformLocationConst, light->constant);
-        gpuProgram->SetUniformFloat(uniformLocationLinear, light->linear);
-        gpuProgram->SetUniformFloat(uniformLocationQuad, light->quadratic);
+        SceneNode* nodePtr = SceneNode::FindNode(node.id);
+        if (!nodePtr) {
+            LOG_ERROR(LogSceneRenderer, std::format("SceneRenderer::SetPointLightParams: SceneNode with ID {} not found.", node.id));
+            rmt_EndCPUSample();
+            continue;
+        }
+        gpuProgram->SetUniformVector(uniformLocationPosition, nodePtr->GetGlobalPosition());
+        gpuProgram->SetUniformVector(uniformLocationColor, light.properties.color);
+        gpuProgram->SetUniformFloat(uniformLocationDiffuse, light.properties.diffuseIntensity);
+        gpuProgram->SetUniformFloat(uniformLocationSpecular, light.properties.specularIntensity);
+        gpuProgram->SetUniformFloat(uniformLocationCutOff, light.properties.cutoffRange);
+        gpuProgram->SetUniformFloat(uniformLocationConst, light.constant);
+        gpuProgram->SetUniformFloat(uniformLocationLinear, light.linear);
+        gpuProgram->SetUniformFloat(uniformLocationQuad, light.quadratic);
         rmt_EndCPUSample();
 
         numLight++;

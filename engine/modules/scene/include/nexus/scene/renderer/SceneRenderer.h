@@ -16,6 +16,8 @@
 #include <string>
 #include <unordered_map>
 
+DECLARE_LOG_EXTERN(SceneRenderer);
+
 NXS_NAMESPACE
 {
     class RenderSystem;
@@ -27,8 +29,6 @@ NXS_NAMESPACE
     struct LightProperties;
     struct PointLightComponent;
     struct DirectLightComponent;
-
-    DECLARE_LOG_EXTERN(SceneRenderer);
 
     class SceneRenderer
     {
