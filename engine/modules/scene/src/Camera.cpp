@@ -91,6 +91,7 @@ Array<SceneNode*> Camera::GetVisibleNodes(const Scene& scene) const
 
 Frustum Camera::GetViewFrustum() const
 {
+    rmt_ScopedCPUSample(Camera_GetViewFrustum, 0)
     return Properties().GetViewFrustum(GetGlobalPosition(), GetGlobalOrientation());
 }
 

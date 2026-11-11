@@ -32,6 +32,7 @@ DEFINE_LOG(SceneRenderer);
 
 RenderCommand SceneRenderer::CreateRenderCommand(Ref<const Mesh> mesh, glm::mat4&& modelMtx, const glm::mat4& mvpMtx)
 {
+    rmt_ScopedCPUSample(SceneRenderer_CreateRenderCommand, 0);
     const auto material = mesh->GetMaterial();
     const auto meshSphere = mesh->GetSphere();
     const auto pos = mvpMtx * glm::vec4(meshSphere.center, 1);

@@ -30,6 +30,7 @@ void RenderPass::ReleaseResources()
 
 void RenderPass::Begin(RenderSystem& rs) const
 {
+    rmt_ScopedCPUSample(RenderPass_BeginRenderPass, 0);
     auto renderInterface = rs.GetRenderInterface();
     // NOTE: Pipeline state should be applied before anything.
     renderInterface->ApplyPipelineState(pipelineState);
@@ -248,6 +249,7 @@ void RenderPass::SetFilterType(std::string type)
 
 RenderCommand RenderPass::CreateRenderCommand(Ref<const Mesh> mesh, const glm::mat4 &modelMtx, const glm::mat4 &mvpMtx) const
 {
+    rmt_ScopedCPUSample(RenderPass_CreateRenderCommand, 0);
     const auto material = mesh->GetMaterial();
     const auto meshSphere = mesh->GetSphere();
     const auto pos = mvpMtx * glm::vec4(meshSphere.center, 1);
