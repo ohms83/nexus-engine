@@ -169,7 +169,7 @@ NXS_NAMESPACE
         void UpdateTransform() const;
         void UpdateGlobalTransform();
         //! Returns this node's transform composed with all its ancestors.
-        NODISCARD glm::mat4 GetGlobalTransform() const;
+        NODISCARD const glm::mat4& GetGlobalTransform() const;
         NODISCARD glm::vec3 GetGlobalPosition() const;
         NODISCARD glm::quat GetGlobalOrientation() const;
         NODISCARD glm::vec3 GetGlobalScale() const;

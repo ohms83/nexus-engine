@@ -49,7 +49,7 @@ const Color3F& Scene::Ambient() const
 
 Dict<const ISceneView*, Array<SceneNode*>> Scene::GetVisibilitySets() const
 {
-    rmt_ScopedCPUSample(Scene_BuildVisibilitySets, 0)
+    rmt_ScopedCPUSample(Scene_GetVisibilitySets, 0)
     Dict<const ISceneView*, Array<SceneNode*>> visibilitySets;
     VisitDescendants([&](const SceneNode& sceneNode) {
         if (!sceneNode.IsActive()) return;

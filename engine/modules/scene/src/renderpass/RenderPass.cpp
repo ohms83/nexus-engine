@@ -305,6 +305,7 @@ void RenderPass::PopulateSceneView(const SceneNode& scene, Array<Ref<ISceneView>
 
 void RenderPass::PrepareRenderCommands(const SceneNode &scene, const ISceneView &view, Array<RenderCommand>& outCommands) const
 {
+#if 0
     rmt_ScopedCPUSample(RenderPass_PrepareRenderCommands, 0);
     const glm::mat4& viewProjMtx = view.GetViewProjectionMatrix();
 
@@ -325,4 +326,5 @@ void RenderPass::PrepareRenderCommands(const SceneNode &scene, const ISceneView 
             outCommands.push_back(CreateRenderCommand(mesh, modelMtx, mvpMtx));
         }
     }
+#endif
 }

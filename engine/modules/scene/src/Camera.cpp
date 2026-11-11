@@ -64,25 +64,28 @@ Array<SceneNode*> Camera::GetVisibleNodes(const Scene& scene) const
     Frustum viewFrustum = GetViewFrustum(); // Ensure the view frustum is up to date
 
     rmt_ScopedCPUSample(Camera_CullSceneNodes, 0)
-    for (const auto& node : scene.GetAllDescendantsOfType<SceneNode>(true))
+    const auto& registry = scene.GetRegistry();
+    for (const auto view = registry->view<SceneNodeComponent, MeshComponent>(); const auto& [entity, node, meshComp] : view.each())
     {
-        if (!node->IsActive()) continue;
-        // TODO: Replace the MeshComponent dependency with a more generic visibility check if needed
-        const auto meshComp = node->GetComponent<MeshComponent>();
-        if (!meshComp) continue;
+        if (!node.active) continue;
 
-        const auto modelMtx = node->GetGlobalTransform();
-        if (auto mesh = meshComp->GetMesh(); mesh != nullptr)
+        SceneNode* sceneNode = SceneNode::FindNode(node.id);
+        if (!sceneNode) {
+            LOG_ERROR(LogSceneRenderer, std::format("Camera::GetVisibleNodes: SceneNode with ID {} not found.", node.id));
+            continue;
+        }
+        const auto modelMtx = sceneNode->GetGlobalTransform();
+        if (auto mesh = meshComp.GetMesh(); mesh != nullptr)
         {
             const auto boundingSphere = mesh->GetSphere();
             const glm::vec3 pos = modelMtx * glm::vec4(boundingSphere.center, 1);
-            const auto globalScale = node->GetGlobalScale();
+            const auto globalScale = sceneNode->GetGlobalScale();
             const float scaledRadius = boundingSphere.radius * std::max({ globalScale.x, globalScale.y, globalScale.z });
             const bool isVisible = viewFrustum.IsSphereInside(pos, scaledRadius);
 
             if (isVisible)
             {
-                visibleNodes.push_back(node);
+                visibleNodes.push_back(sceneNode);
             }
         }
     }

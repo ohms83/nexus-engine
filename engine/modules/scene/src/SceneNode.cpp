@@ -377,7 +377,7 @@ void SceneNode::UpdateGlobalTransform()
     }
 }
 
-glm::mat4 SceneNode::GetGlobalTransform() const
+const glm::mat4& SceneNode::GetGlobalTransform() const
 {
     UpdateTransform();
     return m_globalTransform;

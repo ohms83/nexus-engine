@@ -229,9 +229,7 @@ void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
             const glm::mat4& viewProjMtx = view->GetViewProjectionMatrix();
             for (const auto node : visibleNodes)
             {
-                if (!node->IsActive()) continue;
                 const auto meshComp = node->GetComponent<MeshComponent>();
-                if (!meshComp) continue;
 
                 const auto modelMtx = node->GetGlobalTransform();
                 const auto mvpMtx = viewProjMtx * modelMtx;
