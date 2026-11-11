@@ -144,13 +144,13 @@ TEST_F(SceneNodeTest, ParentReferenceDoesNotKeepParentAlive)
 TEST_F(SceneNodeTest, LocalAndGlobalTransformsComposeFromRootToLeaf)
 {
     auto parent = scene->EmplaceChild<SceneNode3D>("Transform Parent");
-    parent->Position().value = {2.0f, 0.0f, 0.0f};
-    parent->Orient().FromEuler({0.0f, 90.0f, 0.0f});
-    parent->Scale().value = {2.0f, 2.0f, 2.0f};
+    parent->SetPosition({2.0f, 0.0f, 0.0f});
+    parent->SetOrientation(glm::quat(glm::radians(glm::vec3(0.0f, 90.0f, 0.0f))));
+    parent->SetScale({2.0f, 2.0f, 2.0f});
 
     auto child = parent->EmplaceChild<SceneNode3D>("Transform Child");
-    child->Position().value = {1.0f, 0.0f, 0.0f};
-    child->Scale().value = {0.5f, 1.0f, 1.0f};
+    child->SetPosition({1.0f, 0.0f, 0.0f});
+    child->SetScale({0.5f, 1.0f, 1.0f});
 
     const auto localPosition = child->GetLocalTransform() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
     EXPECT_EQ(glm::vec3(localPosition), glm::vec3(1.0f, 0.0f, 0.0f));
@@ -184,7 +184,7 @@ TEST_F(SceneNodeTest, LocalTransformUsesOnlyComponentsPresentOnNodeType)
     EXPECT_NEAR(lightGlobalPosition.z, -1.0f, 0.0001f);
 
     auto camera = parent->EmplaceChild<Camera>("Camera");
-    camera->Position().value = {4.0f, 5.0f, 6.0f};
+    camera->SetPosition({4.0f, 5.0f, 6.0f});
     const auto cameraLocalPosition = camera->GetLocalTransform() * glm::vec4(0, 0, 0, 1);
     EXPECT_EQ(glm::vec3(cameraLocalPosition), glm::vec3(4.0f, 5.0f, 6.0f));
 }
@@ -192,11 +192,11 @@ TEST_F(SceneNodeTest, LocalTransformUsesOnlyComponentsPresentOnNodeType)
 TEST_F(SceneNodeTest, ReparentingAndDetachingUpdatesGlobalTransform)
 {
     auto firstParent = scene->EmplaceChild<SceneNode3D>("First Parent");
-    firstParent->Position().value = {10.0f, 0.0f, 0.0f};
+    firstParent->SetPosition({10.0f, 0.0f, 0.0f});
     auto secondParent = scene->EmplaceChild<SceneNode3D>("Second Parent");
-    secondParent->Position().value = {20.0f, 0.0f, 0.0f};
+    secondParent->SetPosition({20.0f, 0.0f, 0.0f});
     auto child = firstParent->EmplaceChild<SceneNode3D>("Child");
-    child->Position().value = {1.0f, 0.0f, 0.0f};
+    child->SetPosition({1.0f, 0.0f, 0.0f});
 
     EXPECT_NEAR(child->GetGlobalPosition().x, 11.0f, 0.0001f);
 

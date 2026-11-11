@@ -51,16 +51,16 @@ public:
         m_euler.y += euler.y;
 
         auto modelNode = PTR_CAST<nxs::SceneNode3D>(m_scene->FindNodeWithName("Model"));
-        modelNode->Orient().quat = glm::mat4_cast(glm::quat(glm::radians(m_euler)));
-        modelNode->Scale().value = modelScales[selectedModel] * scale;
+        modelNode->SetOrientation(glm::quat(glm::radians(m_euler)));
+        modelNode->SetScale(modelScales[selectedModel] * scale);
 
         auto modelComp = modelNode->GetComponent<nxs::ModelComponent>();
         if (modelComp)
         {
             const auto model = modelComp->GetModel();
-            const auto position = modelNode->Position().value;
-            const auto orient = modelNode->Orient().quat;
-            const auto scale = modelNode->Scale().value;
+            const auto position = modelNode->GetPosition();
+            const auto orient = modelNode->GetOrientation();
+            const auto scale = modelNode->GetScale();
             const auto transform = nxs::Matrix::CreateModelMatrix(position, orient, scale);
             if (drawSphere)
             {
@@ -206,7 +206,7 @@ private:
     void InitScene()
     {
         auto camera = m_scene->EmplaceChild<nxs::Camera>("Camera");
-        camera->Position().value = {0, 0, 5};
+        camera->SetPosition({0, 0, 5});
         camera->LookAt(glm::vec3(0), glm::vec3(0, 0, 0));
 
         for (int i = 0; i < modelPaths.size(); i++)
@@ -229,7 +229,7 @@ private:
 
         auto node = m_scene->EmplaceChild<nxs::SceneNode3D>("Model");
         node->AddComponent<nxs::ModelComponent>();
-        node->Scale().value = modelScales[0];
+        node->SetScale(modelScales[0]);
 
         m_scene->SetRenderer(std::make_unique<nxs::ForwardSceneRenderer>(GetRenderSystem()));
     }

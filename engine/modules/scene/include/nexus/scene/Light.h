@@ -75,17 +75,5 @@ NXS_NAMESPACE
         {
             return *GetComponent<PointLightComponent>();
         }
-
-        void SetPosition(const glm::vec3& position)
-        {
-            GetComponent<PositionComponent>()->value = position;
-        }
-
-        NODISCARD const glm::vec3& GetPosition() const
-        {
-            return GetComponent<PositionComponent>()->value;
-        }
-
-        NODISCARD glm::mat4 GetLocalTransform() const override;
     };
 }

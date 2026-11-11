@@ -33,11 +33,3 @@ PointLight::PointLight(Ref<entt::registry>  registry, std::string name)
     auto [lightComp, position] = AddComponents<PointLightComponent, PositionComponent>();
     lightComp->properties.cutoffRange = DEFAULT_CUTOFF;
 }
-
-glm::mat4 PointLight::GetLocalTransform() const
-{
-    return Matrix::CreateModelMatrix(
-        GetPosition(),
-        glm::quat(1.0f, 0.0f, 0.0f, 0.0f),
-        glm::vec3(1.0f));
-}

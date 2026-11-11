@@ -214,7 +214,8 @@ void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
             rmt_BeginOpenGLSampleDynamic(pass->name.c_str());
 
             rmt_BeginCPUSample(SceneRenderer_BuildCommandsFromVisibleNodes, 0)
-            const glm::vec3& cameraPos = view->GetPosition();
+            const SceneNode* viewNode = view->GetViewNode();
+            const glm::vec3& cameraPos = viewNode ? viewNode->GetPosition() : glm::vec3(0.0f);
             const glm::mat4& viewMtx = view->GetViewMatrix();
             const glm::mat4& projectionMtx = view->GetProjectionMatrix();
             const glm::mat4& viewProjMtx = view->GetViewProjectionMatrix();

@@ -276,19 +276,107 @@ void SceneNode::AddChild(Ref<SceneNode> child)
 
     child->m_parent = self;
     m_children.push_back(child);
+    child->UpdateGlobalTransform();
 }
 
-glm::mat4 SceneNode::GetLocalTransform() const
+void SceneNode::SetPosition(const glm::vec3& position)
 {
-    return glm::mat4(1.0f);
+    auto positionComponent = GetComponent<PositionComponent>();
+    if (!positionComponent) return;
+    positionComponent->value = position;
+    m_localTransformExplicit = false;
+    UpdateGlobalTransform();
+}
+
+void SceneNode::SetOrientation(const glm::quat& orientation)
+{
+    auto orientationComponent = GetComponent<OrientationComponent>();
+    if (!orientationComponent) return;
+    orientationComponent->quat = orientation;
+    m_localTransformExplicit = false;
+    UpdateGlobalTransform();
+}
+
+void SceneNode::SetScale(const glm::vec3& scale)
+{
+    auto scaleComponent = GetComponent<ScaleComponent>();
+    if (!scaleComponent) return;
+    scaleComponent->value = scale;
+    m_localTransformExplicit = false;
+    UpdateGlobalTransform();
+}
+
+void SceneNode::SetLocalTransform(const glm::mat4& transform)
+{
+    m_transform = transform;
+    m_localTransformExplicit = true;
+    UpdateGlobalTransform();
+}
+
+const glm::vec3& SceneNode::GetPosition() const
+{
+    auto positionComponent = GetComponent<PositionComponent>();
+    static const glm::vec3 defaultPosition(0.0f);
+    return positionComponent ? positionComponent->value : defaultPosition;
+}
+
+glm::quat SceneNode::GetOrientation() const
+{
+    auto orientationComponent = GetComponent<OrientationComponent>();
+    return orientationComponent ? orientationComponent->quat : glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+}
+
+glm::vec3 SceneNode::GetScale() const
+{
+    auto scaleComponent = GetComponent<ScaleComponent>();
+    return scaleComponent ? scaleComponent->value : glm::vec3(1.0f);
+}
+
+const glm::mat4& SceneNode::GetLocalTransform() const
+{
+    UpdateTransform();
+    return m_transform;
+}
+
+void SceneNode::UpdateTransform() const
+{
+    if (!m_transformDirty) return;
+
+    if (!m_localTransformExplicit)
+    {
+        const auto translationMatrix = glm::translate(glm::mat4(1.0f), GetPosition());
+        const auto rotationMatrix = glm::toMat4(GetOrientation());
+        const auto scaleMatrix = glm::scale(glm::mat4(1.0f), GetScale());
+        m_transform = translationMatrix * rotationMatrix * scaleMatrix;
+    }
+
+    const auto parent = m_parent.lock();
+    if (parent)
+    {
+        m_globalTransform = parent->GetGlobalTransform() * m_transform;
+    }
+    else
+    {
+        m_globalTransform = m_transform;
+    }
+
+    m_transformDirty = false;
+}
+
+void SceneNode::UpdateGlobalTransform()
+{
+    m_transformDirty = true;
+    UpdateTransform();
+    for (const auto& child : m_children)
+    {
+        child->UpdateGlobalTransform();
+    }
 }
 
 glm::mat4 SceneNode::GetGlobalTransform() const
 {
-    rmt_ScopedCPUSample(SceneNode_GetGlobalTransform, 0);
-    const auto localTransform = GetLocalTransform();
-    const auto parent = m_parent.lock();
-    return parent ? parent->GetGlobalTransform() * localTransform : localTransform;
+    UpdateTransform();
+    return m_globalTransform;
 }
 
 glm::vec3 SceneNode::GetGlobalPosition() const
@@ -319,6 +407,34 @@ glm::vec3 SceneNode::GetGlobalScale() const
     };
 }
 
+void SceneNode::LookAt(const glm::vec3& center, const glm::vec3& up)
+{
+    if (auto orientationComponent = GetComponent<OrientationComponent>())
+    {
+        orientationComponent->LookAt(GetPosition(), center, up);
+        m_localTransformExplicit = false;
+        UpdateGlobalTransform();
+    }
+}
+
+glm::vec3 SceneNode::Right() const
+{
+    static const glm::vec3 right = {1, 0, 0};
+    return GetOrientation() * right;
+}
+
+glm::vec3 SceneNode::Up() const
+{
+    static const glm::vec3 up = {0, 1, 0};
+    return GetOrientation() * up;
+}
+
+glm::vec3 SceneNode::Forward() const
+{
+    static const glm::vec3 forward = {0, 0, -1};
+    return GetOrientation() * forward;
+}
+
 void SceneNode::AddChildren(const ChildList& children)
 {
     for (const auto& child : children)
@@ -338,6 +454,7 @@ void SceneNode::RemoveChild(Ref<SceneNode> node, bool removeDescendant)
     if (!removeDescendant) node->GetAllChildren(children);
     std::erase(m_children, node);
     node->m_parent.reset();
+    node->UpdateGlobalTransform();
 
     // Reparent the children.
     if (!removeDescendant)
@@ -364,6 +481,7 @@ void SceneNode::RemoveAllChildren(bool removeDescendant)
         for (const auto& child : children)
         {
             child->m_parent.reset();
+            child->UpdateGlobalTransform();
         }
     }
 }

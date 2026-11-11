@@ -18,14 +18,6 @@ Camera::Camera(Ref<entt::registry>  registry, const std::string& name)
     AddComponents<CameraComponent, PositionComponent, OrientationComponent>();
 }
 
-glm::mat4 Camera::GetLocalTransform() const
-{
-    return Matrix::CreateModelMatrix(
-        Position().value,
-        Orient().quat,
-        glm::vec3(1.0f));
-}
-
 void Camera::SetProjection(const float fov, const float width, const float height, const float nearZ, const float farZ)
 {
     auto& properties = Properties();
@@ -100,11 +92,6 @@ Array<SceneNode*> Camera::GetVisibleNodes(const Scene& scene) const
 Frustum Camera::GetViewFrustum() const
 {
     return Properties().GetViewFrustum(GetGlobalPosition(), GetGlobalOrientation());
-}
-
-void Camera::LookAt(const glm::vec3 &center, const glm::vec3 &up)
-{
-    Orient().LookAt(Position().value, center, up);
 }
 
 void Camera::AcceptReflector(IReflector& reflector)

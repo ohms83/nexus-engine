@@ -8,31 +8,3 @@ SceneNode3D::SceneNode3D(Ref<entt::registry> registry, std::string name)
 {
     AddComponents<PositionComponent, OrientationComponent, ScaleComponent>();
 }
-
-glm::mat4 SceneNode3D::GetLocalTransform() const
-{
-    return Matrix::CreateModelMatrix(Position().value, Orient().quat, Scale().value);
-}
-
-void SceneNode3D::LookAt(const glm::vec3& center, const glm::vec3& up)
-{
-    Orient().LookAt(Position().value, center, up);
-}
-
-glm::vec3 SceneNode3D::Right() const
-{
-    static const glm::vec3 right = {1, 0, 0};
-    return Orient().quat * right;
-}
-
-glm::vec3 SceneNode3D::Up() const
-{
-    static const glm::vec3 up = {0, 1, 0};
-    return Orient().quat * up;
-}
-
-glm::vec3 SceneNode3D::Forward() const
-{
-    static const glm::vec3 forward = {0, 0, -1};
-    return Orient().quat * forward;
-}

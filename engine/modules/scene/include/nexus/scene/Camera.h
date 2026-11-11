@@ -27,20 +27,6 @@ NXS_NAMESPACE
         CameraComponent& Properties() { return *GetComponent<CameraComponent>(); }
         const CameraComponent& Properties() const { return *GetComponent<CameraComponent>(); }
 
-        NODISCARD PositionComponent& Position() { return *GetComponent<PositionComponent>(); }
-        NODISCARD const PositionComponent& Position() const { return *GetComponent<PositionComponent>(); }
-        NODISCARD const glm::vec3& GetPosition() const override { return GetComponent<PositionComponent>()->value; }
-        void SetPosition(const glm::vec3& position) { GetComponent<PositionComponent>()->value = position; }
-
-        NODISCARD OrientationComponent& Orient() { return *GetComponent<OrientationComponent>(); }
-        NODISCARD const OrientationComponent& Orient() const { return *GetComponent<OrientationComponent>(); }
-        NODISCARD const glm::quat& GetOrientation() const { return GetComponent<OrientationComponent>()->quat; }
-        void SetOrientation(const glm::quat& orientation) { GetComponent<OrientationComponent>()->quat = orientation; }
-
-        NODISCARD glm::mat4 GetLocalTransform() const override;
-
-        void LookAt(const glm::vec3& center, const glm::vec3& up);
-
         /**
          * Setup camera's projection.
          * @param fov Field-of-view in degree.

@@ -52,12 +52,13 @@ void CameraController::Update(float dt)
     glm::vec3 moveVec = inputManager.GetAxisValue("movement");
 
     // Transform the translation vector into the camera's local coordinate.
-    auto& cameraOrient = camera->Orient();
     glm::vec2 euler = inputManager.GetMouseAxisValue("camera_turn") * dt;
-    cameraOrient.Rotate(glm::vec3(euler.y, euler.x, 0));
+    auto cameraOrientation = camera->GetOrientation();
+    cameraOrientation *= glm::quat(glm::radians(glm::vec3(euler.y, euler.x, 0)));
+    camera->SetOrientation(cameraOrientation);
 
     camera->GetComponent<nxs::MoveComponent>()->direction =
-        nxs::Vector::SafeNormalize(cameraOrient.quat * moveVec);
+        nxs::Vector::SafeNormalize(cameraOrientation * moveVec);
 
     const auto turninAxis = nxs::Vector::SafeNormalize(inputManager.GetAxisValue("camera_turn"));
     auto& compAxis = camera->GetComponent<nxs::TurningComponent>()->axis;

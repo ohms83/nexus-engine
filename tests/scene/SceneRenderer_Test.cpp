@@ -13,7 +13,6 @@ public:
     {
     }
 
-    NODISCARD const glm::vec3& GetPosition() const override { return m_position; }
     NODISCARD glm::mat4 GetViewMatrix() const override { return glm::mat4(1.0f); }
     NODISCARD glm::mat4 GetProjectionMatrix() const override { return glm::mat4(1.0f); }
     NODISCARD glm::mat4 GetViewProjectionMatrix() const override { return glm::mat4(1.0f); }

@@ -150,13 +150,29 @@ NXS_NAMESPACE
         Ref<SceneNode> GetParent() const { return m_parent.lock(); }
         void RemoveFromParent();
 
+        void SetPosition(const glm::vec3& position);
+        void SetOrientation(const glm::quat& orientation);
+        void SetScale(const glm::vec3& scale);
+        NODISCARD const glm::vec3& GetPosition() const;
+        NODISCARD glm::quat GetOrientation() const;
+        NODISCARD glm::vec3 GetScale() const;
+
+        void SetLocalTransform(const glm::mat4& transform);
         //! Returns this node's transform relative to its parent.
-        NODISCARD virtual glm::mat4 GetLocalTransform() const;
+        const glm::mat4& GetLocalTransform() const;
+        void UpdateTransform() const;
+        void UpdateGlobalTransform();
         //! Returns this node's transform composed with all its ancestors.
         NODISCARD glm::mat4 GetGlobalTransform() const;
         NODISCARD glm::vec3 GetGlobalPosition() const;
         NODISCARD glm::quat GetGlobalOrientation() const;
         NODISCARD glm::vec3 GetGlobalScale() const;
+
+        void LookAt(const glm::vec3& center, const glm::vec3& up);
+
+        NODISCARD glm::vec3 Right() const;
+        NODISCARD glm::vec3 Up() const;
+        NODISCARD glm::vec3 Forward() const;
 
         void AddScript(Ref<Script> script);
         void RemoveScript(Ref<Script> script);
@@ -208,6 +224,11 @@ NXS_NAMESPACE
         WeakRef<SceneNode> m_parent;
         ChildList m_children;
         Array<Ref<Script>> m_scripts;
+
+        mutable glm::mat4 m_transform { 1.0f };
+        mutable glm::mat4 m_globalTransform { 1.0f };
+        mutable bool m_transformDirty = true;
+        bool m_localTransformExplicit = false;
 
         // --- ECS ---
         struct Simulation

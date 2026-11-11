@@ -158,7 +158,7 @@ private:
     void InitScene()
     {
         auto camera = m_scene->EmplaceChild<nxs::Camera>("Camera");
-        camera->Position().value = {5, 5, 5};
+        camera->SetPosition({5, 5, 5});
         camera->LookAt(glm::vec3(0), glm::vec3(0, 1, 0));
 
         for (int i = 0; i < modelPaths.size(); i++)
@@ -169,7 +169,7 @@ private:
 
         auto node = m_scene->EmplaceChild<nxs::SceneNode3D>("Model");
         node->AddComponent<nxs::MeshComponent>();
-        node->Scale().value = modelScales[0];
+        node->SetScale(modelScales[0]);
 
         auto material = std::make_shared<nxs::Material>("Default Material", 0);
         material->CreateDefaultShader(*nxs::Engine::Instance().GetResourceManager());
@@ -240,8 +240,8 @@ private:
         auto modelNode = PTR_CAST<nxs::SceneNode3D>(m_scene->FindNodeWithName("Model"));
         if (!modelNode) return;
 
-        modelNode->Orient().quat = glm::mat4_cast(glm::quat(glm::radians(m_euler)));
-        modelNode->Scale().value = modelScales[selectedModel] * scale;
+        modelNode->SetOrientation(glm::quat(glm::radians(m_euler)));
+        modelNode->SetScale(modelScales[selectedModel] * scale);
 
         SetMesh(selectedModel);
     }

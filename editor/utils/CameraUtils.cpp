@@ -7,7 +7,7 @@ using namespace nxs::editor;
 Ref<Camera> CameraUtils::InitCamera(Scene& scene, const std::string& name)
 {
     auto camera = scene.EmplaceChild<nxs::Camera>(name);
-    camera->Position().value = {0, 50, 0};
+    camera->SetPosition({0, 50, 0});
     camera->LookAt({0, 50, -10}, {0, 1, 0});
     camera->Properties().farZ = 10000.f;
 

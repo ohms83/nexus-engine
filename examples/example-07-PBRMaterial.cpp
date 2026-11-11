@@ -31,7 +31,10 @@ public:
         m_propertyWindow->SetSceneNode(selectedNode);
 
         const float dt = GetDeltaTime();
-        m_lightRoot->Orient().Rotate(30.f * dt, glm::vec3(0, 1, 0));
+        m_lightRoot->SetOrientation(glm::rotate(
+            m_lightRoot->GetOrientation(),
+            glm::radians(30.f * dt),
+            glm::vec3(0, 1, 0)));
     }
 
     void Render(nxs::RenderSystem& renderSystem) override
@@ -178,7 +181,7 @@ private:
     void InitScene()
     {
         auto camera = m_scene->EmplaceChild<nxs::Camera>("Camera");
-        camera->Position().value = {8, 8, 8};
+        camera->SetPosition({8, 8, 8});
         camera->LookAt(glm::vec3(0), glm::vec3(0, 1, 0));
 
         if (m_loadModel)
@@ -191,8 +194,8 @@ private:
 
             auto node = m_scene->EmplaceChild<nxs::SceneNode3D>("Model");
             node->AddComponent<nxs::MeshComponent>();
-            node->Scale().value = modelScales[0];
-            node->Position().value = {0, 0.2f, 0};
+            node->SetScale(modelScales[0]);
+            node->SetPosition({0, 0.2f, 0});
         }
 
         auto resourceManager = nxs::Engine::Instance().GetResourceManager();
@@ -311,7 +314,7 @@ private:
         auto modelNode = PTR_CAST<nxs::SceneNode3D>(m_scene->FindNodeWithName("Model"));
         if (!modelNode) return;
 
-        modelNode->Orient().quat = glm::mat4_cast(glm::quat(glm::radians(m_euler)));
+        modelNode->SetOrientation(glm::quat(glm::radians(m_euler)));
         SetMesh(selectedModel);
     }
 
