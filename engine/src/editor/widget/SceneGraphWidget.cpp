@@ -106,7 +106,7 @@ void SceneGraphWidget::DeleteNode(Ref<SceneNode> node)
 {
     if (!node) return;
     m_selectedNode = NXS_INVALID_ID;
-    m_scene->RemoveChild(node);
+    node->RemoveFromParent();
 }
 
 void SceneGraphWidget::HandleInput(Ref<SceneNode> node)
@@ -122,7 +122,7 @@ void SceneGraphWidget::ShowContextMenu()
     if (m_selectedNode == NXS_INVALID_ID) return;
     static const char* contexMenuID = "Scene Graph Context Menu";
 
-    auto node = m_scene->FindNode(m_selectedNode);
+    auto node = m_scene->FindChild(m_selectedNode, true);
     if (!node) return;
 
     bool closePopup = false;

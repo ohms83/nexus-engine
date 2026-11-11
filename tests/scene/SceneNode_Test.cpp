@@ -42,33 +42,36 @@ TEST_F(SceneNodeTest, RemoveNode)
     EXPECT_EQ(scene->FindNodeWithName(name), nullptr);
 }
 
-TEST_F(SceneNodeTest, RemoveChild_RemovesDescendantsByDefault)
+TEST_F(SceneNodeTest, RemoveChild_ReparentsDescendantsByDefault)
 {
     auto parent = scene->EmplaceChild<SceneNode>("Parent");
     auto child = parent->EmplaceChild<SceneNode>("Child");
     auto grandchild = child->EmplaceChild<SceneNode>("Grandchild");
 
-    EXPECT_NE(parent->FindNodeWithName("Child"), nullptr);
-    EXPECT_NE(parent->FindNodeWithName("Grandchild"), nullptr);
-
     parent->RemoveChild(child);
-    // The default behavior removes descendants as well
+
+    EXPECT_EQ(child->GetParent(), nullptr);
+    EXPECT_EQ(child->GetNumChildren(), 0u);
     EXPECT_EQ(parent->FindNodeWithName("Child"), nullptr);
-    EXPECT_EQ(parent->FindNodeWithName("Grandchild"), nullptr);
+    EXPECT_EQ(parent->FindNodeWithName("Grandchild"), grandchild);
+    EXPECT_EQ(grandchild->GetParent(), parent);
 }
 
-TEST_F(SceneNodeTest, RemoveChild_ReparentsChildrenWhenRequested)
+TEST_F(SceneNodeTest, RemoveChild_KeepsDescendantsWithDetachedNodeWhenNotReparenting)
 {
     auto parent = scene->EmplaceChild<SceneNode>("Parent");
     auto child = parent->EmplaceChild<SceneNode>("Child");
     auto grandchild = child->EmplaceChild<SceneNode>("Grandchild");
 
     parent->RemoveChild(child, false);
-    // Child should be removed but the direct child (grandchild) should be reparented to parent
+
+    EXPECT_EQ(child->GetParent(), nullptr);
+    EXPECT_EQ(parent->GetNumChildren(), 0u);
     EXPECT_EQ(parent->FindNodeWithName("Child"), nullptr);
-    auto foundGrandchild = parent->FindNodeWithName("Grandchild");
-    EXPECT_NE(foundGrandchild, nullptr);
-    EXPECT_EQ(foundGrandchild->GetParent(), parent);
+    EXPECT_EQ(parent->FindNodeWithName("Grandchild"), nullptr);
+    EXPECT_EQ(child->GetNumChildren(), 1u);
+    EXPECT_EQ(child->FindNodeWithName("Grandchild"), grandchild);
+    EXPECT_EQ(grandchild->GetParent(), child);
 }
 
 // Testing for a bug where removing a scene node will have side effects on the others
@@ -262,7 +265,7 @@ TEST_F(SceneNodeTest, GetAllDescendantsOfTypeReturnsOrderedMatches)
 TEST_F(SceneNodeTest, FindNodeById)
 {
     auto node = scene->EmplaceChild<SceneNode>("Test Node");
-    auto found = scene->FindNode(node->GetId());
+    auto found = scene->FindChild(node->GetId(), true);
     EXPECT_EQ(found, node);
 }
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "nexus/NxsDefine.h"
-#include "nexus/container/Array.h"
+#include "nexus/Container.h"
 #include "nexus/serialize/Serializeable.h"
 #include "nexus/resource/ResourceManager.h"
 #include "nexus/reflection/Reflection.h"
@@ -99,13 +99,13 @@ NXS_NAMESPACE
         void AddChildren(const ChildList& children);
         /**
          * @brief Remove a child node from this node.
-         * If @c removeDescendant is true, the child and all its descendants will be destroyed.
+         * If @c reparentDescendants is true, the children of the removed node will be reparented to this node.
          * 
          * @param child A reference to the child node to be removed.
-         * @param removeDescendant Whether to remove the child and all its descendants.
+         * @param reparentDescendants Whether to reparent the descendants of the removed child to this node. Default is true.
          */
-        void RemoveChild(Ref<SceneNode> child, bool removeDescendant = true);
-        void RemoveAllChildren(bool removeDescendant = true);
+        void RemoveChild(Ref<SceneNode> child, bool reparentDescendants = true);
+        void RemoveAllChildren(bool reparentDescendants = true);
         /**
          * @brief Get all direct child nodes.
          * 
@@ -135,7 +135,13 @@ NXS_NAMESPACE
             VisitDescendantsImpl(visitor);
         }
 
-        NODISCARD Ref<SceneNode> FindNode(Identifier id);
+        NODISCARD Ref<SceneNode> FindChild(Identifier id, bool recursive = false);
+        /**
+         * Find a node with the specified @c id.
+         * @param id Node ID
+         * @return A scene node with specified ID or a nullptr, if not found
+         */
+        NODISCARD static SceneNode* FindNode(Identifier id);
 
         /**
          * Find a node with the specified @c name.
@@ -148,7 +154,7 @@ NXS_NAMESPACE
         size_t GetNumChildren() const { return m_children.size(); }
 
         Ref<SceneNode> GetParent() const { return m_parent.lock(); }
-        void RemoveFromParent();
+        void RemoveFromParent(bool reparentDescendants = true);
 
         void SetPosition(const glm::vec3& position);
         void SetOrientation(const glm::quat& orientation);
@@ -238,6 +244,7 @@ NXS_NAMESPACE
         };
         Array<Simulation> m_simulations;
 
-        static std::unordered_map<std::string, Creator> s_factoryFunctions;
+        static HashMap<std::string, Creator> s_factoryFunctions;
+        static HashMap<Identifier, SceneNode*> s_nodeRegistry;
     };
 }

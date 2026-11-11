@@ -33,7 +33,7 @@ void PropertyWindow::Draw_Internal(RenderSystem& renderSystem)
 {
     if (m_sceneNodeId == NXS_INVALID_ID || !m_currentScene) return;
 
-    auto selectedNode = m_currentScene->GetId() == m_sceneNodeId ? m_currentScene : m_currentScene->FindNode(m_sceneNodeId);
+    auto selectedNode = m_currentScene->GetId() == m_sceneNodeId ? m_currentScene : m_currentScene->FindChild(m_sceneNodeId, true);
     if (!selectedNode)
     {
         m_sceneNodeId = NXS_INVALID_ID;

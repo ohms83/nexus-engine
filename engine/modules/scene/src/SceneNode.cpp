@@ -15,7 +15,8 @@ DEFINE_LOG(SceneNode);
 
 static Identifier s_runningId = 0;
 
-std::unordered_map<std::string, SceneNode::Creator> SceneNode::s_factoryFunctions;
+HashMap<std::string, SceneNode::Creator> SceneNode::s_factoryFunctions;
+HashMap<Identifier, SceneNode*> SceneNode::s_nodeRegistry;
 
 SceneNode::SceneNode(Ref<entt::registry> registry, std::string name)
     : Entity(registry)
@@ -35,11 +36,14 @@ SceneNode::SceneNode(Ref<entt::registry> registry, std::string name)
     component->id = Hasher().Hash32(std::format("{}_{}_{}", name, milliseconds, s_runningId++));
     component->name = std::move(name);
     component->active = true;
+
+    s_nodeRegistry.emplace(component->id, this);
 }
 
 SceneNode::~SceneNode()
 {
     OnDestroy();
+    s_nodeRegistry.erase(GetId());
 }
 
 void SceneNode::Destroy()
@@ -437,28 +441,32 @@ glm::vec3 SceneNode::Forward() const
 
 void SceneNode::AddChildren(const ChildList& children)
 {
-    for (const auto& child : children)
-    {
+    std::ranges::for_each(children, [&](Ref<SceneNode> child) {
         AddChild(child);
-    }
+    });
 }
 
-void SceneNode::RemoveChild(Ref<SceneNode> node, bool removeDescendant)
+void SceneNode::RemoveChild(Ref<SceneNode> node, bool reparentDescendants)
 {
     if (IsShuttingDown() || !node) return;
 
-    const auto child = std::ranges::find(m_children, node);
-    if (child == m_children.end()) return;
+    const size_t numRemoved = std::erase_if(m_children, [&](const Ref<SceneNode>& child) {
+        return child == node;
+    });
+
+    if (numRemoved == 0)
+    {
+        LOG_WARNING(LogSceneNode, std::format("Failed to remove node '{}' from its parent '{}'.", node->GetName(), GetName()));
+        return;
+    }
 
     SceneNode::ChildList children;
-    if (!removeDescendant) node->GetAllChildren(children);
-    std::erase(m_children, node);
     node->m_parent.reset();
     node->UpdateGlobalTransform();
 
-    // Reparent the children.
-    if (!removeDescendant)
+    if (reparentDescendants)
     {
+        node->GetAllChildren(children);
         AddChildren(children);
     }
 }
@@ -472,9 +480,7 @@ void SceneNode::RemoveAllChildren(bool removeDescendant)
     m_children.clear();
     if (!removeDescendant && parent)
     {
-        std::ranges::for_each(children, [&parent](Ref<SceneNode> child) {
-            parent->AddChild(child);
-        });
+        parent->AddChildren(children);
     }
     else
     {
@@ -502,7 +508,7 @@ void SceneNode::GetAllDescendants(ChildList& childrenList, bool parentFirst) con
     }
 }
 
-Ref<SceneNode> SceneNode::FindNode(const Identifier id)
+Ref<SceneNode> SceneNode::FindChild(const Identifier id, bool recursive)
 {
     if (IsShuttingDown()) return nullptr;
 
@@ -511,10 +517,19 @@ Ref<SceneNode> SceneNode::FindNode(const Identifier id)
     for (const auto child : m_children)
     {
         if (child->GetId() == id) return child;
-        if (auto node = child->FindNode(id); node != nullptr) return node;
+        if (recursive)
+        {
+            if (auto node = child->FindChild(id, true); node != nullptr) return node;
+        }
     }
 
     return nullptr;
+}
+
+NODISCARD SceneNode* SceneNode::FindNode(Identifier id)
+{
+    auto it = s_nodeRegistry.find(id);
+    return (it != s_nodeRegistry.end()) ? it->second : nullptr;
 }
 
 Ref<SceneNode> SceneNode::FindNodeWithName(const std::string& name)
@@ -530,15 +545,12 @@ Ref<SceneNode> SceneNode::FindNodeWithName(const std::string& name)
     return nullptr;
 }
 
-void SceneNode::RemoveFromParent()
+void SceneNode::RemoveFromParent(bool reparentDescendants)
 {
     if (const auto parent = m_parent.lock())
     {
-        std::erase_if(parent->m_children, [&](const Ref<SceneNode>& child) {
-            return child.get() == this;
-        });
+        parent->RemoveChild(GetSelf(), reparentDescendants);
     }
-    m_parent.reset();
 }
 
 void SceneNode::AddScript(Ref<Script> script)
