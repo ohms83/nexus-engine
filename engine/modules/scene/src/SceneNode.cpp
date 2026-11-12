@@ -259,6 +259,7 @@ void SceneNode::Activate(const bool activate)
 
 void SceneNode::AddChild(Ref<SceneNode> child)
 {
+    rmt_ScopedCPUSample(SceneNode_AddChild, 0);
     if (!child) return;
 
     const auto self = GetSelf();
@@ -285,6 +286,7 @@ void SceneNode::AddChild(Ref<SceneNode> child)
 
 void SceneNode::SetPosition(const glm::vec3& position)
 {
+    rmt_ScopedCPUSample(SceneNode_SetPosition, 0);
     auto positionComponent = GetComponent<PositionComponent>();
     if (!positionComponent) return;
     positionComponent->value = position;
@@ -294,6 +296,7 @@ void SceneNode::SetPosition(const glm::vec3& position)
 
 void SceneNode::SetOrientation(const glm::quat& orientation)
 {
+    rmt_ScopedCPUSample(SceneNode_SetOrientation, 0);
     auto orientationComponent = GetComponent<OrientationComponent>();
     if (!orientationComponent) return;
     orientationComponent->quat = orientation;
@@ -303,6 +306,7 @@ void SceneNode::SetOrientation(const glm::quat& orientation)
 
 void SceneNode::SetScale(const glm::vec3& scale)
 {
+    rmt_ScopedCPUSample(SceneNode_SetScale, 0);
     auto scaleComponent = GetComponent<ScaleComponent>();
     if (!scaleComponent) return;
     scaleComponent->value = scale;
@@ -312,6 +316,7 @@ void SceneNode::SetScale(const glm::vec3& scale)
 
 void SceneNode::SetLocalTransform(const glm::mat4& transform)
 {
+    rmt_ScopedCPUSample(SceneNode_LocalTransform, 0);
     m_transform = transform;
     m_localTransformExplicit = true;
     UpdateGlobalTransform();
@@ -344,6 +349,7 @@ const glm::mat4& SceneNode::GetLocalTransform() const
 
 void SceneNode::UpdateTransform() const
 {
+    rmt_ScopedCPUSample(SceneNode_UpdateTransform, 0);
     if (!m_transformDirty) return;
 
     if (!m_localTransformExplicit)
@@ -369,6 +375,7 @@ void SceneNode::UpdateTransform() const
 
 void SceneNode::UpdateGlobalTransform()
 {
+    rmt_ScopedCPUSample(SceneNode_UpdateGlobalTransform, 0);
     m_transformDirty = true;
     UpdateTransform();
     for (const auto& child : m_children)
@@ -379,6 +386,7 @@ void SceneNode::UpdateGlobalTransform()
 
 const glm::mat4& SceneNode::GetGlobalTransform() const
 {
+    rmt_ScopedCPUSample(SceneNode_GetGlobalTransform, 0);
     UpdateTransform();
     return m_globalTransform;
 }
@@ -448,6 +456,7 @@ void SceneNode::AddChildren(const ChildList& children)
 
 void SceneNode::RemoveChild(Ref<SceneNode> node, bool reparentDescendants)
 {
+    rmt_ScopedCPUSample(SceneNode_RemoveChild, 0);
     if (IsShuttingDown() || !node) return;
 
     const size_t numRemoved = std::erase_if(m_children, [&](const Ref<SceneNode>& child) {
@@ -494,11 +503,13 @@ void SceneNode::RemoveAllChildren(bool removeDescendant)
 
 void SceneNode::GetAllChildren(ChildList& childrenList) const
 {
+    rmt_ScopedCPUSample(SceneNode_GetAllChildren, 0);
     for (auto child : m_children) childrenList.push_back(child);
 }
 
 void SceneNode::GetAllDescendants(ChildList& childrenList, bool parentFirst) const
 {
+    rmt_ScopedCPUSample(SceneNode_GetAllDescendants, 0);
     for (auto child : m_children)
     {
         if (parentFirst) childrenList.push_back(child);
@@ -510,6 +521,7 @@ void SceneNode::GetAllDescendants(ChildList& childrenList, bool parentFirst) con
 
 Ref<SceneNode> SceneNode::FindChild(const Identifier id, bool recursive)
 {
+    rmt_ScopedCPUSample(SceneNode_FindChild, 0);
     if (IsShuttingDown()) return nullptr;
 
     if (GetId() == id) return GetSelf();
@@ -528,12 +540,14 @@ Ref<SceneNode> SceneNode::FindChild(const Identifier id, bool recursive)
 
 NODISCARD SceneNode* SceneNode::FindNode(Identifier id)
 {
+    rmt_ScopedCPUSample(SceneNode_FindNode, 0);
     auto it = s_nodeRegistry.find(id);
     return (it != s_nodeRegistry.end()) ? it->second : nullptr;
 }
 
 Ref<SceneNode> SceneNode::FindNodeWithName(const std::string& name)
 {
+    rmt_ScopedCPUSample(SceneNode_FindNodeWithName, 0);
     if (IsShuttingDown()) return nullptr;
 
     for (const auto child : m_children)
@@ -572,6 +586,7 @@ void SceneNode::RemoveScript(Ref<Script> script)
 
 void SceneNode::Update(float dt)
 {
+    rmt_ScopedCPUSample(SceneNode_Update, 0);
     std::ranges::for_each(m_scripts, [dt](Ref<Script> script) {
         script->Update(dt);
     });
