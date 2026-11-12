@@ -5,6 +5,22 @@
 #include "nexus/container/Array.h"
 #include <ranges>
 
+#include "Remotery.h"
+
+#if NXS_BUILD_DEBUG
+    // Turning on/off entity deep profiling. The profiling can greatly affect performance.
+    // Please turn it on only when necessary.
+    #define ENTITY_PROFILING 0
+#else
+    #define ENTITY_PROFILING 1
+#endif
+
+#if ENTITY_PROFILING
+    #define ENT_SCOPED_CPU_SAMPLE(name, flag) rmt_ScopedCPUSample(name, flag)
+#else
+    #define ENT_SCOPED_CPU_SAMPLE(name, flag)
+#endif
+
 NXS_NAMESPACE
 {
     class IComponent;
@@ -76,6 +92,7 @@ NXS_NAMESPACE
         template<typename Type, typename... Args>
         MAYBE_UNUSED decltype(auto) AddComponent(Args &&...args)
         {
+            ENT_SCOPED_CPU_SAMPLE(Entity_AddComponent, 0);
             if (HasComponent<Type>()) {
                 return GetComponent<Type>();
             }
@@ -98,6 +115,7 @@ NXS_NAMESPACE
         template<typename... Types>
         MAYBE_UNUSED decltype(auto) AddComponents()
         {
+            ENT_SCOPED_CPU_SAMPLE(Entity_AddComponents, 0);
             if constexpr(sizeof...(Types) == 1u) {
                 return (AddComponent<Types>(), ...);
             }
@@ -124,6 +142,7 @@ NXS_NAMESPACE
         template<typename Type>
         NODISCARD auto GetComponent() const
         {
+            ENT_SCOPED_CPU_SAMPLE(Entity_GetComponent, 0);
             if (!HasComponent<Type>()) {
                 return static_cast<Type*>(nullptr);
             }
@@ -133,6 +152,7 @@ NXS_NAMESPACE
         template<typename... Types>
         NODISCARD auto GetComponents() const
         {
+            ENT_SCOPED_CPU_SAMPLE(Entity_GetComponents, 0);
             if constexpr(sizeof...(Types) == 1u) {
                 return (GetComponent<Types>(), ...);
             }
@@ -143,6 +163,7 @@ NXS_NAMESPACE
 
         NODISCARD decltype(auto) GetComponent(const ComponentID type_id) const
         {
+            ENT_SCOPED_CPU_SAMPLE(Entity_GetComponent, 0);
             if (!HasComponent(type_id)) {
                 return static_cast<IComponent*>(nullptr);
             }
@@ -167,6 +188,8 @@ NXS_NAMESPACE
          */
         void GetAllComponents(Array<IComponent*>& outComponents) const
         {
+            ENT_SCOPED_CPU_SAMPLE(Entity_GetAllComponents, 0);
+            outComponents.clear();
             for (const auto id : m_components)
             {
                 const auto storage = m_registry->storage(id);
@@ -187,6 +210,7 @@ NXS_NAMESPACE
         template<typename Type>
         MAYBE_UNUSED size_t RemoveComponent()
         {
+            ENT_SCOPED_CPU_SAMPLE(Entity_RemoveComponent, 0);
             const auto numRemoved = m_registry->remove<Type>(m_entity);
             if (numRemoved > 0) {
                 const auto [begin, end] = std::ranges::remove(m_components, entt::type_id<Type>().hash());
