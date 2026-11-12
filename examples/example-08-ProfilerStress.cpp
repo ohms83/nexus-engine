@@ -35,23 +35,15 @@ public:
         Application::Update();
 
         rmt_BeginCPUSample(MakeDirty, 0);
-#if 1
-        for (auto node : m_allNodes)
-        {
-            node->SetPosition(glm::vec3(1));
-            node->SetOrientation(glm::quat {1, 0, 0, 0});
-            node->SetScale(glm::vec3(1));
-        };
-#else
+        
+        m_root->SetPosition(glm::vec3(1));
+        m_root->SetOrientation(glm::quat {1, 0, 0, 0});
+        m_root->SetScale(glm::vec3(1));
         m_root->VisitDescendants([](nxs::SceneNode& node) {
             node.SetPosition(glm::vec3(1));
             node.SetOrientation(glm::quat {1, 0, 0, 0});
             node.SetScale(glm::vec3(1));
         });
-        m_root->SetPosition(glm::vec3(1));
-        m_root->SetOrientation(glm::quat {1, 0, 0, 0});
-        m_root->SetScale(glm::vec3(1));
-#endif
         rmt_EndCPUSample();
 
         auto begin = std::chrono::high_resolution_clock::now();
@@ -84,7 +76,6 @@ private:
     void BuildHierarchy(const nxs::Ref<nxs::SceneNode>& root, int level)
     {
         ++m_numNodes;
-        m_allNodes.push_back(root);
 
         if (level >= kDepth)
         {
@@ -102,7 +93,6 @@ private:
         }
     }
 
-    nxs::Array<nxs::Ref<nxs::SceneNode>> m_allNodes;
     nxs::Array<nxs::Ref<nxs::SceneNode>> m_leaveNodes;
     nxs::Ref<nxs::SceneNode> m_root;
     nxs::Ref<nxs::Scene> m_scene;
