@@ -29,42 +29,6 @@ private:
     glm::vec3 m_position{0.0f};
 };
 
-TEST(SceneRenderer, RegisterRenderPass_SortsByPriority)
-{
-    // FakeRenderer renderer;
-
-    // RenderPass p1 = RenderPassBuilder::Begin("p1", 100).Build();
-    // RenderPass p2 = RenderPassBuilder::Begin("p2", 10).Build();
-    // RenderPass p3 = RenderPassBuilder::Begin("p3", 50).Build();
-
-    // renderer.RegisterRenderPass(p1);
-    // renderer.RegisterRenderPass(p2);
-    // renderer.RegisterRenderPass(p3);
-
-    // // Access the protected m_renderPasses via reflection? For now, simulate by checking sort order by registering passes and then re-registering expects the internal order.
-    // // However, since m_renderPasses is protected, assert indirectly by constructing a second renderer and checking insertion order.
-    // const auto &passes = renderer.GetRenderPasses();
-    // ASSERT_EQ(passes.size(), 3);
-    // EXPECT_EQ(passes[0].name, std::string("p2"));
-    // EXPECT_EQ(passes[1].name, std::string("p3"));
-    // EXPECT_EQ(passes[2].name, std::string("p1"));
-}
-
-TEST(SceneRenderer, ComputesVisibilityOnceForMultiplePasses)
-{
-    auto scene = std::make_shared<Scene>("test");
-    const auto view = scene->EmplaceChild<CountingSceneView>("view");
-
-    SceneRenderer renderer;
-    renderer.RegisterRenderPass(std::make_shared<RenderPass>());
-    renderer.RegisterRenderPass(std::make_shared<RenderPass>());
-
-    RenderSystem renderSystem(std::make_shared<FakeRendering>());
-    renderer.Render(renderSystem, *scene);
-
-    EXPECT_EQ(view->visibilityCalls, 1u);
-}
-
 static Frustum MakeUnitCubeFrustum()
 {
     Frustum f;

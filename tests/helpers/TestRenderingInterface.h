@@ -91,6 +91,8 @@ public:
     FakeRendering() {}
     ~FakeRendering() override {}
 
+    void DebugMarker(const std::string& message) override {}
+
     GpuProgram* CreateGpuProgram() const override { return new FakeGpuProgram(); }
     TextureProxy* CreateTexture() const override { return new FakeTexture(); }
     IndexBuffer* CreateIndexBuffer() const override { return new FakeIndexBuffer(); }
