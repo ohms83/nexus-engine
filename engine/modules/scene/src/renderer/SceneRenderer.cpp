@@ -30,9 +30,14 @@ USING_NAMESPACE_NXS;
 
 DEFINE_LOG(SceneRenderer);
 
-RenderCommand SceneRenderer::CreateRenderCommand(Ref<const Mesh> mesh, glm::mat4&& modelMtx, const glm::mat4& mvpMtx)
+inline void CreateRenderCommand(
+    RenderCommand& cmd,
+    const Mesh* mesh,
+    const glm::mat4 &modelMtx,
+    const glm::mat4 &mvpMtx,
+    CommandSortType sortType)
 {
-    rmt_ScopedCPUSample(SceneRenderer_CreateRenderCommand, 0);
+    rmt_ScopedCPUSample(CreateRenderCommand, 0);
     const auto material = mesh->GetMaterial();
     const auto meshSphere = mesh->GetSphere();
     const auto pos = mvpMtx * glm::vec4(meshSphere.center, 1);
@@ -41,7 +46,6 @@ RenderCommand SceneRenderer::CreateRenderCommand(Ref<const Mesh> mesh, glm::mat4
     const uint32_t materialId = 0x7FFFFFFF & material->GetId();
     const float depthN = clipZ; // normalized in -1..1
     const float depthNormalized = (depthN + 1.0f) * 0.5f;
-    RenderCommand cmd;
     cmd.vertexBuffer = mesh->GetVertexBuffer();
     cmd.indexBuffer = mesh->GetIndexBuffer();
     cmd.indexCount = mesh->GetIndexBuffer()->GetNumIndexDraw();
@@ -51,8 +55,10 @@ RenderCommand SceneRenderer::CreateRenderCommand(Ref<const Mesh> mesh, glm::mat4
     cmd.bounds = mesh->GetSphere();
     cmd.layerMask = 0xFFFFFFFFu;
     cmd.material = material;
-    cmd.SetSortKey(translucent, materialId, depthNormalized);
-    return cmd;
+    cmd.SetSortKey(
+        translucent,
+        materialId,
+        sortType == CommandSortType::FrontToBack ? depthNormalized : 1.0f - depthNormalized);
 }
 
 bool SceneRenderer::RenderInstancedMesh(RenderSystem& renderSystem, const RenderCommand& command, Ref<GpuProgram> gpuProgram)
@@ -203,34 +209,40 @@ void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
     commands.reserve(1024);
 
     Dict<const ISceneView*, Array<SceneNode*>> visibilitySets;
-    {
-        rmt_ScopedCPUSample(SceneRenderer_BuildVisibilityCache, 0)
-        visibilitySets = scene.GetVisibilitySets();
-    }
 
     for (auto pass : m_renderPasses)
     {
         if (!pass->enabled) continue;
+        rmt_BeginCPUSampleDynamic(pass->name.c_str(), 0);
+        rmt_BeginOpenGLSampleDynamic(pass->name.c_str());
 
-        for (const auto& [view, visibleNodes] : visibilitySets)
+        pass->Begin(renderSystem);
+        Ref<GpuProgram> globalShader = pass->pipelineState.globalShader;
+
+        const auto sceneViews = pass->PopulateSceneView(scene);
+        for (const auto view : sceneViews)
         {
-            if (!view || visibleNodes.empty() || !pass->FilterSceneView(view)) continue;
-
             commands.clear();
-
-            rmt_BeginCPUSampleDynamic(pass->name.c_str(), 0);
-            rmt_BeginOpenGLSampleDynamic(pass->name.c_str());
 
             rmt_BeginCPUSample(SceneRenderer_BuildCommandsFromVisibleNodes, 0)
             const SceneNode* viewNode = view->GetViewNode();
-            const glm::vec3& cameraPos = viewNode ? viewNode->GetPosition() : glm::vec3(0.0f);
+            const glm::vec3 cameraPos = viewNode ? viewNode->GetGlobalPosition() : glm::vec3(0.0f);
             const glm::mat4& viewMtx = view->GetViewMatrix();
             const glm::mat4& projectionMtx = view->GetProjectionMatrix();
             const glm::mat4& viewProjMtx = view->GetViewProjectionMatrix();
+
+            const auto [itr, isNew] = visibilitySets.try_emplace(view, Array<SceneNode*>());
+            auto& visibleNodes = itr->second;
+
+            if (isNew)
+            {
+                rmt_ScopedCPUSample(SceneRenderer_BuildVisibilityCache, 0)
+                visibleNodes = view->GetVisibleNodes(scene);
+            }
+
             for (const auto node : visibleNodes)
             {
                 const auto meshComp = node->GetComponent<MeshComponent>();
-
                 const auto modelMtx = node->GetGlobalTransform();
                 const auto mvpMtx = viewProjMtx * modelMtx;
 
@@ -238,7 +250,8 @@ void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
                 {
                     if (!pass->IsPassFiltered(mesh)) continue;
 
-                    commands.push_back(pass->CreateRenderCommand(mesh, modelMtx, mvpMtx));
+                    CreateRenderCommand(commands.emplace_back(RenderCommand {}),
+                        mesh.get(), modelMtx, mvpMtx, pass->commandSortType);
                 }
             }
             rmt_EndCPUSample();
@@ -249,9 +262,7 @@ void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
                     return a.sortKey < b.sortKey;
                 });
             }
-            
-            pass->Begin(renderSystem);
-            Ref<GpuProgram> globalShader = pass->pipelineState.globalShader;
+
             {
                 rmt_ScopedCPUSample(SceneRenderer_RenderMeshes, 0)
 
@@ -303,12 +314,12 @@ void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
                     }
                 }
             }
-            pass->End(renderSystem);
-
-            // End per-pass GPU and CPU samples
-            rmt_EndOpenGLSample();
-            rmt_EndCPUSample();
         }
+        // End per-pass GPU and CPU samples
+        pass->End(renderSystem);
+
+        rmt_EndOpenGLSample();
+        rmt_EndCPUSample();
     }
 }
 

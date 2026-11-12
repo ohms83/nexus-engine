@@ -57,7 +57,6 @@ NXS_NAMESPACE
         static bool IsSphereInside(const Frustum& viewFustrum, const Sphere& sphere, glm::mat4 modelMtx, const glm::vec3& scale);
 
     protected:
-        static RenderCommand CreateRenderCommand(Ref<const Mesh> mesh, glm::mat4&& modelMtx, const glm::mat4& mvpMtx);
         static bool RenderInstancedMesh(RenderSystem& renderSystem, const RenderCommand& command, Ref<GpuProgram> gpuProgram);
         static void SetAmbientLightParams(Ref<GpuProgram> gpuProgram, const entt::registry& registry);
         static void SetDirectLightParams(Ref<GpuProgram> gpuProgram, const SceneNode& scene);

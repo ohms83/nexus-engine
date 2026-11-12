@@ -247,84 +247,18 @@ void RenderPass::SetFilterType(std::string type)
     }
 }
 
-RenderCommand RenderPass::CreateRenderCommand(Ref<const Mesh> mesh, const glm::mat4 &modelMtx, const glm::mat4 &mvpMtx) const
+Array<const ISceneView*> RenderPass::PopulateSceneView(const SceneNode &scene) const
 {
-    rmt_ScopedCPUSample(RenderPass_CreateRenderCommand, 0);
-    const auto material = mesh->GetMaterial();
-    const auto meshSphere = mesh->GetSphere();
-    const auto pos = mvpMtx * glm::vec4(meshSphere.center, 1);
-    const auto clipZ = pos.z / pos.w;
-    const bool translucent = (material->blendMode != BlendMode::None);
-    const uint32_t materialId = 0x7FFFFFFF & material->GetId();
-    const float depthN = clipZ; // normalized in -1..1
-    const float depthNormalized = (depthN + 1.0f) * 0.5f;
-    RenderCommand cmd;
-    cmd.vertexBuffer = mesh->GetVertexBuffer();
-    cmd.indexBuffer = mesh->GetIndexBuffer();
-    cmd.indexCount = mesh->GetIndexBuffer()->GetNumIndexDraw();
-    cmd.indexOffset = 0;
-    cmd.vertexOffset = 0;
-    cmd.modelMatrix = modelMtx;
-    cmd.bounds = mesh->GetSphere();
-    cmd.layerMask = 0xFFFFFFFFu;
-    cmd.material = material;
-    cmd.SetSortKey(
-        translucent,
-        materialId,
-        commandSortType == CommandSortType::FrontToBack ? depthNormalized : 1.0f - depthNormalized);
-    return cmd;
-}
-
-bool RenderPass::FilterSceneView(const ISceneView* view) const
-{
-    const SceneNode* sceneNode = D_CAST<const SceneNode*>(view);
-    if (!sceneNode || !sceneNode->IsActive()) return false;
-
-    const auto camera = sceneNode->GetComponent<CameraComponent>();
-    return camera != nullptr;
-}
-
-void RenderPass::PopulateSceneView(const SceneNode& scene, Array<Ref<ISceneView>>& outViews) const
-{
-#if 0
     rmt_ScopedCPUSample(RenderPass_PopulateSceneView, 0);
-    Array<Ref<SceneNode>> nodes;
-    scene.GetAllDescendants(nodes, true);
-    for (const auto& node : nodes)
+    Array<const ISceneView*> outViews;
+    const auto& registry = *scene.GetRegistry();
+    const auto& view = registry.view<const CameraComponent, const SceneNodeComponent>();
+    for (const auto& [entity, cameraComp, nodeComp] : view.each())
     {
-        if (!node->IsActive()) continue;
-        const auto camera = node->GetComponent<CameraComponent>();
-        if (!camera) continue;
-        outViews.push_back(std::make_shared<CameraView>(
-            *camera,
-            node->GetGlobalPosition(),
-            node->GetGlobalOrientation()));
+        if (!nodeComp.active) continue;
+
+        const ISceneView* cameraView = D_CAST<const ISceneView*>(SceneNode::FindNode(nodeComp.id));
+        if (cameraView) outViews.push_back(cameraView);
     }
-#endif
-}
-
-void RenderPass::PrepareRenderCommands(const SceneNode &scene, const ISceneView &view, Array<RenderCommand>& outCommands) const
-{
-#if 0
-    rmt_ScopedCPUSample(RenderPass_PrepareRenderCommands, 0);
-    const glm::mat4& viewProjMtx = view.GetViewProjectionMatrix();
-
-    Array<Ref<SceneNode>> nodes;
-    scene.GetAllDescendants(nodes, true);
-    for (const auto& node : nodes)
-    {
-        if (!node->IsActive()) continue;
-        const auto meshComp = node->GetComponent<MeshComponent>();
-        if (!meshComp) continue;
-
-        const auto modelMtx = node->GetGlobalTransform();
-        const auto mvpMtx = viewProjMtx * modelMtx;
-
-        if (auto mesh = meshComp->GetMesh(); mesh != nullptr)
-        {
-            if (!view.IsObjectVisible(mesh->GetSphere(), modelMtx, node->GetGlobalScale())) continue;
-            outCommands.push_back(CreateRenderCommand(mesh, modelMtx, mvpMtx));
-        }
-    }
-#endif
+    return outViews;
 }

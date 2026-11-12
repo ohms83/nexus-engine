@@ -11,7 +11,8 @@ NXS_NAMESPACE
 
         bool IsPassFiltered(Ref<const Mesh> mesh) const override
         {
-            return mesh->GetMaterial() && mesh->GetMaterial()->blendMode == BlendMode::None;
+            auto material = mesh->GetMaterial();
+            return material && material->blendMode == BlendMode::None;
         }
     };
 }
