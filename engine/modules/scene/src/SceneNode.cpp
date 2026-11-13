@@ -291,7 +291,7 @@ void SceneNode::SetPosition(const glm::vec3& position)
     if (!positionComponent) return;
     positionComponent->value = position;
     m_localTransformExplicit = false;
-    UpdateGlobalTransform();
+    m_transformDirty = true;
 }
 
 void SceneNode::SetOrientation(const glm::quat& orientation)
@@ -301,7 +301,7 @@ void SceneNode::SetOrientation(const glm::quat& orientation)
     if (!orientationComponent) return;
     orientationComponent->quat = orientation;
     m_localTransformExplicit = false;
-    UpdateGlobalTransform();
+    m_transformDirty = true;
 }
 
 void SceneNode::SetScale(const glm::vec3& scale)
@@ -311,7 +311,7 @@ void SceneNode::SetScale(const glm::vec3& scale)
     if (!scaleComponent) return;
     scaleComponent->value = scale;
     m_localTransformExplicit = false;
-    UpdateGlobalTransform();
+    m_transformDirty = true;
 }
 
 void SceneNode::SetLocalTransform(const glm::mat4& transform)
@@ -319,7 +319,7 @@ void SceneNode::SetLocalTransform(const glm::mat4& transform)
     rmt_ScopedCPUSample(SceneNode_LocalTransform, 0);
     m_transform = transform;
     m_localTransformExplicit = true;
-    UpdateGlobalTransform();
+    m_transformDirty = true;
 }
 
 const glm::vec3& SceneNode::GetPosition() const
@@ -360,16 +360,6 @@ void SceneNode::UpdateTransform() const
         m_transform = translationMatrix * rotationMatrix * scaleMatrix;
     }
 
-    const auto parent = m_parent.lock();
-    if (parent)
-    {
-        m_globalTransform = parent->GetGlobalTransform() * m_transform;
-    }
-    else
-    {
-        m_globalTransform = m_transform;
-    }
-
     m_transformDirty = false;
 }
 
@@ -388,6 +378,8 @@ const glm::mat4& SceneNode::GetGlobalTransform() const
 {
     rmt_ScopedCPUSample(SceneNode_GetGlobalTransform, 0);
     UpdateTransform();
+    auto parent = m_parent.lock();
+    m_globalTransform = (parent ? parent->GetGlobalTransform() * m_transform : m_transform);
     return m_globalTransform;
 }
 
@@ -425,7 +417,7 @@ void SceneNode::LookAt(const glm::vec3& center, const glm::vec3& up)
     {
         orientationComponent->LookAt(GetPosition(), center, up);
         m_localTransformExplicit = false;
-        UpdateGlobalTransform();
+        m_transformDirty = true;
     }
 }
 

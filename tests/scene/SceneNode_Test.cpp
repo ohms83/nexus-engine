@@ -169,6 +169,89 @@ TEST_F(SceneNodeTest, LocalAndGlobalTransformsComposeFromRootToLeaf)
     EXPECT_NEAR(globalScale.z, 2.0f, 0.0001f);
 }
 
+TEST_F(SceneNodeTest, GlobalTransformsIncludeAllAncestors)
+{
+    const glm::quat parentOrientation(glm::radians(glm::vec3(0.0f, 90.0f, 0.0f)));
+    const glm::quat childOrientation(glm::radians(glm::vec3(0.0f, 45.0f, 0.0f)));
+    const glm::quat grandchildOrientation(glm::radians(glm::vec3(0.0f, -30.0f, 0.0f)));
+
+    auto parent = scene->EmplaceChild<SceneNode3D>("Parent");
+    parent->SetPosition({5.0f, 0.0f, 0.0f});
+    parent->SetOrientation(parentOrientation);
+    parent->SetScale({2.0f, 2.0f, 2.0f});
+
+    auto child = parent->EmplaceChild<SceneNode3D>("Child");
+    child->SetPosition({1.0f, 0.0f, 0.0f});
+    child->SetOrientation(childOrientation);
+    child->SetScale({3.0f, 3.0f, 3.0f});
+
+    auto grandchild = child->EmplaceChild<SceneNode3D>("Grandchild");
+    grandchild->SetPosition({0.0f, 0.0f, 1.0f});
+    grandchild->SetOrientation(grandchildOrientation);
+    grandchild->SetScale({0.5f, 0.5f, 0.5f});
+
+    const auto expectedGlobalTransform =
+        parent->GetLocalTransform() * child->GetLocalTransform() * grandchild->GetLocalTransform();
+    const auto& globalTransform = grandchild->GetGlobalTransform();
+    for (glm::length_t column = 0; column < 4; ++column)
+    {
+        for (glm::length_t row = 0; row < 4; ++row)
+        {
+            EXPECT_NEAR(globalTransform[column][row], expectedGlobalTransform[column][row], 0.0001f);
+        }
+    }
+
+    const auto expectedPosition = glm::vec3(expectedGlobalTransform * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+    const auto globalPosition = grandchild->GetGlobalPosition();
+    EXPECT_NEAR(globalPosition.x, expectedPosition.x, 0.0001f);
+    EXPECT_NEAR(globalPosition.y, expectedPosition.y, 0.0001f);
+    EXPECT_NEAR(globalPosition.z, expectedPosition.z, 0.0001f);
+
+    const auto expectedScale = glm::vec3(
+        glm::length(glm::vec3(expectedGlobalTransform[0])),
+        glm::length(glm::vec3(expectedGlobalTransform[1])),
+        glm::length(glm::vec3(expectedGlobalTransform[2])));
+    const auto globalScale = grandchild->GetGlobalScale();
+    EXPECT_NEAR(globalScale.x, expectedScale.x, 0.0001f);
+    EXPECT_NEAR(globalScale.y, expectedScale.y, 0.0001f);
+    EXPECT_NEAR(globalScale.z, expectedScale.z, 0.0001f);
+
+    const auto expectedOrientation = parentOrientation * childOrientation * grandchildOrientation;
+    const auto globalOrientation = grandchild->GetGlobalOrientation();
+    EXPECT_NEAR(std::abs(glm::dot(globalOrientation, expectedOrientation)), 1.0f, 0.0001f);
+}
+
+TEST_F(SceneNodeTest, GlobalTransformReflectsAncestorChangesAfterDescendantQuery)
+{
+    auto parent = scene->EmplaceChild<SceneNode3D>("Parent");
+    parent->SetPosition({2.0f, 0.0f, 0.0f});
+    auto child = parent->EmplaceChild<SceneNode3D>("Child");
+    child->SetPosition({1.0f, 0.0f, 0.0f});
+    auto grandchild = child->EmplaceChild<SceneNode3D>("Grandchild");
+    grandchild->SetPosition({1.0f, 0.0f, 0.0f});
+
+    const auto initialPosition = grandchild->GetGlobalPosition();
+    EXPECT_NEAR(initialPosition.x, 4.0f, 0.0001f);
+
+    parent->SetPosition({10.0f, 0.0f, 0.0f});
+
+    const auto expectedGlobalTransform =
+        parent->GetLocalTransform() * child->GetLocalTransform() * grandchild->GetLocalTransform();
+    const auto& globalTransform = grandchild->GetGlobalTransform();
+    for (glm::length_t column = 0; column < 4; ++column)
+    {
+        for (glm::length_t row = 0; row < 4; ++row)
+        {
+            EXPECT_NEAR(globalTransform[column][row], expectedGlobalTransform[column][row], 0.0001f);
+        }
+    }
+
+    const auto updatedPosition = grandchild->GetGlobalPosition();
+    EXPECT_NEAR(updatedPosition.x, 12.0f, 0.0001f);
+    EXPECT_NEAR(updatedPosition.y, 0.0f, 0.0001f);
+    EXPECT_NEAR(updatedPosition.z, 0.0f, 0.0001f);
+}
+
 TEST_F(SceneNodeTest, LocalTransformUsesOnlyComponentsPresentOnNodeType)
 {
     auto plainNode = scene->EmplaceChild<SceneNode>("Plain Node");
