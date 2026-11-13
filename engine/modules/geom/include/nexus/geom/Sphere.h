@@ -11,11 +11,6 @@ NXS_NAMESPACE
             : center(pos)
             , radius(r)
         {}
-
-        bool Intersect(const Sphere& rhs) const
-        {
-            return glm::distance(center,  rhs.center) <= radius + rhs.radius;
-        }
         
         float RadiusSquare() const
         {

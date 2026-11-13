@@ -97,6 +97,7 @@ void NexusEditor::InitModel()
             auto modelNode = scene->EmplaceChild<nxs::ModelNode>(filename.string());
             NXS_ASSERT(PTR_CAST<nxs::SceneNode>(modelNode));
             modelNode->SetModel(model);
+            scene->RefreshPartition();
             return false;
         }
         else if (status == nxs::IResourceLoader::LoadResult::Status::Failed)
@@ -117,6 +118,7 @@ void NexusEditor::InitModel()
     auto modelNode = scene->EmplaceChild<nxs::ModelNode>(filename.string());
     NXS_ASSERT(PTR_CAST<nxs::SceneNode>(modelNode));
     modelNode->SetModel(model);
+    scene->RefreshPartition();
 #endif
 }
 
@@ -132,6 +134,12 @@ bool NexusEditor::Init_Internal()
     auto sceneManager = engine.GetSceneManager();
     auto scene = sceneManager->EmplaceAndChange<nxs::Scene>("Editor Scene");
     scene->SetRenderer(std::make_unique<nxs::ForwardSceneRenderer>(GetRenderSystem()));
+    scene->SetPartition(std::make_shared<nxs::Quadtree>(
+        2, 20,
+        nxs::Box {
+            glm::vec3(0), glm::vec3(1000.f)
+        }
+    ));
 
     InitModel();
     InitLight(*scene);

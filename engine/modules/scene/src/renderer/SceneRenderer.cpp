@@ -243,6 +243,8 @@ void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
             for (const auto node : visibleNodes)
             {
                 const auto meshComp = node->GetComponent<MeshComponent>();
+                if (!meshComp) continue;
+
                 const auto modelMtx = node->GetGlobalTransform();
                 const auto mvpMtx = viewProjMtx * modelMtx;
 

@@ -8,6 +8,7 @@
 #include "nexus/ecs/Ecs.h"
 #include "nexus/ecs/Entity.h"
 #include "nexus/graphics/RenderingInterface.h"
+#include "nexus/geom/Box.h"
 
 #include "Script.h"
 #include "component/SceneNodeComponent.h"
@@ -95,7 +96,7 @@ NXS_NAMESPACE
             return PTR_CAST<T>(node);
         }
 
-        void AddChild(Ref<SceneNode> child);
+        virtual void AddChild(Ref<SceneNode> child);
         void AddChildren(const ChildList& children);
         /**
          * @brief Remove a child node from this node.
@@ -104,7 +105,7 @@ NXS_NAMESPACE
          * @param child A reference to the child node to be removed.
          * @param reparentDescendants Whether to reparent the descendants of the removed child to this node. Default is true.
          */
-        void RemoveChild(Ref<SceneNode> child, bool reparentDescendants = true);
+        virtual void RemoveChild(Ref<SceneNode> child, bool reparentDescendants = true);
         void RemoveAllChildren(bool reparentDescendants = true);
         /**
          * @brief Get all direct child nodes.
@@ -150,10 +151,10 @@ NXS_NAMESPACE
          */
         NODISCARD Ref<SceneNode> FindNodeWithName(const std::string& name);
 
-        bool HasChild() const { return m_children.size() > 0; }
-        size_t GetNumChildren() const { return m_children.size(); }
+        NODISCARD bool HasChild() const { return m_children.size() > 0; }
+        NODISCARD size_t GetNumChildren() const { return m_children.size(); }
 
-        Ref<SceneNode> GetParent() const { return m_parent.lock(); }
+        NODISCARD Ref<SceneNode> GetParent() const { return m_parent.lock(); }
         void RemoveFromParent(bool reparentDescendants = true);
 
         void SetPosition(const glm::vec3& position);
@@ -165,7 +166,7 @@ NXS_NAMESPACE
 
         void SetLocalTransform(const glm::mat4& transform);
         //! Returns this node's transform relative to its parent.
-        const glm::mat4& GetLocalTransform() const;
+        NODISCARD const glm::mat4& GetLocalTransform() const;
         void UpdateTransform() const;
         void UpdateGlobalTransform();
         //! Returns this node's transform composed with all its ancestors.
@@ -180,10 +181,12 @@ NXS_NAMESPACE
         NODISCARD glm::vec3 Up() const;
         NODISCARD glm::vec3 Forward() const;
 
+        NODISCARD virtual Box GetBound() const;
+
         void AddScript(Ref<Script> script);
         void RemoveScript(Ref<Script> script);
 
-        uint32_t AddSimulation(ECS::SimulationSystem system);
+        MAYBE_UNUSED uint32_t AddSimulation(ECS::SimulationSystem system);
         void RemoveSimulation(uint32_t id);
 
         void Update(float dt);

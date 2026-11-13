@@ -16,6 +16,8 @@ NXS_NAMESPACE
 
         IMPLEMENT_NODE(ModelNode);
 
+        NODISCARD Box GetBound() const override;
+
         bool IsModelReady() const { return GetModel() != nullptr; }
         void SetModel(Ref<Model> model);
 

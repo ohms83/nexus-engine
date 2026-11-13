@@ -63,6 +63,14 @@ Array<SceneNode*> Camera::GetVisibleNodes(const Scene& scene) const
     Array<SceneNode*> visibleNodes;
     Frustum viewFrustum = GetViewFrustum(); // Ensure the view frustum is up to date
 
+    auto partition = scene.GetPartition();
+    if (partition)
+    {
+        rmt_ScopedCPUSample(Camera_QueryPartition, 0)
+        partition->Query(viewFrustum, visibleNodes);
+        return visibleNodes;
+    }
+
     rmt_ScopedCPUSample(Camera_CullSceneNodes, 0)
     const auto& registry = scene.GetRegistry();
     for (const auto view = registry->view<SceneNodeComponent, MeshComponent>(); const auto& [entity, node, meshComp] : view.each())

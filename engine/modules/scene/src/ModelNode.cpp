@@ -15,6 +15,11 @@ ModelNode::ModelNode(Ref<entt::registry> registry, std::string name)
     AddComponent<ModelComponent>();
 }
 
+Box ModelNode::GetBound() const
+{
+    return Box {};
+}
+
 void ModelNode::SetModel(Ref<Model> model)
 {
     ModelComponent& modelComp = *GetComponent<ModelComponent>();

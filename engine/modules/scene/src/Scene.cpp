@@ -26,6 +26,32 @@ Scene::~Scene()
     m_simulations.clear();
 }
 
+void Scene::AddChild(Ref<SceneNode> child)
+{
+    Base::AddChild(child);
+
+    if (m_partition) {
+        m_partition->AddNode(child, child->GetBound());
+        child->VisitDescendants([&](SceneNode& descendant) {
+            m_partition->AddNode(descendant.GetSelf(), descendant.GetBound());
+        });
+    }
+}
+
+void Scene::RemoveChild(Ref<SceneNode> child, bool reparentDescendants)
+{
+    Base::RemoveChild(child, reparentDescendants);
+
+    if (m_partition && child) {
+        m_partition->RemoveNode(child->GetId());
+        if (!reparentDescendants) {
+            child->VisitDescendants([&](SceneNode& descendant) {
+                m_partition->RemoveNode(descendant.GetId());
+            });
+        }
+    }
+}
+
 void Scene::Render(RenderSystem &renderSystem) const
 {
     rmt_ScopedCPUSample(Scene_Render, 0)
@@ -35,6 +61,30 @@ void Scene::Render(RenderSystem &renderSystem) const
 void Scene::SetRenderer(Ref<SceneRenderer> renderer)
 {
     m_renderer = renderer;
+}
+
+void Scene::SetPartition(Ref<IScenePartition> partition)
+{
+    if (m_partition) {
+        m_partition->RemoveAllNodes();
+    }
+
+    m_partition = partition;
+    if (m_partition) {
+        VisitDescendants([&](SceneNode& descendant) {
+            m_partition->AddNode(descendant.GetSelf(), descendant.GetBound());
+        });
+    }
+}
+
+void Scene::RefreshPartition()
+{
+    if (!m_partition) return;
+
+    m_partition->RemoveAllNodes();
+    VisitDescendants([&](SceneNode& descendant) {
+        m_partition->AddNode(descendant.GetSelf(), descendant.GetBound());
+    });
 }
 
 Color3F& Scene::Ambient()

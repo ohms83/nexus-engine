@@ -5,6 +5,7 @@
 #include "nexus/ecs/Component.h"
 #include "nexus/core/Hasher.h"
 #include "nexus/scene/component/TransformComponent.h"
+#include "nexus/scene/component/MeshComponent.h"
 
 #include <utility>
 #include <chrono>
@@ -437,6 +438,30 @@ glm::vec3 SceneNode::Forward() const
 {
     static const glm::vec3 forward = {0, 0, -1};
     return GetOrientation() * forward;
+}
+
+Box SceneNode::GetBound() const
+{
+    // TODO: Use another component for querying the bounding box
+    // instead of MeshComponent
+    static const Box tmpBound {};
+    auto meshComp = GetComponent<MeshComponent>();
+    if (!meshComp) {
+        return tmpBound;
+    }
+
+    auto mesh = meshComp->GetMesh();
+    if (!mesh) {
+        return tmpBound;
+    }
+
+    const auto& sphere = mesh->GetSphere();
+    const auto modelMtx = GetGlobalTransform();
+    const glm::vec3 worldCenter = glm::vec3(modelMtx * glm::vec4(sphere.center, 1.0f));
+    const auto globalScale = GetGlobalScale();
+    const float maxScale = std::max({ glm::abs(globalScale.x), glm::abs(globalScale.y), glm::abs(globalScale.z) });
+    const float scaledRadius = sphere.radius * maxScale;
+    return Box { worldCenter, glm::vec3(scaledRadius) };
 }
 
 void SceneNode::AddChildren(const ChildList& children)
