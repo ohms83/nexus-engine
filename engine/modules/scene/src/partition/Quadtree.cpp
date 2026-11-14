@@ -251,9 +251,11 @@ void Quadtree::QueryInternal(const Frustum& frustum, Array<SceneNode*>& results)
 
         for (const auto& item : node.nodeList)
         {
+            // Cull on the bound first; locking the weak_ptr is an atomic op.
+            if (!Collider::IsIntersect(item.bound, frustum)) continue;
             if (auto itemNode = item.node.lock())
             {
-                if (itemNode->IsActive() && Collider::IsIntersect(item.bound, frustum))
+                if (itemNode->IsActive())
                 {
                     results.push_back(itemNode.get());
                 }
@@ -281,8 +283,6 @@ void Quadtree::QueryInternal(const Frustum& frustum, Array<SceneNode*>& results)
 void Quadtree::Query(const Frustum& frustum, Array<SceneNode*>& results) const
 {
     rmt_ScopedCPUSample(Quadtree_Query, 0)
-    if (!Collider::IsIntersect(m_bound, frustum)) return;
-
     const size_t startIndex = results.size();
     QueryInternal(frustum, results);
 

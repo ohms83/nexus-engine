@@ -1,6 +1,5 @@
 #include "nexus/geom/Collider.h"
 
-#include "Remotery.h"
 
 NXS_NAMESPACE
 {
@@ -8,7 +7,6 @@ NXS_NAMESPACE
     {
         bool IsInside(const glm::vec3& point, const Box& box)
         {
-            rmt_ScopedCPUSample(Collider_IsInside_PointBox, 0);
             if (glm::any(glm::lessThan(box.extent, glm::vec3(0.0f)))) return false;
             return glm::all(glm::greaterThanEqual(point, box.GetMin()))
                 && glm::all(glm::lessThanEqual(point, box.GetMax()));
@@ -16,7 +14,6 @@ NXS_NAMESPACE
 
         bool IsInside(const glm::vec3& point, const Sphere& sphere)
         {
-            rmt_ScopedCPUSample(Collider_IsInside_PointSphere, 0);
             if (sphere.radius < 0.0f) return false;
             const auto offset = point - sphere.center;
             return glm::dot(offset, offset) <= sphere.RadiusSquare();
@@ -24,7 +21,6 @@ NXS_NAMESPACE
 
         bool IsInside(const glm::vec3& point, const Frustum& frustum)
         {
-            rmt_ScopedCPUSample(Collider_IsInside_PointFrustum, 0);
             for (const auto& plane : frustum.planes)
             {
                 if (glm::dot(plane.normal, point) + plane.distance < 0) return false;
@@ -35,7 +31,6 @@ NXS_NAMESPACE
 
         bool IsIntersect(const Box& a, const Box& b)
         {
-            rmt_ScopedCPUSample(Collider_IsIntersect_BoxBox, 0);
             if (glm::any(glm::lessThanEqual(a.extent, glm::vec3(0.0f)))
                 || glm::any(glm::lessThanEqual(b.extent, glm::vec3(0.0f))))
             {
@@ -49,7 +44,6 @@ NXS_NAMESPACE
 
         bool IsIntersect(const Box& box, const Sphere& sphere)
         {
-            rmt_ScopedCPUSample(Collider_IsIntersect_BoxSphere, 0);
             if (sphere.radius < 0.0f || glm::any(glm::lessThan(box.extent, glm::vec3(0.0f))))
             {
                 return false;
@@ -62,7 +56,6 @@ NXS_NAMESPACE
 
         bool IsIntersect(const Box& box, const Frustum& frustum)
         {
-            rmt_ScopedCPUSample(Collider_IsIntersect_BoxFrustum, 0);
             if (glm::any(glm::lessThan(box.extent, glm::vec3(0.0f)))) return false;
 
             const auto min = box.GetMin();
@@ -85,7 +78,6 @@ NXS_NAMESPACE
 
         bool IsIntersect(const Sphere& a, const Sphere& b)
         {
-            rmt_ScopedCPUSample(Collider_IsIntersect_SphereSphere, 0);
             if (a.radius < 0.0f || b.radius < 0.0f) return false;
             const auto combinedRadius = a.radius + b.radius;
             const auto centerOffset = a.center - b.center;
@@ -94,7 +86,6 @@ NXS_NAMESPACE
 
         bool IsIntersect(const Sphere& sphere, const Frustum& frustum)
         {
-            rmt_ScopedCPUSample(Collider_IsIntersect_SphereFrustum, 0);
             if (sphere.radius <= 0.0f) return false;
 
             for (const auto& plane : frustum.planes)
