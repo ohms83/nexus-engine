@@ -32,7 +32,7 @@ void Quadtree::AddNode(Ref<SceneNode> node, const Box& bound)
     }
 
     const auto id = node->GetId();
-    const auto it = std::ranges::find_if(m_nodeList, [id](const NodeBound& n) {
+    const auto it = std::ranges::find_if(m_nodeList, [id](const PartitionEntry& n) {
         return n.Id() == id;
     });
     if (it != m_nodeList.end()) {
@@ -42,7 +42,7 @@ void Quadtree::AddNode(Ref<SceneNode> node, const Box& bound)
 
     if (m_depth >= m_maxDepth || m_nodeList.size() < m_partitionSize)
     {
-        m_nodeList.emplace_back(NodeBound {
+        m_nodeList.emplace_back(PartitionEntry {
             node,
             bound
         });
@@ -50,7 +50,7 @@ void Quadtree::AddNode(Ref<SceneNode> node, const Box& bound)
     }
 
     // Leaf capacity reached and depth < maxDepth: add node and subdivide
-    m_nodeList.emplace_back(NodeBound {
+    m_nodeList.emplace_back(PartitionEntry {
         node,
         bound
     });
@@ -122,7 +122,7 @@ void Quadtree::UpdateNode(Identifier id, const Box& bound)
 
 void Quadtree::RemoveNode(Identifier id)
 {
-    std::erase_if(m_nodeList, [id](const NodeBound& node) {
+    std::erase_if(m_nodeList, [id](const PartitionEntry& node) {
         return node.Id() == id;
     });
 

@@ -19,11 +19,11 @@ NXS_NAMESPACE
         void Query(const Frustum& frustum, Array<SceneNode*>& results) const override;
         bool IsOverlap(const Box& bound) const;
 
-        NODISCARD uint32_t GetDepth() const { return m_depth; }
-        NODISCARD uint32_t GetMaxDepth() const { return m_maxDepth; }
-        NODISCARD uint32_t GetPartitionSize() const { return m_partitionSize; }
-        NODISCARD const Box& GetBound() const { return m_bound; }
-        NODISCARD size_t GetNodeCount() const { return m_nodeList.size(); }
+        NODISCARD uint32_t GetDepth() const override { return m_depth; }
+        NODISCARD uint32_t GetMaxDepth() const override { return m_maxDepth; }
+        NODISCARD uint32_t GetPartitionSize() const override { return m_partitionSize; }
+        NODISCARD const Box& GetBound() const override { return m_bound; }
+        NODISCARD size_t GetNodeCount() const override { return m_nodeList.size(); }
         NODISCARD const Array<Ref<Quadtree>>& GetQuadrants() const { return m_quadrants; }
 
     private:
@@ -34,6 +34,15 @@ NXS_NAMESPACE
             MinusXMinusZ,
             PlusXMinusZ,
             Num
+        };
+
+        struct TreeNode
+        {
+            bool create = false;
+            int32_t depth = -1;
+            //! World partition's boundary.
+            Box bound;
+            Array<PartitionEntry> nodeList;
         };
 
         void Subdivide();
@@ -52,7 +61,7 @@ NXS_NAMESPACE
 
         static constexpr int NUM_QUADRANT = INT_CAST(Quadtree::Quadrant::Num);
 
-        Array<NodeBound> m_nodeList;
+        Array<PartitionEntry> m_nodeList;
         Array<Ref<Quadtree>> m_quadrants;
     };
 }
