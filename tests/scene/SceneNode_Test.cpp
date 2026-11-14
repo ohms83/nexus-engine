@@ -169,6 +169,44 @@ TEST_F(SceneNodeTest, LocalAndGlobalTransformsComposeFromRootToLeaf)
     EXPECT_NEAR(globalScale.z, 2.0f, 0.0001f);
 }
 
+TEST_F(SceneNodeTest, LocalTransformEnforcesAffineForm)
+{
+    auto node = scene->EmplaceChild<SceneNode>("Affine Node");
+    auto transform = glm::mat4(1.0f);
+    transform[0][3] = 2.0f;
+    transform[1][3] = -3.0f;
+    transform[2][3] = 4.0f;
+    transform[3][3] = 5.0f;
+    node->SetLocalTransform(transform);
+
+    const auto affineTransform = node->GetLocalTransform();
+    EXPECT_EQ(affineTransform[0][3], 0.0f);
+    EXPECT_EQ(affineTransform[1][3], 0.0f);
+    EXPECT_EQ(affineTransform[2][3], 0.0f);
+    EXPECT_EQ(affineTransform[3][3], 1.0f);
+}
+
+TEST_F(SceneNodeTest, CameraViewMatrixInvertsWorldPositionAndOrientation)
+{
+    auto camera = scene->EmplaceChild<Camera>("Camera");
+    camera->SetPosition({3.0f, -2.0f, 5.0f});
+    camera->SetOrientation(glm::quat(glm::radians(glm::vec3(15.0f, 40.0f, -10.0f))));
+
+    const auto worldPosition = camera->GetGlobalPosition();
+    const auto worldOrientation = camera->GetGlobalOrientation();
+    const auto viewMatrix = camera->GetViewMatrix();
+    const auto cameraOrigin = viewMatrix * glm::vec4(worldPosition, 1.0f);
+    const auto pointInFront = viewMatrix
+        * glm::vec4(worldPosition + worldOrientation * glm::vec3(0.0f, 0.0f, -1.0f), 1.0f);
+
+    EXPECT_NEAR(cameraOrigin.x, 0.0f, 0.0001f);
+    EXPECT_NEAR(cameraOrigin.y, 0.0f, 0.0001f);
+    EXPECT_NEAR(cameraOrigin.z, 0.0f, 0.0001f);
+    EXPECT_NEAR(pointInFront.x, 0.0f, 0.0001f);
+    EXPECT_NEAR(pointInFront.y, 0.0f, 0.0001f);
+    EXPECT_NEAR(pointInFront.z, -1.0f, 0.0001f);
+}
+
 TEST_F(SceneNodeTest, GlobalTransformsIncludeAllAncestors)
 {
     const glm::quat parentOrientation(glm::radians(glm::vec3(0.0f, 90.0f, 0.0f)));

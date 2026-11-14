@@ -44,11 +44,11 @@ void Camera::SetOrthographic(const float width, const float height, const float 
 
 glm::mat4 Camera::GetViewMatrix() const
 {
-    const auto worldOrientation = GetGlobalOrientation();
-    const auto worldPosition = GetGlobalPosition();
-    auto viewMatrix = glm::mat4(worldOrientation);
-    viewMatrix[3] = glm::vec4(worldPosition, 1);
-    return glm::inverse(viewMatrix);
+    const auto viewOrientation = glm::inverse(GetGlobalOrientation());
+    const auto viewPosition = viewOrientation * -GetGlobalPosition();
+    auto viewMatrix = glm::mat4(viewOrientation);
+    viewMatrix[3] = glm::vec4(viewPosition, 1.0f);
+    return viewMatrix;
 }
 
 glm::mat4 Camera::GetViewProjectionMatrix() const

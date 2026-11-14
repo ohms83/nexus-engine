@@ -19,6 +19,28 @@ static Identifier s_runningId = 0;
 HashMap<std::string, SceneNode::Creator> SceneNode::s_factoryFunctions;
 HashMap<Identifier, SceneNode*> SceneNode::s_nodeRegistry;
 
+namespace
+{
+    glm::mat4x3 ComposeAffine(const glm::mat4x3& parent, const glm::mat4x3& local)
+    {
+        glm::mat4x3 result(1.0f);
+        result[0] = parent * glm::vec4(local[0], 0.0f);
+        result[1] = parent * glm::vec4(local[1], 0.0f);
+        result[2] = parent * glm::vec4(local[2], 0.0f);
+        result[3] = parent * glm::vec4(local[3], 1.0f);
+        return result;
+    }
+
+    glm::mat4 ExpandAffine(const glm::mat4x3& transform)
+    {
+        return glm::mat4(
+            glm::vec4(transform[0], 0.0f),
+            glm::vec4(transform[1], 0.0f),
+            glm::vec4(transform[2], 0.0f),
+            glm::vec4(transform[3], 1.0f));
+    }
+}
+
 SceneNode::SceneNode(Ref<entt::registry> registry, std::string name)
     : Entity(registry)
 {
@@ -317,7 +339,17 @@ void SceneNode::SetScale(const glm::vec3& scale)
 
 void SceneNode::SetLocalTransform(const glm::mat4& transform)
 {
-    rmt_ScopedCPUSample(SceneNode_LocalTransform, 0);
+    rmt_ScopedCPUSample(SceneNode_SetLocalTransform, 0);
+    for (glm::length_t column = 0; column < 4; ++column)
+    {
+        m_transform[column] = glm::vec3(transform[column]);
+    }
+    m_localTransformExplicit = true;
+    m_transformDirty = true;
+}
+
+void SceneNode::SetLocalAffineTransform(const glm::mat4x3& transform)
+{
     m_transform = transform;
     m_localTransformExplicit = true;
     m_transformDirty = true;
@@ -342,7 +374,12 @@ glm::vec3 SceneNode::GetScale() const
     return scaleComponent ? scaleComponent->value : glm::vec3(1.0f);
 }
 
-const glm::mat4& SceneNode::GetLocalTransform() const
+glm::mat4 SceneNode::GetLocalTransform() const
+{
+    return ExpandAffine(GetLocalAffineTransform());
+}
+
+const glm::mat4x3& SceneNode::GetLocalAffineTransform() const
 {
     UpdateTransform();
     return m_transform;
@@ -355,10 +392,12 @@ void SceneNode::UpdateTransform() const
 
     if (!m_localTransformExplicit)
     {
-        const auto translationMatrix = glm::translate(glm::mat4(1.0f), GetPosition());
-        const auto rotationMatrix = glm::toMat4(GetOrientation());
-        const auto scaleMatrix = glm::scale(glm::mat4(1.0f), GetScale());
-        m_transform = translationMatrix * rotationMatrix * scaleMatrix;
+        const auto rotation = glm::mat3_cast(GetOrientation());
+        const auto scale = GetScale();
+        m_transform[0] = rotation[0] * scale.x;
+        m_transform[1] = rotation[1] * scale.y;
+        m_transform[2] = rotation[2] * scale.z;
+        m_transform[3] = GetPosition();
     }
 
     m_transformDirty = false;
@@ -375,19 +414,26 @@ void SceneNode::UpdateGlobalTransform()
     }
 }
 
-const glm::mat4& SceneNode::GetGlobalTransform() const
+const glm::mat4x3& SceneNode::GetGlobalAffineTransform() const
 {
-    rmt_ScopedCPUSample(SceneNode_GetGlobalTransform, 0);
+    rmt_ScopedCPUSample(SceneNode_GetGlobalAffineTransform, 0);
     UpdateTransform();
     auto parent = m_parent.lock();
-    m_globalTransform = (parent ? parent->GetGlobalTransform() * m_transform : m_transform);
+    m_globalTransform = parent
+        ? ComposeAffine(parent->GetGlobalAffineTransform(), m_transform)
+        : m_transform;
     return m_globalTransform;
+}
+
+glm::mat4 SceneNode::GetGlobalTransform() const
+{
+    return ExpandAffine(GetGlobalAffineTransform());
 }
 
 glm::vec3 SceneNode::GetGlobalPosition() const
 {
     rmt_ScopedCPUSample(SceneNode_GetGlobalPosition, 0);
-    return glm::vec3(GetGlobalTransform() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+    return GetGlobalAffineTransform()[3];
 }
 
 glm::quat SceneNode::GetGlobalOrientation() const
@@ -404,11 +450,11 @@ glm::quat SceneNode::GetGlobalOrientation() const
 glm::vec3 SceneNode::GetGlobalScale() const
 {
     rmt_ScopedCPUSample(SceneNode_GetGlobalScale, 0);
-    const auto globalTransform = GetGlobalTransform();
+    const auto& globalTransform = GetGlobalAffineTransform();
     return {
-        glm::length(glm::vec3(globalTransform[0])),
-        glm::length(glm::vec3(globalTransform[1])),
-        glm::length(glm::vec3(globalTransform[2]))
+        glm::length(globalTransform[0]),
+        glm::length(globalTransform[1]),
+        glm::length(globalTransform[2])
     };
 }
 
@@ -456,7 +502,7 @@ Box SceneNode::GetBound() const
     }
 
     const auto& sphere = mesh->GetSphere();
-    const auto modelMtx = GetGlobalTransform();
+    const auto modelMtx = GetGlobalAffineTransform();
     const glm::vec3 worldCenter = glm::vec3(modelMtx * glm::vec4(sphere.center, 1.0f));
     const auto globalScale = GetGlobalScale();
     const float maxScale = std::max({ glm::abs(globalScale.x), glm::abs(globalScale.y), glm::abs(globalScale.z) });

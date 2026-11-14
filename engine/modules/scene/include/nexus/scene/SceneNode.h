@@ -164,13 +164,16 @@ NXS_NAMESPACE
         NODISCARD glm::quat GetOrientation() const;
         NODISCARD glm::vec3 GetScale() const;
 
+        //! Sets the affine portion of the transform; any projective terms are discarded.
         void SetLocalTransform(const glm::mat4& transform);
+        void SetLocalAffineTransform(const glm::mat4x3& transform);
         //! Returns this node's transform relative to its parent.
-        NODISCARD const glm::mat4& GetLocalTransform() const;
+        NODISCARD glm::mat4 GetLocalTransform() const;
+        NODISCARD const glm::mat4x3& GetLocalAffineTransform() const;
         void UpdateTransform() const;
         void UpdateGlobalTransform();
         //! Returns this node's transform composed with all its ancestors.
-        NODISCARD const glm::mat4& GetGlobalTransform() const;
+        NODISCARD glm::mat4 GetGlobalTransform() const;
         NODISCARD glm::vec3 GetGlobalPosition() const;
         NODISCARD glm::quat GetGlobalOrientation() const;
         NODISCARD glm::vec3 GetGlobalScale() const;
@@ -197,6 +200,8 @@ NXS_NAMESPACE
         virtual void OnUpdate(float dt) {}
 
     private:
+        NODISCARD const glm::mat4x3& GetGlobalAffineTransform() const;
+
         template<typename TVisitor>
         void VisitDescendantsImpl(TVisitor& visitor) const
         {
@@ -234,8 +239,8 @@ NXS_NAMESPACE
         ChildList m_children;
         Array<Ref<Script>> m_scripts;
 
-        mutable glm::mat4 m_transform { 1.0f };
-        mutable glm::mat4 m_globalTransform { 1.0f };
+        mutable glm::mat4x3 m_transform { 1.0f };
+        mutable glm::mat4x3 m_globalTransform { 1.0f };
         mutable bool m_transformDirty = true;
         bool m_localTransformExplicit = false;
 
