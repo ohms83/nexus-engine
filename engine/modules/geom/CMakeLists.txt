@@ -9,6 +9,7 @@ add_library(${TARGET_NAME} STATIC ${NXS_GEOM_SOURCES})
 
 target_include_directories(${TARGET_NAME}
     PUBLIC ${NXS_GEOM_PUBLIC_HEADER_DIR}
+    PRIVATE ${REMOTERY_SOURCE_DIR}
 )
 
 target_link_libraries(${TARGET_NAME}
