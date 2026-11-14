@@ -240,6 +240,7 @@ void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
                 visibleNodes = view->GetVisibleNodes(scene);
             }
 
+            rmt_BeginCPUSample(SceneRenderer_CreateRenderCommands, 0);
             for (const auto node : visibleNodes)
             {
                 const auto meshComp = node->GetComponent<MeshComponent>();
@@ -256,6 +257,7 @@ void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
                         mesh.get(), modelMtx, mvpMtx, pass->commandSortType);
                 }
             }
+            rmt_EndCPUSample();
             rmt_EndCPUSample();
 
             {
