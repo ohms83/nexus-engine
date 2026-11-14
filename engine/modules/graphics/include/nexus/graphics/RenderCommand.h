@@ -59,13 +59,9 @@ NXS_NAMESPACE
         uint32_t vertexOffset = 0; // a base vertex offset
         uint32_t instanceCount = 1;
 
-        // Per-instance/model matrix: pointer because many commands share the same matrix
         glm::mat4 modelMatrix;
         // For batched commands with multiple instances, store a list of model matrices.
         Array<glm::mat4> instanceModels;
-
-        // Bounding volume for frustum culling and sorting
-        Sphere bounds;
 
         uint32_t layerMask = 0xFFFFFFFFu;
 

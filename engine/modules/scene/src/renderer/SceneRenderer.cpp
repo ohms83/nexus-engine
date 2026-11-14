@@ -57,7 +57,6 @@ inline void CreateRenderCommand(
     cmd.indexOffset = 0;
     cmd.vertexOffset = 0;
     cmd.modelMatrix = modelMtx;
-    cmd.bounds = mesh->GetSphere();
     cmd.layerMask = 0xFFFFFFFFu;
     cmd.material = material;
     cmd.SetSortKey(

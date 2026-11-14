@@ -295,7 +295,6 @@ void Gizmos::CreateRenderCommands(Array<RenderCommand>& outCommands, RenderSyste
         command.indexBuffer = indexBuffer;
         command.indexCount = indexBuffer->GetNumIndexDraw();
         command.material = s_overlayMaterial;
-        command.bounds = boundingSphere;
 
         // Override pipeline states
         command.pipelineOverrides.depthFunction = DepthFunction::Always;
