@@ -22,6 +22,7 @@
 #include "nexus/scene/Scene.h"
 #include "nexus/scene/component/LightComponent.h"
 #include "nexus/scene/component/MeshComponent.h"
+#include "nexus/math/Matrix.h"
 
 #include "Remotery.h"
 #include "nexus/graphics/GraphicsProfiler.h"
@@ -33,7 +34,7 @@ DEFINE_LOG(SceneRenderer);
 inline void CreateRenderCommand(
     RenderCommand& cmd,
     const Mesh* mesh,
-    const glm::mat4 &modelMtx,
+    const glm::mat4x3 &modelMtx,
     const glm::mat4 &viewProjMtx,
     CommandSortType sortType)
 {
@@ -253,7 +254,7 @@ void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
                 auto mesh = meshComp->GetMesh();
                 if (!mesh || !pass->IsPassFiltered(mesh)) continue;
 
-                const auto modelMtx = node->GetGlobalTransform();
+                const auto& modelMtx = node->GetGlobalAffineTransform();
                 CreateRenderCommand(commands.emplace_back(RenderCommand {}),
                     mesh.get(), modelMtx, viewProjMtx, pass->commandSortType);
             }
@@ -308,7 +309,7 @@ void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
 
                     if (!RenderInstancedMesh(renderSystem, cmd, gpuProgram))
                     {
-                        gpuProgram->SetUniformMatrix("_Model", cmd.modelMatrix, false);
+                        gpuProgram->SetUniformMatrix("_Model", Matrix::ExpandAffine(cmd.modelMatrix), false);
                         cmd.vertexBuffer->Bind();
                         cmd.indexBuffer->Bind();
                         // Record composition stats

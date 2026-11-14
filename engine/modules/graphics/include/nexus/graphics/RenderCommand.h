@@ -59,7 +59,7 @@ NXS_NAMESPACE
         uint32_t vertexOffset = 0; // a base vertex offset
         uint32_t instanceCount = 1;
 
-        glm::mat4 modelMatrix;
+        glm::mat4x3 modelMatrix;
         // For batched commands with multiple instances, store a list of model matrices.
         Array<glm::mat4> instanceModels;
 
