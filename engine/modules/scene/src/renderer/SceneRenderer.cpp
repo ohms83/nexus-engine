@@ -34,14 +34,19 @@ inline void CreateRenderCommand(
     RenderCommand& cmd,
     const Mesh* mesh,
     const glm::mat4 &modelMtx,
-    const glm::mat4 &mvpMtx,
+    const glm::mat4 &viewProjMtx,
     CommandSortType sortType)
 {
     rmt_ScopedCPUSample(CreateRenderCommand, 0);
     const auto material = mesh->GetMaterial();
     const auto meshSphere = mesh->GetSphere();
-    const auto pos = mvpMtx * glm::vec4(meshSphere.center, 1);
-    const auto clipZ = pos.z / pos.w;
+    // Transform sphere's center to world using only a model matrix
+    const glm::vec3 worldCenter = glm::vec3(modelMtx * glm::vec4(meshSphere.center, 1.0f));
+    // Transform only the world's z and w coordinates to the clipping plane;
+    // eliminates unnecessary x and y transform.
+    const float z = viewProjMtx[0][2] * worldCenter.x + viewProjMtx[1][2] * worldCenter.y + viewProjMtx[2][2] * worldCenter.z + viewProjMtx[3][2];
+    const float w = viewProjMtx[0][3] * worldCenter.x + viewProjMtx[1][3] * worldCenter.y + viewProjMtx[2][3] * worldCenter.z + viewProjMtx[3][3];
+    const float clipZ = z / w;
     const bool translucent = (material->blendMode != BlendMode::None);
     const uint32_t materialId = 0x7FFFFFFF & material->GetId();
     const float depthN = clipZ; // normalized in -1..1
@@ -246,16 +251,12 @@ void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
                 const auto meshComp = node->GetComponent<MeshComponent>();
                 if (!meshComp) continue;
 
+                auto mesh = meshComp->GetMesh();
+                if (!mesh || !pass->IsPassFiltered(mesh)) continue;
+
                 const auto modelMtx = node->GetGlobalTransform();
-                const auto mvpMtx = viewProjMtx * modelMtx;
-
-                if (auto mesh = meshComp->GetMesh(); mesh != nullptr)
-                {
-                    if (!pass->IsPassFiltered(mesh)) continue;
-
-                    CreateRenderCommand(commands.emplace_back(RenderCommand {}),
-                        mesh.get(), modelMtx, mvpMtx, pass->commandSortType);
-                }
+                CreateRenderCommand(commands.emplace_back(RenderCommand {}),
+                    mesh.get(), modelMtx, viewProjMtx, pass->commandSortType);
             }
             rmt_EndCPUSample();
             rmt_EndCPUSample();
