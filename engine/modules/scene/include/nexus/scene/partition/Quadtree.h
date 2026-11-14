@@ -8,6 +8,34 @@ NXS_NAMESPACE
     class Quadtree final : public IScenePartition
     {
     public:
+        using NodeList = Array<PartitionEntry>;
+
+        enum class Quadrant : int8_t
+        {
+            None = -1,
+            PlusXPlusZ = 0,
+            MinusXPlusZ = 1,
+            MinusXMinusZ = 2,
+            PlusXMinusZ = 3,
+            Num = 4
+        };
+
+        struct TreeNode
+        {
+            bool create = false;
+            int32_t depth = -1;
+            Quadrant quadrant = Quadrant::None;
+            //! World partition's boundary.
+            Box bound;
+            NodeList nodeList;
+            Array<TreeNode*> quadrants;
+
+            NODISCARD uint32_t GetDepth() const { return depth >= 0 ? static_cast<uint32_t>(depth) : 0; }
+            NODISCARD size_t GetNodeCount() const { return nodeList.size(); }
+            NODISCARD const Box& GetBound() const { return bound; }
+            NODISCARD const Array<TreeNode*>& GetQuadrants() const { return quadrants; }
+        };
+
         Quadtree() = delete;
         virtual ~Quadtree() = default;
         explicit Quadtree(uint32_t maxDepth, uint32_t partitionSize, const Box& worldBound);
@@ -23,30 +51,40 @@ NXS_NAMESPACE
         NODISCARD uint32_t GetMaxDepth() const override { return m_maxDepth; }
         NODISCARD uint32_t GetPartitionSize() const override { return m_partitionSize; }
         NODISCARD const Box& GetBound() const override { return m_bound; }
-        NODISCARD size_t GetNodeCount() const override { return m_nodeList.size(); }
-        NODISCARD const Array<Ref<Quadtree>>& GetQuadrants() const { return m_quadrants; }
+        NODISCARD size_t GetNodeCount() const override { return m_tree.empty() ? 0 : m_tree[0].nodeList.size(); }
+        NODISCARD const Array<TreeNode*>& GetQuadrants() const
+        {
+            static const Array<TreeNode*> empty;
+            return m_tree.empty() ? empty : m_tree[0].quadrants;
+        }
+        NODISCARD const Array<TreeNode>& GetTree() const { return m_tree; }
 
     private:
-        enum class Quadrant : int8_t
-        {
-            PlusXPlusZ,
-            MinusXPlusZ,
-            MinusXMinusZ,
-            PlusXMinusZ,
-            Num
-        };
-
-        struct TreeNode
-        {
-            bool create = false;
-            int32_t depth = -1;
-            //! World partition's boundary.
-            Box bound;
-            Array<PartitionEntry> nodeList;
-        };
-
-        void Subdivide();
+        void Subdivide(uint32_t nodeIndex);
+        /**
+         * @brief Subdividing a subtree from the specific quadrant and depth.
+         * 
+         * @param depth 
+         * @param quadrant 
+         */
+        void Subdivide(int32_t depth, Quadrant quadrant);
         void QueryInternal(const Frustum& frustum, Array<SceneNode*>& results) const;
+
+        static inline int32_t GetTreeIndex(int32_t depth, Quadrant quadrant)
+        {
+            if (depth <= 0) return 0;
+            return static_cast<int32_t>(std::pow(4, depth)) + INT_CAST(quadrant) - 1;
+        }
+
+        static inline uint32_t GetChildIndex(uint32_t parentIndex, Quadrant quadrant)
+        {
+            return 4 * parentIndex + 1 + static_cast<uint32_t>(quadrant);
+        }
+
+        static inline uint32_t GetParentIndex(uint32_t childIndex)
+        {
+            return childIndex > 0 ? (childIndex - 1) / 4 : 0;
+        }
 
         Box m_bound;
 
@@ -61,7 +99,6 @@ NXS_NAMESPACE
 
         static constexpr int NUM_QUADRANT = INT_CAST(Quadtree::Quadrant::Num);
 
-        Array<PartitionEntry> m_nodeList;
-        Array<Ref<Quadtree>> m_quadrants;
+        Array<TreeNode> m_tree;
     };
 }
