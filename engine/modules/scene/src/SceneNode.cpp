@@ -4,6 +4,7 @@
 #include "nexus/debug/LogDispatcher.h"
 #include "nexus/ecs/Component.h"
 #include "nexus/core/Hasher.h"
+#include "nexus/math/Matrix.h"
 #include "nexus/scene/component/TransformComponent.h"
 #include "nexus/scene/component/MeshComponent.h"
 
@@ -18,28 +19,6 @@ static Identifier s_runningId = 0;
 
 HashMap<std::string, SceneNode::Creator> SceneNode::s_factoryFunctions;
 HashMap<Identifier, SceneNode*> SceneNode::s_nodeRegistry;
-
-namespace
-{
-    glm::mat4x3 ComposeAffine(const glm::mat4x3& parent, const glm::mat4x3& local)
-    {
-        glm::mat4x3 result(1.0f);
-        result[0] = parent * glm::vec4(local[0], 0.0f);
-        result[1] = parent * glm::vec4(local[1], 0.0f);
-        result[2] = parent * glm::vec4(local[2], 0.0f);
-        result[3] = parent * glm::vec4(local[3], 1.0f);
-        return result;
-    }
-
-    glm::mat4 ExpandAffine(const glm::mat4x3& transform)
-    {
-        return glm::mat4(
-            glm::vec4(transform[0], 0.0f),
-            glm::vec4(transform[1], 0.0f),
-            glm::vec4(transform[2], 0.0f),
-            glm::vec4(transform[3], 1.0f));
-    }
-}
 
 SceneNode::SceneNode(Ref<entt::registry> registry, std::string name)
     : Entity(registry)
@@ -376,7 +355,7 @@ glm::vec3 SceneNode::GetScale() const
 
 glm::mat4 SceneNode::GetLocalTransform() const
 {
-    return ExpandAffine(GetLocalAffineTransform());
+    return Matrix::ExpandAffine(GetLocalAffineTransform());
 }
 
 const glm::mat4x3& SceneNode::GetLocalAffineTransform() const
@@ -420,14 +399,14 @@ const glm::mat4x3& SceneNode::GetGlobalAffineTransform() const
     UpdateTransform();
     auto parent = m_parent.lock();
     m_globalTransform = parent
-        ? ComposeAffine(parent->GetGlobalAffineTransform(), m_transform)
+        ? Matrix::ComposeAffine(parent->GetGlobalAffineTransform(), m_transform)
         : m_transform;
     return m_globalTransform;
 }
 
 glm::mat4 SceneNode::GetGlobalTransform() const
 {
-    return ExpandAffine(GetGlobalAffineTransform());
+    return Matrix::ExpandAffine(GetGlobalAffineTransform());
 }
 
 glm::vec3 SceneNode::GetGlobalPosition() const
