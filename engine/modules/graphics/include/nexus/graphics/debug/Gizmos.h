@@ -20,7 +20,8 @@ NXS_NAMESPACE
         static void Destroy();
         //! Clear gizmos data from the last frame.
         static void Clear();
-        static void ProcessDraw(RenderSystem& renderSystem, const glm::mat4& cameraMtx);
+        //! Upload this frame's gizmos to the GPU and append one draw command per primitive type.
+        //! Called by the overlay render pass.
         static void CreateRenderCommands(Array<RenderCommand>& outCommands, RenderSystem& renderSystem);
         static void DrawPoint(
             const glm::vec3& position,

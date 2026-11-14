@@ -165,6 +165,20 @@ NXS_NAMESPACE
 
         virtual Array<const ISceneView*> PopulateSceneView(const SceneNode& scene) const;
         virtual bool IsPassFiltered(Ref<const Mesh> mesh) const { return false; }
+
+        /**
+         * @brief Hook for passes to inject non-mesh commands (e.g. debug gizmos) for a view.
+         *
+         * Called by the renderer once per view, after the mesh commands are built and before sorting.
+         *
+         * @param renderSystem The render system used to upload dynamic GPU data.
+         * @param visibleNodes The nodes that survived culling for this view.
+         * @param outCommands The command list to append to.
+         */
+        virtual void AppendCommands(
+            RenderSystem& renderSystem,
+            const Array<SceneNode*>& visibleNodes,
+            Array<RenderCommand>& outCommands) const {}
     };
 
     struct RenderPassBuilder

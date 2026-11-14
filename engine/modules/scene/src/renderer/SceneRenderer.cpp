@@ -259,6 +259,8 @@ void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
                     mesh.get(), modelMtx, viewProjMtx, pass->commandSortType);
             }
             rmt_EndCPUSample();
+
+            pass->AppendCommands(renderSystem, visibleNodes, commands);
             rmt_EndCPUSample();
 
             {

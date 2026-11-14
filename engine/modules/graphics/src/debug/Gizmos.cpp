@@ -256,25 +256,6 @@ void Gizmos::Clear()
     }
 }
 
-void Gizmos::ProcessDraw(RenderSystem& renderSystem, const glm::mat4& cameraMtx)
-{
-    // TODO: Perform drawing during the overlay render pass
-#if 0
-    rmt_ScopedCPUSample(DrawGizmos, 0);
-    auto& renderInterface = *renderSystem.GetRenderInterface();
-    renderInterface.SetDepthFunction(DepthFunction::Always);
-
-    s_gpuProgram->Bind();
-    s_gpuProgram->SetUniformMatrix("_Model", glm::mat4(1), false);
-    s_gpuProgram->SetUniformMatrix("_CameraMtx", cameraMtx, false);
-
-    for (auto [index, vertexData] : s_vertexDataList)
-    {
-        vertexData->DrawIndexed(renderInterface);
-    }
-#endif
-}
-
 void Gizmos::CreateRenderCommands(Array<RenderCommand>& outCommands, RenderSystem& renderSystem)
 {
     static const Sphere boundingSphere { glm::vec3(0), FLT_MAX };
@@ -295,6 +276,9 @@ void Gizmos::CreateRenderCommands(Array<RenderCommand>& outCommands, RenderSyste
         command.indexBuffer = indexBuffer;
         command.indexCount = indexBuffer->GetNumIndexDraw();
         command.material = s_overlayMaterial;
+        command.modelMatrix = glm::mat4x3(1.0f);
+        // Gizmos always draw last, on top of everything else in the pass.
+        command.sortKey.key = UINT64_MAX;
 
         // Override pipeline states
         command.pipelineOverrides.depthFunction = DepthFunction::Always;

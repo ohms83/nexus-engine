@@ -25,7 +25,14 @@ NXS_NAMESPACE
             return material &&
                    material->blendMode != BlendMode::None &&
                    !material->depthWrite &&
-                   material->depthFunction == DepthFunction::Always;;
+                   material->depthFunction == DepthFunction::Always;
         }
+
+        //! Emits debug gizmos (bounding box/sphere) for visible meshes that request them, plus any
+        //! gizmos queued through the Gizmos API this frame.
+        void AppendCommands(
+            RenderSystem& renderSystem,
+            const Array<SceneNode*>& visibleNodes,
+            Array<RenderCommand>& outCommands) const override;
     };
 }
