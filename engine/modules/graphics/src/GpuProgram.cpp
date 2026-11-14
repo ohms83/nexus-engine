@@ -5,6 +5,8 @@
 
 #include <ranges>
 
+#include "Remotery.h"
+
 USING_NAMESPACE_NXS;
 
 DEFINE_LOG(GpuProgram);
@@ -31,6 +33,7 @@ void GpuProgram::Compile()
 
 int32_t GpuProgram::FindUniform(const std::string &name)
 {
+    rmt_ScopedCPUSample(GpuProgram_FindUniform, 0);
     if (const auto& itr = m_uniforms.find(name); itr != m_uniforms.end()) return itr->second;
 
     int32_t location = FindUniform_Internal(name);
