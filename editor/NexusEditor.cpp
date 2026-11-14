@@ -135,9 +135,9 @@ bool NexusEditor::Init_Internal()
     auto scene = sceneManager->EmplaceAndChange<nxs::Scene>("Editor Scene");
     scene->SetRenderer(std::make_unique<nxs::ForwardSceneRenderer>(GetRenderSystem()));
     scene->SetPartition(std::make_shared<nxs::Quadtree>(
-        2, 20,
+        2, 100,
         nxs::Box {
-            glm::vec3(0), glm::vec3(1000.f)
+            glm::vec3(0), glm::vec3(2000.f)
         }
     ));
 
