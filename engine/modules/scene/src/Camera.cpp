@@ -82,13 +82,14 @@ Array<SceneNode*> Camera::GetVisibleNodes(const Scene& scene) const
             LOG_ERROR(LogSceneRenderer, std::format("Camera::GetVisibleNodes: SceneNode with ID {} not found.", node.id));
             continue;
         }
-        const auto modelMtx = sceneNode->GetGlobalTransform();
+        const auto& modelMtx = sceneNode->GetGlobalAffineTransform();
         if (auto mesh = meshComp.GetMesh(); mesh != nullptr)
         {
             const auto boundingSphere = mesh->GetSphere();
             const glm::vec3 pos = modelMtx * glm::vec4(boundingSphere.center, 1);
-            const auto globalScale = sceneNode->GetGlobalScale();
-            const float scaledRadius = boundingSphere.radius * std::max({ globalScale.x, globalScale.y, globalScale.z });
+            const float maxScale = std::max({
+                glm::length(modelMtx[0]), glm::length(modelMtx[1]), glm::length(modelMtx[2]) });
+            const float scaledRadius = boundingSphere.radius * maxScale;
             const bool isVisible = viewFrustum.IsSphereInside(pos, scaledRadius);
 
             if (isVisible)

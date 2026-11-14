@@ -174,6 +174,8 @@ NXS_NAMESPACE
         void UpdateGlobalTransform();
         //! Returns this node's transform composed with all its ancestors.
         NODISCARD glm::mat4 GetGlobalTransform() const;
+        //! Affine (4x3) variant of @c GetGlobalTransform; cheaper when the projective row is not needed.
+        NODISCARD const glm::mat4x3& GetGlobalAffineTransform() const;
         NODISCARD glm::vec3 GetGlobalPosition() const;
         NODISCARD glm::quat GetGlobalOrientation() const;
         NODISCARD glm::vec3 GetGlobalScale() const;
@@ -200,8 +202,6 @@ NXS_NAMESPACE
         virtual void OnUpdate(float dt) {}
 
     private:
-        NODISCARD const glm::mat4x3& GetGlobalAffineTransform() const;
-
         template<typename TVisitor>
         void VisitDescendantsImpl(TVisitor& visitor) const
         {
