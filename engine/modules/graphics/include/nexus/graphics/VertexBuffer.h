@@ -3,7 +3,6 @@
 #include "nexus/NxsDefine.h"
 #include "nexus/container/Array.h"
 #include "nexus/memory/Buffer.h"
-#include "nexus/serialize/Serializeable.h"
 
 #include "GPUBuffer.h"
 #include "GpuResource.h"
