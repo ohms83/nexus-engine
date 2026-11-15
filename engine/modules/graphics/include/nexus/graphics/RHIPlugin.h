@@ -1,6 +1,7 @@
 #pragma once
 
 #include "nexus/NxsDefine.h"
+#include "nexus/ApplicationContext.h"
 #include "nexus/graphics/GraphicsConfig.h"
 
 #if defined(_WIN32)
@@ -16,6 +17,7 @@
 NXS_NAMESPACE
 {
     class IGpuResourceFactory;
+    class RenderingInterface;
 
     class IRHIPlugin
     {
@@ -23,6 +25,9 @@ NXS_NAMESPACE
         virtual ~IRHIPlugin() = default;
 
         virtual IGpuResourceFactory* GetGpuResourceFactory() = 0;
+        virtual Ref<RenderingInterface> CreateRenderingInterface(
+            WindowContext window,
+            const GraphicsConfig& config) = 0;
     };
     
     extern "C" {

@@ -111,7 +111,7 @@ VertexBuffer& VertexBuffer::AttachInstanceStream(Ref<IBuffer> instanceData, cons
     s.stride = 0;
     for (const auto& a : attributes) s.stride += NxsDataTypeSize(a.dataType) * a.numElements;
     m_instanceStreams.push_back(std::move(s));
-    // Platform-specific VAO attachment happens in GLVertexBuffer::AttachInstanceStream_Impl
+    // Platform-specific buffer attachment is handled by the active RHI implementation.
     return *this;
 }
 

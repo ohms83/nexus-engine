@@ -1,5 +1,7 @@
 #include "nexus/graphics/RHIPlugin.h"
 #include "nexus/graphics/GpuResourceFactory.h"
+#include "nexus/graphics/RenderingInterface.h"
+#include "nexus/graphics/opengl/GLRenderingInterface.h"
 #include "nexus/graphics/opengl/GLVertexBuffer.h"
 #include "nexus/graphics/opengl/GLIndexBuffer.h"
 #include "nexus/graphics/opengl/GLGpuProgram.h"
@@ -42,13 +44,20 @@ NXS_NAMESPACE
             return &m_factory;
         }
 
+        Ref<RenderingInterface> CreateRenderingInterface(
+            const WindowContext window,
+            const GraphicsConfig& config) override
+        {
+            return NewRef<GLRenderingInterface>(window, config);
+        }
+
     private:
         GLResourceFactory m_factory;
     };
 
     static GLRHIPlugin* s_plugin = nullptr;
     
-    IRHIPlugin* InitRHI(const GraphicsConfig& config)
+    IRHIPlugin* InitRHI(const GraphicsConfig&)
     {
         s_plugin = new GLRHIPlugin();
         return s_plugin;

@@ -7,7 +7,7 @@
 #include "nexus/container/Array.h"
 
 #include "NxsGL.h"
-#include "../GpuProgram.h"
+#include "nexus/graphics/GpuProgram.h"
 
 NXS_NAMESPACE
 {

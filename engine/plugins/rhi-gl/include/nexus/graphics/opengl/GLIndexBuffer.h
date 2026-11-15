@@ -5,7 +5,7 @@
 #pragma once
 
 #include "NxsGL.h"
-#include "../IndexBuffer.h"
+#include "nexus/graphics/IndexBuffer.h"
 
 NXS_NAMESPACE
 {

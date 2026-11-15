@@ -5,7 +5,7 @@
 #pragma once
 
 #include "NxsGL.h"
-#include "../TextureProxy.h"
+#include "nexus/graphics/TextureProxy.h"
 
 #include <atomic>
 

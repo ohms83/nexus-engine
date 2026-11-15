@@ -11,8 +11,6 @@ target_include_directories(${TARGET_NAME}
     PUBLIC ${NXS_GRAPHICS_PUBLIC_HEADER_DIR}
 
     PUBLIC ${ENGINE_3RD_PARTY_DIR}/SDL/include
-    PUBLIC ${ENGINE_3RD_PARTY_DIR}/glad/include
-
     PRIVATE "${STB_SOURCE_DIR}"
     PRIVATE "${REMOTERY_SOURCE_DIR}"
 )
@@ -33,7 +31,5 @@ target_link_libraries(${TARGET_NAME}
     PRIVATE nexus-serialize
 
     PRIVATE SDL3::SDL3
-    PRIVATE glad
-    PRIVATE OpenGL::GL
     PRIVATE assimp::assimp
 )

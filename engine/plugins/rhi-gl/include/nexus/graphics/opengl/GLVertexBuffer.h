@@ -6,7 +6,7 @@
 
 #include "NxsGL.h"
 #include "nexus/container/Array.h"
-#include "../VertexBuffer.h"
+#include "nexus/graphics/VertexBuffer.h"
 
 NXS_NAMESPACE
 {

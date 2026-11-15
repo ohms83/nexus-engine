@@ -1,12 +1,15 @@
 //
 // Created by nutta on 7/4/2025.
 //
-#include <array>
-#include <functional>
+#include <filesystem>
 
 #include "nexus/graphics/RenderingInterface.h"
-#include "nexus/graphics/opengl/GLRenderingInterface.h"
+#include "nexus/graphics/RHIPlugin.h"
 #include "nexus/debug/Logger.h"
+#include "nexus/debug/LogDispatcher.h"
+
+#include <SDL3/SDL_filesystem.h>
+#include <SDL3/SDL_loadso.h>
 
 #include "Remotery.h"
 
@@ -14,29 +17,122 @@ USING_NAMESPACE_NXS;
 
 DEFINE_LOG(RenderingInterface);
 
+namespace
+{
+    using InitRHIProc = nxs::IRHIPlugin* (*)(const nxs::GraphicsConfig&);
+    using GetRHIProc = nxs::IRHIPlugin* (*)();
+    using DestroyRHIProc = void (*)();
+
+    struct RHIPluginModule
+    {
+        SDL_SharedObject* module = nullptr; // Retained so plugin-created objects remain callable.
+        nxs::IRHIPlugin* plugin = nullptr;
+        InitRHIProc init = nullptr;
+        GetRHIProc get = nullptr;
+        DestroyRHIProc destroy = nullptr;
+        bool initialized = false;
+
+        ~RHIPluginModule()
+        {
+            if (initialized && destroy)
+            {
+                destroy();
+            }
+        }
+    };
+
+    nxs::IRHIPlugin* LoadOpenGLPlugin(const nxs::GraphicsConfig& config)
+    {
+        static RHIPluginModule runtime;
+        if (runtime.plugin)
+        {
+            return runtime.plugin;
+        }
+
+        if (!runtime.module)
+        {
+            const char* basePath = SDL_GetBasePath();
+            if (!basePath)
+            {
+                LOG_FATAL(LogRenderingInterface,
+                    std::format("Failed to locate application directory: {}", SDL_GetError()));
+                return nullptr;
+            }
+
+#if defined(_WIN32)
+            constexpr auto libraryName = "nexus-rhi-opengl.dll";
+#elif defined(__APPLE__)
+            constexpr auto libraryName = "nexus-rhi-opengl.dylib";
+#else
+            constexpr auto libraryName = "nexus-rhi-opengl.so";
+#endif
+            const auto path = std::filesystem::path(basePath) / "plugins" / libraryName;
+            const auto utf8Path = path.u8string();
+            runtime.module = SDL_LoadObject(reinterpret_cast<const char*>(utf8Path.c_str()));
+            if (!runtime.module)
+            {
+                LOG_FATAL(LogRenderingInterface,
+                    std::format("Failed to load RHI plugin '{}': {}", path.string(), SDL_GetError()));
+                return nullptr;
+            }
+
+            runtime.init = reinterpret_cast<InitRHIProc>(SDL_LoadFunction(runtime.module, "InitRHI"));
+            runtime.get = reinterpret_cast<GetRHIProc>(SDL_LoadFunction(runtime.module, "GetRHI"));
+            runtime.destroy = reinterpret_cast<DestroyRHIProc>(SDL_LoadFunction(runtime.module, "DestroyRHI"));
+            if (!runtime.init || !runtime.get || !runtime.destroy)
+            {
+                LOG_FATAL(LogRenderingInterface,
+                    std::format("RHI plugin '{}' is missing one or more required entry points", path.string()));
+                SDL_UnloadObject(runtime.module);
+                runtime.module = nullptr;
+                runtime.init = nullptr;
+                runtime.get = nullptr;
+                runtime.destroy = nullptr;
+                return nullptr;
+            }
+        }
+
+        if (!runtime.init(config))
+        {
+            LOG_FATAL(LogRenderingInterface, "Failed to initialize the OpenGL RHI plugin");
+            runtime.destroy();
+            return nullptr;
+        }
+
+        runtime.plugin = runtime.get();
+        if (!runtime.plugin)
+        {
+            LOG_FATAL(LogRenderingInterface, "OpenGL RHI plugin returned an empty plugin instance");
+            runtime.destroy();
+            return nullptr;
+        }
+
+        runtime.initialized = true;
+        return runtime.plugin;
+    }
+}
+
 Ref<RenderingInterface> RenderingInterface::Create(WindowContext window, const GraphicsConfig& config)
 {
     LOG_INFO(LogRenderingInterface, std::format("Creating Rendering Interface API: {}", GraphicsAPIToString(config.api)));
-    Ref<RenderingInterface> result;
-    switch (config.api)
+    if (config.api != GraphicsAPI::OpenGL && config.api != GraphicsAPI::Undefined)
     {
-    case GraphicsAPI::OpenGL:
-        result.reset(new GLRenderingInterface(window, config));
-        break;
-    case GraphicsAPI::Undefined:
-        // Automatically choose the most suitable API based on the current platform.
-#ifdef NXS_PLATFORM_WINDOWS
-        // TODO: Return D3D11 or D3D12 graphics API's instance.
-        result.reset(new GLRenderingInterface(window, config));
-#else
-        result.reset(new GLRenderingInterface(window, config));
-#endif
-        break;
-    default:
         NXS_ASSERT_MSG(false, "Unknown API type");
-        break;
+        return nullptr;
     }
-    return result;
+
+    auto* plugin = LoadOpenGLPlugin(config);
+    if (!plugin)
+    {
+        return nullptr;
+    }
+
+    auto renderingInterface = plugin->CreateRenderingInterface(window, config);
+    if (!renderingInterface)
+    {
+        LOG_FATAL(LogRenderingInterface, "OpenGL RHI plugin returned an empty rendering interface");
+    }
+    return renderingInterface;
 }
 
 RenderingInterface::~RenderingInterface()
