@@ -76,6 +76,10 @@ GLRenderingInterface::GLRenderingInterface(WindowContext window, const GraphicsC
 GLRenderingInterface::~GLRenderingInterface()
 {
     SDL_GLContext gl_context = R_CAST<SDL_GLContext>(m_renderContext.nativeContext);
+    if (gl_context && rmt_GetGlobalInstance())
+    {
+        rmt_UnbindOpenGL();
+    }
     SDL_GL_DestroyContext(gl_context);
 }
 

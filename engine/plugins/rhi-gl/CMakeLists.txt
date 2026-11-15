@@ -17,6 +17,7 @@ target_include_directories(${TARGET_NAME}
 target_link_libraries(${TARGET_NAME}
     # Links against the core RHI interface (brings in SDL3, nexus-core, etc. transitively)
     PRIVATE nexus-graphics
+    PRIVATE nexus-remotery
     PRIVATE SDL3::SDL3
     PRIVATE glad
     PRIVATE OpenGL::GL

@@ -54,8 +54,15 @@ set(ENGINE_THIRD_PARTY_SOURCES
     ${IMGUI_SOURCES}
     ${IMPLOT_SOURCES}
     "${STB_SOURCE_DIR}/stb_image.cpp"
-    "${REMOTERY_SOURCE_DIR}/Remotery.c"
 )
+
+add_library(nexus-remotery SHARED "${REMOTERY_SOURCE_DIR}/Remotery.c")
+target_compile_definitions(nexus-remotery PUBLIC RMT_DLL RMT_USE_OPENGL=1)
+if (WIN32)
+    target_link_libraries(nexus-remotery PRIVATE ws2_32)
+elseif (CMAKE_DL_LIBS)
+    target_link_libraries(nexus-remotery PRIVATE ${CMAKE_DL_LIBS})
+endif()
 
 # A static library containing sources from third-party libraries that don't have
 # their own CMake build system. This library is linked to engine modules that need it.
@@ -76,9 +83,9 @@ target_include_directories(nexus-3rdparty
 
 target_link_libraries(nexus-3rdparty
     PUBLIC mimalloc-static
+    PUBLIC nexus-remotery
 )
 
 target_compile_definitions(nexus-3rdparty
     PUBLIC IMGUI_IMPL_OPENGL_LOADER_GLAD
-    PRIVATE RMT_USE_OPENGL=1
 )

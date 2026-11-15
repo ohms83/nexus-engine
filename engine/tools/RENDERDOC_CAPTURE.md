@@ -5,7 +5,8 @@ This document explains how to capture a GPU frame using RenderDoc on Windows and
 Prerequisites
 - Install RenderDoc (https://renderdoc.org/) and launch the RenderDoc UI.
 - Build the engine in Debug (or any build with symbols).
-- Ensure Remotery is enabled in the build (it already is in this repo).
+- Set `ApplicationConfig::allowProfile` to `true` for the application being profiled.
+- Deploy the shared `nexus-remotery` library with the application and OpenGL plugin; both use the same profiler instance.
 
 Capturing a frame
 1. Start RenderDoc.
@@ -27,6 +28,7 @@ What to look for in RenderDoc
 Correlating with Remotery and GraphicsProfiler
 - Remotery: use the Remotery UI (if Remotery server is available) to view per-pass CPU/OpenGL samples added by the instrumentation.
   - We added dynamic OpenGL + CPU samples named after each `RenderPass` in `SceneRenderer::Render`.
+  - `SceneRenderer_RenderShadowMap` appears on both the CPU and OpenGL timelines for comparing submission time with GPU time.
   - We also call `rmt_MarkFrame()` once per frame to collect GPU timestamps for Remotery.
 - GraphicsProfiler: the engine now logs a compact per-frame summary via the `GraphicsProfiler` (LOG_INFO). The log line looks like:
   "Frame Composition: drawCalls=..., uniquePrograms=..., uniqueTextures=..., indices=..., programBindEvents=..., textureBindEvents=..."

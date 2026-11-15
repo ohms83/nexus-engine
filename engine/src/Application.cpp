@@ -71,7 +71,10 @@ Application::~Application()
     // Shouldn't send out any callback at this point.
     logger.Info(LogApplication, "Shutting down...");
 
-    DestroyImGui();
+    if (ImGui::GetCurrentContext())
+    {
+        DestroyImGui();
+    }
 
     InputManager::Destroy();
     TimerManager::Destroy();
@@ -98,12 +101,6 @@ Application::~Application()
 bool Application::Init(const ApplicationConfig& info)
 {
     m_config = info;
-    if (m_config.allowProfile)
-    {
-        rmt_CreateGlobalInstance(&s_rmt);
-        rmt_SetCurrentThreadName("MainThread");
-    }
-
     // TaskManager should be initialized before anything.
     LogDispatcher::Init();
     auto& logger = LogDispatcher::Instance();
@@ -111,6 +108,17 @@ bool Application::Init(const ApplicationConfig& info)
         std::make_shared<FileLogger>("debug.log"),
         std::make_shared<StdOutLogger>()
     });
+
+    if (m_config.allowProfile)
+    {
+        const auto result = rmt_CreateGlobalInstance(&s_rmt);
+        if (result != RMT_ERROR_NONE)
+        {
+            LOG_ERROR(LogApplication, std::format("Failed to initialize Remotery: error {}", static_cast<int>(result)));
+            return false;
+        }
+        rmt_SetCurrentThreadName("MainThread");
+    }
 
     //Initialize SDL
     if( SDL_Init( SDL_INIT_VIDEO ) == false )
