@@ -3,7 +3,7 @@
 #include "nexus/NxsCommon.h"
 #include "nexus/graphics/RenderTarget.h"
 #include "nexus/graphics/TextureProxy.h"
-#include "nexus/graphics/opengl/NxsGL.h"
+#include "NxsGL.h"
 
 NXS_NAMESPACE
 {

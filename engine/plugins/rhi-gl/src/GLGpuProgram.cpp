@@ -2,7 +2,7 @@
 // Created by nutta on 7/6/2025.
 //
 
-#include "nexus/graphics/opengl/GLGpuProgram.h"
+#include "nexus/GLGpuProgram.h"
 #include "glm/gtc/type_ptr.inl"
 
 #include "Remotery.h"

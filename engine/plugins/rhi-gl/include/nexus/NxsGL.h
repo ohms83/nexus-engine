@@ -2,9 +2,6 @@
 
 #include <glad/glad.h>
 
-#include <cassert>
-#include <format>
-
 #include "nexus/NxsDefine.h"
 #include "nexus/debug/LogDispatcher.h"
 #include "nexus/graphics/GraphicsConst.h"

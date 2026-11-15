@@ -2,9 +2,9 @@
 // Created by nutta on 7/4/2025.
 //
 
-#include "nexus/graphics/opengl/GLVertexBuffer.h"
+#include "nexus/GLVertexBuffer.h"
 #include "nexus/container/Array.h"
-#include "nexus/graphics/opengl/GLGpuBuffer.h"
+#include "nexus/GLGpuBuffer.h"
 
 #include "Remotery.h"
 

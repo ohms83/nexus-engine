@@ -2,7 +2,6 @@
 // Created by nutta on 7/18/2025.
 //
 
-#include "nexus/graphics/opengl/NxsGL.h"
-#include <string>
+#include "nexus/NxsGL.h"
 
 DEFINE_LOG(OpenGL);

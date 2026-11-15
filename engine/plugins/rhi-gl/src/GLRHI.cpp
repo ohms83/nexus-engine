@@ -1,11 +1,11 @@
 #include "nexus/graphics/RHIPlugin.h"
 #include "nexus/graphics/GpuResourceFactory.h"
 #include "nexus/graphics/RenderingInterface.h"
-#include "nexus/graphics/opengl/GLRenderingInterface.h"
-#include "nexus/graphics/opengl/GLVertexBuffer.h"
-#include "nexus/graphics/opengl/GLIndexBuffer.h"
-#include "nexus/graphics/opengl/GLGpuProgram.h"
-#include "nexus/graphics/opengl/GLTexture.h"
+#include "nexus/GLRenderingInterface.h"
+#include "nexus/GLVertexBuffer.h"
+#include "nexus/GLIndexBuffer.h"
+#include "nexus/GLGpuProgram.h"
+#include "nexus/GLTexture.h"
 
 NXS_NAMESPACE
 {

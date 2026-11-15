@@ -2,15 +2,15 @@
 // Created by nutta on 7/4/2025.
 //
 
-#include "nexus/graphics/opengl/GLRenderingInterface.h"
+#include "nexus/GLRenderingInterface.h"
 
 #include <sstream>
 
 #include "nexus/debug/Logger.h"
-#include "nexus/graphics/opengl/GLIndexBuffer.h"
-#include "nexus/graphics/opengl/GLGpuProgram.h"
-#include "nexus/graphics/opengl/GLTexture.h"
-#include "nexus/graphics/opengl/GLVertexBuffer.h"
+#include "nexus/GLIndexBuffer.h"
+#include "nexus/GLGpuProgram.h"
+#include "nexus/GLTexture.h"
+#include "nexus/GLVertexBuffer.h"
 #include "SDL3/SDL_error.h"
 
 #include "Remotery.h"

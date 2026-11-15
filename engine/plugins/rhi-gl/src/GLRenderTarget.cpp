@@ -1,7 +1,7 @@
 
-#include "nexus/graphics/opengl/GLRenderTarget.h"
-#include "nexus/graphics/opengl/GLTexture.h"
-#include "nexus/graphics/opengl/GLRenderingInterface.h"
+#include "nexus/GLRenderTarget.h"
+#include "nexus/GLTexture.h"
+#include "nexus/GLRenderingInterface.h"
 #include "nexus/graphics/RenderSystem.h"
 #include "nexus/container/Array.h"
 
