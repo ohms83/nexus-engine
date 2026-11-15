@@ -86,7 +86,8 @@ Application::~Application()
     Engine::Destroy();
 
     //Destroy the window
-    SDL_DestroyWindow(m_window);
+    SDL_Window* sdlWindow = R_CAST<SDL_Window*>(m_window);
+    SDL_DestroyWindow(sdlWindow);
     m_window = nullptr;
 
     SDL_Quit();
@@ -148,7 +149,8 @@ bool Application::Init(const ApplicationConfig& info)
         return false;
     }
 
-    SDL_GetWindowSizeInPixels(m_window, &m_actualSize.x, &m_actualSize.y);
+    SDL_Window* sdlWindow = R_CAST<SDL_Window*>(m_window);
+    SDL_GetWindowSizeInPixels(sdlWindow, &m_actualSize.x, &m_actualSize.y);
     const auto log = std::format("Actual window size width: {} height: {}", m_actualSize.x, m_actualSize.y);
     logger.Info(LogApplication, log);
 
@@ -297,8 +299,9 @@ void Application::OnEvent(const SDL_Event& e)
     case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
     case SDL_EVENT_WINDOW_RESIZED:
         {
-            SDL_GetWindowSize(m_window, &m_screenSize.x, &m_screenSize.y);
-            SDL_GetWindowSizeInPixels(m_window, &m_actualSize.x, &m_actualSize.y);
+            SDL_Window* sdlWindow = R_CAST<SDL_Window*>(m_window);
+            SDL_GetWindowSize(sdlWindow, &m_screenSize.x, &m_screenSize.y);
+            SDL_GetWindowSizeInPixels(sdlWindow, &m_actualSize.x, &m_actualSize.y);
             OnResize(m_screenSize, m_actualSize);
         }
         break;
@@ -404,7 +407,8 @@ void Application::InitImGui() const
     if (const auto api = m_renderInterface->GetAPI(); api == GraphicsAPI::OpenGL)
     {
         // Setup Platform/Renderer backends
-        ImGui_ImplSDL3_InitForOpenGL(m_window, m_renderSystem->GetRenderContext().gl_context);
+        SDL_Window* sdlWindow = R_CAST<SDL_Window*>(m_window);
+        ImGui_ImplSDL3_InitForOpenGL(sdlWindow, m_renderSystem->GetRenderContext().nativeContext);
         ImGui_ImplOpenGL3_Init(nullptr); // Match your core profile version
     }
     else

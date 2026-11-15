@@ -51,6 +51,6 @@ NXS_NAMESPACE
         void DebugMarker(const std::string& message) override;
 
     protected:
-        SDL_Window* m_window = nullptr;
+        WindowContext m_window {};
     };
 }

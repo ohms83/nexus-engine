@@ -21,7 +21,9 @@ USING_NAMESPACE_NXS;
 GLRenderingInterface::GLRenderingInterface(WindowContext window, const GraphicsConfig& config)
     : RenderingInterface()
 {
+    m_window = window;
     m_graphicsAPI = GraphicsAPI::OpenGL;
+
     // TODO: Make it configurable.
     SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
@@ -36,15 +38,15 @@ GLRenderingInterface::GLRenderingInterface(WindowContext window, const GraphicsC
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 6);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
-    m_window = window;
-    const auto renderContext = SDL_GL_CreateContext(window);
+    SDL_Window* sdlWindow = R_CAST<SDL_Window*>(window);
+    const auto renderContext = SDL_GL_CreateContext(sdlWindow);
     if (!renderContext)
     {
         LOG_FATAL(LogOpenGL, std::format("Failed to created OpenGL's context! SDL_Error={}", SDL_GetError()));
         return;
     }
 
-    m_renderContext.gl_context = renderContext;
+    m_renderContext.nativeContext = renderContext;
 
     if (!gladLoadGLLoader(R_CAST<GLADloadproc>(SDL_GL_GetProcAddress)))
     {
@@ -52,7 +54,7 @@ GLRenderingInterface::GLRenderingInterface(WindowContext window, const GraphicsC
         return;
     }
 
-    SDL_GL_MakeCurrent(window, renderContext);
+    SDL_GL_MakeCurrent(sdlWindow, renderContext);
 
     std::stringstream ss;
     ss  << "OpenGL\n"
@@ -77,7 +79,8 @@ GLRenderingInterface::GLRenderingInterface(WindowContext window, const GraphicsC
 
 GLRenderingInterface::~GLRenderingInterface()
 {
-    SDL_GL_DestroyContext(m_renderContext.gl_context);
+    SDL_GLContext gl_context = R_CAST<SDL_GLContext>(m_renderContext.nativeContext);
+    SDL_GL_DestroyContext(gl_context);
 }
 
 void GLRenderingInterface::ClearColor(const Color4F& color)
@@ -111,7 +114,8 @@ void GLRenderingInterface::ClearBuffer(const Color4F& color, float depth)
 void GLRenderingInterface::SwapBuffer()
 {
     rmt_ScopedCPUSample(SDL_GL_SwapWindow, 0);
-    SDL_GL_SwapWindow(m_window);
+    SDL_Window* sdlWindow = R_CAST<SDL_Window*>(m_window);
+    SDL_GL_SwapWindow(sdlWindow);
 }
 
 void GLRenderingInterface::SetViewport(int32_t x, int32_t y, int32_t w, int32_t h)

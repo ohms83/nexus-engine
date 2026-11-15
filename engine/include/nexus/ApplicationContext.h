@@ -4,10 +4,11 @@
 
 namespace nxs
 {    
-    using WindowContext = SDL_Window*;
+    using WindowContext = void*;
 
-    union RenderContext
+    struct RenderContext
     {
-        SDL_GLContext gl_context;
+        void* nativeContext = nullptr; // Holds SDL_GLContext, VkDevice, ID3D12Device*, etc.
+        void* nativeSurface = nullptr; // Holds VkSurfaceKHR, IDXGISwapChain*, etc.
     };
 }

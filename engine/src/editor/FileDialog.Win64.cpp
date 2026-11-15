@@ -64,8 +64,9 @@ namespace nxs
             OPENFILENAME ofn;
             ZeroMemory(&ofn, sizeof(ofn));
 
+            SDL_Window* sdlWindow = R_CAST<SDL_Window*>(context.windowContext);
             HWND hwnd = (HWND)SDL_GetPointerProperty(
-                SDL_GetWindowProperties(context.windowContext),
+                SDL_GetWindowProperties(sdlWindow),
                 SDL_PROP_WINDOW_WIN32_HWND_POINTER,
                 NULL);
             // Convert the initial filepath to the OS preferred format (replacing "/" with "\" in the case of Windows).
