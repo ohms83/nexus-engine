@@ -7,6 +7,21 @@
 
 #include "NxsDataType.h"
 
+#ifdef _WIN32
+    #ifdef NXS_EXPORTS
+        #define NXS_API __declspec(dllexport)
+    #else
+        #define NXS_API __declspec(dllimport)
+    #endif
+#else
+    // Linux and macOS (GCC / Clang)
+    #ifdef NXS_EXPORTS
+        #define NXS_API __attribute__((visibility("default")))
+    #else
+        #define NXS_API 
+    #endif
+#endif
+
 #ifdef NXS_BUILD_DEBUG
 constexpr char const* NXS_BUILD_CFG = "Debug";
 #elif defined(NXS_BUILD_RELWITHDEBINFO)
