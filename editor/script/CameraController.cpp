@@ -3,6 +3,9 @@
 using namespace nxs::editor;
 using namespace nxs;
 
+static const std::string s_MovementAxis = "movement";
+static const std::string s_CameraTurnAxis = "camera_turn";
+
 void CameraController::Begin()
 {
     auto camera = PTR_CAST<Camera>(GetOwner());
@@ -37,9 +40,9 @@ void CameraController::Begin()
         SDL_BUTTON_RIGHT,
         {5, 5}
     };
-    inputManager.RegisterAxisInputMap("movement", cameraMovementKeyInput);
-    inputManager.RegisterAxisInputMap("camera_turn", cameraTurnKeyInput);
-    inputManager.RegisterMouseAxisInputMap("camera_turn", cameraTurnMouseInput);
+    inputManager.RegisterAxisInputMap(s_MovementAxis, cameraMovementKeyInput);
+    inputManager.RegisterAxisInputMap(s_CameraTurnAxis, cameraTurnKeyInput);
+    inputManager.RegisterMouseAxisInputMap(s_CameraTurnAxis, cameraTurnMouseInput);
 }
 
 void CameraController::Update(float dt)
@@ -49,10 +52,10 @@ void CameraController::Update(float dt)
     auto camera = PTR_CAST<Camera>(GetOwner());
     const auto& inputManager = nxs::InputManager::Instance();
 
-    glm::vec3 moveVec = inputManager.GetAxisValue("movement");
+    glm::vec3 moveVec = inputManager.GetAxisValue(s_MovementAxis);
 
     // Transform the translation vector into the camera's local coordinate.
-    glm::vec2 euler = inputManager.GetMouseAxisValue("camera_turn") * dt;
+    glm::vec2 euler = inputManager.GetMouseAxisValue(s_CameraTurnAxis) * dt;
     auto cameraOrientation = camera->GetOrientation();
     cameraOrientation *= glm::quat(glm::radians(glm::vec3(euler.y, euler.x, 0)));
     camera->SetOrientation(cameraOrientation);
@@ -60,7 +63,7 @@ void CameraController::Update(float dt)
     camera->GetComponent<nxs::MoveComponent>()->direction =
         nxs::Vector::SafeNormalize(cameraOrientation * moveVec);
 
-    const auto turninAxis = nxs::Vector::SafeNormalize(inputManager.GetAxisValue("camera_turn"));
+    const auto turninAxis = nxs::Vector::SafeNormalize(inputManager.GetAxisValue(s_CameraTurnAxis));
     auto& compAxis = camera->GetComponent<nxs::TurningComponent>()->axis;
     compAxis.x = turninAxis.y;
     compAxis.y = turninAxis.x;

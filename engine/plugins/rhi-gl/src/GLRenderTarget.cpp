@@ -5,6 +5,8 @@
 #include "nexus/graphics/RenderSystem.h"
 #include "nexus/container/Array.h"
 
+#include "Remotery.h"
+
 USING_NAMESPACE_NXS;
 
 GLRenderTarget::GLRenderTarget(
@@ -34,6 +36,7 @@ GLRenderTarget::~GLRenderTarget()
 
 void GLRenderTarget::Bind(RenderSystem& rs)
 {
+    rmt_ScopedCPUSample(GLRenderTarget_Bind, 0);
     auto renderInterface = rs.GetRenderInterface();
     if (!m_initialized)
     {

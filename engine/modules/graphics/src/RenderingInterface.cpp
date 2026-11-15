@@ -159,6 +159,7 @@ RenderingInterface::~RenderingInterface()
 
 void RenderingInterface::ApplyPipelineState(const PipelineState &state)
 {
+    rmt_ScopedCPUSample(RenderingInterface_ApplyPipelineState, 0);
     if (!glm::all(glm::equal(m_pipelineState.colorMask, state.colorMask)))
     {
         SetColorMask(state.colorMask);
