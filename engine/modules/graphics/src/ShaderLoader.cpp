@@ -21,7 +21,7 @@ Ref<Resource> ShaderLoader::Load(const std::string &path, uint32_t id)
         return nullptr;
     }
 
-    shader->CompileFromSource(*m_renderingInterface, veretxShaderSource, fragmentShaderSource, "");
+    shader->CompileFromSource(veretxShaderSource, fragmentShaderSource, "");
     return PTR_CAST<Resource>(shader);
 }
 Ref<IResourceLoader::LoadResult> ShaderLoader::LoadAsync(const std::string& path, uint32_t id, TaskScheduler& scheduler, Callback onFinishCallback)

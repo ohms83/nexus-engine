@@ -2,6 +2,7 @@
 // Created by nutta on 6/23/2025.
 //
 #include "nexus/Nexus.h"
+#include "nexus/graphics/GpuResourceFactory.h"
 #include "nexus/container/Array.h"
 
 #include <glm/gtc/type_ptr.hpp>
@@ -149,10 +150,11 @@ protected:
     {
         auto& renderSystem = GetRenderSystem();
         const auto renderInterface = renderSystem.GetRenderInterface();
+        const auto gpuResourceFactory = nxs::GetGpuResourceFactory();
         renderSystem.GetRenderInterface()->SetClearColor(0x303030ff);
 
         const auto vertexData = std::make_shared<nxs::BorrowBuffer>(cubeVertices);
-        m_vertexBuffer.reset(renderInterface->CreateVertexBuffer());
+        m_vertexBuffer = gpuResourceFactory->CreateVertexBuffer();
         m_vertexBuffer->Begin()
             .SetVertices(vertexData)
             .SetUsage(nxs::BufferUsage::StaticDraw)
@@ -161,14 +163,14 @@ protected:
         .Build();
 
         const auto indexData = std::make_shared<nxs::BorrowBuffer>(cubeIndices);
-        m_indexBuffer.reset(renderInterface->CreateIndexBuffer());
+        m_indexBuffer = gpuResourceFactory->CreateIndexBuffer();
         m_indexBuffer->Begin()
             .SetIndices(indexData, nxs::FrontFace::ClockWise)
             .SetUsage(nxs::BufferUsage::StaticDraw)
             .SetDrawMode(nxs::DrawMode::Triangle)
         .Build();
 
-        m_gpuProgram.reset(renderInterface->CreateGpuProgram());
+        m_gpuProgram = gpuResourceFactory->CreateGpuProgram();
         m_gpuProgram->BeginCompile()
             .AddSource(vertexShaderSource, nxs::GpuProgram::Type::Vertex)
             .AddSource(fragmentShaderSource, nxs::GpuProgram::Type::Fragment)

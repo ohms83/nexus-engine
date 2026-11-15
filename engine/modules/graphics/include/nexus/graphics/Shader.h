@@ -11,7 +11,7 @@
 #include "nexus/serialize/Serializeable.h"
 
 #include "GpuProgram.h"
-#include "RenderingInterface.h"
+#include "GpuResourceFactory.h"
 
 #include <string>
 #include <string_view>
@@ -47,19 +47,28 @@ NXS_NAMESPACE
         Shader(std::string path, const uint32_t id) : Resource(std::move(path), id) {}
 
         MAYBE_UNUSED bool CompileFromSource(
-            const RenderingInterface& renderingInterface,
             std::string&& vertexShaderSource,
             std::string&& fragmentShaderSource,
             std::string&& geometryShaderSource);
 
         MAYBE_UNUSED bool CompileFromSource(
-            const RenderingInterface& renderingInterface,
+            const IGpuResourceFactory& gpuResourceFactory,
+            const std::string& vertexShaderSource,
+            const std::string& fragmentShaderSource,
+            const std::string& geometryShaderSource);
+
+        MAYBE_UNUSED bool CompileFromSource(
             const std::string& vertexShaderSource,
             const std::string& fragmentShaderSource,
             const std::string& geometryShaderSource);
 
         MAYBE_UNUSED bool CompileFromFile(
-            const RenderingInterface& renderingInterface,
+            const std::string& vertexShaderPath,
+            const std::string& fragmentShaderPath,
+            const std::string& geometryShaderPath);
+
+        MAYBE_UNUSED bool CompileFromFile(
+            const IGpuResourceFactory& gpuResourceFactory,
             const std::string& vertexShaderPath,
             const std::string& fragmentShaderPath,
             const std::string& geometryShaderPath);
@@ -82,10 +91,10 @@ NXS_NAMESPACE
         /**
          * @brief Compile the shader from the existing source files. This is usually called after @c Deserialized.
          * 
-         * @param renderingInterface An interface to the underlying rendering API that will perform the compilation.
          * @return true, if success; otherwise, false.
          */
-        MAYBE_UNUSED bool Compile(RenderingInterface& renderingInterface);
+        MAYBE_UNUSED bool Compile();
+        MAYBE_UNUSED bool Compile(const IGpuResourceFactory& gpuResourceFactory);
 
         NODISCARD Ref<GpuProgram> GetGpuProgram() const
         {

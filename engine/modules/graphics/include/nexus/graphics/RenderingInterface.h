@@ -73,30 +73,6 @@ NXS_NAMESPACE
             NXS_ASSERT_MSG(false, "SetViewport not implemented for this graphics API.");
         }
 
-        NODISCARD virtual VertexBuffer* CreateVertexBuffer() const
-        {
-            NXS_ASSERT_MSG(false, "CreateVertexBuffer not implemented for this graphics API.");
-            return nullptr;
-        }
-
-        NODISCARD virtual IndexBuffer* CreateIndexBuffer() const
-        {
-            NXS_ASSERT_MSG(false, "CreateIndexBuffer not implemented for this graphics API.");
-            return nullptr;
-        }
-
-        NODISCARD virtual GpuProgram* CreateGpuProgram() const
-        {
-            NXS_ASSERT_MSG(false, "CreateGpuProgram not implemented for this graphics API.");
-            return nullptr;
-        }
-
-        NODISCARD virtual TextureProxy* CreateTexture() const
-        {
-            NXS_ASSERT_MSG(false, "CreateTexture not implemented for this graphics API.");
-            return nullptr;
-        }
-
         virtual void OnResize(uint32_t pixel_w, uint32_t pixel_h)
         {
             NXS_ASSERT_MSG(false, "OnResize not implemented for this graphics API.");

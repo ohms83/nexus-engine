@@ -1,4 +1,5 @@
 #include "nexus/graphics/Mesh.h"
+#include "nexus/graphics/GpuResourceFactory.h"
 #include "nexus/container/Array.h"
 #include "nexus/graphics/RenderingInterface.h"
 #include "nexus/memory/OwningBuffer.h"
@@ -79,7 +80,7 @@ namespace
 Ref<Mesh> PrimitiveMesh::CreateBox(
     std::string name,
     const glm::vec3& size,
-    const RenderingInterface& renderingInterface,
+    const IGpuResourceFactory& gpuResourceFactory,
     Ref<Material> material)
 {
     // Scale the unit cube vertices by the specified size
@@ -100,7 +101,7 @@ Ref<Mesh> PrimitiveMesh::CreateBox(
         sizeof(Vertex) * scaledVertices.size());
 
     Ref<VertexBuffer> vertexBuffer;
-    vertexBuffer.reset(renderingInterface.CreateVertexBuffer());
+    vertexBuffer = gpuResourceFactory.CreateVertexBuffer();
     vertexBuffer->Begin()
         .SetVertices(vertexData)
         .SetUsage(BufferUsage::StaticDraw)
@@ -116,7 +117,7 @@ Ref<Mesh> PrimitiveMesh::CreateBox(
         R_CAST<uint8_t*>(indices.data()),
         sizeof(uint32_t) * indices.size());
     Ref<IndexBuffer> indexBuffer;
-    indexBuffer.reset(renderingInterface.CreateIndexBuffer());
+    indexBuffer = gpuResourceFactory.CreateIndexBuffer();
     indexBuffer->Begin()
         .SetIndices(indexData, FrontFace::CounterClockWise)
         .SetUsage(BufferUsage::StaticDraw)

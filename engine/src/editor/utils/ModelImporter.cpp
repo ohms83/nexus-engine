@@ -14,6 +14,7 @@
 
 #include "nexus/graphics/Mesh.h"
 #include "nexus/graphics/Material.h"
+#include "nexus/graphics/GpuResourceFactory.h"
 
 #include "nexus/scene/Scene.h"
 #include "nexus/scene/SceneNode.h"
@@ -183,10 +184,10 @@ void ModelImporter::ProcessMesh(Ref<SceneNode> sceneNode, const aiMesh* ai_mesh,
     Array<uint32_t> indices;
     Ref<VertexBuffer> vertexBuffer;
     Ref<IndexBuffer> indexBuffer;
-    auto renderingInterface = Engine::Instance().GetRenderingInterface();
+    auto* gpuResourceFactory = GetGpuResourceFactory();
     
-    vertexBuffer.reset(renderingInterface->CreateVertexBuffer());
-    indexBuffer.reset(renderingInterface->CreateIndexBuffer());
+    vertexBuffer = gpuResourceFactory->CreateVertexBuffer();
+    indexBuffer = gpuResourceFactory->CreateIndexBuffer();
 
     vertices.reserve(ai_mesh->mNumVertices);
     indices.reserve(ai_mesh->mNumFaces * 3);

@@ -5,10 +5,8 @@
 
 #include "Shader.h"
 #include "ShaderGenerator.h"
-#include "RenderingInterface.h"
 
 #include <string>
-#include <functional>
 
 NXS_NAMESPACE
 {
@@ -17,16 +15,10 @@ NXS_NAMESPACE
     class ShaderLoader : public IResourceLoader
     {
     public:
-        explicit ShaderLoader(Ref<RenderingInterface> renderingInterface)
-            : m_renderingInterface(renderingInterface)
-        {
-        }
-
         Ref<Resource> Load(const std::string& path, uint32_t id) override;
         Ref<LoadResult> LoadAsync(const std::string& path, uint32_t id, TaskScheduler& scheduler, Callback onFinishCallback) override;
 
     private:
-        Ref<RenderingInterface> m_renderingInterface;
         ShaderGenerator m_shaderGenerator;
     };
 }

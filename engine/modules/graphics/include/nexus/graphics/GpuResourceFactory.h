@@ -1,7 +1,6 @@
 #pragma once
 
 #include "nexus/NxsDefine.h"
-#include "nexus/graphics/GraphicsConfig.h"
 
 NXS_NAMESPACE
 {
@@ -20,4 +19,6 @@ NXS_NAMESPACE
         NODISCARD virtual Ref<TextureProxy> CreateTextureProxy() const = 0;
         NODISCARD virtual Ref<GpuProgram> CreateGpuProgram() const = 0;
     };
+
+    NODISCARD IGpuResourceFactory* GetGpuResourceFactory();
 }

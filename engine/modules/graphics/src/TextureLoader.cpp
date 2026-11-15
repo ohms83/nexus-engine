@@ -53,11 +53,6 @@ namespace
     }
 }
 
-TextureLoader::TextureLoader(const Ref<RenderingInterface>& renderingInterface)
-    : m_renderingInterface(renderingInterface)
-{
-}
-
 Ref<Resource> TextureLoader::Load(const std::string& path, uint32_t id)
 {
     return Load(path, id, UINT_CAST(TextureColorSpace::Linear));
@@ -81,7 +76,7 @@ Ref<Resource> TextureLoader::Load(const std::string& path, uint32_t id, const ui
 
     const auto texture = std::make_shared<Texture>(path, id);
     texture->DescribeTexture(desc);
-    texture->AllocateGpuResource(pixels.get(), desc.GetBufferSize(), m_renderingInterface);
+    texture->AllocateGpuResource(pixels.get());
     return PTR_CAST<Resource>(texture);
 }
 
@@ -115,7 +110,7 @@ Ref<IResourceLoader::LoadResult> TextureLoader::LoadAsync(
         return ProcessLoadFile(path, colorSpace);
     });
 
-    const auto waitingTask = std::make_shared<FutureWaitingTask<TextureLoadedData>>(std::move(future), [onFinishCallback, path, id, result, renderInterface = m_renderingInterface](const TextureLoadedData& loadedData)
+    const auto waitingTask = std::make_shared<FutureWaitingTask<TextureLoadedData>>(std::move(future), [onFinishCallback, path, id, result](const TextureLoadedData& loadedData)
     {
         if (!loadedData.pixels)
         {
@@ -126,7 +121,7 @@ Ref<IResourceLoader::LoadResult> TextureLoader::LoadAsync(
 
         const auto texture = std::make_shared<Texture>(path, id);
         texture->DescribeTexture(loadedData.desc);
-        texture->AllocateGpuResource(loadedData.pixels.get(), loadedData.desc.GetBufferSize(), renderInterface);
+        texture->AllocateGpuResource(loadedData.pixels.get());
 
         result->status.store(LoadResult::Status::Ready);
         result->resource = texture;

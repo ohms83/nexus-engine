@@ -3,6 +3,7 @@
 //
 
 #include "nexus/graphics/Mesh.h"
+#include "nexus/graphics/GpuResourceFactory.h"
 #include "nexus/container/Array.h"
 #include "nexus/graphics/RenderingInterface.h"
 #include "nexus/memory/OwningBuffer.h"
@@ -22,7 +23,7 @@ namespace
 Ref<Mesh> PrimitiveMesh::CreatePlane(
     std::string name,
     float width, float height,
-    const RenderingInterface& renderingInterface,
+    const IGpuResourceFactory& gpuResourceFactory,
     Ref<Material> material)
 {
     Array<Vertex> vertices = {
@@ -38,7 +39,7 @@ Ref<Mesh> PrimitiveMesh::CreatePlane(
         sizeof(Vertex) * vertices.size());
 
     Ref<VertexBuffer> vertexBuffer;
-    vertexBuffer.reset(renderingInterface.CreateVertexBuffer());
+    vertexBuffer = gpuResourceFactory.CreateVertexBuffer();
     vertexBuffer->Begin()
         .SetVertices(vertexData)
         .SetUsage(BufferUsage::StaticDraw)
@@ -57,7 +58,7 @@ Ref<Mesh> PrimitiveMesh::CreatePlane(
         R_CAST<uint8_t*>(indices.data()),
         sizeof(uint32_t) * indices.size());
     Ref<IndexBuffer> indexBuffer;
-    indexBuffer.reset(renderingInterface.CreateIndexBuffer());
+    indexBuffer = gpuResourceFactory.CreateIndexBuffer();
     indexBuffer->Begin()
         .SetIndices(indexData, FrontFace::CounterClockWise)
         .SetUsage(BufferUsage::StaticDraw)

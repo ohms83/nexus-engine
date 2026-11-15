@@ -90,7 +90,7 @@ NXS_NAMESPACE
             auto mesh = PrimitiveMesh::CreatePlane(
                 meshPath,
                 width, height,
-                renderingInterface);
+                *GetGpuResourceFactory());
             SetMesh(mesh);
         }
 

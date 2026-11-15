@@ -47,7 +47,7 @@ protected:
     ResourceManager resourceManager;
     void SetUp() override
     {
-        resourceManager.RegisterLoader(typeid(Texture), std::make_unique<TextureLoader>(std::make_shared<FakeRendering>()));
+        resourceManager.RegisterLoader(typeid(Texture), std::make_unique<TextureLoader>());
     }
 
     void TearDown() override

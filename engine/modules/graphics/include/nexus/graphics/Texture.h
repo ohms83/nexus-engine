@@ -9,7 +9,7 @@
 #include "nexus/resource/ResourceLoader.h"
 #include "nexus/resource/ResourceManager.h"
 #include "TextureProxy.h"
-#include "RenderingInterface.h"
+#include "GpuResourceFactory.h"
 
 NXS_NAMESPACE
 {
@@ -35,7 +35,10 @@ NXS_NAMESPACE
             return m_desc;
         }
 
-        MAYBE_UNUSED Ref<TextureProxy> AllocateGpuResource(const uint8_t* pixels, size_t size, Ref<RenderingInterface> renderingInterface);
+        MAYBE_UNUSED Ref<TextureProxy> AllocateGpuResource(const uint8_t* pixels);
+        MAYBE_UNUSED Ref<TextureProxy> AllocateGpuResource(
+            const uint8_t* pixels,
+            const IGpuResourceFactory& gpuResourceFactory);
 
         NODISCARD Ref<TextureProxy> GetProxy() const
         {

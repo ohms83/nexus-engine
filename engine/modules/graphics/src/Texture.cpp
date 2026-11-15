@@ -3,7 +3,7 @@
 //
 
 #include "nexus/graphics/Texture.h"
-#include "nexus/graphics/RenderingInterface.h"
+#include "nexus/graphics/GpuResourceFactory.h"
 
 USING_NAMESPACE_NXS;
 
@@ -47,7 +47,14 @@ void Texture::DescribeTexture(const TextureDescription& desc)
     m_desc = desc;
 }
 
-Ref<TextureProxy> Texture::AllocateGpuResource(const uint8_t* pixels, const size_t size, Ref<RenderingInterface> renderingInterface)
+Ref<TextureProxy> Texture::AllocateGpuResource(const uint8_t* pixels)
+{
+    return AllocateGpuResource(pixels, *GetGpuResourceFactory());
+}
+
+Ref<TextureProxy> Texture::AllocateGpuResource(
+    const uint8_t* pixels,
+    const IGpuResourceFactory& gpuResourceFactory)
 {
     if (m_textureProxy != nullptr)
     {
@@ -55,9 +62,9 @@ Ref<TextureProxy> Texture::AllocateGpuResource(const uint8_t* pixels, const size
         return m_textureProxy;
     }
 
-    m_textureProxy.reset(renderingInterface->CreateTexture());
+    m_textureProxy = gpuResourceFactory.CreateTextureProxy();
     m_textureProxy->Begin(m_desc)
-        .LoadData(pixels, size)
+        .LoadData(pixels, m_desc.width * m_desc.height * m_desc.channels)
     .End();
     return m_textureProxy;
 }

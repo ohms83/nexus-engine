@@ -2,6 +2,7 @@
 
 #include "nexus/NxsCommon.h"
 #include "nexus/graphics/RenderSystem.h"
+#include "nexus/graphics/GpuResourceFactory.h"
 
 USING_NAMESPACE_NXS;
 
@@ -85,7 +86,7 @@ private:
     NODISCARD uint32_t Alloc() override { return 1; }
 };
 
-class FakeRendering : public RenderingInterface
+class FakeRendering : public RenderingInterface, public IGpuResourceFactory
 {
 public:
     FakeRendering() {}
@@ -93,10 +94,10 @@ public:
 
     void DebugMarker(const std::string& message) override {}
 
-    GpuProgram* CreateGpuProgram() const override { return new FakeGpuProgram(); }
-    TextureProxy* CreateTexture() const override { return new FakeTexture(); }
-    IndexBuffer* CreateIndexBuffer() const override { return new FakeIndexBuffer(); }
-    VertexBuffer* CreateVertexBuffer() const override { return new FakdeVertexBuffer(); }
+    Ref<GpuProgram> CreateGpuProgram() const override { return std::make_shared<FakeGpuProgram>(); }
+    Ref<TextureProxy> CreateTextureProxy() const override { return std::make_shared<FakeTexture>(); }
+    Ref<IndexBuffer> CreateIndexBuffer() const override { return std::make_shared<FakeIndexBuffer>(); }
+    Ref<VertexBuffer> CreateVertexBuffer() const override { return std::make_shared<FakdeVertexBuffer>(); }
 };
 
 class BadGpuProgram : public GpuProgram
@@ -108,7 +109,7 @@ private:
 class BadRendering : public FakeRendering
 {
 public:
-    GpuProgram* CreateGpuProgram() const override { return new BadGpuProgram(); }
+    Ref<GpuProgram> CreateGpuProgram() const override { return std::make_shared<BadGpuProgram>(); }
 };
 
 class FakeRenderer final : public SceneRenderer

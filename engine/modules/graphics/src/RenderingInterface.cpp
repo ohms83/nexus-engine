@@ -5,6 +5,7 @@
 
 #include "nexus/graphics/RenderingInterface.h"
 #include "nexus/graphics/RHIPlugin.h"
+#include "nexus/graphics/GpuResourceFactory.h"
 #include "nexus/debug/Logger.h"
 #include "nexus/debug/LogDispatcher.h"
 
@@ -41,9 +42,15 @@ namespace
         }
     };
 
-    nxs::IRHIPlugin* LoadOpenGLPlugin(const nxs::GraphicsConfig& config)
+    RHIPluginModule& GetRHIPluginModule()
     {
         static RHIPluginModule runtime;
+        return runtime;
+    }
+
+    nxs::IRHIPlugin* LoadOpenGLPlugin(const nxs::GraphicsConfig& config)
+    {
+        auto& runtime = GetRHIPluginModule();
         if (runtime.plugin)
         {
             return runtime.plugin;
@@ -109,6 +116,16 @@ namespace
 
         runtime.initialized = true;
         return runtime.plugin;
+    }
+}
+
+NXS_NAMESPACE
+{
+    IGpuResourceFactory* GetGpuResourceFactory()
+    {
+        auto* plugin = GetRHIPluginModule().plugin;
+        NXS_ASSERT_MSG(plugin, "RHI plugin is not initialized");
+        return plugin->GetGpuResourceFactory();
     }
 }
 

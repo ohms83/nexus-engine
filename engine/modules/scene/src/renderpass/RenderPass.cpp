@@ -207,7 +207,7 @@ void RenderPass::Resolve(RenderingInterface &renderingInterface)
     {    
         Hasher hasher;
         auto shader = std::make_shared<Shader>(globalShaderName, hasher.Hash32(name));
-        if (shader->CompileFromSource(renderingInterface,
+        if (shader->CompileFromSource(
             globalShaderSources[GpuProgram::Type::Vertex],
             globalShaderSources[GpuProgram::Type::Fragment],
             globalShaderSources[GpuProgram::Type::Geometry]))

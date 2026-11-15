@@ -47,10 +47,10 @@ Engine& Engine::Initialize(WindowContext window, const GraphicsConfig& graphicsC
     );
 
     auto resourceManager = std::make_shared<ResourceManager>();
-    resourceManager->RegisterLoader(typeid(Texture), std::make_unique<TextureLoader>(s_engine->GetRenderingInterface()));
-    resourceManager->RegisterLoader(typeid(Shader), std::make_unique<ShaderLoader>(s_engine->GetRenderingInterface()));
+    resourceManager->RegisterLoader(typeid(Texture), std::make_unique<TextureLoader>());
+    resourceManager->RegisterLoader(typeid(Shader), std::make_unique<ShaderLoader>());
     resourceManager->RegisterLoader(typeid(Material), std::make_unique<MaterialLoader>(s_engine->GetRenderingInterface(), *resourceManager));
-    resourceManager->RegisterLoader(typeid(Model), std::make_unique<ModelLoader>(s_engine->GetRenderingInterface(), resourceManager));
+    resourceManager->RegisterLoader(typeid(Model), std::make_unique<ModelLoader>(resourceManager));
     s_engine->m_resourceManager = resourceManager;
 
     InitModules();

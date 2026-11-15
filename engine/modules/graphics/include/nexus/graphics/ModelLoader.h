@@ -21,9 +21,7 @@ NXS_NAMESPACE
     class ModelLoader final : public IResourceLoader
     {
     public:
-        explicit ModelLoader(
-            const Ref<RenderingInterface>& renderingInterface,
-            const Ref<ResourceManager>& resourceManager);
+        explicit ModelLoader(const Ref<ResourceManager>& resourceManager);
 
         /**
          * @brief Attempts to load a resource from the given path.
@@ -48,7 +46,6 @@ NXS_NAMESPACE
         void ProcessTextures(const Ref<Material>& newMat, const aiMaterial* material, const std::filesystem::path&) const;
         void ComputeBoundingVolume(const Ref<Model>& model);
 
-        Ref<RenderingInterface> m_renderingInterface;
         Ref<ResourceManager> m_resourceManager;
     };
 }

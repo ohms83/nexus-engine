@@ -3,6 +3,8 @@
 //
 
 #include "nexus/graphics/Shader.h"
+#include "nexus/graphics/GpuResourceFactory.h"
+
 #include "nexus/container/Array.h"
 #include "nexus/debug/LogDispatcher.h"
 #include "nexus/core/StringUtil.h"
@@ -18,16 +20,28 @@ USING_NAMESPACE_NXS;
 DEFINE_LOG(Shader);
 
 bool Shader::CompileFromSource(
-    const RenderingInterface& renderingInterface,
     std::string&& vertexShaderSource,
     std::string&& fragmentShaderSource,
     std::string&& geometryShaderSource)
+{
+    return CompileFromSource(
+        *GetGpuResourceFactory(),
+        vertexShaderSource,
+        fragmentShaderSource,
+        geometryShaderSource);
+}
+
+bool Shader::CompileFromSource(
+    const IGpuResourceFactory& gpuResourceFactory,
+    const std::string& vertexShaderSource,
+    const std::string& fragmentShaderSource,
+    const std::string& geometryShaderSource)
 {
     m_sources[GpuProgram::Type::Vertex] = vertexShaderSource;
     m_sources[GpuProgram::Type::Fragment] = fragmentShaderSource;
     m_sources[GpuProgram::Type::Geometry] = geometryShaderSource;
 
-    m_gpuProgram.reset(renderingInterface.CreateGpuProgram());
+    m_gpuProgram = gpuResourceFactory.CreateGpuProgram();
     m_gpuProgram->BeginCompile()
         .AddSource(vertexShaderSource, GpuProgram::Type::Vertex)
         .AddSource(fragmentShaderSource, GpuProgram::Type::Fragment)
@@ -43,32 +57,31 @@ bool Shader::CompileFromSource(
 }
 
 bool Shader::CompileFromSource(
-    const RenderingInterface& renderingInterface,
     const std::string& vertexShaderSource,
     const std::string& fragmentShaderSource,
     const std::string& geometryShaderSource)
 {
-    m_sources[GpuProgram::Type::Vertex] = vertexShaderSource;
-    m_sources[GpuProgram::Type::Fragment] = fragmentShaderSource;
-    m_sources[GpuProgram::Type::Geometry] = geometryShaderSource;
-
-    m_gpuProgram.reset(renderingInterface.CreateGpuProgram());
-    m_gpuProgram->BeginCompile()
-        .AddSource(vertexShaderSource, GpuProgram::Type::Vertex)
-        .AddSource(fragmentShaderSource, GpuProgram::Type::Fragment)
-        .AddSource(geometryShaderSource, GpuProgram::Type::Geometry)
-    .Compile();
-
-    if (m_gpuProgram->GetHandle() == 0) return false;
-
-    ExtractUniform(vertexShaderSource);
-    ExtractUniform(fragmentShaderSource);
-    ExtractUniform(geometryShaderSource);
-    return true;
+    return CompileFromSource(
+        *GetGpuResourceFactory(),
+        vertexShaderSource,
+        fragmentShaderSource,
+        geometryShaderSource);
 }
 
 bool Shader::CompileFromFile(
-    const RenderingInterface& renderingInterface,
+    const std::string& vertexShaderPath,
+    const std::string& fragmentShaderPath,
+    const std::string& geometryShaderPath)
+{
+    return CompileFromFile(
+        *GetGpuResourceFactory(),
+        vertexShaderPath,
+        fragmentShaderPath,
+        geometryShaderPath);
+}
+
+bool Shader::CompileFromFile(
+    const IGpuResourceFactory& gpuResourceFactory,
     const std::string& vertexShaderPath,
     const std::string& fragmentShaderPath,
     const std::string& geometryShaderPath)
@@ -89,16 +102,25 @@ bool Shader::CompileFromFile(
     fragmenShaderSource << fragmentShader.rdbuf();
     geometryShaderSource << geometryShader.rdbuf();
 
-    return CompileFromSource(renderingInterface, vertexShaderSource.str(), fragmenShaderSource.str(), geometryShaderSource.str());
+    return CompileFromSource(
+        gpuResourceFactory,
+        vertexShaderSource.str(),
+        fragmenShaderSource.str(),
+        geometryShaderSource.str());
 }
 
-bool Shader::Compile(RenderingInterface& renderingInterface)
+bool Shader::Compile()
+{
+    return Compile(*GetGpuResourceFactory());
+}
+
+bool Shader::Compile(const IGpuResourceFactory& gpuResourceFactory)
 {
     const auto vertex = m_sources.at(GpuProgram::Type::Vertex);
     const auto fragment = m_sources.at(GpuProgram::Type::Fragment);
     const auto geometry = m_sources.at(GpuProgram::Type::Geometry);
 
-    m_gpuProgram.reset(renderingInterface.CreateGpuProgram());
+    m_gpuProgram = gpuResourceFactory.CreateGpuProgram();
     m_gpuProgram->BeginCompile()
         .AddSource(vertex, GpuProgram::Type::Vertex)
         .AddSource(fragment, GpuProgram::Type::Fragment)

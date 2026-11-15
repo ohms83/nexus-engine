@@ -2,6 +2,7 @@
 // Created by nutta on 6/23/2025.
 //
 #include "nexus/Nexus.h"
+#include "nexus/graphics/GpuResourceFactory.h"
 #include <glm/gtc/type_ptr.hpp>
 
 // Shader sources
@@ -77,9 +78,10 @@ protected:
     {
         auto& renderSystem = GetRenderSystem();
         const auto renderInterface = renderSystem.GetRenderInterface();
+        const auto gpuResourceFactory = nxs::GetGpuResourceFactory();
         renderSystem.GetRenderInterface()->SetClearColor(0x303030ff);
 
-        m_gpuProgram.reset(renderInterface->CreateGpuProgram());
+        m_gpuProgram = gpuResourceFactory->CreateGpuProgram();
         m_gpuProgram->BeginCompile()
             .AddSource(vertexShaderSource, nxs::GpuProgram::Type::Vertex)
             .AddSource(fragmentShaderSource, nxs::GpuProgram::Type::Fragment)
@@ -92,7 +94,7 @@ protected:
         m_mesh = nxs::PrimitiveMesh::CreateBox(
             "Cube",
             glm::vec3(1.0f),
-            *renderInterface
+            *gpuResourceFactory
         );
         return true;
     }

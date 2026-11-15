@@ -2,6 +2,7 @@
 #include "nexus/GLRenderTarget.h"
 #include "nexus/GLTexture.h"
 #include "nexus/GLRenderingInterface.h"
+#include "nexus/graphics/GpuResourceFactory.h"
 #include "nexus/graphics/RenderSystem.h"
 #include "nexus/container/Array.h"
 
@@ -27,7 +28,7 @@ void GLRenderTarget::Bind(RenderSystem& rs)
     if (!m_initialized)
     {
         // Create textures and FBO
-        m_colorTexture.reset(renderInterface->CreateTexture());
+        m_colorTexture = GetGpuResourceFactory()->CreateTextureProxy();
         TextureDescription desc;
         desc.width = INT_CAST(m_width);
         desc.height = INT_CAST(m_height);
@@ -40,7 +41,7 @@ void GLRenderTarget::Bind(RenderSystem& rs)
         m_colorTexture->LoadData(empty.data(), INT_CAST(bytes));
         m_colorTexture->End();
 
-        m_depthTexture.reset(renderInterface->CreateTexture());
+        m_depthTexture = GetGpuResourceFactory()->CreateTextureProxy();
         TextureDescription dd;
         dd.width = INT_CAST(m_width);
         dd.height = INT_CAST(m_height);

@@ -1,6 +1,7 @@
 #include <iostream>
 #include "nexus/container/Array.h"
 #include "nexus/Nexus.h"
+#include "nexus/graphics/GpuResourceFactory.h"
 
 // Define Vertex structure
 struct Vertex {
@@ -77,10 +78,11 @@ protected:
     {
         auto& renderSystem = GetRenderSystem();
         const auto renderInterface = renderSystem.GetRenderInterface();
+        const auto gpuResourceFactory = nxs::GetGpuResourceFactory();
         renderSystem.GetRenderInterface()->SetClearColor({0.2f, 0.3f, 0.3f, 1.0f});
 
         const auto vertexData = std::make_shared<nxs::BorrowBuffer>(squareVertices);
-        m_vertexBuffer.reset(renderInterface->CreateVertexBuffer());
+        m_vertexBuffer = gpuResourceFactory->CreateVertexBuffer();
         m_vertexBuffer->Begin()
             .SetVertices(vertexData)
             .SetUsage(nxs::BufferUsage::StaticDraw)
@@ -89,14 +91,14 @@ protected:
         .Build();
 
         const auto indexData = std::make_shared<nxs::BorrowBuffer>(squareIndices);
-        m_indexBuffer.reset(renderInterface->CreateIndexBuffer());
+        m_indexBuffer = gpuResourceFactory->CreateIndexBuffer();
         m_indexBuffer->Begin()
             .SetIndices(indexData, nxs::FrontFace::ClockWise)
             .SetUsage(nxs::BufferUsage::StaticDraw)
             .SetDrawMode(nxs::DrawMode::Triangle)
         .Build();
 
-        m_gpuProgram.reset(renderInterface->CreateGpuProgram());
+        m_gpuProgram = gpuResourceFactory->CreateGpuProgram();
         m_gpuProgram->BeginCompile()
             .AddSource(vertexShaderSource, nxs::GpuProgram::Type::Vertex)
             .AddSource(fragmentShaderSource, nxs::GpuProgram::Type::Fragment)

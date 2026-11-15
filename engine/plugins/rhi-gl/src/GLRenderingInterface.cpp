@@ -7,10 +7,6 @@
 #include <sstream>
 
 #include "nexus/debug/Logger.h"
-#include "nexus/GLIndexBuffer.h"
-#include "nexus/GLGpuProgram.h"
-#include "nexus/GLTexture.h"
-#include "nexus/GLVertexBuffer.h"
 #include "SDL3/SDL_error.h"
 
 #include "Remotery.h"
@@ -121,26 +117,6 @@ void GLRenderingInterface::SwapBuffer()
 void GLRenderingInterface::SetViewport(int32_t x, int32_t y, int32_t w, int32_t h)
 {
     CALL_GL_FUNC(glViewport(x, y, w, h));
-}
-
-VertexBuffer* GLRenderingInterface::CreateVertexBuffer() const
-{
-    return new GLVertexBuffer();
-}
-
-IndexBuffer* GLRenderingInterface::CreateIndexBuffer() const
-{
-    return new GLIndexBuffer();
-}
-
-GpuProgram* GLRenderingInterface::CreateGpuProgram() const
-{
-    return new GLGpuProgram();
-}
-
-TextureProxy* GLRenderingInterface::CreateTexture() const
-{
-    return new GLTexture();
 }
 
 void GLRenderingInterface::DrawIndexed(const Ref<IndexBuffer> indexBuffer)

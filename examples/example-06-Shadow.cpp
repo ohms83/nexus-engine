@@ -2,6 +2,7 @@
 // Created by nutta on 6/23/2025.
 //
 #include "nexus/Nexus.h"
+#include "nexus/graphics/GpuResourceFactory.h"
 #include "nexus/container/Array.h"
 #include "imgui.h"
 #include <glm/gtc/type_ptr.hpp>
@@ -93,12 +94,8 @@ public:
 protected:
     bool Init_Internal() override
     {
-        auto& renderSystem = GetRenderSystem();
-        const auto renderInterface = renderSystem.GetRenderInterface();
-
         const auto engine = nxs::Engine::Instance();
         m_modelLoader = std::make_unique<nxs::ModelLoader>(
-            renderInterface,
             engine.GetResourceManager()
         );
 
@@ -178,7 +175,7 @@ private:
         meshComp->SetMesh(nxs::PrimitiveMesh::CreatePlane(
                 "Ground Plane",
                 10, 10,
-                *GetRenderSystem().GetRenderInterface(),
+                *nxs::GetGpuResourceFactory(),
                 material
             )
         );

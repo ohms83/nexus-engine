@@ -2,6 +2,8 @@
 // Created by nutta on 8/18/2025.
 //
 #include "nexus/graphics/ModelLoader.h"
+#include "nexus/graphics/GpuResourceFactory.h"
+
 #include "nexus/container/Array.h"
 #include "nexus/debug/LogDispatcher.h"
 #include "nexus/memory/OwningBuffer.h"
@@ -110,13 +112,10 @@ static Array<Ref<IResourceLoader::LoadResult>> PreloadTextures(const aiScene& sc
     return result;
 }
 
-ModelLoader::ModelLoader(
-    const Ref<RenderingInterface>& renderingInterface,
-    const Ref<ResourceManager>& resourceManager)
-    : m_renderingInterface(renderingInterface)
-    , m_resourceManager(resourceManager)
+ModelLoader::ModelLoader(const Ref<ResourceManager>& resourceManager)
+    : m_resourceManager(resourceManager)
 {
-    NXS_ASSERT(renderingInterface && resourceManager);
+    NXS_ASSERT(resourceManager);
 }
 
 Ref<Resource> ModelLoader::Load(const std::string &path, uint32_t id)
@@ -285,8 +284,9 @@ void ModelLoader::ProcessMesh(const Ref<Model>& model, const aiMesh* mesh, const
     Array<uint32_t> indices;
     Ref<VertexBuffer> vertexBuffer;
     Ref<IndexBuffer> indexBuffer;
-    vertexBuffer.reset(m_renderingInterface->CreateVertexBuffer());
-    indexBuffer.reset(m_renderingInterface->CreateIndexBuffer());
+    IGpuResourceFactory* gpuFactory = GetGpuResourceFactory();
+    vertexBuffer = gpuFactory->CreateVertexBuffer();
+    indexBuffer = gpuFactory->CreateIndexBuffer();
 
     vertices.reserve(mesh->mNumVertices);
     indices.reserve(mesh->mNumFaces * 3);

@@ -12,7 +12,7 @@ protected:
         resourceManager.RegisterLoader(typeid(Material), std::make_unique<MaterialLoader>(
             std::make_shared<FakeRendering>(),
             resourceManager));
-        resourceManager.RegisterLoader(typeid(Texture), std::make_unique<TextureLoader>(std::make_shared<FakeRendering>()));
+        resourceManager.RegisterLoader(typeid(Texture), std::make_unique<TextureLoader>());
     }
 
     void TearDown() override

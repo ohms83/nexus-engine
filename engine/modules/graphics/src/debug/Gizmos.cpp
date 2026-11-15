@@ -5,6 +5,7 @@
 #include "nexus/graphics/debug/Gizmos.h"
 #include "nexus/container/Array.h"
 #include "nexus/graphics/RenderSystem.h"
+#include "nexus/graphics/GpuResourceFactory.h"
 #include "nexus/math/Math.h"
 #include "nexus/memory/BorrowBuffer.h"
 
@@ -26,15 +27,16 @@ namespace
     class VertexData
     {
     public:
-        VertexData(size_t maxSize, const RenderingInterface& renderInterface, const DrawMode drawMode)
+        VertexData(size_t maxSize, IGpuResourceFactory& gpuResourceFactory, const DrawMode drawMode)
             : m_drawMode(drawMode)
+            , m_gpuResourceFactory(gpuResourceFactory)
             , m_newMaxVertex(maxSize)
             , m_newMaxIndex(maxSize)
         {
-            GenerateBuffers(renderInterface);
+            GenerateBuffers();
         }
 
-        void GenerateBuffers(const RenderingInterface& renderInterface)
+        void GenerateBuffers()
         {
             if (m_newMaxVertex > 0)
             {
@@ -46,7 +48,7 @@ namespace
                 auto* data = R_CAST<uint8_t*>(m_vertices.data());
                 uint64_t bufferSize = sizeof(Vertex) * m_vertices.capacity();
                 const auto buffer = std::make_shared<BorrowBuffer>(data, bufferSize);
-                m_vertexBuffer.reset(renderInterface.CreateVertexBuffer());
+                m_vertexBuffer = m_gpuResourceFactory.CreateVertexBuffer();
                 m_vertexBuffer->Begin()
                     .SetVertices(buffer)
                     .SetUsage(BufferUsage::DynamicDraw)
@@ -66,7 +68,7 @@ namespace
                 auto* data = R_CAST<uint8_t*>(m_indices.data());
                 const uint64_t bufferSize = sizeof(uint32_t) * m_indices.capacity();
                 const auto buffer = std::make_shared<BorrowBuffer>(data, bufferSize);
-                m_indexBuffer.reset(renderInterface.CreateIndexBuffer());
+                m_indexBuffer = m_gpuResourceFactory.CreateIndexBuffer();
                 m_indexBuffer->Begin()
                     .SetIndices(buffer, FrontFace::ClockWise)
                     .SetUsage(BufferUsage::DynamicDraw)
@@ -124,7 +126,7 @@ namespace
             if (!m_indices.empty())
             {
                 if (m_newMaxVertex > 0 || m_newMaxIndex > 0) {
-                    GenerateBuffers(renderInterface);
+                    GenerateBuffers();
                 }
 
                 m_vertexBuffer->Bind();
@@ -144,7 +146,7 @@ namespace
             if (m_indices.empty()) return;
 
             if (m_newMaxVertex > 0 || m_newMaxIndex > 0) {
-                GenerateBuffers(renderInterface);
+                GenerateBuffers();
             }
 
             m_vertexBuffer->Bind();
@@ -163,6 +165,7 @@ namespace
 
     private:
         DrawMode m_drawMode;
+        IGpuResourceFactory& m_gpuResourceFactory;
         Array<Vertex> m_vertices;
         Array<uint32_t> m_indices;
         Ref<VertexBuffer>   m_vertexBuffer;
@@ -217,11 +220,10 @@ void main()
 
 void Gizmos::Init(const RenderSystem& renderSystem)
 {
-    const auto renderInterface = renderSystem.GetRenderInterface();
+    auto& gpuResourceFactory = *GetGpuResourceFactory();
 
     s_overlayShader = std::make_shared<Shader>("_OverlayShader", 0);
     const auto succeed = s_overlayShader->CompileFromSource(
-        *renderInterface,
         s_vertexShaderSource,
         s_fragmentShaderSource,
         "");
@@ -234,11 +236,11 @@ void Gizmos::Init(const RenderSystem& renderSystem)
     s_overlayMaterial->depthTest = false;
     s_overlayMaterial->depthWrite = false;
 
-    s_vertexDataList.emplace(POINT, std::make_shared<VertexData>(100, *renderInterface, DrawMode::Point));
-    s_vertexDataList.emplace(LINE, std::make_shared<VertexData>(100, *renderInterface, DrawMode::Line));
-    s_vertexDataList.emplace(BOX, std::make_shared<VertexData>(200, *renderInterface, DrawMode::Line));
+    s_vertexDataList.emplace(POINT, std::make_shared<VertexData>(100, gpuResourceFactory, DrawMode::Point));
+    s_vertexDataList.emplace(LINE, std::make_shared<VertexData>(100, gpuResourceFactory, DrawMode::Line));
+    s_vertexDataList.emplace(BOX, std::make_shared<VertexData>(200, gpuResourceFactory, DrawMode::Line));
     // TODO: Use DrawMode::LineStrip
-    s_vertexDataList.emplace(SPHERE, std::make_shared<VertexData>(200, *renderInterface, DrawMode::Line));
+    s_vertexDataList.emplace(SPHERE, std::make_shared<VertexData>(200, gpuResourceFactory, DrawMode::Line));
 }
 
 void Gizmos::Destroy()
