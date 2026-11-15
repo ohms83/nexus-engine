@@ -66,6 +66,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 endif()
 
 add_subdirectory(modules)
+add_subdirectory(plugins)
 
 file(GLOB_RECURSE ENGINE_EDITOR_MODULE_SOURCES CONFIGURE_DEPENDS src/editor/*.cpp)
 add_library(nexus-editor-module STATIC ${ENGINE_EDITOR_MODULE_SOURCES})

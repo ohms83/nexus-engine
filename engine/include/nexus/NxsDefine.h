@@ -13,6 +13,7 @@
     #else
         #define NXS_API __declspec(dllimport)
     #endif
+    #define NXS_API_EXPORT __declspec(dllexport) 
 #else
     // Linux and macOS (GCC / Clang)
     #ifdef NXS_EXPORTS
@@ -20,6 +21,7 @@
     #else
         #define NXS_API 
     #endif
+    #define NXS_API_EXPORT __attribute__((visibility("default")))
 #endif
 
 #ifdef NXS_BUILD_DEBUG
@@ -96,6 +98,12 @@ NXS_NAMESPACE
 
     template<typename T>
     using WeakRef = std::weak_ptr<T>;
+
+    template<typename T, class... _Types>
+    Ref<T> NewRef(_Types&&... _Args) { return std::make_shared<T>(std::forward<_Types>(_Args)...); }
+    
+    template<typename T, class... _Types>
+    Ptr<T> NewPtr(_Types&&... _Args) { return std::make_unique<T>(std::forward<_Types>(_Args)...); }
 
     enum class PixelFormat
     {
