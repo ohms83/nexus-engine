@@ -3,6 +3,7 @@
 #include "nexus/NxsCommon.h"
 #include "nexus/graphics/RenderSystem.h"
 #include "nexus/graphics/GpuResourceFactory.h"
+#include "nexus/graphics/RenderTarget.h"
 
 USING_NAMESPACE_NXS;
 
@@ -86,6 +87,17 @@ private:
     NODISCARD uint32_t Alloc() override { return 1; }
 };
 
+class FakeRenderTarget : public RenderTarget
+{
+public:
+    void Bind(RenderSystem&) override {}
+    void Unbind(RenderSystem&) override {}
+    NODISCARD Ref<TextureProxy> GetDepthTextureProxy() const override
+    {
+        return std::make_shared<FakeTexture>();
+    }
+};
+
 class FakeRendering : public RenderingInterface, public IGpuResourceFactory
 {
 public:
@@ -98,6 +110,10 @@ public:
     Ref<TextureProxy> CreateTextureProxy() const override { return std::make_shared<FakeTexture>(); }
     Ref<IndexBuffer> CreateIndexBuffer() const override { return std::make_shared<FakeIndexBuffer>(); }
     Ref<VertexBuffer> CreateVertexBuffer() const override { return std::make_shared<FakdeVertexBuffer>(); }
+    Ref<RenderTarget> CreateRenderTarget(uint32_t, uint32_t, bool) const override
+    {
+        return std::make_shared<FakeRenderTarget>();
+    }
 };
 
 class BadGpuProgram : public GpuProgram

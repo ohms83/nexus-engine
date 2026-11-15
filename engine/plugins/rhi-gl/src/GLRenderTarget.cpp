@@ -2,14 +2,24 @@
 #include "nexus/GLRenderTarget.h"
 #include "nexus/GLTexture.h"
 #include "nexus/GLRenderingInterface.h"
-#include "nexus/graphics/GpuResourceFactory.h"
 #include "nexus/graphics/RenderSystem.h"
 #include "nexus/container/Array.h"
 
 USING_NAMESPACE_NXS;
 
-GLRenderTarget::GLRenderTarget(uint32_t width, uint32_t height, PixelFormat format)
-    : m_width(width), m_height(height), m_format(format)
+GLRenderTarget::GLRenderTarget(
+    const uint32_t width,
+    const uint32_t height,
+    Ref<TextureProxy> colorTexture,
+    Ref<TextureProxy> depthTexture,
+    const PixelFormat format,
+    const bool depthOnly)
+    : m_colorTexture(std::move(colorTexture))
+    , m_depthTexture(std::move(depthTexture))
+    , m_width(width)
+    , m_height(height)
+    , m_format(format)
+    , m_depthOnly(depthOnly)
 {
 }
 
@@ -27,35 +37,45 @@ void GLRenderTarget::Bind(RenderSystem& rs)
     auto renderInterface = rs.GetRenderInterface();
     if (!m_initialized)
     {
-        // Create textures and FBO
-        m_colorTexture = GetGpuResourceFactory()->CreateTextureProxy();
-        TextureDescription desc;
-        desc.width = INT_CAST(m_width);
-        desc.height = INT_CAST(m_height);
-        desc.format = m_format;
-        // Begin and alloc empty data:
-        m_colorTexture->Begin(desc);
-        // Allocate empty texture
-        const size_t bytes = desc.GetBufferSize();
-        Array<uint8_t> empty(bytes, 0);
-        m_colorTexture->LoadData(empty.data(), INT_CAST(bytes));
-        m_colorTexture->End();
+        if (m_colorTexture)
+        {
+            TextureDescription colorDesc;
+            colorDesc.width = INT_CAST(m_width);
+            colorDesc.height = INT_CAST(m_height);
+            colorDesc.format = m_format;
+            const size_t bytes = colorDesc.GetBufferSize();
+            Array<uint8_t> empty(bytes, 0);
+            m_colorTexture->Begin(colorDesc);
+            m_colorTexture->LoadData(empty.data(), INT_CAST(bytes));
+            m_colorTexture->End();
+        }
 
-        m_depthTexture = GetGpuResourceFactory()->CreateTextureProxy();
+        NXS_ASSERT_MSG(m_depthTexture, "Render target requires a depth texture.");
         TextureDescription dd;
         dd.width = INT_CAST(m_width);
         dd.height = INT_CAST(m_height);
+        dd.channels = 1;
         dd.format = PixelFormat::Depth;
+        dd.filterMin = TextureFilterMode::Nearest;
+        dd.filterMag = TextureFilterMode::Nearest;
+        dd.wrapModeS = TextureWrapMode::ClampToEdge;
+        dd.wrapModeT = TextureWrapMode::ClampToEdge;
         m_depthTexture->Begin(dd);
-        const size_t db = dd.GetBufferSize();
-        Array<uint8_t> emptyDepth(db, 0);
-        m_depthTexture->LoadData(emptyDepth.data(), INT_CAST(db));
+        m_depthTexture->LoadData(nullptr, 0);
         m_depthTexture->End();
 
         CALL_GL_FUNC(glGenFramebuffers(1, &m_fbo));
         CALL_GL_FUNC(glBindFramebuffer(GL_FRAMEBUFFER, m_fbo));
-        CALL_GL_FUNC(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_colorTexture->GetHandle(), 0));
+        if (m_colorTexture)
+        {
+            CALL_GL_FUNC(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_colorTexture->GetHandle(), 0));
+        }
         CALL_GL_FUNC(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_depthTexture->GetHandle(), 0));
+        if (m_depthOnly)
+        {
+            CALL_GL_FUNC(glDrawBuffer(GL_NONE));
+            CALL_GL_FUNC(glReadBuffer(GL_NONE));
+        }
         const auto status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
         NXS_ASSERT(status == GL_FRAMEBUFFER_COMPLETE);
         CALL_GL_FUNC(glBindFramebuffer(GL_FRAMEBUFFER, 0));

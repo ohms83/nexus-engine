@@ -10,15 +10,18 @@ layout (location = 6) in vec2 aTexCoord0;
 out vec3 FragPos;
 out vec3 Normal;
 out vec2 TexCoord0;
+out vec4 FragPosLightSpace;
 
 uniform mat4 _Model;
 uniform mat4 _View;
 uniform mat4 _Projection;
+uniform mat4 _LightSpaceMatrix;
 
 void main()
 {
     vec4 worldPos = _Model * vec4(aPos, 1.0);
     FragPos = vec3(worldPos);
+    FragPosLightSpace = _LightSpaceMatrix * worldPos;
     TexCoord0 = aTexCoord0;
 
     // Compute normal
@@ -38,6 +41,7 @@ out vec4 FragColor;
 in vec3 FragPos;
 in vec3 Normal;
 in vec2 TexCoord0;
+in vec4 FragPosLightSpace;
 
 // Camera's position in the world space.
 uniform vec3 _CameraPos;
@@ -73,7 +77,8 @@ void main()
 
     // Caculate lighting
     vec3 ambientBase = CalcAmbientLight(material, _AmbientLight);
-    vec3 lightingAccumulator = AccumulateLighting(material, FragPos, normal, viewDir);
+    vec3 lightingAccumulator = AccumulateLighting(
+        material, FragPos, normal, viewDir, FragPosLightSpace);
 
     // Lighting is multiplied by albedo. Ambient color is also multiplied by albedo
     // so that the object's details will show on the shaded surface.

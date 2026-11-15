@@ -12,15 +12,18 @@ out vec3 FragPos;
 out vec3 Normal;
 out vec2 TexCoord0;
 out mat3 TBN;
+out vec4 FragPosLightSpace;
 
 uniform mat4 _Model;
 uniform mat4 _View;
 uniform mat4 _Projection;
+uniform mat4 _LightSpaceMatrix;
 
 void main()
 {
     vec4 worldPos = _Model * vec4(aPos, 1.0);
     FragPos = vec3(worldPos);
+    FragPosLightSpace = _LightSpaceMatrix * worldPos;
     Normal = TransformNormalToWorldSpace(aNormal, _Model);
     TexCoord0 = aTexCoord0;
     TBN = GetTBNMatrix(aTangent, aNormal, mat3(_Model));
@@ -40,6 +43,7 @@ in vec3 FragPos;
 in vec3 Normal;
 in vec2 TexCoord0;
 in mat3 TBN;
+in vec4 FragPosLightSpace;
 
 uniform vec3 _CameraPos;
 uniform sampler2D _DiffuseMap;
@@ -64,6 +68,8 @@ uniform int _NumDirectLight;
 uniform DirectLight _DirectLights[8];
 uniform int _NumPointLight;
 uniform PointLight _PointLights[20];
+
+@include "include/shadow_functions.glsl"
 
 const float PI = 3.14159265359;
 
@@ -176,12 +182,16 @@ void main()
     for (int i = 0; i < _NumDirectLight; ++i)
     {
         vec3 lightDir = normalize(-_DirectLights[i].direction);
+        float shadow = i == 0
+            ? CalcShadow(FragPosLightSpace, normal, lightDir)
+            : 0.0;
         vec3 diffuseRadiance = _DirectLights[i].properties.color *
             _DirectLights[i].properties.diffuseIntensity;
         vec3 specularRadiance = _DirectLights[i].properties.color *
             _DirectLights[i].properties.specularIntensity;
         color += EvaluateLight(diffuseRadiance, specularRadiance, normal, viewDir, lightDir,
-            baseColor.rgb, metalness, roughness, specularColor, _HasSpecularMap != 0);
+            baseColor.rgb, metalness, roughness, specularColor, _HasSpecularMap != 0) *
+            (1.0 - shadow);
     }
 
     for (int i = 0; i < _NumPointLight; ++i)

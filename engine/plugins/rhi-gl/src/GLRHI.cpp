@@ -6,6 +6,7 @@
 #include "nexus/GLIndexBuffer.h"
 #include "nexus/GLGpuProgram.h"
 #include "nexus/GLTexture.h"
+#include "nexus/GLRenderTarget.h"
 
 NXS_NAMESPACE
 {
@@ -30,6 +31,20 @@ NXS_NAMESPACE
         NODISCARD virtual Ref<GpuProgram> CreateGpuProgram() const override
         {
             return NewRef<GLGpuProgram>();   
+        }
+
+        NODISCARD Ref<RenderTarget> CreateRenderTarget(
+            const uint32_t width,
+            const uint32_t height,
+            const bool depthOnly) const override
+        {
+            return NewRef<GLRenderTarget>(
+                width,
+                height,
+                depthOnly ? nullptr : CreateTextureProxy(),
+                CreateTextureProxy(),
+                depthOnly ? PixelFormat::Depth : PixelFormat::RGBA,
+                depthOnly);
         }
     };
 

@@ -16,6 +16,8 @@ public:
     NODISCARD glm::mat4 GetViewMatrix() const override { return glm::mat4(1.0f); }
     NODISCARD glm::mat4 GetProjectionMatrix() const override { return glm::mat4(1.0f); }
     NODISCARD glm::mat4 GetViewProjectionMatrix() const override { return glm::mat4(1.0f); }
+    NODISCARD RenderTarget* GetRenderTarget() const override { return nullptr; }
+    void SetRenderTarget(RenderTarget*) override {}
 
     NODISCARD Array<SceneNode*> GetVisibleNodes(const Scene&) const override
     {

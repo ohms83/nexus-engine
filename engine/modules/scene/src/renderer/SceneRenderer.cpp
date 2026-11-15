@@ -6,13 +6,17 @@
 
 #include <format>
 #include <algorithm>
+#include <cmath>
 #include <cstring>
+#include <limits>
 
 #include "nexus/debug/Logger.h"
 #include "nexus/graphics/debug/Gizmos.h"
 #include "nexus/graphics/RenderSystem.h"
 #include "nexus/graphics/RenderCommand.h"
 #include "nexus/graphics/RenderTarget.h"
+#include "nexus/graphics/GpuResourceFactory.h"
+#include "nexus/graphics/Shader.h"
 #include "nexus/graphics/RenderCommandBatcher.h"
 #include "nexus/graphics/RenderCommand.h"
 #include "nexus/geom/Frustum.h"
@@ -206,9 +210,190 @@ void SceneRenderer::SetCameraUniforms(Ref<GpuProgram> gpuProgram, const glm::vec
     gpuProgram->SetUniformMatrix("_Projection", projectionMtx, false);
 }
 
+void SceneRenderer::RenderDirectionalShadowMap(RenderSystem& renderSystem, const Scene& scene)
+{
+    rmt_ScopedCPUSample(SceneRenderer_RenderDirectionalShadowMap, 0);
+    m_shadowMapReady = false;
+    const auto& registry = *scene.GetRegistry();
+
+    SceneNode* lightNode = nullptr;
+    const DirectLightComponent* shadowLight = nullptr;
+    for (const auto view = registry.view<const SceneNodeComponent, const DirectLightComponent>();
+         const auto& [entity, nodeComponent, light] : view.each())
+    {
+        if (!nodeComponent.active) continue;
+
+        lightNode = SceneNode::FindNode(nodeComponent.id);
+        if (!lightNode)
+        {
+            LOG_ERROR(LogSceneRenderer, std::format(
+                "Directional shadow map light node {} was not found.", nodeComponent.id));
+            continue;
+        }
+
+        shadowLight = &light;
+        break;
+    }
+
+    if (!shadowLight || !lightNode)
+    {
+        return;
+    }
+
+    const glm::vec3 unnormalizedDirection =
+        lightNode->GetGlobalOrientation() * shadowLight->direction;
+    const float directionLength = glm::length(unnormalizedDirection);
+    if (!std::isfinite(directionLength) || directionLength < 0.000001f)
+    {
+        LOG_WARNING(LogSceneRenderer, "Directional shadow map is disabled because the light direction is invalid.");
+        return;
+    }
+    const glm::vec3 lightDirection = unnormalizedDirection / directionLength;
+
+    glm::vec3 boundsMin(std::numeric_limits<float>::max());
+    glm::vec3 boundsMax(std::numeric_limits<float>::lowest());
+    bool hasBounds = false;
+    for (const auto view = registry.view<const SceneNodeComponent, const MeshComponent>();
+         const auto& [entity, nodeComponent, meshComponent] : view.each())
+    {
+        if (!nodeComponent.active) continue;
+
+        auto* node = SceneNode::FindNode(nodeComponent.id);
+        const auto mesh = meshComponent.GetMesh();
+        if (!node || !mesh) continue;
+
+        const glm::mat4 modelMatrix = Matrix::ExpandAffine(node->GetGlobalAffineTransform());
+        const glm::vec3 center = glm::vec3(modelMatrix * glm::vec4(mesh->GetSphere().center, 1.0f));
+        const float maxScale = std::max({
+            glm::length(glm::vec3(modelMatrix[0])),
+            glm::length(glm::vec3(modelMatrix[1])),
+            glm::length(glm::vec3(modelMatrix[2]))});
+        const float radius = std::max(mesh->GetSphere().radius * maxScale, 0.0f);
+        boundsMin = glm::min(boundsMin, center - radius);
+        boundsMax = glm::max(boundsMax, center + radius);
+        hasBounds = true;
+    }
+
+    if (!hasBounds)
+    {
+        return;
+    }
+
+    const glm::vec3 center = (boundsMin + boundsMax) * 0.5f;
+    const float radius = std::max(glm::length(boundsMax - boundsMin) * 0.5f, 1.0f);
+    const float lightDistance = radius * 2.0f + 10.0f;
+    const glm::vec3 up = std::abs(glm::dot(lightDirection, glm::vec3(0.0f, 1.0f, 0.0f))) > 0.98f
+        ? glm::vec3(0.0f, 0.0f, 1.0f)
+        : glm::vec3(0.0f, 1.0f, 0.0f);
+    const glm::mat4 lightView = glm::lookAt(
+        center - lightDirection * lightDistance,
+        center,
+        up);
+    const glm::mat4 lightProjection = glm::ortho(
+        -radius,
+        radius,
+        -radius,
+        radius,
+        0.1f,
+        lightDistance + radius * 2.0f);
+    m_lightSpaceMatrix = lightProjection * lightView;
+
+    constexpr uint32_t shadowMapResolution = 2048;
+    if (!m_shadowMap)
+    {
+        m_shadowMap = GetGpuResourceFactory()->CreateRenderTarget(
+            shadowMapResolution,
+            shadowMapResolution,
+            true);
+    }
+    if (!m_shadowMap)
+    {
+        LOG_ERROR(LogSceneRenderer, "Failed to create a directional shadow map render target.");
+        return;
+    }
+
+    if (!m_shadowProgram)
+    {
+        auto shader = std::make_shared<Shader>("_DirectionalShadowMap", 0);
+        constexpr auto vertexSource = R"(
+            #version 330 core
+            layout (location = 0) in vec3 aPos;
+            uniform mat4 _Model;
+            uniform mat4 _LightSpaceMatrix;
+            void main()
+            {
+                gl_Position = _LightSpaceMatrix * _Model * vec4(aPos, 1.0);
+            }
+        )";
+        constexpr auto fragmentSource = R"(
+            #version 330 core
+            void main() {}
+        )";
+        if (!shader->CompileFromSource(vertexSource, fragmentSource, ""))
+        {
+            LOG_ERROR(LogSceneRenderer, "Failed to compile the directional shadow map shader.");
+            return;
+        }
+        m_shadowProgram = shader->GetGpuProgram();
+    }
+
+    m_shadowMap->Bind(renderSystem);
+    auto renderInterface = renderSystem.GetRenderInterface();
+    PipelineState shadowState;
+    shadowState.depthTest = true;
+    shadowState.depthWrite = true;
+    shadowState.depthFunction = DepthFunction::Lesser;
+    shadowState.overrideBlendMode = BlendMode::None;
+    renderInterface->ApplyPipelineState(shadowState);
+    renderInterface->ClearDepth(1.0f);
+    m_shadowProgram->Bind();
+    m_shadowProgram->SetUniformMatrix("_LightSpaceMatrix", m_lightSpaceMatrix, false);
+
+    for (const auto view = registry.view<const SceneNodeComponent, const MeshComponent>();
+         const auto& [entity, nodeComponent, meshComponent] : view.each())
+    {
+        if (!nodeComponent.active) continue;
+
+        auto* node = SceneNode::FindNode(nodeComponent.id);
+        const auto mesh = meshComponent.GetMesh();
+        if (!node || !mesh || !mesh->GetVertexBuffer() || !mesh->GetIndexBuffer()) continue;
+
+        const auto indexBuffer = mesh->GetIndexBuffer();
+        m_shadowProgram->SetUniformMatrix(
+            "_Model",
+            Matrix::ExpandAffine(node->GetGlobalAffineTransform()),
+            false);
+        mesh->GetVertexBuffer()->Bind();
+        indexBuffer->Bind();
+        renderSystem.DrawIndexed(indexBuffer);
+    }
+
+    m_shadowProgram->Unbind();
+    m_shadowMap->Unbind(renderSystem);
+    m_shadowMapReady = true;
+}
+
+void SceneRenderer::SetShadowMapParams(Ref<GpuProgram> gpuProgram) const
+{
+    rmt_ScopedCPUSample(SceneRenderer_SetShadowMapParams, 0);
+    gpuProgram->SetUniformInt("_HasShadowMap", m_shadowMapReady ? 1 : 0);
+    if (!m_shadowMapReady)
+    {
+        return;
+    }
+
+    gpuProgram->SetUniformMatrix("_LightSpaceMatrix", m_lightSpaceMatrix, false);
+    gpuProgram->SetUniformTexture2D(
+        "_ShadowMap",
+        m_shadowMap->GetDepthTextureProxy(),
+        15);
+}
+
 void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
 {
     rmt_ScopedCPUSample(SceneRenderer_Render, 0);
+
+    RenderDirectionalShadowMap(renderSystem, scene);
 
     Array<RenderCommand> commands;
     commands.reserve(1024);
@@ -221,12 +406,22 @@ void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
         rmt_BeginCPUSampleDynamic(pass->name.c_str(), 0);
         rmt_BeginOpenGLSampleDynamic(pass->name.c_str());
 
-        pass->Begin(renderSystem);
         Ref<GpuProgram> globalShader = pass->pipelineState.globalShader;
 
         const auto sceneViews = pass->PopulateSceneView(scene);
+        if (sceneViews.empty())
+        {
+            pass->Begin(renderSystem);
+            pass->End(renderSystem);
+        }
         for (const auto view : sceneViews)
         {
+            if (auto* target = view->GetRenderTarget())
+            {
+                target->Bind(renderSystem);
+            }
+            pass->Begin(renderSystem);
+
             commands.clear();
 
             rmt_BeginCPUSample(SceneRenderer_BuildCommandsFromVisibleNodes, 0)
@@ -306,6 +501,7 @@ void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
                         SetAmbientLightParams(gpuProgram, *scene.GetRegistry());
                         SetDirectLightParams(gpuProgram, scene);
                         SetPointLightParams(gpuProgram, scene);
+                        SetShadowMapParams(gpuProgram);
                         usingProgram = gpuProgram;
                     }
 
@@ -321,9 +517,12 @@ void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
                     }
                 }
             }
+            pass->End(renderSystem);
+            if (auto* target = view->GetRenderTarget())
+            {
+                target->Unbind(renderSystem);
+            }
         }
-        // End per-pass GPU and CPU samples
-        pass->End(renderSystem);
 
         rmt_EndOpenGLSample();
         rmt_EndCPUSample();

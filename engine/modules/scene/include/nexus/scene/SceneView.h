@@ -3,6 +3,7 @@
 #include "nexus/NxsDefine.h"
 #include "nexus/container/Array.h"
 #include "nexus/scene/SceneNode.h"
+#include "nexus/graphics/RenderTarget.h"
 
 #include "glm/glm.hpp"
 
@@ -31,5 +32,7 @@ NXS_NAMESPACE
         NODISCARD virtual glm::mat4 GetProjectionMatrix() const = 0;
         NODISCARD virtual glm::mat4 GetViewProjectionMatrix() const = 0;
         NODISCARD virtual Array<SceneNode*> GetVisibleNodes(const Scene& scene) const = 0;
+        NODISCARD virtual RenderTarget* GetRenderTarget() const = 0;
+        virtual void SetRenderTarget(RenderTarget* renderTarget) = 0;
     };
 }

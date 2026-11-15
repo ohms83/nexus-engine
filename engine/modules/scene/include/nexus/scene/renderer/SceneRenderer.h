@@ -61,11 +61,17 @@ NXS_NAMESPACE
         static void SetAmbientLightParams(Ref<GpuProgram> gpuProgram, const entt::registry& registry);
         static void SetDirectLightParams(Ref<GpuProgram> gpuProgram, const SceneNode& scene);
         static void SetPointLightParams(Ref<GpuProgram> gpuProgram, const SceneNode& scene);
+        void RenderDirectionalShadowMap(RenderSystem& renderSystem, const Scene& scene);
+        void SetShadowMapParams(Ref<GpuProgram> gpuProgram) const;
 
         static void SetCameraUniforms(Ref<GpuProgram> gpuProgram, const glm::vec3& cameraPos, const glm::mat4& viewMtx, const glm::mat4& projectionMtx);
 
         //! A list of render passes sorted by their priority.
         Array<Ref<const RenderPass>> m_renderPasses;
         std::unordered_map<std::string, Ref<RenderTarget>> m_renderTargets;
+        Ref<RenderTarget> m_shadowMap;
+        Ref<GpuProgram> m_shadowProgram;
+        glm::mat4 m_lightSpaceMatrix{1.0f};
+        bool m_shadowMapReady = false;
     };
 }

@@ -49,11 +49,14 @@ NXS_NAMESPACE
 
         // NODISCARD bool IsObjectVisible(const Sphere &boundingSphere, const glm::mat4 &modelMtx, const glm::vec3 &scale) const override;
         NODISCARD Array<SceneNode*> GetVisibleNodes(const Scene& scene) const override;
+        NODISCARD RenderTarget* GetRenderTarget() const override { return m_renderTarget; }
+        void SetRenderTarget(RenderTarget* renderTarget) override { m_renderTarget = renderTarget; }
 
         NODISCARD Frustum GetViewFrustum() const;
 
     protected:
         //! Projection matrix.
         glm::mat4 m_projMtx{1.0f};
+        RenderTarget* m_renderTarget = nullptr;
     };
 }

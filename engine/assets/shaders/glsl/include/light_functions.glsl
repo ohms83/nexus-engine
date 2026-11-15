@@ -1,5 +1,6 @@
 @include "material.glsl"
 @include "light_types.glsl"
+@include "shadow_functions.glsl"
 
 /**
  * @brief Calculates the ambient light contribution.
@@ -112,7 +113,12 @@ vec3 CalcPointLight(Material material, PointLight light, vec3 fragPos, vec3 norm
  * @return The accumulated lighting.
  */
 // GLSL uses global uniforms directly or passes fixed-size arrays
-vec3 AccumulateLighting(Material material, vec3 fragPos, vec3 normal, vec3 viewDir)
+vec3 AccumulateLighting(
+    Material material,
+    vec3 fragPos,
+    vec3 normal,
+    vec3 viewDir,
+    vec4 lightSpacePosition)
 {
     vec3 result = vec3(0.0);
 
@@ -120,7 +126,10 @@ vec3 AccumulateLighting(Material material, vec3 fragPos, vec3 normal, vec3 viewD
     // Accessing the global uniform _DirectLights and _NumDirectLight
     for (int i = 0; i < _NumDirectLight; ++i) 
     {
-        result += CalcDirectLight(material, _DirectLights[i], normal, viewDir);
+        float shadow = i == 0
+            ? CalcShadow(lightSpacePosition, normal, normalize(-_DirectLights[i].direction))
+            : 0.0;
+        result += CalcDirectLight(material, _DirectLights[i], normal, viewDir) * (1.0 - shadow);
     }
 
     // 2. Accumulate Point Lights

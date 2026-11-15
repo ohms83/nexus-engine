@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GraphicsConst.h"
+#include "TextureProxy.h"
 
 NXS_NAMESPACE
 {
@@ -24,5 +25,7 @@ NXS_NAMESPACE
          * @brief Unbinds the render target.
          */
         virtual void Unbind(RenderSystem& rs) = 0;
+
+        NODISCARD virtual Ref<TextureProxy> GetDepthTextureProxy() const = 0;
     };
 }

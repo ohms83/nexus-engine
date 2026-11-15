@@ -8,6 +8,7 @@ NXS_NAMESPACE
     class IndexBuffer;
     class TextureProxy;
     class GpuProgram;
+    class RenderTarget;
 
     class IGpuResourceFactory
     {
@@ -18,6 +19,10 @@ NXS_NAMESPACE
         NODISCARD virtual Ref<IndexBuffer> CreateIndexBuffer() const = 0;
         NODISCARD virtual Ref<TextureProxy> CreateTextureProxy() const = 0;
         NODISCARD virtual Ref<GpuProgram> CreateGpuProgram() const = 0;
+        NODISCARD virtual Ref<RenderTarget> CreateRenderTarget(
+            uint32_t width,
+            uint32_t height,
+            bool depthOnly = false) const = 0;
     };
 
     NODISCARD IGpuResourceFactory* GetGpuResourceFactory();
