@@ -3,9 +3,19 @@
 #include "nexus/NxsDefine.h"
 #include "nexus/graphics/GraphicsConfig.h"
 
+#if defined(_WIN32)
+    #if defined(NXS_RHI_PLUGIN_EXPORTS)
+        #define NXS_RHI_PLUGIN_API __declspec(dllexport)
+    #else
+        #define NXS_RHI_PLUGIN_API __declspec(dllimport)
+    #endif
+#else
+    #define NXS_RHI_PLUGIN_API __attribute__((visibility("default")))
+#endif
+
 NXS_NAMESPACE
 {
-    class NXS_API IGpuResourceFactory;
+    class IGpuResourceFactory;
 
     class IRHIPlugin
     {
@@ -16,8 +26,8 @@ NXS_NAMESPACE
     };
     
     extern "C" {
-        MAYBE_UNUSED NXS_API IRHIPlugin* InitRHI(const GraphicsConfig& config);
-        NODISCARD NXS_API IRHIPlugin* GetRHI();
-        NXS_API void DestroyRHI();
+        MAYBE_UNUSED NXS_RHI_PLUGIN_API IRHIPlugin* InitRHI(const GraphicsConfig& config);
+        NODISCARD NXS_RHI_PLUGIN_API IRHIPlugin* GetRHI();
+        NXS_RHI_PLUGIN_API void DestroyRHI();
     }
 }

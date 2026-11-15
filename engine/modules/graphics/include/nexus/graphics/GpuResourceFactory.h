@@ -10,7 +10,7 @@ NXS_NAMESPACE
     class TextureProxy;
     class GpuProgram;
 
-    class NXS_API IGpuResourceFactory
+    class IGpuResourceFactory
     {
     public:
         virtual ~IGpuResourceFactory() = default;

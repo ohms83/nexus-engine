@@ -31,9 +31,12 @@ NXS_NAMESPACE
         }
     };
 
-    class NXS_API GLRHIPlugin : public IRHIPlugin
+    class GLRHIPlugin : public IRHIPlugin
     {
     public:
+        GLRHIPlugin() = default;
+        virtual ~GLRHIPlugin() = default;
+
         IGpuResourceFactory* GetGpuResourceFactory() override
         {
             return &m_factory;
@@ -45,18 +48,18 @@ NXS_NAMESPACE
 
     static GLRHIPlugin* s_plugin = nullptr;
     
-    NXS_API_EXPORT IRHIPlugin* InitRHI(const GraphicsConfig& config)
+    IRHIPlugin* InitRHI(const GraphicsConfig& config)
     {
         s_plugin = new GLRHIPlugin();
         return s_plugin;
     }
 
-    NXS_API_EXPORT IRHIPlugin* GetRHI()
+    IRHIPlugin* GetRHI()
     {
         return s_plugin;
     }
 
-    NXS_API_EXPORT void DestroyRHI()
+    void DestroyRHI()
     {
         if (s_plugin)
         {
