@@ -1,5 +1,5 @@
-set(SDL_SHARED OFF)
-set(SDL_STATIC ON)
+set(SDL_SHARED ON CACHE BOOL "Build SDL as a shared library" FORCE)
+set(SDL_STATIC OFF CACHE BOOL "Build SDL without a static library" FORCE)
 add_subdirectory(SDL)
 
 add_subdirectory(glad EXCLUDE_FROM_ALL)
