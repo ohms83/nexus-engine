@@ -45,6 +45,10 @@ SceneNode::SceneNode(Ref<entt::registry> registry, std::string name)
 SceneNode::~SceneNode()
 {
     OnDestroy();
+    for (const auto& child : m_children)
+    {
+        child->InvalidateGlobalTransform();
+    }
     s_nodeRegistry.erase(GetId());
 }
 
@@ -294,6 +298,7 @@ void SceneNode::SetPosition(const glm::vec3& position)
     positionComponent->value = position;
     m_localTransformExplicit = false;
     m_transformDirty = true;
+    InvalidateGlobalTransform();
 }
 
 void SceneNode::SetOrientation(const glm::quat& orientation)
@@ -304,6 +309,7 @@ void SceneNode::SetOrientation(const glm::quat& orientation)
     orientationComponent->quat = orientation;
     m_localTransformExplicit = false;
     m_transformDirty = true;
+    InvalidateGlobalTransform();
 }
 
 void SceneNode::SetScale(const glm::vec3& scale)
@@ -314,6 +320,7 @@ void SceneNode::SetScale(const glm::vec3& scale)
     scaleComponent->value = scale;
     m_localTransformExplicit = false;
     m_transformDirty = true;
+    InvalidateGlobalTransform();
 }
 
 void SceneNode::SetLocalTransform(const glm::mat4& transform)
@@ -325,6 +332,7 @@ void SceneNode::SetLocalTransform(const glm::mat4& transform)
     }
     m_localTransformExplicit = true;
     m_transformDirty = true;
+    InvalidateGlobalTransform();
 }
 
 void SceneNode::SetLocalAffineTransform(const glm::mat4x3& transform)
@@ -332,6 +340,7 @@ void SceneNode::SetLocalAffineTransform(const glm::mat4x3& transform)
     m_transform = transform;
     m_localTransformExplicit = true;
     m_transformDirty = true;
+    InvalidateGlobalTransform();
 }
 
 const glm::vec3& SceneNode::GetPosition() const
@@ -387,20 +396,35 @@ void SceneNode::UpdateGlobalTransform()
     rmt_ScopedCPUSample(SceneNode_UpdateGlobalTransform, 0);
     m_transformDirty = true;
     UpdateTransform();
+    m_globalTransformDirty = true;
     for (const auto& child : m_children)
     {
         child->UpdateGlobalTransform();
     }
 }
 
+void SceneNode::InvalidateGlobalTransform()
+{
+    if (m_globalTransformDirty) return;
+    m_globalTransformDirty = true;
+    for (const auto& child : m_children)
+    {
+        child->InvalidateGlobalTransform();
+    }
+}
+
 const glm::mat4x3& SceneNode::GetGlobalAffineTransform() const
 {
     rmt_ScopedCPUSample(SceneNode_GetGlobalAffineTransform, 0);
-    UpdateTransform();
-    auto parent = m_parent.lock();
-    m_globalTransform = parent
-        ? Matrix::ComposeAffine(parent->GetGlobalAffineTransform(), m_transform)
-        : m_transform;
+    if (m_globalTransformDirty)
+    {
+        UpdateTransform();
+        auto parent = m_parent.lock();
+        m_globalTransform = parent
+            ? Matrix::ComposeAffine(parent->GetGlobalAffineTransform(), m_transform)
+            : m_transform;
+        m_globalTransformDirty = false;
+    }
     return m_globalTransform;
 }
 
@@ -444,6 +468,7 @@ void SceneNode::LookAt(const glm::vec3& center, const glm::vec3& up)
         orientationComponent->LookAt(GetPosition(), center, up);
         m_localTransformExplicit = false;
         m_transformDirty = true;
+        InvalidateGlobalTransform();
     }
 }
 

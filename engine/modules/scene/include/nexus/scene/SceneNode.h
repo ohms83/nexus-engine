@@ -171,6 +171,8 @@ NXS_NAMESPACE
         NODISCARD glm::mat4 GetLocalTransform() const;
         NODISCARD const glm::mat4x3& GetLocalAffineTransform() const;
         void UpdateTransform() const;
+        //! Rebuilds local transforms and invalidates world transforms for this subtree.
+        //! Call after directly changing transform components instead of using node setters.
         void UpdateGlobalTransform();
         //! Returns this node's transform composed with all its ancestors.
         NODISCARD glm::mat4 GetGlobalTransform() const;
@@ -202,6 +204,8 @@ NXS_NAMESPACE
         virtual void OnUpdate(float dt) {}
 
     private:
+        void InvalidateGlobalTransform();
+
         template<typename TVisitor>
         void VisitDescendantsImpl(TVisitor& visitor) const
         {
@@ -242,6 +246,7 @@ NXS_NAMESPACE
         mutable glm::mat4x3 m_transform { 1.0f };
         mutable glm::mat4x3 m_globalTransform { 1.0f };
         mutable bool m_transformDirty = true;
+        mutable bool m_globalTransformDirty = true;
         bool m_localTransformExplicit = false;
 
         // --- ECS ---

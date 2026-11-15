@@ -17,6 +17,13 @@ protected:
     }
 };
 
+class TransformCacheProbe : public SceneNode3D
+{
+public:
+    using SceneNode3D::SceneNode3D;
+    bool IsGlobalTransformDirty() const { return m_globalTransformDirty; }
+};
+
 TEST_F(SceneNodeTest, AddNode)
 {
     // The specified node shouldn't have already existed before adding.
@@ -331,6 +338,77 @@ TEST_F(SceneNodeTest, ReparentingAndDetachingUpdatesGlobalTransform)
     secondParent->RemoveChild(child);
     EXPECT_EQ(child->GetParent(), nullptr);
     EXPECT_NEAR(child->GetGlobalPosition().x, 1.0f, 0.0001f);
+}
+
+TEST_F(SceneNodeTest, CachedGlobalTransformsTrackRepeatedAncestorChanges)
+{
+    auto parent = scene->EmplaceChild<SceneNode3D>("Parent");
+    auto child = parent->EmplaceChild<SceneNode3D>("Child");
+    auto sibling = parent->EmplaceChild<SceneNode3D>("Sibling");
+    auto grandchild = child->EmplaceChild<SceneNode3D>("Grandchild");
+    child->SetPosition({1.0f, 0.0f, 0.0f});
+    grandchild->SetPosition({2.0f, 0.0f, 0.0f});
+
+    EXPECT_FLOAT_EQ(grandchild->GetGlobalPosition().x, 3.0f);
+    EXPECT_FLOAT_EQ(sibling->GetGlobalPosition().x, 0.0f);
+    parent->SetPosition({10.0f, 0.0f, 0.0f});
+    EXPECT_FLOAT_EQ(grandchild->GetGlobalPosition().x, 13.0f);
+    parent->SetPosition({20.0f, 0.0f, 0.0f});
+    EXPECT_FLOAT_EQ(sibling->GetGlobalPosition().x, 20.0f);
+    EXPECT_FLOAT_EQ(grandchild->GetGlobalPosition().x, 23.0f);
+
+    glm::mat4x3 local(1.0f);
+    local[3] = {4.0f, 0.0f, 0.0f};
+    child->SetLocalAffineTransform(local);
+    EXPECT_FLOAT_EQ(grandchild->GetGlobalPosition().x, 26.0f);
+}
+
+TEST_F(SceneNodeTest, GlobalTransformCacheIsInvalidatedByAncestorChanges)
+{
+    auto registry = std::make_shared<entt::registry>();
+    auto parent = std::make_shared<TransformCacheProbe>(registry, "Parent");
+    auto child = std::make_shared<TransformCacheProbe>(registry, "Child");
+    parent->AddChild(child);
+
+    EXPECT_TRUE(child->IsGlobalTransformDirty());
+    EXPECT_EQ(child->GetGlobalPosition(), glm::vec3(0.0f));
+    EXPECT_FALSE(parent->IsGlobalTransformDirty());
+    EXPECT_FALSE(child->IsGlobalTransformDirty());
+    EXPECT_EQ(child->GetGlobalPosition(), glm::vec3(0.0f));
+    EXPECT_FALSE(child->IsGlobalTransformDirty());
+
+    parent->SetScale({2.0f, 2.0f, 2.0f});
+    EXPECT_TRUE(parent->IsGlobalTransformDirty());
+    EXPECT_TRUE(child->IsGlobalTransformDirty());
+    EXPECT_EQ(child->GetGlobalPosition(), glm::vec3(0.0f));
+    EXPECT_FALSE(parent->IsGlobalTransformDirty());
+    EXPECT_FALSE(child->IsGlobalTransformDirty());
+}
+
+TEST_F(SceneNodeTest, CachedGlobalTransformUpdatesWhenParentIsDestroyed)
+{
+    auto registry = std::make_shared<entt::registry>();
+    auto parent = std::make_shared<SceneNode3D>(registry, "Parent");
+    auto child = std::make_shared<SceneNode3D>(registry, "Child");
+    parent->SetPosition({10.0f, 0.0f, 0.0f});
+    child->SetPosition({2.0f, 0.0f, 0.0f});
+    parent->AddChild(child);
+
+    EXPECT_FLOAT_EQ(child->GetGlobalPosition().x, 12.0f);
+    parent.reset();
+    EXPECT_FLOAT_EQ(child->GetGlobalPosition().x, 2.0f);
+}
+
+TEST_F(SceneNodeTest, UpdateGlobalTransformRefreshesDirectComponentChanges)
+{
+    auto parent = scene->EmplaceChild<SceneNode3D>("Parent");
+    auto child = parent->EmplaceChild<SceneNode3D>("Child");
+    child->SetPosition({2.0f, 0.0f, 0.0f});
+    EXPECT_FLOAT_EQ(child->GetGlobalPosition().x, 2.0f);
+
+    parent->GetComponent<PositionComponent>()->value.x = 5.0f;
+    parent->UpdateGlobalTransform();
+    EXPECT_FLOAT_EQ(child->GetGlobalPosition().x, 7.0f);
 }
 
 TEST_F(SceneNodeTest, GetAllChildren)

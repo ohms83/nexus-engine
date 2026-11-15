@@ -250,53 +250,63 @@ void SceneRenderer::RenderDirectionalShadowMap(RenderSystem& renderSystem, const
     }
     const glm::vec3 lightDirection = unnormalizedDirection / directionLength;
 
-    glm::vec3 boundsMin(std::numeric_limits<float>::max());
-    glm::vec3 boundsMax(std::numeric_limits<float>::lowest());
-    bool hasBounds = false;
-    for (const auto view = registry.view<const SceneNodeComponent, const MeshComponent>();
-         const auto& [entity, nodeComponent, meshComponent] : view.each())
+    struct ShadowMesh
     {
-        if (!nodeComponent.active) continue;
-
-        auto* node = SceneNode::FindNode(nodeComponent.id);
-        const auto mesh = meshComponent.GetMesh();
-        if (!node || !mesh) continue;
-
-        const glm::mat4 modelMatrix = Matrix::ExpandAffine(node->GetGlobalAffineTransform());
-        const glm::vec3 center = glm::vec3(modelMatrix * glm::vec4(mesh->GetSphere().center, 1.0f));
-        const float maxScale = std::max({
-            glm::length(glm::vec3(modelMatrix[0])),
-            glm::length(glm::vec3(modelMatrix[1])),
-            glm::length(glm::vec3(modelMatrix[2]))});
-        const float radius = std::max(mesh->GetSphere().radius * maxScale, 0.0f);
-        boundsMin = glm::min(boundsMin, center - radius);
-        boundsMax = glm::max(boundsMax, center + radius);
-        hasBounds = true;
-    }
-
-    if (!hasBounds)
+        Ref<Mesh> mesh;
+        glm::mat4 modelMatrix;
+    };
+    Array<ShadowMesh> shadowMeshes;
     {
-        return;
-    }
+        rmt_ScopedCPUSample(SceneRenderer_CalculateLightBounds, 0);
+        glm::vec3 boundsMin(std::numeric_limits<float>::max());
+        glm::vec3 boundsMax(std::numeric_limits<float>::lowest());
+        bool hasBounds = false;
+        for (const auto view = registry.view<const SceneNodeComponent, const MeshComponent>();
+            const auto& [entity, nodeComponent, meshComponent] : view.each())
+        {
+            if (!nodeComponent.active) continue;
 
-    const glm::vec3 center = (boundsMin + boundsMax) * 0.5f;
-    const float radius = std::max(glm::length(boundsMax - boundsMin) * 0.5f, 1.0f);
-    const float lightDistance = radius * 2.0f + 10.0f;
-    const glm::vec3 up = std::abs(glm::dot(lightDirection, glm::vec3(0.0f, 1.0f, 0.0f))) > 0.98f
-        ? glm::vec3(0.0f, 0.0f, 1.0f)
-        : glm::vec3(0.0f, 1.0f, 0.0f);
-    const glm::mat4 lightView = glm::lookAt(
-        center - lightDirection * lightDistance,
-        center,
-        up);
-    const glm::mat4 lightProjection = glm::ortho(
-        -radius,
-        radius,
-        -radius,
-        radius,
-        0.1f,
-        lightDistance + radius * 2.0f);
-    m_lightSpaceMatrix = lightProjection * lightView;
+            auto* node = SceneNode::FindNode(nodeComponent.id);
+            const auto mesh = meshComponent.GetMesh();
+            if (!node || !mesh) continue;
+
+            const glm::mat4 modelMatrix = Matrix::ExpandAffine(node->GetGlobalAffineTransform());
+            const glm::vec3 center = glm::vec3(modelMatrix * glm::vec4(mesh->GetSphere().center, 1.0f));
+            const float maxScale = std::max({
+                glm::length(glm::vec3(modelMatrix[0])),
+                glm::length(glm::vec3(modelMatrix[1])),
+                glm::length(glm::vec3(modelMatrix[2]))});
+            const float radius = std::max(mesh->GetSphere().radius * maxScale, 0.0f);
+            boundsMin = glm::min(boundsMin, center - radius);
+            boundsMax = glm::max(boundsMax, center + radius);
+            shadowMeshes.push_back({mesh, modelMatrix});
+            hasBounds = true;
+        }
+
+        if (!hasBounds)
+        {
+            return;
+        }
+
+        const glm::vec3 center = (boundsMin + boundsMax) * 0.5f;
+        const float radius = std::max(glm::length(boundsMax - boundsMin) * 0.5f, 1.0f);
+        const float lightDistance = radius * 2.0f + 10.0f;
+        const glm::vec3 up = std::abs(glm::dot(lightDirection, glm::vec3(0.0f, 1.0f, 0.0f))) > 0.98f
+            ? glm::vec3(0.0f, 0.0f, 1.0f)
+            : glm::vec3(0.0f, 1.0f, 0.0f);
+        const glm::mat4 lightView = glm::lookAt(
+            center - lightDirection * lightDistance,
+            center,
+            up);
+        const glm::mat4 lightProjection = glm::ortho(
+            -radius,
+            radius,
+            -radius,
+            radius,
+            0.1f,
+            lightDistance + radius * 2.0f);
+        m_lightSpaceMatrix = lightProjection * lightView;
+    }
 
     constexpr uint32_t shadowMapResolution = 2048;
     if (!m_shadowMap)
@@ -349,23 +359,21 @@ void SceneRenderer::RenderDirectionalShadowMap(RenderSystem& renderSystem, const
     m_shadowProgram->Bind();
     m_shadowProgram->SetUniformMatrix("_LightSpaceMatrix", m_lightSpaceMatrix, false);
 
-    for (const auto view = registry.view<const SceneNodeComponent, const MeshComponent>();
-         const auto& [entity, nodeComponent, meshComponent] : view.each())
     {
-        if (!nodeComponent.active) continue;
+        rmt_ScopedCPUSample(SceneRenderer_RenderShadowMap, 0);
+        for (const auto& [mesh, modelMatrix] : shadowMeshes)
+        {
+            if (!mesh->GetVertexBuffer() || !mesh->GetIndexBuffer()) continue;
 
-        auto* node = SceneNode::FindNode(nodeComponent.id);
-        const auto mesh = meshComponent.GetMesh();
-        if (!node || !mesh || !mesh->GetVertexBuffer() || !mesh->GetIndexBuffer()) continue;
-
-        const auto indexBuffer = mesh->GetIndexBuffer();
-        m_shadowProgram->SetUniformMatrix(
-            "_Model",
-            Matrix::ExpandAffine(node->GetGlobalAffineTransform()),
-            false);
-        mesh->GetVertexBuffer()->Bind();
-        indexBuffer->Bind();
-        renderSystem.DrawIndexed(indexBuffer);
+            const auto indexBuffer = mesh->GetIndexBuffer();
+            m_shadowProgram->SetUniformMatrix(
+                "_Model",
+                modelMatrix,
+                false);
+            mesh->GetVertexBuffer()->Bind();
+            indexBuffer->Bind();
+            renderSystem.DrawIndexed(indexBuffer);
+        }
     }
 
     m_shadowProgram->Unbind();
