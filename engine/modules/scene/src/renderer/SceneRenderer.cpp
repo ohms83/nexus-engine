@@ -362,15 +362,16 @@ void SceneRenderer::RenderDirectionalShadowMap(RenderSystem& renderSystem, const
     {
         rmt_ScopedCPUSample(SceneRenderer_RenderShadowMap, 0);
         rmt_ScopedOpenGLSample(SceneRenderer_RenderShadowMap);
-        for (const auto& [mesh, modelMatrix] : shadowMeshes)
+        for (const auto& shadowMesh : shadowMeshes)
         {
             rmt_ScopedCPUSample(SceneRenderer_RenderShadowMesh, 0)
+            const auto& mesh = shadowMesh.mesh;
             if (!mesh->GetVertexBuffer() || !mesh->GetIndexBuffer()) continue;
 
             const auto indexBuffer = mesh->GetIndexBuffer();
             m_shadowProgram->SetUniformMatrix(
                 "_Model",
-                modelMatrix,
+                shadowMesh.modelMatrix,
                 false);
             mesh->GetVertexBuffer()->Bind();
             indexBuffer->Bind();
