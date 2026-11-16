@@ -127,7 +127,7 @@ void GLRenderingInterface::DrawIndexed(const Ref<IndexBuffer> indexBuffer)
 {
     rmt_ScopedCPUSample(GLRendering_DrawIndexed, 0);
     NXS_ASSERT(indexBuffer != nullptr);
-    if (!indexBuffer->IsBinding()) indexBuffer->Bind();
+    indexBuffer->Bind();
 
     CALL_GL_FUNC(glFrontFace(GL::NxsFrontFaceToGL(indexBuffer->GetFrontFace())));
 
@@ -152,7 +152,7 @@ void GLRenderingInterface::DrawIndexedInstanced(const Ref<IndexBuffer> indexBuff
 {
     rmt_ScopedCPUSample(GLRendering_DrawIndexedInstanced, 0);
     NXS_ASSERT(indexBuffer != nullptr);
-    if (!indexBuffer->IsBinding()) indexBuffer->Bind();
+    indexBuffer->Bind();
 
     CALL_GL_FUNC(glFrontFace(GL::NxsFrontFaceToGL(indexBuffer->GetFrontFace())));
 

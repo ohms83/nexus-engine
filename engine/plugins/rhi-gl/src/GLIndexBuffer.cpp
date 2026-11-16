@@ -28,8 +28,6 @@ IndexBuffer& GLIndexBuffer::Begin()
 void GLIndexBuffer::Bind() const
 {
     rmt_ScopedCPUSample(GLIndexBuffer_Bind, 0);
-    if (IsBinding()) return;
-
     CALL_GL_FUNC(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_handle));
 }
 

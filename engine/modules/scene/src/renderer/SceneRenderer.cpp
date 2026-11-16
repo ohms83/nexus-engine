@@ -374,7 +374,6 @@ void SceneRenderer::RenderDirectionalShadowMap(RenderSystem& renderSystem, const
                 shadowMesh.modelMatrix,
                 false);
             mesh->GetVertexBuffer()->Bind();
-            indexBuffer->Bind();
             renderSystem.DrawIndexed(indexBuffer);
         }
     }
@@ -520,7 +519,6 @@ void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
                     {
                         gpuProgram->SetUniformMatrix("_Model", Matrix::ExpandAffine(cmd.modelMatrix), false);
                         cmd.vertexBuffer->Bind();
-                        cmd.indexBuffer->Bind();
                         // Record composition stats
                         GraphicsProfiler::RecordMaterialDraw(material ? material->GetId() : 0, cmd.indexCount, cmd.instanceCount);
                         GraphicsProfiler::RecordProgramDraw(gpuProgram ? gpuProgram->GetHandle() : 0, cmd.indexCount, cmd.instanceCount);

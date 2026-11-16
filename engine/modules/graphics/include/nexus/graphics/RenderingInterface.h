@@ -78,11 +78,13 @@ NXS_NAMESPACE
             NXS_ASSERT_MSG(false, "OnResize not implemented for this graphics API.");
         }
 
+        //! Draw using the supplied index buffer; the implementation binds it for the current vertex buffer.
         virtual void DrawIndexed(const Ref<IndexBuffer> indexBuffer)
         {
             NXS_ASSERT_MSG(false, "DrawIndexed not implemented for this graphics API.");
         }
 
+        //! As with DrawIndexed, the implementation binds the supplied index buffer.
         virtual void DrawIndexedInstanced(const Ref<IndexBuffer> indexBuffer, uint32_t instanceCount)
         {
             NXS_ASSERT_MSG(false, "DrawIndexedInstanced not implemented for this graphics API.");

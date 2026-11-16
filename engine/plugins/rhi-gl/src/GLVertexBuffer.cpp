@@ -31,8 +31,6 @@ VertexBuffer& GLVertexBuffer::Begin()
 void GLVertexBuffer::Bind() const
 {
     rmt_ScopedCPUSample(GLVertexBuffer_Bind, 0);
-    if (IsBinding()) return;
-
     CALL_GL_FUNC(glBindVertexArray(m_handle));
     CALL_GL_FUNC(glBindBuffer(GL_ARRAY_BUFFER, m_vbo));
 }
