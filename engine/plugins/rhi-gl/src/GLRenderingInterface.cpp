@@ -133,7 +133,7 @@ void GLRenderingInterface::DrawIndexed(const Ref<IndexBuffer> indexBuffer)
 
     // ReSharper disable once CppDFANullDereference
     const GLuint gl_drawMode = GL::NxsDrawModeToGL(indexBuffer->GetDrawMode());
-    NXS_ASSERT_MSG(gl_drawMode != GL_QUADS, "GL_QUADS is not a valid primitive type.")
+    NXS_ASSERT_MSG(gl_drawMode != GL_QUADS, "GL_QUADS is not a valid primitive type.");
     
     {
         rmt_ScopedOpenGLSample(glDrawElements);
@@ -157,7 +157,7 @@ void GLRenderingInterface::DrawIndexedInstanced(const Ref<IndexBuffer> indexBuff
     CALL_GL_FUNC(glFrontFace(GL::NxsFrontFaceToGL(indexBuffer->GetFrontFace())));
 
     const GLuint gl_drawMode = GL::NxsDrawModeToGL(indexBuffer->GetDrawMode());
-    NXS_ASSERT_MSG(gl_drawMode != GL_QUADS, "GL_QUADS is not a valid primitive type.")
+    NXS_ASSERT_MSG(gl_drawMode != GL_QUADS, "GL_QUADS is not a valid primitive type.");
     {
         rmt_ScopedOpenGLSample(glDrawElementsInstanced);
         CALL_GL_FUNC(glDrawElementsInstanced(

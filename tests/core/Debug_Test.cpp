@@ -119,4 +119,63 @@ TEST_F(AssertTest, Macro_EvaluatesExpressionWithSideEffectsOnce)
     EXPECT_EQ(counter, 1);
 }
 
+TEST_F(AssertTest, MessageMacro_EvaluatesPassingConditionOnceAndSkipsMessage)
+{
+    int conditionCalls = 0;
+    int messageCalls = 0;
+    NXS_ASSERT_MSG(++conditionCalls == 1, (++messageCalls, "unexpected message"));
+    EXPECT_EQ(conditionCalls, 1);
+    EXPECT_EQ(messageCalls, 0);
+}
+
+TEST_F(AssertTest, Macro_EvaluatesFailingConditionOnce)
+{
+    EXPECT_DEATH({
+        int conditionCalls = 0;
+        nxs::Assert::onAssertionFailedEvent.connect([&conditionCalls](const std::string&) {
+            std::cerr << "Condition calls: " << conditionCalls << std::endl;
+        });
+        NXS_ASSERT(++conditionCalls > 1);
+    }, "Condition calls: 1");
+}
+
+TEST_F(AssertTest, MessageMacro_EvaluatesFailingConditionAndMessageOnce)
+{
+    EXPECT_DEATH({
+        int conditionCalls = 0;
+        int messageCalls = 0;
+        nxs::Assert::onAssertionFailedEvent.connect([&](const std::string& message) {
+            std::cerr << "Condition calls: " << conditionCalls
+                      << " Message calls: " << messageCalls << " " << message << std::endl;
+        });
+        NXS_ASSERT_MSG(++conditionCalls > 1, (++messageCalls, "failure details"));
+    }, "Condition calls: 1 Message calls: 1.*failure details");
+}
+
+TEST_F(AssertTest, MacrosBehaveAsSingleStatementsInIfElse)
+{
+    int elseCalls = 0;
+    if (true)
+        NXS_ASSERT(true);
+    else
+        ++elseCalls;
+
+    if (false)
+        NXS_ASSERT(false);
+    else
+        ++elseCalls;
+
+    if (true)
+        NXS_ASSERT_MSG(true, "unexpected");
+    else
+        ++elseCalls;
+
+    if (false)
+        NXS_ASSERT_MSG(false, "unexpected");
+    else
+        ++elseCalls;
+
+    EXPECT_EQ(elseCalls, 2);
+}
+
 #endif // !defined(NXS_NO_LOG)

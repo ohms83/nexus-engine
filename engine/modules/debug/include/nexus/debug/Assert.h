@@ -9,9 +9,11 @@
 #if !defined(NXS_NO_LOG)
 #define NXS_ASSERT(Condition) \
     do { \
-        const auto formatted = std::format("({}:{}) {}", __FILE__, __LINE__, #Condition); \
-        nxs::Assert::Check(!!(Condition), formatted); \
-    } while(0);
+        if (!(Condition)) { \
+            const auto formatted = std::format("({}:{}) {}", __FILE__, __LINE__, #Condition); \
+            nxs::Assert::Check(false, formatted); \
+        } \
+    } while (0)
 
 /**
  * @brief Custom assertion macro that logs an error message and terminates the program if the condition is false.
@@ -21,12 +23,14 @@
  */
 #define NXS_ASSERT_MSG(Condition, Message) \
     do { \
-        const auto formatted = std::format("({}:{}) {}. {}", __FILE__, __LINE__, #Condition, Message); \
-        nxs::Assert::Check(!!(Condition), formatted); \
-    } while(0);
+        if (!(Condition)) { \
+            const auto formatted = std::format("({}:{}) {}. {}", __FILE__, __LINE__, #Condition, Message); \
+            nxs::Assert::Check(false, formatted); \
+        } \
+    } while (0)
 #else
-#define NXS_ASSERT(Condition)
-#define NXS_ASSERT_MSG(Condition, Message)
+#define NXS_ASSERT(Condition) do {} while (0)
+#define NXS_ASSERT_MSG(Condition, Message) do {} while (0)
 #endif // !defined(NXS_NO_LOG)
     
 namespace nxs

@@ -13,11 +13,15 @@ DECLARE_LOG_EXTERN(OpenGL);
 #ifdef GL_STRICT_CHECK
     #define CHECK_GL_ERROR(func_name) {\
         GLenum error = glGetError();\
-        NXS_ASSERT_MSG(error == GL_NO_ERROR, std::format("Error calling function {0}. Error Code={1:X}", #func_name, error));\
+        if (error != GL_NO_ERROR) {\
+            NXS_ASSERT_MSG(error == GL_NO_ERROR, std::format("Error calling function {0}. Error Code={1:X}", #func_name, error));\
+        }\
     }
     #define CHECK_GL_ERROR_MSG(func_name, message) {\
         GLenum error = glGetError();\
-        NXS_ASSERT_MSG(error == GL_NO_ERROR, std::format("Error calling function {0}. Error Code={1:X} Message={2}", #func_name, error, message));\
+        if (error != GL_NO_ERROR) {\
+            NXS_ASSERT_MSG(error == GL_NO_ERROR, std::format("Error calling function {0}. Error Code={1:X} Message={2}", #func_name, error, message));\
+        }\
     }
 #else
     #define CHECK_GL_ERROR(func_name) {\
