@@ -126,7 +126,7 @@ vec3 AccumulateLighting(
     // Accessing the global uniform _DirectLights and _NumDirectLight
     for (int i = 0; i < _NumDirectLight; ++i) 
     {
-        float shadow = i == 0
+        float shadow = material.receiveShadows > 0.0 && i == _ShadowLightIndex
             ? CalcShadow(lightSpacePosition, normal, normalize(-_DirectLights[i].direction))
             : 0.0;
         result += CalcDirectLight(material, _DirectLights[i], normal, viewDir) * (1.0 - shadow);

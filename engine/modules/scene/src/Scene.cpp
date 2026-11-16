@@ -61,6 +61,9 @@ void Scene::Render(RenderSystem &renderSystem) const
 void Scene::SetRenderer(Ref<SceneRenderer> renderer)
 {
     m_renderer = renderer;
+    if (!m_renderer->Init()) {
+        LOG_ERROR(LogScene, "Failed to initialize scene renderer");
+    }
 }
 
 void Scene::SetPartition(Ref<IScenePartition> partition)

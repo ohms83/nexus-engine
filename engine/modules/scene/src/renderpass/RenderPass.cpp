@@ -58,6 +58,8 @@ void RenderPass::Begin(RenderSystem& rs) const
 
     renderInterface->SetGlobalShader(pipelineState.globalShader);
 
+    Begin_Internal(rs);
+
     // Hook
     if (onBegin) onBegin(rs);
 }
@@ -66,6 +68,7 @@ void RenderPass::End(RenderSystem& rs) const
 {
     // Reset the global shader.
     rs.GetRenderInterface()->SetGlobalShader(nullptr);
+    End_Internal(rs);
     // Offscreen target is unbound by the caller (SceneRenderer/RenderSystem).
     // Hook
     if (onEnd) onEnd(rs);

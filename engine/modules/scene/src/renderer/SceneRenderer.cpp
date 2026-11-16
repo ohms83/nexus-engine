@@ -118,10 +118,11 @@ void SceneRenderer::SetAmbientLightParams(Ref<GpuProgram> gpuProgram, const entt
     gpuProgram->SetUniformVector("_AmbientLight", color);
 }
 
-void SceneRenderer::SetDirectLightParams(Ref<GpuProgram> gpuProgram, const SceneNode& scene)
+void SceneRenderer::SetDirectLightParams(Ref<GpuProgram> gpuProgram, const SceneNode& scene) const
 {
     rmt_ScopedCPUSample(SceneRenderer_SetDirectLightParams, 0);
     int32_t numLight = 0;
+    int32_t shadowLightIndex = -1;
     const auto registry = scene.GetRegistry();
     for (const auto view = registry->view<SceneNodeComponent, DirectLightComponent>(); const auto& [entity, node, light] : view.each())
     {
@@ -146,6 +147,7 @@ void SceneRenderer::SetDirectLightParams(Ref<GpuProgram> gpuProgram, const Scene
             continue;
         }
         const auto direction = nodePtr->GetGlobalOrientation() * light.direction;
+        if (m_shadowMapReady && node.id == m_shadowLightId) shadowLightIndex = numLight;
         gpuProgram->SetUniformVector(uniformLocationColor, light.properties.color);
         gpuProgram->SetUniformVector(uniformLocationDirection, glm::normalize(direction));
         gpuProgram->SetUniformFloat(uniformLocationDiffuse, light.properties.diffuseIntensity);
@@ -156,6 +158,7 @@ void SceneRenderer::SetDirectLightParams(Ref<GpuProgram> gpuProgram, const Scene
         numLight++;
     }
     gpuProgram->SetUniformInt("_NumDirectLight", numLight);
+    gpuProgram->SetUniformInt("_ShadowLightIndex", shadowLightIndex);
 }
 
 void SceneRenderer::SetPointLightParams(Ref<GpuProgram> gpuProgram, const SceneNode& scene)
@@ -214,6 +217,7 @@ void SceneRenderer::RenderDirectionalShadowMap(RenderSystem& renderSystem, const
 {
     rmt_ScopedCPUSample(SceneRenderer_RenderDirectionalShadowMap, 0);
     m_shadowMapReady = false;
+    m_shadowLightId = 0;
     const auto& registry = *scene.GetRegistry();
 
     SceneNode* lightNode = nullptr;
@@ -230,6 +234,8 @@ void SceneRenderer::RenderDirectionalShadowMap(RenderSystem& renderSystem, const
                 "Directional shadow map light node {} was not found.", nodeComponent.id));
             continue;
         }
+
+        if (!light.properties.canCastShadows) continue;
 
         shadowLight = &light;
         break;
@@ -270,6 +276,9 @@ void SceneRenderer::RenderDirectionalShadowMap(RenderSystem& renderSystem, const
             const auto mesh = meshComponent.GetMesh();
             if (!node || !mesh) continue;
 
+            const auto material = mesh->GetMaterial();
+            if (!material || (!material->castShadow && !material->receiveShadows)) continue;
+
             const glm::mat4 modelMatrix = Matrix::ExpandAffine(node->GetGlobalAffineTransform());
             const glm::vec3 center = glm::vec3(modelMatrix * glm::vec4(mesh->GetSphere().center, 1.0f));
             const float maxScale = std::max({
@@ -279,11 +288,11 @@ void SceneRenderer::RenderDirectionalShadowMap(RenderSystem& renderSystem, const
             const float radius = std::max(mesh->GetSphere().radius * maxScale, 0.0f);
             boundsMin = glm::min(boundsMin, center - radius);
             boundsMax = glm::max(boundsMax, center + radius);
-            shadowMeshes.push_back({mesh, modelMatrix});
+            if (material->castShadow) shadowMeshes.push_back({mesh, modelMatrix});
             hasBounds = true;
         }
 
-        if (!hasBounds)
+        if (!hasBounds || shadowMeshes.empty())
         {
             return;
         }
@@ -380,6 +389,7 @@ void SceneRenderer::RenderDirectionalShadowMap(RenderSystem& renderSystem, const
 
     m_shadowProgram->Unbind();
     m_shadowMap->Unbind(renderSystem);
+    m_shadowLightId = lightNode->GetId();
     m_shadowMapReady = true;
 }
 
@@ -397,6 +407,17 @@ void SceneRenderer::SetShadowMapParams(Ref<GpuProgram> gpuProgram) const
         "_ShadowMap",
         m_shadowMap->GetDepthTextureProxy(),
         15);
+}
+
+
+bool SceneRenderer::Init()
+{
+    if (m_initialized) return true;
+    for (auto& pass : m_renderPasses)
+    {
+        if (!pass->Init()) return false;
+    }
+    return m_initialized = true;
 }
 
 void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)

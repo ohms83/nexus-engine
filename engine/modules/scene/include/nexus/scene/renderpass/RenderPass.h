@@ -75,6 +75,8 @@ NXS_NAMESPACE
         RenderPass() = default;
         virtual ~RenderPass();
 
+        virtual bool Init() { return true; }
+
         //! Pass name. Mainly used for debugging purposes.
         std::string name;
         //! Priority of the render pass. Lower values are rendered first.
@@ -179,6 +181,10 @@ NXS_NAMESPACE
             RenderSystem& renderSystem,
             const Array<SceneNode*>& visibleNodes,
             Array<RenderCommand>& outCommands) const {}
+
+        private:
+            virtual void Begin_Internal(RenderSystem& rs) const {}
+            virtual void End_Internal(RenderSystem& rs) const {}
     };
 
     struct RenderPassBuilder

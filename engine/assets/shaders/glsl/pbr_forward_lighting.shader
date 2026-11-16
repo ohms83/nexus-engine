@@ -182,7 +182,7 @@ void main()
     for (int i = 0; i < _NumDirectLight; ++i)
     {
         vec3 lightDir = normalize(-_DirectLights[i].direction);
-        float shadow = i == 0
+        float shadow = _Material.receiveShadows > 0 && i == _ShadowLightIndex
             ? CalcShadow(FragPosLightSpace, normal, lightDir)
             : 0.0;
         vec3 diffuseRadiance = _DirectLights[i].properties.color *

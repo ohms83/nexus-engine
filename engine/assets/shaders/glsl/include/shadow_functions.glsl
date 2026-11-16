@@ -1,5 +1,6 @@
 uniform sampler2D _ShadowMap;
 uniform int _HasShadowMap;
+uniform int _ShadowLightIndex;
 
 float CalcShadow(vec4 lightSpacePosition, vec3 normal, vec3 lightDir)
 {

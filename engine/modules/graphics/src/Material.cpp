@@ -131,6 +131,7 @@ Ref<GpuProgram> Material::Use()
     gpuProgram->SetUniformFloat("_Material.shininess", shininess);
     gpuProgram->SetUniformFloat("_Material.metalness", metalness);
     gpuProgram->SetUniformFloat("_Material.roughness", roughness);
+    gpuProgram->SetUniformInt("_Material.receiveShadows", INT_CAST(receiveShadows));
 
     const auto hasResolvedTexture = [this](const TextureType type)
     {
@@ -176,6 +177,8 @@ VariantData Material::Serialize() const
     data["cull"] = cull;
     data["depthTest"] = depthTest;
     data["depthWrite"] = depthWrite;
+    data["castShadow"] = castShadow;
+    data["receiveShadows"] = receiveShadows;
     data["blendMode"] = INT_CAST(blendMode);
     data["depthFunction"] = INT_CAST(depthFunction);
     data["shader"] = m_shader ? m_shader->GetPath() : std::string();
@@ -226,6 +229,8 @@ bool Material::Deserialize(const VariantData& data)
         emissive.b = FLOAT_CAST(arr.at(2).GetDouble());
     }
     if (data.HasKey("shininess")) shininess = FLOAT_CAST(data["shininess"].GetDouble());
+    if (data.HasKey("castShadow")) castShadow = data["castShadow"].GetBool();
+    if (data.HasKey("receiveShadows")) receiveShadows = data["receiveShadows"].GetBool();
     if (data.HasKey("metalness")) metalness = FLOAT_CAST(data["metalness"].GetDouble());
     if (data.HasKey("roughness")) roughness = FLOAT_CAST(data["roughness"].GetDouble());
     if (data.HasKey("wireframe")) wireframe = data["wireframe"].GetBool();

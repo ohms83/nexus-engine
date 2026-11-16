@@ -47,6 +47,12 @@ NXS_NAMESPACE
 
         void AcceptReflector(IReflector& reflector) override
         {
+            AcceptCommonReflector(reflector);
+            reflector.VisitBool("Can Cast Shadows", canCastShadows);
+        }
+
+        void AcceptCommonReflector(IReflector& reflector)
+        {
             reflector.SetMarker("Light");
             reflector.VisitColor3("Color",  color);
             reflector.VisitFloat("Diffuse Intensity", diffuseIntensity);
@@ -60,6 +66,7 @@ NXS_NAMESPACE
             data["diffuseIntensity"] = diffuseIntensity;
             data["specularIntensity"] = specularIntensity;
             data["cutoffRange"] = cutoffRange;
+            data["canCastShadows"] = canCastShadows;
             return data;
         }
 
@@ -70,6 +77,7 @@ NXS_NAMESPACE
             diffuseIntensity = data["diffuseIntensity"].GetFloat();
             specularIntensity = data["specularIntensity"].GetFloat();
             cutoffRange = data["cutoffRange"].GetFloat();
+            if (data.HasKey("canCastShadows")) canCastShadows = data["canCastShadows"].GetBool();
             return true;
         }
 
@@ -77,6 +85,8 @@ NXS_NAMESPACE
         float diffuseIntensity = 1.f;
         float specularIntensity = 1.f;
         float cutoffRange = FLT_MAX;
+        //! Currently only directional lights support shadow maps.
+        bool canCastShadows = true;
 
         Color3F DiffuseColor()
         {
@@ -131,7 +141,7 @@ NXS_NAMESPACE
 
         void AcceptReflector(IReflector& reflector) override
         {
-            properties.AcceptReflector(reflector);
+            properties.AcceptCommonReflector(reflector);
 
             reflector.SetMarker("Light");
             reflector.VisitFloat("Constant", constant);

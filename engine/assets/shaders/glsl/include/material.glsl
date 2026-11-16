@@ -9,4 +9,5 @@ struct Material {
     float shininess;
     float metalness;
     float roughness;
+    int receiveShadows;
 };

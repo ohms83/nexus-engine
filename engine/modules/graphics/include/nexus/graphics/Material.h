@@ -75,6 +75,10 @@ NXS_NAMESPACE
         bool cull = false;
         bool depthTest = false;
         bool depthWrite = false;
+        //! Include this mesh in the directional shadow map; alpha is not sampled in the shadow pass.
+        bool castShadow = true;
+        //! Apply the directional shadow map when shading this material.
+        bool receiveShadows = true;
         BlendMode blendMode = BlendMode::None;
         DepthFunction depthFunction = DepthFunction::Lesser;
 

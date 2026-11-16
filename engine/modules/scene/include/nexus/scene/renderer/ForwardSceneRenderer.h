@@ -8,6 +8,5 @@ NXS_NAMESPACE
     {
     public:
         ForwardSceneRenderer(const RenderSystem& renderSystem);
-        void Render(RenderSystem& renderSystem, const Scene& scene) override;
     };
 }

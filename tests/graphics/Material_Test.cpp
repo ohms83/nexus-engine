@@ -6,6 +6,32 @@ USING_NAMESPACE_NXS;
 
 namespace
 {
+    class MaterialTestProgram final : public GpuProgram
+    {
+    public:
+        void Bind() override {}
+        bool IsBinding() const override { return false; }
+        bool SetUniformInt(const std::string&, int32_t) override { return true; }
+        bool SetUniformVector(const std::string&, const glm::vec3&) override { return true; }
+        bool SetUniformFloat(const std::string& name, float value) override
+        {
+            if (name == "_Material.receiveShadows") receiveShadows = value;
+            return true;
+        }
+
+        float receiveShadows = -1.0f;
+
+    private:
+        uint32_t Alloc() override { return 1; }
+    };
+
+    class MaterialTestRendering final : public FakeRendering
+    {
+    public:
+        Ref<GpuProgram> CreateGpuProgram() const override { return program; }
+        Ref<MaterialTestProgram> program = std::make_shared<MaterialTestProgram>();
+    };
+
     class VariantResource final : public Resource
     {
     public:
@@ -68,6 +94,8 @@ TEST_F(MaterialTest, SerializeDeserialize)
     m.cull = true;
     m.depthTest = true;
     m.depthWrite = true;
+    m.castShadow = false;
+    m.receiveShadows = false;
     m.blendMode = BlendMode::Alpha;
     m.depthFunction = DepthFunction::Equal;
 
@@ -92,6 +120,8 @@ TEST_F(MaterialTest, SerializeDeserialize)
     EXPECT_EQ(m2.cull, m.cull);
     EXPECT_EQ(m2.depthTest, m.depthTest);
     EXPECT_EQ(m2.depthWrite, m.depthWrite);
+    EXPECT_EQ(m2.castShadow, m.castShadow);
+    EXPECT_EQ(m2.receiveShadows, m.receiveShadows);
     EXPECT_EQ(m2.blendMode, m.blendMode);
     EXPECT_EQ(m2.depthFunction, m.depthFunction);
     EXPECT_EQ(m2.TextureCount(), 1u);
@@ -105,6 +135,33 @@ TEST_F(MaterialTest, SerializeDeserialize)
     EXPECT_NE(tex, nullptr);
     m2.Resolve(resourceManager);
     // Since we did not add material to material manager, resolve will not populate m2 textures via material manager here.
+}
+
+TEST_F(MaterialTest, LegacyMaterialDefaultsToCastingAndReceivingShadows)
+{
+    Material source("source", 1);
+    auto serialized = source.Serialize();
+    serialized.GetMap().erase("castShadow");
+    serialized.GetMap().erase("receiveShadows");
+    Material restored("restored", 2);
+    ASSERT_TRUE(restored.Deserialize(serialized));
+    EXPECT_TRUE(restored.castShadow);
+    EXPECT_TRUE(restored.receiveShadows);
+}
+
+TEST_F(MaterialTest, UseUploadsReceiveShadowsFlag)
+{
+    MaterialTestRendering rendering;
+    auto shader = std::make_shared<Shader>("shader", 1);
+    ASSERT_TRUE(shader->CompileFromSource(rendering, "void main() {}", "void main() {}", ""));
+    Material material("material", 2);
+    material.SetShader(shader);
+
+    ASSERT_NE(material.Use(), nullptr);
+    EXPECT_FLOAT_EQ(rendering.program->receiveShadows, 1.0f);
+    material.receiveShadows = false;
+    ASSERT_NE(material.Use(), nullptr);
+    EXPECT_FLOAT_EQ(rendering.program->receiveShadows, 0.0f);
 }
 
 TEST_F(MaterialTest, MetallicRoughnessPropertiesSerialize)

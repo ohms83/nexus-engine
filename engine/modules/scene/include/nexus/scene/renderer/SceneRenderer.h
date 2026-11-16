@@ -34,9 +34,10 @@ NXS_NAMESPACE
     {
     public:
         virtual ~SceneRenderer() = default;
+        bool Init();
         virtual void Render(RenderSystem& renderSystem, const Scene& scene);
 
-        void RegisterRenderPass(Ref<const RenderPass> renderPass)
+        void RegisterRenderPass(Ref<RenderPass> renderPass)
         {
             m_renderPasses.push_back(renderPass);
         }
@@ -59,7 +60,7 @@ NXS_NAMESPACE
     protected:
         static bool RenderInstancedMesh(RenderSystem& renderSystem, const RenderCommand& command, Ref<GpuProgram> gpuProgram);
         static void SetAmbientLightParams(Ref<GpuProgram> gpuProgram, const entt::registry& registry);
-        static void SetDirectLightParams(Ref<GpuProgram> gpuProgram, const SceneNode& scene);
+        void SetDirectLightParams(Ref<GpuProgram> gpuProgram, const SceneNode& scene) const;
         static void SetPointLightParams(Ref<GpuProgram> gpuProgram, const SceneNode& scene);
         void RenderDirectionalShadowMap(RenderSystem& renderSystem, const Scene& scene);
         void SetShadowMapParams(Ref<GpuProgram> gpuProgram) const;
@@ -67,11 +68,13 @@ NXS_NAMESPACE
         static void SetCameraUniforms(Ref<GpuProgram> gpuProgram, const glm::vec3& cameraPos, const glm::mat4& viewMtx, const glm::mat4& projectionMtx);
 
         //! A list of render passes sorted by their priority.
-        Array<Ref<const RenderPass>> m_renderPasses;
-        std::unordered_map<std::string, Ref<RenderTarget>> m_renderTargets;
+        Array<Ref<RenderPass>> m_renderPasses;
+        HashMap<std::string, Ref<RenderTarget>> m_renderTargets;
         Ref<RenderTarget> m_shadowMap;
         Ref<GpuProgram> m_shadowProgram;
         glm::mat4 m_lightSpaceMatrix{1.0f};
+        Identifier m_shadowLightId = 0;
         bool m_shadowMapReady = false;
+        bool m_initialized = false;
     };
 }
