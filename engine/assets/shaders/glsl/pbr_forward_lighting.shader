@@ -221,6 +221,6 @@ void main()
     }
     color += emissive;
 
-    FragColor = vec4(LinearToSRGB(color), baseColor.a);
+    FragColor = vec4(OutputColor(color), baseColor.a);
 }
 @endprogram fragment

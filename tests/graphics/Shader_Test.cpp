@@ -270,12 +270,12 @@ TEST_F(ShaderGeneratorTest, GeneratesPbrForwardLightingShader) {
     EXPECT_NE(vs.find("GetTBNMatrix"), std::string::npos);
     EXPECT_NE(fs.find("DistributionGGX"), std::string::npos);
     EXPECT_NE(fs.find("EvaluateLight"), std::string::npos);
-    EXPECT_NE(fs.find("LinearToSRGB"), std::string::npos);
-    EXPECT_NE(fs.find("FragColor = vec4(LinearToSRGB(color), baseColor.a)"), std::string::npos);
+    EXPECT_NE(fs.find("OutputColor"), std::string::npos);
+    EXPECT_NE(fs.find("FragColor = vec4(OutputColor(color), baseColor.a)"), std::string::npos);
     EXPECT_EQ(gs, "");
 }
 
-TEST_F(ShaderGeneratorTest, ForwardLightingShadersEncodeLinearOutput)
+TEST_F(ShaderGeneratorTest, ForwardLightingShadersUseFramebufferColorManagement)
 {
     const auto shaderDir = std::filesystem::path(NXS_ENGINE_ASSETS_DIR) / "shaders/glsl";
     for (const auto* shaderName : {
@@ -289,8 +289,10 @@ TEST_F(ShaderGeneratorTest, ForwardLightingShadersEncodeLinearOutput)
         std::string vs, fs, gs;
         const auto path = (shaderDir / shaderName).string();
         ASSERT_TRUE(shaderGen.GenerateShaderSource(path, vs, fs, gs)) << shaderName;
-        EXPECT_NE(fs.find("LinearToSRGB"), std::string::npos) << shaderName;
-        EXPECT_NE(fs.find("FragColor = vec4(LinearToSRGB("), std::string::npos) << shaderName;
+        EXPECT_NE(fs.find("uniform int _OutputLinearColor;"), std::string::npos) << shaderName;
+        EXPECT_NE(fs.find("vec3 OutputColor(vec3 linearColor)"), std::string::npos) << shaderName;
+        EXPECT_NE(fs.find("FragColor = vec4(OutputColor("), std::string::npos) << shaderName;
+        EXPECT_EQ(fs.find("FragColor = vec4(LinearToSRGB("), std::string::npos) << shaderName;
     }
 }
 

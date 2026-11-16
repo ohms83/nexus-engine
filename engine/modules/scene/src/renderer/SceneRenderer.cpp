@@ -528,6 +528,14 @@ void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
                     {
                         if (!gpuProgram->IsBinding()) gpuProgram->Bind();
 
+                        if (gpuProgram->FindUniform("_OutputLinearColor") >= 0)
+                        {
+                            gpuProgram->SetUniformInt(
+                                "_OutputLinearColor",
+                                (view->GetRenderTarget() ||
+                                 renderSystem.GetRenderInterface()->IsFramebufferSRGBSupported()) ? 1 : 0);
+                        }
+
                         SetCameraUniforms(gpuProgram, cameraPos, viewMtx, projectionMtx);
                         SetAmbientLightParams(gpuProgram, *scene.GetRegistry());
                         SetDirectLightParams(gpuProgram, scene);

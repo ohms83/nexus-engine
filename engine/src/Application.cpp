@@ -136,6 +136,10 @@ bool Application::Init(const ApplicationConfig& info)
     {
     case GraphicsAPI::OpenGL:
         flags |= SDL_WINDOW_OPENGL;
+        if (!SDL_GL_SetAttribute(SDL_GL_FRAMEBUFFER_SRGB_CAPABLE, 1))
+        {
+            LOG_WARNING(LogApplication, std::format("Failed to request an sRGB-capable framebuffer: {}", SDL_GetError()));
+        }
         break;
     case GraphicsAPI::Vulkan:
         flags |= SDL_WINDOW_VULKAN;
@@ -432,6 +436,7 @@ void Application::InitImGui() const
 void Application::BeginDrawUI() const
 {
     rmt_ScopedCPUSample(BeginDrawUI, 0);
+    m_renderInterface->SetFramebufferSRGB(false);
     if (const auto api = m_renderInterface->GetAPI(); api == GraphicsAPI::OpenGL)
     {
         ImGui_ImplOpenGL3_NewFrame();

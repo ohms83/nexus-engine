@@ -71,6 +71,6 @@ void main()
     vec3 result = ambientColor + AccumulateLighting(
         material, FragPos, normal, viewDir, FragPosLightSpace);
 
-    FragColor = vec4(LinearToSRGB(result), 1.0);
+    FragColor = vec4(OutputColor(result), 1.0);
 }
 @endprogram fragment

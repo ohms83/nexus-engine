@@ -51,6 +51,7 @@ void RenderSystem::BeginDraw()
     RenderDocCapture::BeginCaptureIfRequested();
     GraphicsProfiler::BeginFrame();
     m_timer.Tick();
+    m_renderingInterface->SetFramebufferSRGB(m_renderingInterface->IsFramebufferSRGBSupported());
     ClearScreen();
 
     m_drawCount = 0;

@@ -20,6 +20,8 @@ NXS_NAMESPACE
         void ClearBuffer(const Color4F& color, float depth) override;
 
         void SwapBuffer() override;
+        void SetFramebufferSRGB(bool enabled) override;
+        NODISCARD bool IsFramebufferSRGBSupported() const override { return m_framebufferSRGBSupported; }
 
         void SetViewport(int32_t x, int32_t y, int32_t w, int32_t h) override;
 
@@ -46,5 +48,6 @@ NXS_NAMESPACE
 
     protected:
         WindowContext m_window {};
+        bool m_framebufferSRGBSupported = false;
     };
 }

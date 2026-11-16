@@ -29,7 +29,6 @@ GLRenderingInterface::GLRenderingInterface(WindowContext window, const GraphicsC
     SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
-
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 6);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
@@ -51,6 +50,15 @@ GLRenderingInterface::GLRenderingInterface(WindowContext window, const GraphicsC
     }
 
     SDL_GL_MakeCurrent(sdlWindow, renderContext);
+
+    GLint colorEncoding = GL_LINEAR;
+    CALL_GL_FUNC(glGetFramebufferAttachmentParameteriv(
+        GL_FRAMEBUFFER, GL_BACK_LEFT, GL_FRAMEBUFFER_ATTACHMENT_COLOR_ENCODING, &colorEncoding));
+    m_framebufferSRGBSupported = colorEncoding == GL_SRGB;
+    if (!m_framebufferSRGBSupported)
+    {
+        LOG_WARNING(LogOpenGL, "The default framebuffer is not sRGB-capable; built-in shaders will use shader-based sRGB encoding and alpha blending will not be linear-light.");
+    }
 
     std::stringstream ss;
     ss  << "OpenGL\n"
@@ -116,6 +124,18 @@ void GLRenderingInterface::SwapBuffer()
     rmt_ScopedCPUSample(SDL_GL_SwapWindow, 0);
     SDL_Window* sdlWindow = R_CAST<SDL_Window*>(m_window);
     SDL_GL_SwapWindow(sdlWindow);
+}
+
+void GLRenderingInterface::SetFramebufferSRGB(const bool enabled)
+{
+    if (enabled && m_framebufferSRGBSupported)
+    {
+        CALL_GL_FUNC(glEnable(GL_FRAMEBUFFER_SRGB));
+    }
+    else
+    {
+        CALL_GL_FUNC(glDisable(GL_FRAMEBUFFER_SRGB));
+    }
 }
 
 void GLRenderingInterface::SetViewport(int32_t x, int32_t y, int32_t w, int32_t h)

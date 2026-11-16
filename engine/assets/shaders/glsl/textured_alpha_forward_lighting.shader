@@ -90,6 +90,6 @@ void main()
     // so that the object's details will show on the shaded surface.
     vec3 finalColor = (ambientBase + lightingAccumulator) * albedo.rgb;
 
-    FragColor = vec4(LinearToSRGB(finalColor), albedo.a);
+    FragColor = vec4(OutputColor(finalColor), albedo.a);
 }
 @endprogram fragment

@@ -68,6 +68,11 @@ NXS_NAMESPACE
             NXS_ASSERT_MSG(false, "SwapBuffer not implemented for this graphics API.");
         }
 
+        //! Control sRGB conversion for display rendering; disable it for display-encoded UI.
+        virtual void SetFramebufferSRGB(bool enabled) {}
+        //! Whether the default framebuffer supports hardware sRGB conversion and linear blending.
+        NODISCARD virtual bool IsFramebufferSRGBSupported() const { return false; }
+
         virtual void SetViewport(int32_t x, int32_t y, int32_t w, int32_t h)
         {
             NXS_ASSERT_MSG(false, "SetViewport not implemented for this graphics API.");
