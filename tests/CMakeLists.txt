@@ -18,14 +18,12 @@ add_executable(nexus-test
 target_include_directories(nexus-test
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/..
-    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../engine/plugins/rhi-gl/include
 )
 
 # 2. Link to Google Test's main library
 # googletest::gtest_main provides the main() function that runs all tests.
 target_link_libraries(nexus-test PRIVATE
     nexus-engine
-    glad
     GTest::gtest_main # Provides main() for Google Test
 )
 
@@ -38,3 +36,8 @@ target_compile_definitions(nexus-test
 # for each TEST() or TEST_F() defined in the source files.
 include(GoogleTest)
 gtest_discover_tests(nexus-test)
+
+add_subdirectory(
+    "${CMAKE_CURRENT_SOURCE_DIR}/../engine/plugins/rhi-gl/tests"
+    "${CMAKE_CURRENT_BINARY_DIR}/rhi-gl"
+)
