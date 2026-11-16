@@ -29,3 +29,8 @@ set_target_properties(${TARGET_NAME} PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/plugins"
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/plugins"
 )
+
+# Use the actual target filename, including any configuration-specific postfix.
+target_compile_definitions(nexus-graphics PRIVATE
+    "NXS_OPENGL_RHI_LIBRARY_NAME=\"$<TARGET_FILE_NAME:${TARGET_NAME}>\""
+)

@@ -66,14 +66,7 @@ namespace
                 return nullptr;
             }
 
-#if defined(_WIN32)
-            constexpr auto libraryName = "nexus-rhi-opengl.dll";
-#elif defined(__APPLE__)
-            constexpr auto libraryName = "nexus-rhi-opengl.dylib";
-#else
-            constexpr auto libraryName = "nexus-rhi-opengl.so";
-#endif
-            const auto path = std::filesystem::path(basePath) / "plugins" / libraryName;
+            const auto path = std::filesystem::path(basePath) / "plugins" / NXS_OPENGL_RHI_LIBRARY_NAME;
             const auto utf8Path = path.u8string();
             runtime.module = SDL_LoadObject(reinterpret_cast<const char*>(utf8Path.c_str()));
             if (!runtime.module)
