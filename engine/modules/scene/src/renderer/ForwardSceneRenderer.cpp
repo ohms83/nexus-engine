@@ -10,7 +10,7 @@ USING_NAMESPACE_NXS;
 
 ForwardSceneRenderer::ForwardSceneRenderer(const RenderSystem& renderSystem)
 {
-    // RegisterRenderPass(NewRef<DepthPrePass>());
+    RegisterRenderPass(NewRef<DepthPrePass>());
     RegisterRenderPass(NewRef<OpaquePass>());
     RegisterRenderPass(NewRef<AlphaPass>());
     RegisterRenderPass(NewRef<OverlayPass>());

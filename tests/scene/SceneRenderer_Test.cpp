@@ -33,6 +33,24 @@ private:
 
 namespace
 {
+    class FailedInitPass final : public RenderPass
+    {
+    public:
+        bool Init() override { return false; }
+    };
+
+    class CountingRenderer final : public SceneRenderer
+    {
+    public:
+        explicit CountingRenderer(bool fails)
+        {
+            if (fails) RegisterRenderPass(std::make_shared<FailedInitPass>());
+        }
+
+        void Render(RenderSystem&, const Scene&) override { ++renders; }
+        int renders = 0;
+    };
+
     class ShadowTestProgram final : public GpuProgram
     {
     public:
@@ -82,6 +100,25 @@ namespace
         mesh->SetIndexBuffer(std::make_shared<FakeIndexBuffer>());
         return mesh;
     }
+}
+
+TEST(SceneRendererTest, FailedRendererInitializationKeepsPreviousRenderer)
+{
+    auto scene = std::make_shared<Scene>("scene");
+    auto rendering = std::make_shared<FakeRendering>();
+    RenderSystem renderSystem(rendering);
+    auto previous = std::make_shared<CountingRenderer>(false);
+    auto failing = std::make_shared<CountingRenderer>(true);
+
+    scene->SetRenderer(previous);
+    scene->SetRenderer(failing);
+    scene->Render(renderSystem);
+    EXPECT_EQ(previous->renders, 1);
+    EXPECT_EQ(failing->renders, 0);
+
+    scene->SetRenderer(nullptr);
+    scene->Render(renderSystem);
+    EXPECT_EQ(previous->renders, 1);
 }
 
 TEST(SceneRendererShadowTest, SelectsEnabledLightAndUpdatesShaderIndex)

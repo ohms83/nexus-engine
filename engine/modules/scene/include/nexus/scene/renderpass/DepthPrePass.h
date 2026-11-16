@@ -9,6 +9,9 @@ NXS_NAMESPACE
     public:
         DepthPrePass();
 
+        bool Init() override;
+        bool Init(const IGpuResourceFactory& factory);
+
         bool IsPassFiltered(Ref<const Mesh> mesh) const override
         {
             return mesh->GetMaterial() && mesh->GetMaterial()->blendMode == BlendMode::None;

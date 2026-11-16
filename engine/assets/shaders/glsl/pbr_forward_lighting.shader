@@ -8,6 +8,7 @@ layout (location = 1) in vec3 aNormal;
 layout (location = 4) in vec3 aTangent;
 layout (location = 6) in vec2 aTexCoord0;
 
+invariant gl_Position;
 out vec3 FragPos;
 out vec3 Normal;
 out vec2 TexCoord0;

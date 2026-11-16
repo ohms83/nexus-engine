@@ -60,10 +60,11 @@ void Scene::Render(RenderSystem &renderSystem) const
 
 void Scene::SetRenderer(Ref<SceneRenderer> renderer)
 {
-    m_renderer = renderer;
-    if (!m_renderer->Init()) {
+    if (renderer && !renderer->Init()) {
         LOG_ERROR(LogScene, "Failed to initialize scene renderer");
+        return;
     }
+    m_renderer = std::move(renderer);
 }
 
 void Scene::SetPartition(Ref<IScenePartition> partition)

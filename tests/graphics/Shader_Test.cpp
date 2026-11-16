@@ -312,6 +312,23 @@ TEST_F(ShaderGeneratorTest, ForwardLightingShadersUseSelectedShadowLightAndRecei
     }
 }
 
+TEST_F(ShaderGeneratorTest, OpaqueForwardShadersMatchDepthPrepassPosition)
+{
+    const auto shaderDir = std::filesystem::path(NXS_ENGINE_ASSETS_DIR) / "shaders/glsl";
+    for (const auto* shaderName : {
+        "default_forward_lighting.shader",
+        "textured_forward_lighting.shader",
+        "normalmap_forward_lighting.shader",
+        "pbr_forward_lighting.shader"})
+    {
+        std::string vs, fs, gs;
+        ASSERT_TRUE(shaderGen.GenerateShaderSource((shaderDir / shaderName).string(), vs, fs, gs)) << shaderName;
+        EXPECT_NE(vs.find("invariant gl_Position;"), std::string::npos) << shaderName;
+        EXPECT_NE(vs.find("vec4 worldPos = _Model * vec4(aPos, 1.0);"), std::string::npos) << shaderName;
+        EXPECT_NE(vs.find("gl_Position = _Projection * _View * worldPos;"), std::string::npos) << shaderName;
+    }
+}
+
 TEST_F(ShaderGeneratorTest, HandlesInvalidIncludePath) {
     CreateFile("main.shader", 
         "@glsl_version 330\n"
