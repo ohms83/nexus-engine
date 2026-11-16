@@ -212,9 +212,17 @@ static auto s_fragmentShaderSource = R"(
 out vec4 FragColor;
 in vec3 Color;
 
+vec3 LinearToSRGB(vec3 linearColor)
+{
+    vec3 nonNegativeColor = max(linearColor, vec3(0.0));
+    vec3 linearSegment = 12.92 * nonNegativeColor;
+    vec3 srgbSegment = 1.055 * pow(nonNegativeColor, vec3(1.0 / 2.4)) - 0.055;
+    return mix(srgbSegment, linearSegment, lessThanEqual(nonNegativeColor, vec3(0.0031308)));
+}
+
 void main()
 {
-    FragColor = vec4(Color, 1.0);
+    FragColor = vec4(LinearToSRGB(Color), 1.0);
 }
 )";
 
