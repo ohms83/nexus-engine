@@ -8,7 +8,6 @@
 #include "nexus/graphics/TextureLoader.h"
 
 #include "nexus/scene/Camera.h"
-#include "nexus/scene/SceneNode3D.h"
 #include "nexus/scene/Light.h"
 #include "nexus/scene/ModelNode.h"
 
@@ -94,7 +93,6 @@ void Engine::InitModules()
 
     SceneNode::Register();
     Camera::Register();
-    SceneNode3D::Register();
     DirectionalLight::Register();
     PointLight::Register();
     ModelNode::Register();

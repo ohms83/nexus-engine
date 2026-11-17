@@ -47,7 +47,7 @@ TEST_F(QuadtreeTest, EmptyTreeQueryReturnsNoResults)
 TEST_F(QuadtreeTest, SingleNodeInsideFrustumIsReturned)
 {
     Quadtree tree(4, 2, Box(glm::vec3(0.0f), glm::vec3(100.0f)));
-    auto node = scene->EmplaceChild<SceneNode3D>("NodeA");
+    auto node = scene->EmplaceChild<SceneNode>("NodeA");
 
     tree.AddNode(node, Box(glm::vec3(10.0f, 0.0f, 10.0f), glm::vec3(2.0f)));
 
@@ -62,7 +62,7 @@ TEST_F(QuadtreeTest, SingleNodeInsideFrustumIsReturned)
 TEST_F(QuadtreeTest, SingleNodeOutsideFrustumIsCulled)
 {
     Quadtree tree(4, 2, Box(glm::vec3(0.0f), glm::vec3(100.0f)));
-    auto node = scene->EmplaceChild<SceneNode3D>("NodeA");
+    auto node = scene->EmplaceChild<SceneNode>("NodeA");
 
     tree.AddNode(node, Box(glm::vec3(80.0f, 0.0f, 80.0f), glm::vec3(2.0f)));
 
@@ -76,7 +76,7 @@ TEST_F(QuadtreeTest, SingleNodeOutsideFrustumIsCulled)
 TEST_F(QuadtreeTest, InactiveNodeIsCulled)
 {
     Quadtree tree(4, 2, Box(glm::vec3(0.0f), glm::vec3(100.0f)));
-    auto node = scene->EmplaceChild<SceneNode3D>("NodeA");
+    auto node = scene->EmplaceChild<SceneNode>("NodeA");
     node->Activate(false);
 
     tree.AddNode(node, Box(glm::vec3(10.0f, 0.0f, 10.0f), glm::vec3(2.0f)));
@@ -93,9 +93,9 @@ TEST_F(QuadtreeTest, SubdivisionOnCapacityExceeded)
     // maxDepth = 2, partitionSize = 2, root bound = [-100, 100]
     Quadtree tree(2, 2, Box(glm::vec3(0.0f), glm::vec3(100.0f)));
 
-    auto node1 = scene->EmplaceChild<SceneNode3D>("Node1");
-    auto node2 = scene->EmplaceChild<SceneNode3D>("Node2");
-    auto node3 = scene->EmplaceChild<SceneNode3D>("Node3");
+    auto node1 = scene->EmplaceChild<SceneNode>("Node1");
+    auto node2 = scene->EmplaceChild<SceneNode>("Node2");
+    auto node3 = scene->EmplaceChild<SceneNode>("Node3");
 
     // Place them in different quadrants:
     // PlusXPlusZ: center at (50, 0, 50)
@@ -129,10 +129,10 @@ TEST_F(QuadtreeTest, MaxDepthPreventsInfiniteSubdivision)
     Quadtree tree(1, 2, Box(glm::vec3(0.0f), glm::vec3(100.0f)));
 
     // Add 4 nodes into the same quadrant (+X, +Z)
-    auto node1 = scene->EmplaceChild<SceneNode3D>("Node1");
-    auto node2 = scene->EmplaceChild<SceneNode3D>("Node2");
-    auto node3 = scene->EmplaceChild<SceneNode3D>("Node3");
-    auto node4 = scene->EmplaceChild<SceneNode3D>("Node4");
+    auto node1 = scene->EmplaceChild<SceneNode>("Node1");
+    auto node2 = scene->EmplaceChild<SceneNode>("Node2");
+    auto node3 = scene->EmplaceChild<SceneNode>("Node3");
+    auto node4 = scene->EmplaceChild<SceneNode>("Node4");
 
     tree.AddNode(node1, Box(glm::vec3(50.0f, 0.0f, 50.0f), glm::vec3(2.0f)));
     tree.AddNode(node2, Box(glm::vec3(51.0f, 0.0f, 51.0f), glm::vec3(2.0f)));
@@ -155,10 +155,10 @@ TEST_F(QuadtreeTest, SpanningNodeDoesNotProduceDuplicateQueryResults)
     Quadtree tree(2, 2, Box(glm::vec3(0.0f), glm::vec3(100.0f)));
 
     // Create 3 nodes so the tree subdivides
-    auto nodeA = scene->EmplaceChild<SceneNode3D>("NodeA");
-    auto nodeB = scene->EmplaceChild<SceneNode3D>("NodeB");
+    auto nodeA = scene->EmplaceChild<SceneNode>("NodeA");
+    auto nodeB = scene->EmplaceChild<SceneNode>("NodeB");
     // Node spanning the origin (0,0,0), overlapping all 4 quadrants
-    auto nodeSpanning = scene->EmplaceChild<SceneNode3D>("NodeSpanning");
+    auto nodeSpanning = scene->EmplaceChild<SceneNode>("NodeSpanning");
 
     tree.AddNode(nodeA, Box(glm::vec3(60.0f, 0.0f, 60.0f), glm::vec3(5.0f)));
     tree.AddNode(nodeB, Box(glm::vec3(-60.0f, 0.0f, -60.0f), glm::vec3(5.0f)));
@@ -186,9 +186,9 @@ TEST_F(QuadtreeTest, RemoveNodeRemovesFromLeavesAndQuadrants)
 {
     Quadtree tree(2, 2, Box(glm::vec3(0.0f), glm::vec3(100.0f)));
 
-    auto node1 = scene->EmplaceChild<SceneNode3D>("Node1");
-    auto node2 = scene->EmplaceChild<SceneNode3D>("Node2");
-    auto node3 = scene->EmplaceChild<SceneNode3D>("Node3");
+    auto node1 = scene->EmplaceChild<SceneNode>("Node1");
+    auto node2 = scene->EmplaceChild<SceneNode>("Node2");
+    auto node3 = scene->EmplaceChild<SceneNode>("Node3");
 
     tree.AddNode(node1, Box(glm::vec3(50.0f, 0.0f, 50.0f), glm::vec3(5.0f)));
     tree.AddNode(node2, Box(glm::vec3(-50.0f, 0.0f, -50.0f), glm::vec3(5.0f)));
@@ -217,9 +217,9 @@ TEST_F(QuadtreeTest, UpdateNodeMovesNodeToNewQuadrant)
 {
     Quadtree tree(2, 2, Box(glm::vec3(0.0f), glm::vec3(100.0f)));
 
-    auto node1 = scene->EmplaceChild<SceneNode3D>("Node1");
-    auto node2 = scene->EmplaceChild<SceneNode3D>("Node2");
-    auto node3 = scene->EmplaceChild<SceneNode3D>("Node3");
+    auto node1 = scene->EmplaceChild<SceneNode>("Node1");
+    auto node2 = scene->EmplaceChild<SceneNode>("Node2");
+    auto node3 = scene->EmplaceChild<SceneNode>("Node3");
 
     tree.AddNode(node1, Box(glm::vec3(50.0f, 0.0f, 50.0f), glm::vec3(5.0f)));
     tree.AddNode(node2, Box(glm::vec3(-50.0f, 0.0f, -50.0f), glm::vec3(5.0f)));
@@ -245,9 +245,9 @@ TEST_F(QuadtreeTest, RemoveAllNodesResetsTree)
 {
     Quadtree tree(2, 2, Box(glm::vec3(0.0f), glm::vec3(100.0f)));
 
-    auto node1 = scene->EmplaceChild<SceneNode3D>("Node1");
-    auto node2 = scene->EmplaceChild<SceneNode3D>("Node2");
-    auto node3 = scene->EmplaceChild<SceneNode3D>("Node3");
+    auto node1 = scene->EmplaceChild<SceneNode>("Node1");
+    auto node2 = scene->EmplaceChild<SceneNode>("Node2");
+    auto node3 = scene->EmplaceChild<SceneNode>("Node3");
 
     tree.AddNode(node1, Box(glm::vec3(50.0f, 0.0f, 50.0f), glm::vec3(5.0f)));
     tree.AddNode(node2, Box(glm::vec3(-50.0f, 0.0f, -50.0f), glm::vec3(5.0f)));
@@ -275,15 +275,15 @@ TEST_F(QuadtreeTest, SceneCameraVisibilityCullingWithPartition)
     auto meshA = std::make_shared<Mesh>("MeshA");
     meshA->SetSphere(Sphere(glm::vec3(0.0f), 2.0f));
 
-    auto nodeVisible = scene->EmplaceChild<SceneNode3D>("VisibleNode");
+    auto nodeVisible = scene->EmplaceChild<SceneNode>("VisibleNode");
     nodeVisible->AddComponent<MeshComponent>()->SetMesh(meshA);
     nodeVisible->SetPosition(glm::vec3(0.0f, 0.0f, -50.0f));
 
-    auto nodeBehindCamera = scene->EmplaceChild<SceneNode3D>("BehindNode");
+    auto nodeBehindCamera = scene->EmplaceChild<SceneNode>("BehindNode");
     nodeBehindCamera->AddComponent<MeshComponent>()->SetMesh(meshA);
     nodeBehindCamera->SetPosition(glm::vec3(0.0f, 0.0f, 50.0f));
 
-    auto nodeFarAway = scene->EmplaceChild<SceneNode3D>("FarAwayNode");
+    auto nodeFarAway = scene->EmplaceChild<SceneNode>("FarAwayNode");
     nodeFarAway->AddComponent<MeshComponent>()->SetMesh(meshA);
     nodeFarAway->SetPosition(glm::vec3(500.0f, 0.0f, -50.0f));
 

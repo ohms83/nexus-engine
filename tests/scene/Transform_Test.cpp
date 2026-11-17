@@ -129,7 +129,7 @@ TEST(SceneNode3DTest, ForwardVector) {
         const glm::vec3 randTarget = glm::ballRand(100.f);
         constexpr glm::vec3 up {0, 1, 0};
 
-        nxs::SceneNode3D node(std::make_shared<entt::registry>());
+        nxs::SceneNode node(std::make_shared<entt::registry>());
         node.SetPosition(randPos);
         node.LookAt(randTarget, up);
 
@@ -154,7 +154,7 @@ TEST(SceneNode3DTest, RightVector) {
         const glm::vec3 randTarget = glm::ballRand(100.f);
         constexpr glm::vec3 up {0, 1, 0};
         
-        nxs::SceneNode3D node(std::make_shared<entt::registry>());
+        nxs::SceneNode node(std::make_shared<entt::registry>());
         node.SetPosition(randPos);
         node.LookAt(randTarget, up);
 
@@ -180,7 +180,7 @@ TEST(SceneNode3DTest, UpVector) {
         const glm::vec3 randTarget = glm::ballRand(100.f);
         constexpr glm::vec3 up {0, 1, 0};
         
-        nxs::SceneNode3D node(std::make_shared<entt::registry>());
+        nxs::SceneNode node(std::make_shared<entt::registry>());
         node.SetPosition(randPos);
         node.LookAt(randTarget, up);
 

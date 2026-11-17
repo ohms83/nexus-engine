@@ -104,7 +104,6 @@
 #include "nexus/scene/Scene.h"
 #include "nexus/scene/SceneManager.h"
 #include "nexus/scene/SceneNode.h"
-#include "nexus/scene/SceneNode3D.h"
 #include "nexus/scene/Script.h"
 #include "nexus/scene/component/CameraComponent.h"
 #include "nexus/scene/component/GeometryComponent.h"

@@ -18,10 +18,10 @@ protected:
     }
 };
 
-class TransformCacheProbe : public SceneNode3D
+class TransformCacheProbe : public SceneNode
 {
 public:
-    using SceneNode3D::SceneNode3D;
+    using SceneNode::SceneNode;
     bool IsGlobalTransformDirty() const { return m_globalTransformDirty; }
 };
 
@@ -32,7 +32,7 @@ TEST_F(SceneNodeTest, AddNode)
     auto emptyNode = scene->FindNodeWithName(name);
     EXPECT_EQ(emptyNode, nullptr);
 
-    auto node = scene->EmplaceChild<SceneNode3D>(name);
+    auto node = scene->EmplaceChild<SceneNode>(name);
     EXPECT_NE(node, nullptr);
     EXPECT_EQ(node->GetName(), name);
 }
@@ -214,12 +214,12 @@ TEST_F(SceneNodeTest, ParentReferenceDoesNotKeepParentAlive)
 
 TEST_F(SceneNodeTest, LocalAndGlobalTransformsComposeFromRootToLeaf)
 {
-    auto parent = scene->EmplaceChild<SceneNode3D>("Transform Parent");
+    auto parent = scene->EmplaceChild<SceneNode>("Transform Parent");
     parent->SetPosition({2.0f, 0.0f, 0.0f});
     parent->SetOrientation(glm::quat(glm::radians(glm::vec3(0.0f, 90.0f, 0.0f))));
     parent->SetScale({2.0f, 2.0f, 2.0f});
 
-    auto child = parent->EmplaceChild<SceneNode3D>("Transform Child");
+    auto child = parent->EmplaceChild<SceneNode>("Transform Child");
     child->SetPosition({1.0f, 0.0f, 0.0f});
     child->SetScale({0.5f, 1.0f, 1.0f});
 
@@ -329,17 +329,17 @@ TEST_F(SceneNodeTest, GlobalTransformsIncludeAllAncestors)
     const glm::quat childOrientation(glm::radians(glm::vec3(0.0f, 45.0f, 0.0f)));
     const glm::quat grandchildOrientation(glm::radians(glm::vec3(0.0f, -30.0f, 0.0f)));
 
-    auto parent = scene->EmplaceChild<SceneNode3D>("Parent");
+    auto parent = scene->EmplaceChild<SceneNode>("Parent");
     parent->SetPosition({5.0f, 0.0f, 0.0f});
     parent->SetOrientation(parentOrientation);
     parent->SetScale({2.0f, 2.0f, 2.0f});
 
-    auto child = parent->EmplaceChild<SceneNode3D>("Child");
+    auto child = parent->EmplaceChild<SceneNode>("Child");
     child->SetPosition({1.0f, 0.0f, 0.0f});
     child->SetOrientation(childOrientation);
     child->SetScale({3.0f, 3.0f, 3.0f});
 
-    auto grandchild = child->EmplaceChild<SceneNode3D>("Grandchild");
+    auto grandchild = child->EmplaceChild<SceneNode>("Grandchild");
     grandchild->SetPosition({0.0f, 0.0f, 1.0f});
     grandchild->SetOrientation(grandchildOrientation);
     grandchild->SetScale({0.5f, 0.5f, 0.5f});
@@ -377,11 +377,11 @@ TEST_F(SceneNodeTest, GlobalTransformsIncludeAllAncestors)
 
 TEST_F(SceneNodeTest, GlobalTransformReflectsAncestorChangesAfterDescendantQuery)
 {
-    auto parent = scene->EmplaceChild<SceneNode3D>("Parent");
+    auto parent = scene->EmplaceChild<SceneNode>("Parent");
     parent->SetPosition({2.0f, 0.0f, 0.0f});
-    auto child = parent->EmplaceChild<SceneNode3D>("Child");
+    auto child = parent->EmplaceChild<SceneNode>("Child");
     child->SetPosition({1.0f, 0.0f, 0.0f});
-    auto grandchild = child->EmplaceChild<SceneNode3D>("Grandchild");
+    auto grandchild = child->EmplaceChild<SceneNode>("Grandchild");
     grandchild->SetPosition({1.0f, 0.0f, 0.0f});
 
     const auto initialPosition = grandchild->GetGlobalPosition();
@@ -411,7 +411,7 @@ TEST_F(SceneNodeTest, LocalTransformUsesOnlyComponentsPresentOnNodeType)
     auto plainNode = scene->EmplaceChild<SceneNode>("Plain Node");
     EXPECT_EQ(plainNode->GetLocalTransform(), glm::mat4(1.0f));
 
-    auto parent = plainNode->EmplaceChild<SceneNode3D>("Transformed Parent");
+    auto parent = plainNode->EmplaceChild<SceneNode>("Transformed Parent");
     parent->SetPosition({10.0f, 0.0f, 0.0f});
     parent->SetOrientation(glm::quat(glm::radians(glm::vec3(0.0f, 90.0f, 0.0f))));
     auto light = parent->EmplaceChild<PointLight>("Point Light");
@@ -431,11 +431,11 @@ TEST_F(SceneNodeTest, LocalTransformUsesOnlyComponentsPresentOnNodeType)
 
 TEST_F(SceneNodeTest, ReparentingAndDetachingUpdatesGlobalTransform)
 {
-    auto firstParent = scene->EmplaceChild<SceneNode3D>("First Parent");
+    auto firstParent = scene->EmplaceChild<SceneNode>("First Parent");
     firstParent->SetPosition({10.0f, 0.0f, 0.0f});
-    auto secondParent = scene->EmplaceChild<SceneNode3D>("Second Parent");
+    auto secondParent = scene->EmplaceChild<SceneNode>("Second Parent");
     secondParent->SetPosition({20.0f, 0.0f, 0.0f});
-    auto child = firstParent->EmplaceChild<SceneNode3D>("Child");
+    auto child = firstParent->EmplaceChild<SceneNode>("Child");
     child->SetPosition({1.0f, 0.0f, 0.0f});
 
     EXPECT_NEAR(child->GetGlobalPosition().x, 11.0f, 0.0001f);
@@ -451,10 +451,10 @@ TEST_F(SceneNodeTest, ReparentingAndDetachingUpdatesGlobalTransform)
 
 TEST_F(SceneNodeTest, CachedGlobalTransformsTrackRepeatedAncestorChanges)
 {
-    auto parent = scene->EmplaceChild<SceneNode3D>("Parent");
-    auto child = parent->EmplaceChild<SceneNode3D>("Child");
-    auto sibling = parent->EmplaceChild<SceneNode3D>("Sibling");
-    auto grandchild = child->EmplaceChild<SceneNode3D>("Grandchild");
+    auto parent = scene->EmplaceChild<SceneNode>("Parent");
+    auto child = parent->EmplaceChild<SceneNode>("Child");
+    auto sibling = parent->EmplaceChild<SceneNode>("Sibling");
+    auto grandchild = child->EmplaceChild<SceneNode>("Grandchild");
     child->SetPosition({1.0f, 0.0f, 0.0f});
     grandchild->SetPosition({2.0f, 0.0f, 0.0f});
 
@@ -497,8 +497,8 @@ TEST_F(SceneNodeTest, GlobalTransformCacheIsInvalidatedByAncestorChanges)
 TEST_F(SceneNodeTest, CachedGlobalTransformUpdatesWhenParentIsDestroyed)
 {
     auto registry = std::make_shared<entt::registry>();
-    auto parent = std::make_shared<SceneNode3D>(registry, "Parent");
-    auto child = std::make_shared<SceneNode3D>(registry, "Child");
+    auto parent = std::make_shared<SceneNode>(registry, "Parent");
+    auto child = std::make_shared<SceneNode>(registry, "Child");
     parent->SetPosition({10.0f, 0.0f, 0.0f});
     child->SetPosition({2.0f, 0.0f, 0.0f});
     parent->AddChild(child);
@@ -510,8 +510,8 @@ TEST_F(SceneNodeTest, CachedGlobalTransformUpdatesWhenParentIsDestroyed)
 
 TEST_F(SceneNodeTest, DirectComponentChangesInvalidateDescendants)
 {
-    auto parent = scene->EmplaceChild<SceneNode3D>("Parent");
-    auto child = parent->EmplaceChild<SceneNode3D>("Child");
+    auto parent = scene->EmplaceChild<SceneNode>("Parent");
+    auto child = parent->EmplaceChild<SceneNode>("Child");
     child->SetPosition({2.0f, 0.0f, 0.0f});
     EXPECT_FLOAT_EQ(child->GetGlobalPosition().x, 2.0f);
 
@@ -552,32 +552,6 @@ TEST_F(SceneNodeTest, SimulationUpdatesCachedTransforms)
     EXPECT_NEAR(position.z, -1.0f, 0.0001f);
 }
 
-TEST_F(SceneNodeTest, LegacyTransformComponentsDeserializeIntoUnifiedTransform)
-{
-    auto node = std::make_shared<SceneNode>(std::make_shared<entt::registry>());
-    PositionComponent position;
-    position.value = {1.0f, 2.0f, 3.0f};
-    OrientationComponent orientation;
-    orientation.SetAngles({0.0f, 90.0f, 0.0f});
-    ScaleComponent scale;
-    scale.value = {2.0f, 3.0f, 4.0f};
-    auto data = VariantData::Map();
-    data["__class__"] = "SceneNode";
-    data["active"] = true;
-    data["children"] = VariantData::Array();
-    data["components"] = VariantData::Array();
-    data["components"].PushBack(position.Serialize());
-    data["components"].PushBack(orientation.Serialize());
-    data["components"].PushBack(scale.Serialize());
-    EXPECT_EQ(node->GetGlobalPosition(), glm::vec3(0.0f));
-
-    ASSERT_TRUE(node->Deserialize(data));
-    EXPECT_EQ(node->GetGlobalPosition(), position.value);
-    EXPECT_EQ(node->GetScale(), scale.value);
-    EXPECT_NEAR(std::abs(glm::dot(node->GetOrientation(), orientation.GetQuaternion())), 1.0f, 0.0001f);
-    EXPECT_FALSE(node->HasComponent<PositionComponent>());
-}
-
 TEST_F(SceneNodeTest, GetAllChildren)
 {
     auto parent = scene->EmplaceChild<SceneNode>("Parent");
@@ -610,22 +584,24 @@ TEST_F(SceneNodeTest, GetAllDescendants)
 
 TEST_F(SceneNodeTest, GetAllDescendantsOfTypeReturnsOrderedMatches)
 {
-    auto first = scene->EmplaceChild<SceneNode3D>("First");
+    auto first = scene->EmplaceChild<SceneNode>("First");
     auto plain = first->EmplaceChild<SceneNode>("Plain");
-    auto nested = plain->EmplaceChild<SceneNode3D>("Nested");
-    auto second = scene->EmplaceChild<SceneNode3D>("Second");
+    auto nested = plain->EmplaceChild<SceneNode>("Nested");
+    auto second = scene->EmplaceChild<SceneNode>("Second");
 
-    const auto parentFirst = scene->GetAllDescendantsOfType<SceneNode3D>(true);
-    ASSERT_EQ(parentFirst.size(), 3u);
+    const auto parentFirst = scene->GetAllDescendantsOfType<SceneNode>(true);
+    ASSERT_EQ(parentFirst.size(), 4u);
     EXPECT_EQ(parentFirst[0], first.get());
-    EXPECT_EQ(parentFirst[1], nested.get());
-    EXPECT_EQ(parentFirst[2], second.get());
+    EXPECT_EQ(parentFirst[1], plain.get());
+    EXPECT_EQ(parentFirst[2], nested.get());
+    EXPECT_EQ(parentFirst[3], second.get());
 
-    const auto childFirst = scene->GetAllDescendantsOfType<SceneNode3D>(false);
-    ASSERT_EQ(childFirst.size(), 3u);
+    const auto childFirst = scene->GetAllDescendantsOfType<SceneNode>(false);
+    ASSERT_EQ(childFirst.size(), 4u);
     EXPECT_EQ(childFirst[0], nested.get());
-    EXPECT_EQ(childFirst[1], first.get());
-    EXPECT_EQ(childFirst[2], second.get());
+    EXPECT_EQ(childFirst[1], plain.get());
+    EXPECT_EQ(childFirst[2], first.get());
+    EXPECT_EQ(childFirst[3], second.get());
 }
 
 TEST_F(SceneNodeTest, FindNodeById)

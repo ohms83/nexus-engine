@@ -154,7 +154,7 @@ TEST(SceneRendererShadowTest, SelectsEnabledLightAndUpdatesShaderIndex)
     auto* first = firstNode->GetComponent<DirectLightComponent>();
     first->properties.canCastShadows = false;
     auto material = std::make_shared<Material>("shadow", 1);
-    scene->EmplaceChild<SceneNode3D>("caster")->AddComponent<MeshComponent>()->SetMesh(MakeShadowTestMesh(material));
+    scene->EmplaceChild<SceneNode>("caster")->AddComponent<MeshComponent>()->SetMesh(MakeShadowTestMesh(material));
 
     auto program = std::make_shared<ShadowTestProgram>();
     auto rendering = std::make_shared<ShadowTestRendering>();
@@ -203,12 +203,12 @@ TEST(SceneRendererShadowTest, NonCastingReceiverContributesBoundsButIsNotDrawn)
     auto ignoredMaterial = std::make_shared<Material>("ignored", 3);
     ignoredMaterial->castShadow = false;
     ignoredMaterial->receiveShadows = false;
-    auto caster = scene->EmplaceChild<SceneNode3D>("caster");
+    auto caster = scene->EmplaceChild<SceneNode>("caster");
     caster->AddComponent<MeshComponent>()->SetMesh(MakeShadowTestMesh(casterMaterial));
-    auto receiver = scene->EmplaceChild<SceneNode3D>("receiver");
+    auto receiver = scene->EmplaceChild<SceneNode>("receiver");
     receiver->SetPosition(glm::vec3(100.0f, 0.0f, 0.0f));
     receiver->AddComponent<MeshComponent>()->SetMesh(MakeShadowTestMesh(receiverMaterial));
-    auto ignored = scene->EmplaceChild<SceneNode3D>("ignored");
+    auto ignored = scene->EmplaceChild<SceneNode>("ignored");
     ignored->SetPosition(glm::vec3(1000.0f, 0.0f, 0.0f));
     ignored->AddComponent<MeshComponent>()->SetMesh(MakeShadowTestMesh(ignoredMaterial));
 
