@@ -135,7 +135,7 @@ public:
         m_gpuProgram->Bind();
         m_gpuProgram->SetUniformMatrix(
             "model",
-            nxs::Matrix::CreateModelMatrix(glm::vec3(0.0f), m_cubeOrientation.quat, glm::vec3(1.0f)),
+            nxs::Matrix::CreateModelMatrix(glm::vec3(0.0f), m_cubeOrientation.GetQuaternion(), glm::vec3(1.0f)),
             false);
         m_gpuProgram->SetUniformMatrix("view", view, false);
         m_gpuProgram->SetUniformMatrix("projection", projection, false);

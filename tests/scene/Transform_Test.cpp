@@ -11,8 +11,8 @@ TEST(TransformComponentTest, DefaultsAreNeutralAndValid)
     EXPECT_EQ(position.value, glm::vec3(0.0f));
 
     const nxs::OrientationComponent orientation;
-    EXPECT_EQ(orientation.quat, glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
-    EXPECT_EQ(orientation.euler, glm::vec3(0.0f));
+    EXPECT_EQ(orientation.GetQuaternion(), glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
+    EXPECT_EQ(orientation.GetAngles(), glm::vec3(0.0f));
 
     const nxs::ScaleComponent scale;
     EXPECT_EQ(scale.value, glm::vec3(1.0f));
@@ -24,6 +24,39 @@ TEST(TransformComponentTest, DefaultsAreNeutralAndValid)
     const nxs::TurningComponent turning;
     EXPECT_EQ(turning.axis, glm::vec3(0.0f, 1.0f, 0.0f));
     EXPECT_FLOAT_EQ(turning.degree, 0.0f);
+}
+
+TEST(TransformComponentTest, SceneNodeOrientationRoundTripsThroughSerialization)
+{
+    nxs::SceneNode3D node(std::make_shared<entt::registry>());
+    const glm::quat rotation = glm::quat(glm::radians(glm::vec3(20.0f, 35.0f, -10.0f)));
+    node.SetOrientation(rotation);
+
+    const auto* orientation = node.GetComponent<nxs::OrientationComponent>();
+    ASSERT_NE(orientation, nullptr);
+    EXPECT_EQ(node.GetOrientation(), rotation);
+    EXPECT_TRUE(glm::all(glm::epsilonEqual(
+        orientation->GetAngles(), glm::vec3(20.0f, 35.0f, -10.0f), 0.001f)));
+
+    nxs::OrientationComponent restored;
+    ASSERT_TRUE(restored.Deserialize(orientation->Serialize()));
+    EXPECT_TRUE(glm::all(glm::epsilonEqual(restored.GetQuaternion(), rotation, 0.00001f)));
+}
+
+TEST(TransformComponentTest, PlaneMeshSerializationPreservesBaseFields)
+{
+    nxs::PlaneMeshComponent plane;
+    plane.meshPath = "plane";
+    plane.showBoundingBox = true;
+    plane.width = 3.0f;
+    plane.height = 5.0f;
+
+    nxs::PlaneMeshComponent restored;
+    ASSERT_TRUE(restored.Deserialize(plane.Serialize()));
+    EXPECT_EQ(restored.meshPath, "plane");
+    EXPECT_TRUE(restored.showBoundingBox);
+    EXPECT_FLOAT_EQ(restored.width, 3.0f);
+    EXPECT_FLOAT_EQ(restored.height, 5.0f);
 }
 
 std::string FormatVector(const glm::vec3& vec)

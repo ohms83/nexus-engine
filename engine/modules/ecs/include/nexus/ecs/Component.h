@@ -10,7 +10,9 @@
 #include <string>
 
 #define COMPONENT_HASH(Type) entt::type_id<Type>().hash()
-#define IMPLEMENT_COMPONENT(Type) \
+#define IMPLEMENT_COMPONENT(Type) IMPLEMENT_COMPONENT_WITH_BASE(Type, IComponent)
+#define IMPLEMENT_COMPONENT_WITH_BASE(Type, BaseType) \
+    using Base = BaseType; \
     IMPLEMENT_REFLECTION(Type); \
     static ComponentID StaticComponentID() { \
         return COMPONENT_HASH(Type); \

@@ -306,7 +306,7 @@ void SceneNode::SetOrientation(const glm::quat& orientation)
     rmt_ScopedCPUSample(SceneNode_SetOrientation, 0);
     auto orientationComponent = GetComponent<OrientationComponent>();
     if (!orientationComponent) return;
-    orientationComponent->quat = orientation;
+    orientationComponent->SetQuaternion(orientation);
     m_localTransformExplicit = false;
     m_transformDirty = true;
     InvalidateGlobalTransform();
@@ -353,7 +353,7 @@ const glm::vec3& SceneNode::GetPosition() const
 glm::quat SceneNode::GetOrientation() const
 {
     auto orientationComponent = GetComponent<OrientationComponent>();
-    return orientationComponent ? orientationComponent->quat : glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+    return orientationComponent ? orientationComponent->GetQuaternion() : glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
 }
 
 glm::vec3 SceneNode::GetScale() const
@@ -444,7 +444,7 @@ glm::quat SceneNode::GetGlobalOrientation() const
     rmt_ScopedCPUSample(SceneNode_GetGlobalOrientation, 0);
     const auto orientation = GetComponent<OrientationComponent>();
     const auto localOrientation = orientation
-        ? orientation->quat
+        ? orientation->GetQuaternion()
         : glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
     const auto parent = m_parent.lock();
     return parent ? parent->GetGlobalOrientation() * localOrientation : localOrientation;

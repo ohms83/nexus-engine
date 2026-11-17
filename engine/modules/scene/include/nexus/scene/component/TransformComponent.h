@@ -12,8 +12,6 @@ NXS_NAMESPACE
 {
     struct PositionComponent : public IComponent
     {
-        using Base = IComponent;
-
         IMPLEMENT_COMPONENT(PositionComponent);
 
         void AcceptReflector(IReflector& reflector) override
@@ -53,47 +51,49 @@ NXS_NAMESPACE
      * issues like Gimbal Lock. The Euler angles are maintained solely for UI presentation
      * and must be modified only through the provided member functions.
      */
-    struct OrientationComponent : public IComponent
+    class OrientationComponent : public IComponent
     {
-        using Base = IComponent;
-
+    public:
         IMPLEMENT_COMPONENT(OrientationComponent);
 
         void AcceptReflector(IReflector& reflector) override
         {
             reflector.SetMarker("Transform");
-            if (reflector.VisitVec3("Orient", euler)) {
-                const auto radians = glm::radians(euler);
-                quat = glm::quat(radians);
+            if (reflector.VisitVec3("Orient", m_euler)) {
+                const auto radians = glm::radians(m_euler);
+                m_quat = glm::quat(radians);
             };
         }
 
         VariantData Serialize() const override
         {
             auto data = Base::Serialize();
-            data["orient"] = euler;
+            // Serialize Euler angles instead of Quaternion for human readability and UI purposes.
+            data["orient"] = m_euler;
             return data;
         }
 
         MAYBE_UNUSED bool Deserialize(const VariantData& data) override
         {
             if (!Base::Deserialize(data)) return false;
-            euler = data["orient"].GetVec3();
-            quat = glm::quat(glm::radians(euler));
+            m_euler = data["orient"].GetVec3();
+            m_quat = glm::quat(glm::radians(m_euler));
             return true;
         }
 
-        /// @brief The Quaternion (main source of truth) used for all transformations.
-        glm::quat quat = glm::quat(1, 0, 0, 0);
+        const glm::quat& GetQuaternion() const { return m_quat; }
+        void SetQuaternion(const glm::quat& quat)
+        {
+            m_quat = quat;
+            m_euler = glm::degrees(glm::eulerAngles(m_quat));
+        }
 
-        /**
-         * @brief Euler angles in Pitch, Yaw, Roll order (in degrees).
-         * @warning This value is **read-only** for external access and used only for
-         * UI visualization (e.g., property windows). Direct modification
-         * will create a desync with the primary @c quat and lead to errors.
-         * Use @c FromEuler, @c Rotate, or @c LookAt to safely update the orientation.
-         */
-        glm::vec3 euler {0, 0, 0};
+        const glm::vec3& GetAngles() const { return m_euler; }
+        void SetAngles(const glm::vec3& angles)
+        {
+            m_euler = angles;
+            m_quat = glm::quat(glm::radians(m_euler));
+        }
 
         /**
          * @brief Initializes the orientation from the specified Euler angles.
@@ -104,8 +104,8 @@ NXS_NAMESPACE
          */
         void FromEuler(const glm::vec3& angles)
         {
-            euler = angles;
-            quat = glm::quat(glm::radians(euler));
+            m_euler = angles;
+            m_quat = glm::quat(glm::radians(m_euler));
         }
 
         /**
@@ -122,8 +122,8 @@ NXS_NAMESPACE
             // Checks for a zero vector.
             if (glm::all(glm::epsilonEqual(axis, glm::vec3(0), glm::vec3(FLT_EPSILON)))) return;
 
-            quat = glm::rotate(quat, glm::radians(degree), axis);
-            euler = glm::degrees(glm::eulerAngles(quat));
+            m_quat = glm::rotate(m_quat, glm::radians(degree), axis);
+            m_euler = glm::degrees(glm::eulerAngles(m_quat));
         }
 
         /**
@@ -136,8 +136,8 @@ NXS_NAMESPACE
          */
         void Rotate(const glm::vec3& eulerAngles)
         {
-            quat *= glm::quat(glm::radians(eulerAngles));
-            euler = glm::degrees(glm::eulerAngles(quat));
+            m_quat *= glm::quat(glm::radians(eulerAngles));
+            m_euler = glm::degrees(glm::eulerAngles(m_quat));
         }
 
         /**
@@ -151,15 +151,25 @@ NXS_NAMESPACE
          */
         void LookAt(const glm::vec3& pos, const glm::vec3& center, const glm::vec3& up)
         {
-            quat = glm::quatLookAt(glm::normalize(center - pos), up);
-            euler = glm::degrees(glm::eulerAngles(quat));
+            m_quat = glm::quatLookAt(glm::normalize(center - pos), up);
+            m_euler = glm::degrees(glm::eulerAngles(m_quat));
         }
+
+    private:
+        /// @brief The Quaternion (main source of truth) used for all transformations.
+        glm::quat m_quat = glm::quat(1, 0, 0, 0);
+        /**
+         * @brief Euler angles in Pitch, Yaw, Roll order (in degrees).
+         * @warning This value is **read-only** for external access and used only for
+         * UI visualization (e.g., property windows). Direct modification
+         * will create a desync with the primary @c quat and lead to errors.
+         * Use @c FromEuler, @c Rotate, or @c LookAt to safely update the orientation.
+         */
+        glm::vec3 m_euler {0, 0, 0};
     };
 
     struct ScaleComponent : public IComponent
     {
-        using Base = IComponent;
-
         IMPLEMENT_COMPONENT(ScaleComponent);
 
         void AcceptReflector(IReflector& reflector) override

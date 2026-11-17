@@ -105,7 +105,7 @@ public:
         m_cubeOrientation.Rotate(90.f * dt, glm::normalize(glm::vec3(5.0f, 1.0f, 0.0f)));
         const auto model = nxs::Matrix::CreateModelMatrix(
             glm::vec3(0.0f),
-            m_cubeOrientation.quat,
+            m_cubeOrientation.GetQuaternion(),
             glm::vec3(1.0f));
         glm::mat4 view = glm::lookAt(glm::vec3(0.0f, 0.0f, 5.0f), // Camera position
                                      glm::vec3(0.0f, 0.0f, 0.0f), // Look at origin

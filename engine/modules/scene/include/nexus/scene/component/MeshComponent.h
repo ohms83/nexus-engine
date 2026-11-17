@@ -65,9 +65,7 @@ NXS_NAMESPACE
     class PlaneMeshComponent : public MeshComponent
     {
     public:
-        using Base = MeshComponent;
-
-        IMPLEMENT_COMPONENT(PlaneMeshComponent);
+        IMPLEMENT_COMPONENT_WITH_BASE(PlaneMeshComponent, MeshComponent);
 
         VariantData Serialize() const override
         {
@@ -100,9 +98,7 @@ NXS_NAMESPACE
     class BoxMeshComponent : public MeshComponent
     {
     public:
-        using Base = MeshComponent;
-
-        IMPLEMENT_COMPONENT(BoxMeshComponent);
+        IMPLEMENT_COMPONENT_WITH_BASE(BoxMeshComponent, MeshComponent);
     };
 
 }
