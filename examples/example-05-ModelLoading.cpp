@@ -50,7 +50,7 @@ public:
         m_euler.x += euler.x;
         m_euler.y += euler.y;
 
-        auto modelNode = PTR_CAST<nxs::SceneNode3D>(m_scene->FindNodeWithName("Model"));
+        auto modelNode = PTR_CAST<nxs::SceneNode>(m_scene->FindNodeWithName("Model"));
         modelNode->SetOrientation(glm::quat(glm::radians(m_euler)));
         modelNode->SetScale(modelScales[selectedModel] * scale);
 
@@ -225,7 +225,7 @@ private:
             return false;
         }), nxs::TaskScheduler::UpdatePhase::Update);
 
-        auto node = m_scene->EmplaceChild<nxs::SceneNode3D>("Model");
+        auto node = m_scene->EmplaceChild<nxs::SceneNode>("Model");
         node->AddComponent<nxs::ModelComponent>();
         node->SetScale(modelScales[0]);
 

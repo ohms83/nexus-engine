@@ -19,7 +19,7 @@ class ProfilerStressApp final : public nxs::Application
 public:
     bool Init_Internal() override
     {
-        auto root = std::make_shared<nxs::SceneNode3D>(std::make_shared<entt::registry>(), "ProfilerRoot");
+        auto root = std::make_shared<nxs::SceneNode>(std::make_shared<entt::registry>(), "ProfilerRoot");
         m_root = std::move(root);
 
         BuildHierarchy(m_root, 0);
@@ -85,7 +85,7 @@ private:
 
         for (int i = 0; i < kNodesPerLevel; ++i)
         {
-            const auto child = root->EmplaceChild<nxs::SceneNode3D>(std::format("Node_{}_{}", level, i));
+            const auto child = root->EmplaceChild<nxs::SceneNode>(std::format("Node_{}_{}", level, i));
             child->SetPosition({float(i), float(level), float(i % 3)});
             child->SetScale({1.0f + (float(i) * 0.1f), 1.0f, 1.0f});
             child->SetOrientation(glm::quat(glm::radians(glm::vec3(0.0f, float(i * 7), 0.0f))));

@@ -160,13 +160,13 @@ private:
         m_loadedModels.resize(modelPaths.size());
         m_loadedModels[0] = LoadModel(0);
 
-        m_modelNode = m_scene->EmplaceChild<nxs::SceneNode3D>("Model");
+        m_modelNode = m_scene->EmplaceChild<nxs::SceneNode>("Model");
 
         m_groundMaterial = std::make_shared<nxs::Material>("Ground Material", 0);
         m_groundMaterial->castShadow = false;
         m_groundMaterial->CreateDefaultShader(*nxs::Engine::Instance().GetResourceManager());
 
-        auto meshComp = m_scene->EmplaceChild<nxs::SceneNode3D>("Ground")->AddComponent<nxs::MeshComponent>();
+        auto meshComp = m_scene->EmplaceChild<nxs::SceneNode>("Ground")->AddComponent<nxs::MeshComponent>();
         meshComp->SetMesh(nxs::PrimitiveMesh::CreatePlane(
                 "Ground Plane",
                 10, 10,
@@ -225,7 +225,7 @@ private:
             m_modelOffset = {-bounds.center.x, -bounds.center.y + bounds.extent.y, -bounds.center.z};
             for (const auto& mesh : model->GetMeshes())
             {
-                auto child = m_modelNode->EmplaceChild<nxs::SceneNode3D>(mesh->GetName());
+                auto child = m_modelNode->EmplaceChild<nxs::SceneNode>(mesh->GetName());
                 child->AddComponent<nxs::MeshComponent>()->SetMesh(mesh);
             }
             m_displayedModel = m_selectedModel;
@@ -256,7 +256,7 @@ protected:
     glm::vec3 m_euler {};
     glm::vec3 m_modelOffset {};
     std::string m_modelError;
-    nxs::Ref<nxs::SceneNode3D> m_modelNode;
+    nxs::Ref<nxs::SceneNode> m_modelNode;
     nxs::Ref<nxs::DirectionalLight> m_light;
     nxs::Ref<nxs::Material> m_groundMaterial;
     nxs::Ptr<nxs::ModelLoader> m_modelLoader;

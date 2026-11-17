@@ -30,6 +30,6 @@ PointLight::PointLight(Ref<entt::registry>  registry, std::string name)
         SetName(name);
     }
 
-    auto [lightComp, position] = AddComponents<PointLightComponent, PositionComponent>();
+    auto lightComp = AddComponent<PointLightComponent>();
     lightComp->properties.cutoffRange = DEFAULT_CUTOFF;
 }

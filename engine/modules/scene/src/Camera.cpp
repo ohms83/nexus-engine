@@ -15,7 +15,7 @@ USING_NAMESPACE_NXS;
 Camera::Camera(Ref<entt::registry>  registry, const std::string& name)
     : SceneNode(registry, name)
 {
-    AddComponents<CameraComponent, PositionComponent, OrientationComponent>();
+    AddComponent<CameraComponent>();
 }
 
 void Camera::SetProjection(const float fov, const float width, const float height, const float nearZ, const float farZ)

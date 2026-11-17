@@ -109,7 +109,7 @@ protected:
     nxs::Ref<nxs::GpuProgram> m_gpuProgram;
     nxs::Ref<nxs::Texture> m_texture;
     nxs::Ref<nxs::Mesh> m_mesh;
-    nxs::OrientationComponent m_cubeOrientation;
+    nxs::TransformComponent m_cubeOrientation;
     nxs::CameraComponent m_camera;
 };
 

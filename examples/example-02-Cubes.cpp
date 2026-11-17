@@ -188,7 +188,7 @@ protected:
     nxs::Ref<nxs::VertexBuffer> m_vertexBuffer;
     nxs::Ref<nxs::IndexBuffer> m_indexBuffer;
     nxs::Ref<nxs::GpuProgram> m_gpuProgram;
-    nxs::OrientationComponent m_cubeOrientation;
+    nxs::TransformComponent m_cubeOrientation;
     nxs::CameraComponent m_camera;
 };
 

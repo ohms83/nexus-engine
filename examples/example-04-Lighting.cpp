@@ -230,7 +230,7 @@ protected:
     nxs::Ref<nxs::GpuProgram> m_gpuProgram;
     nxs::Ref<nxs::Texture> m_texture;
     nxs::Ref<nxs::Mesh> m_cubeMesh;
-    nxs::OrientationComponent m_cubeOrientation;
+    nxs::TransformComponent m_cubeOrientation;
     nxs::CameraComponent m_camera;
     nxs::DirectLightComponent m_directionalLight {};
     nxs::PointLightComponent m_pointLights[2] {};

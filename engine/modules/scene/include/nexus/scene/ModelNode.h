@@ -1,15 +1,15 @@
 #pragma once
 
-#include "SceneNode3D.h"
+#include "SceneNode.h"
 
 #include "nexus/graphics/Model.h"
 
 NXS_NAMESPACE
 {
-    class ModelNode : public SceneNode3D
+    class ModelNode : public SceneNode
     {
     public:
-        using Base = SceneNode3D;
+        using Base = SceneNode;
 
         ModelNode(Ref<entt::registry> registry, std::string name = "");
         virtual ~ModelNode() override = default;

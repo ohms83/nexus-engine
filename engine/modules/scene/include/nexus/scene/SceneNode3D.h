@@ -9,9 +9,7 @@
 
 NXS_NAMESPACE
 {
-    /**
-     * 
-     */
+    //! @deprecated Use SceneNode. Retained for source and scene-data compatibility.
     class SceneNode3D : public SceneNode
     {
     public:

@@ -189,7 +189,7 @@ private:
                 m_loadedModels.emplace_back(LoadModel(i));
             }
 
-            auto node = m_scene->EmplaceChild<nxs::SceneNode3D>("Model");
+            auto node = m_scene->EmplaceChild<nxs::SceneNode>("Model");
             node->AddComponent<nxs::MeshComponent>();
             node->SetScale(modelScales[0]);
             node->SetPosition({0, 0.2f, 0});
@@ -216,7 +216,7 @@ private:
         }
         material->CreateDefaultShader(*resourceManager);
 
-        auto meshComp = m_scene->EmplaceChild<nxs::SceneNode3D>("Ground")->AddComponent<nxs::MeshComponent>();
+        auto meshComp = m_scene->EmplaceChild<nxs::SceneNode>("Ground")->AddComponent<nxs::MeshComponent>();
         meshComp->SetMesh(nxs::PrimitiveMesh::CreatePlane(
                 "Ground Plane",
                 10, 10,
@@ -269,7 +269,7 @@ private:
     {
         m_scene->Ambient() = {0.5f, 0.5f, 0.5f};
 
-        m_lightRoot = m_scene->EmplaceChild<nxs::SceneNode3D>("Light Root");
+        m_lightRoot = m_scene->EmplaceChild<nxs::SceneNode>("Light Root");
 
         {
             auto light = m_scene->EmplaceChild<nxs::DirectionalLight>("Direct Light");
@@ -308,7 +308,7 @@ private:
         m_euler.x += euler.x;
         m_euler.y += euler.y;
 
-        auto modelNode = PTR_CAST<nxs::SceneNode3D>(m_scene->FindNodeWithName("Model"));
+        auto modelNode = PTR_CAST<nxs::SceneNode>(m_scene->FindNodeWithName("Model"));
         if (!modelNode) return;
 
         modelNode->SetOrientation(glm::quat(glm::radians(m_euler)));
@@ -317,7 +317,7 @@ private:
 
 protected:
     nxs::Ref<nxs::Scene> m_scene;
-    nxs::Ref<nxs::SceneNode3D> m_lightRoot;
+    nxs::Ref<nxs::SceneNode> m_lightRoot;
     nxs::CameraComponent m_camera;
     nxs::Color3F m_ambient {0.5, 0.5, 0.5};
     glm::vec3 m_euler {};

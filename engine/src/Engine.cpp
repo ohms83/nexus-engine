@@ -79,9 +79,7 @@ void Engine::InitModules()
     // TODO: Create each module as a plugin.
     // Init scene modules
     SceneNodeComponent::Register();
-    PositionComponent::Register();
-    OrientationComponent::Register();
-    ScaleComponent::Register();
+    TransformComponent::Register();
     MoveComponent::Register();
     TurningComponent::Register();
     CameraComponent::Register();

@@ -18,7 +18,7 @@
 
 #include "nexus/scene/Scene.h"
 #include "nexus/scene/SceneNode.h"
-#include "nexus/scene/SceneNode3D.h"
+#include "nexus/scene/SceneNode.h"
 #include "nexus/scene/component/MeshComponent.h"
 #include "nexus/scene/component/GeometryComponent.h"
 
@@ -147,7 +147,7 @@ Ref<SceneNode> ModelImporter::Import(const std::string& path)
     // Store the directory path of the model file for texture loading
     const auto directory = std::filesystem::path(path).parent_path();
     auto thisScene = Engine::Instance().GetSceneManager()->GetCurrentScene();    
-    auto thisNode = thisScene->EmplaceChild<SceneNode3D>(ai_scene->mRootNode->mName.C_Str());
+    auto thisNode = thisScene->EmplaceChild<SceneNode>(ai_scene->mRootNode->mName.C_Str());
     ProcessNode(thisNode, ai_scene->mRootNode, ai_scene, directory);
 
     auto sphereComp = thisNode->AddComponent<SphereComponent>();
@@ -168,7 +168,7 @@ void ModelImporter::ProcessNode(Ref<SceneNode> thisNode, const aiNode* ai_node, 
     }
     // Then do the same for its children
     for (unsigned int i = 0; i < ai_node->mNumChildren; i++) {
-        auto childNode = thisNode->EmplaceChild<SceneNode3D>(ai_node->mChildren[i]->mName.C_Str());
+        auto childNode = thisNode->EmplaceChild<SceneNode>(ai_node->mChildren[i]->mName.C_Str());
         ProcessNode(childNode, ai_node->mChildren[i], ai_scene, directory);
     }
 }

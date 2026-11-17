@@ -34,15 +34,20 @@ SceneNode::SceneNode(Ref<entt::registry> registry, std::string name)
     auto milliseconds =
         std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
 
-    auto component = AddComponent<SceneNodeComponent>();
-    component->id = Hasher().Hash32(std::format("{}_{}_{}", name, milliseconds, s_runningId++));
-    component->name = std::move(name);
+    auto [nodeComp, transformComp] = AddComponents<SceneNodeComponent, TransformComponent>();
+    nodeComp->id = Hasher().Hash32(std::format("{}_{}_{}", name, milliseconds, s_runningId++));
+    nodeComp->name = std::move(name);
+    s_nodeRegistry.emplace(nodeComp->id, this);
 
-    s_nodeRegistry.emplace(component->id, this);
+    m_transformCallback = transformComp->onTransformDirty.connect([this](const TransformComponent&, TransformComponent::ComponentType) {
+        m_transformDirty = true;
+        InvalidateGlobalTransform();
+    });
 }
 
 SceneNode::~SceneNode()
 {
+    m_transformCallback.disconnect();
     OnDestroy();
     for (const auto& child : m_children)
     {
@@ -192,6 +197,22 @@ bool SceneNode::Deserialize(const VariantData &data)
     for (const auto compData : data["components"].GetArray())
     {
         const auto className = compData["__class__"].GetString();
+        auto transform = GetComponent<TransformComponent>();
+        if (className == "PositionComponent")
+        {
+            transform->SetPosition(compData["position"].GetVec3());
+            continue;
+        }
+        if (className == "OrientationComponent")
+        {
+            transform->SetAngles(compData["orient"].GetVec3());
+            continue;
+        }
+        if (className == "ScaleComponent")
+        {
+            transform->SetScale(compData["scale"].GetVec3());
+            continue;
+        }
         if (!IComponent::HasRegisteredClassName(className))
         {
             LOG_WARNING(LogSerialize, std::format(
@@ -218,7 +239,12 @@ bool SceneNode::Deserialize(const VariantData &data)
                 GetName(), className));
             continue;
         }
-        component->Deserialize(compData);
+        if (!component->Deserialize(compData))
+        {
+            LOG_ERROR(LogSerialize, std::format(
+                "Failed to deserialize component. Node={}, ComponentClass={}", GetName(), className));
+            return false;
+        }
     }
 
     return true;
@@ -316,73 +342,59 @@ void SceneNode::AddChild(Ref<SceneNode> child)
 void SceneNode::SetPosition(const glm::vec3& position)
 {
     rmt_ScopedCPUSample(SceneNode_SetPosition, 0);
-    auto positionComponent = GetComponent<PositionComponent>();
-    if (!positionComponent) return;
-    positionComponent->value = position;
-    m_localTransformExplicit = false;
-    m_transformDirty = true;
-    InvalidateGlobalTransform();
+    auto transform = GetComponent<TransformComponent>();
+    if (!transform) return;
+    transform->SetPosition(position);
 }
 
 void SceneNode::SetOrientation(const glm::quat& orientation)
 {
     rmt_ScopedCPUSample(SceneNode_SetOrientation, 0);
-    auto orientationComponent = GetComponent<OrientationComponent>();
-    if (!orientationComponent) return;
-    orientationComponent->SetQuaternion(orientation);
-    m_localTransformExplicit = false;
-    m_transformDirty = true;
-    InvalidateGlobalTransform();
+    auto transform = GetComponent<TransformComponent>();
+    if (!transform) return;
+    transform->SetQuaternion(orientation);
 }
 
 void SceneNode::SetScale(const glm::vec3& scale)
 {
     rmt_ScopedCPUSample(SceneNode_SetScale, 0);
-    auto scaleComponent = GetComponent<ScaleComponent>();
-    if (!scaleComponent) return;
-    scaleComponent->value = scale;
-    m_localTransformExplicit = false;
-    m_transformDirty = true;
-    InvalidateGlobalTransform();
+    auto transform = GetComponent<TransformComponent>();
+    if (!transform) return;
+    transform->SetScale(scale);
 }
 
 void SceneNode::SetLocalTransform(const glm::mat4& transform)
 {
     rmt_ScopedCPUSample(SceneNode_SetLocalTransform, 0);
-    for (glm::length_t column = 0; column < 4; ++column)
-    {
-        m_transform[column] = glm::vec3(transform[column]);
-    }
-    m_localTransformExplicit = true;
-    m_transformDirty = true;
-    InvalidateGlobalTransform();
+    glm::mat4x3 affine(1.0f);
+    for (glm::length_t column = 0; column < 4; ++column) affine[column] = glm::vec3(transform[column]);
+    SetLocalAffineTransform(affine);
 }
 
 void SceneNode::SetLocalAffineTransform(const glm::mat4x3& transform)
 {
-    m_transform = transform;
-    m_localTransformExplicit = true;
-    m_transformDirty = true;
-    InvalidateGlobalTransform();
+    GetComponent<TransformComponent>()->SetAffine(transform);
 }
 
 const glm::vec3& SceneNode::GetPosition() const
 {
-    auto positionComponent = GetComponent<PositionComponent>();
+    auto transform = GetComponent<TransformComponent>();
     static const glm::vec3 defaultPosition(0.0f);
-    return positionComponent ? positionComponent->value : defaultPosition;
+    return transform ? transform->GetPosition() : defaultPosition;
 }
 
-glm::quat SceneNode::GetOrientation() const
+const glm::quat& SceneNode::GetOrientation() const
 {
-    auto orientationComponent = GetComponent<OrientationComponent>();
-    return orientationComponent ? orientationComponent->GetQuaternion() : glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+    auto transform = GetComponent<TransformComponent>();
+    static const glm::quat defaultOrient(1.0f, 0.0f, 0.0f, 0.0f);
+    return transform ? transform->GetQuaternion() : defaultOrient;
 }
 
-glm::vec3 SceneNode::GetScale() const
+const glm::vec3& SceneNode::GetScale() const
 {
-    auto scaleComponent = GetComponent<ScaleComponent>();
-    return scaleComponent ? scaleComponent->value : glm::vec3(1.0f);
+    auto transform = GetComponent<TransformComponent>();
+    static const glm::vec3 defaultScale(1.0f);
+    return transform ? transform->GetScale() : defaultScale;
 }
 
 glm::mat4 SceneNode::GetLocalTransform() const
@@ -401,14 +413,10 @@ void SceneNode::UpdateTransform() const
     rmt_ScopedCPUSample(SceneNode_UpdateTransform, 0);
     if (!m_transformDirty) return;
 
-    if (!m_localTransformExplicit)
+    const auto transform = GetComponent<TransformComponent>();
+    if (transform)
     {
-        const auto rotation = glm::mat3_cast(GetOrientation());
-        const auto scale = GetScale();
-        m_transform[0] = rotation[0] * scale.x;
-        m_transform[1] = rotation[1] * scale.y;
-        m_transform[2] = rotation[2] * scale.z;
-        m_transform[3] = GetPosition();
+        m_transform = transform->GetAffine();
     }
 
     m_transformDirty = false;
@@ -465,10 +473,7 @@ glm::vec3 SceneNode::GetGlobalPosition() const
 glm::quat SceneNode::GetGlobalOrientation() const
 {
     rmt_ScopedCPUSample(SceneNode_GetGlobalOrientation, 0);
-    const auto orientation = GetComponent<OrientationComponent>();
-    const auto localOrientation = orientation
-        ? orientation->GetQuaternion()
-        : glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+    const auto localOrientation = GetOrientation();
     const auto parent = m_parent.lock();
     return parent ? parent->GetGlobalOrientation() * localOrientation : localOrientation;
 }
@@ -486,12 +491,9 @@ glm::vec3 SceneNode::GetGlobalScale() const
 
 void SceneNode::LookAt(const glm::vec3& center, const glm::vec3& up)
 {
-    if (auto orientationComponent = GetComponent<OrientationComponent>())
+    if (auto transform = GetComponent<TransformComponent>())
     {
-        orientationComponent->LookAt(GetPosition(), center, up);
-        m_localTransformExplicit = false;
-        m_transformDirty = true;
-        InvalidateGlobalTransform();
+        transform->LookAt(GetPosition(), center, up);
     }
 }
 

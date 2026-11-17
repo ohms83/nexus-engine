@@ -160,10 +160,11 @@ NXS_NAMESPACE
         void SetOrientation(const glm::quat& orientation);
         void SetScale(const glm::vec3& scale);
         NODISCARD const glm::vec3& GetPosition() const;
-        NODISCARD glm::quat GetOrientation() const;
-        NODISCARD glm::vec3 GetScale() const;
+        NODISCARD const glm::quat& GetOrientation() const;
+        NODISCARD const glm::vec3& GetScale() const;
 
         //! Sets the affine portion of the transform; any projective terms are discarded.
+        //! Shear is preserved until rotation or scale is edited.
         void SetLocalTransform(const glm::mat4& transform);
         void SetLocalAffineTransform(const glm::mat4x3& transform);
         //! Returns this node's transform relative to its parent.
@@ -171,7 +172,6 @@ NXS_NAMESPACE
         NODISCARD const glm::mat4x3& GetLocalAffineTransform() const;
         void UpdateTransform() const;
         //! Rebuilds local transforms and invalidates world transforms for this subtree.
-        //! Call after directly changing transform components instead of using node setters.
         void UpdateGlobalTransform();
         //! Returns this node's transform composed with all its ancestors.
         NODISCARD glm::mat4 GetGlobalTransform() const;
@@ -243,11 +243,12 @@ NXS_NAMESPACE
         ChildList m_children;
         Array<Ref<Script>> m_scripts;
 
+        sigslot::connection m_transformCallback;
+
         mutable glm::mat4x3 m_transform { 1.0f };
         mutable glm::mat4x3 m_globalTransform { 1.0f };
         mutable bool m_transformDirty = true;
         mutable bool m_globalTransformDirty = true;
-        bool m_localTransformExplicit = false;
 
         // --- ECS ---
         struct Simulation

@@ -5,17 +5,67 @@
 #include <string>
 #include <iomanip>
 
+namespace
+{
+    class TransformTestReflector final : public nxs::IReflector
+    {
+    public:
+        void SetMarker(const std::string&) override {}
+        void SetReadOnlyFlag(bool value) override
+        {
+            disabledDepth += value ? 1 : -1;
+            EXPECT_GE(disabledDepth, 0);
+        }
+        bool VisitBool(const std::string&, bool&) override { return false; }
+        bool VisitInt(const std::string&, int32_t&) override { return false; }
+        bool VisitUInt(const std::string&, uint32_t&) override { return false; }
+        bool VisitInt64(const std::string&, int64_t&) override { return false; }
+        bool VisitUInt64(const std::string&, uint64_t&) override { return false; }
+        bool VisitFloat(const std::string&, float&) override { return false; }
+        bool VisitDouble(const std::string&, double&) override { return false; }
+        bool VisitString(const std::string&, std::string&) override { return false; }
+        bool VisitVec2(const std::string&, glm::vec2&) override { return false; }
+        bool VisitVec3(const std::string& name, glm::vec3& value) override
+        {
+            if (disabledDepth != 0 || name != "Position") return false;
+            value = {4.0f, 5.0f, 6.0f};
+            return true;
+        }
+        bool VisitVec4(const std::string&, glm::vec4&) override { return false; }
+        bool VisitColor3(const std::string&, nxs::Color3F&) override { return false; }
+        bool VisitColor4(const std::string&, nxs::Color4F&) override { return false; }
+        bool VisitObject(const std::string&, nxs::IReflector&) override { return false; }
+        int disabledDepth = 0;
+    };
+}
+
+TEST(TransformComponentTest, ReflectionAndDeserializationInvalidateCachedTransforms)
+{
+    auto registry = std::make_shared<entt::registry>();
+    auto parent = std::make_shared<nxs::SceneNode>(registry);
+    auto child = std::make_shared<nxs::SceneNode>(registry);
+    parent->AddChild(child);
+    EXPECT_EQ(child->GetGlobalPosition(), glm::vec3(0.0f));
+
+    TransformTestReflector reflector;
+    auto transform = parent->GetComponent<nxs::TransformComponent>();
+    transform->AcceptReflector(reflector);
+    EXPECT_EQ(reflector.disabledDepth, 0);
+    EXPECT_EQ(child->GetGlobalPosition(), glm::vec3(4.0f, 5.0f, 6.0f));
+
+    nxs::TransformComponent replacement;
+    replacement.SetPosition({7.0f, 8.0f, 9.0f});
+    ASSERT_TRUE(transform->Deserialize(replacement.Serialize()));
+    EXPECT_EQ(child->GetGlobalPosition(), glm::vec3(7.0f, 8.0f, 9.0f));
+}
+
 TEST(TransformComponentTest, DefaultsAreNeutralAndValid)
 {
-    const nxs::PositionComponent position;
-    EXPECT_EQ(position.value, glm::vec3(0.0f));
-
-    const nxs::OrientationComponent orientation;
-    EXPECT_EQ(orientation.GetQuaternion(), glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
-    EXPECT_EQ(orientation.GetAngles(), glm::vec3(0.0f));
-
-    const nxs::ScaleComponent scale;
-    EXPECT_EQ(scale.value, glm::vec3(1.0f));
+    const nxs::TransformComponent transform;
+    EXPECT_EQ(transform.GetPosition(), glm::vec3(0.0f));
+    EXPECT_EQ(transform.GetQuaternion(), glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
+    EXPECT_EQ(transform.GetAngles(), glm::vec3(0.0f));
+    EXPECT_EQ(transform.GetScale(), glm::vec3(1.0f));
 
     const nxs::MoveComponent move;
     EXPECT_EQ(move.direction, glm::vec3(0.0f));
@@ -28,19 +78,24 @@ TEST(TransformComponentTest, DefaultsAreNeutralAndValid)
 
 TEST(TransformComponentTest, SceneNodeOrientationRoundTripsThroughSerialization)
 {
-    nxs::SceneNode3D node(std::make_shared<entt::registry>());
+    nxs::SceneNode node(std::make_shared<entt::registry>());
     const glm::quat rotation = glm::quat(glm::radians(glm::vec3(20.0f, 35.0f, -10.0f)));
+    node.SetPosition({1.0f, 2.0f, 3.0f});
+    node.SetScale({4.0f, 5.0f, 6.0f});
     node.SetOrientation(rotation);
 
-    const auto* orientation = node.GetComponent<nxs::OrientationComponent>();
+    const auto* orientation = node.GetComponent<nxs::TransformComponent>();
     ASSERT_NE(orientation, nullptr);
     EXPECT_EQ(node.GetOrientation(), rotation);
     EXPECT_TRUE(glm::all(glm::epsilonEqual(
         orientation->GetAngles(), glm::vec3(20.0f, 35.0f, -10.0f), 0.001f)));
 
-    nxs::OrientationComponent restored;
+    nxs::TransformComponent restored;
     ASSERT_TRUE(restored.Deserialize(orientation->Serialize()));
     EXPECT_TRUE(glm::all(glm::epsilonEqual(restored.GetQuaternion(), rotation, 0.00001f)));
+    EXPECT_EQ(restored.GetPosition(), node.GetPosition());
+    EXPECT_EQ(restored.GetScale(), node.GetScale());
+    EXPECT_EQ(restored.GetMatrix(), nxs::Matrix::ExpandAffine(restored.GetAffine()));
 }
 
 TEST(TransformComponentTest, PlaneMeshSerializationPreservesBaseFields)

@@ -1,5 +1,6 @@
 #include "gtest/gtest.h"
 #include "nexus/Nexus.h"
+#include "nexus/scene/system/SceneNodeTransformSystem.h"
 #include <random>
 
 USING_NAMESPACE_NXS;
@@ -253,6 +254,54 @@ TEST_F(SceneNodeTest, LocalTransformEnforcesAffineForm)
     EXPECT_EQ(affineTransform[3][3], 1.0f);
 }
 
+TEST_F(SceneNodeTest, AffineTransformIsStoredAndSerializedByComponent)
+{
+    auto node = scene->EmplaceChild<SceneNode>("Affine Node");
+    auto child = node->EmplaceChild<SceneNode>("Child");
+    child->SetPosition({1.0f, 0.0f, 0.0f});
+    EXPECT_EQ(child->GetGlobalPosition(), glm::vec3(1.0f, 0.0f, 0.0f));
+
+    glm::mat4x3 affine(1.0f);
+    affine[0] = {0.0f, 2.0f, 0.0f};
+    affine[1] = {-3.0f, 0.5f, 0.0f};
+    affine[3] = {4.0f, 5.0f, 6.0f};
+    node->SetLocalAffineTransform(affine);
+    auto component = node->GetComponent<TransformComponent>();
+    EXPECT_EQ(component->GetAffine(), affine);
+    EXPECT_EQ(node->GetPosition(), affine[3]);
+    EXPECT_TRUE(glm::all(glm::epsilonEqual(node->GetScale(), glm::vec3(2.0f, 3.0f, 1.0f), 0.0001f)));
+    const glm::quat rotation = glm::angleAxis(glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    EXPECT_NEAR(std::abs(glm::dot(node->GetOrientation(), rotation)), 1.0f, 0.0001f);
+    EXPECT_EQ(child->GetGlobalPosition(), glm::vec3(4.0f, 7.0f, 6.0f));
+
+    TransformComponent restored;
+    ASSERT_TRUE(restored.Deserialize(component->Serialize()));
+    EXPECT_EQ(restored.GetAffine(), affine);
+    restored.Translate({1.0f, 0.0f, 0.0f});
+    affine[3].x += 1.0f;
+    EXPECT_EQ(restored.GetAffine(), affine);
+    restored.SetScale({4.0f, 5.0f, 1.0f});
+    const auto edited = restored.GetAffine();
+    EXPECT_TRUE(glm::all(glm::epsilonEqual(edited[0], glm::vec3(0.0f, 4.0f, 0.0f), 0.0001f)));
+    EXPECT_TRUE(glm::all(glm::epsilonEqual(edited[1], glm::vec3(-5.0f, 0.0f, 0.0f), 0.0001f)));
+}
+
+TEST_F(SceneNodeTest, SingularAffineTransformIsPreserved)
+{
+    auto node = scene->EmplaceChild<SceneNode>("Singular");
+    glm::mat4x3 affine(1.0f);
+    affine[0] = glm::vec3(0.0f);
+    affine[3] = {2.0f, 3.0f, 4.0f};
+    node->SetLocalAffineTransform(affine);
+    EXPECT_EQ(node->GetLocalAffineTransform(), affine);
+    EXPECT_EQ(node->GetPosition(), affine[3]);
+    EXPECT_EQ(node->GetScale(), glm::vec3(0.0f, 1.0f, 1.0f));
+    EXPECT_EQ(node->GetOrientation(), glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
+    TransformComponent restored;
+    ASSERT_TRUE(restored.Deserialize(node->GetComponent<TransformComponent>()->Serialize()));
+    EXPECT_EQ(restored.GetAffine(), affine);
+}
+
 TEST_F(SceneNodeTest, CameraViewMatrixInvertsWorldPositionAndOrientation)
 {
     auto camera = scene->EmplaceChild<Camera>("Camera");
@@ -459,16 +508,74 @@ TEST_F(SceneNodeTest, CachedGlobalTransformUpdatesWhenParentIsDestroyed)
     EXPECT_FLOAT_EQ(child->GetGlobalPosition().x, 2.0f);
 }
 
-TEST_F(SceneNodeTest, UpdateGlobalTransformRefreshesDirectComponentChanges)
+TEST_F(SceneNodeTest, DirectComponentChangesInvalidateDescendants)
 {
     auto parent = scene->EmplaceChild<SceneNode3D>("Parent");
     auto child = parent->EmplaceChild<SceneNode3D>("Child");
     child->SetPosition({2.0f, 0.0f, 0.0f});
     EXPECT_FLOAT_EQ(child->GetGlobalPosition().x, 2.0f);
 
-    parent->GetComponent<PositionComponent>()->value.x = 5.0f;
-    parent->UpdateGlobalTransform();
+    parent->GetComponent<TransformComponent>()->SetPosition({5.0f, 0.0f, 0.0f});
     EXPECT_FLOAT_EQ(child->GetGlobalPosition().x, 7.0f);
+}
+
+TEST_F(SceneNodeTest, ComponentUpdatesSurviveOtherNodesBeingDestroyed)
+{
+    auto registry = std::make_shared<entt::registry>();
+    auto first = std::make_shared<SceneNode>(registry);
+    auto parent = std::make_shared<SceneNode>(registry);
+    auto child = std::make_shared<SceneNode>(registry);
+    parent->AddChild(child);
+    child->SetPosition({2.0f, 0.0f, 0.0f});
+    EXPECT_FLOAT_EQ(child->GetGlobalPosition().x, 2.0f);
+    first.reset();
+    parent->GetComponent<TransformComponent>()->Translate({3.0f, 0.0f, 0.0f});
+    EXPECT_FLOAT_EQ(child->GetGlobalPosition().x, 5.0f);
+}
+
+TEST_F(SceneNodeTest, SimulationUpdatesCachedTransforms)
+{
+    auto parent = scene->EmplaceChild<SceneNode>("Moving");
+    auto child = parent->EmplaceChild<SceneNode>("Child");
+    child->SetPosition({1.0f, 0.0f, 0.0f});
+    auto move = parent->AddComponent<MoveComponent>();
+    move->direction = {1.0f, 0.0f, 0.0f};
+    move->speed = 2.0f;
+    auto turning = parent->AddComponent<TurningComponent>();
+    turning->degree = 90.0f;
+    EXPECT_EQ(child->GetGlobalPosition(), glm::vec3(1.0f, 0.0f, 0.0f));
+
+    MoveNode(*scene->GetRegistry(), 1.0f);
+    RotateNode(*scene->GetRegistry(), 1.0f);
+    const auto position = child->GetGlobalPosition();
+    EXPECT_NEAR(position.x, 2.0f, 0.0001f);
+    EXPECT_NEAR(position.z, -1.0f, 0.0001f);
+}
+
+TEST_F(SceneNodeTest, LegacyTransformComponentsDeserializeIntoUnifiedTransform)
+{
+    auto node = std::make_shared<SceneNode>(std::make_shared<entt::registry>());
+    PositionComponent position;
+    position.value = {1.0f, 2.0f, 3.0f};
+    OrientationComponent orientation;
+    orientation.SetAngles({0.0f, 90.0f, 0.0f});
+    ScaleComponent scale;
+    scale.value = {2.0f, 3.0f, 4.0f};
+    auto data = VariantData::Map();
+    data["__class__"] = "SceneNode";
+    data["active"] = true;
+    data["children"] = VariantData::Array();
+    data["components"] = VariantData::Array();
+    data["components"].PushBack(position.Serialize());
+    data["components"].PushBack(orientation.Serialize());
+    data["components"].PushBack(scale.Serialize());
+    EXPECT_EQ(node->GetGlobalPosition(), glm::vec3(0.0f));
+
+    ASSERT_TRUE(node->Deserialize(data));
+    EXPECT_EQ(node->GetGlobalPosition(), position.value);
+    EXPECT_EQ(node->GetScale(), scale.value);
+    EXPECT_NEAR(std::abs(glm::dot(node->GetOrientation(), orientation.GetQuaternion())), 1.0f, 0.0001f);
+    EXPECT_FALSE(node->HasComponent<PositionComponent>());
 }
 
 TEST_F(SceneNodeTest, GetAllChildren)
