@@ -436,6 +436,7 @@ void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
     Array<RenderCommand> commands;
     commands.reserve(1024);
 
+#if 0
     Dict<const ISceneView*, Array<SceneNode*>> visibilitySets;
 
     for (auto pass : m_renderPasses)
@@ -475,7 +476,7 @@ void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
             if (isNew)
             {
                 rmt_ScopedCPUSample(SceneRenderer_BuildVisibilityCache, 0)
-                visibleNodes = view->GetVisibleNodes(scene);
+                view->ComputeVisibility(scene);
             }
 
             rmt_BeginCPUSample(SceneRenderer_CreateRenderCommands, 0);
@@ -572,6 +573,8 @@ void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
         rmt_EndOpenGLSample();
         rmt_EndCPUSample();
     }
+#else
+#endif
 }
 
 bool SceneRenderer::IsSphereInside(const Frustum &viewFustrum, const Sphere &sphere, glm::mat4 modelMtx, const glm::vec3 &scale)

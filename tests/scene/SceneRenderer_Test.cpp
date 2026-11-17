@@ -16,19 +16,15 @@ public:
     NODISCARD glm::mat4 GetViewMatrix() const override { return glm::mat4(1.0f); }
     NODISCARD glm::mat4 GetProjectionMatrix() const override { return glm::mat4(1.0f); }
     NODISCARD glm::mat4 GetViewProjectionMatrix() const override { return glm::mat4(1.0f); }
-    NODISCARD RenderTarget* GetRenderTarget() const override { return nullptr; }
-    void SetRenderTarget(RenderTarget*) override {}
+    NODISCARD Ref<RenderTarget> GetRenderTarget() const override { return nullptr; }
+    void SetRenderTarget(Ref<RenderTarget>) override {}
 
-    NODISCARD Array<SceneNode*> GetVisibleNodes(const Scene&) const override
-    {
-        ++visibilityCalls;
-        return {};
-    }
+    NODISCARD ViewContext CreateViewContext(const Scene& scene) const override { return ViewContext {}; }
 
     mutable uint32_t visibilityCalls = 0;
 
 private:
-    glm::vec3 m_position{0.0f};
+    glm::vec3 m_position {0.0f};
 };
 
 namespace

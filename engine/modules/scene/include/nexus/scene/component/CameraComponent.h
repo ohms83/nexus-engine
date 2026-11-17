@@ -1,8 +1,9 @@
 #pragma once
 
 #include "nexus/NxsCommon.h"
-#include "nexus/graphics/GraphicsConst.h"
 #include "nexus/ecs/Component.h"
+#include "nexus/graphics/GraphicsConst.h"
+#include "nexus/graphics/RenderTarget.h"
 
 NXS_NAMESPACE
 {
@@ -10,8 +11,6 @@ NXS_NAMESPACE
 
     struct CameraComponent : public IComponent
     {
-        using Base = IComponent;
-
         IMPLEMENT_COMPONENT(CameraComponent);
 
         void AcceptReflector(IReflector& reflector) override
@@ -79,6 +78,13 @@ NXS_NAMESPACE
         float nearZ = 0.1f;
         //! Fustrum's far clipping plane.
         float farZ = 1000.0f;
+        //! nullptr means swapchain
+        Ref<RenderTarget> target;
+        //!
+        ClearFlags clearFlags = ClearFlags::All;
+        Color3F clearColor {0.0f, 0.0f, 0.0f};
+        float clearDepth = 1.0f;
+        uint32_t clearStencil = 0;
 
         float GetAspect() const { return height == 0 ? 0 : width / height; };
 

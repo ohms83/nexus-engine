@@ -100,23 +100,3 @@ const Color3F& Scene::Ambient() const
 {
     return GetComponent<AmbientLightComponent>()->color;
 }
-
-Dict<const ISceneView*, Array<SceneNode*>> Scene::GetVisibilitySets() const
-{
-    rmt_ScopedCPUSample(Scene_GetVisibilitySets, 0)
-    Dict<const ISceneView*, Array<SceneNode*>> visibilitySets;
-    VisitDescendants([&](const SceneNode& sceneNode) {
-        if (!sceneNode.IsActive()) return;
-
-        const auto view = D_CAST<const ISceneView*>(&sceneNode);
-        if (!view) return;
-
-        Array<SceneNode*> visibleNodes;
-        {
-            rmt_ScopedCPUSample(Scene_ComputeViewVisibility, 0)
-            visibleNodes = view->GetVisibleNodes(*this);
-        }
-        visibilitySets.insert_or_assign(view, std::move(visibleNodes));
-    });
-    return visibilitySets;
-}

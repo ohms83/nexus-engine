@@ -11,6 +11,7 @@ NXS_NAMESPACE
 {
     struct Sphere;
     class Scene;
+    struct ViewContext;
 
     /**
      * @brief Abstract base class representing a view of a scene.
@@ -23,7 +24,8 @@ NXS_NAMESPACE
     class ISceneView
     {
     public:
-        virtual ~ISceneView() = default;
+        ISceneView();
+        virtual ~ISceneView();
 
         NODISCARD const SceneNode* GetViewNode() const { return D_CAST<const SceneNode*>(this); }
 
@@ -31,8 +33,33 @@ NXS_NAMESPACE
         NODISCARD virtual glm::mat4 GetViewMatrix() const = 0;
         NODISCARD virtual glm::mat4 GetProjectionMatrix() const = 0;
         NODISCARD virtual glm::mat4 GetViewProjectionMatrix() const = 0;
-        NODISCARD virtual Array<SceneNode*> GetVisibleNodes(const Scene& scene) const = 0;
-        NODISCARD virtual RenderTarget* GetRenderTarget() const = 0;
-        virtual void SetRenderTarget(RenderTarget* renderTarget) = 0;
+        NODISCARD virtual Ref<RenderTarget> GetRenderTarget() const = 0;
+        virtual void SetRenderTarget(Ref<RenderTarget> renderTarget) = 0;
+
+        NODISCARD virtual ViewContext CreateViewContext(const Scene& scene) const = 0;
+
+        static const Array<ISceneView*>& GetViewRegistry();
+    };
+
+    struct ViewContext
+    {
+        const ISceneView* view = nullptr;
+        //! nullptr means swapchain
+        RenderTarget* target = nullptr;
+
+        // Clear
+        ClearFlags clearFlags = ClearFlags::None;
+        Color3F clearColor {0.0f, 0.0f, 0.0f};
+        float clearDepth = 1.0f;
+        uint32_t clearStencil = 0;
+
+        //! Global view's position
+        glm::vec3 position;
+        glm::mat4 viewMatrix;
+        glm::mat4 projectionMatrix;
+        glm::mat4 viewProjectionMatrix;
+
+        //! A list of visible scene nodes that will be rendered by this view.
+        Array<SceneNode*> visibleNodes;
     };
 }

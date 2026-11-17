@@ -28,26 +28,6 @@ NXS_NAMESPACE
     class RenderTarget;
     class SceneNode;
 
-    enum class RenderTargetType
-    {
-        /**
-         * @brief Render to the swapchain (screen).
-         */
-        Swapchain,
-        /**
-         * @brief Render to an offscreen render target.
-         */
-        Offscreen
-    };
-
-    enum class ClearFlags : uint32_t
-    {
-        None    = 0,
-        Color   = 1 << 0,
-        Depth   = 1 << 1,
-        Stencil = 1 << 2
-    };
-
     enum class CommandSortType : uint32_t
     {
         BackToFront,

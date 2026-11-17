@@ -56,11 +56,36 @@ glm::mat4 Camera::GetViewProjectionMatrix() const
     return GetProjectionMatrix() * GetViewMatrix();
 }
 
-Array<SceneNode*> Camera::GetVisibleNodes(const Scene& scene) const
+Ref<RenderTarget> Camera::GetRenderTarget() const
 {
-    rmt_ScopedCPUSample(Camera_GetVisibleNodes, 0)
-    // Implementation for getting visible nodes
-    Array<SceneNode*> visibleNodes;
+    return GetComponent<CameraComponent>()->target;
+}
+
+void Camera::SetRenderTarget(Ref<RenderTarget> renderTarget)
+{
+    GetComponent<CameraComponent>()->target = renderTarget;
+}
+
+ViewContext Camera::CreateViewContext(const Scene& scene) const
+{
+    rmt_ScopedCPUSample(Camera_ComputeVisibility, 0)
+    auto cameraComp = GetComponent<CameraComponent>();
+    NXS_ASSERT(cameraComp);
+    ViewContext context {
+        this,
+        cameraComp->target.get(),
+        cameraComp->clearFlags,
+        cameraComp->clearColor,
+        cameraComp->clearDepth,
+        cameraComp->clearStencil,
+        GetGlobalPosition(),
+        GetViewMatrix(),
+        GetProjectionMatrix(),
+        GetViewProjectionMatrix()
+    };
+    Array<SceneNode*>& visibleNodes = context.visibleNodes;
+    visibleNodes.clear();
+
     Frustum viewFrustum = GetViewFrustum(); // Ensure the view frustum is up to date
 
     auto partition = scene.GetPartition();
@@ -68,7 +93,7 @@ Array<SceneNode*> Camera::GetVisibleNodes(const Scene& scene) const
     {
         rmt_ScopedCPUSample(Camera_QueryPartition, 0)
         partition->Query(viewFrustum, visibleNodes);
-        return visibleNodes;
+        return context;
     }
 
     rmt_ScopedCPUSample(Camera_CullSceneNodes, 0)
@@ -98,7 +123,7 @@ Array<SceneNode*> Camera::GetVisibleNodes(const Scene& scene) const
             }
         }
     }
-    return visibleNodes;
+    return context;
 }
 
 Frustum Camera::GetViewFrustum() const

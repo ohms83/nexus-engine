@@ -7,6 +7,18 @@ NXS_NAMESPACE
 {
     class RenderSystem;
 
+    enum class RenderTargetType
+    {
+        /**
+         * @brief Render to the swapchain (screen).
+         */
+        Swapchain,
+        /**
+         * @brief Render to an offscreen render target.
+         */
+        Offscreen
+    };
+
     /**
      * @brief Represents a render target where the rendering output is directed.
      * 
