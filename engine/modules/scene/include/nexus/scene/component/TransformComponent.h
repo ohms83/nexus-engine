@@ -49,8 +49,6 @@ NXS_NAMESPACE
 
     struct TurningComponent : public IComponent
     {
-        using Base = IComponent;
-
         IMPLEMENT_COMPONENT(TurningComponent);
         
         void AcceptReflector(IReflector& reflector) override
@@ -97,7 +95,8 @@ NXS_NAMESPACE
         {
             Position,
             Orientation,
-            Scale
+            Scale,
+            All
         };
 
         TransformComponent() = default;
@@ -303,22 +302,23 @@ NXS_NAMESPACE
                 m_scale = {glm::length(affine[0]), glm::length(affine[1]), glm::length(affine[2])};
                 m_orient = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
             }
-            onTransformDirty(*this, ComponentType::Position);
-            onTransformDirty(*this, ComponentType::Orientation);
-            onTransformDirty(*this, ComponentType::Scale);
+            onTransformDirty(*this, ComponentType::All);
         }
 
-        NODISCARD glm::mat4x3 GetAffine() const
+        NODISCARD const glm::mat4x3& GetAffine() const
         {
-            if (m_hasAffine) return m_affine;
-            glm::mat4x3 mtx {1.0};
-            const auto rotation = glm::mat3_cast(m_orient);
-            const auto scale = m_scale;
-            mtx[0] = rotation[0] * scale.x;
-            mtx[1] = rotation[1] * scale.y;
-            mtx[2] = rotation[2] * scale.z;
-            mtx[3] = GetPosition();
-            return mtx;
+            if (!m_hasAffine)
+            {
+                m_affine = glm::mat4x3 {1.0};
+                const auto rotation = glm::mat3_cast(m_orient);
+                const auto scale = m_scale;
+                m_affine[0] = rotation[0] * scale.x;
+                m_affine[1] = rotation[1] * scale.y;
+                m_affine[2] = rotation[2] * scale.z;
+                m_affine[3] = GetPosition();
+                m_hasAffine = true;
+            }
+            return m_affine;
         }
 
         NODISCARD glm::mat4 GetMatrix() const
@@ -333,7 +333,7 @@ NXS_NAMESPACE
         glm::vec3 m_scale {1.0f};
         glm::quat m_orient {1.0f, 0.0f, 0.0f, 0.0f};
         glm::bvec3 m_locks { false };
-        glm::mat4x3 m_affine {1.0f};
-        bool m_hasAffine = false;
+        mutable glm::mat4x3 m_affine {1.0f};
+        mutable bool m_hasAffine = false;
     };
 }
