@@ -123,6 +123,66 @@ TEST_F(SceneNodeTest, ActivateDeactivate)
     EXPECT_TRUE(node->IsActive());
 }
 
+TEST_F(SceneNodeTest, ActiveStateIncludesAncestorsAndPreservesLocalState)
+{
+    auto parent = scene->EmplaceChild<SceneNode>("Parent");
+    auto child = parent->EmplaceChild<SceneNode>("Child");
+    auto grandchild = child->EmplaceChild<SceneNode>("Grandchild");
+
+    parent->Activate(false);
+    EXPECT_FALSE(child->IsActive());
+    EXPECT_FALSE(grandchild->IsActive());
+
+    child->Activate(false);
+    parent->Activate(true);
+    EXPECT_FALSE(child->IsActive());
+    EXPECT_FALSE(grandchild->IsActive());
+
+    parent->Activate(false);
+    child->Activate(true);
+    EXPECT_FALSE(child->IsActive());
+    parent->Activate(true);
+    EXPECT_TRUE(child->IsActive());
+    EXPECT_TRUE(grandchild->IsActive());
+
+    parent->Activate(false);
+    child->RemoveFromParent(false);
+    EXPECT_TRUE(child->IsActive());
+    EXPECT_TRUE(grandchild->IsActive());
+}
+
+TEST_F(SceneNodeTest, SerializesLocalActiveStateUnderInactiveParent)
+{
+    auto parent = scene->EmplaceChild<SceneNode>("Parent");
+    auto child = parent->EmplaceChild<SceneNode>("Child");
+    parent->Activate(false);
+
+    auto data = child->Serialize();
+    child->Activate(false);
+    ASSERT_TRUE(child->Deserialize(data));
+    EXPECT_FALSE(child->IsActive());
+    parent->Activate(true);
+    EXPECT_TRUE(child->IsActive());
+}
+
+TEST_F(SceneNodeTest, DeserializesLegacyComponentActiveState)
+{
+    SceneNodeComponent::Register();
+    auto node = scene->EmplaceChild<SceneNode>("Node");
+    auto data = node->Serialize();
+    data.GetMap().erase("active");
+    for (auto& component : data["components"].GetArray())
+    {
+        if (component["__class__"].GetString() == "SceneNodeComponent")
+        {
+            component["active"] = false;
+        }
+    }
+
+    ASSERT_TRUE(node->Deserialize(data));
+    EXPECT_FALSE(node->IsActive());
+}
+
 TEST_F(SceneNodeTest, ParentChildRelationship)
 {
     auto parent = scene->EmplaceChild<SceneNode>("Parent");

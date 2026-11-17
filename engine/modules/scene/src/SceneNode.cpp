@@ -37,7 +37,6 @@ SceneNode::SceneNode(Ref<entt::registry> registry, std::string name)
     auto component = AddComponent<SceneNodeComponent>();
     component->id = Hasher().Hash32(std::format("{}_{}_{}", name, milliseconds, s_runningId++));
     component->name = std::move(name);
-    component->active = true;
 
     s_nodeRegistry.emplace(component->id, this);
 }
@@ -90,7 +89,11 @@ void SceneNode::AcceptReflector(IReflector& reflector)
 {
     reflector.SetMarker("Properties");
 
-    const auto isActive = IsActive();
+    auto active = m_active;
+    if (reflector.VisitBool("Active", active))
+    {
+        Activate(active);
+    }
 
     const auto registry = GetRegistry();
     for (const auto id : GetRegisteredComponentIDs())
@@ -104,12 +107,6 @@ void SceneNode::AcceptReflector(IReflector& reflector)
             componentPtr->AcceptReflector(reflector);
         }
     }
-
-    if (isActive != IsActive())
-    {
-        if (IsActive()) OnActivate();
-        else OnDeactivate();
-    }
 }
 
 VariantData SceneNode::Serialize() const
@@ -117,6 +114,7 @@ VariantData SceneNode::Serialize() const
     auto data = VariantData::Map();
     data["__class__"] = ClassName();
     // Node data
+    data["active"] = m_active;
     data["children"] = VariantData::Array();
     for (const auto child : m_children)
     {
@@ -156,6 +154,21 @@ bool SceneNode::Deserialize(const VariantData &data)
         return false;
     }
 
+    if (data.HasKey("active"))
+    {
+        m_active = data["active"].GetBool();
+    }
+    else
+    {
+        for (const auto& component : data["components"].GetArray())
+        {
+            if (component["__class__"].GetString() == "SceneNodeComponent" && component.HasKey("active"))
+            {
+                m_active = component["active"].GetBool();
+                break;
+            }
+        }
+    }
     for (const auto child : data["children"].GetArray())
     {
         const auto className = child["__class__"].GetString();
@@ -255,12 +268,22 @@ void SceneNode::Validate()
 
 void SceneNode::Activate(const bool activate)
 {
-    if (IsActive() != activate)
+    if (m_active != activate)
     {
-        GetComponent<SceneNodeComponent>()->active = activate;
+        m_active = activate;
         if (activate) OnActivate();
         else OnDeactivate();
     }
+}
+
+bool SceneNode::IsActive() const
+{
+    if (!m_active) return false;
+    for (auto parent = m_parent.lock(); parent != nullptr; parent = parent->m_parent.lock())
+    {
+        if (!parent->m_active) return false;
+    }
+    return true;
 }
 
 void SceneNode::AddChild(Ref<SceneNode> child)

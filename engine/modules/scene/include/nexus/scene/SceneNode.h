@@ -81,11 +81,10 @@ NXS_NAMESPACE
             GetComponent<SceneNodeComponent>()->name = name;
         }
 
+        //! Sets this node's local active state, independently of its ancestors.
         void Activate(bool activate);
-        NODISCARD bool IsActive() const
-        {
-            return GetComponent<SceneNodeComponent>()->active;
-        }
+        //! Returns true only if this node and all its ancestors are locally active.
+        NODISCARD bool IsActive() const;
 
         template<typename T, typename... Args>
         requires std::derived_from<T, SceneNode>
@@ -239,6 +238,7 @@ NXS_NAMESPACE
         }
 
     protected:
+        bool m_active = true;
         WeakRef<SceneNode> m_parent;
         ChildList m_children;
         Array<Ref<Script>> m_scripts;

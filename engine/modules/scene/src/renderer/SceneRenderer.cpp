@@ -70,6 +70,17 @@ inline void CreateRenderCommand(
         sortType == CommandSortType::FrontToBack ? depthNormalized : 1.0f - depthNormalized);
 }
 
+inline bool IsNodeActive(const SceneNodeComponent& nodeComp)
+{
+    const auto* node = SceneNode::FindNode(nodeComp.id);
+    if (!node)
+    {
+        LOG_ERROR(LogSceneRenderer, std::format("Scene node {} was not found.", nodeComp.id));
+        return false;
+    }
+    return node->IsActive();
+}
+
 bool SceneRenderer::RenderInstancedMesh(RenderSystem& renderSystem, const RenderCommand& command, Ref<GpuProgram> gpuProgram)
 {
     rmt_ScopedCPUSample(SceneRenderer_RenderInstancedMesh, 0);
@@ -126,7 +137,7 @@ void SceneRenderer::SetDirectLightParams(Ref<GpuProgram> gpuProgram, const Scene
     const auto registry = scene.GetRegistry();
     for (const auto view = registry->view<SceneNodeComponent, DirectLightComponent>(); const auto& [entity, node, light] : view.each())
     {
-        if (!node.active) continue;
+        if (!IsNodeActive(node)) continue;
 
         rmt_BeginCPUSample(CreateUniformNames, 0);
         // TODO: Cache the uniform names.
@@ -168,7 +179,7 @@ void SceneRenderer::SetPointLightParams(Ref<GpuProgram> gpuProgram, const SceneN
     const auto registry = scene.GetRegistry();
     for (const auto view = registry->view<SceneNodeComponent, PointLightComponent>(); const auto& [entity, node, light] : view.each())
     {
-        if (!node.active) continue;
+        if (!IsNodeActive(node)) continue;
 
         rmt_BeginCPUSample(CreateUniformNames, 0);
         // TODO: Cache the uniform names.
@@ -225,8 +236,6 @@ void SceneRenderer::RenderDirectionalShadowMap(RenderSystem& renderSystem, const
     for (const auto view = registry.view<const SceneNodeComponent, const DirectLightComponent>();
          const auto& [entity, nodeComponent, light] : view.each())
     {
-        if (!nodeComponent.active) continue;
-
         lightNode = SceneNode::FindNode(nodeComponent.id);
         if (!lightNode)
         {
@@ -234,7 +243,7 @@ void SceneRenderer::RenderDirectionalShadowMap(RenderSystem& renderSystem, const
                 "Directional shadow map light node {} was not found.", nodeComponent.id));
             continue;
         }
-
+        if (!lightNode->IsActive()) continue;
         if (!light.properties.canCastShadows) continue;
 
         shadowLight = &light;
@@ -270,11 +279,9 @@ void SceneRenderer::RenderDirectionalShadowMap(RenderSystem& renderSystem, const
         for (const auto view = registry.view<const SceneNodeComponent, const MeshComponent>();
             const auto& [entity, nodeComponent, meshComponent] : view.each())
         {
-            if (!nodeComponent.active) continue;
-
             auto* node = SceneNode::FindNode(nodeComponent.id);
             const auto mesh = meshComponent.GetMesh();
-            if (!node || !mesh) continue;
+            if (!node || !mesh || !node->IsActive()) continue;
 
             const auto material = mesh->GetMaterial();
             if (!material || (!material->castShadow && !material->receiveShadows)) continue;

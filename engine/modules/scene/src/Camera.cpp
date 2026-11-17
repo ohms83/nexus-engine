@@ -75,13 +75,13 @@ Array<SceneNode*> Camera::GetVisibleNodes(const Scene& scene) const
     const auto& registry = scene.GetRegistry();
     for (const auto view = registry->view<SceneNodeComponent, MeshComponent>(); const auto& [entity, node, meshComp] : view.each())
     {
-        if (!node.active) continue;
-
         SceneNode* sceneNode = SceneNode::FindNode(node.id);
         if (!sceneNode) {
             LOG_ERROR(LogSceneRenderer, std::format("Camera::GetVisibleNodes: SceneNode with ID {} not found.", node.id));
             continue;
         }
+        if (!sceneNode->IsActive()) continue;
+
         const auto& modelMtx = sceneNode->GetGlobalAffineTransform();
         if (auto mesh = meshComp.GetMesh(); mesh != nullptr)
         {

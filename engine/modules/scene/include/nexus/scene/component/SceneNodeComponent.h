@@ -11,8 +11,6 @@ NXS_NAMESPACE
 {
     struct SceneNodeComponent : public IComponent
     {
-        using Base = IComponent;
-
         IMPLEMENT_COMPONENT(SceneNodeComponent);
 
         void AcceptReflector(IReflector& reflector) override
@@ -22,7 +20,6 @@ NXS_NAMESPACE
             reflector.SetReadOnlyFlag(false);
 
             reflector.VisitString("Name", name);
-            reflector.VisitBool("Active", active);
         }
 
         VariantData Serialize() const override
@@ -30,7 +27,6 @@ NXS_NAMESPACE
             VariantData data = Base::Serialize();
             data["id"] = INT64_CAST(id);
             data["name"] = name;
-            data["active"] = active;
             return data;
         }
 
@@ -40,12 +36,10 @@ NXS_NAMESPACE
 
             id = CAST<Identifier>(data["id"].GetInt());
             name = data["name"].GetString();
-            active = data["active"].GetBool();
             return true;
         }
 
-        Identifier id = 0;
+        Identifier id = NXS_INVALID_ID;
         std::string name;
-        bool active = true;
     };
 }

@@ -258,9 +258,10 @@ Array<const ISceneView*> RenderPass::PopulateSceneView(const SceneNode &scene) c
     const auto& view = registry.view<const CameraComponent, const SceneNodeComponent>();
     for (const auto& [entity, cameraComp, nodeComp] : view.each())
     {
-        if (!nodeComp.active) continue;
+        const auto node = SceneNode::FindNode(nodeComp.id);
+        if (!node || !node->IsActive()) continue;
 
-        const ISceneView* cameraView = D_CAST<const ISceneView*>(SceneNode::FindNode(nodeComp.id));
+        const ISceneView* cameraView = D_CAST<const ISceneView*>(node);
         if (cameraView) outViews.push_back(cameraView);
     }
     return outViews;

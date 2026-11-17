@@ -121,6 +121,26 @@ TEST(SceneRendererTest, FailedRendererInitializationKeepsPreviousRenderer)
     EXPECT_EQ(previous->renders, 1);
 }
 
+TEST(SceneRendererTest, InactiveAncestorExcludesCameraAndLight)
+{
+    auto scene = std::make_shared<Scene>("scene");
+    auto parent = scene->EmplaceChild<SceneNode>("parent");
+    parent->EmplaceChild<Camera>("camera");
+    parent->EmplaceChild<DirectionalLight>("light");
+    RenderPass pass;
+    auto program = std::make_shared<ShadowTestProgram>();
+    ShadowTestRenderer renderer(program);
+
+    EXPECT_EQ(pass.PopulateSceneView(*scene).size(), 1u);
+    renderer.SetDirectLightParams(program, *scene);
+    EXPECT_EQ(program->ints["_NumDirectLight"], 1);
+
+    parent->Activate(false);
+    EXPECT_TRUE(pass.PopulateSceneView(*scene).empty());
+    renderer.SetDirectLightParams(program, *scene);
+    EXPECT_EQ(program->ints["_NumDirectLight"], 0);
+}
+
 TEST(SceneRendererShadowTest, SelectsEnabledLightAndUpdatesShaderIndex)
 {
     auto scene = std::make_shared<Scene>("shadow");
