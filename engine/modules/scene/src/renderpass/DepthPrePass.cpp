@@ -36,8 +36,6 @@ DepthPrePass::DepthPrePass()
     name = "Depth Pre-Pass";
     priority = RENDER_PASS_DEPTH_FILL;
     commandSortType = CommandSortType::FrontToBack;
-    clearFlags = ClearFlags::Depth;
-    clearDepth = 1.0f;
     pipelineState.depthTest = true;
     pipelineState.depthWrite = true;
     pipelineState.colorMask = glm::bvec4(false);

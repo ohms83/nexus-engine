@@ -44,7 +44,6 @@ TEST(DepthPrePassTest, InitializesDepthProgramAndUsesOpaqueDepthState)
     ASSERT_TRUE(pass.Init(factory));
     EXPECT_EQ(pass.pipelineState.globalShader, program);
 
-    EXPECT_EQ(pass.clearFlags, ClearFlags::Depth);
     EXPECT_TRUE(pass.pipelineState.depthTest);
     EXPECT_TRUE(pass.pipelineState.depthWrite);
     EXPECT_EQ(pass.pipelineState.depthFunction, DepthFunction::Lesser);
@@ -79,7 +78,6 @@ TEST(DepthPrePassTest, FailedProgramInitializationIsReported)
 TEST(DepthPrePassTest, OpaquePassPreservesAndUsesPrepassDepth)
 {
     OpaquePass pass;
-    EXPECT_EQ(pass.clearFlags, ClearFlags::Color);
     EXPECT_TRUE(pass.pipelineState.depthTest);
     EXPECT_TRUE(pass.pipelineState.depthWrite);
     EXPECT_EQ(pass.pipelineState.depthFunction, DepthFunction::LesserOrEqual);
@@ -146,9 +144,6 @@ TEST(RenderPassTest, SerializeDeserialize)
     pass.priority = 123;
     pass.enabled = true;
     pass.targetType = RenderTargetType::Offscreen;
-    pass.clearFlags = ClearFlags::Color | ClearFlags::Depth;
-    pass.clearColor = Color3F{0.2f, 0.3f, 0.4f};
-    pass.clearDepth = 0.5f;
     pass.layerMask = 42;
     pass.filterType = "opaque";
 
@@ -166,9 +161,6 @@ TEST(RenderPassTest, SerializeDeserialize)
     EXPECT_EQ(pass2.priority, pass.priority);
     EXPECT_EQ(pass2.enabled, pass.enabled);
     EXPECT_EQ(pass2.targetType, pass.targetType);
-    EXPECT_EQ(pass2.clearFlags, pass.clearFlags);
-    EXPECT_FLOAT_EQ(pass2.clearColor.r, pass.clearColor.r);
-    EXPECT_FLOAT_EQ(pass2.clearDepth, pass.clearDepth);
     EXPECT_EQ(pass2.layerMask, pass.layerMask);
     EXPECT_EQ(pass2.pipelineState.depthTest, pass.pipelineState.depthTest);
     EXPECT_EQ(pass2.pipelineState.depthFunction, pass.pipelineState.depthFunction);

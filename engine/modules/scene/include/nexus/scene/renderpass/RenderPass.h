@@ -78,12 +78,6 @@ NXS_NAMESPACE
         //! A list of offscreen render targets that this pass reads/samples from
         Array<std::string> readTargets;
 
-        // Legacy serialized clear settings; the scene renderer clears once per view.
-        ClearFlags clearFlags = ClearFlags::None;
-        Color3F clearColor{0.0f, 0.0f, 0.0f};
-        float clearDepth = 1.0f;
-        uint32_t clearStencil = 0;
-
         // Pipeline state
         PipelineState pipelineState;
 
@@ -178,9 +172,6 @@ NXS_NAMESPACE
             return b;
         }
 
-        RenderPassBuilder& ClearFlags(ClearFlags flags) { pass.clearFlags = flags; return *this; }
-        RenderPassBuilder& ClearColor(const Color3F& color) { pass.clearColor = color; return *this; }
-        RenderPassBuilder& ClearDepth(float depth) { pass.clearDepth = depth; return *this; }
         RenderPassBuilder& DepthTest(bool v) { pass.pipelineState.depthTest = v; return *this; }
         RenderPassBuilder& DepthWrite(bool v) { pass.pipelineState.depthWrite = v; return *this; }
         RenderPassBuilder& DepthFunction(DepthFunction f) { pass.pipelineState.depthFunction = f; return *this; }

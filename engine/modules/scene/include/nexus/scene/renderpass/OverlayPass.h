@@ -12,7 +12,6 @@ NXS_NAMESPACE
             name = "Overlay Pass";
             priority = RENDER_PASS_OVERLAY;
             commandSortType = CommandSortType::FrontToBack;
-            clearFlags = ClearFlags::None;
             pipelineState.depthTest = false;
             pipelineState.depthWrite = false;
             pipelineState.overrideBlendMode = BlendMode::Alpha;

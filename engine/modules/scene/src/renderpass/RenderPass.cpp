@@ -83,14 +83,6 @@ VariantData RenderPass::Serialize() const
     data["priority"] = INT_CAST(priority);
     data["enabled"] = enabled;
     data["targetType"] = INT_CAST(targetType);
-    data["clearFlags"] = INT_CAST(clearFlags);
-    data["clearColor"] = VariantData::Map {
-        {"r", DOUBLE_CAST(clearColor.r)},
-        {"g", DOUBLE_CAST(clearColor.g)},
-        {"b", DOUBLE_CAST(clearColor.b)},
-    };
-    data["clearDepth"] = DOUBLE_CAST(clearDepth);
-    data["clearStencil"] = INT_CAST(clearStencil);
 
     // Pipeline
     VariantData::Map pipeline;
@@ -143,13 +135,6 @@ bool RenderPass::Deserialize(const VariantData& data)
     priority = UINT_CAST(data["priority"].GetInt());
     enabled = data["enabled"].GetBool();
     targetType = CAST<RenderTargetType>(data["targetType"].GetInt());
-    clearFlags = CAST<ClearFlags>(data["clearFlags"].GetInt());
-    const auto& cc = data["clearColor"].GetMap();
-    clearColor.r = FLOAT_CAST(cc.at("r").GetDouble());
-    clearColor.g = FLOAT_CAST(cc.at("g").GetDouble());
-    clearColor.b = FLOAT_CAST(cc.at("b").GetDouble());
-    clearDepth = FLOAT_CAST(data["clearDepth"].GetDouble());
-    clearStencil = UINT_CAST(data["clearStencil"].GetInt());
 
     // Pipeline
     const auto& p = data["pipelineState"].GetMap();

@@ -12,9 +12,6 @@ NXS_NAMESPACE
             name = "Alpha Pass";
             priority = RENDER_PASS_ALPHA;
             commandSortType = CommandSortType::BackToFront;
-            clearFlags = ClearFlags::None;
-            clearColor = Color3F(0x303030ff);
-            clearDepth = 1.0f;
             pipelineState.depthTest = true;
             pipelineState.depthWrite = true;
             pipelineState.overrideBlendMode = BlendMode::Alpha;

@@ -82,7 +82,7 @@ NXS_NAMESPACE
         Ref<RenderTarget> target;
         //!
         ClearFlags clearFlags = ClearFlags::All;
-        Color3F clearColor {0.0f, 0.0f, 0.0f};
+        Color3F clearColor { 0x303030FF };
         float clearDepth = 1.0f;
         uint32_t clearStencil = 0;
 
