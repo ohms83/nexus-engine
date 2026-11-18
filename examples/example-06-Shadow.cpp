@@ -156,6 +156,7 @@ private:
         camera->SetPosition({5, 5, 5});
         camera->LookAt(glm::vec3(0), glm::vec3(0, 1, 0));
         camera->SetProjection(m_camera.fov, m_camera.width, m_camera.height, m_camera.nearZ, m_camera.farZ);
+        camera->Properties().clearColor = nxs::Color3F::Grey;
 
         m_loadedModels.resize(modelPaths.size());
         m_loadedModels[0] = LoadModel(0);

@@ -36,6 +36,8 @@ void RenderPass::Begin(RenderSystem& rs) const
     renderInterface->ApplyPipelineState(pipelineState);
 
     renderInterface->DebugMarker(name);
+
+#if 0 // Move to ViewContext
     // Offscreen target is bound by the caller (SceneRenderer/RenderSystem).
     // Clear
     auto hasFlag = [](ClearFlags flags, ClearFlags f){ return (UINT_CAST(flags) & UINT_CAST(f)) != 0; };
@@ -55,7 +57,7 @@ void RenderPass::Begin(RenderSystem& rs) const
         }
         // Stencil: Not supported yet by the generic interface. Add later if needed.
     }
-
+#endif
     renderInterface->SetGlobalShader(pipelineState.globalShader);
 
     Begin_Internal(rs);

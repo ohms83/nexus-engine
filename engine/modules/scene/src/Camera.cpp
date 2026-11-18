@@ -68,7 +68,7 @@ void Camera::SetRenderTarget(Ref<RenderTarget> renderTarget)
 
 ViewContext Camera::CreateViewContext(const Scene& scene) const
 {
-    rmt_ScopedCPUSample(Camera_ComputeVisibility, 0)
+    rmt_ScopedCPUSample(Camera_CreateViewContext, 0)
     auto cameraComp = GetComponent<CameraComponent>();
     NXS_ASSERT(cameraComp);
     ViewContext context {

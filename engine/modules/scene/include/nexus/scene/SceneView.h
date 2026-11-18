@@ -10,8 +10,9 @@
 NXS_NAMESPACE
 {
     struct Sphere;
-    class Scene;
     struct ViewContext;
+    class Scene;
+    class RenderingInterface;
 
     /**
      * @brief Abstract base class representing a view of a scene.
@@ -61,5 +62,8 @@ NXS_NAMESPACE
 
         //! A list of visible scene nodes that will be rendered by this view.
         Array<SceneNode*> visibleNodes;
+
+        //! Clear selected buffers with writes enabled; the next pass applies its own state.
+        void ClearView(RenderingInterface& rhi) const;
     };
 }

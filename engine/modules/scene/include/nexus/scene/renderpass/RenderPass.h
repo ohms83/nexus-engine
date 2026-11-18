@@ -78,7 +78,7 @@ NXS_NAMESPACE
         //! A list of offscreen render targets that this pass reads/samples from
         Array<std::string> readTargets;
 
-        // Clear
+        // Legacy serialized clear settings; the scene renderer clears once per view.
         ClearFlags clearFlags = ClearFlags::None;
         Color3F clearColor{0.0f, 0.0f, 0.0f};
         float clearDepth = 1.0f;

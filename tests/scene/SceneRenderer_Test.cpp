@@ -19,9 +19,19 @@ public:
     NODISCARD Ref<RenderTarget> GetRenderTarget() const override { return nullptr; }
     void SetRenderTarget(Ref<RenderTarget>) override {}
 
-    NODISCARD ViewContext CreateViewContext(const Scene& scene) const override { return ViewContext {}; }
+    NODISCARD ViewContext CreateViewContext(const Scene&) const override
+    {
+        ++visibilityCalls;
+        ViewContext context{};
+        context.view = this;
+        context.clearFlags = ClearFlags::Color | ClearFlags::Depth;
+        context.viewMatrix = context.projectionMatrix = context.viewProjectionMatrix = glm::mat4(1.0f);
+        context.visibleNodes = visibleNodes;
+        return context;
+    }
 
     mutable uint32_t visibilityCalls = 0;
+    Array<SceneNode*> visibleNodes;
 
 private:
     glm::vec3 m_position {0.0f};
@@ -87,6 +97,67 @@ namespace
         const glm::mat4& LightSpaceMatrix() const { return m_lightSpaceMatrix; }
     };
 
+    class ViewTestProgram final : public GpuProgram
+    {
+    public:
+        void Bind() override {}
+        bool IsBinding() const override { return false; }
+        bool SetUniformInt(const std::string&, int32_t) override { return true; }
+        bool SetUniformFloat(const std::string&, float) override { return true; }
+        bool SetUniformVector(const std::string&, const glm::vec3&) override { return true; }
+        bool SetUniformMatrix(const std::string&, const glm::mat4&, bool) override { return true; }
+
+    private:
+        int32_t FindUniform_Internal(const std::string&) const override { return -1; }
+    };
+
+    class ViewTestRendering final : public FakeRendering
+    {
+    public:
+        void ClearBuffer(const Color4F&, float) override
+        {
+            ++clears;
+            clearMasksValid &= GetDepthWrite() && glm::all(glm::equal(GetColorMask(), glm::bvec4(true)));
+        }
+        void DrawIndexed(const Ref<IndexBuffer>) override
+        {
+            drawMasks.push_back(GetColorMask());
+        }
+        int clears = 0;
+        bool clearMasksValid = true;
+        Array<glm::bvec4> drawMasks;
+    };
+
+    class ViewTestPass final : public RenderPass
+    {
+    public:
+        Array<const ISceneView*> PopulateSceneView(const SceneNode& scene) const override
+        {
+            return useSceneCameras ? RenderPass::PopulateSceneView(scene) : views;
+        }
+        bool IsPassFiltered(Ref<const Mesh> mesh) const override
+        {
+            return mesh->GetMaterial()->blendMode == BlendMode::None;
+        }
+        void AppendCommands(RenderSystem&, const Array<SceneNode*>&, Array<RenderCommand>& commands) const override
+        {
+            ++appendCalls;
+            if (appendedMesh)
+            {
+                RenderCommand command{};
+                command.material = appendedMesh->GetMaterial();
+                command.vertexBuffer = appendedMesh->GetVertexBuffer();
+                command.indexBuffer = appendedMesh->GetIndexBuffer();
+                command.modelMatrix = glm::mat4x3(1.0f);
+                commands.push_back(command);
+            }
+        }
+        Array<const ISceneView*> views;
+        Ref<Mesh> appendedMesh;
+        bool useSceneCameras = false;
+        mutable int appendCalls = 0;
+    };
+
     Ref<Mesh> MakeShadowTestMesh(const Ref<Material>& material)
     {
         auto mesh = std::make_shared<Mesh>("test");
@@ -96,6 +167,105 @@ namespace
         mesh->SetIndexBuffer(std::make_shared<FakeIndexBuffer>());
         return mesh;
     }
+}
+
+TEST(SceneRendererTest, ExecutesSelectedPassesPerViewWithFreshCommandsAndClearMasks)
+{
+    auto scene = std::make_shared<Scene>("scene");
+    auto first = scene->EmplaceChild<CountingSceneView>("first");
+    auto second = scene->EmplaceChild<CountingSceneView>("second");
+    auto inactive = scene->EmplaceChild<CountingSceneView>("inactive");
+    inactive->Activate(false);
+    auto otherScene = std::make_shared<Scene>("other");
+    auto foreign = otherScene->EmplaceChild<CountingSceneView>("foreign");
+    auto material = std::make_shared<Material>("opaque", 1);
+    auto mesh = scene->EmplaceChild<SceneNode>("mesh");
+    mesh->AddComponent<MeshComponent>()->SetMesh(MakeShadowTestMesh(material));
+    first->visibleNodes.push_back(mesh.get());
+    second->visibleNodes.push_back(mesh.get());
+
+    auto depth = std::make_shared<ViewTestPass>();
+    auto opaque = std::make_shared<ViewTestPass>();
+    depth->views = {first.get(), second.get(), inactive.get(), foreign.get()};
+    opaque->views = {first.get()};
+    depth->pipelineState.colorMask = glm::bvec4(false);
+    depth->pipelineState.depthWrite = false;
+    opaque->pipelineState.colorMask = glm::bvec4(true);
+    depth->pipelineState.globalShader = std::make_shared<ViewTestProgram>();
+    opaque->pipelineState.globalShader = std::make_shared<ViewTestProgram>();
+    int depthBegins = 0, depthEnds = 0, opaqueBegins = 0, opaqueEnds = 0;
+    depth->onBegin = [&](RenderSystem&) { ++depthBegins; };
+    depth->onEnd = [&](RenderSystem&) { ++depthEnds; };
+    opaque->onBegin = [&](RenderSystem&) { ++opaqueBegins; };
+    opaque->onEnd = [&](RenderSystem&) { ++opaqueEnds; };
+
+    SceneRenderer renderer;
+    renderer.RegisterRenderPass(depth);
+    renderer.RegisterRenderPass(opaque);
+    auto rendering = std::make_shared<ViewTestRendering>();
+    RenderSystem renderSystem(rendering);
+    renderer.Render(renderSystem, *scene);
+    renderer.Render(renderSystem, *scene);
+
+    EXPECT_EQ(first->visibilityCalls, 2u);
+    EXPECT_EQ(second->visibilityCalls, 2u);
+    EXPECT_EQ(inactive->visibilityCalls, 0u);
+    EXPECT_EQ(foreign->visibilityCalls, 0u);
+    EXPECT_EQ(rendering->clears, 4);
+    EXPECT_TRUE(rendering->clearMasksValid);
+    EXPECT_EQ(depthBegins, 4);
+    EXPECT_EQ(depthEnds, 4);
+    EXPECT_EQ(opaqueBegins, 2);
+    EXPECT_EQ(opaqueEnds, 2);
+    ASSERT_EQ(rendering->drawMasks.size(), 6u);
+    for (size_t i = 0; i < rendering->drawMasks.size(); ++i)
+        EXPECT_TRUE(glm::all(glm::equal(rendering->drawMasks[i], glm::bvec4(i % 3 == 1))));
+}
+
+TEST(SceneRendererTest, EmptyViewStillRunsPassLifecycle)
+{
+    auto scene = std::make_shared<Scene>("scene");
+    auto view = scene->EmplaceChild<CountingSceneView>("empty");
+    auto pass = std::make_shared<ViewTestPass>();
+    pass->views = {view.get()};
+    pass->appendedMesh = MakeShadowTestMesh(std::make_shared<Material>("overlay", 1));
+    pass->pipelineState.globalShader = std::make_shared<ViewTestProgram>();
+    int begins = 0, ends = 0;
+    pass->onBegin = [&](RenderSystem&) { ++begins; };
+    pass->onEnd = [&](RenderSystem&) { ++ends; };
+    SceneRenderer renderer;
+    renderer.RegisterRenderPass(pass);
+    auto rendering = std::make_shared<ViewTestRendering>();
+    RenderSystem renderSystem(rendering);
+    renderer.Render(renderSystem, *scene);
+    EXPECT_EQ(begins, 1);
+    EXPECT_EQ(ends, 1);
+    EXPECT_EQ(pass->appendCalls, 1);
+    EXPECT_EQ(rendering->drawMasks.size(), 1u);
+}
+
+TEST(SceneRendererTest, RendersVisibleMeshThroughSceneCamera)
+{
+    auto scene = std::make_shared<Scene>("scene");
+    auto camera = scene->EmplaceChild<Camera>("camera");
+    camera->SetPosition({0.0f, 0.0f, 5.0f});
+    camera->LookAt(glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    camera->SetProjection(60.0f, 800.0f, 600.0f, 0.1f, 100.0f);
+    auto mesh = scene->EmplaceChild<SceneNode>("mesh");
+    mesh->AddComponent<MeshComponent>()->SetMesh(
+        MakeShadowTestMesh(std::make_shared<Material>("opaque", 1)));
+
+    auto pass = std::make_shared<ViewTestPass>();
+    pass->useSceneCameras = true;
+    pass->pipelineState.globalShader = std::make_shared<ViewTestProgram>();
+    SceneRenderer renderer;
+    renderer.RegisterRenderPass(pass);
+    auto rendering = std::make_shared<ViewTestRendering>();
+    RenderSystem renderSystem(rendering);
+    renderer.Render(renderSystem, *scene);
+
+    EXPECT_EQ(rendering->clears, 1);
+    EXPECT_EQ(rendering->drawMasks.size(), 1u);
 }
 
 TEST(SceneRendererTest, FailedRendererInitializationKeepsPreviousRenderer)

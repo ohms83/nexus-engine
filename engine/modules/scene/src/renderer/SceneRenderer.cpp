@@ -574,6 +574,148 @@ void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
         rmt_EndCPUSample();
     }
 #else
+    struct ViewPasses
+    {
+        const ISceneView* view;
+        Array<Ref<RenderPass>> passes;
+    };
+    Array<ViewPasses> views;
+    for (const auto& pass : m_renderPasses)
+    {
+        if (!pass->enabled) continue;
+        for (const auto* view : pass->PopulateSceneView(scene))
+        {
+            if (!view) continue;
+            const auto* node = view->GetViewNode();
+            if (node && (!node->IsActive() || node->GetRegistry() != scene.GetRegistry())) continue;
+            const auto it = std::ranges::find_if(views, [view](const ViewPasses& entry) {
+                return entry.view == view;
+            });
+            if (it == views.end()) {
+                views.push_back({view, {pass}});
+            }
+            else if (std::ranges::find(it->passes, pass) == it->passes.end()) {
+                it->passes.push_back(pass);
+            }
+        }
+    }
+
+    for (const auto& viewPasses : views)
+    {
+        const auto* view = viewPasses.view;
+        const auto viewCtx = view->CreateViewContext(scene);
+        if (viewCtx.target) {
+            viewCtx.target->Bind(renderSystem);
+        }
+
+        viewCtx.ClearView(*renderSystem.GetRenderInterface());
+
+        for (const auto& pass : viewPasses.passes)
+        {
+            rmt_BeginCPUSampleDynamic(pass->name.c_str(), 0);
+            rmt_BeginOpenGLSampleDynamic(pass->name.c_str());
+
+            pass->Begin(renderSystem);
+            commands.clear();
+            const auto& visibleNodes = viewCtx.visibleNodes;
+            const auto globalShader = pass->pipelineState.globalShader;
+
+            rmt_BeginCPUSample(SceneRenderer_CreateRenderCommands, 0);
+            for (const auto node : viewCtx.visibleNodes)
+            {
+                const auto meshComp = node->GetComponent<MeshComponent>();
+                if (!meshComp) continue;
+
+                auto mesh = meshComp->GetMesh();
+                if (!mesh || !pass->IsPassFiltered(mesh)) continue;
+
+                const auto& modelMtx = node->GetGlobalAffineTransform();
+                CreateRenderCommand(commands.emplace_back(RenderCommand {}),
+                    mesh.get(),
+                    modelMtx,
+                    viewCtx.viewProjectionMatrix,
+                    pass->commandSortType);
+            }
+
+            pass->AppendCommands(renderSystem, visibleNodes, commands);
+            rmt_EndCPUSample();
+
+            {
+                rmt_ScopedCPUSample(SceneRenderer_SortMeshes, 0)
+                std::ranges::sort(commands, [](const RenderCommand& a, const RenderCommand& b) {
+                    return a.sortKey < b.sortKey;
+                });
+            }
+
+            {
+                rmt_ScopedCPUSample(SceneRenderer_RenderMeshes, 0)
+
+                Ref<GpuProgram> usingProgram = nullptr;
+                Ref<Material> usingMaterial = nullptr;
+                for (const auto& cmd : commands)
+                {
+                    if (!cmd.material) continue;
+                    auto material = cmd.material;
+
+                    Ref<GpuProgram> gpuProgram = nullptr;
+                    if (globalShader) {
+                        gpuProgram = globalShader;
+                    }
+                    else {
+                        if (usingMaterial != material)
+                        {
+                            gpuProgram = material->Use();
+                            GraphicsProfiler::RecordMaterialSwitching(material->GetId());
+                            usingMaterial = material;
+                        }
+                        else
+                        {
+                            gpuProgram = material->GetGpuProgram();
+                        }
+                    }
+                    NXS_ASSERT_MSG(gpuProgram, "No shader program available for rendering");
+
+                    if (gpuProgram != usingProgram)
+                    {
+                        if (!gpuProgram->IsBinding()) gpuProgram->Bind();
+
+                        if (gpuProgram->FindUniform("_OutputLinearColor") >= 0)
+                        {
+                            gpuProgram->SetUniformInt(
+                                "_OutputLinearColor",
+                                (viewCtx.target ||
+                                 renderSystem.GetRenderInterface()->IsFramebufferSRGBSupported()) ? 1 : 0);
+                        }
+
+                        SetCameraUniforms(gpuProgram, viewCtx.position, viewCtx.viewMatrix, viewCtx.projectionMatrix);
+                        SetAmbientLightParams(gpuProgram, *scene.GetRegistry());
+                        SetDirectLightParams(gpuProgram, scene);
+                        SetPointLightParams(gpuProgram, scene);
+                        SetShadowMapParams(gpuProgram);
+                        usingProgram = gpuProgram;
+                    }
+
+                    if (!RenderInstancedMesh(renderSystem, cmd, gpuProgram))
+                    {
+                        gpuProgram->SetUniformMatrix("_Model", Matrix::ExpandAffine(cmd.modelMatrix), false);
+                        cmd.vertexBuffer->Bind();
+                        // Record composition stats
+                        GraphicsProfiler::RecordMaterialDraw(material ? material->GetId() : 0, cmd.indexCount, cmd.instanceCount);
+                        GraphicsProfiler::RecordProgramDraw(gpuProgram ? gpuProgram->GetHandle() : 0, cmd.indexCount, cmd.instanceCount);
+                        renderSystem.DrawIndexed(cmd.indexBuffer);
+                    }
+                }
+            }
+            pass->End(renderSystem);
+
+            rmt_EndOpenGLSample();
+            rmt_EndCPUSample();
+        }
+
+        if (viewCtx.target) {
+            viewCtx.target->Unbind(renderSystem);
+        }
+    }
 #endif
 }
 
