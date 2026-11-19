@@ -38,6 +38,7 @@ NXS_NAMESPACE
          */
         virtual void Unbind(RenderSystem& rs) = 0;
 
+        NODISCARD virtual Ref<TextureProxy> GetColorTextureProxy() const { return nullptr; }
         NODISCARD virtual Ref<TextureProxy> GetDepthTextureProxy() const = 0;
     };
 }
