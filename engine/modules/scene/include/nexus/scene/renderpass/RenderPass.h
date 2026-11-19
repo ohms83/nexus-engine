@@ -67,8 +67,6 @@ NXS_NAMESPACE
 
         //! Pass name. Mainly used for debugging purposes.
         std::string name;
-        //! Priority of the render pass. Lower values are rendered first.
-        uint32_t priority = 0u;
         //! Whether this pass is enabled.
         bool enabled = true;
         CommandSortType commandSortType = CommandSortType::FrontToBack;
@@ -166,43 +164,5 @@ NXS_NAMESPACE
         private:
             virtual void Begin_Internal(RenderSystem& rs) const {}
             virtual void End_Internal(RenderSystem& rs) const {}
-    };
-
-    struct RenderPassBuilder
-    {
-        RenderPass pass;
-        static RenderPassBuilder Begin(std::string name, uint32_t priority)
-        {
-            RenderPassBuilder b;
-            b.pass.name = std::move(name);
-            b.pass.priority = priority;
-            return b;
-        }
-
-        RenderPassBuilder& DepthTest(bool v) { pass.pipelineState.depthTest = v; return *this; }
-        RenderPassBuilder& DepthWrite(bool v) { pass.pipelineState.depthWrite = v; return *this; }
-        RenderPassBuilder& DepthFunction(DepthFunction f) { pass.pipelineState.depthFunction = f; return *this; }
-        RenderPassBuilder& StencilTest(bool v) { pass.pipelineState.depthTest = v; return *this; }
-        RenderPassBuilder& GlobalShader(const Ref<GpuProgram>& s) { pass.pipelineState.globalShader = s; return *this; }
-        RenderPassBuilder& GlobalShaderSources(const std::map<GpuProgram::Type, std::string>& sources)
-        {
-            pass.globalShaderSources = sources;
-            return *this;
-        }
-        RenderPassBuilder& GlobalShaderName(const std::string& name) { pass.globalShaderName = name; return *this; }
-        RenderPassBuilder& FilterType(const std::string& t) { pass.SetFilterType(t); return *this; }
-        RenderPassBuilder& TargetType(RenderTargetType t) { pass.targetType = t; return *this; }
-        RenderPassBuilder& OffscreenTargetName(const std::string& name) { pass.offscreenTargetName = name; return *this; }
-        RenderPassBuilder& ReadTargets(const Array<std::string>& targets) { pass.readTargets = targets; return *this; }
-        RenderPassBuilder& LayerMask(uint32_t mask) { pass.layerMask = mask; return *this; }
-        RenderPassBuilder& BlendMode(BlendMode mode) { pass.pipelineState.overrideBlendMode = mode; return *this; }
-        /**
-         * @brief Finalize and build the render pass.
-         * @note If the render pass has global shader sources set, the caller must
-         * ensure that the @c Resolve() function is called before using the render pass.
-         * @return The constructed RenderPass object.
-         * @see RenderPass::Resolve
-         */
-        RenderPass&& Build() { return std::move(pass); }
     };
 }

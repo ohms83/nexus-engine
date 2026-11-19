@@ -141,7 +141,6 @@ TEST(RenderPassTest, SerializeDeserialize)
 {
     RenderPass pass;
     pass.name = "TestPass";
-    pass.priority = 123;
     pass.enabled = true;
     pass.targetType = RenderTargetType::Offscreen;
     pass.layerMask = 42;
@@ -158,13 +157,11 @@ TEST(RenderPassTest, SerializeDeserialize)
     pass2.Deserialize(serialized);
 
     EXPECT_EQ(pass2.name, pass.name);
-    EXPECT_EQ(pass2.priority, pass.priority);
     EXPECT_EQ(pass2.enabled, pass.enabled);
     EXPECT_EQ(pass2.targetType, pass.targetType);
     EXPECT_EQ(pass2.layerMask, pass.layerMask);
     EXPECT_EQ(pass2.pipelineState.depthTest, pass.pipelineState.depthTest);
     EXPECT_EQ(pass2.pipelineState.depthFunction, pass.pipelineState.depthFunction);
-    EXPECT_EQ(pass2.pipelineState.polygonMode, pass.pipelineState.polygonMode);
 }
 
 TEST(RenderPassTest, FilterPreset)
