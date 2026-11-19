@@ -14,13 +14,13 @@ namespace
     class LightTestReflector final : public FakeReflector
     {
     public:
-        bool VisitBool(const std::string& name, bool&) override
+        bool sawShadowFlag = false;
+    private:
+        bool VisitBool_Implement(const std::string& name, bool&) override
         {
             if (name == "Can Cast Shadows") sawShadowFlag = true;
             return false;
         }
-
-        bool sawShadowFlag = false;
     };
 }
 

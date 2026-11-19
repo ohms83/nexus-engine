@@ -47,26 +47,131 @@ NXS_NAMESPACE
          */
         virtual void SetReadOnlyFlag(bool value) = 0;
 
-        MAYBE_UNUSED virtual bool VisitBool(const std::string& name, bool& value) = 0;
-        MAYBE_UNUSED virtual bool VisitInt(const std::string& name, int32_t& value) = 0;
-        MAYBE_UNUSED virtual bool VisitUInt(const std::string& name, uint32_t& value) = 0;
-        MAYBE_UNUSED virtual bool VisitInt64(const std::string& name, int64_t& value) = 0;
-        MAYBE_UNUSED virtual bool VisitUInt64(const std::string& name, uint64_t& value) = 0;
-        MAYBE_UNUSED virtual bool VisitFloat(const std::string& name, float& value) = 0;
-        MAYBE_UNUSED virtual bool VisitDouble(const std::string& name, double& value) = 0;
-        MAYBE_UNUSED virtual bool VisitString(const std::string& name, std::string& value) = 0;
-        MAYBE_UNUSED virtual bool VisitVec2(const std::string& name, glm::vec2& value) = 0;
-        MAYBE_UNUSED virtual bool VisitVec3(const std::string& name, glm::vec3& value) = 0;
-        MAYBE_UNUSED virtual bool VisitVec4(const std::string& name, glm::vec4& value) = 0;
-        MAYBE_UNUSED virtual bool VisitColor3(const std::string& name, Color3F& value) = 0;
-        MAYBE_UNUSED virtual bool VisitColor4(const std::string& name, Color4F& value) = 0;
-        MAYBE_UNUSED virtual bool VisitObject(const std::string& name, IReflection& value) = 0;
-        MAYBE_UNUSED virtual bool VisitEnum(const std::string& name, int32_t& value, const Array<std::string>& enumStrings) = 0;
+        MAYBE_UNUSED bool VisitBool(const std::string& name, bool& value)
+        {
+            if (VisitBool_Implement(name, value)) {
+                onValueChangedEvent(name);
+                return true;
+            }
+            return false;
+        }
+        MAYBE_UNUSED bool VisitInt(const std::string& name, int32_t& value)
+        {
+            if (VisitInt_Implement(name, value)) {
+                onValueChangedEvent(name);
+                return true;
+            }
+            return false;
+        }
+        MAYBE_UNUSED bool VisitUInt(const std::string& name, uint32_t& value)
+        {
+            if (VisitUInt_Implement(name, value)) {
+                onValueChangedEvent(name);
+                return true;
+            }
+            return false;
+        }
+        MAYBE_UNUSED bool VisitInt64(const std::string& name, int64_t& value)
+        {
+            if (VisitInt64_Implement(name, value)) {
+                onValueChangedEvent(name);
+                return true;
+            }
+            return false;
+        }
+        MAYBE_UNUSED bool VisitUInt64(const std::string& name, uint64_t& value)
+        {
+            if (VisitUInt64_Implement(name, value)) {
+                onValueChangedEvent(name);
+                return true;
+            }
+            return false;
+        }
+        MAYBE_UNUSED bool VisitFloat(const std::string& name, float& value)
+        {
+            if (VisitFloat_Implement(name, value)) {
+                onValueChangedEvent(name);
+                return true;
+            }
+            return false;
+        }
+        MAYBE_UNUSED bool VisitDouble(const std::string& name, double& value)
+        {
+            if (VisitDouble_Implement(name, value)) {
+                onValueChangedEvent(name);
+                return true;
+            }
+            return false;
+        }
+        MAYBE_UNUSED bool VisitString(const std::string& name, std::string& value)
+        {
+            if (VisitString_Implement(name, value)) {
+                onValueChangedEvent(name);
+                return true;
+            }
+            return false;
+        }
+        MAYBE_UNUSED bool VisitVec2(const std::string& name, glm::vec2& value)
+        {
+            if (VisitVec2_Implement(name, value)) {
+                onValueChangedEvent(name);
+                return true;
+            }
+            return false;
+        }
+        MAYBE_UNUSED bool VisitVec3(const std::string& name, glm::vec3& value)
+        {
+            if (VisitVec3_Implement(name, value)) {
+                onValueChangedEvent(name);
+                return true;
+            }
+            return false;
+        }
+        MAYBE_UNUSED bool VisitVec4(const std::string& name, glm::vec4& value)
+        {
+            if (VisitVec4_Implement(name, value)) {
+                onValueChangedEvent(name);
+                return true;
+            }
+            return false;
+        }
+        MAYBE_UNUSED bool VisitColor3(const std::string& name, Color3F& value)
+        {
+            if (VisitColor3_Implement(name, value)) {
+                onValueChangedEvent(name);
+                return true;
+            }
+            return false;
+        }
+        MAYBE_UNUSED bool VisitColor4(const std::string& name, Color4F& value)
+        {
+            if (VisitColor4_Implement(name, value)) {
+                onValueChangedEvent(name);
+                return true;
+            }
+            return false;
+        }
+        MAYBE_UNUSED bool VisitObject(const std::string& name, IReflection& value)
+        {
+            if (VisitObject_Implement(name, value)) {
+                onValueChangedEvent(name);
+                return true;
+            }
+            return false;
+        }
+        MAYBE_UNUSED bool VisitEnum(const std::string& name, int32_t& value, const Array<std::string>& enumStrings)
+        {
+            if (VisitEnum_Implement(name, value, enumStrings)) {
+                onValueChangedEvent(name);
+                return true;
+            }
+            return false;
+        }
 
         template<typename T>
         MAYBE_UNUSED bool Visit(const std::string& name, T& value)
         {
-            #define VISIT(Type) if (Visit##Type(name, value)) { onValueChangedEvent(name); return true; }
+            #define VISIT(Type) if (Visit##Type##_Implement(name, value)) { onValueChangedEvent(name); return true; }
 
             if constexpr (std::is_same_v<T, bool>)
             {
@@ -132,6 +237,23 @@ NXS_NAMESPACE
         }
 
         sigslot::signal<const std::string&> onValueChangedEvent;
+
+    private:
+        NODISCARD virtual bool VisitBool_Implement(const std::string& name, bool& value) = 0;
+        NODISCARD virtual bool VisitInt_Implement(const std::string& name, int32_t& value) = 0;
+        NODISCARD virtual bool VisitUInt_Implement(const std::string& name, uint32_t& value) = 0;
+        NODISCARD virtual bool VisitInt64_Implement(const std::string& name, int64_t& value) = 0;
+        NODISCARD virtual bool VisitUInt64_Implement(const std::string& name, uint64_t& value) = 0;
+        NODISCARD virtual bool VisitFloat_Implement(const std::string& name, float& value) = 0;
+        NODISCARD virtual bool VisitDouble_Implement(const std::string& name, double& value) = 0;
+        NODISCARD virtual bool VisitString_Implement(const std::string& name, std::string& value) = 0;
+        NODISCARD virtual bool VisitVec2_Implement(const std::string& name, glm::vec2& value) = 0;
+        NODISCARD virtual bool VisitVec3_Implement(const std::string& name, glm::vec3& value) = 0;
+        NODISCARD virtual bool VisitVec4_Implement(const std::string& name, glm::vec4& value) = 0;
+        NODISCARD virtual bool VisitColor3_Implement(const std::string& name, Color3F& value) = 0;
+        NODISCARD virtual bool VisitColor4_Implement(const std::string& name, Color4F& value) = 0;
+        NODISCARD virtual bool VisitObject_Implement(const std::string& name, IReflection& value) = 0;
+        NODISCARD virtual bool VisitEnum_Implement(const std::string& name, int32_t& value, const Array<std::string>& enumStrings) = 0;
     };
 
     class IReflection : public ISerializeable

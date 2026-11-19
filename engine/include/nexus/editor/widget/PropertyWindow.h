@@ -23,21 +23,22 @@ NXS_NAMESPACE
 
         void SetReadOnlyFlag(bool value) override;
 
-        MAYBE_UNUSED bool VisitBool(const std::string& name, bool& value) override;
-        MAYBE_UNUSED bool VisitInt(const std::string& name, int32_t& value) override;
-        MAYBE_UNUSED bool VisitUInt(const std::string& name, uint32_t& value) override;
-        MAYBE_UNUSED bool VisitInt64(const std::string& name, int64_t& value) override;
-        MAYBE_UNUSED bool VisitUInt64(const std::string& name, uint64_t& value) override;
-        MAYBE_UNUSED bool VisitFloat(const std::string& name, float& value) override;
-        MAYBE_UNUSED bool VisitDouble(const std::string& name, double& value) override;
-        MAYBE_UNUSED bool VisitString(const std::string& name, std::string& value) override;
-        MAYBE_UNUSED bool VisitVec2(const std::string& name, glm::vec2& value) override;
-        MAYBE_UNUSED bool VisitVec3(const std::string& name, glm::vec3& value) override;
-        MAYBE_UNUSED bool VisitVec4(const std::string& name, glm::vec4& value) override;
-        MAYBE_UNUSED bool VisitColor3(const std::string& name, Color3F& value) override;
-        MAYBE_UNUSED bool VisitColor4(const std::string& name, Color4F& value) override;
-        MAYBE_UNUSED bool VisitObject(const std::string& name, IReflection& value) override;
-        MAYBE_UNUSED bool VisitEnum(const std::string& name, int32_t& value, const Array<std::string>& enumStrings) override;
+    private:
+        NODISCARD bool VisitBool_Implement(const std::string& name, bool& value) override;
+        NODISCARD bool VisitInt_Implement(const std::string& name, int32_t& value) override;
+        NODISCARD bool VisitUInt_Implement(const std::string& name, uint32_t& value) override;
+        NODISCARD bool VisitInt64_Implement(const std::string& name, int64_t& value) override;
+        NODISCARD bool VisitUInt64_Implement(const std::string& name, uint64_t& value) override;
+        NODISCARD bool VisitFloat_Implement(const std::string& name, float& value) override;
+        NODISCARD bool VisitDouble_Implement(const std::string& name, double& value) override;
+        NODISCARD bool VisitString_Implement(const std::string& name, std::string& value) override;
+        NODISCARD bool VisitVec2_Implement(const std::string& name, glm::vec2& value) override;
+        NODISCARD bool VisitVec3_Implement(const std::string& name, glm::vec3& value) override;
+        NODISCARD bool VisitVec4_Implement(const std::string& name, glm::vec4& value) override;
+        NODISCARD bool VisitColor3_Implement(const std::string& name, Color3F& value) override;
+        NODISCARD bool VisitColor4_Implement(const std::string& name, Color4F& value) override;
+        NODISCARD bool VisitObject_Implement(const std::string& name, IReflection& value) override;
+        NODISCARD bool VisitEnum_Implement(const std::string& name, int32_t& value, const Array<std::string>& enumStrings) override;
 
     protected:
         void Draw_Internal(RenderSystem& renderSystem) override;

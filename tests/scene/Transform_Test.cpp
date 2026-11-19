@@ -17,13 +17,15 @@ namespace
             disabledDepth += value ? 1 : -1;
             EXPECT_GE(disabledDepth, 0);
         }
-        bool VisitVec3(const std::string& name, glm::vec3& value) override
+        int disabledDepth = 0;
+
+    private:
+        bool VisitVec3_Implement(const std::string& name, glm::vec3& value) override
         {
             if (disabledDepth != 0 || name != "Position") return false;
             value = {4.0f, 5.0f, 6.0f};
             return true;
         }
-        int disabledDepth = 0;
     };
 }
 

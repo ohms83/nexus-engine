@@ -60,42 +60,42 @@ void PropertyWindow::SetReadOnlyFlag(bool value)
     else ImGui::EndDisabled();
 }
 
-bool PropertyWindow::VisitBool(const std::string& name, bool& value)
+bool PropertyWindow::VisitBool_Implement(const std::string& name, bool& value)
 {
     return ImGui::Checkbox(name.c_str(), &value);
 }
 
-bool PropertyWindow::VisitInt(const std::string& name, int32_t& value)
+bool PropertyWindow::VisitInt_Implement(const std::string& name, int32_t& value)
 {
     return ImGui::InputInt(name.c_str(), &value);
 }
 
-bool PropertyWindow::VisitUInt(const std::string& name, uint32_t& value)
+bool PropertyWindow::VisitUInt_Implement(const std::string& name, uint32_t& value)
 {
     return ImGui::InputScalar(name.c_str(), ImGuiDataType_U32, &value);
 }
 
-bool PropertyWindow::VisitInt64(const std::string& name, int64_t& value)
+bool PropertyWindow::VisitInt64_Implement(const std::string& name, int64_t& value)
 {
     return ImGui::InputScalar(name.c_str(), ImGuiDataType_S64, &value);
 }
 
-bool PropertyWindow::VisitUInt64(const std::string& name, uint64_t& value)
+bool PropertyWindow::VisitUInt64_Implement(const std::string& name, uint64_t& value)
 {
     return ImGui::InputScalar(name.c_str(), ImGuiDataType_U64, &value);
 }
 
-bool PropertyWindow::VisitFloat(const std::string& name, float& value)
+bool PropertyWindow::VisitFloat_Implement(const std::string& name, float& value)
 {
     return ImGui::InputFloat(name.c_str(), &value);
 }
 
-bool PropertyWindow::VisitDouble(const std::string & name, double & value)
+bool PropertyWindow::VisitDouble_Implement(const std::string & name, double & value)
 {
     return ImGui::InputDouble(name.c_str(), &value);
 }
 
-bool PropertyWindow::VisitString(const std::string& name, std::string& value)
+bool PropertyWindow::VisitString_Implement(const std::string& name, std::string& value)
 {
     char buf[2048] = "";
     const auto size = sizeof(buf);
@@ -108,39 +108,44 @@ bool PropertyWindow::VisitString(const std::string& name, std::string& value)
     return false;
 }
 
-bool PropertyWindow::VisitVec2(const std::string& name, glm::vec2& value)
+bool PropertyWindow::VisitVec2_Implement(const std::string& name, glm::vec2& value)
 {
     return ImGui::InputFloat2(name.c_str(), R_CAST<float*>(&value));
 }
 
-bool PropertyWindow::VisitVec3(const std::string& name, glm::vec3& value)
+bool PropertyWindow::VisitVec3_Implement(const std::string& name, glm::vec3& value)
 {
     return ImGui::InputFloat3(name.c_str(), R_CAST<float*>(&value));
 }
 
-bool PropertyWindow::VisitVec4(const std::string& name, glm::vec4& value)
+bool PropertyWindow::VisitVec4_Implement(const std::string& name, glm::vec4& value)
 {
     return ImGui::InputFloat4(name.c_str(), R_CAST<float*>(&value));
 }
 
-bool PropertyWindow::VisitColor3(const std::string& name, Color3F& value)
+bool PropertyWindow::VisitColor3_Implement(const std::string& name, Color3F& value)
 {
     return ImGui::ColorPicker3(name.c_str(), R_CAST<float*>(&value));
 }
 
-bool PropertyWindow::VisitColor4(const std::string& name, Color4F& value)
+bool PropertyWindow::VisitColor4_Implement(const std::string& name, Color4F& value)
 {
     return ImGui::ColorPicker3(name.c_str(), R_CAST<float*>(&value));
 }
 
-bool PropertyWindow::VisitObject(const std::string &name, IReflection&value)
+bool PropertyWindow::VisitObject_Implement(const std::string &name, IReflection&value)
 {
     SetMarker(name.c_str());
+    bool valueChanged = false;
+    auto connection = onValueChangedEvent.connect([&valueChanged](const std::string& name) {
+        valueChanged = true;
+    });
     value.AcceptReflector(*this);
-    return false;
+    connection.disconnect();
+    return valueChanged;
 }
 
-MAYBE_UNUSED bool PropertyWindow::VisitEnum(const std::string &name, int32_t &value, const Array<std::string> &enumStrings)
+MAYBE_UNUSED bool PropertyWindow::VisitEnum_Implement(const std::string &name, int32_t &value, const Array<std::string> &enumStrings)
 {
     std::vector<const char*> items;
     items.reserve(enumStrings.size());
