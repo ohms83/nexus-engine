@@ -80,7 +80,6 @@ VariantData RenderPass::Serialize() const
 {
     VariantData::Map data;
     data["name"] = name;
-    data["priority"] = INT_CAST(priority);
     data["enabled"] = enabled;
     data["targetType"] = INT_CAST(targetType);
 
@@ -132,7 +131,6 @@ VariantData RenderPass::Serialize() const
 bool RenderPass::Deserialize(const VariantData& data)
 {
     name = data["name"].GetString();
-    priority = UINT_CAST(data["priority"].GetInt());
     enabled = data["enabled"].GetBool();
     targetType = CAST<RenderTargetType>(data["targetType"].GetInt());
 

@@ -34,7 +34,6 @@ void main()
 DepthPrePass::DepthPrePass()
 {
     name = "Depth Pre-Pass";
-    priority = RENDER_PASS_DEPTH_FILL;
     commandSortType = CommandSortType::FrontToBack;
     pipelineState.depthTest = true;
     pipelineState.depthWrite = true;

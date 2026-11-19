@@ -10,7 +10,6 @@ NXS_NAMESPACE
         AlphaPass()
         {
             name = "Alpha Pass";
-            priority = RENDER_PASS_ALPHA;
             commandSortType = CommandSortType::BackToFront;
             pipelineState.depthTest = true;
             pipelineState.depthWrite = true;

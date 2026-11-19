@@ -5,6 +5,7 @@ USING_NAMESPACE_NXS;
 
 Array<RenderPass> RenderGraph::Build(const Array<RenderPass>& passes)
 {
+#if 0
     const size_t n = passes.size();
     Array<Array<size_t>> adj(n);
     Array<size_t> indeg(n, 0);
@@ -62,6 +63,8 @@ Array<RenderPass> RenderGraph::Build(const Array<RenderPass>& passes)
         std::ranges::sort(sorted, std::ranges::less{}, &RenderPass::priority);
         return sorted;
     }
-
+#else
+    Array<RenderPass> result = passes;
+#endif
     return result;
 }

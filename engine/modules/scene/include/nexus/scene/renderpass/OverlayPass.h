@@ -10,7 +10,6 @@ NXS_NAMESPACE
         OverlayPass()
         {
             name = "Overlay Pass";
-            priority = RENDER_PASS_OVERLAY;
             commandSortType = CommandSortType::FrontToBack;
             pipelineState.depthTest = false;
             pipelineState.depthWrite = false;
