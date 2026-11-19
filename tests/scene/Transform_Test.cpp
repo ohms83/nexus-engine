@@ -5,36 +5,24 @@
 #include <string>
 #include <iomanip>
 
+#include "helpers/FakeReflector.h"
+
 namespace
 {
-    class TransformTestReflector final : public nxs::IReflector
+    class TransformTestReflector final : public FakeReflector
     {
     public:
-        void SetMarker(const std::string&) override {}
         void SetReadOnlyFlag(bool value) override
         {
             disabledDepth += value ? 1 : -1;
             EXPECT_GE(disabledDepth, 0);
         }
-        bool VisitBool(const std::string&, bool&) override { return false; }
-        bool VisitInt(const std::string&, int32_t&) override { return false; }
-        bool VisitUInt(const std::string&, uint32_t&) override { return false; }
-        bool VisitInt64(const std::string&, int64_t&) override { return false; }
-        bool VisitUInt64(const std::string&, uint64_t&) override { return false; }
-        bool VisitFloat(const std::string&, float&) override { return false; }
-        bool VisitDouble(const std::string&, double&) override { return false; }
-        bool VisitString(const std::string&, std::string&) override { return false; }
-        bool VisitVec2(const std::string&, glm::vec2&) override { return false; }
         bool VisitVec3(const std::string& name, glm::vec3& value) override
         {
             if (disabledDepth != 0 || name != "Position") return false;
             value = {4.0f, 5.0f, 6.0f};
             return true;
         }
-        bool VisitVec4(const std::string&, glm::vec4&) override { return false; }
-        bool VisitColor3(const std::string&, nxs::Color3F&) override { return false; }
-        bool VisitColor4(const std::string&, nxs::Color4F&) override { return false; }
-        bool VisitObject(const std::string&, nxs::IReflector&) override { return false; }
         int disabledDepth = 0;
     };
 }

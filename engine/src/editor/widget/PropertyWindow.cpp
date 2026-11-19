@@ -5,6 +5,8 @@
 
 #include "imgui.h"
 
+#include <vector>
+
 #include "glm/gtx/euler_angles.hpp" // Required for eulerAngleXYZ
 
 USING_NAMESPACE_NXS;
@@ -131,8 +133,20 @@ bool PropertyWindow::VisitColor4(const std::string& name, Color4F& value)
     return ImGui::ColorPicker3(name.c_str(), R_CAST<float*>(&value));
 }
 
-bool PropertyWindow::VisitObject(const std::string &name, IReflector &value)
+bool PropertyWindow::VisitObject(const std::string &name, IReflection&value)
 {
-    // Property window doesn't support nested object so it will be silently ignored.
+    SetMarker(name.c_str());
+    value.AcceptReflector(*this);
     return false;
+}
+
+MAYBE_UNUSED bool PropertyWindow::VisitEnum(const std::string &name, int32_t &value, const Array<std::string> &enumStrings)
+{
+    std::vector<const char*> items;
+    items.reserve(enumStrings.size());
+    for (const auto& item : enumStrings)
+    {
+        items.push_back(item.c_str());
+    }
+    return ImGui::Combo(name.c_str(), &value, items.data(), static_cast<int>(items.size()));
 }

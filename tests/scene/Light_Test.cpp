@@ -5,34 +5,20 @@
 
 #include "gtest/gtest.h"
 #include "nexus/Nexus.h"
+#include "helpers/FakeReflector.h"
 
 USING_NAMESPACE_NXS;
 
 namespace
 {
-    class LightTestReflector final : public IReflector
+    class LightTestReflector final : public FakeReflector
     {
     public:
-        void SetMarker(const std::string&) override {}
-        void SetReadOnlyFlag(bool) override {}
         bool VisitBool(const std::string& name, bool&) override
         {
             if (name == "Can Cast Shadows") sawShadowFlag = true;
             return false;
         }
-        bool VisitInt(const std::string&, int32_t&) override { return false; }
-        bool VisitUInt(const std::string&, uint32_t&) override { return false; }
-        bool VisitInt64(const std::string&, int64_t&) override { return false; }
-        bool VisitUInt64(const std::string&, uint64_t&) override { return false; }
-        bool VisitFloat(const std::string&, float&) override { return false; }
-        bool VisitDouble(const std::string&, double&) override { return false; }
-        bool VisitString(const std::string&, std::string&) override { return false; }
-        bool VisitVec2(const std::string&, glm::vec2&) override { return false; }
-        bool VisitVec3(const std::string&, glm::vec3&) override { return false; }
-        bool VisitVec4(const std::string&, glm::vec4&) override { return false; }
-        bool VisitColor3(const std::string&, Color3F&) override { return false; }
-        bool VisitColor4(const std::string&, Color4F&) override { return false; }
-        bool VisitObject(const std::string&, IReflector&) override { return false; }
 
         bool sawShadowFlag = false;
     };

@@ -20,8 +20,14 @@ public: \
     const std::string& ClassName() const override { static std::string className = #Class; return className; } \
     static const std::string& StaticClassName() { static std::string className = #Class; return className; } \
 
+#define IMPLEMENT_REFLECTION_STRUCT(Struct) \
+    const std::string& ClassName() const override { static std::string className = #Struct; return className; } \
+    static const std::string& StaticClassName() { static std::string className = #Struct; return className; } \
+
 NXS_NAMESPACE
 {
+    class IReflection;
+
     class IReflector
     {
     public:
@@ -54,7 +60,8 @@ NXS_NAMESPACE
         MAYBE_UNUSED virtual bool VisitVec4(const std::string& name, glm::vec4& value) = 0;
         MAYBE_UNUSED virtual bool VisitColor3(const std::string& name, Color3F& value) = 0;
         MAYBE_UNUSED virtual bool VisitColor4(const std::string& name, Color4F& value) = 0;
-        MAYBE_UNUSED virtual bool VisitObject(const std::string& name, IReflector& value) = 0;
+        MAYBE_UNUSED virtual bool VisitObject(const std::string& name, IReflection& value) = 0;
+        MAYBE_UNUSED virtual bool VisitEnum(const std::string& name, int32_t& value, const Array<std::string>& enumStrings) = 0;
 
         template<typename T>
         MAYBE_UNUSED bool Visit(const std::string& name, T& value)
@@ -113,7 +120,7 @@ NXS_NAMESPACE
             {
                 VISIT(Color4);
             }
-            else if constexpr (std::is_base_of_v<IReflector, T>)
+            else if constexpr (std::is_base_of_v<IReflection, T>)
             {
                 VISIT(Object);
             }

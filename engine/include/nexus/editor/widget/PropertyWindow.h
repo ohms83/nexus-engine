@@ -23,20 +23,21 @@ NXS_NAMESPACE
 
         void SetReadOnlyFlag(bool value) override;
 
-        bool VisitBool(const std::string& name, bool& value) override;
-        bool VisitInt(const std::string& name, int32_t& value) override;
-        bool VisitUInt(const std::string& name, uint32_t& value) override;
-        bool VisitInt64(const std::string& name, int64_t& value) override;
-        bool VisitUInt64(const std::string& name, uint64_t& value) override;
-        bool VisitFloat(const std::string& name, float& value) override;
-        bool VisitDouble(const std::string& name, double& value) override;
-        bool VisitString(const std::string& name, std::string& value) override;
-        bool VisitVec2(const std::string& name, glm::vec2& value) override;
-        bool VisitVec3(const std::string& name, glm::vec3& value) override;
-        bool VisitVec4(const std::string& name, glm::vec4& value) override;
-        bool VisitColor3(const std::string& name, Color3F& value) override;
-        bool VisitColor4(const std::string& name, Color4F& value) override;
-        bool VisitObject(const std::string& name, IReflector& value) override;
+        MAYBE_UNUSED bool VisitBool(const std::string& name, bool& value) override;
+        MAYBE_UNUSED bool VisitInt(const std::string& name, int32_t& value) override;
+        MAYBE_UNUSED bool VisitUInt(const std::string& name, uint32_t& value) override;
+        MAYBE_UNUSED bool VisitInt64(const std::string& name, int64_t& value) override;
+        MAYBE_UNUSED bool VisitUInt64(const std::string& name, uint64_t& value) override;
+        MAYBE_UNUSED bool VisitFloat(const std::string& name, float& value) override;
+        MAYBE_UNUSED bool VisitDouble(const std::string& name, double& value) override;
+        MAYBE_UNUSED bool VisitString(const std::string& name, std::string& value) override;
+        MAYBE_UNUSED bool VisitVec2(const std::string& name, glm::vec2& value) override;
+        MAYBE_UNUSED bool VisitVec3(const std::string& name, glm::vec3& value) override;
+        MAYBE_UNUSED bool VisitVec4(const std::string& name, glm::vec4& value) override;
+        MAYBE_UNUSED bool VisitColor3(const std::string& name, Color3F& value) override;
+        MAYBE_UNUSED bool VisitColor4(const std::string& name, Color4F& value) override;
+        MAYBE_UNUSED bool VisitObject(const std::string& name, IReflection& value) override;
+        MAYBE_UNUSED bool VisitEnum(const std::string& name, int32_t& value, const Array<std::string>& enumStrings) override;
 
     protected:
         void Draw_Internal(RenderSystem& renderSystem) override;
