@@ -254,6 +254,46 @@ TEST(SceneRendererTest, DisabledPassDoesNotRun)
     EXPECT_TRUE(rendering->drawMasks.empty());
 }
 
+TEST(SceneRendererTest, RenderProfileSelectsPassesInQueueOrder)
+{
+    auto scene = std::make_shared<Scene>("scene");
+    auto view = scene->EmplaceChild<CountingSceneView>("view");
+    SceneRenderer renderer;
+    Array<RenderPassQueue> executed;
+    auto registerPass = [&](RenderPassQueue queue) {
+        auto pass = std::make_shared<ViewTestPass>();
+        pass->onBegin = [&, queue](RenderSystem&) { executed.push_back(queue); };
+        renderer.RegisterRenderPass(queue, pass);
+        return pass;
+    };
+    auto overlay = registerPass(RenderPassQueue::Overlay);
+    auto alpha = registerPass(RenderPassQueue::Alpha);
+    registerPass(RenderPassQueue::Opaque);
+    registerPass(RenderPassQueue::DepthFill);
+    auto rendering = std::make_shared<ViewTestRendering>();
+    RenderSystem renderSystem(rendering);
+
+    view->profile.depthFill = true;
+    renderer.Render(renderSystem, *scene);
+    EXPECT_EQ(executed, (Array<RenderPassQueue>{
+        RenderPassQueue::DepthFill, RenderPassQueue::Opaque,
+        RenderPassQueue::Alpha, RenderPassQueue::Overlay}));
+
+    executed.clear();
+    view->profile.depthFill = false;
+    view->profile.culling = static_cast<CullingFlags>(
+        static_cast<uint32_t>(CullingFlags::Opaque) | static_cast<uint32_t>(CullingFlags::Alpha));
+    renderer.Render(renderSystem, *scene);
+    EXPECT_EQ(executed, (Array<RenderPassQueue>{RenderPassQueue::Overlay}));
+
+    executed.clear();
+    view->profile.culling = CullingFlags::None;
+    alpha->enabled = false;
+    overlay->enabled = false;
+    renderer.Render(renderSystem, *scene);
+    EXPECT_EQ(executed, (Array<RenderPassQueue>{RenderPassQueue::Opaque}));
+}
+
 TEST(SceneRendererTest, RendersVisibleMeshThroughSceneCamera)
 {
     auto scene = std::make_shared<Scene>("scene");

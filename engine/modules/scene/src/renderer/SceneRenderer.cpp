@@ -459,44 +459,21 @@ void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
             viewCtx,
         };
 
-        // Select render passes based on profile
         const auto& renderProfile = viewCtx.profile;
-        if (renderProfile.depthFill) {
-            const auto& itr = m_passesByQueue.find(RenderPassQueue::DepthFill);
+        const auto addPass = [&](RenderPassQueue queue, bool selected) {
+            if (!selected) return;
+            const auto itr = m_passesByQueue.find(queue);
             if (itr != m_passesByQueue.end() && itr->second->enabled) {
                 viewPasses.passes.emplace_back(QueuedRenderPass {
                     INT_CAST(itr->first),
                     itr->second.get()
                 });
             }
-        }
-        if (!renderProfile.IsCull(CullingFlags::Opaque)) {
-            const auto& itr = m_passesByQueue.find(RenderPassQueue::Opaque);
-            if (itr != m_passesByQueue.end() && itr->second->enabled) {
-                viewPasses.passes.emplace_back(QueuedRenderPass {
-                    INT_CAST(itr->first),
-                    itr->second.get()
-                });
-            }
-        }
-        if (!renderProfile.IsCull(CullingFlags::Alpha)) {
-            const auto& itr = m_passesByQueue.find(RenderPassQueue::Alpha);
-            if (itr != m_passesByQueue.end() && itr->second->enabled) {
-                viewPasses.passes.emplace_back(QueuedRenderPass {
-                    INT_CAST(itr->first),
-                    itr->second.get()
-                });
-            }
-        }
-        if (!renderProfile.IsCull(CullingFlags::Overlay)) {
-            const auto& itr = m_passesByQueue.find(RenderPassQueue::Overlay);
-            if (itr != m_passesByQueue.end() && itr->second->enabled) {
-                viewPasses.passes.emplace_back(QueuedRenderPass {
-                    INT_CAST(itr->first),
-                    itr->second.get()
-                });
-            }
-        }
+        };
+        addPass(RenderPassQueue::DepthFill, renderProfile.depthFill);
+        addPass(RenderPassQueue::Opaque, !renderProfile.IsCull(CullingFlags::Opaque));
+        addPass(RenderPassQueue::Alpha, !renderProfile.IsCull(CullingFlags::Alpha));
+        addPass(RenderPassQueue::Overlay, !renderProfile.IsCull(CullingFlags::Overlay));
         std::ranges::sort(viewPasses.passes, {}, &QueuedRenderPass::priority);
         views.push_back(viewPasses);
     }
