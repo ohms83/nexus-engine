@@ -71,13 +71,14 @@ ViewContext Camera::CreateViewContext(const Scene& scene) const
     rmt_ScopedCPUSample(Camera_CreateViewContext, 0)
     auto cameraComp = GetComponent<CameraComponent>();
     NXS_ASSERT(cameraComp);
+    const auto& renderProfile = cameraComp->profile;
     ViewContext context {
         this,
         cameraComp->target.get(),
-        cameraComp->clearFlags,
-        cameraComp->clearColor,
-        cameraComp->clearDepth,
-        cameraComp->clearStencil,
+        renderProfile.clearFlags,
+        renderProfile.clearColor,
+        renderProfile.clearDepth,
+        renderProfile.clearStencil,
         GetGlobalPosition(),
         GetViewMatrix(),
         GetProjectionMatrix(),

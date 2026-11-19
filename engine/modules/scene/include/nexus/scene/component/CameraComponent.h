@@ -4,6 +4,7 @@
 #include "nexus/ecs/Component.h"
 #include "nexus/graphics/GraphicsConst.h"
 #include "nexus/graphics/RenderTarget.h"
+#include "nexus/scene/RenderProfile.h"
 
 NXS_NAMESPACE
 {
@@ -23,6 +24,7 @@ NXS_NAMESPACE
             reflector.Visit<float>("Far", farZ);
             reflector.Visit<float>("Width", width);
             reflector.Visit<float>("Height", height);
+            reflector.VisitObject("Render Profile", CAST<IReflection&>(profile));
             Validate();
         }
 
@@ -35,6 +37,7 @@ NXS_NAMESPACE
             data["far"] = farZ;
             data["width"] = width;
             data["height"] = height;
+            data["profile"] = profile.Serialize();
             return data;
         }
 
@@ -47,6 +50,7 @@ NXS_NAMESPACE
             farZ = data["far"].GetFloat();
             width = data["width"].GetFloat();
             height = data["height"].GetFloat();
+            profile.Deserialize(data["profile"]);
             Validate();
             return true;
         }
@@ -80,11 +84,7 @@ NXS_NAMESPACE
         float farZ = 1000.0f;
         //! nullptr means swapchain
         Ref<RenderTarget> target;
-        //!
-        ClearFlags clearFlags = ClearFlags::All;
-        Color3F clearColor { 0x303030FF };
-        float clearDepth = 1.0f;
-        uint32_t clearStencil = 0;
+        RenderProfile profile;
 
         float GetAspect() const { return height == 0 ? 0 : width / height; };
 
