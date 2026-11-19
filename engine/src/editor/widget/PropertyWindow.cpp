@@ -145,7 +145,7 @@ bool PropertyWindow::VisitObject_Implement(const std::string &name, IReflection&
     return valueChanged;
 }
 
-MAYBE_UNUSED bool PropertyWindow::VisitEnum_Implement(const std::string &name, int32_t &value, const Array<std::string> &enumStrings)
+bool PropertyWindow::VisitEnum_Implement(const std::string &name, int32_t &value, const Array<std::string> &enumStrings)
 {
     std::vector<const char*> items;
     items.reserve(enumStrings.size());
@@ -154,4 +154,23 @@ MAYBE_UNUSED bool PropertyWindow::VisitEnum_Implement(const std::string &name, i
         items.push_back(item.c_str());
     }
     return ImGui::Combo(name.c_str(), &value, items.data(), static_cast<int>(items.size()));
+}
+
+bool PropertyWindow::VisitBitfield_Implement(const std::string& name, uint32_t& value, const Array<BitfieldOption>& options)
+{
+    unsigned int flags = value;
+    bool changed = false;
+    ImGui::PushID(name.c_str());
+    ImGui::TextUnformatted(name.c_str());
+    ImGui::Indent();
+    for (size_t i = 0; i < options.size(); ++i)
+    {
+        ImGui::PushID(static_cast<int>(i));
+        changed |= ImGui::CheckboxFlags(options[i].name.c_str(), &flags, options[i].mask);
+        ImGui::PopID();
+    }
+    ImGui::Unindent();
+    ImGui::PopID();
+    if (changed) value = flags;
+    return changed;
 }

@@ -24,4 +24,5 @@ private:
     bool VisitColor4_Implement(const std::string& name, nxs::Color4F& value) { return false; }
     bool VisitObject_Implement(const std::string& name, nxs::IReflection& value) { return false; }
     bool VisitEnum_Implement(const std::string& name, int32_t& value, const nxs::Array<std::string>& enumStrings) { return false; }
+    bool VisitBitfield_Implement(const std::string&, uint32_t&, const nxs::Array<nxs::BitfieldOption>&) override { return false; }
 };

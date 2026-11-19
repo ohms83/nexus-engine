@@ -39,6 +39,7 @@ NXS_NAMESPACE
         NODISCARD bool VisitColor4_Implement(const std::string& name, Color4F& value) override;
         NODISCARD bool VisitObject_Implement(const std::string& name, IReflection& value) override;
         NODISCARD bool VisitEnum_Implement(const std::string& name, int32_t& value, const Array<std::string>& enumStrings) override;
+        NODISCARD bool VisitBitfield_Implement(const std::string& name, uint32_t& value, const Array<BitfieldOption>& options) override;
 
     protected:
         void Draw_Internal(RenderSystem& renderSystem) override;

@@ -1,5 +1,7 @@
 #include "gtest/gtest.h"
+#include "helpers/FakeReflector.h"
 #include "nexus/reflection/Reflection.h"
+#include "nexus/scene/RenderProfile.h"
 
 #include <string>
 #include <vector>
@@ -40,6 +42,10 @@ namespace
         {
             return Record("Enum");
         }
+        bool VisitBitfield_Implement(const std::string&, uint32_t&, const nxs::Array<nxs::BitfieldOption>&) override
+        {
+            return Record("Bitfield");
+        }
     };
 
     class ReflectableFixture final : public nxs::IReflection
@@ -54,6 +60,25 @@ namespace
 
         bool Deserialize(const nxs::VariantData&) override { return true; }
         void AcceptReflector(nxs::IReflector&) override {}
+    };
+
+    class CullingReflector final : public FakeReflector
+    {
+    public:
+        uint32_t initialValue = 0;
+        nxs::Array<nxs::BitfieldOption> options;
+        bool change = false;
+
+    private:
+        bool VisitBitfield_Implement(const std::string& name, uint32_t& value,
+            const nxs::Array<nxs::BitfieldOption>& fieldOptions) override
+        {
+            EXPECT_EQ(name, "Culling");
+            initialValue = value;
+            options = fieldOptions;
+            if (change) value ^= static_cast<uint32_t>(nxs::CullingFlags::Alpha);
+            return change;
+        }
     };
 }
 
@@ -81,6 +106,8 @@ TEST(IReflectorTest, TypedVisitMethodsDispatchAndNotifyChanges)
     ReflectableFixture object;
     int32_t enumValue = 0;
     nxs::Array<std::string> enumStrings{"First", "Second"};
+    uint32_t bitfieldValue = 0;
+    nxs::Array<nxs::BitfieldOption> bitfieldOptions{{"Flag", 0x80}};
 
     EXPECT_TRUE(reflector.VisitBool("bool", boolValue));
     EXPECT_TRUE(reflector.VisitInt("int", intValue));
@@ -97,14 +124,15 @@ TEST(IReflectorTest, TypedVisitMethodsDispatchAndNotifyChanges)
     EXPECT_TRUE(reflector.VisitColor4("color4", color4Value));
     EXPECT_TRUE(reflector.VisitObject("object", object));
     EXPECT_TRUE(reflector.VisitEnum("enum", enumValue, enumStrings));
+    EXPECT_TRUE(reflector.VisitBitfield("bitfield", bitfieldValue, bitfieldOptions));
 
     const std::vector<std::string> expectedTypes{
         "Bool", "Int", "UInt", "Int64", "UInt64", "Float", "Double", "String",
-        "Vec2", "Vec3", "Vec4", "Color3", "Color4", "Object", "Enum"
+        "Vec2", "Vec3", "Vec4", "Color3", "Color4", "Object", "Enum", "Bitfield"
     };
     const std::vector<std::string> expectedProperties{
         "bool", "int", "uint", "int64", "uint64", "float", "double", "string",
-        "vec2", "vec3", "vec4", "color3", "color4", "object", "enum"
+        "vec2", "vec3", "vec4", "color3", "color4", "object", "enum", "bitfield"
     };
     EXPECT_EQ(reflector.visits, expectedTypes);
     EXPECT_EQ(changedProperties, expectedProperties);
@@ -175,10 +203,42 @@ TEST(IReflectorTest, DoesNotNotifyWhenAVisitReportsNoChange)
 
     int32_t intValue = 0;
     float floatValue = 0.0f;
+    uint32_t bitfieldValue = 0;
     EXPECT_FALSE(reflector.VisitInt("int", intValue));
     EXPECT_FALSE(reflector.Visit("float", floatValue));
+    EXPECT_FALSE(reflector.VisitBitfield("bitfield", bitfieldValue, {{"Flag", 1}}));
     EXPECT_EQ(changeNotifications, 0);
-    EXPECT_EQ(reflector.visits, (std::vector<std::string>{"Int", "Float"}));
+    EXPECT_EQ(reflector.visits, (std::vector<std::string>{"Int", "Float", "Bitfield"}));
 
+    reflector.onValueChangedEvent.disconnect(connection);
+}
+
+TEST(IReflectorTest, RenderProfileReflectsCullingAsFlags)
+{
+    nxs::RenderProfile profile;
+    profile.culling = nxs::CullingFlags::All;
+    CullingReflector reflector;
+
+    profile.AcceptReflector(reflector);
+    EXPECT_EQ(reflector.initialValue, 0xFFFFFFFFu);
+    EXPECT_EQ(profile.culling, nxs::CullingFlags::All);
+    ASSERT_EQ(reflector.options.size(), 3u);
+    EXPECT_EQ(reflector.options[0].name, "Opaque");
+    EXPECT_EQ(reflector.options[0].mask, static_cast<uint32_t>(nxs::CullingFlags::Opaque));
+    EXPECT_EQ(reflector.options[1].name, "Alpha");
+    EXPECT_EQ(reflector.options[1].mask, static_cast<uint32_t>(nxs::CullingFlags::Alpha));
+    EXPECT_EQ(reflector.options[2].name, "Overlay");
+    EXPECT_EQ(reflector.options[2].mask, static_cast<uint32_t>(nxs::CullingFlags::Overlay));
+
+    int notifications = 0;
+    auto connection = reflector.onValueChangedEvent.connect([&](const std::string& name) {
+        EXPECT_EQ(name, "Culling");
+        EXPECT_EQ(static_cast<uint32_t>(profile.culling), 0xFFFFFFFDu);
+        ++notifications;
+    });
+    reflector.change = true;
+    profile.AcceptReflector(reflector);
+    EXPECT_EQ(static_cast<uint32_t>(profile.culling), 0xFFFFFFFDu);
+    EXPECT_EQ(notifications, 1);
     reflector.onValueChangedEvent.disconnect(connection);
 }

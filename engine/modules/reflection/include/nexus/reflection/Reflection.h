@@ -28,6 +28,12 @@ NXS_NAMESPACE
 {
     class IReflection;
 
+    struct BitfieldOption
+    {
+        std::string name;
+        uint32_t mask;
+    };
+
     class IReflector
     {
     public:
@@ -167,6 +173,31 @@ NXS_NAMESPACE
             }
             return false;
         }
+        /**
+         * @brief Visit a bitfield using named single-bit masks. Bits not described by
+         * the options are preserved when an option changes.
+         */
+        MAYBE_UNUSED bool VisitBitfield(const std::string& name, uint32_t& value, const Array<BitfieldOption>& options)
+        {
+            if (VisitBitfield_Implement(name, value, options)) {
+                onValueChangedEvent(name);
+                return true;
+            }
+            return false;
+        }
+
+        template<typename T>
+            requires std::is_enum_v<T> && std::is_same_v<std::underlying_type_t<T>, uint32_t>
+        MAYBE_UNUSED bool VisitBitfield(const std::string& name, T& value, const Array<BitfieldOption>& options)
+        {
+            auto bits = static_cast<uint32_t>(value);
+            if (VisitBitfield_Implement(name, bits, options)) {
+                value = static_cast<T>(bits);
+                onValueChangedEvent(name);
+                return true;
+            }
+            return false;
+        }
 
         template<typename T>
         MAYBE_UNUSED bool Visit(const std::string& name, T& value)
@@ -254,6 +285,7 @@ NXS_NAMESPACE
         NODISCARD virtual bool VisitColor4_Implement(const std::string& name, Color4F& value) = 0;
         NODISCARD virtual bool VisitObject_Implement(const std::string& name, IReflection& value) = 0;
         NODISCARD virtual bool VisitEnum_Implement(const std::string& name, int32_t& value, const Array<std::string>& enumStrings) = 0;
+        NODISCARD virtual bool VisitBitfield_Implement(const std::string& name, uint32_t& value, const Array<BitfieldOption>& options) = 0;
     };
 
     class IReflection : public ISerializeable

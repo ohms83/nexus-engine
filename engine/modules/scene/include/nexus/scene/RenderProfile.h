@@ -3,6 +3,7 @@
 #include "nexus/NxsDefine.h"
 #include "nexus/core/Color.h"
 #include "nexus/graphics/GraphicsConst.h"
+#include "nexus/reflection/Reflection.h"
 
 NXS_NAMESPACE
 {
@@ -68,12 +69,10 @@ NXS_NAMESPACE
             r.VisitFloat("Clear Depth", clearDepth);
             r.VisitInt("Clear Stencil", R_CAST<int32_t&>(clearStencil));
             r.VisitBool("Depth Fill", depthFill);
-            r.VisitEnum("Culling", R_CAST<int32_t&>(culling), {
-                "None",
-                "Opaque",
-                "Alpha",
-                "Overlay",
-                "All"
+            r.VisitBitfield("Culling", culling, {
+                {"Opaque", static_cast<uint32_t>(CullingFlags::Opaque)},
+                {"Alpha", static_cast<uint32_t>(CullingFlags::Alpha)},
+                {"Overlay", static_cast<uint32_t>(CullingFlags::Overlay)}
             });
         }
     };
