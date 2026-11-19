@@ -3,6 +3,7 @@
 #include "nexus/NxsDefine.h"
 #include "nexus/container/Array.h"
 #include "nexus/scene/SceneNode.h"
+#include "nexus/scene/RenderProfile.h"
 #include "nexus/graphics/RenderTarget.h"
 
 #include "glm/glm.hpp"
@@ -47,12 +48,7 @@ NXS_NAMESPACE
         const ISceneView* view = nullptr;
         //! nullptr means swapchain
         RenderTarget* target = nullptr;
-
-        // Clear
-        ClearFlags clearFlags = ClearFlags::None;
-        Color3F clearColor { 0x303030FF };
-        float clearDepth = 1.0f;
-        uint32_t clearStencil = 0;
+        RenderProfile profile;
 
         //! Global view's position
         glm::vec3 position;

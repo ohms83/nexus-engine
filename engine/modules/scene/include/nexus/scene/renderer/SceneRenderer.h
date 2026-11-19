@@ -37,16 +37,15 @@ NXS_NAMESPACE
         bool Init();
         virtual void Render(RenderSystem& renderSystem, const Scene& scene);
 
-        void RegisterRenderPass(Ref<RenderPass> renderPass)
+        void RegisterRenderPass(RenderPassQueue queue, Ref<RenderPass> renderPass)
         {
-            m_renderPasses.push_back(renderPass);
+            m_passesByQueue[queue] = renderPass;
         }
 
-        void SortRenderPasses()
+        Ref<RenderPass> GetRenderPass(RenderPassQueue queue)
         {
-            std::ranges::sort(m_renderPasses, [this](const Ref<const RenderPass>& a, const Ref<const RenderPass>& b) {
-                return a->priority < b->priority;
-            });
+            if(!m_passesByQueue.contains(queue)) return nullptr;
+            return m_passesByQueue[queue];
         }
 
         //! Register an offscreen render target which can be referenced by renderpasses.
@@ -67,8 +66,6 @@ NXS_NAMESPACE
 
         static void SetCameraUniforms(Ref<GpuProgram> gpuProgram, const glm::vec3& cameraPos, const glm::mat4& viewMtx, const glm::mat4& projectionMtx);
 
-        //! A list of render passes sorted by their priority.
-        Array<Ref<RenderPass>> m_renderPasses;
         HashMap<std::string, Ref<RenderTarget>> m_renderTargets;
         Ref<RenderTarget> m_shadowMap;
         Ref<GpuProgram> m_shadowProgram;
@@ -76,5 +73,9 @@ NXS_NAMESPACE
         Identifier m_shadowLightId = 0;
         bool m_shadowMapReady = false;
         bool m_initialized = false;
+
+    private:
+        //! A list of render passes sorted by their priority.
+        Dict<RenderPassQueue, Ref<RenderPass>> m_passesByQueue;
     };
 }

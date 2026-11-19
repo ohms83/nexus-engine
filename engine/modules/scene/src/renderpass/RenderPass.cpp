@@ -236,20 +236,3 @@ void RenderPass::SetFilterType(std::string type)
         filter = nullptr;
     }
 }
-
-Array<const ISceneView*> RenderPass::PopulateSceneView(const SceneNode &scene) const
-{
-    rmt_ScopedCPUSample(RenderPass_PopulateSceneView, 0);
-    Array<const ISceneView*> outViews;
-    const auto& registry = *scene.GetRegistry();
-    const auto& view = registry.view<const CameraComponent, const SceneNodeComponent>();
-    for (const auto& [entity, cameraComp, nodeComp] : view.each())
-    {
-        const auto node = SceneNode::FindNode(nodeComp.id);
-        if (!node || !node->IsActive()) continue;
-
-        const ISceneView* cameraView = D_CAST<const ISceneView*>(node);
-        if (cameraView) outViews.push_back(cameraView);
-    }
-    return outViews;
-}

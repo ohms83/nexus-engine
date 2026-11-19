@@ -75,5 +75,10 @@ NXS_NAMESPACE
                 {"Overlay", static_cast<uint32_t>(CullingFlags::Overlay)}
             });
         }
+
+        bool IsCull(CullingFlags flag) const
+        {
+            return (UINT_CAST(culling) & UINT_CAST(flag)) > 0;
+        }
     };
 }

@@ -420,7 +420,7 @@ void SceneRenderer::SetShadowMapParams(Ref<GpuProgram> gpuProgram) const
 bool SceneRenderer::Init()
 {
     if (m_initialized) return true;
-    for (auto& pass : m_renderPasses)
+    for (auto& [queue, pass] : m_passesByQueue)
     {
         if (!pass->Init()) return false;
     }
@@ -436,43 +436,82 @@ void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
     Array<RenderCommand> commands;
     commands.reserve(1024);
 
+    struct QueuedRenderPass
+    {
+        int priority;
+        RenderPass* pass;
+    };
     struct ViewPasses
     {
         const ISceneView* view;
-        Array<Ref<RenderPass>> passes;
+        ViewContext viewCtx;
+        Array<QueuedRenderPass> passes;
     };
     Array<ViewPasses> views;
-    for (const auto& pass : m_renderPasses)
+    for (const auto view : ISceneView::GetViewRegistry())
     {
-        if (!pass->enabled) continue;
-        for (const auto* view : pass->PopulateSceneView(scene))
-        {
-            if (!view) continue;
-            const auto* node = view->GetViewNode();
-            if (node && (!node->IsActive() || node->GetRegistry() != scene.GetRegistry())) continue;
-            const auto it = std::ranges::find_if(views, [view](const ViewPasses& entry) {
-                return entry.view == view;
-            });
-            if (it == views.end()) {
-                views.push_back({view, {pass}});
-            }
-            else if (std::ranges::find(it->passes, pass) == it->passes.end()) {
-                it->passes.push_back(pass);
+        const auto* node = view->GetViewNode();
+        if (node && (!node->IsActive() || node->GetRegistry() != scene.GetRegistry())) continue;
+
+        auto viewCtx = view->CreateViewContext(scene);
+        ViewPasses viewPasses {
+            view,
+            viewCtx,
+        };
+
+        // Select render passes based on profile
+        const auto& renderProfile = viewCtx.profile;
+        if (renderProfile.depthFill) {
+            const auto& itr = m_passesByQueue.find(RenderPassQueue::DepthFill);
+            if (itr != m_passesByQueue.end() && itr->second->enabled) {
+                viewPasses.passes.emplace_back(QueuedRenderPass {
+                    INT_CAST(itr->first),
+                    itr->second.get()
+                });
             }
         }
+        if (!renderProfile.IsCull(CullingFlags::Opaque)) {
+            const auto& itr = m_passesByQueue.find(RenderPassQueue::Opaque);
+            if (itr != m_passesByQueue.end() && itr->second->enabled) {
+                viewPasses.passes.emplace_back(QueuedRenderPass {
+                    INT_CAST(itr->first),
+                    itr->second.get()
+                });
+            }
+        }
+        if (!renderProfile.IsCull(CullingFlags::Alpha)) {
+            const auto& itr = m_passesByQueue.find(RenderPassQueue::Alpha);
+            if (itr != m_passesByQueue.end() && itr->second->enabled) {
+                viewPasses.passes.emplace_back(QueuedRenderPass {
+                    INT_CAST(itr->first),
+                    itr->second.get()
+                });
+            }
+        }
+        if (!renderProfile.IsCull(CullingFlags::Overlay)) {
+            const auto& itr = m_passesByQueue.find(RenderPassQueue::Overlay);
+            if (itr != m_passesByQueue.end() && itr->second->enabled) {
+                viewPasses.passes.emplace_back(QueuedRenderPass {
+                    INT_CAST(itr->first),
+                    itr->second.get()
+                });
+            }
+        }
+        std::ranges::sort(viewPasses.passes, {}, &QueuedRenderPass::priority);
+        views.push_back(viewPasses);
     }
 
     for (const auto& viewPasses : views)
     {
         const auto* view = viewPasses.view;
-        const auto viewCtx = view->CreateViewContext(scene);
+        const auto& viewCtx = viewPasses.viewCtx;
         if (viewCtx.target) {
             viewCtx.target->Bind(renderSystem);
         }
 
         viewCtx.ClearView(*renderSystem.GetRenderInterface());
 
-        for (const auto& pass : viewPasses.passes)
+        for (const auto& [priority, pass] : viewPasses.passes)
         {
             rmt_BeginCPUSampleDynamic(pass->name.c_str(), 0);
             rmt_BeginOpenGLSampleDynamic(pass->name.c_str());

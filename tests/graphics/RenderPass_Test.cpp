@@ -93,7 +93,7 @@ TEST(DepthPrePassTest, PassSequenceRestoresColorMaskAndKeepsDepth)
     OpaquePass opaque;
 
     ViewContext view{};
-    view.clearFlags = ClearFlags::Color | ClearFlags::Depth;
+    view.profile.clearFlags = ClearFlags::Color | ClearFlags::Depth;
     view.ClearView(*rendering);
     depth.Begin(renderSystem);
     EXPECT_EQ(rendering->GetGlobalShader(), depth.pipelineState.globalShader);
@@ -116,7 +116,7 @@ TEST(RenderPassTest, ViewClearRespectsFlagsAndEnablesRequiredWrites)
     rendering.SetDepthWrite(false);
     ViewContext view{};
 
-    view.clearFlags = ClearFlags::Color;
+    view.profile.clearFlags = ClearFlags::Color;
     view.ClearView(rendering);
     EXPECT_EQ(rendering.colorClears, 1);
     EXPECT_EQ(rendering.depthClears, 0);
@@ -124,14 +124,14 @@ TEST(RenderPassTest, ViewClearRespectsFlagsAndEnablesRequiredWrites)
     EXPECT_FALSE(rendering.GetDepthWrite());
 
     rendering.SetColorMask(glm::bvec4(false));
-    view.clearFlags = ClearFlags::Depth;
+    view.profile.clearFlags = ClearFlags::Depth;
     view.ClearView(rendering);
     EXPECT_EQ(rendering.colorClears, 1);
     EXPECT_EQ(rendering.depthClears, 1);
     EXPECT_TRUE(rendering.depthClearWritesEnabled);
     EXPECT_TRUE(glm::all(glm::equal(rendering.GetColorMask(), glm::bvec4(false))));
 
-    view.clearFlags = ClearFlags::None;
+    view.profile.clearFlags = ClearFlags::None;
     view.ClearView(rendering);
     EXPECT_EQ(rendering.colorClears, 1);
     EXPECT_EQ(rendering.depthClears, 1);
