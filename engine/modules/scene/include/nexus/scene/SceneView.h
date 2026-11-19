@@ -43,23 +43,43 @@ NXS_NAMESPACE
         static const Array<ISceneView*>& GetViewRegistry();
     };
 
+    /**
+     * @brief Snapshot of a view's rendering inputs for a scene.
+     *
+     * Created by ISceneView::CreateViewContext(), this context carries the
+     * view's profile, transforms, render target, and visible nodes to the
+     * scene renderer. Its pointers are non-owning: the view, target, and
+     * visible nodes must remain alive while the context is used.
+     */
     struct ViewContext
     {
+        //! View that produced this context.
         const ISceneView* view = nullptr;
-        //! nullptr means swapchain
+        //! Output target, or nullptr for the swapchain.
         RenderTarget* target = nullptr;
+        //! Snapshot of the view's clear settings and render-pass selection.
         RenderProfile profile;
 
-        //! Global view's position
+        //! View position in world space.
         glm::vec3 position;
+        //! World-to-view transformation.
         glm::mat4 viewMatrix;
+        //! View-to-clip transformation.
         glm::mat4 projectionMatrix;
+        //! World-to-clip transformation (projectionMatrix * viewMatrix).
         glm::mat4 viewProjectionMatrix;
 
-        //! A list of visible scene nodes that will be rendered by this view.
+        //! Candidate visible nodes; individual passes may filter them further.
         Array<SceneNode*> visibleNodes;
 
-        //! Clear selected buffers with writes enabled; the next pass applies its own state.
+        /**
+         * @brief Clear the current render target according to the profile.
+         *
+         * Color and depth writes are enabled as needed and are not restored;
+         * the next render pass applies its own state. Stencil clearing is not
+         * currently supported by the generic rendering interface.
+         * @param rhi Rendering interface with the desired target already bound.
+         */
         void ClearView(RenderingInterface& rhi) const;
     };
 }
