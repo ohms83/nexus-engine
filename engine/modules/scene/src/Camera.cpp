@@ -75,10 +75,7 @@ ViewContext Camera::CreateViewContext(const Scene& scene) const
     ViewContext context {
         this,
         cameraComp->target.get(),
-        renderProfile.clearFlags,
-        renderProfile.clearColor,
-        renderProfile.clearDepth,
-        renderProfile.clearStencil,
+        renderProfile,
         GetGlobalPosition(),
         GetViewMatrix(),
         GetProjectionMatrix(),

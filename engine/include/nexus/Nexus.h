@@ -113,7 +113,6 @@
 #include "nexus/scene/component/SceneNodeComponent.h"
 #include "nexus/scene/component/TransformComponent.h"
 #include "nexus/scene/partition/Quadtree.h"
-#include "nexus/scene/renderer/DummySceneRenderer.h"
 #include "nexus/scene/renderer/ForwardSceneRenderer.h"
 #include "nexus/scene/renderer/SceneRenderer.h"
 #include "nexus/scene/system/SceneNodeTransformSystem.h"

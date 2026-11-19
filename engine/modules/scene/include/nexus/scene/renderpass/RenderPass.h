@@ -28,6 +28,14 @@ NXS_NAMESPACE
     class RenderTarget;
     class SceneNode;
 
+    enum class RenderPassQueue
+    {
+        DepthFill   = RENDER_PASS_DEPTH_FILL,
+        Opaque      = RENDER_PASS_OPAQUE,
+        Alpha       = RENDER_PASS_ALPHA,
+        Overlay     = RENDER_PASS_OVERLAY
+    };
+
     enum class CommandSortType : uint32_t
     {
         BackToFront,
@@ -139,7 +147,6 @@ NXS_NAMESPACE
             return !filter || filter(cmd);
         }
 
-        virtual Array<const ISceneView*> PopulateSceneView(const SceneNode& scene) const;
         virtual bool IsPassFiltered(Ref<const Mesh> mesh) const { return false; }
 
         /**

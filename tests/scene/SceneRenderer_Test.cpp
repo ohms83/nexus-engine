@@ -24,17 +24,16 @@ public:
         ++visibilityCalls;
         ViewContext context{};
         context.view = this;
-        context.clearFlags = ClearFlags::Color | ClearFlags::Depth;
+        context.profile = profile;
+        context.profile.clearFlags = ClearFlags::Color | ClearFlags::Depth;
         context.viewMatrix = context.projectionMatrix = context.viewProjectionMatrix = glm::mat4(1.0f);
         context.visibleNodes = visibleNodes;
         return context;
     }
 
     mutable uint32_t visibilityCalls = 0;
+    RenderProfile profile;
     Array<SceneNode*> visibleNodes;
-
-private:
-    glm::vec3 m_position {0.0f};
 };
 
 namespace
@@ -50,7 +49,7 @@ namespace
     public:
         explicit CountingRenderer(bool fails)
         {
-            if (fails) RegisterRenderPass(std::make_shared<FailedInitPass>());
+            if (fails) RegisterRenderPass(RenderPassQueue::Opaque, std::make_shared<FailedInitPass>());
         }
 
         void Render(RenderSystem&, const Scene&) override { ++renders; }
@@ -131,10 +130,6 @@ namespace
     class ViewTestPass final : public RenderPass
     {
     public:
-        Array<const ISceneView*> PopulateSceneView(const SceneNode& scene) const override
-        {
-            return useSceneCameras ? RenderPass::PopulateSceneView(scene) : views;
-        }
         bool IsPassFiltered(Ref<const Mesh> mesh) const override
         {
             return mesh->GetMaterial()->blendMode == BlendMode::None;
@@ -152,9 +147,7 @@ namespace
                 commands.push_back(command);
             }
         }
-        Array<const ISceneView*> views;
         Ref<Mesh> appendedMesh;
-        bool useSceneCameras = false;
         mutable int appendCalls = 0;
     };
 
@@ -186,8 +179,9 @@ TEST(SceneRendererTest, ExecutesSelectedPassesPerViewWithFreshCommandsAndClearMa
 
     auto depth = std::make_shared<ViewTestPass>();
     auto opaque = std::make_shared<ViewTestPass>();
-    depth->views = {first.get(), second.get(), inactive.get(), foreign.get()};
-    opaque->views = {first.get()};
+    first->profile.depthFill = true;
+    second->profile.depthFill = true;
+    second->profile.culling = CullingFlags::Opaque;
     depth->pipelineState.colorMask = glm::bvec4(false);
     depth->pipelineState.depthWrite = false;
     opaque->pipelineState.colorMask = glm::bvec4(true);
@@ -200,8 +194,8 @@ TEST(SceneRendererTest, ExecutesSelectedPassesPerViewWithFreshCommandsAndClearMa
     opaque->onEnd = [&](RenderSystem&) { ++opaqueEnds; };
 
     SceneRenderer renderer;
-    renderer.RegisterRenderPass(depth);
-    renderer.RegisterRenderPass(opaque);
+    renderer.RegisterRenderPass(RenderPassQueue::DepthFill, depth);
+    renderer.RegisterRenderPass(RenderPassQueue::Opaque, opaque);
     auto rendering = std::make_shared<ViewTestRendering>();
     RenderSystem renderSystem(rendering);
     renderer.Render(renderSystem, *scene);
@@ -227,14 +221,13 @@ TEST(SceneRendererTest, EmptyViewStillRunsPassLifecycle)
     auto scene = std::make_shared<Scene>("scene");
     auto view = scene->EmplaceChild<CountingSceneView>("empty");
     auto pass = std::make_shared<ViewTestPass>();
-    pass->views = {view.get()};
     pass->appendedMesh = MakeShadowTestMesh(std::make_shared<Material>("overlay", 1));
     pass->pipelineState.globalShader = std::make_shared<ViewTestProgram>();
     int begins = 0, ends = 0;
     pass->onBegin = [&](RenderSystem&) { ++begins; };
     pass->onEnd = [&](RenderSystem&) { ++ends; };
     SceneRenderer renderer;
-    renderer.RegisterRenderPass(pass);
+    renderer.RegisterRenderPass(RenderPassQueue::Opaque, pass);
     auto rendering = std::make_shared<ViewTestRendering>();
     RenderSystem renderSystem(rendering);
     renderer.Render(renderSystem, *scene);
@@ -242,6 +235,23 @@ TEST(SceneRendererTest, EmptyViewStillRunsPassLifecycle)
     EXPECT_EQ(ends, 1);
     EXPECT_EQ(pass->appendCalls, 1);
     EXPECT_EQ(rendering->drawMasks.size(), 1u);
+}
+
+TEST(SceneRendererTest, DisabledPassDoesNotRun)
+{
+    auto scene = std::make_shared<Scene>("scene");
+    scene->EmplaceChild<CountingSceneView>("view");
+    auto pass = std::make_shared<ViewTestPass>();
+    pass->enabled = false;
+    SceneRenderer renderer;
+    renderer.RegisterRenderPass(RenderPassQueue::Opaque, pass);
+    auto rendering = std::make_shared<ViewTestRendering>();
+    RenderSystem renderSystem(rendering);
+
+    renderer.Render(renderSystem, *scene);
+
+    EXPECT_EQ(pass->appendCalls, 0);
+    EXPECT_TRUE(rendering->drawMasks.empty());
 }
 
 TEST(SceneRendererTest, RendersVisibleMeshThroughSceneCamera)
@@ -256,10 +266,9 @@ TEST(SceneRendererTest, RendersVisibleMeshThroughSceneCamera)
         MakeShadowTestMesh(std::make_shared<Material>("opaque", 1)));
 
     auto pass = std::make_shared<ViewTestPass>();
-    pass->useSceneCameras = true;
     pass->pipelineState.globalShader = std::make_shared<ViewTestProgram>();
     SceneRenderer renderer;
-    renderer.RegisterRenderPass(pass);
+    renderer.RegisterRenderPass(RenderPassQueue::Opaque, pass);
     auto rendering = std::make_shared<ViewTestRendering>();
     RenderSystem renderSystem(rendering);
     renderer.Render(renderSystem, *scene);
@@ -293,16 +302,22 @@ TEST(SceneRendererTest, InactiveAncestorExcludesCameraAndLight)
     auto parent = scene->EmplaceChild<SceneNode>("parent");
     parent->EmplaceChild<Camera>("camera");
     parent->EmplaceChild<DirectionalLight>("light");
-    RenderPass pass;
+    auto pass = std::make_shared<ViewTestPass>();
+    auto rendering = std::make_shared<ViewTestRendering>();
+    RenderSystem renderSystem(rendering);
+    SceneRenderer viewRenderer;
+    viewRenderer.RegisterRenderPass(RenderPassQueue::Opaque, pass);
     auto program = std::make_shared<ShadowTestProgram>();
     ShadowTestRenderer renderer(program);
 
-    EXPECT_EQ(pass.PopulateSceneView(*scene).size(), 1u);
+    viewRenderer.Render(renderSystem, *scene);
+    EXPECT_EQ(pass->appendCalls, 1);
     renderer.SetDirectLightParams(program, *scene);
     EXPECT_EQ(program->ints["_NumDirectLight"], 1);
 
     parent->Activate(false);
-    EXPECT_TRUE(pass.PopulateSceneView(*scene).empty());
+    viewRenderer.Render(renderSystem, *scene);
+    EXPECT_EQ(pass->appendCalls, 1);
     renderer.SetDirectLightParams(program, *scene);
     EXPECT_EQ(program->ints["_NumDirectLight"], 0);
 }
