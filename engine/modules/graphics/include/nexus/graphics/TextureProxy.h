@@ -57,6 +57,7 @@ NXS_NAMESPACE
         TextureColorSpace colorSpace = TextureColorSpace::Linear;
         TextureWrapMode wrapModeS = TextureWrapMode::Repeat;
         TextureWrapMode wrapModeT = TextureWrapMode::Repeat;
+        TextureWrapMode wrapModeR = TextureWrapMode::Repeat;
         TextureFilterMode filterMin = TextureFilterMode::Linear;
         TextureFilterMode filterMag = TextureFilterMode::Linear;
         uint32_t numMips = 0;
