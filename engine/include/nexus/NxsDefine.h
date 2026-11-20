@@ -126,6 +126,8 @@ NXS_NAMESPACE
         RGBA,
         Depth,
         Stencil,
+        //! 24-bit depth and 8-bit stencil buffer
+        DepthStencil,
 
         Num
     };

@@ -86,16 +86,6 @@ NXS_NAMESPACE
 
     protected:
         uint32_t m_textureID = 0;
-        int32_t m_width = 0;
-        int32_t m_height = 0;
-        int32_t m_channels = 0;
-        PixelFormat m_format = PixelFormat::None;
-        DataType m_componentType = DataType::None;
-        TextureColorSpace m_colorSpace = TextureColorSpace::Linear;
-        TextureWrapMode m_wrapModeS = TextureWrapMode::Clamp;
-        TextureWrapMode m_wrapModeT = TextureWrapMode::Clamp;
-        TextureFilterMode m_filterMin = TextureFilterMode::Linear;
-        TextureFilterMode m_filterMag = TextureFilterMode::Linear;
-        uint32_t m_numMips = 0;
+        TextureDescription m_desc {};
     };
 }

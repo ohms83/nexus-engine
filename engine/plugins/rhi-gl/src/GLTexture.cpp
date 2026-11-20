@@ -10,7 +10,7 @@ NXS_NAMESPACE
 {
     namespace GL
     {
-        static GLuint NxsTextureWrapModeToGL(const TextureWrapMode mode)
+        inline GLuint NxsTextureWrapModeToGL(const TextureWrapMode mode)
         {
             switch (mode)
             {
@@ -32,7 +32,7 @@ NXS_NAMESPACE
             return GL_NONE;
         }
 
-        static GLuint NxsTextureFilterModeToGL(const TextureFilterMode mode)
+        inline GLuint NxsTextureFilterModeToGL(const TextureFilterMode mode)
         {
             switch (mode)
             {
@@ -54,7 +54,7 @@ NXS_NAMESPACE
             return GL_NONE;
         }
 
-        static GLint NxsPixelFormatToGL(const PixelFormat format)
+        inline GLint NxsPixelFormatToGL(const PixelFormat format)
         {
             switch (format)
             {
@@ -135,11 +135,11 @@ TextureProxy& GLTexture::LoadData(const uint8_t* data, const uint32_t size)
 {
     TextureProxy::LoadData(data, size);
 
-    const GLint gl_pixelFormats = GL::NxsPixelFormatToGL(m_format);
+    const GLint gl_pixelFormats = GL::NxsPixelFormatToGL(m_desc.format);
     GLint gl_internalFormat = gl_pixelFormats;
-    if (m_colorSpace == TextureColorSpace::SRgb)
+    if (m_desc.colorSpace == TextureColorSpace::SRgb)
     {
-        switch (m_format)
+        switch (m_desc.format)
         {
         case PixelFormat::RGB:
             gl_internalFormat = GL_SRGB8;
@@ -161,10 +161,10 @@ TextureProxy& GLTexture::LoadData(const uint8_t* data, const uint32_t size)
             break;
         }
     }
-    const auto gl_dataType = GL::NxsDataToGLenum(m_componentType);
-    CALL_GL_FUNC(glTexImage2D(GL_TEXTURE_2D, 0, gl_internalFormat, m_width, m_height, 0, gl_pixelFormats, gl_dataType, data));
+    const auto gl_dataType = GL::NxsDataToGLenum(m_desc.componentType);
+    CALL_GL_FUNC(glTexImage2D(GL_TEXTURE_2D, 0, gl_internalFormat, m_desc.width, m_desc.height, 0, gl_pixelFormats, gl_dataType, data));
 
-    if (m_numMips > 1)
+    if (m_desc.numMips > 1)
     {
         CALL_GL_FUNC(glGenerateMipmap(GL_TEXTURE_2D));
     }
@@ -179,11 +179,11 @@ TextureProxy& GLTexture::LoadMipData(const uint8_t* data, uint32_t size, uint32_
 void GLTexture::CopyData(const void* data, size_t bytes, const size_t offset)
 {
     NXS_ASSERT_MSG(IsBinding(), std::format("Invalid operation. The texture is unbound."));
-    const GLint gl_pixelFormats = GL::NxsPixelFormatToGL(m_format);
-    const GLint xOffset = offset % m_width;
-    const GLint yOffset = offset / m_width;
-    const auto gl_dataType = GL::NxsDataToGLenum(m_componentType);
-    CALL_GL_FUNC(glTexSubImage2D(GL_TEXTURE_2D, 0, xOffset, yOffset, m_width, m_height, gl_pixelFormats, gl_dataType, data));
+    const GLint gl_pixelFormats = GL::NxsPixelFormatToGL(m_desc.format);
+    const GLint xOffset = offset % m_desc.width;
+    const GLint yOffset = offset / m_desc.width;
+    const auto gl_dataType = GL::NxsDataToGLenum(m_desc.componentType);
+    CALL_GL_FUNC(glTexSubImage2D(GL_TEXTURE_2D, 0, xOffset, yOffset, m_desc.width, m_desc.height, gl_pixelFormats, gl_dataType, data));
 }
 
 uint32_t GLTexture::Alloc()

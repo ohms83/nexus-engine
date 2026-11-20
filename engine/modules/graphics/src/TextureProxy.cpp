@@ -28,18 +28,7 @@ TextureProxy& TextureProxy::Begin(const TextureDescription& info)
 {
     NXS_ASSERT_MSG(m_textureID == 0, std::format("Texture is already created."));
     m_textureID = Alloc();
-
-    m_width = info.width;
-    m_height = info.height;
-    m_format = info.format;
-    m_channels = info.channels;
-    m_componentType = info.componentType;
-    m_colorSpace = info.colorSpace;
-    m_filterMin = info.filterMin;
-    m_filterMag = info.filterMag;
-    m_wrapModeS = info.wrapModeS;
-    m_wrapModeT = info.wrapModeT;
-    m_numMips = info.numMips;
+    m_desc = info;
 
     Bind();
     return *this;
