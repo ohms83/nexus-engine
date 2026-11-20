@@ -36,9 +36,6 @@ NXS_NAMESPACE
         }
 
         MAYBE_UNUSED Ref<TextureProxy> AllocateGpuResource(const uint8_t* pixels);
-        MAYBE_UNUSED Ref<TextureProxy> AllocateGpuResource(
-            const uint8_t* pixels,
-            const IGpuResourceFactory& gpuResourceFactory);
 
         NODISCARD Ref<TextureProxy> GetProxy() const
         {
@@ -46,7 +43,7 @@ NXS_NAMESPACE
         }
 
     protected:
-        TextureDescription m_desc{};
+        TextureDescription m_desc {};
         Ref<TextureProxy> m_textureProxy;
     };
 }

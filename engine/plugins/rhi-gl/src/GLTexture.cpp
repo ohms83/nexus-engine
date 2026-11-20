@@ -6,92 +6,15 @@
 
 #include "Remotery.h"
 
-NXS_NAMESPACE
-{
-    namespace GL
-    {
-        inline GLuint NxsTextureWrapModeToGL(const TextureWrapMode mode)
-        {
-            switch (mode)
-            {
-            case TextureWrapMode::Clamp:
-                return GL_CLAMP;
-            case TextureWrapMode::Repeat:
-                return GL_REPEAT;
-            case TextureWrapMode::MirroredRepeat:
-                return GL_MIRRORED_REPEAT;
-            case TextureWrapMode::ClampToEdge:
-                return GL_CLAMP_TO_EDGE;
-            case TextureWrapMode::ClampToBorder:
-                return GL_CLAMP_TO_BORDER;
-            case TextureWrapMode::MirroredClampToEdge:
-                return GL_MIRROR_CLAMP_TO_EDGE;
-            default:
-                NXS_ASSERT(false);
-            }
-            return GL_NONE;
-        }
-
-        inline GLuint NxsTextureFilterModeToGL(const TextureFilterMode mode)
-        {
-            switch (mode)
-            {
-            case TextureFilterMode::Nearest:
-                return GL_NEAREST;
-            case TextureFilterMode::Linear:
-                return GL_LINEAR;
-            case TextureFilterMode::NearestMipmapNearest:
-                return GL_NEAREST_MIPMAP_NEAREST;
-            case TextureFilterMode::LinearMipmapNearest:
-                return GL_LINEAR_MIPMAP_NEAREST;
-            case TextureFilterMode::NearestMipmapLinear:
-                return GL_NEAREST_MIPMAP_LINEAR;
-            case TextureFilterMode::LinearMipmapLinear:
-                return GL_LINEAR_MIPMAP_LINEAR;
-            default:
-                NXS_ASSERT(false);
-            }
-            return GL_NONE;
-        }
-
-        inline GLint NxsPixelFormatToGL(const PixelFormat format)
-        {
-            switch (format)
-            {
-            case PixelFormat::None:
-                break;
-            case PixelFormat::Grey:
-            case PixelFormat::Red:
-                // OpenGL has no explicit Greyscale format. The greyscale textures are normally
-                // represented by a single channel red component.
-                return GL_RED;
-            case PixelFormat::Green:
-                return GL_GREEN;
-            case PixelFormat::Blue:
-                return GL_BLUE;
-            case PixelFormat::Alpha:
-                return GL_RGBA;
-            case PixelFormat::RedGreen:
-                return GL_RG;
-            case PixelFormat::RGB:
-                return GL_RGB;
-            case PixelFormat::RGBA:
-                return GL_RGBA;
-            case PixelFormat::Depth:
-                return GL_DEPTH_COMPONENT;
-            case PixelFormat::Stencil:
-                return GL_STENCIL_INDEX;
-            default:
-                NXS_ASSERT(false);
-            }
-            return GL_NONE;
-        }
-    }
-}
-
 USING_NAMESPACE_NXS;
 
 std::atomic<uint32_t> GLTexture::s_bindingTexture(0);
+
+GLTexture::GLTexture(const TextureDescription& desc)
+    : TextureProxy(desc)
+{
+
+}
 
 void GLTexture::Bind() const
 {
@@ -114,27 +37,8 @@ bool GLTexture::IsBinding() const
     return m_textureID != 0 && s_bindingTexture.load() == m_textureID;
 }
 
-TextureProxy& GLTexture::Begin(const TextureDescription& info)
+void GLTexture::LoadData(const uint8_t* data, const uint32_t size)
 {
-    TextureProxy::Begin(info);
-
-    GLuint gl_wrapModeS = GL::NxsTextureWrapModeToGL(info.wrapModeS);
-    GLuint gl_wrapModeT = GL::NxsTextureWrapModeToGL(info.wrapModeT);
-
-    GLuint gl_filterMin = GL::NxsTextureFilterModeToGL(info.filterMin);
-    GLuint gl_filterMag = GL::NxsTextureFilterModeToGL(info.filterMag);
-
-    CALL_GL_FUNC(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, gl_wrapModeS));
-    CALL_GL_FUNC(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, gl_wrapModeT));
-    CALL_GL_FUNC(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filterMin));
-    CALL_GL_FUNC(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filterMag));
-    return *this;
-}
-
-TextureProxy& GLTexture::LoadData(const uint8_t* data, const uint32_t size)
-{
-    TextureProxy::LoadData(data, size);
-
     const GLint gl_pixelFormats = GL::NxsPixelFormatToGL(m_desc.format);
     GLint gl_internalFormat = gl_pixelFormats;
     if (m_desc.colorSpace == TextureColorSpace::SRgb)
@@ -168,12 +72,11 @@ TextureProxy& GLTexture::LoadData(const uint8_t* data, const uint32_t size)
     {
         CALL_GL_FUNC(glGenerateMipmap(GL_TEXTURE_2D));
     }
-    return *this;
 }
 
-TextureProxy& GLTexture::LoadMipData(const uint8_t* data, uint32_t size, uint32_t mip)
+void GLTexture::LoadMipData(const uint8_t* data, uint32_t size, uint32_t mip)
 {
-    return TextureProxy::LoadMipData(data, size, mip);
+    // TODO:
 }
 
 void GLTexture::CopyData(const void* data, size_t bytes, const size_t offset)

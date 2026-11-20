@@ -42,30 +42,18 @@ void GLRenderTarget::Bind(RenderSystem& rs)
     {
         if (m_colorTexture)
         {
-            TextureDescription colorDesc;
-            colorDesc.width = INT_CAST(m_width);
-            colorDesc.height = INT_CAST(m_height);
-            colorDesc.format = m_format;
+            const auto& colorDesc = m_colorTexture->GetDescription();
             const size_t bytes = colorDesc.GetBufferSize();
             Array<uint8_t> empty(bytes, 0);
-            m_colorTexture->Begin(colorDesc);
+            m_colorTexture->Bind();
             m_colorTexture->LoadData(empty.data(), INT_CAST(bytes));
-            m_colorTexture->End();
+            m_colorTexture->Unbind();
         }
 
         NXS_ASSERT_MSG(m_depthTexture, "Render target requires a depth texture.");
-        TextureDescription dd;
-        dd.width = INT_CAST(m_width);
-        dd.height = INT_CAST(m_height);
-        dd.channels = 1;
-        dd.format = PixelFormat::Depth;
-        dd.filterMin = TextureFilterMode::Nearest;
-        dd.filterMag = TextureFilterMode::Nearest;
-        dd.wrapModeS = TextureWrapMode::ClampToEdge;
-        dd.wrapModeT = TextureWrapMode::ClampToEdge;
-        m_depthTexture->Begin(dd);
+        m_depthTexture->Bind();
         m_depthTexture->LoadData(nullptr, 0);
-        m_depthTexture->End();
+        m_depthTexture->Unbind();
 
         CALL_GL_FUNC(glGenFramebuffers(1, &m_fbo));
         CALL_GL_FUNC(glBindFramebuffer(GL_FRAMEBUFFER, m_fbo));

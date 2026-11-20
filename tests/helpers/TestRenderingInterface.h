@@ -54,9 +54,9 @@ protected:
 class FakeTexture : public TextureProxy
 {
 public:
-    using Super = TextureProxy;
+    using Base = TextureProxy;
 
-    FakeTexture() {}
+    FakeTexture() : TextureProxy(TextureDescription {}) { m_textureID = 1; }
     ~FakeTexture() override {}
 
     NODISCARD uint32_t GetHandle() const override { return 1; }
@@ -65,14 +65,8 @@ public:
     void Unbind() const override {}
     bool IsBinding() const override { return false; }
 
-    TextureProxy& Begin(const TextureDescription& info) override
-    { 
-        m_textureID = 1;
-        return *this;
-    }
-
-    TextureProxy& LoadData(const uint8_t* data, uint32_t size) override { return *this; }
-    TextureProxy& LoadMipData(const uint8_t* data, uint32_t size, uint32_t mip) override { return *this; }
+    void LoadData(const uint8_t* data, uint32_t size) override {}
+    void LoadMipData(const uint8_t* data, uint32_t size, uint32_t mip) override {}
 
     void CopyData(const void* data, size_t bytes, size_t offset) override {}
 
@@ -107,7 +101,7 @@ public:
     void DebugMarker(const std::string& message) override {}
 
     Ref<GpuProgram> CreateGpuProgram() const override { return std::make_shared<FakeGpuProgram>(); }
-    Ref<TextureProxy> CreateTextureProxy() const override { return std::make_shared<FakeTexture>(); }
+    Ref<TextureProxy> CreateTextureProxy(const TextureDescription& desc) const override { return std::make_shared<FakeTexture>(); }
     Ref<IndexBuffer> CreateIndexBuffer() const override { return std::make_shared<FakeIndexBuffer>(); }
     Ref<VertexBuffer> CreateVertexBuffer() const override { return std::make_shared<FakdeVertexBuffer>(); }
     Ref<RenderTarget> CreateRenderTarget(uint32_t, uint32_t, bool) const override

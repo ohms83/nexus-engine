@@ -23,9 +23,24 @@ NXS_NAMESPACE
             return NewRef<GLIndexBuffer>();
         }
 
-        NODISCARD virtual Ref<TextureProxy> CreateTextureProxy() const override
+        NODISCARD virtual Ref<TextureProxy> CreateTextureProxy(const TextureDescription& desc) const override
         {
-            return NewRef<GLTexture>();
+            auto texture = NewRef<GLTexture>(desc);
+
+            texture->Alloc();
+            texture->Bind();
+            GLuint gl_wrapModeS = GL::NxsTextureWrapModeToGL(desc.wrapModeS);
+            GLuint gl_wrapModeT = GL::NxsTextureWrapModeToGL(desc.wrapModeT);
+
+            GLuint gl_filterMin = GL::NxsTextureFilterModeToGL(desc.filterMin);
+            GLuint gl_filterMag = GL::NxsTextureFilterModeToGL(desc.filterMag);
+
+            CALL_GL_FUNC(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, gl_wrapModeS));
+            CALL_GL_FUNC(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, gl_wrapModeT));
+            CALL_GL_FUNC(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filterMin));
+            CALL_GL_FUNC(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filterMag));
+            texture->Unbind();
+            return texture;
         }
 
         NODISCARD virtual Ref<GpuProgram> CreateGpuProgram() const override
@@ -38,11 +53,28 @@ NXS_NAMESPACE
             const uint32_t height,
             const bool depthOnly) const override
         {
+            TextureDescription colorDesc;
+            colorDesc.width = INT_CAST(width);
+            colorDesc.height = INT_CAST(height);
+            colorDesc.format = depthOnly ? PixelFormat::Depth : PixelFormat::RGBA;
+
+            TextureDescription depthDesc;
+            depthDesc.width = INT_CAST(width);
+            depthDesc.height = INT_CAST(height);
+            depthDesc.channels = 1;
+            depthDesc.format = PixelFormat::Depth;
+            depthDesc.filterMin = TextureFilterMode::Nearest;
+            depthDesc.filterMag = TextureFilterMode::Nearest;
+            depthDesc.wrapModeS = TextureWrapMode::ClampToEdge;
+            depthDesc.wrapModeT = TextureWrapMode::ClampToEdge;
+
+            auto colorTexture = depthOnly ? nullptr : CreateTextureProxy(colorDesc);
+            auto depthTexture = CreateTextureProxy(depthDesc);
             return NewRef<GLRenderTarget>(
                 width,
                 height,
-                depthOnly ? nullptr : CreateTextureProxy(),
-                CreateTextureProxy(),
+                colorTexture,
+                depthTexture,
                 depthOnly ? PixelFormat::Depth : PixelFormat::RGBA,
                 depthOnly);
         }

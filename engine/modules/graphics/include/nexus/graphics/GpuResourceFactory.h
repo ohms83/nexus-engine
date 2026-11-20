@@ -10,6 +10,8 @@ NXS_NAMESPACE
     class GpuProgram;
     class RenderTarget;
 
+    struct TextureDescription;
+
     class IGpuResourceFactory
     {
     public:
@@ -17,7 +19,7 @@ NXS_NAMESPACE
 
         NODISCARD virtual Ref<VertexBuffer> CreateVertexBuffer() const = 0;
         NODISCARD virtual Ref<IndexBuffer> CreateIndexBuffer() const = 0;
-        NODISCARD virtual Ref<TextureProxy> CreateTextureProxy() const = 0;
+        NODISCARD virtual Ref<TextureProxy> CreateTextureProxy(const TextureDescription& desc) const = 0;
         NODISCARD virtual Ref<GpuProgram> CreateGpuProgram() const = 0;
         NODISCARD virtual Ref<RenderTarget> CreateRenderTarget(
             uint32_t width,

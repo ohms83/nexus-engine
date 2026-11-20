@@ -3,6 +3,7 @@
 //
 
 #include "nexus/graphics/Texture.h"
+#include "nexus/graphics/TextureBuilder.h"
 #include "nexus/graphics/GpuResourceFactory.h"
 
 USING_NAMESPACE_NXS;
@@ -49,21 +50,14 @@ void Texture::DescribeTexture(const TextureDescription& desc)
 
 Ref<TextureProxy> Texture::AllocateGpuResource(const uint8_t* pixels)
 {
-    return AllocateGpuResource(pixels, *GetGpuResourceFactory());
-}
-
-Ref<TextureProxy> Texture::AllocateGpuResource(
-    const uint8_t* pixels,
-    const IGpuResourceFactory& gpuResourceFactory)
-{
     if (m_textureProxy != nullptr)
     {
         LOG_ERROR(LogTexture, "TextureProxy was already allocated. If you want to re-allocate, the existing texture must be released first.");
         return m_textureProxy;
     }
 
-    m_textureProxy = gpuResourceFactory.CreateTextureProxy();
-    m_textureProxy->Begin(m_desc)
+    auto builder = TextureBuilder();
+    m_textureProxy = builder.Begin(GetGpuResourceFactory(), m_desc)
         .LoadData(pixels, m_desc.width * m_desc.height * m_desc.channels)
     .End();
     return m_textureProxy;

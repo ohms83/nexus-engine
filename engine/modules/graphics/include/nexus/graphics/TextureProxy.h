@@ -70,19 +70,17 @@ NXS_NAMESPACE
     class TextureProxy : public IGpuResource
     {
     public:
-        TextureProxy() = default;
-        ~TextureProxy() override;
+        explicit TextureProxy(const TextureDescription& desc);
 
         NODISCARD uint32_t GetHandle() const override
         {
             return m_textureID;
         }
 
-        //! Begin building this texture
-        virtual TextureProxy& Begin(const TextureDescription& info);
-        virtual TextureProxy& LoadData(const uint8_t* data, uint32_t size);
-        virtual TextureProxy& LoadMipData(const uint8_t* data, uint32_t size, uint32_t mip);
-        virtual void End();
+        const TextureDescription& GetDescription() const { return m_desc; }
+
+        virtual void LoadData(const uint8_t* data, uint32_t size) = 0;
+        virtual void LoadMipData(const uint8_t* data, uint32_t size, uint32_t mip) = 0;
 
     protected:
         uint32_t m_textureID = 0;
