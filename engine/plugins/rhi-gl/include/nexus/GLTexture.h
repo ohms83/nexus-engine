@@ -108,8 +108,5 @@ NXS_NAMESPACE
         void LoadMipData(const uint8_t* data, uint32_t size, uint32_t mip) override;
 
         void CopyData(const void* data, size_t bytes, size_t) override;
-
-    private:
-        static std::atomic<uint32_t> s_bindingTexture;
     };
 }

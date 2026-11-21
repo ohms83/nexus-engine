@@ -27,8 +27,5 @@ NXS_NAMESPACE
         // void LoadData(Face face, Ref<IBuffer> data) override;
         // void LoadData(Array<Ref<IBuffer>> data) override;
         void LoadData(Face face, const uint8_t* data, uint32_t size) override;
-
-    private:
-        static std::atomic<uint32_t> s_bindingTexture;
     };
 }

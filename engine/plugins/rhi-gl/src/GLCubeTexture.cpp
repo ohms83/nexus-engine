@@ -8,7 +8,7 @@ USING_NAMESPACE_NXS;
 
 DEFINE_LOG(CubeTexture);
 
-std::atomic<uint32_t> GLCubeTexture::s_bindingTexture(0);
+extern std::atomic<uint32_t> s_bindingTexture;
 
 GLCubeTexture::GLCubeTexture(int32_t width, int32_t height)
     : CubeTexture(width, height)

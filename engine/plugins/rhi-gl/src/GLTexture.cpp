@@ -8,7 +8,7 @@
 
 USING_NAMESPACE_NXS;
 
-std::atomic<uint32_t> GLTexture::s_bindingTexture(0);
+std::atomic<uint32_t> s_bindingTexture(0);
 
 GLTexture::GLTexture(const TextureDescription& desc)
     : TextureProxy(desc)
