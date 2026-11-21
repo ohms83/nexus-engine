@@ -40,31 +40,9 @@ bool GLTexture::IsBinding() const
 void GLTexture::LoadData(const uint8_t* data, const uint32_t size)
 {
     const GLint gl_pixelFormats = GL::NxsPixelFormatToGL(m_desc.format);
-    GLint gl_internalFormat = gl_pixelFormats;
-    if (m_desc.colorSpace == TextureColorSpace::SRgb)
-    {
-        switch (m_desc.format)
-        {
-        case PixelFormat::RGB:
-            gl_internalFormat = GL_SRGB8;
-            break;
-        case PixelFormat::RGBA:
-            gl_internalFormat = GL_SRGB8_ALPHA8;
-            break;
-        case PixelFormat::Grey:
-        case PixelFormat::Red:
-            NXS_ASSERT_MSG(GLAD_GL_EXT_texture_sRGB_R8, "sRGB single-channel textures require GL_EXT_texture_sRGB_R8.");
-            gl_internalFormat = GL_SR8_EXT;
-            break;
-        case PixelFormat::RedGreen:
-            NXS_ASSERT_MSG(GLAD_GL_EXT_texture_sRGB_RG8, "sRGB two-channel textures require GL_EXT_texture_sRGB_RG8.");
-            gl_internalFormat = GL_SRG8_EXT;
-            break;
-        default:
-            NXS_ASSERT_MSG(false, "sRGB color space is only valid for color texture formats.");
-            break;
-        }
-    }
+    const GLint gl_internalFormat = m_desc.colorSpace == TextureColorSpace::SRgb ?
+        gl_pixelFormats :
+        GL::GetSRGBFormat(m_desc.format);
     const auto gl_dataType = GL::NxsDataToGLenum(m_desc.componentType);
     CALL_GL_FUNC(glTexImage2D(GL_TEXTURE_2D, 0, gl_internalFormat, m_desc.width, m_desc.height, 0, gl_pixelFormats, gl_dataType, data));
 

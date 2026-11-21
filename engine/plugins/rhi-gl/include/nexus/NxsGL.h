@@ -151,5 +151,33 @@ NXS_NAMESPACE
             NXS_ASSERT(false);
             return GL_NONE;
         }
+
+        //! Convert the linear space color format into sRGB
+        inline GLint GetSRGBFormat(PixelFormat format)
+        {
+            GLint gl_internalFormat = GL_NONE;
+            switch (format)
+            {
+            case PixelFormat::RGB:
+                gl_internalFormat = GL_SRGB8;
+                break;
+            case PixelFormat::RGBA:
+                gl_internalFormat = GL_SRGB8_ALPHA8;
+                break;
+            case PixelFormat::Grey:
+            case PixelFormat::Red:
+                NXS_ASSERT_MSG(GLAD_GL_EXT_texture_sRGB_R8, "sRGB single-channel textures require GL_EXT_texture_sRGB_R8.");
+                gl_internalFormat = GL_SR8_EXT;
+                break;
+            case PixelFormat::RedGreen:
+                NXS_ASSERT_MSG(GLAD_GL_EXT_texture_sRGB_RG8, "sRGB two-channel textures require GL_EXT_texture_sRGB_RG8.");
+                gl_internalFormat = GL_SRG8_EXT;
+                break;
+            default:
+                NXS_ASSERT_MSG(false, "sRGB color space is only valid for color texture formats.");
+                break;
+            }
+            return gl_internalFormat;
+        }
     }
 }
