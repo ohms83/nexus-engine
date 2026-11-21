@@ -5,6 +5,7 @@
 #pragma once
 
 #include <string>
+#include "nexus/NxsDefine.h"
 
 namespace nxs
 {
@@ -35,7 +36,7 @@ namespace nxs
         Num
     };
 
-    class ILogger
+    class NXS_API ILogger
     {
     public:
         ILogger() = default;

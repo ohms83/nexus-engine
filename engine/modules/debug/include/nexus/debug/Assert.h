@@ -5,6 +5,7 @@
 #include <format>
 
 #include "sigslot/signal.hpp"
+#include "nexus/NxsDefine.h"
 
 #if !defined(NXS_NO_LOG)
 #define NXS_ASSERT(Condition) \
@@ -35,7 +36,7 @@
     
 namespace nxs
 {
-    class Assert
+    class NXS_API Assert
     {
     public:
         /**

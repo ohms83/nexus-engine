@@ -5,10 +5,11 @@
 #pragma once
 
 #include "Logger.h"
+#include "nexus/NxsDefine.h"
 
 namespace nxs
 {
-    class StdOutLogger final : public ILogger
+    class NXS_API StdOutLogger final : public ILogger
     {
     public:
         void Log(LogLevel level, const std::string& message) override;

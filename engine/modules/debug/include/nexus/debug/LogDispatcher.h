@@ -45,13 +45,15 @@
 
 #define DECLARE_LOG_EXTERN(LogCategory) extern const std::string Log##LogCategory
 #define DEFINE_LOG(LogCategory) const std::string Log##LogCategory = #LogCategory
+#define DECLARE_LOG_DLL_EXTERN(LogCategory) NXS_API extern const std::string Log##LogCategory
+#define DEFINE_LOG_DLL(LogCategory) NXS_API_EXPORT const std::string Log##LogCategory = #LogCategory
 
 //! Uncategorized logs.
-DECLARE_LOG_EXTERN(Temp);
+DECLARE_LOG_DLL_EXTERN(Temp);
 
 namespace nxs
 {
-    class LogDispatcher final
+    class NXS_API LogDispatcher final
     {
     public:
         static void Init();

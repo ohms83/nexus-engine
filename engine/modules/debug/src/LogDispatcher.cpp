@@ -9,7 +9,7 @@
 using namespace nxs;
 
 DEFINE_LOG(LogDispatcher);
-DEFINE_LOG(Temp);
+DEFINE_LOG_DLL(Temp);
 
 #define LOG_FORMAT(Level, Category, Message) std::format("[{}][{}] {}\n", #Level, Category, Message);
 

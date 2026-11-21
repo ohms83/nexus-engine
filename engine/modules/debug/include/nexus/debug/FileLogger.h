@@ -4,11 +4,12 @@
 #pragma once
 
 #include "Logger.h"
+#include "nexus/NxsDefine.h"
 #include <fstream>
 
 namespace nxs
 {
-    class FileLogger final : public ILogger
+    class NXS_API FileLogger final : public ILogger
     {
     public:
         explicit FileLogger(const std::string& fileName);
