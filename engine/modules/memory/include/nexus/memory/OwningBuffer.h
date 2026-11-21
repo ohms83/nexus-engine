@@ -23,6 +23,8 @@ NXS_NAMESPACE
          */
         OwningBuffer() = default;
 
+        virtual ~OwningBuffer();
+
         /**
          * @brief Constructs an owning buffer from a raw pointer.
          * The buffer takes ownership of the given dynamically allocated data.

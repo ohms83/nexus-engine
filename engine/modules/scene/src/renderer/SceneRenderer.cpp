@@ -424,6 +424,8 @@ bool SceneRenderer::Init()
     {
         if (!pass->Init()) return false;
     }
+
+    m_skyboxRenderer = NewPtr<SkyboxRenderer>(*GetGpuResourceFactory());
     return m_initialized = true;
 }
 
@@ -488,8 +490,9 @@ void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
 
         viewCtx.ClearView(*renderSystem.GetRenderInterface());
 
-        for (const auto& [priority, pass] : viewPasses.passes)
+        for (const auto& queuedPass : viewPasses.passes)
         {
+            const auto pass = queuedPass.pass;
             rmt_BeginCPUSampleDynamic(pass->name.c_str(), 0);
             rmt_BeginOpenGLSampleDynamic(pass->name.c_str());
 
@@ -594,6 +597,9 @@ void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
             viewCtx.target->Unbind(renderSystem);
         }
     }
+
+    // TODO: Should be rendered after Opaque pass and before Alpha pass.
+    m_skyboxRenderer->Render(renderSystem, scene);
 }
 
 void SceneRenderer::RenderSkybox(Ref<GpuProgram> gpuProgram, const Scene& scene)

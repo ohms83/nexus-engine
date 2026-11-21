@@ -15,7 +15,7 @@ NXS_NAMESPACE
     {
     public:
         explicit SkyboxRenderer(const IGpuResourceFactory& gpuFactory);
-        void Render(RenderSystem &rs, const Scene &scene, const ISceneView& viewPoint);
+        void Render(RenderSystem &rs, const Scene &scene);
     private:
         Ref<Mesh> m_skybox;
         Ref<GpuProgram> m_shader;

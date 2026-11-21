@@ -19,6 +19,12 @@ OwningBuffer::OwningBuffer(OwningBuffer&& rhs) noexcept
     m_size   = rhs.m_size;
 }
 
+OwningBuffer::~OwningBuffer()
+{
+    m_buffer.reset();
+    m_size = 0;
+}
+
 OwningBuffer& OwningBuffer::operator = (OwningBuffer&& rhs) noexcept
 {
     m_buffer = std::move(rhs.m_buffer);

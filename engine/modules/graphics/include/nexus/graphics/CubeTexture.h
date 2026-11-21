@@ -27,7 +27,8 @@ NXS_NAMESPACE
         void LoadData(const uint8_t* data, uint32_t size) override {}
         void LoadMipData(const uint8_t* data, uint32_t size, uint32_t mip)override {}
 
-        virtual void LoadData(Face face, Ref<IBuffer> data) = 0;
-        virtual void LoadData(Array<Ref<IBuffer>> data) = 0;
+        // virtual void LoadData(Face face, Ref<IBuffer> data) = 0;
+        // virtual void LoadData(Array<Ref<IBuffer>> data) = 0;
+        virtual void LoadData(Face face, const uint8_t* data, uint32_t size) = 0;
     };
 }

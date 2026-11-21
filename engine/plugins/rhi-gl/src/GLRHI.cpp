@@ -6,6 +6,7 @@
 #include "nexus/GLIndexBuffer.h"
 #include "nexus/GLGpuProgram.h"
 #include "nexus/GLTexture.h"
+#include "nexus/GLCubeTexture.h"
 #include "nexus/GLRenderTarget.h"
 
 NXS_NAMESPACE
@@ -39,6 +40,28 @@ NXS_NAMESPACE
             CALL_GL_FUNC(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, gl_wrapModeT));
             CALL_GL_FUNC(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filterMin));
             CALL_GL_FUNC(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filterMag));
+            texture->Unbind();
+            return texture;
+        }
+
+        NODISCARD virtual Ref<CubeTexture> CreateCubeTexture(int32_t width, int32_t height) const override
+        {
+            auto texture = NewRef<GLCubeTexture>(width, height);
+            texture->Alloc();
+            texture->Bind();
+
+            const auto& desc = texture->GetDescription();
+            const GLuint gl_wrapModeS = GL::NxsTextureWrapModeToGL(desc.wrapModeS);
+            const GLuint gl_wrapModeT = GL::NxsTextureWrapModeToGL(desc.wrapModeT);
+            const GLuint gl_wrapModeR = GL::NxsTextureWrapModeToGL(desc.wrapModeR);
+            const GLuint gl_filterMin = GL::NxsTextureFilterModeToGL(desc.filterMin);
+            const GLuint gl_filterMag = GL::NxsTextureFilterModeToGL(desc.filterMag);
+
+            CALL_GL_FUNC(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, gl_wrapModeS));
+            CALL_GL_FUNC(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, gl_wrapModeT));
+            CALL_GL_FUNC(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, gl_wrapModeR));
+            CALL_GL_FUNC(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, gl_filterMag));
+            CALL_GL_FUNC(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, gl_filterMin));
             texture->Unbind();
             return texture;
         }

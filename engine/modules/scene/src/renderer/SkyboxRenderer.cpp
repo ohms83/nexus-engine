@@ -4,6 +4,8 @@
 #include "nexus/graphics/CubeTexture.h"
 #include "nexus/scene/Scene.h"
 #include "nexus/scene/SceneView.h"
+#include "nexus/scene/component/SceneNodeComponent.h"
+#include "nexus/scene/component/CameraComponent.h"
 
 USING_NAMESPACE_NXS;
 
@@ -33,32 +35,53 @@ namespace
             FragColor = texture(_Skybox, TexCoord0);
         }
     )";
+
+    PipelineState pipelineState = {
+        .depthTest = true,
+        .depthWrite = false,
+        .cullMode = PolygonFacing::None,
+    };
 }
 
 SkyboxRenderer::SkyboxRenderer(const IGpuResourceFactory& gpuFactory)
 {
     m_skybox = PrimitiveMesh::CreateBox("skybox", glm::vec3(1.0f), gpuFactory);
     m_shader = gpuFactory.CreateGpuProgram();
-    m_shader->AddSource(vs, GpuProgram::Type::Vertex);
-    m_shader->AddSource(fs, GpuProgram::Type::Fragment);
-    m_shader->Compile();
+    m_shader->BeginCompile()
+        .AddSource(vs, GpuProgram::Type::Vertex)
+        .AddSource(fs, GpuProgram::Type::Fragment)
+        .Compile();
 }
 
-void SkyboxRenderer::Render(RenderSystem &rs, const Scene &scene, const ISceneView& viewPoint)
+void SkyboxRenderer::Render(RenderSystem &rs, const Scene &scene)
 {
     auto cubemap = scene.Skybox();
     if (!cubemap) return;
+
+    const ISceneView* viewPoint = nullptr;
+    const auto& registry = *scene.GetRegistry();
+    for (const auto view = registry.view<const SceneNodeComponent, const CameraComponent>();
+         const auto& [entity, nodeComp, cameraComp] : view.each())
+    {
+        viewPoint = D_CAST<const ISceneView*>(SceneNode::FindNode(nodeComp.id));
+        if (viewPoint) break;
+    }
+    if (!viewPoint) return;
 
     auto vertexBuffer = m_skybox->GetVertexBuffer();
     auto indexBuffer = m_skybox->GetIndexBuffer();
 
     m_shader->Bind();
-    m_shader->SetUniformTexture2D("_Skybox", cubemap, 0);
-    m_shader->SetUniformMatrix("_View", viewPoint.GetViewMatrix());
-    m_shader->SetUniformMatrix("_Projection", viewPoint.GetProjectionMatrix());
+    m_shader->SetUniformTextureCube("_Skybox", cubemap, 0);
+    m_shader->SetUniformMatrix("_View", viewPoint->GetViewMatrix());
+    m_shader->SetUniformMatrix("_Projection", viewPoint->GetProjectionMatrix());
 
     cubemap->Bind();
     vertexBuffer->Bind();
     indexBuffer->Bind();
+
+    // Draw skybox
+    auto rhi = rs.GetRenderInterface();
+    rhi->ApplyPipelineState(pipelineState);
     rs.DrawIndexed(indexBuffer);
 }

@@ -233,6 +233,20 @@ bool GLGpuProgram::SetUniformTexture2D(const std::string& name, Ref<const Textur
     return true;
 }
 
+bool GLGpuProgram::SetUniformTextureCube(const std::string& name, Ref<const TextureProxy> texture, const int32_t textureUnit)
+{
+    CHECK_IF_BINDING(false);
+    rmt_ScopedCPUSample(GLGpuProgram_SetUniform_TextureCube, 0);
+    const auto location = FindUniform(name);
+    if (location < 0) return false;
+    const GLint gl_textureUnit = GL_TEXTURE0 + textureUnit;
+    CALL_GL_FUNC(glActiveTexture(gl_textureUnit));
+    CALL_GL_FUNC(glBindTexture(GL_TEXTURE_CUBE_MAP, texture->GetHandle()));
+    GraphicsProfiler::RecordTextureBind(texture->GetHandle());
+    CALL_GL_FUNC(glUniform1i(location, textureUnit));
+    return true;
+}
+
 void GLGpuProgram::Bind()
 {
     rmt_ScopedCPUSample(GLGpuProgram_Bind, 0);

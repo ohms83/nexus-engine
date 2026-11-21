@@ -108,6 +108,12 @@ NXS_NAMESPACE
             return false;
         }
 
+        MAYBE_UNUSED virtual bool SetUniformTextureCube(const std::string& name, Ref<const TextureProxy> texture, int32_t textureUnit)
+        {
+            NXS_ASSERT_MSG(false, "SetUniformTextureCube not implemented for this graphics API.");
+            return false;
+        }
+
     protected:
         uint32_t m_id = 0;
         bool m_compiling = false;

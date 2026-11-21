@@ -102,6 +102,7 @@ public:
 
     Ref<GpuProgram> CreateGpuProgram() const override { return std::make_shared<FakeGpuProgram>(); }
     Ref<TextureProxy> CreateTextureProxy(const TextureDescription& desc) const override { return std::make_shared<FakeTexture>(); }
+    Ref<CubeTexture> CreateCubeTexture(int32_t, int32_t) const override { return nullptr; }
     Ref<IndexBuffer> CreateIndexBuffer() const override { return std::make_shared<FakeIndexBuffer>(); }
     Ref<VertexBuffer> CreateVertexBuffer() const override { return std::make_shared<FakdeVertexBuffer>(); }
     Ref<RenderTarget> CreateRenderTarget(uint32_t, uint32_t, bool) const override

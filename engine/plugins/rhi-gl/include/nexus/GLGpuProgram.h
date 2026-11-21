@@ -36,6 +36,7 @@ NXS_NAMESPACE
         MAYBE_UNUSED bool SetUniformMatrix(const std::string& name, const glm::mat3& matrix, bool tranpose) override;
         MAYBE_UNUSED bool SetUniformMatrix(const std::string& name, const glm::mat4& matrix, bool tranpose) override;
         MAYBE_UNUSED bool SetUniformTexture2D(const std::string& name, Ref<const TextureProxy> texture, int32_t textureUnit) override;
+        MAYBE_UNUSED bool SetUniformTextureCube(const std::string& name, Ref<const TextureProxy> texture, int32_t textureUnit) override;
 
     protected:
         void ClearHandles();

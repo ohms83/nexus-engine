@@ -12,7 +12,8 @@
 
 #include "entt/entity/registry.hpp"
 
-#include <algorithm>
+#include "SkyboxRenderer.h"
+
 #include <string>
 #include <unordered_map>
 
@@ -70,8 +71,7 @@ NXS_NAMESPACE
         HashMap<std::string, Ref<RenderTarget>> m_renderTargets;
         Ref<RenderTarget> m_shadowMap;
         Ref<GpuProgram> m_shadowProgram;
-        Ref<Mesh> m_skybox;
-        Ref<GpuProgram> m_skyboxProgram;
+        Ptr<SkyboxRenderer> m_skyboxRenderer;
         glm::mat4 m_lightSpaceMatrix{1.0f};
         Identifier m_shadowLightId = 0;
         bool m_shadowMapReady = false;
