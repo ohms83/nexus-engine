@@ -9,7 +9,7 @@ CubeTexture::CubeTexture(int32_t width, int32_t height)
         .channels = 3,
         .format = PixelFormat::RGB,
         .componentType = DataType::UByte,
-        .colorSpace = TextureColorSpace::Linear,
+        .colorSpace = TextureColorSpace::SRgb,
         .wrapModeS = TextureWrapMode::ClampToEdge,
         .wrapModeT = TextureWrapMode::ClampToEdge,
         .wrapModeR = TextureWrapMode::ClampToEdge,

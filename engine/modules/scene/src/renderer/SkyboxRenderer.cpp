@@ -21,7 +21,8 @@ namespace
         void main()
         {
             TexCoord0 = aPos;
-            gl_Position = vec4(_Projection * _View * vec4(aPos, 1.0)).xyww;
+            mat4 skyboxView = mat4(mat3(_View));
+            gl_Position = vec4(_Projection * skyboxView * vec4(aPos, 1.0)).xyww;
         }
     )";
 
@@ -39,6 +40,8 @@ namespace
     PipelineState pipelineState = {
         .depthTest = true,
         .depthWrite = false,
+        .depthFunction = DepthFunction::LesserOrEqual,
+        .overrideBlendMode = BlendMode::None,
         .cullMode = PolygonFacing::None,
     };
 }
@@ -73,8 +76,8 @@ void SkyboxRenderer::Render(RenderSystem &rs, const Scene &scene)
 
     m_shader->Bind();
     m_shader->SetUniformTextureCube("_Skybox", cubemap, 0);
-    m_shader->SetUniformMatrix("_View", viewPoint->GetViewMatrix());
-    m_shader->SetUniformMatrix("_Projection", viewPoint->GetProjectionMatrix());
+    m_shader->SetUniformMatrix("_View", viewPoint->GetViewMatrix(), false);
+    m_shader->SetUniformMatrix("_Projection", viewPoint->GetProjectionMatrix(), false);
 
     cubemap->Bind();
     vertexBuffer->Bind();

@@ -8,6 +8,8 @@ USING_NAMESPACE_NXS;
 
 DEFINE_LOG(CubeTexture);
 
+std::atomic<uint32_t> GLCubeTexture::s_bindingTexture(0);
+
 GLCubeTexture::GLCubeTexture(int32_t width, int32_t height)
     : CubeTexture(width, height)
 {
@@ -43,17 +45,19 @@ void GLCubeTexture::Bind() const
     if (IsBinding()) return;
 
     CALL_GL_FUNC(glBindTexture(GL_TEXTURE_CUBE_MAP, m_textureID));
+    s_bindingTexture.store(m_textureID);
 }
 
 void GLCubeTexture::Unbind() const
 {
     rmt_ScopedCPUSample(GLCubeTexture_Unbind, 0);
     CALL_GL_FUNC(glBindTexture(GL_TEXTURE_CUBE_MAP, 0));
+    if (IsBinding()) s_bindingTexture.store(0);
 }
 
 bool GLCubeTexture::IsBinding() const
 {
-    return false;
+    return m_textureID != 0 && s_bindingTexture.load() == m_textureID;
 }
 
 // void GLCubeTexture::LoadData(Face face, Ref<IBuffer> data)
