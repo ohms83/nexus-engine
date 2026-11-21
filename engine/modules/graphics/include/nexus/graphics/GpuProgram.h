@@ -90,13 +90,13 @@ NXS_NAMESPACE
             return false;
         }
 
-        MAYBE_UNUSED virtual bool SetUniformMatrix(const std::string& name, const glm::mat3& matrix, bool tranpose)
+        MAYBE_UNUSED virtual bool SetUniformMatrix(const std::string& name, const glm::mat3& matrix, bool tranpose = false)
         {
             NXS_ASSERT_MSG(false, "SetUniformMatrix(mat3) not implemented for this graphics API.");
             return false;
         }
 
-        MAYBE_UNUSED virtual bool SetUniformMatrix(const std::string& name, const glm::mat4& matrix, bool tranpose)
+        MAYBE_UNUSED virtual bool SetUniformMatrix(const std::string& name, const glm::mat4& matrix, bool tranpose = false)
         {
             NXS_ASSERT_MSG(false, "SetUniformMatrix(mat4) not implemented for this graphics API.");
             return false;
