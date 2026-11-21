@@ -28,8 +28,6 @@ NXS_NAMESPACE
         void LoadData(Array<Ref<IBuffer>> data) override;
 
     private:
-        uint32_t m_textureID = 0;
-
         static std::atomic<uint32_t> s_bindingTexture;
     };
 }

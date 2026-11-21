@@ -80,6 +80,7 @@ NXS_NAMESPACE
 
         const TextureDescription& GetDescription() const { return m_desc; }
 
+        // TODO: Refactor load functions to support more targets
         virtual void LoadData(const uint8_t* data, uint32_t size) = 0;
         virtual void LoadMipData(const uint8_t* data, uint32_t size, uint32_t mip) = 0;
 

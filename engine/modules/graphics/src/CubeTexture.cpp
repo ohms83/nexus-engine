@@ -3,17 +3,21 @@
 USING_NAMESPACE_NXS;
 
 CubeTexture::CubeTexture(int32_t width, int32_t height)
+    : TextureProxy( {
+        .width = width,
+        .height = height,
+        .channels = 3,
+        .format = PixelFormat::RGB,
+        .componentType = DataType::UByte,
+        .colorSpace = TextureColorSpace::Linear,
+        .wrapModeS = TextureWrapMode::ClampToEdge,
+        .wrapModeT = TextureWrapMode::ClampToEdge,
+        .wrapModeR = TextureWrapMode::ClampToEdge,
+        .filterMin = TextureFilterMode::Linear,
+        .filterMag = TextureFilterMode::Linear,
+        .numMips = 1,
+    }
+)
 {
-    m_desc.width = width;
-    m_desc.height = height;
-    m_desc.format = PixelFormat::RGB;
-    m_desc.channels = 3;
-    m_desc.colorSpace = TextureColorSpace::Linear;
-    m_desc.componentType = DataType::UByte;
-    m_desc.numMips = 1;
-    m_desc.filterMag = TextureFilterMode::Linear;
-    m_desc.filterMin = TextureFilterMode::Linear;
-    m_desc.wrapModeS = TextureWrapMode::ClampToEdge;
-    m_desc.wrapModeT = TextureWrapMode::ClampToEdge;
-    m_desc.wrapModeR = TextureWrapMode::ClampToEdge;
+
 }

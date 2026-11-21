@@ -596,6 +596,12 @@ void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
     }
 }
 
+void SceneRenderer::RenderSkybox(Ref<GpuProgram> gpuProgram, const Scene& scene)
+{
+    auto cubemap = scene.Skybox();
+    if (!cubemap) return;
+}
+
 bool SceneRenderer::IsSphereInside(const Frustum &viewFustrum, const Sphere &sphere, glm::mat4 modelMtx, const glm::vec3 &scale)
 {
     const glm::vec3 pos = modelMtx * glm::vec4(sphere.center, 1);

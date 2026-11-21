@@ -7,7 +7,7 @@
 
 NXS_NAMESPACE
 {
-    class CubeTexture : public IGpuResource
+    class CubeTexture : public TextureProxy
     {
     public:
         enum class Face
@@ -24,10 +24,10 @@ NXS_NAMESPACE
         explicit CubeTexture(int32_t width, int32_t height);
         virtual ~CubeTexture() = default;
 
+        void LoadData(const uint8_t* data, uint32_t size) override {}
+        void LoadMipData(const uint8_t* data, uint32_t size, uint32_t mip)override {}
+
         virtual void LoadData(Face face, Ref<IBuffer> data) = 0;
         virtual void LoadData(Array<Ref<IBuffer>> data) = 0;
-
-    protected:
-        TextureDescription m_desc {};
     };
 }

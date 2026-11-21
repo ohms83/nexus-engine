@@ -63,12 +63,15 @@ NXS_NAMESPACE
         static void SetPointLightParams(Ref<GpuProgram> gpuProgram, const SceneNode& scene);
         void RenderDirectionalShadowMap(RenderSystem& renderSystem, const Scene& scene);
         void SetShadowMapParams(Ref<GpuProgram> gpuProgram) const;
+        void RenderSkybox(Ref<GpuProgram> gpuProgram, const Scene& scene);
 
         static void SetCameraUniforms(Ref<GpuProgram> gpuProgram, const glm::vec3& cameraPos, const glm::mat4& viewMtx, const glm::mat4& projectionMtx);
 
         HashMap<std::string, Ref<RenderTarget>> m_renderTargets;
         Ref<RenderTarget> m_shadowMap;
         Ref<GpuProgram> m_shadowProgram;
+        Ref<Mesh> m_skybox;
+        Ref<GpuProgram> m_skyboxProgram;
         glm::mat4 m_lightSpaceMatrix{1.0f};
         Identifier m_shadowLightId = 0;
         bool m_shadowMapReady = false;

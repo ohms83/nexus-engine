@@ -15,6 +15,7 @@ NXS_NAMESPACE
 {
     class RenderSystem;
     class TaskScheduler;
+    class CubeTexture;
 
     class Scene : public SceneNode
     {
@@ -41,9 +42,13 @@ NXS_NAMESPACE
         Color3F& Ambient();
         NODISCARD const Color3F& Ambient() const;
 
+        NODISCARD Ref<CubeTexture> Skybox() const { return m_skybox; }
+        void SetSkybox(Ref<CubeTexture> cubemap) { m_skybox = cubemap; }
+
     protected:
         // --- Rendering ---
         Ref<SceneRenderer> m_renderer;
         Ref<IScenePartition> m_partition;
+        Ref<CubeTexture> m_skybox;
     };
 }
