@@ -152,6 +152,22 @@ NXS_NAMESPACE
             return GL_NONE;
         }
 
+        inline bool IsSRGBCapableFormat(PixelFormat format)
+        {
+            switch (format)
+            {
+            case PixelFormat::RGB:
+            case PixelFormat::RGBA:
+            case PixelFormat::Grey:
+            case PixelFormat::Red:
+            case PixelFormat::RedGreen:
+                return true;
+            default:
+                break;
+            }
+            return false;
+        }
+
         //! Convert the linear space color format into sRGB
         inline GLint GetSRGBFormat(PixelFormat format)
         {

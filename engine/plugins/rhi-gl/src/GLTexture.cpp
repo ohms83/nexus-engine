@@ -40,9 +40,9 @@ bool GLTexture::IsBinding() const
 void GLTexture::LoadData(const uint8_t* data, const uint32_t size)
 {
     const GLint gl_pixelFormats = GL::NxsPixelFormatToGL(m_desc.format);
-    const GLint gl_internalFormat = m_desc.colorSpace == TextureColorSpace::SRgb ?
-        gl_pixelFormats :
-        GL::GetSRGBFormat(m_desc.format);
+    const GLint gl_internalFormat = m_desc.colorSpace == TextureColorSpace::SRgb && GL::IsSRGBCapableFormat(m_desc.format) ?
+        GL::GetSRGBFormat(m_desc.format) :
+        gl_pixelFormats;
     const auto gl_dataType = GL::NxsDataToGLenum(m_desc.componentType);
     CALL_GL_FUNC(glTexImage2D(GL_TEXTURE_2D, 0, gl_internalFormat, m_desc.width, m_desc.height, 0, gl_pixelFormats, gl_dataType, data));
 

@@ -67,8 +67,8 @@ void GLCubeTexture::LoadData(Face face, Ref<IBuffer> data)
     const int border = 0;
     const GLint gl_pixelFormats = GL::NxsPixelFormatToGL(m_desc.format);
     const GLint gl_internalFormat = m_desc.colorSpace == TextureColorSpace::SRgb ?
-        gl_pixelFormats :
-        GL::GetSRGBFormat(m_desc.format);
+        GL::GetSRGBFormat(m_desc.format) :
+        gl_pixelFormats;
     const auto gl_dataType = GL::NxsDataToGLenum(m_desc.componentType);
     glTexImage2D(
         GL_TEXTURE_CUBE_MAP_POSITIVE_X + index,
