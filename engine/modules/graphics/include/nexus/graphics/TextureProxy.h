@@ -10,6 +10,35 @@
 
 NXS_NAMESPACE
 {
+    enum class TextureKind
+    {
+        Texture2D,
+        TextureCube,
+    };
+
+    enum class TextureTarget
+    {
+        Texture2D,
+        PositiveX,
+        NegativeX,
+        PositiveY,
+        NegativeY,
+        PositiveZ,
+        NegativeZ,
+        Num,
+    };
+
+    enum class CubeFace
+    {
+        PositiveX,
+        NegativeX,
+        PositiveY,
+        NegativeY,
+        PositiveZ,
+        NegativeZ,
+        Num,
+    };
+
     enum class TextureWrapMode
     {
         None,
@@ -50,6 +79,7 @@ NXS_NAMESPACE
     {
         int32_t width = 0;
         int32_t height = 0;
+        TextureKind kind = TextureKind::Texture2D;
         int32_t channels = 4;
         PixelFormat format = PixelFormat::RGBA;
         DataType componentType = DataType::UByte;
@@ -71,7 +101,13 @@ NXS_NAMESPACE
     class TextureProxy : public IGpuResource
     {
     public:
+        using Face = CubeFace;
+        using Target = TextureTarget;
+        using Kind = TextureKind;
+        using TextureType = TextureKind;
+
         explicit TextureProxy(const TextureDescription& desc);
+        TextureProxy(const TextureDescription& desc, TextureKind kind);
 
         NODISCARD uint32_t GetHandle() const override
         {
@@ -80,8 +116,15 @@ NXS_NAMESPACE
 
         const TextureDescription& GetDescription() const { return m_desc; }
 
-        // TODO: Refactor load functions to support more targets
         virtual void LoadData(const uint8_t* data, uint32_t size) = 0;
+        virtual void LoadData(TextureTarget target, const uint8_t* data, uint32_t size)
+        {
+            LoadData(data, size);
+        }
+        virtual void LoadData(Face face, const uint8_t* data, uint32_t size)
+        {
+            LoadData(static_cast<TextureTarget>(UINT_CAST(face) + 1), data, size);
+        }
         virtual void LoadMipData(const uint8_t* data, uint32_t size, uint32_t mip) = 0;
 
     protected:

@@ -66,6 +66,7 @@ public:
     bool IsBinding() const override { return false; }
 
     void LoadData(const uint8_t* data, uint32_t size) override {}
+    void LoadData(TextureTarget target, const uint8_t* data, uint32_t size) override {}
     void LoadMipData(const uint8_t* data, uint32_t size, uint32_t mip) override {}
 
     void CopyData(const void* data, size_t bytes, size_t offset) override {}
@@ -102,7 +103,7 @@ public:
 
     Ref<GpuProgram> CreateGpuProgram() const override { return std::make_shared<FakeGpuProgram>(); }
     Ref<TextureProxy> CreateTextureProxy(const TextureDescription& desc) const override { return std::make_shared<FakeTexture>(); }
-    Ref<CubeTexture> CreateCubeTexture(int32_t, int32_t) const override { return nullptr; }
+    Ref<TextureProxy> CreateCubeTexture(int32_t, int32_t) const override { return nullptr; }
     Ref<IndexBuffer> CreateIndexBuffer() const override { return std::make_shared<FakeIndexBuffer>(); }
     Ref<VertexBuffer> CreateVertexBuffer() const override { return std::make_shared<FakdeVertexBuffer>(); }
     Ref<RenderTarget> CreateRenderTarget(uint32_t, uint32_t, bool) const override

@@ -105,6 +105,8 @@ NXS_NAMESPACE
         NODISCARD bool IsBinding() const override;
 
         void LoadData(const uint8_t* data, uint32_t size) override;
+        void LoadData(TextureTarget target, const uint8_t* data, uint32_t size) override;
+        void LoadData(Face face, const uint8_t* data, uint32_t size) override;
         void LoadMipData(const uint8_t* data, uint32_t size, uint32_t mip) override;
 
         void CopyData(const void* data, size_t bytes, size_t) override;

@@ -21,14 +21,20 @@ void GLTexture::Bind() const
     rmt_ScopedCPUSample(GLTexture_Bind, 0);
     if (IsBinding()) return;
 
-    CALL_GL_FUNC(glBindTexture(GL_TEXTURE_2D, m_textureID));
+    const GLenum target = m_desc.kind == TextureKind::TextureCube
+        ? GL_TEXTURE_CUBE_MAP
+        : GL_TEXTURE_2D;
+    CALL_GL_FUNC(glBindTexture(target, m_textureID));
     s_bindingTexture.store(m_textureID);
 }
 
 void GLTexture::Unbind() const
 {
     rmt_ScopedCPUSample(GLTexture_Unbind, 0);
-    CALL_GL_FUNC(glBindTexture(GL_TEXTURE_2D, 0));
+    const GLenum target = m_desc.kind == TextureKind::TextureCube
+        ? GL_TEXTURE_CUBE_MAP
+        : GL_TEXTURE_2D;
+    CALL_GL_FUNC(glBindTexture(target, 0));
     if (IsBinding()) s_bindingTexture.store(0);
 }
 
@@ -45,12 +51,63 @@ void GLTexture::LoadData(const uint8_t* data, const uint32_t size)
         m_desc.colorSpace,
         gl_pixelFormats);
     const auto gl_dataType = GL::NxsDataToGLenum(m_desc.componentType);
+    if (m_desc.kind == TextureKind::TextureCube)
+    {
+        for (uint32_t i = 0; i < UINT_CAST(TextureTarget::Num) - 1; ++i)
+        {
+            CALL_GL_FUNC(glTexImage2D(
+                GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+                0,
+                gl_internalFormat,
+                m_desc.width,
+                m_desc.height,
+                0,
+                gl_pixelFormats,
+                gl_dataType,
+                data));
+        }
+        return;
+    }
     CALL_GL_FUNC(glTexImage2D(GL_TEXTURE_2D, 0, gl_internalFormat, m_desc.width, m_desc.height, 0, gl_pixelFormats, gl_dataType, data));
 
     if (m_desc.numMips > 1)
     {
         CALL_GL_FUNC(glGenerateMipmap(GL_TEXTURE_2D));
     }
+}
+
+void GLTexture::LoadData(TextureTarget target, const uint8_t* data, uint32_t size)
+{
+    if (m_desc.kind != TextureKind::TextureCube ||
+        target == TextureTarget::Texture2D ||
+        UINT_CAST(target) >= UINT_CAST(TextureTarget::Num))
+    {
+        LoadData(data, size);
+        return;
+    }
+
+    const GLint gl_pixelFormats = GL::NxsPixelFormatToGL(m_desc.format);
+    const GLint gl_internalFormat = GL::ResolveTextureInternalFormat(
+        m_desc.format,
+        m_desc.colorSpace,
+        gl_pixelFormats);
+    const auto gl_dataType = GL::NxsDataToGLenum(m_desc.componentType);
+    const uint32_t faceIndex = UINT_CAST(target) - UINT_CAST(TextureTarget::Texture2D) - 1;
+    CALL_GL_FUNC(glTexImage2D(
+        GL_TEXTURE_CUBE_MAP_POSITIVE_X + faceIndex,
+        0,
+        gl_internalFormat,
+        m_desc.width,
+        m_desc.height,
+        0,
+        gl_pixelFormats,
+        gl_dataType,
+        data));
+}
+
+void GLTexture::LoadData(Face face, const uint8_t* data, uint32_t size)
+{
+    LoadData(static_cast<TextureTarget>(UINT_CAST(face) + 1), data, size);
 }
 
 void GLTexture::LoadMipData(const uint8_t* data, uint32_t size, uint32_t mip)

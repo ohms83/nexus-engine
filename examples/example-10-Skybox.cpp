@@ -110,7 +110,7 @@ protected:
     }
 
 private:
-    nxs::Ref<nxs::CubeTexture> LoadSkybox()
+    nxs::Ref<nxs::TextureProxy> LoadSkybox()
     {
         static const nxs::Array<std::string> faceNames = {
             "px.png",
@@ -156,7 +156,7 @@ private:
             }
 
             const uint32_t size = UINT_CAST(width) * UINT_CAST(height) * 3;
-            cubemap->LoadData(CAST<nxs::CubeTexture::Face>(i), pixels, size);
+            cubemap->LoadData(CAST<nxs::CubeFace>(i), pixels, size);
             stbi_image_free(pixels);
         }
 
