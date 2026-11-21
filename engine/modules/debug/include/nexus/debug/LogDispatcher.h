@@ -54,9 +54,6 @@ namespace nxs
     class LogDispatcher final
     {
     public:
-        LogDispatcher();
-        ~LogDispatcher();
-
         static void Init();
         static void Destroy();
         static LogDispatcher& Instance();
@@ -91,6 +88,11 @@ namespace nxs
             return m_message;
         }
     private:
+        LogDispatcher();
+        ~LogDispatcher();
+
+        static LogDispatcher* s_instance;
+
         Array<Ref<ILogger>> m_loggers;
         std::string m_message;
 

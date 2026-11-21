@@ -13,12 +13,13 @@ DEFINE_LOG(Temp);
 
 #define LOG_FORMAT(Level, Category, Message) std::format("[{}][{}] {}\n", #Level, Category, Message);
 
-static Ptr<LogDispatcher> s_instance;
+LogDispatcher* LogDispatcher::s_instance = nullptr;
 
 LogDispatcher::LogDispatcher()
 {
     m_assertConnection = Assert::onAssertionFailedEvent.connect([this](const std::string& message) {
         Log(LogLevel::Fatal, "Assert", message);
+        Flush();
         Destroy();
     });
 }
@@ -26,17 +27,18 @@ LogDispatcher::LogDispatcher()
 LogDispatcher::~LogDispatcher()
 {
     m_assertConnection.disconnect();
-    m_loggers.clear();
 }
 
 void LogDispatcher::Init()
 {
-    s_instance = std::make_unique<LogDispatcher>();
+    if (s_instance) return;
+    s_instance = new LogDispatcher();
 }
 
 void LogDispatcher::Destroy()
 {
-    s_instance.reset();
+    delete s_instance;
+    s_instance = nullptr;
 }
 
 LogDispatcher& LogDispatcher::Instance()
@@ -60,7 +62,9 @@ void LogDispatcher::AddLoggers(const std::initializer_list<Ref<ILogger>> loggers
 
 void LogDispatcher::Flush() const
 {
-    for (const auto& logger : m_loggers) logger->Flush();
+    for (const auto& logger : m_loggers) {
+        logger->Flush();
+    }
 }
 
 void LogDispatcher::Log(const LogLevel level, const std::string& category, const std::string& message)
