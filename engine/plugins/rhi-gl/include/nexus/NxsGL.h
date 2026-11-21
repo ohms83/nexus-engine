@@ -5,6 +5,7 @@
 #include "nexus/NxsDefine.h"
 #include "nexus/debug/LogDispatcher.h"
 #include "nexus/graphics/GraphicsConst.h"
+#include "nexus/graphics/TextureProxy.h"
 
 #define GL_STRICT_CHECK
 
@@ -194,6 +195,16 @@ NXS_NAMESPACE
                 break;
             }
             return gl_internalFormat;
+        }
+
+        inline GLint ResolveTextureInternalFormat(
+            PixelFormat format,
+            TextureColorSpace colorSpace,
+            GLint fallbackFormat)
+        {
+            return colorSpace == TextureColorSpace::SRgb && IsSRGBCapableFormat(format)
+                ? GetSRGBFormat(format)
+                : fallbackFormat;
         }
     }
 }

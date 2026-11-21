@@ -44,6 +44,46 @@ TEST_F(GLCallTest, SuccessfulChecksDoNotEvaluateMessage)
     EXPECT_EQ(evaluations, 0);
 }
 
+TEST(TextureInternalFormatTest, SRgbRgbUsesSrgbInternalFormat)
+{
+    EXPECT_EQ(
+        nxs::GL::ResolveTextureInternalFormat(
+            nxs::PixelFormat::RGB,
+            nxs::TextureColorSpace::SRgb,
+            GL_RGB),
+        GL_SRGB8);
+}
+
+TEST(TextureInternalFormatTest, SRgbRgbaUsesSrgbAlphaInternalFormat)
+{
+    EXPECT_EQ(
+        nxs::GL::ResolveTextureInternalFormat(
+            nxs::PixelFormat::RGBA,
+            nxs::TextureColorSpace::SRgb,
+            GL_RGBA),
+        GL_SRGB8_ALPHA8);
+}
+
+TEST(TextureInternalFormatTest, LinearRgbUsesLinearInternalFormat)
+{
+    EXPECT_EQ(
+        nxs::GL::ResolveTextureInternalFormat(
+            nxs::PixelFormat::RGB,
+            nxs::TextureColorSpace::Linear,
+            GL_RGB),
+        GL_RGB);
+}
+
+TEST(TextureInternalFormatTest, UnsupportedSrgbFormatUsesFallback)
+{
+    EXPECT_EQ(
+        nxs::GL::ResolveTextureInternalFormat(
+            nxs::PixelFormat::Depth,
+            nxs::TextureColorSpace::SRgb,
+            GL_DEPTH_COMPONENT),
+        GL_DEPTH_COMPONENT);
+}
+
 #if !defined(NXS_NO_LOG)
 TEST_F(GLCallTest, FailedCheckReportsFunctionAndError)
 {
