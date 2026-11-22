@@ -352,13 +352,13 @@ TEST(SceneRendererTest, InactiveAncestorExcludesCameraAndLight)
 
     viewRenderer.Render(renderSystem, *scene);
     EXPECT_EQ(pass->appendCalls, 1);
-    renderer.SetDirectLightParams(program, *scene);
+    renderer.SetDirectLightParams(*program, *scene);
     EXPECT_EQ(program->ints["_NumDirectLight"], 1);
 
     parent->Activate(false);
     viewRenderer.Render(renderSystem, *scene);
     EXPECT_EQ(pass->appendCalls, 1);
-    renderer.SetDirectLightParams(program, *scene);
+    renderer.SetDirectLightParams(*program, *scene);
     EXPECT_EQ(program->ints["_NumDirectLight"], 0);
 }
 
@@ -382,8 +382,8 @@ TEST(SceneRendererShadowTest, SelectsEnabledLightAndUpdatesShaderIndex)
     RenderSystem renderSystem(rendering);
     ShadowTestRenderer renderer(program);
     renderer.RenderDirectionalShadowMap(renderSystem, *scene);
-    renderer.SetDirectLightParams(program, *scene);
-    renderer.SetShadowMapParams(program);
+    renderer.SetDirectLightParams(*program, *scene);
+    renderer.SetShadowMapParams(*program);
     EXPECT_EQ(rendering->draws, 1);
     EXPECT_EQ(program->ints["_NumDirectLight"], 2);
     EXPECT_EQ(program->ints["_ShadowLightIndex"], 1);
@@ -391,13 +391,13 @@ TEST(SceneRendererShadowTest, SelectsEnabledLightAndUpdatesShaderIndex)
 
     first->properties.canCastShadows = true;
     renderer.RenderDirectionalShadowMap(renderSystem, *scene);
-    renderer.SetDirectLightParams(program, *scene);
+    renderer.SetDirectLightParams(*program, *scene);
     EXPECT_EQ(rendering->draws, 2);
     EXPECT_EQ(program->ints["_ShadowLightIndex"], 0);
 
     firstNode->Activate(false);
     renderer.RenderDirectionalShadowMap(renderSystem, *scene);
-    renderer.SetDirectLightParams(program, *scene);
+    renderer.SetDirectLightParams(*program, *scene);
     EXPECT_EQ(rendering->draws, 3);
     EXPECT_EQ(program->ints["_NumDirectLight"], 1);
     EXPECT_EQ(program->ints["_ShadowLightIndex"], 0);
@@ -405,8 +405,8 @@ TEST(SceneRendererShadowTest, SelectsEnabledLightAndUpdatesShaderIndex)
     lightA->Properties().canCastShadows = false;
     lightB->Properties().canCastShadows = false;
     renderer.RenderDirectionalShadowMap(renderSystem, *scene);
-    renderer.SetDirectLightParams(program, *scene);
-    renderer.SetShadowMapParams(program);
+    renderer.SetDirectLightParams(*program, *scene);
+    renderer.SetShadowMapParams(*program);
     EXPECT_EQ(rendering->draws, 3);
     EXPECT_EQ(program->ints["_ShadowLightIndex"], -1);
     EXPECT_EQ(program->ints["_HasShadowMap"], 0);
@@ -448,7 +448,7 @@ TEST(SceneRendererShadowTest, NonCastingReceiverContributesBoundsButIsNotDrawn)
 
     casterMaterial->castShadow = false;
     renderer.RenderDirectionalShadowMap(renderSystem, *scene);
-    renderer.SetShadowMapParams(program);
+    renderer.SetShadowMapParams(*program);
     EXPECT_EQ(rendering->draws, 1);
     EXPECT_EQ(program->ints["_HasShadowMap"], 0);
 }

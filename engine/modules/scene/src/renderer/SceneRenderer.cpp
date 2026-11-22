@@ -81,7 +81,7 @@ inline bool IsNodeActive(const SceneNodeComponent& nodeComp)
     return node->IsActive();
 }
 
-bool SceneRenderer::RenderInstancedMesh(RenderSystem& renderSystem, const RenderCommand& command, Ref<GpuProgram> gpuProgram)
+bool SceneRenderer::RenderInstancedMesh(RenderSystem& renderSystem, const RenderCommand& command, GpuProgram& gpuProgram)
 {
     rmt_ScopedCPUSample(SceneRenderer_RenderInstancedMesh, 0);
     if (command.instanceModels.empty()) return false;
@@ -112,7 +112,7 @@ bool SceneRenderer::RenderInstancedMesh(RenderSystem& renderSystem, const Render
 
     command.vertexBuffer->AttachInstanceStream(std::static_pointer_cast<IBuffer>(instanceBuffer), attrs, BufferUsage::StaticDraw);
     // Record composition stats for instanced draw
-    GraphicsProfiler::RecordProgramDraw(gpuProgram ? gpuProgram->GetHandle() : 0, command.indexCount, instanceCount);
+    GraphicsProfiler::RecordProgramDraw(gpuProgram.GetHandle(), command.indexCount, instanceCount);
     GraphicsProfiler::RecordMaterialDraw(command.material ? command.material->GetId() : 0, command.indexCount, instanceCount);
     renderSystem.DrawIndexedInstanced(command.indexBuffer, instanceCount);
     command.vertexBuffer->DetachInstanceStreams();
@@ -121,15 +121,15 @@ bool SceneRenderer::RenderInstancedMesh(RenderSystem& renderSystem, const Render
     return true;
 }
 
-void SceneRenderer::SetAmbientLightParams(Ref<GpuProgram> gpuProgram, const entt::registry &registry)
+void SceneRenderer::SetAmbientLightParams(GpuProgram& gpuProgram, const entt::registry &registry)
 {
     rmt_ScopedCPUSample(SceneRenderer_SetAmbientLightParams, 0);
     const auto ambientLightEnt = registry.view<AmbientLightComponent>().front();
     const auto color = ambientLightEnt == entt::null ? Color3F::Grey : registry.get<AmbientLightComponent>(ambientLightEnt).color;
-    gpuProgram->SetUniformVector("_AmbientLight", color);
+    gpuProgram.SetUniformVector("_AmbientLight", color);
 }
 
-void SceneRenderer::SetDirectLightParams(Ref<GpuProgram> gpuProgram, const SceneNode& scene) const
+void SceneRenderer::SetDirectLightParams(GpuProgram& gpuProgram, const SceneNode& scene, int32_t shadowLightId)
 {
     rmt_ScopedCPUSample(SceneRenderer_SetDirectLightParams, 0);
     int32_t numLight = 0;
@@ -158,21 +158,21 @@ void SceneRenderer::SetDirectLightParams(Ref<GpuProgram> gpuProgram, const Scene
             continue;
         }
         const auto direction = nodePtr->GetGlobalOrientation() * light.direction;
-        if (m_shadowMapReady && node.id == m_shadowLightId) shadowLightIndex = numLight;
-        gpuProgram->SetUniformVector(uniformLocationColor, light.properties.color);
-        gpuProgram->SetUniformVector(uniformLocationDirection, glm::normalize(direction));
-        gpuProgram->SetUniformFloat(uniformLocationDiffuse, light.properties.diffuseIntensity);
-        gpuProgram->SetUniformFloat(uniformLocationSpecular, light.properties.specularIntensity);
-        gpuProgram->SetUniformFloat(uniformLocationCutoff, light.properties.cutoffRange);
+        shadowLightIndex = node.id == shadowLightId ? numLight : -1;
+        gpuProgram.SetUniformVector(uniformLocationColor, light.properties.color);
+        gpuProgram.SetUniformVector(uniformLocationDirection, glm::normalize(direction));
+        gpuProgram.SetUniformFloat(uniformLocationDiffuse, light.properties.diffuseIntensity);
+        gpuProgram.SetUniformFloat(uniformLocationSpecular, light.properties.specularIntensity);
+        gpuProgram.SetUniformFloat(uniformLocationCutoff, light.properties.cutoffRange);
         rmt_EndCPUSample();
 
         numLight++;
     }
-    gpuProgram->SetUniformInt("_NumDirectLight", numLight);
-    gpuProgram->SetUniformInt("_ShadowLightIndex", shadowLightIndex);
+    gpuProgram.SetUniformInt("_NumDirectLight", numLight);
+    gpuProgram.SetUniformInt("_ShadowLightIndex", shadowLightIndex);
 }
 
-void SceneRenderer::SetPointLightParams(Ref<GpuProgram> gpuProgram, const SceneNode& scene)
+void SceneRenderer::SetPointLightParams(GpuProgram& gpuProgram, const SceneNode& scene)
 {
     rmt_ScopedCPUSample(SceneRenderer_SetPointLightParams, 0);
     int32_t numLight = 0;
@@ -201,27 +201,27 @@ void SceneRenderer::SetPointLightParams(Ref<GpuProgram> gpuProgram, const SceneN
             rmt_EndCPUSample();
             continue;
         }
-        gpuProgram->SetUniformVector(uniformLocationPosition, nodePtr->GetGlobalPosition());
-        gpuProgram->SetUniformVector(uniformLocationColor, light.properties.color);
-        gpuProgram->SetUniformFloat(uniformLocationDiffuse, light.properties.diffuseIntensity);
-        gpuProgram->SetUniformFloat(uniformLocationSpecular, light.properties.specularIntensity);
-        gpuProgram->SetUniformFloat(uniformLocationCutOff, light.properties.cutoffRange);
-        gpuProgram->SetUniformFloat(uniformLocationConst, light.constant);
-        gpuProgram->SetUniformFloat(uniformLocationLinear, light.linear);
-        gpuProgram->SetUniformFloat(uniformLocationQuad, light.quadratic);
+        gpuProgram.SetUniformVector(uniformLocationPosition, nodePtr->GetGlobalPosition());
+        gpuProgram.SetUniformVector(uniformLocationColor, light.properties.color);
+        gpuProgram.SetUniformFloat(uniformLocationDiffuse, light.properties.diffuseIntensity);
+        gpuProgram.SetUniformFloat(uniformLocationSpecular, light.properties.specularIntensity);
+        gpuProgram.SetUniformFloat(uniformLocationCutOff, light.properties.cutoffRange);
+        gpuProgram.SetUniformFloat(uniformLocationConst, light.constant);
+        gpuProgram.SetUniformFloat(uniformLocationLinear, light.linear);
+        gpuProgram.SetUniformFloat(uniformLocationQuad, light.quadratic);
         rmt_EndCPUSample();
 
         numLight++;
     }
-    gpuProgram->SetUniformInt("_NumPointLight", numLight);
+    gpuProgram.SetUniformInt("_NumPointLight", numLight);
 }
 
-void SceneRenderer::SetCameraUniforms(Ref<GpuProgram> gpuProgram, const glm::vec3& cameraPos, const glm::mat4& viewMtx, const glm::mat4& projectionMtx)
+void SceneRenderer::SetCameraUniforms(GpuProgram& gpuProgram, const glm::vec3& cameraPos, const glm::mat4& viewMtx, const glm::mat4& projectionMtx)
 {
     rmt_ScopedCPUSample(SceneRenderer_SetCameraUniforms, 0);
-    gpuProgram->SetUniformVector("_CameraPos", cameraPos);
-    gpuProgram->SetUniformMatrix("_View", viewMtx, false);
-    gpuProgram->SetUniformMatrix("_Projection", projectionMtx, false);
+    gpuProgram.SetUniformVector("_CameraPos", cameraPos);
+    gpuProgram.SetUniformMatrix("_View", viewMtx, false);
+    gpuProgram.SetUniformMatrix("_Projection", projectionMtx, false);
 }
 
 void SceneRenderer::RenderDirectionalShadowMap(RenderSystem& renderSystem, const Scene& scene)
@@ -400,17 +400,17 @@ void SceneRenderer::RenderDirectionalShadowMap(RenderSystem& renderSystem, const
     m_shadowMapReady = true;
 }
 
-void SceneRenderer::SetShadowMapParams(Ref<GpuProgram> gpuProgram) const
+void SceneRenderer::SetShadowMapParams(GpuProgram& gpuProgram) const
 {
     rmt_ScopedCPUSample(SceneRenderer_SetShadowMapParams, 0);
-    gpuProgram->SetUniformInt("_HasShadowMap", m_shadowMapReady ? 1 : 0);
+    gpuProgram.SetUniformInt("_HasShadowMap", m_shadowMapReady ? 1 : 0);
     if (!m_shadowMapReady)
     {
         return;
     }
 
-    gpuProgram->SetUniformMatrix("_LightSpaceMatrix", m_lightSpaceMatrix, false);
-    gpuProgram->SetUniformTexture2D(
+    gpuProgram.SetUniformMatrix("_LightSpaceMatrix", m_lightSpaceMatrix, false);
+    gpuProgram.SetUniformTexture2D(
         "_ShadowMap",
         m_shadowMap->GetDepthTextureProxy(),
         15);
@@ -568,15 +568,15 @@ void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
                                  renderSystem.GetRenderInterface()->IsFramebufferSRGBSupported()) ? 1 : 0);
                         }
 
-                        SetCameraUniforms(gpuProgram, viewCtx.position, viewCtx.viewMatrix, viewCtx.projectionMatrix);
-                        SetAmbientLightParams(gpuProgram, *scene.GetRegistry());
-                        SetDirectLightParams(gpuProgram, scene);
-                        SetPointLightParams(gpuProgram, scene);
-                        SetShadowMapParams(gpuProgram);
+                        SetCameraUniforms(*gpuProgram, viewCtx.position, viewCtx.viewMatrix, viewCtx.projectionMatrix);
+                        SetAmbientLightParams(*gpuProgram, *scene.GetRegistry());
+                        SetDirectLightParams(*gpuProgram, scene, m_shadowMapReady ? m_shadowLightId : NXS_INVALID_ID);
+                        SetPointLightParams(*gpuProgram, scene);
+                        SetShadowMapParams(*gpuProgram);
                         usingProgram = gpuProgram;
                     }
 
-                    if (!RenderInstancedMesh(renderSystem, cmd, gpuProgram))
+                    if (!RenderInstancedMesh(renderSystem, cmd, *gpuProgram))
                     {
                         gpuProgram->SetUniformMatrix("_Model", Matrix::ExpandAffine(cmd.modelMatrix), false);
                         cmd.vertexBuffer->Bind();
@@ -600,12 +600,6 @@ void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
 
     // TODO: Should be rendered after Opaque pass and before Alpha pass.
     m_skyboxRenderer->Render(renderSystem, scene);
-}
-
-void SceneRenderer::RenderSkybox(Ref<GpuProgram> gpuProgram, const Scene& scene)
-{
-    auto cubemap = scene.Skybox();
-    if (!cubemap) return;
 }
 
 bool SceneRenderer::IsSphereInside(const Frustum &viewFustrum, const Sphere &sphere, glm::mat4 modelMtx, const glm::vec3 &scale)

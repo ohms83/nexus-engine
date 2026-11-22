@@ -9,6 +9,7 @@
 #include "nexus/scene/component/SceneNodeComponent.h"
 #include "nexus/scene/component/TransformComponent.h"
 #include "nexus/scene/component/MeshComponent.h"
+#include "nexus/scene/component/LightComponent.h"
 
 #include "nexus/math/Matrix.h"
 
@@ -17,6 +18,8 @@
 #include "Remotery.h"
 
 USING_NAMESPACE_NXS;
+
+DEFINE_LOG(RenderPass);
 
 RenderPass::~RenderPass()
 {
@@ -36,28 +39,6 @@ void RenderPass::Begin(RenderSystem& rs) const
     renderInterface->ApplyPipelineState(pipelineState);
 
     renderInterface->DebugMarker(name);
-
-#if 0 // Move to ViewContext
-    // Offscreen target is bound by the caller (SceneRenderer/RenderSystem).
-    // Clear
-    auto hasFlag = [](ClearFlags flags, ClearFlags f){ return (UINT_CAST(flags) & UINT_CAST(f)) != 0; };
-    if (hasFlag(clearFlags, ClearFlags::Color) && hasFlag(clearFlags, ClearFlags::Depth))
-    {
-        renderInterface->ClearBuffer(Color4F{clearColor.r, clearColor.g, clearColor.b, 1.0f}, clearDepth);
-    }
-    else
-    {
-        if (hasFlag(clearFlags, ClearFlags::Color))
-        {
-            renderInterface->ClearColor(Color4F{clearColor.r, clearColor.g, clearColor.b, 1.0f});
-        }
-        if (hasFlag(clearFlags, ClearFlags::Depth))
-        {
-            renderInterface->ClearDepth(clearDepth);
-        }
-        // Stencil: Not supported yet by the generic interface. Add later if needed.
-    }
-#endif
     renderInterface->SetGlobalShader(pipelineState.globalShader);
 
     Begin_Internal(rs);
@@ -74,6 +55,85 @@ void RenderPass::End(RenderSystem& rs) const
     // Offscreen target is unbound by the caller (SceneRenderer/RenderSystem).
     // Hook
     if (onEnd) onEnd(rs);
+}
+
+bool RenderPass::IsNodeActive(const SceneNodeComponent& nodeComp)
+{
+    const auto* node = SceneNode::FindNode(nodeComp.id);
+    if (!node)
+    {
+        LOG_ERROR(LogRenderPass, std::format("Scene node {} was not found.", nodeComp.id));
+        return false;
+    }
+    return node->IsActive();
+}
+
+void RenderPass::SetShaderParams(GpuProgram& gpuProgram, const SceneNode& scene, const ViewContext& viewCtx) const
+{
+    // SetCameraUniforms(gpuProgram, viewCtx.position, viewCtx.viewMatrix, viewCtx.projectionMatrix);
+    // SetAmbientLightParams(gpuProgram, *scene.GetRegistry());
+    // SetDirectLightParams(gpuProgram, scene, m_shadowMapReady ? m_shadowLightId : NXS_INVALID_ID);
+    // SetPointLightParams(gpuProgram, scene);
+    // SetShadowMapParams(gpuProgram);
+}
+
+void RenderPass::SetAmbientLightParams(Ref<GpuProgram> gpuProgram, const entt::registry& registry)
+{
+    
+}
+
+void RenderPass::SetDirectLightParams(Ref<GpuProgram> gpuProgram, const SceneNode& scene, int32_t shadowLightId)
+{
+    
+}
+
+void RenderPass::SetPointLightParams(Ref<GpuProgram> gpuProgram, const SceneNode& scene)
+{
+    rmt_ScopedCPUSample(SceneRenderer_SetPointLightParams, 0);
+    int32_t numLight = 0;
+    const auto registry = scene.GetRegistry();
+    for (const auto view = registry->view<SceneNodeComponent, PointLightComponent>(); const auto& [entity, node, light] : view.each())
+    {
+        if (!IsNodeActive(node)) continue;
+
+        rmt_BeginCPUSample(CreateUniformNames, 0);
+        // TODO: Cache the uniform names.
+        const auto uniformLocation = std::format("_PointLights[{}]", numLight);
+        const auto uniformLocationColor = std::format("{}.properties.color", uniformLocation);
+        const auto uniformLocationDiffuse = std::format("{}.properties.diffuseIntensity", uniformLocation);
+        const auto uniformLocationSpecular = std::format("{}.properties.specularIntensity", uniformLocation);
+        const auto uniformLocationCutOff = std::format("{}.cutoff", uniformLocation);
+        const auto uniformLocationPosition = std::format("{}.position", uniformLocation);
+        const auto uniformLocationConst = std::format("{}.constant", uniformLocation);
+        const auto uniformLocationLinear = std::format("{}.linear", uniformLocation);
+        const auto uniformLocationQuad = std::format("{}.quadratic", uniformLocation);
+        rmt_EndCPUSample();
+
+        rmt_BeginCPUSample(EmplaceUniformValues, 0);
+        SceneNode* nodePtr = SceneNode::FindNode(node.id);
+        if (!nodePtr) {
+            LOG_ERROR(LogRenderPass, std::format("SceneRenderer::SetPointLightParams: SceneNode with ID {} not found.", node.id));
+            rmt_EndCPUSample();
+            continue;
+        }
+        gpuProgram->SetUniformVector(uniformLocationPosition, nodePtr->GetGlobalPosition());
+        gpuProgram->SetUniformVector(uniformLocationColor, light.properties.color);
+        gpuProgram->SetUniformFloat(uniformLocationDiffuse, light.properties.diffuseIntensity);
+        gpuProgram->SetUniformFloat(uniformLocationSpecular, light.properties.specularIntensity);
+        gpuProgram->SetUniformFloat(uniformLocationCutOff, light.properties.cutoffRange);
+        gpuProgram->SetUniformFloat(uniformLocationConst, light.constant);
+        gpuProgram->SetUniformFloat(uniformLocationLinear, light.linear);
+        gpuProgram->SetUniformFloat(uniformLocationQuad, light.quadratic);
+        rmt_EndCPUSample();
+
+        numLight++;
+    }
+    gpuProgram->SetUniformInt("_NumPointLight", numLight);
+}
+
+void RenderPass::SetCameraUniforms(Ref<GpuProgram> gpuProgram, const glm::vec3& cameraPos, const glm::mat4& viewMtx, const glm::mat4& projectionMtx)
+{
+    
 }
 
 VariantData RenderPass::Serialize() const

@@ -58,15 +58,13 @@ NXS_NAMESPACE
         static bool IsSphereInside(const Frustum& viewFustrum, const Sphere& sphere, glm::mat4 modelMtx, const glm::vec3& scale);
 
     protected:
-        static bool RenderInstancedMesh(RenderSystem& renderSystem, const RenderCommand& command, Ref<GpuProgram> gpuProgram);
-        static void SetAmbientLightParams(Ref<GpuProgram> gpuProgram, const entt::registry& registry);
-        void SetDirectLightParams(Ref<GpuProgram> gpuProgram, const SceneNode& scene) const;
-        static void SetPointLightParams(Ref<GpuProgram> gpuProgram, const SceneNode& scene);
+        static bool RenderInstancedMesh(RenderSystem& renderSystem, const RenderCommand& command, GpuProgram& gpuProgram);
+        static void SetAmbientLightParams(GpuProgram& gpuProgram, const entt::registry& registry);
+        static void SetDirectLightParams(GpuProgram& gpuProgram, const SceneNode& scene, int32_t shadowLightI = -1);
+        static void SetPointLightParams(GpuProgram& gpuProgram, const SceneNode& scene);
+        static void SetCameraUniforms(GpuProgram& gpuProgram, const glm::vec3& cameraPos, const glm::mat4& viewMtx, const glm::mat4& projectionMtx);
         void RenderDirectionalShadowMap(RenderSystem& renderSystem, const Scene& scene);
-        void SetShadowMapParams(Ref<GpuProgram> gpuProgram) const;
-        void RenderSkybox(Ref<GpuProgram> gpuProgram, const Scene& scene);
-
-        static void SetCameraUniforms(Ref<GpuProgram> gpuProgram, const glm::vec3& cameraPos, const glm::mat4& viewMtx, const glm::mat4& projectionMtx);
+        void SetShadowMapParams(GpuProgram& gpuProgram) const;
 
         HashMap<std::string, Ref<RenderTarget>> m_renderTargets;
         Ref<RenderTarget> m_shadowMap;

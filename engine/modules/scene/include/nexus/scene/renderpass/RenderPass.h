@@ -114,6 +114,7 @@ NXS_NAMESPACE
         // These functions are designed to be called by the renderer.
         void Begin(RenderSystem& rs) const;
         void End(RenderSystem& rs) const;
+        virtual void SetShaderParams(GpuProgram& gpuProgram, const SceneNode& scene, const ViewContext& viewCtx) const;
 
         // Serialization helpers
         VariantData Serialize() const override;
@@ -160,6 +161,13 @@ NXS_NAMESPACE
             RenderSystem& renderSystem,
             const Array<SceneNode*>& visibleNodes,
             Array<RenderCommand>& outCommands) const {}
+        
+        protected:
+            static bool IsNodeActive(const SceneNodeComponent& nodeComp);
+            static void SetAmbientLightParams(Ref<GpuProgram> gpuProgram, const entt::registry& registry);
+            static void SetDirectLightParams(Ref<GpuProgram> gpuProgram, const SceneNode& scene, int32_t shadowLightId = -1);
+            static void SetPointLightParams(Ref<GpuProgram> gpuProgram, const SceneNode& scene);
+            static void SetCameraUniforms(Ref<GpuProgram> gpuProgram, const glm::vec3& cameraPos, const glm::mat4& viewMtx, const glm::mat4& projectionMtx);
 
         private:
             virtual void Begin_Internal(RenderSystem& rs) const {}
