@@ -93,20 +93,21 @@ TEST(DepthPrePassTest, PassSequenceRestoresColorMaskAndKeepsDepth)
     OpaquePass opaque;
 
     ViewContext view{};
+    Array<AttachmentDesc> offscreenBuffers;
     view.profile.clearFlags = ClearFlags::Color | ClearFlags::Depth;
     view.ClearView(*rendering);
-    depth.Begin(renderSystem);
+    depth.Begin(renderSystem, offscreenBuffers);
     EXPECT_EQ(rendering->GetGlobalShader(), depth.pipelineState.globalShader);
     EXPECT_TRUE(glm::all(glm::equal(rendering->GetColorMask(), glm::bvec4(false))));
-    depth.End(renderSystem);
-    opaque.Begin(renderSystem);
+    depth.End(renderSystem, offscreenBuffers);
+    opaque.Begin(renderSystem, offscreenBuffers);
     EXPECT_EQ(rendering->GetGlobalShader(), nullptr);
     EXPECT_EQ(rendering->GetDepthFunction(), DepthFunction::LesserOrEqual);
     EXPECT_EQ(rendering->depthClears, 1);
     EXPECT_EQ(rendering->colorClears, 1);
     EXPECT_TRUE(rendering->depthClearWritesEnabled);
     EXPECT_TRUE(rendering->colorClearWritesEnabled);
-    opaque.End(renderSystem);
+    opaque.End(renderSystem, offscreenBuffers);
 }
 
 TEST(RenderPassTest, ViewClearRespectsFlagsAndEnablesRequiredWrites)

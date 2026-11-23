@@ -4,51 +4,54 @@ USING_NAMESPACE_NXS;
 
 DEFINE_LOG(ShadowPass);
 
+ShadowPass::ShadowPass()
+{
+    name = "Shadow Pass";
+    targetType = RenderTargetType::Offscreen;
+    offscreenTarget = AttachmentDesc {
+        .name = AttachmentDesc::shadowMap,
+        .widht = 2048,
+        .height = 2048,
+    };
+
+    commandSortType = CommandSortType::FrontToBack;
+    pipelineState.depthTest = true;
+    pipelineState.depthWrite = true;
+    pipelineState.depthFunction = DepthFunction::LesserOrEqual;
+}
+
 bool ShadowPass::Init()
 {
-    m_shadowMapReady = false;
-    // TODO: Make shadow map resolution configurable
-    constexpr uint32_t shadowMapResolution = 2048;
-    if (!m_shadowMap)
-    {
-        m_shadowMap = GetGpuResourceFactory()->CreateRenderTarget(
-            shadowMapResolution,
-            shadowMapResolution,
-            true);
-    }
-    if (!m_shadowMap)
+    if (!offscreenTarget.IsValid() || offscreenTarget.name != AttachmentDesc::shadowMap)
     {
         LOG_ERROR(LogShadowPass, "Failed to create a directional shadow map render target.");
+        enabled = false;
         return false;
     }
-    if (!m_shadowProgram)
-    {
-        auto shader = std::make_shared<Shader>("_DirectionalShadowMap", 0);
-        constexpr auto vertexSource = R"(
-            #version 330 core
-            layout (location = 0) in vec3 aPos;
-            uniform mat4 _Model;
-            uniform mat4 _LightSpaceMatrix;
-            void main()
-            {
-                gl_Position = _LightSpaceMatrix * _Model * vec4(aPos, 1.0);
-            }
-        )";
-        constexpr auto fragmentSource = R"(
-            #version 330 core
-            void main() {}
-        )";
-        if (!shader->CompileFromSource(vertexSource, fragmentSource, ""))
+    auto shader = std::make_shared<Shader>("_DirectionalShadowMap", 0);
+    constexpr auto vertexSource = R"(
+        #version 330 core
+        layout (location = 0) in vec3 aPos;
+        uniform mat4 _Model;
+        uniform mat4 _LightSpaceMatrix;
+        void main()
         {
-            LOG_ERROR(LogShadowPass, "Failed to compile the directional shadow map shader.");
-            return false;
+            gl_Position = _LightSpaceMatrix * _Model * vec4(aPos, 1.0);
         }
-        m_shadowProgram = shader->GetGpuProgram();
+    )";
+    constexpr auto fragmentSource = R"(
+        #version 330 core
+        void main() {}
+    )";
+    if (!shader->CompileFromSource(vertexSource, fragmentSource, ""))
+    {
+        LOG_ERROR(LogShadowPass, "Failed to compile the directional shadow map shader.");
+        return false;
     }
-    m_shadowMapReady = true;
+    pipelineState.globalShader = shader->GetGpuProgram();
     return true;
 }
 
-void ShadowPass::Begin_Internal(RenderSystem& rs) const
+void ShadowPass::Begin_Internal(RenderSystem& rs)
 {
 }

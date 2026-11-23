@@ -490,13 +490,15 @@ void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
 
         viewCtx.ClearView(*renderSystem.GetRenderInterface());
 
+        // TODO: Append the offscreen targets from the ShadowPass
+        Array<AttachmentDesc> offscreenTargets;
         for (const auto& queuedPass : viewPasses.passes)
         {
             const auto pass = queuedPass.pass;
             rmt_BeginCPUSampleDynamic(pass->name.c_str(), 0);
             rmt_BeginOpenGLSampleDynamic(pass->name.c_str());
 
-            pass->Begin(renderSystem);
+            pass->Begin(renderSystem, offscreenTargets);
             commands.clear();
             const auto& visibleNodes = viewCtx.visibleNodes;
             const auto globalShader = pass->pipelineState.globalShader;
@@ -587,7 +589,7 @@ void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
                     }
                 }
             }
-            pass->End(renderSystem);
+            pass->End(renderSystem, offscreenTargets);
 
             rmt_EndOpenGLSample();
             rmt_EndCPUSample();

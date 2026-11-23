@@ -46,11 +46,22 @@ NXS_NAMESPACE
 
     struct AttachmentDesc
     {
-        PixelFormat format = PixelFormat::RGBA;
-        bool load = false;
-        bool store = true;
-        bool clear = false;
-        uint32_t samples = 1;
+        std::string name;
+        uint32_t widht = 0;
+        uint32_t height = 0;
+        Ref<RenderTarget> renderTarget;
+
+        inline bool IsValidDesc() const
+        {
+            return !name.empty() && widht > 0 && height > 0;
+        }
+
+        inline bool IsValid() const
+        {
+            return !name.empty() && widht > 0 && height > 0 && renderTarget != nullptr;
+        }
+
+        static std::string shadowMap;
     };
 
     /**
@@ -63,7 +74,7 @@ NXS_NAMESPACE
         RenderPass() = default;
         virtual ~RenderPass();
 
-        virtual bool Init() { return true; }
+        virtual bool Init();
 
         //! Pass name. Mainly used for debugging purposes.
         std::string name;
@@ -80,7 +91,7 @@ NXS_NAMESPACE
          * @brief Optional offscreen render target for this pass.
          * If targetType is Offscreen, this must be set.
          */
-        std::string offscreenTargetName;
+        AttachmentDesc offscreenTarget;
         //! A list of offscreen render targets that this pass reads/samples from
         Array<std::string> readTargets;
 
@@ -99,9 +110,6 @@ NXS_NAMESPACE
         std::function<void(RenderSystem&)> onBegin = nullptr;
         std::function<void(RenderSystem&)> onEnd = nullptr;
 
-        // Attachments and other advanced settings
-        Array<AttachmentDesc> attachments;
-
         // Optional layer mask filtering. 0 => all layers.
         uint32_t layerMask = 0;
 
@@ -111,10 +119,21 @@ NXS_NAMESPACE
         /**< @brief Release all resources held by this render pass. */
         void ReleaseResources();
 
-        // Map this pass to a concrete RenderingInterface state (GL/VK).
-        // These functions are designed to be called by the renderer.
-        void Begin(RenderSystem& rs) const;
-        void End(RenderSystem& rs) const;
+        /**
+         * @brief
+         *
+         * @param rs
+         * @param sampleTargets A list of offscreen targets from the previous passes
+         */
+        void Begin(RenderSystem& rs, const Array<AttachmentDesc>& sampleTargets);
+        /**
+         * @brief
+         *
+         * @param rs
+         * @param outTargets The render pass will append its own @c offscreenTarget
+         * to the output parameter.
+         */
+        void End(RenderSystem& rs, Array<AttachmentDesc>& outTargets);
         virtual void SetShaderParams(GpuProgram& gpuProgram, const SceneNode& scene, const ViewContext& viewCtx) const;
 
         virtual bool IsPassFiltered(Ref<const Mesh> mesh) const { return false; }
@@ -142,7 +161,13 @@ NXS_NAMESPACE
         static void SetShadowMapParams(GpuProgram& gpuProgram);
 
     private:
-        virtual void Begin_Internal(RenderSystem& rs) const {}
-        virtual void End_Internal(RenderSystem& rs) const {}
+        virtual void Begin_Internal(RenderSystem& rs) {}
+        virtual void End_Internal(RenderSystem& rs) {}
+
+        /**
+         * @brief A list of offscreen targets that this pass might read/sample
+         * from. @see readTargets)
+         */
+        Array<AttachmentDesc> m_sampleTargets;
     };
 }

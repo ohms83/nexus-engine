@@ -2,7 +2,7 @@
 #include "nexus/container/Array.h"
 
 #include "nexus/graphics/RenderSystem.h"
-#include "nexus/serialize/Serializer.h"
+#include "nexus/graphics/GpuResourceFactory.h"
 
 #include "nexus/scene/SceneNode.h"
 #include "nexus/scene/component/CameraComponent.h"
@@ -17,21 +17,41 @@
 
 #include "Remotery.h"
 
+#include <ranges>
+
 USING_NAMESPACE_NXS;
 
 DEFINE_LOG(RenderPass);
+
+std::string AttachmentDesc::shadowMap = "shadowmap";
 
 RenderPass::~RenderPass()
 {
     ReleaseResources();
 }
 
+bool RenderPass::Init()
+{
+    if (targetType == RenderTargetType::Offscreen)
+    {
+        // offscreenTargetName can't be invalid if the targetType is RenderTargetType::Offscreen
+        NXS_ASSERT(offscreenTarget.IsValidDesc());
+        offscreenTarget.renderTarget = GetGpuResourceFactory()->CreateRenderTarget(
+            offscreenTarget.widht,
+            offscreenTarget.height,
+            true
+        );
+    }
+    return true;
+}
+
 void RenderPass::ReleaseResources()
 {
     pipelineState.globalShader = nullptr;
+    offscreenTarget.renderTarget.reset();
 }
 
-void RenderPass::Begin(RenderSystem& rs) const
+void RenderPass::Begin(RenderSystem& rs, const Array<AttachmentDesc>& sampleTargets)
 {
     rmt_ScopedCPUSample(RenderPass_BeginRenderPass, 0);
     auto renderInterface = rs.GetRenderInterface();
@@ -41,14 +61,29 @@ void RenderPass::Begin(RenderSystem& rs) const
     renderInterface->DebugMarker(name);
     renderInterface->SetGlobalShader(pipelineState.globalShader);
 
+    // Only sample the designated offscreen targets
+    m_sampleTargets.clear();
+    for (const auto& attachment : sampleTargets)
+    {
+        const auto it = std::ranges::find(readTargets, attachment.name);
+        if (it != readTargets.end()) {
+            m_sampleTargets.push_back(attachment);
+        }
+    }
+
     Begin_Internal(rs);
 
     // Hook
     if (onBegin) onBegin(rs);
 }
 
-void RenderPass::End(RenderSystem& rs) const
+void RenderPass::End(RenderSystem& rs, Array<AttachmentDesc>& outTargets)
 {
+    if (targetType == RenderTargetType::Offscreen &&
+        offscreenTarget.renderTarget != nullptr)
+    {
+        outTargets.push_back(offscreenTarget);
+    }
     // Reset the global shader.
     rs.GetRenderInterface()->SetGlobalShader(nullptr);
     End_Internal(rs);

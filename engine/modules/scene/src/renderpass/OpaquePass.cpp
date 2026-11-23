@@ -9,4 +9,7 @@ OpaquePass::OpaquePass()
     pipelineState.depthTest = true;
     pipelineState.depthWrite = true;
     pipelineState.depthFunction = DepthFunction::LesserOrEqual;
+    readTargets = {
+        AttachmentDesc::shadowMap
+    };
 }
