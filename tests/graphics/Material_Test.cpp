@@ -11,7 +11,11 @@ namespace
     public:
         void Bind() override {}
         bool IsBinding() const override { return false; }
-        bool SetUniformInt(const std::string&, int32_t) override { return true; }
+        bool SetUniformInt(const std::string& name, int32_t value) override
+        {
+            if (name == "_Material.receiveShadows") receiveShadows = static_cast<float>(value);
+            return true;
+        }
         bool SetUniformVector(const std::string&, const glm::vec3&) override { return true; }
         bool SetUniformFloat(const std::string& name, float value) override
         {
