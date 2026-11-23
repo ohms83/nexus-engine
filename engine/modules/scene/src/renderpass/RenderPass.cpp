@@ -149,7 +149,10 @@ void RenderPass::SetDirectLightParams(GpuProgram& gpuProgram, const SceneNode& s
             continue;
         }
         const auto direction = nodePtr->GetGlobalOrientation() * light.direction;
-        shadowLightIndex = node.id == shadowLightId ? numLight : -1;
+        if (node.id == shadowLightId)
+        {
+            shadowLightIndex = numLight;
+        }
         gpuProgram.SetUniformVector(uniformLocationColor, light.properties.color);
         gpuProgram.SetUniformVector(uniformLocationDirection, glm::normalize(direction));
         gpuProgram.SetUniformFloat(uniformLocationDiffuse, light.properties.diffuseIntensity);

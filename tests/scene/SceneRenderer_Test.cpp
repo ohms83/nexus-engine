@@ -47,11 +47,6 @@ namespace
     class CountingRenderer final : public SceneRenderer
     {
     public:
-        bool Init(const IGpuResourceFactory& factory) override
-        {
-            return SceneRenderer::Init(factory);
-        }
-
         explicit CountingRenderer(bool fails)
         {
             if (fails) RegisterRenderPass(RenderPassQueue::Opaque, std::make_shared<FailedInitPass>());
@@ -99,6 +94,7 @@ namespace
         using SceneRenderer::SetDirectLightParams;
         using SceneRenderer::SetShadowMapParams;
         const glm::mat4& LightSpaceMatrix() const { return m_lightSpaceMatrix; }
+        Identifier ShadowLightId() const { return m_shadowLightId; }
     };
 
     class ViewTestProgram final : public GpuProgram
@@ -390,7 +386,7 @@ TEST(SceneRendererShadowTest, SelectsEnabledLightAndUpdatesShaderIndex)
     RenderSystem renderSystem(rendering);
     ShadowTestRenderer renderer(program);
     renderer.RenderDirectionalShadowMap(renderSystem, *scene);
-    renderer.SetDirectLightParams(*program, *scene);
+    renderer.SetDirectLightParams(*program, *scene, renderer.ShadowLightId());
     renderer.SetShadowMapParams(*program);
     EXPECT_EQ(rendering->draws, 1);
     EXPECT_EQ(program->ints["_NumDirectLight"], 2);
@@ -399,13 +395,13 @@ TEST(SceneRendererShadowTest, SelectsEnabledLightAndUpdatesShaderIndex)
 
     first->properties.canCastShadows = true;
     renderer.RenderDirectionalShadowMap(renderSystem, *scene);
-    renderer.SetDirectLightParams(*program, *scene);
+    renderer.SetDirectLightParams(*program, *scene, renderer.ShadowLightId());
     EXPECT_EQ(rendering->draws, 2);
     EXPECT_EQ(program->ints["_ShadowLightIndex"], 0);
 
     firstNode->Activate(false);
     renderer.RenderDirectionalShadowMap(renderSystem, *scene);
-    renderer.SetDirectLightParams(*program, *scene);
+    renderer.SetDirectLightParams(*program, *scene, renderer.ShadowLightId());
     EXPECT_EQ(rendering->draws, 3);
     EXPECT_EQ(program->ints["_NumDirectLight"], 1);
     EXPECT_EQ(program->ints["_ShadowLightIndex"], 0);
@@ -413,7 +409,7 @@ TEST(SceneRendererShadowTest, SelectsEnabledLightAndUpdatesShaderIndex)
     lightA->Properties().canCastShadows = false;
     lightB->Properties().canCastShadows = false;
     renderer.RenderDirectionalShadowMap(renderSystem, *scene);
-    renderer.SetDirectLightParams(*program, *scene);
+    renderer.SetDirectLightParams(*program, *scene, NXS_INVALID_ID);
     renderer.SetShadowMapParams(*program);
     EXPECT_EQ(rendering->draws, 3);
     EXPECT_EQ(program->ints["_ShadowLightIndex"], -1);
