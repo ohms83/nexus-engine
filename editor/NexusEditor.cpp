@@ -8,6 +8,7 @@
 
 #include "nexus/Engine.h"
 #include "nexus/graphics/Model.h"
+#include "nexus/graphics/GpuResourceFactory.h"
 #include "nexus/editor/widget/PropertyWindow.h"
 
 #include "utils/CameraUtils.h"
@@ -131,6 +132,8 @@ bool NexusEditor::Init_Internal()
     auto& renderSystem = GetRenderSystem();
     renderSystem.GetRenderInterface()->SetClearColor(0x303030ff);
 
+    auto renderer = std::make_unique<nxs::ForwardSceneRenderer>(GetRenderSystem());
+    renderer->Init(*nxs::GetGpuResourceFactory());
     auto sceneManager = engine.GetSceneManager();
     auto scene = sceneManager->EmplaceAndChange<nxs::Scene>("Editor Scene");
     scene->SetRenderer(std::make_unique<nxs::ForwardSceneRenderer>(GetRenderSystem()));

@@ -417,15 +417,16 @@ void SceneRenderer::SetShadowMapParams(GpuProgram& gpuProgram) const
 }
 
 
-bool SceneRenderer::Init()
+bool SceneRenderer::Init(const IGpuResourceFactory& factory)
 {
     if (m_initialized) return true;
+
     for (auto& [queue, pass] : m_passesByQueue)
     {
-        if (!pass->Init()) return false;
+        if (!pass->Init(factory)) return false;
     }
 
-    m_skyboxRenderer = NewPtr<SkyboxRenderer>(*GetGpuResourceFactory());
+    m_skyboxRenderer = NewPtr<SkyboxRenderer>(factory);
     return m_initialized = true;
 }
 

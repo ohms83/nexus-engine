@@ -35,7 +35,10 @@ NXS_NAMESPACE
     {
     public:
         virtual ~SceneRenderer() = default;
-        bool Init();
+
+        virtual bool Init(const IGpuResourceFactory& factory);
+        bool IsInit() const { return m_initialized; }
+
         virtual void Render(RenderSystem& renderSystem, const Scene& scene);
 
         void RegisterRenderPass(RenderPassQueue queue, Ref<RenderPass> renderPass)

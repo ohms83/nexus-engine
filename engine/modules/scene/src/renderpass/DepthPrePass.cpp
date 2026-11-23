@@ -46,17 +46,6 @@ DepthPrePass::DepthPrePass()
     };
 }
 
-bool DepthPrePass::Init()
-{
-    const auto* factory = GetGpuResourceFactory();
-    if (!factory)
-    {
-        LOG_ERROR(LogDepthPrePass, "Cannot initialize the depth pre-pass without a GPU resource factory.");
-        return false;
-    }
-    return Init(*factory);
-}
-
 bool DepthPrePass::Init(const IGpuResourceFactory& factory)
 {
     if (pipelineState.globalShader) return true;

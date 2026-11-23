@@ -9,8 +9,7 @@ NXS_NAMESPACE
     public:
         DepthPrePass();
 
-        bool Init() override;
-        bool Init(const IGpuResourceFactory& factory);
+        bool Init(const IGpuResourceFactory& factory) override;
 
         bool IsPassFiltered(Ref<const Mesh> mesh) const override
         {

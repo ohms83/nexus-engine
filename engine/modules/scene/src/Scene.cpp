@@ -60,8 +60,8 @@ void Scene::Render(RenderSystem &renderSystem) const
 
 void Scene::SetRenderer(Ref<SceneRenderer> renderer)
 {
-    if (renderer && !renderer->Init()) {
-        LOG_ERROR(LogScene, "Failed to initialize scene renderer");
+    if (renderer && !renderer->IsInit()) {
+        LOG_ERROR(LogScene, "Scene renderer hasn't yet been initialized!");
         return;
     }
     m_renderer = std::move(renderer);

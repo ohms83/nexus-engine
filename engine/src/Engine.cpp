@@ -37,19 +37,22 @@ NXS_NAMESPACE
 
 Engine& Engine::Initialize(WindowContext window, const GraphicsConfig& graphicsConfig)
 {
-    s_engine = std::make_unique<Engine>();
-    s_engine->m_renderSystem = std::make_shared<RenderSystem>(window, graphicsConfig);
-    s_engine->m_taskScheduler = std::make_shared<TaskScheduler>(std::make_shared<StandardTimeSource>());
-    s_engine->m_sceneManager =  std::make_shared<SceneManager>(
+    s_engine = NewPtr<Engine>();
+    s_engine->m_renderSystem = NewRef<RenderSystem>(window, graphicsConfig);
+    s_engine->m_taskScheduler = NewRef<TaskScheduler>(NewRef<StandardTimeSource>());
+
+    auto renderer = NewRef<ForwardSceneRenderer>(*s_engine->GetRenderSystem());
+    renderer->Init(*GetGpuResourceFactory());
+    s_engine->m_sceneManager =  NewRef<SceneManager>(
         s_engine->GetTaskScheduler(),
-        std::make_unique<ForwardSceneRenderer>(*s_engine->GetRenderSystem())
+        renderer
     );
 
-    auto resourceManager = std::make_shared<ResourceManager>();
-    resourceManager->RegisterLoader(typeid(Texture), std::make_unique<TextureLoader>());
-    resourceManager->RegisterLoader(typeid(Shader), std::make_unique<ShaderLoader>());
-    resourceManager->RegisterLoader(typeid(Material), std::make_unique<MaterialLoader>(s_engine->GetRenderingInterface(), *resourceManager));
-    resourceManager->RegisterLoader(typeid(Model), std::make_unique<ModelLoader>(resourceManager));
+    auto resourceManager = NewRef<ResourceManager>();
+    resourceManager->RegisterLoader(typeid(Texture), NewPtr<TextureLoader>());
+    resourceManager->RegisterLoader(typeid(Shader), NewPtr<ShaderLoader>());
+    resourceManager->RegisterLoader(typeid(Material), NewPtr<MaterialLoader>(s_engine->GetRenderingInterface(), *resourceManager));
+    resourceManager->RegisterLoader(typeid(Model), NewPtr<ModelLoader>(resourceManager));
     s_engine->m_resourceManager = resourceManager;
 
     InitModules();

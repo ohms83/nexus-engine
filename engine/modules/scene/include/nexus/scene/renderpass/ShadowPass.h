@@ -10,7 +10,7 @@ NXS_NAMESPACE
         ShadowPass();
         virtual ~ShadowPass() = default;
 
-        bool Init() override;
+        bool Init(const IGpuResourceFactory& factory) override;
 
     private:
         void Begin_Internal(RenderSystem& rs) override;

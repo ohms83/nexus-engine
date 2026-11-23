@@ -74,7 +74,7 @@ NXS_NAMESPACE
         RenderPass() = default;
         virtual ~RenderPass();
 
-        virtual bool Init();
+        virtual bool Init(const IGpuResourceFactory& factory);
 
         //! Pass name. Mainly used for debugging purposes.
         std::string name;
@@ -135,6 +135,7 @@ NXS_NAMESPACE
          */
         void End(RenderSystem& rs, Array<AttachmentDesc>& outTargets);
         virtual void SetShaderParams(GpuProgram& gpuProgram, const SceneNode& scene, const ViewContext& viewCtx) const;
+        const Array<AttachmentDesc>& GetSampleTargets() const { return m_sampleTargets; }
 
         virtual bool IsPassFiltered(Ref<const Mesh> mesh) const { return false; }
 

@@ -41,12 +41,18 @@ namespace
     class FailedInitPass final : public RenderPass
     {
     public:
-        bool Init() override { return false; }
+        bool Init(const IGpuResourceFactory& factory) override { return false; }
     };
 
     class CountingRenderer final : public SceneRenderer
     {
     public:
+        bool Init(const IGpuResourceFactory& factory) override
+        {
+            m_initialized = true;
+            return true;
+        }
+
         explicit CountingRenderer(bool fails)
         {
             if (fails) RegisterRenderPass(RenderPassQueue::Opaque, std::make_shared<FailedInitPass>());
@@ -321,9 +327,12 @@ TEST(SceneRendererTest, FailedRendererInitializationKeepsPreviousRenderer)
 {
     auto scene = std::make_shared<Scene>("scene");
     auto rendering = std::make_shared<FakeRendering>();
+    FakeGpuResourceFactory factory;
     RenderSystem renderSystem(rendering);
     auto previous = std::make_shared<CountingRenderer>(false);
     auto failing = std::make_shared<CountingRenderer>(true);
+    previous->Init(factory);
+    failing->Init(factory);
 
     scene->SetRenderer(previous);
     scene->SetRenderer(failing);

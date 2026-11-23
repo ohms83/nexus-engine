@@ -20,8 +20,13 @@ ShadowPass::ShadowPass()
     pipelineState.depthFunction = DepthFunction::LesserOrEqual;
 }
 
-bool ShadowPass::Init()
+bool ShadowPass::Init(const IGpuResourceFactory& factory)
 {
+    if (!RenderPass::Init(factory))
+    {
+        enabled = false;
+        return false;
+    }
     if (!offscreenTarget.IsValid() || offscreenTarget.name != AttachmentDesc::shadowMap)
     {
         LOG_ERROR(LogShadowPass, "Failed to create a directional shadow map render target.");
@@ -43,7 +48,7 @@ bool ShadowPass::Init()
         #version 330 core
         void main() {}
     )";
-    if (!shader->CompileFromSource(vertexSource, fragmentSource, ""))
+    if (!shader->CompileFromSource(factory, vertexSource, fragmentSource, ""))
     {
         LOG_ERROR(LogShadowPass, "Failed to compile the directional shadow map shader.");
         return false;

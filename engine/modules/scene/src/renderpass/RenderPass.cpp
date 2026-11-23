@@ -30,13 +30,13 @@ RenderPass::~RenderPass()
     ReleaseResources();
 }
 
-bool RenderPass::Init()
+bool RenderPass::Init(const IGpuResourceFactory& factory)
 {
     if (targetType == RenderTargetType::Offscreen)
     {
         // offscreenTargetName can't be invalid if the targetType is RenderTargetType::Offscreen
         NXS_ASSERT(offscreenTarget.IsValidDesc());
-        offscreenTarget.renderTarget = GetGpuResourceFactory()->CreateRenderTarget(
+        offscreenTarget.renderTarget = factory.CreateRenderTarget(
             offscreenTarget.widht,
             offscreenTarget.height,
             true
