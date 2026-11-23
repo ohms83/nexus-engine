@@ -44,7 +44,6 @@ DepthPrePass::DepthPrePass()
         { GpuProgram::Type::Vertex, s_depthVertexShader },
         { GpuProgram::Type::Fragment, s_depthFragmentShader }
     };
-    filterType = "opaque";
 }
 
 bool DepthPrePass::Init()

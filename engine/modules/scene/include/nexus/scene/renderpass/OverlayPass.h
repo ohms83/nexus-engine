@@ -14,7 +14,6 @@ NXS_NAMESPACE
             pipelineState.depthTest = false;
             pipelineState.depthWrite = false;
             pipelineState.overrideBlendMode = BlendMode::Alpha;
-            filterType = "overlay";
         }
 
         bool IsPassFiltered(Ref<const Mesh> mesh) const override

@@ -57,7 +57,7 @@ NXS_NAMESPACE
      * @brief Represents a single render pass in the rendering pipeline.
      * 
      */
-    class RenderPass : public ISerializeable
+    class RenderPass
     {
     public:
         RenderPass() = default;
@@ -94,8 +94,6 @@ NXS_NAMESPACE
 
         // Filtering: a pass can decide which objects to render using this callback.
         std::function<bool(const RenderCommand& command)> filter = nullptr;
-        //! A name or preset to deserialize a filter (serializable). Valid values: "opaque", "alpha", "overlay", and "all"
-        std::string filterType = "all";
 
         // Optional lifecycle hooks, called at the start / end of the pass.
         std::function<void(RenderSystem&)> onBegin = nullptr;
@@ -119,36 +117,6 @@ NXS_NAMESPACE
         void End(RenderSystem& rs) const;
         virtual void SetShaderParams(GpuProgram& gpuProgram, const SceneNode& scene, const ViewContext& viewCtx) const;
 
-        // Serialization helpers
-        VariantData Serialize() const override;
-        MAYBE_UNUSED bool Deserialize(const VariantData& data) override;
-        /**
-         * @brief Resolve referenced resources such as shaders. This must be called after deserialization.
-         */
-        void Resolve(RenderingInterface& renderingInterface);
-
-        /**
-         * @brief Check if the render pass has been resolved.
-         * 
-         * @return true, if resolved; otherwise, false.
-         */
-        bool IsResolved() const
-        {
-            return pipelineState.globalShader != nullptr;
-        }
-
-        /**
-         * @brief Set the filter by type preset.
-         * 
-         * @param type A string representing the filter type. Valid values are "opaque", "alpha", and "all".
-         */
-        void SetFilterType(std::string type);
-
-        bool IsPassFiltered(const RenderCommand& cmd) const
-        {
-            return !filter || filter(cmd);
-        }
-
         virtual bool IsPassFiltered(Ref<const Mesh> mesh) const { return false; }
 
         /**
@@ -165,16 +133,16 @@ NXS_NAMESPACE
             const Array<SceneNode*>& visibleNodes,
             Array<RenderCommand>& outCommands) const {}
         
-        protected:
-            static bool IsNodeActive(const SceneNodeComponent& nodeComp);
-            static void SetAmbientLightParams(GpuProgram& gpuProgram, const entt::registry& registry);
-            static void SetDirectLightParams(GpuProgram& gpuProgram, const SceneNode& scene, int32_t shadowLightId = -1);
-            static void SetPointLightParams(GpuProgram& gpuProgram, const SceneNode& scene);
-            static void SetCameraUniforms(GpuProgram& gpuProgram, const glm::vec3& cameraPos, const glm::mat4& viewMtx, const glm::mat4& projectionMtx);
-            static void SetShadowMapParams(GpuProgram& gpuProgram);
+    protected:
+        static bool IsNodeActive(const SceneNodeComponent& nodeComp);
+        static void SetAmbientLightParams(GpuProgram& gpuProgram, const entt::registry& registry);
+        static void SetDirectLightParams(GpuProgram& gpuProgram, const SceneNode& scene, int32_t shadowLightId = -1);
+        static void SetPointLightParams(GpuProgram& gpuProgram, const SceneNode& scene);
+        static void SetCameraUniforms(GpuProgram& gpuProgram, const glm::vec3& cameraPos, const glm::mat4& viewMtx, const glm::mat4& projectionMtx);
+        static void SetShadowMapParams(GpuProgram& gpuProgram);
 
-        private:
-            virtual void Begin_Internal(RenderSystem& rs) const {}
-            virtual void End_Internal(RenderSystem& rs) const {}
+    private:
+        virtual void Begin_Internal(RenderSystem& rs) const {}
+        virtual void End_Internal(RenderSystem& rs) const {}
     };
 }
