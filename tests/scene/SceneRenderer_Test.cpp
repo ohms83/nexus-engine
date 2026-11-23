@@ -49,8 +49,7 @@ namespace
     public:
         bool Init(const IGpuResourceFactory& factory) override
         {
-            m_initialized = true;
-            return true;
+            return SceneRenderer::Init(factory);
         }
 
         explicit CountingRenderer(bool fails)
