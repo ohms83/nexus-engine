@@ -107,6 +107,9 @@ NXS_NAMESPACE
         // Optional layer mask filtering. 0 => all layers.
         uint32_t layerMask = 0;
 
+        // TODO: Refactor to support multiple shadow casters
+        Identifier shadowLightId = NXS_INVALID_ID;
+
         /**< @brief Release all resources held by this render pass. */
         void ReleaseResources();
 
@@ -164,10 +167,11 @@ NXS_NAMESPACE
         
         protected:
             static bool IsNodeActive(const SceneNodeComponent& nodeComp);
-            static void SetAmbientLightParams(Ref<GpuProgram> gpuProgram, const entt::registry& registry);
-            static void SetDirectLightParams(Ref<GpuProgram> gpuProgram, const SceneNode& scene, int32_t shadowLightId = -1);
-            static void SetPointLightParams(Ref<GpuProgram> gpuProgram, const SceneNode& scene);
-            static void SetCameraUniforms(Ref<GpuProgram> gpuProgram, const glm::vec3& cameraPos, const glm::mat4& viewMtx, const glm::mat4& projectionMtx);
+            static void SetAmbientLightParams(GpuProgram& gpuProgram, const entt::registry& registry);
+            static void SetDirectLightParams(GpuProgram& gpuProgram, const SceneNode& scene, int32_t shadowLightId = -1);
+            static void SetPointLightParams(GpuProgram& gpuProgram, const SceneNode& scene);
+            static void SetCameraUniforms(GpuProgram& gpuProgram, const glm::vec3& cameraPos, const glm::mat4& viewMtx, const glm::mat4& projectionMtx);
+            static void SetShadowMapParams(GpuProgram& gpuProgram);
 
         private:
             virtual void Begin_Internal(RenderSystem& rs) const {}
