@@ -19,6 +19,7 @@
 
 #define RENDER_PASS_DEPTH_FILL  0
 #define RENDER_PASS_OPAQUE      1000
+#define RENDER_PASS_ENVIRONMENT 1500
 #define RENDER_PASS_ALPHA       2000
 #define RENDER_PASS_OVERLAY     10000
 
@@ -32,6 +33,7 @@ NXS_NAMESPACE
     {
         DepthFill   = RENDER_PASS_DEPTH_FILL,
         Opaque      = RENDER_PASS_OPAQUE,
+        Environment = RENDER_PASS_ENVIRONMENT,
         Alpha       = RENDER_PASS_ALPHA,
         Overlay     = RENDER_PASS_OVERLAY
     };
@@ -134,11 +136,20 @@ NXS_NAMESPACE
          * to the output parameter.
          */
         void End(RenderSystem& rs, Array<AttachmentDesc>& outTargets);
-        virtual void SetShaderParams(GpuProgram& gpuProgram, const SceneNode& scene, const ViewContext& viewCtx) const;
+
+        virtual void Render(RenderSystem& rs, const ViewContext& viewCtx, const Scene& scene);
+
         const Array<AttachmentDesc>& GetSampleTargets() const { return m_sampleTargets; }
 
         virtual bool IsPassFiltered(Ref<const Mesh> mesh) const { return false; }
-
+        /**
+         * @brief Create a render command
+         * 
+         * @param viewCtx 
+         * @return Array<RenderCommand> A list of generated commands or an empty list if
+         * the queue type is mismatched.
+         */
+        virtual Array<RenderCommand> CreateRenderCommands(const ViewContext& viewCtx) const;
         /**
          * @brief Hook for passes to inject non-mesh commands (e.g. debug gizmos) for a view.
          *

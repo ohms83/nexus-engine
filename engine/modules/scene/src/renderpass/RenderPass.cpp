@@ -3,8 +3,10 @@
 
 #include "nexus/graphics/RenderSystem.h"
 #include "nexus/graphics/GpuResourceFactory.h"
+#include "nexus/graphics/GraphicsProfiler.h"
 
 #include "nexus/scene/SceneNode.h"
+#include "nexus/scene/Scene.h"
 #include "nexus/scene/component/CameraComponent.h"
 #include "nexus/scene/component/SceneNodeComponent.h"
 #include "nexus/scene/component/TransformComponent.h"
@@ -12,6 +14,8 @@
 #include "nexus/scene/component/LightComponent.h"
 
 #include "nexus/math/Matrix.h"
+
+#include "nexus/memory/OwningBuffer.h"
 
 #include "nexus/debug/Assert.h"
 
@@ -24,6 +28,46 @@ USING_NAMESPACE_NXS;
 DEFINE_LOG(RenderPass);
 
 std::string AttachmentDesc::shadowMap = "shadowmap";
+
+static bool RenderInstancedMesh(RenderSystem& renderSystem, const RenderCommand& command, GpuProgram& gpuProgram)
+{
+    rmt_ScopedCPUSample(RenderPass_RenderInstancedMesh, 0);
+    if (command.instanceModels.empty()) return false;
+
+    // Build an OwningBuffer holding all model matrices
+    const auto instanceCount = static_cast<uint32_t>(command.instanceModels.size());
+    const size_t bytes = instanceCount * sizeof(glm::mat4);
+    uint8_t* mem = new uint8_t[bytes];
+    // Copy matrices
+    for (uint32_t i = 0; i < instanceCount; ++i)
+    {
+        std::memcpy(&mem[i * sizeof(glm::mat4)], &command.instanceModels[i], sizeof(glm::mat4));
+    }
+    Ref<IBuffer> instanceBuffer = std::make_shared<OwningBuffer>(mem, bytes);
+
+    // Create instance attributes for mat4 as 4 vec4 attributes (layout locations 10..13)
+    Array<VertexAttribute> attrs;
+    for (int i = 0; i < 4; ++i)
+    {
+        VertexAttribute a;
+        a.type = VertexAttribute::Type::TexCoord0; // type is unused if attribIndex set
+        a.dataType = DataType::Float;
+        a.numElements = 4;
+        a.attribIndex = 10 + i; // locations 10..13
+        a.divisor = 1;
+        attrs.push_back(a);
+    }
+
+    command.vertexBuffer->AttachInstanceStream(std::static_pointer_cast<IBuffer>(instanceBuffer), attrs, BufferUsage::StaticDraw);
+    // Record composition stats for instanced draw
+    GraphicsProfiler::RecordProgramDraw(gpuProgram.GetHandle(), command.indexCount, instanceCount);
+    GraphicsProfiler::RecordMaterialDraw(command.material ? command.material->GetId() : 0, command.indexCount, instanceCount);
+    renderSystem.DrawIndexedInstanced(command.indexBuffer, instanceCount);
+    command.vertexBuffer->DetachInstanceStreams();
+    // free temporary allocation (OwningBuffer::Take took ownership)
+    // OwningBuffer destructor will free it
+    return true;
+}
 
 RenderPass::~RenderPass()
 {
@@ -51,8 +95,58 @@ void RenderPass::ReleaseResources()
     offscreenTarget.renderTarget.reset();
 }
 
+Array<RenderCommand> RenderPass::CreateRenderCommands(const ViewContext& viewCtx) const
+{
+    rmt_ScopedCPUSample(RenderPass_CreateRenderCommands, 0);
+    Array<RenderCommand> commands;
+    for (const auto node : viewCtx.visibleNodes)
+    {
+        const auto meshComp = node->GetComponent<MeshComponent>();
+        if (!meshComp) continue;
+
+        auto mesh = meshComp->GetMesh();
+        if (!mesh || !IsPassFiltered(mesh)) continue;
+
+        const auto& modelMtx = node->GetGlobalAffineTransform();
+        const glm::mat4 &viewProjMtx = viewCtx.viewProjectionMatrix;
+        
+        const auto material = mesh->GetMaterial();
+        const auto meshSphere = mesh->GetSphere();
+        // Transform sphere's center to world using only a model matrix
+        const glm::vec3 worldCenter = glm::vec3(modelMtx * glm::vec4(meshSphere.center, 1.0f));
+        // Transform only the world's z and w coordinates to the clipping plane;
+        // eliminates unnecessary x and y transform.
+        const float z = viewProjMtx[0][2] * worldCenter.x + viewProjMtx[1][2] * worldCenter.y + viewProjMtx[2][2] * worldCenter.z + viewProjMtx[3][2];
+        const float w = viewProjMtx[0][3] * worldCenter.x + viewProjMtx[1][3] * worldCenter.y + viewProjMtx[2][3] * worldCenter.z + viewProjMtx[3][3];
+        const float clipZ = z / w;
+        const bool translucent = (material->blendMode != BlendMode::None);
+        const uint32_t materialId = 0x7FFFFFFF & material->GetId();
+        const float depthN = clipZ; // normalized in -1..1
+        const float depthNormalized = (depthN + 1.0f) * 0.5f;
+        RenderCommand cmd;
+        cmd.vertexBuffer = mesh->GetVertexBuffer();
+        cmd.indexBuffer = mesh->GetIndexBuffer();
+        cmd.indexCount = mesh->GetIndexBuffer()->GetNumIndexDraw();
+        cmd.indexOffset = 0;
+        cmd.vertexOffset = 0;
+        cmd.modelMatrix = modelMtx;
+        cmd.layerMask = 0xFFFFFFFFu;
+        cmd.material = material;
+        cmd.SetSortKey(
+            translucent,
+            materialId,
+            commandSortType == CommandSortType::FrontToBack ? depthNormalized : 1.0f - depthNormalized);
+
+        commands.push_back(cmd);        
+    }
+    return commands;
+}
+
 void RenderPass::Begin(RenderSystem& rs, const Array<AttachmentDesc>& sampleTargets)
 {
+    rmt_BeginCPUSampleDynamic(name.c_str(), 0);
+    rmt_BeginOpenGLSampleDynamic(name.c_str());
+
     rmt_ScopedCPUSample(RenderPass_BeginRenderPass, 0);
     auto renderInterface = rs.GetRenderInterface();
     // NOTE: Pipeline state should be applied before anything.
@@ -90,6 +184,81 @@ void RenderPass::End(RenderSystem& rs, Array<AttachmentDesc>& outTargets)
     // Offscreen target is unbound by the caller (RenderPass/RenderSystem).
     // Hook
     if (onEnd) onEnd(rs);
+
+    rmt_EndOpenGLSample();
+    rmt_EndCPUSample();
+}
+
+void RenderPass::Render(RenderSystem& rs, const ViewContext& viewCtx, const Scene& scene)
+{
+    Array<RenderCommand> commands = CreateRenderCommands(viewCtx);
+
+    {
+        rmt_ScopedCPUSample(RenderPass_SortMeshes, 0)
+        std::ranges::sort(commands, [](const RenderCommand& a, const RenderCommand& b) {
+            return a.sortKey < b.sortKey;
+        });
+    }
+
+    Ref<GpuProgram> globalShader = pipelineState.globalShader;
+    {
+        rmt_ScopedCPUSample(RenderPass_RenderMeshes, 0)
+        Ref<GpuProgram> usingProgram = nullptr;
+        Ref<Material> usingMaterial = nullptr;
+        for (const auto& cmd : commands)
+        {
+            if (!cmd.material) continue;
+            auto material = cmd.material;
+
+            Ref<GpuProgram> gpuProgram = nullptr;
+            if (globalShader) {
+                gpuProgram = globalShader;
+            }
+            else {
+                if (usingMaterial != material)
+                {
+                    gpuProgram = material->Use();
+                    GraphicsProfiler::RecordMaterialSwitching(material->GetId());
+                    usingMaterial = material;
+                }
+                else
+                {
+                    gpuProgram = material->GetGpuProgram();
+                }
+            }
+            NXS_ASSERT_MSG(gpuProgram, "No shader program available for rendering");
+
+            if (gpuProgram != usingProgram)
+            {
+                if (!gpuProgram->IsBinding()) gpuProgram->Bind();
+
+                if (gpuProgram->FindUniform("_OutputLinearColor") >= 0)
+                {
+                    gpuProgram->SetUniformInt(
+                        "_OutputLinearColor",
+                        (viewCtx.target ||
+                        rs.GetRenderInterface()->IsFramebufferSRGBSupported()) ? 1 : 0);
+                }
+
+                SetCameraUniforms(*gpuProgram, viewCtx.position, viewCtx.viewMatrix, viewCtx.projectionMatrix);
+                SetAmbientLightParams(*gpuProgram, *scene.GetRegistry());
+                SetDirectLightParams(*gpuProgram, scene, NXS_INVALID_ID);
+                SetPointLightParams(*gpuProgram, scene);
+                // SetShadowMapParams(*gpuProgram);
+                usingProgram = gpuProgram;
+            }
+
+            if (!RenderInstancedMesh(rs, cmd, *gpuProgram))
+            {
+                gpuProgram->SetUniformMatrix("_Model", Matrix::ExpandAffine(cmd.modelMatrix), false);
+                cmd.vertexBuffer->Bind();
+                // Record composition stats
+                GraphicsProfiler::RecordMaterialDraw(material ? material->GetId() : 0, cmd.indexCount, cmd.instanceCount);
+                GraphicsProfiler::RecordProgramDraw(gpuProgram ? gpuProgram->GetHandle() : 0, cmd.indexCount, cmd.instanceCount);
+                rs.DrawIndexed(cmd.indexBuffer);
+            }
+        }
+    }
 }
 
 bool RenderPass::IsNodeActive(const SceneNodeComponent& nodeComp)
@@ -101,15 +270,6 @@ bool RenderPass::IsNodeActive(const SceneNodeComponent& nodeComp)
         return false;
     }
     return node->IsActive();
-}
-
-void RenderPass::SetShaderParams(GpuProgram& gpuProgram, const SceneNode& scene, const ViewContext& viewCtx) const
-{
-    SetCameraUniforms(gpuProgram, viewCtx.position, viewCtx.viewMatrix, viewCtx.projectionMatrix);
-    SetAmbientLightParams(gpuProgram, *scene.GetRegistry());
-    SetDirectLightParams(gpuProgram, scene, shadowLightId);
-    SetPointLightParams(gpuProgram, scene);
-    // SetShadowMapParams(gpuProgram);
 }
 
 void RenderPass::SetAmbientLightParams(GpuProgram& gpuProgram, const entt::registry& registry)

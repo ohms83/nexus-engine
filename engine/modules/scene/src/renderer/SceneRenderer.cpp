@@ -499,8 +499,6 @@ void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
         for (const auto& queuedPass : viewPasses.passes)
         {
             const auto pass = queuedPass.pass;
-            rmt_BeginCPUSampleDynamic(pass->name.c_str(), 0);
-            rmt_BeginOpenGLSampleDynamic(pass->name.c_str());
 
             pass->Begin(renderSystem, offscreenTargets);
             commands.clear();
@@ -508,7 +506,7 @@ void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
             const auto globalShader = pass->pipelineState.globalShader;
 
             rmt_BeginCPUSample(SceneRenderer_CreateRenderCommands, 0);
-            for (const auto node : viewCtx.visibleNodes)
+            for (const auto node : visibleNodes)
             {
                 const auto meshComp = node->GetComponent<MeshComponent>();
                 if (!meshComp) continue;
@@ -594,9 +592,6 @@ void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
                 }
             }
             pass->End(renderSystem, offscreenTargets);
-
-            rmt_EndOpenGLSample();
-            rmt_EndCPUSample();
         }
 
         if (viewCtx.target) {
