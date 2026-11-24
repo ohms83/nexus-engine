@@ -296,7 +296,7 @@ TEST_F(ShaderGeneratorTest, ForwardLightingShadersUseFramebufferColorManagement)
     }
 }
 
-TEST_F(ShaderGeneratorTest, ForwardLightingShadersUseSelectedShadowLightAndReceiverFlag)
+TEST_F(ShaderGeneratorTest, ForwardLightingShadersSelectShadowLightsAndRespectReceiverFlag)
 {
     const auto shaderDir = std::filesystem::path(NXS_ENGINE_ASSETS_DIR) / "shaders/glsl";
     for (const auto* shaderName : {
@@ -309,8 +309,16 @@ TEST_F(ShaderGeneratorTest, ForwardLightingShadersUseSelectedShadowLightAndRecei
     {
         std::string vs, fs, gs;
         ASSERT_TRUE(shaderGen.GenerateShaderSource((shaderDir / shaderName).string(), vs, fs, gs)) << shaderName;
-        EXPECT_NE(fs.find("uniform int _ShadowLightIndex;"), std::string::npos) << shaderName;
-        EXPECT_NE(fs.find("receiveShadows > 0.0 && i == _ShadowLightIndex"), std::string::npos) << shaderName;
+        if (std::string(shaderName) == "pbr_forward_lighting.shader")
+        {
+            EXPECT_NE(fs.find("_Material.receiveShadows > 0.0 && 1 == _DirectLights[i].properties.castShadow"),
+                std::string::npos) << shaderName;
+        }
+        else
+        {
+            EXPECT_NE(fs.find("uniform int _ShadowLightIndex;"), std::string::npos) << shaderName;
+            EXPECT_NE(fs.find("receiveShadows > 0.0 && i == _ShadowLightIndex"), std::string::npos) << shaderName;
+        }
     }
 }
 

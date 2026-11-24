@@ -196,6 +196,7 @@ void RenderPass::Render(RenderSystem& rs, const ViewContext& viewCtx)
 {
     const Scene& scene = *m_sceneCtx.scene;
     Array<RenderCommand> commands = CreateRenderCommands(viewCtx);
+    AppendCommands(rs, viewCtx.visibleNodes, commands);
 
     {
         rmt_ScopedCPUSample(RenderPass_SortMeshes, 0)
