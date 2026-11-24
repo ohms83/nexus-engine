@@ -496,6 +496,7 @@ void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
 
         // TODO: Append the offscreen targets from the ShadowPass
         Array<AttachmentDesc> offscreenTargets;
+#if 0
         for (const auto& queuedPass : viewPasses.passes)
         {
             const auto pass = queuedPass.pass;
@@ -593,7 +594,15 @@ void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
             }
             pass->End(renderSystem, offscreenTargets);
         }
-
+#else
+        for (const auto& queuedPass : viewPasses.passes)
+        {
+            auto& pass = queuedPass.pass;
+            pass->Begin(renderSystem, offscreenTargets);
+            pass->Render(renderSystem, viewCtx, scene);
+            pass->End(renderSystem, offscreenTargets);
+        }
+#endif
         if (viewCtx.target) {
             viewCtx.target->Unbind(renderSystem);
         }
