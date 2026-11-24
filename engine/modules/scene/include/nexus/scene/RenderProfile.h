@@ -16,11 +16,12 @@ NXS_NAMESPACE
      */
     enum class CullingFlags : uint32_t
     {
-        None    = 0x00,       //!< Do not exclude any queue.
-        Opaque  = 0x01,       //!< Exclude the opaque queue.
-        Alpha   = 0x02,       //!< Exclude the alpha queue.
-        Overlay = 0x04,       //!< Exclude the overlay queue.
-        All     = 0xFFFFFFFF, //!< Set all bits, including currently undefined bits.
+        None        = 0x00,       //!< Do not exclude any queue.
+        Opaque      = 0x01,       //!< Exclude the opaque queue.
+        Environment = 0x02,       //!< Exclude the environment queue.
+        Alpha       = 0x04,       //!< Exclude the alpha queue.
+        Overlay     = 0x08,       //!< Exclude the overlay queue.
+        All         = 0xFFFFFFFF, //!< Set all bits, including currently undefined bits.
     };
 
     /**
@@ -104,6 +105,7 @@ NXS_NAMESPACE
             r.VisitBool("Depth Fill", depthFill);
             r.VisitBitfield("Culling", culling, {
                 {"Opaque", static_cast<uint32_t>(CullingFlags::Opaque)},
+                {"Environment", static_cast<uint32_t>(CullingFlags::Environment)},
                 {"Alpha", static_cast<uint32_t>(CullingFlags::Alpha)},
                 {"Overlay", static_cast<uint32_t>(CullingFlags::Overlay)}
             });

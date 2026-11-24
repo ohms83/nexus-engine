@@ -1,4 +1,4 @@
-#include "nexus/scene/renderer/SkyboxRenderer.h"
+#include "nexus/scene/renderpass/EnvironmentPass.h"
 #include "nexus/graphics/GpuResourceFactory.h"
 #include "nexus/graphics/RenderSystem.h"
 #include "nexus/graphics/CubeTexture.h"
@@ -36,8 +36,15 @@ namespace
             FragColor = texture(_Skybox, TexCoord0);
         }
     )";
+}
 
-    PipelineState pipelineState = {
+DEFINE_LOG(EnvironmentPass);
+
+EnvironmentPass::EnvironmentPass()
+{
+    name = "Environment Pass";
+    commandSortType = CommandSortType::FrontToBack;
+    pipelineState = {
         .depthTest = true,
         .depthWrite = false,
         .depthFunction = DepthFunction::LesserOrEqual,
@@ -46,18 +53,30 @@ namespace
     };
 }
 
-SkyboxRenderer::SkyboxRenderer(const IGpuResourceFactory& gpuFactory)
+bool EnvironmentPass::Init(const IGpuResourceFactory& factory)
 {
-    m_skybox = PrimitiveMesh::CreateBox("skybox", glm::vec3(1.0f), gpuFactory);
-    m_shader = gpuFactory.CreateGpuProgram();
-    m_shader->BeginCompile()
+    if (!Base::Init(factory)) {
+        return false;
+    }
+
+    m_skybox = PrimitiveMesh::CreateBox("skybox", glm::vec3(1.0f), factory);
+    m_skyboxShader = factory.CreateGpuProgram();
+    if (!m_skyboxShader) {
+        LOG_ERROR(LogEnvironmentPass, "Can't create skybox's shader!!");
+        return false;
+    }
+    m_skyboxShader->BeginCompile()
         .AddSource(vs, GpuProgram::Type::Vertex)
         .AddSource(fs, GpuProgram::Type::Fragment)
         .Compile();
+    return true;
 }
 
-void SkyboxRenderer::Render(RenderSystem &rs, const Scene &scene)
+void EnvironmentPass::Render(RenderSystem & rs, const ViewContext & viewCtx)
 {
+    Base::Render(rs, viewCtx);
+    
+    auto& scene = *m_sceneCtx.scene;
     auto cubemap = scene.Skybox();
     if (!cubemap) return;
 
@@ -74,10 +93,10 @@ void SkyboxRenderer::Render(RenderSystem &rs, const Scene &scene)
     auto vertexBuffer = m_skybox->GetVertexBuffer();
     auto indexBuffer = m_skybox->GetIndexBuffer();
 
-    m_shader->Bind();
-    m_shader->SetUniformTextureCube("_Skybox", cubemap, 0);
-    m_shader->SetUniformMatrix("_View", viewPoint->GetViewMatrix(), false);
-    m_shader->SetUniformMatrix("_Projection", viewPoint->GetProjectionMatrix(), false);
+    m_skyboxShader->Bind();
+    m_skyboxShader->SetUniformTextureCube("_Skybox", cubemap, 0);
+    m_skyboxShader->SetUniformMatrix("_View", viewPoint->GetViewMatrix(), false);
+    m_skyboxShader->SetUniformMatrix("_Projection", viewPoint->GetProjectionMatrix(), false);
 
     cubemap->Bind();
     vertexBuffer->Bind();
@@ -85,6 +104,5 @@ void SkyboxRenderer::Render(RenderSystem &rs, const Scene &scene)
 
     // Draw skybox
     auto rhi = rs.GetRenderInterface();
-    rhi->ApplyPipelineState(pipelineState);
     rs.DrawIndexed(indexBuffer);
 }

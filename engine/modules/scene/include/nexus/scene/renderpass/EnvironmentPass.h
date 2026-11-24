@@ -12,8 +12,12 @@ NXS_NAMESPACE
      */
     class EnvironmentPass final : public RenderPass
     {
+        NXS_INHERIT(RenderPass);
     public:
+        EnvironmentPass();
         bool Init(const IGpuResourceFactory& factory) override;
+
+        void Render(RenderSystem& rs, const ViewContext& viewCtx) override;
 
     private:
         // Skybox

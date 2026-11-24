@@ -7,7 +7,6 @@
 #include <format>
 #include <algorithm>
 #include <cmath>
-#include <cstring>
 #include <limits>
 
 #include "nexus/debug/Logger.h"
@@ -224,8 +223,6 @@ bool SceneRenderer::Init(const IGpuResourceFactory& factory)
     {
         if (!pass->Init(factory)) return false;
     }
-
-    m_skyboxRenderer = NewPtr<SkyboxRenderer>(factory);
     return m_initialized = true;
 }
 
@@ -278,6 +275,7 @@ void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
         };
         addPass(RenderPassQueue::DepthFill, renderProfile.depthFill);
         addPass(RenderPassQueue::Opaque, !renderProfile.IsCull(CullingFlags::Opaque));
+        addPass(RenderPassQueue::Environment, !renderProfile.IsCull(CullingFlags::Environment));
         addPass(RenderPassQueue::Alpha, !renderProfile.IsCull(CullingFlags::Alpha));
         addPass(RenderPassQueue::Overlay, !renderProfile.IsCull(CullingFlags::Overlay));
         std::ranges::sort(viewPasses.passes, {}, &QueuedRenderPass::priority);
@@ -306,7 +304,4 @@ void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
             viewCtx.target->Unbind(renderSystem);
         }
     }
-
-    // TODO: Should be rendered after Opaque pass and before Alpha pass.
-    m_skyboxRenderer->Render(renderSystem, scene);
 }
