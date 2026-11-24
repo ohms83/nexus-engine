@@ -58,16 +58,8 @@ NXS_NAMESPACE
             m_renderTargets[name] = target;
         }
 
-        static bool IsSphereInside(const Frustum& viewFustrum, const Sphere& sphere, glm::mat4 modelMtx, const glm::vec3& scale);
-
     protected:
-        static bool RenderInstancedMesh(RenderSystem& renderSystem, const RenderCommand& command, GpuProgram& gpuProgram);
-        static void SetAmbientLightParams(GpuProgram& gpuProgram, const entt::registry& registry);
-        static void SetDirectLightParams(GpuProgram& gpuProgram, const SceneNode& scene);
-        static void SetPointLightParams(GpuProgram& gpuProgram, const SceneNode& scene);
-        static void SetCameraUniforms(GpuProgram& gpuProgram, const glm::vec3& cameraPos, const glm::mat4& viewMtx, const glm::mat4& projectionMtx);
         void RenderDirectionalShadowMap(RenderSystem& renderSystem, SceneRenderingContext& sceneCtx);
-        void SetShadowMapParams(GpuProgram& gpuProgram, const SceneRenderingContext& sceneCtx) const;
 
         HashMap<std::string, Ref<RenderTarget>> m_renderTargets;
         Ref<RenderTarget> m_shadowMap;
