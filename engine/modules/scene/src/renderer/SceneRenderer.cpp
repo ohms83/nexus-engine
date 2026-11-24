@@ -129,11 +129,10 @@ void SceneRenderer::SetAmbientLightParams(GpuProgram& gpuProgram, const entt::re
     gpuProgram.SetUniformVector("_AmbientLight", color);
 }
 
-void SceneRenderer::SetDirectLightParams(GpuProgram& gpuProgram, const SceneNode& scene, int32_t shadowLightId)
+void SceneRenderer::SetDirectLightParams(GpuProgram& gpuProgram, const SceneNode& scene)
 {
     rmt_ScopedCPUSample(SceneRenderer_SetDirectLightParams, 0);
     int32_t numLight = 0;
-    int32_t shadowLightIndex = -1;
     const auto registry = scene.GetRegistry();
     for (const auto view = registry->view<SceneNodeComponent, DirectLightComponent>(); const auto& [entity, node, light] : view.each())
     {
@@ -147,6 +146,7 @@ void SceneRenderer::SetDirectLightParams(GpuProgram& gpuProgram, const SceneNode
         const auto uniformLocationSpecular = std::format("{}.properties.specularIntensity", uniformLocation);
         const auto uniformLocationCutoff = std::format("{}.properties.cutoff", uniformLocation);
         const auto uniformLocationDirection = std::format("{}.direction", uniformLocation);
+        const auto uniformLocationShadow = std::format("{}.castShadow", uniformLocation);
         rmt_EndCPUSample();
 
         rmt_BeginCPUSample(EmplaceUniformValues, 0);
@@ -158,21 +158,17 @@ void SceneRenderer::SetDirectLightParams(GpuProgram& gpuProgram, const SceneNode
             continue;
         }
         const auto direction = nodePtr->GetGlobalOrientation() * light.direction;
-        if (node.id == shadowLightId)
-        {
-            shadowLightIndex = numLight;
-        }
         gpuProgram.SetUniformVector(uniformLocationColor, light.properties.color);
         gpuProgram.SetUniformVector(uniformLocationDirection, glm::normalize(direction));
         gpuProgram.SetUniformFloat(uniformLocationDiffuse, light.properties.diffuseIntensity);
         gpuProgram.SetUniformFloat(uniformLocationSpecular, light.properties.specularIntensity);
         gpuProgram.SetUniformFloat(uniformLocationCutoff, light.properties.cutoffRange);
+        gpuProgram.SetUniformInt(uniformLocationShadow, light.properties.canCastShadows ? 1 : 0);
         rmt_EndCPUSample();
 
         numLight++;
     }
     gpuProgram.SetUniformInt("_NumDirectLight", numLight);
-    gpuProgram.SetUniformInt("_ShadowLightIndex", shadowLightIndex);
 }
 
 void SceneRenderer::SetPointLightParams(GpuProgram& gpuProgram, const SceneNode& scene)
@@ -191,6 +187,7 @@ void SceneRenderer::SetPointLightParams(GpuProgram& gpuProgram, const SceneNode&
         const auto uniformLocationDiffuse = std::format("{}.properties.diffuseIntensity", uniformLocation);
         const auto uniformLocationSpecular = std::format("{}.properties.specularIntensity", uniformLocation);
         const auto uniformLocationCutOff = std::format("{}.cutoff", uniformLocation);
+        const auto uniformLocationShadow = std::format("{}.castShadow", uniformLocation);
         const auto uniformLocationPosition = std::format("{}.position", uniformLocation);
         const auto uniformLocationConst = std::format("{}.constant", uniformLocation);
         const auto uniformLocationLinear = std::format("{}.linear", uniformLocation);
@@ -209,6 +206,7 @@ void SceneRenderer::SetPointLightParams(GpuProgram& gpuProgram, const SceneNode&
         gpuProgram.SetUniformFloat(uniformLocationDiffuse, light.properties.diffuseIntensity);
         gpuProgram.SetUniformFloat(uniformLocationSpecular, light.properties.specularIntensity);
         gpuProgram.SetUniformFloat(uniformLocationCutOff, light.properties.cutoffRange);
+        gpuProgram.SetUniformInt(uniformLocationShadow, light.properties.canCastShadows ? 1 : 0);
         gpuProgram.SetUniformFloat(uniformLocationConst, light.constant);
         gpuProgram.SetUniformFloat(uniformLocationLinear, light.linear);
         gpuProgram.SetUniformFloat(uniformLocationQuad, light.quadratic);
@@ -227,12 +225,12 @@ void SceneRenderer::SetCameraUniforms(GpuProgram& gpuProgram, const glm::vec3& c
     gpuProgram.SetUniformMatrix("_Projection", projectionMtx, false);
 }
 
-void SceneRenderer::RenderDirectionalShadowMap(RenderSystem& renderSystem, const Scene& scene)
+void SceneRenderer::RenderDirectionalShadowMap(RenderSystem& renderSystem, SceneRenderingContext& sceneCtx)
 {
     rmt_ScopedCPUSample(SceneRenderer_RenderDirectionalShadowMap, 0);
     m_shadowMapReady = false;
     m_shadowLightId = 0;
-    const auto& registry = *scene.GetRegistry();
+    const auto& registry = *sceneCtx.scene->GetRegistry();
 
     SceneNode* lightNode = nullptr;
     const DirectLightComponent* shadowLight = nullptr;
@@ -401,10 +399,16 @@ void SceneRenderer::RenderDirectionalShadowMap(RenderSystem& renderSystem, const
     m_shadowMap->Unbind(renderSystem);
     m_shadowLightId = lightNode->GetId();
     m_shadowMapReady = true;
+
+    sceneCtx.shadowMaps.emplace_back(ShadowMap {
+        .lightSpaceMatrix = m_lightSpaceMatrix,
+        .depthMap = m_shadowMap->GetDepthTextureProxy()
+    });
 }
 
-void SceneRenderer::SetShadowMapParams(GpuProgram& gpuProgram) const
+void SceneRenderer::SetShadowMapParams(GpuProgram& gpuProgram, const SceneRenderingContext& sceneCtx) const
 {
+#if 0
     rmt_ScopedCPUSample(SceneRenderer_SetShadowMapParams, 0);
     gpuProgram.SetUniformInt("_HasShadowMap", m_shadowMapReady ? 1 : 0);
     if (!m_shadowMapReady)
@@ -417,6 +421,25 @@ void SceneRenderer::SetShadowMapParams(GpuProgram& gpuProgram) const
         "_ShadowMap",
         m_shadowMap->GetDepthTextureProxy(),
         15);
+#else
+    rmt_ScopedCPUSample(RenderPass_SetShadowMapParams, 0);
+    const bool hasShadowMap = !sceneCtx.shadowMaps.empty() ;
+    gpuProgram.SetUniformInt("_HasShadowMap", 1);
+    if (!hasShadowMap) 
+    {
+        return;
+    }
+
+    for (const auto& shadowMap : sceneCtx.shadowMaps)
+    {
+        // TODO: Support multiple light sources
+        gpuProgram.SetUniformMatrix("_LightSpaceMatrix", shadowMap.lightSpaceMatrix, false);
+        gpuProgram.SetUniformTexture2D(
+            "_ShadowMap",
+            shadowMap.depthMap,
+            15);
+    }
+#endif
 }
 
 
@@ -437,7 +460,11 @@ void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
 {
     rmt_ScopedCPUSample(SceneRenderer_Render, 0);
 
-    RenderDirectionalShadowMap(renderSystem, scene);
+    SceneRenderingContext sceneCtx = {
+        .scene = &scene
+    };
+
+    RenderDirectionalShadowMap(renderSystem, sceneCtx);
 
     Array<RenderCommand> commands;
     commands.reserve(1024);
@@ -501,7 +528,7 @@ void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
         {
             const auto pass = queuedPass.pass;
 
-            pass->Begin(renderSystem, offscreenTargets);
+            pass->Begin(renderSystem, sceneCtx);
             commands.clear();
             const auto& visibleNodes = viewCtx.visibleNodes;
             const auto globalShader = pass->pipelineState.globalShader;
@@ -575,9 +602,9 @@ void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
 
                         SetCameraUniforms(*gpuProgram, viewCtx.position, viewCtx.viewMatrix, viewCtx.projectionMatrix);
                         SetAmbientLightParams(*gpuProgram, *scene.GetRegistry());
-                        SetDirectLightParams(*gpuProgram, scene, m_shadowMapReady ? m_shadowLightId : NXS_INVALID_ID);
+                        SetDirectLightParams(*gpuProgram, scene);
                         SetPointLightParams(*gpuProgram, scene);
-                        SetShadowMapParams(*gpuProgram);
+                        SetShadowMapParams(*gpuProgram, sceneCtx);
                         usingProgram = gpuProgram;
                     }
 
@@ -592,15 +619,15 @@ void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
                     }
                 }
             }
-            pass->End(renderSystem, offscreenTargets);
+            pass->End(renderSystem, sceneCtx);
         }
 #else
         for (const auto& queuedPass : viewPasses.passes)
         {
             auto& pass = queuedPass.pass;
-            pass->Begin(renderSystem, offscreenTargets);
-            pass->Render(renderSystem, viewCtx, scene);
-            pass->End(renderSystem, offscreenTargets);
+            pass->Begin(renderSystem, sceneCtx);
+            pass->Render(renderSystem, viewCtx);
+            pass->End(renderSystem, sceneCtx);
         }
 #endif
         if (viewCtx.target) {

@@ -142,7 +142,7 @@ Array<RenderCommand> RenderPass::CreateRenderCommands(const ViewContext& viewCtx
     return commands;
 }
 
-void RenderPass::Begin(RenderSystem& rs, const Array<AttachmentDesc>& sampleTargets)
+void RenderPass::Begin(RenderSystem& rs, const SceneRenderingContext& sceneCtx)
 {
     rmt_BeginCPUSampleDynamic(name.c_str(), 0);
     rmt_BeginOpenGLSampleDynamic(name.c_str());
@@ -155,9 +155,12 @@ void RenderPass::Begin(RenderSystem& rs, const Array<AttachmentDesc>& sampleTarg
     renderInterface->DebugMarker(name);
     renderInterface->SetGlobalShader(pipelineState.globalShader);
 
+    m_sceneCtx = sceneCtx;
+    NXS_ASSERT(m_sceneCtx.scene != nullptr);
+
     // Only sample the designated offscreen targets
     m_sampleTargets.clear();
-    for (const auto& attachment : sampleTargets)
+    for (const auto& attachment : sceneCtx.offscreenTargets)
     {
         const auto it = std::ranges::find(readTargets, attachment.name);
         if (it != readTargets.end()) {
@@ -171,12 +174,12 @@ void RenderPass::Begin(RenderSystem& rs, const Array<AttachmentDesc>& sampleTarg
     if (onBegin) onBegin(rs);
 }
 
-void RenderPass::End(RenderSystem& rs, Array<AttachmentDesc>& outTargets)
+void RenderPass::End(RenderSystem& rs, SceneRenderingContext& sceneCtx)
 {
     if (targetType == RenderTargetType::Offscreen &&
         offscreenTarget.renderTarget != nullptr)
     {
-        outTargets.push_back(offscreenTarget);
+        sceneCtx.offscreenTargets.push_back(offscreenTarget);
     }
     // Reset the global shader.
     rs.GetRenderInterface()->SetGlobalShader(nullptr);
@@ -189,8 +192,9 @@ void RenderPass::End(RenderSystem& rs, Array<AttachmentDesc>& outTargets)
     rmt_EndCPUSample();
 }
 
-void RenderPass::Render(RenderSystem& rs, const ViewContext& viewCtx, const Scene& scene)
+void RenderPass::Render(RenderSystem& rs, const ViewContext& viewCtx)
 {
+    const Scene& scene = *m_sceneCtx.scene;
     Array<RenderCommand> commands = CreateRenderCommands(viewCtx);
 
     {
@@ -244,7 +248,7 @@ void RenderPass::Render(RenderSystem& rs, const ViewContext& viewCtx, const Scen
                 SetAmbientLightParams(*gpuProgram, *scene.GetRegistry());
                 SetDirectLightParams(*gpuProgram, scene, NXS_INVALID_ID);
                 SetPointLightParams(*gpuProgram, scene);
-                // SetShadowMapParams(*gpuProgram);
+                SetShadowMapParams(*gpuProgram, m_sceneCtx);
                 usingProgram = gpuProgram;
             }
 
@@ -284,7 +288,6 @@ void RenderPass::SetDirectLightParams(GpuProgram& gpuProgram, const SceneNode& s
 {
     rmt_ScopedCPUSample(RenderPass_SetDirectLightParams, 0);
     int32_t numLight = 0;
-    int32_t shadowLightIndex = -1;
     const auto registry = scene.GetRegistry();
     for (const auto view = registry->view<SceneNodeComponent, DirectLightComponent>(); const auto& [entity, node, light] : view.each())
     {
@@ -298,32 +301,29 @@ void RenderPass::SetDirectLightParams(GpuProgram& gpuProgram, const SceneNode& s
         const auto uniformLocationSpecular = std::format("{}.properties.specularIntensity", uniformLocation);
         const auto uniformLocationCutoff = std::format("{}.properties.cutoff", uniformLocation);
         const auto uniformLocationDirection = std::format("{}.direction", uniformLocation);
+        const auto uniformLocationShadow = std::format("{}.castShadow", uniformLocation);
         rmt_EndCPUSample();
 
         rmt_BeginCPUSample(EmplaceUniformValues, 0);
         SceneNode* nodePtr = SceneNode::FindNode(node.id);
         if (!nodePtr)
         {
-            LOG_ERROR(LogRenderPass, std::format("RenderPass::SetDirectLightParams: SceneNode with ID {} not found.", node.id));
+            LOG_ERROR(LogSceneRenderer, std::format("SceneRenderer::SetDirectLightParams: SceneNode with ID {} not found.", node.id));
             rmt_EndCPUSample();
             continue;
         }
         const auto direction = nodePtr->GetGlobalOrientation() * light.direction;
-        if (node.id == shadowLightId)
-        {
-            shadowLightIndex = numLight;
-        }
         gpuProgram.SetUniformVector(uniformLocationColor, light.properties.color);
         gpuProgram.SetUniformVector(uniformLocationDirection, glm::normalize(direction));
         gpuProgram.SetUniformFloat(uniformLocationDiffuse, light.properties.diffuseIntensity);
         gpuProgram.SetUniformFloat(uniformLocationSpecular, light.properties.specularIntensity);
         gpuProgram.SetUniformFloat(uniformLocationCutoff, light.properties.cutoffRange);
+        gpuProgram.SetUniformInt(uniformLocationShadow, light.properties.canCastShadows ? 1 : 0);
         rmt_EndCPUSample();
 
         numLight++;
     }
     gpuProgram.SetUniformInt("_NumDirectLight", numLight);
-    gpuProgram.SetUniformInt("_ShadowLightIndex", shadowLightIndex);
 }
 
 void RenderPass::SetPointLightParams(GpuProgram& gpuProgram, const SceneNode& scene)
@@ -342,6 +342,7 @@ void RenderPass::SetPointLightParams(GpuProgram& gpuProgram, const SceneNode& sc
         const auto uniformLocationDiffuse = std::format("{}.properties.diffuseIntensity", uniformLocation);
         const auto uniformLocationSpecular = std::format("{}.properties.specularIntensity", uniformLocation);
         const auto uniformLocationCutOff = std::format("{}.cutoff", uniformLocation);
+        const auto uniformLocationShadow = std::format("{}.castShadow", uniformLocation);
         const auto uniformLocationPosition = std::format("{}.position", uniformLocation);
         const auto uniformLocationConst = std::format("{}.constant", uniformLocation);
         const auto uniformLocationLinear = std::format("{}.linear", uniformLocation);
@@ -351,7 +352,7 @@ void RenderPass::SetPointLightParams(GpuProgram& gpuProgram, const SceneNode& sc
         rmt_BeginCPUSample(EmplaceUniformValues, 0);
         SceneNode* nodePtr = SceneNode::FindNode(node.id);
         if (!nodePtr) {
-            LOG_ERROR(LogRenderPass, std::format("RenderPass::SetPointLightParams: SceneNode with ID {} not found.", node.id));
+            LOG_ERROR(LogSceneRenderer, std::format("SceneRenderer::SetPointLightParams: SceneNode with ID {} not found.", node.id));
             rmt_EndCPUSample();
             continue;
         }
@@ -360,6 +361,7 @@ void RenderPass::SetPointLightParams(GpuProgram& gpuProgram, const SceneNode& sc
         gpuProgram.SetUniformFloat(uniformLocationDiffuse, light.properties.diffuseIntensity);
         gpuProgram.SetUniformFloat(uniformLocationSpecular, light.properties.specularIntensity);
         gpuProgram.SetUniformFloat(uniformLocationCutOff, light.properties.cutoffRange);
+        gpuProgram.SetUniformInt(uniformLocationShadow, light.properties.canCastShadows ? 1 : 0);
         gpuProgram.SetUniformFloat(uniformLocationConst, light.constant);
         gpuProgram.SetUniformFloat(uniformLocationLinear, light.linear);
         gpuProgram.SetUniformFloat(uniformLocationQuad, light.quadratic);
@@ -378,6 +380,23 @@ void RenderPass::SetCameraUniforms(GpuProgram& gpuProgram, const glm::vec3& came
     gpuProgram.SetUniformMatrix("_Projection", projectionMtx, false);
 }
 
-void RenderPass::SetShadowMapParams(GpuProgram& gpuProgram)
+void RenderPass::SetShadowMapParams(GpuProgram& gpuProgram, const SceneRenderingContext& sceneCtx)
 {
+    rmt_ScopedCPUSample(RenderPass_SetShadowMapParams, 0);
+    const bool hasShadowMap = !sceneCtx.shadowMaps.empty() ;
+    gpuProgram.SetUniformInt("_HasShadowMap", hasShadowMap ? 1 : 0);
+    if (!hasShadowMap) 
+    {
+        return;
+    }
+
+    for (const auto& shadowMap : sceneCtx.shadowMaps)
+    {
+        // TODO: Support multiple light sources
+        gpuProgram.SetUniformMatrix("_LightSpaceMatrix", shadowMap.lightSpaceMatrix, false);
+        gpuProgram.SetUniformTexture2D(
+            "_ShadowMap",
+            shadowMap.depthMap,
+            15);
+    }
 }

@@ -7,6 +7,8 @@ struct Light {
     float diffuseIntensity;
     // Control how this light will affect the specular color.
     float specularIntensity;
+    // Shadow-casting flag.
+    int castShadow;
 };
 
 /**

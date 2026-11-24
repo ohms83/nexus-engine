@@ -66,6 +66,19 @@ NXS_NAMESPACE
         static std::string shadowMap;
     };
 
+    struct ShadowMap
+    {
+        glm::mat4 lightSpaceMatrix;
+        Ref<TextureProxy> depthMap;
+    };
+
+    struct SceneRenderingContext
+    {
+        const Scene* scene = nullptr;
+        Array<AttachmentDesc> offscreenTargets;
+        Array<ShadowMap> shadowMaps;
+    };
+
     /**
      * @brief Represents a single render pass in the rendering pipeline.
      * 
@@ -127,7 +140,7 @@ NXS_NAMESPACE
          * @param rs
          * @param sampleTargets A list of offscreen targets from the previous passes
          */
-        void Begin(RenderSystem& rs, const Array<AttachmentDesc>& sampleTargets);
+        void Begin(RenderSystem& rs, const SceneRenderingContext& sceneCtx);
         /**
          * @brief
          *
@@ -135,9 +148,9 @@ NXS_NAMESPACE
          * @param outTargets The render pass will append its own @c offscreenTarget
          * to the output parameter.
          */
-        void End(RenderSystem& rs, Array<AttachmentDesc>& outTargets);
+        void End(RenderSystem& rs, SceneRenderingContext& sceneCtx);
 
-        virtual void Render(RenderSystem& rs, const ViewContext& viewCtx, const Scene& scene);
+        virtual void Render(RenderSystem& rs, const ViewContext& viewCtx);
 
         const Array<AttachmentDesc>& GetSampleTargets() const { return m_sampleTargets; }
 
@@ -170,7 +183,9 @@ NXS_NAMESPACE
         static void SetDirectLightParams(GpuProgram& gpuProgram, const SceneNode& scene, int32_t shadowLightId = -1);
         static void SetPointLightParams(GpuProgram& gpuProgram, const SceneNode& scene);
         static void SetCameraUniforms(GpuProgram& gpuProgram, const glm::vec3& cameraPos, const glm::mat4& viewMtx, const glm::mat4& projectionMtx);
-        static void SetShadowMapParams(GpuProgram& gpuProgram);
+        static void SetShadowMapParams(GpuProgram& gpuProgram, const SceneRenderingContext& sceneCtx);
+
+        SceneRenderingContext m_sceneCtx {};
 
     private:
         virtual void Begin_Internal(RenderSystem& rs) {}
