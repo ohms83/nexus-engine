@@ -22,6 +22,7 @@ Ref<Mesh> PrimitiveMesh::CreateSphere(
     uint32_t sectorCount,
     uint32_t stackCount,
     const IGpuResourceFactory& gpuResourceFactory,
+    float uvScale,
     Ref<Material> material)
 {
     NXS_ASSERT(sectorCount);
@@ -50,8 +51,8 @@ Ref<Mesh> PrimitiveMesh::CreateSphere(
             glm::vec3 norm = glm::normalize(vertex.position);
             vertex.normal = norm;
 
-            vertex.texCoord0.x = (float)j / sectorCount;
-            vertex.texCoord0.y = (float)i / stackCount;
+            vertex.texCoord0.x = uvScale * (float)j / sectorCount;
+            vertex.texCoord0.y = uvScale * (float)i / stackCount;
 
             vertices[vertexIndex++] = vertex;
         }

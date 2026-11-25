@@ -77,6 +77,7 @@ protected:
                 "Offscreen Cube",
                 glm::vec3(1.5f),
                 *nxs::GetGpuResourceFactory(),
+                1.0f,
                 material));
 
         auto light = m_scene->EmplaceChild<nxs::DirectionalLight>("Sun");

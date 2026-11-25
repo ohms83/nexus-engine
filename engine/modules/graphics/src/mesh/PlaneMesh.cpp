@@ -24,14 +24,15 @@ Ref<Mesh> PrimitiveMesh::CreatePlane(
     std::string name,
     float width, float height,
     const IGpuResourceFactory& gpuResourceFactory,
+    float uvScale,
     Ref<Material> material)
 {
     Array<Vertex> vertices = {
         // Position                             Normal                Texcoord0
-        {{-0.5f * width, 0.0f, -0.5f * height}, { 0.0f, 1.0f, 0.0f }, { 0.0f, 0.0f }},
-        {{-0.5f * width, 0.0f,  0.5f * height}, { 0.0f, 1.0f, 0.0f }, { 0.0f, 1.0f }},
-        {{ 0.5f * width, 0.0f,  0.5f * height}, { 0.0f, 1.0f, 0.0f }, { 1.0f, 1.0f }},
-        {{ 0.5f * width, 0.0f, -0.5f * height}, { 0.0f, 1.0f, 0.0f }, { 1.0f, 0.0f }},
+        {{-0.5f * width, 0.0f, -0.5f * height}, { 0.0f, 1.0f, 0.0f }, uvScale * glm::vec2(0.0f, 0.0f)},
+        {{-0.5f * width, 0.0f,  0.5f * height}, { 0.0f, 1.0f, 0.0f }, uvScale * glm::vec2(0.0f, 1.0f)},
+        {{ 0.5f * width, 0.0f,  0.5f * height}, { 0.0f, 1.0f, 0.0f }, uvScale * glm::vec2(1.0f, 1.0f)},
+        {{ 0.5f * width, 0.0f, -0.5f * height}, { 0.0f, 1.0f, 0.0f }, uvScale * glm::vec2(1.0f, 0.0f)},
     };
     auto vertexData = std::make_shared<OwningBuffer>();
     vertexData->CopyData(

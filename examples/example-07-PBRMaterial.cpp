@@ -221,6 +221,7 @@ private:
                 "Ground Plane",
                 10, 10,
                 *nxs::GetGpuResourceFactory(),
+                1.0f,
                 material
             )
         );

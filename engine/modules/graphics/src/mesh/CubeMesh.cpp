@@ -81,6 +81,7 @@ Ref<Mesh> PrimitiveMesh::CreateBox(
     std::string name,
     const glm::vec3& size,
     const IGpuResourceFactory& gpuResourceFactory,
+    float uvScale,
     Ref<Material> material)
 {
     // Scale the unit cube vertices by the specified size
@@ -91,7 +92,7 @@ Ref<Mesh> PrimitiveMesh::CreateBox(
         Vertex sv;
         sv.position = v.position * size;
         sv.normal = v.normal;
-        sv.texCoord0 = v.texCoord0;
+        sv.texCoord0 = uvScale * v.texCoord0;
         scaledVertices.push_back(sv);
     }
 

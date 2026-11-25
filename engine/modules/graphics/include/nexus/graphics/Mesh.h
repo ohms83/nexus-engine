@@ -110,6 +110,7 @@ NXS_NAMESPACE
             std::string name,
             float width, float height,
             const IGpuResourceFactory& gpuResourceFactory,
+            float uvScale = 1.0f,
             Ref<Material> material = nullptr
         );
 
@@ -117,6 +118,7 @@ NXS_NAMESPACE
             std::string name,
             const glm::vec3& size,
             const IGpuResourceFactory& gpuResourceFactory,
+            float uvScale = 1.0f,
             Ref<Material> material = nullptr
         );
 
@@ -126,6 +128,7 @@ NXS_NAMESPACE
             uint32_t sectorCount,
             uint32_t stackCount,
             const IGpuResourceFactory& gpuResourceFactory,
+            float uvScale = 1.0f,
             Ref<Material> material = nullptr
         );
     };

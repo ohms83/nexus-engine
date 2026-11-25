@@ -55,7 +55,7 @@ TEST_F(MeshTest, PrimitiveCreatePlane)
 {
     auto fakeRendering = std::make_shared<FakeRendering>();
     auto material = resourceManager.Create<Material>("path/to/mat");
-    auto planeMesh = PrimitiveMesh::CreatePlane("plane", 2.0f, 3.0f, *fakeRendering, material);
+    auto planeMesh = PrimitiveMesh::CreatePlane("plane", 2.0f, 3.0f, *fakeRendering, 1.0f, material);
     ASSERT_NE(planeMesh, nullptr);
     EXPECT_EQ(planeMesh->GetName(), "plane");
     ASSERT_NE(planeMesh->GetVertexBuffer(), nullptr);
