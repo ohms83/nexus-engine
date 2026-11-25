@@ -40,8 +40,8 @@ function(nexus_target_defaults TARGET_NAME)
     # Link a single INTERFACE target that provides common compile definitions
     # and include directories to all engine targets.
     target_link_libraries(${TARGET_NAME} PUBLIC nexus-config)
-    # Treat nonportable system include path warnings as errors for Clang/GCC for engine targets only
-    target_compile_options(${TARGET_NAME} PRIVATE $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:GNU>>:-Werror=nonportable-system-include-path>)
+    # Treat nonportable system include path warnings as errors for Clang for engine targets only
+    target_compile_options(${TARGET_NAME} PRIVATE $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-Werror=nonportable-system-include-path>)
     # Platform-specific defines are provided by the nexus-config INTERFACE target.
 endfunction()
 

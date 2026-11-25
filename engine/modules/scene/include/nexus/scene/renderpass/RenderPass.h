@@ -18,6 +18,7 @@
 #include <cstdint>
 
 #define RENDER_PASS_DEPTH_FILL  0
+#define RENDER_PASS_SHADOW      100
 #define RENDER_PASS_OPAQUE      1000
 #define RENDER_PASS_ENVIRONMENT 1500
 #define RENDER_PASS_ALPHA       2000
@@ -32,6 +33,7 @@ NXS_NAMESPACE
     enum class RenderPassQueue
     {
         DepthFill   = RENDER_PASS_DEPTH_FILL,
+        Shadow      = RENDER_PASS_SHADOW,
         Opaque      = RENDER_PASS_OPAQUE,
         Environment = RENDER_PASS_ENVIRONMENT,
         Alpha       = RENDER_PASS_ALPHA,
@@ -134,7 +136,7 @@ NXS_NAMESPACE
          * @param rs
          * @param sampleTargets A list of offscreen targets from the previous passes
          */
-        void Begin(RenderSystem& rs, const SceneRenderingContext& sceneCtx);
+        void Begin(RenderSystem& rs, SceneRenderingContext& sceneCtx);
         /**
          * @brief
          *
@@ -144,7 +146,8 @@ NXS_NAMESPACE
          */
         void End(RenderSystem& rs, SceneRenderingContext& sceneCtx);
 
-        virtual void Render(RenderSystem& rs, const ViewContext& viewCtx);
+        virtual void Render(RenderSystem& rs, const ViewContext& viewCtx, SceneRenderingContext& sceneCtx);
+        virtual void Render(RenderSystem& rs, SceneRenderingContext& sceneCtx) {}
 
         const Array<AttachmentDesc>& GetSampleTargets() const { return m_sampleTargets; }
 
@@ -178,8 +181,6 @@ NXS_NAMESPACE
         static void SetPointLightParams(GpuProgram& gpuProgram, const SceneNode& scene);
         static void SetCameraUniforms(GpuProgram& gpuProgram, const glm::vec3& cameraPos, const glm::mat4& viewMtx, const glm::mat4& projectionMtx);
         static void SetShadowMapParams(GpuProgram& gpuProgram, const SceneRenderingContext& sceneCtx);
-
-        SceneRenderingContext m_sceneCtx {};
 
     private:
         virtual void Begin_Internal(RenderSystem& rs) {}

@@ -221,6 +221,11 @@ bool SceneRenderer::Init(const IGpuResourceFactory& factory)
     {
         if (!pass->Init(factory)) return false;
     }
+
+    for (auto& [queue, pass] : m_perFramePasses)
+    {
+        if (!pass->Init(factory)) return false;
+    }
     return m_initialized = true;
 }
 
@@ -233,6 +238,12 @@ void SceneRenderer::Render(RenderSystem &rs, const Scene &scene)
     };
 
     RenderDirectionalShadowMap(rs, sceneCtx);
+
+    // for (auto& [queue, pass] : m_perFramePasses)
+    // {
+    //     pass->Begin(rs, sceneCtx);
+    //     pass->Render(rs, )
+    // }
 
     Array<RenderCommand> commands;
     commands.reserve(1024);
@@ -293,7 +304,7 @@ void SceneRenderer::Render(RenderSystem &rs, const Scene &scene)
         {
             auto& pass = queuedPass.pass;
             pass->Begin(rs, sceneCtx);
-            pass->Render(rs, viewCtx);
+            pass->Render(rs, viewCtx, sceneCtx);
             pass->End(rs, sceneCtx);
         }
 

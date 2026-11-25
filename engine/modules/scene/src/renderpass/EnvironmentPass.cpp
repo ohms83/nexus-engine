@@ -72,11 +72,11 @@ bool EnvironmentPass::Init(const IGpuResourceFactory& factory)
     return true;
 }
 
-void EnvironmentPass::Render(RenderSystem & rs, const ViewContext & viewCtx)
+void EnvironmentPass::Render(RenderSystem & rs, const ViewContext & viewCtx, SceneRenderingContext& sceneCtx)
 {
-    Base::Render(rs, viewCtx);
+    Base::Render(rs, viewCtx, sceneCtx);
     
-    auto& scene = *m_sceneCtx.scene;
+    auto& scene = *sceneCtx.scene;
     auto cubemap = scene.Skybox();
     if (!cubemap) return;
 

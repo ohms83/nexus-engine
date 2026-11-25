@@ -1,4 +1,11 @@
 #include "nexus/scene/renderpass/ShadowPass.h"
+#include "nexus/scene/component/LightComponent.h"
+#include "nexus/scene/component/SceneNodeComponent.h"
+#include "nexus/scene/component/MeshComponent.h"
+#include "nexus/scene/Scene.h"
+
+#include "nexus/math/Matrix.h"
+#include "nexus/graphics/RenderSystem.h"
 
 USING_NAMESPACE_NXS;
 
@@ -56,6 +63,152 @@ bool ShadowPass::Init(const IGpuResourceFactory& factory)
     return true;
 }
 
-void ShadowPass::Begin_Internal(RenderSystem& rs)
+void ShadowPass::Render(RenderSystem& rs, const ViewContext& viewCtx, SceneRenderingContext& sceneCtx)
 {
+    rmt_ScopedCPUSample(ShadowPass_RenderDirectionalShadowMap, 0);
+    const auto& registry = *sceneCtx.scene->GetRegistry();
+
+    SceneNode* lightNode = nullptr;
+    const DirectLightComponent* shadowLight = nullptr;
+    for (const auto view = registry.view<const SceneNodeComponent, const DirectLightComponent>();
+         const auto& [entity, nodeComponent, light] : view.each())
+    {
+        lightNode = SceneNode::FindNode(nodeComponent.id);
+        if (!lightNode)
+        {
+            LOG_ERROR(LogShadowPass, std::format(
+                "Directional shadow map light node {} was not found.", nodeComponent.id));
+            continue;
+        }
+        if (!lightNode->IsActive()) continue;
+        if (!light.properties.canCastShadows) continue;
+
+        shadowLight = &light;
+        break;
+    }
+
+    if (!shadowLight || !lightNode)
+    {
+        return;
+    }
+
+    const glm::vec3 unnormalizedDirection =
+        lightNode->GetGlobalOrientation() * shadowLight->direction;
+    const float directionLength = glm::length(unnormalizedDirection);
+    if (!std::isfinite(directionLength) || directionLength < 0.000001f)
+    {
+        LOG_WARNING(LogShadowPass, "Directional shadow map is disabled because the light direction is invalid.");
+        return;
+    }
+    const glm::vec3 lightDirection = unnormalizedDirection / directionLength;
+
+    struct ShadowMesh
+    {
+        Ref<Mesh> mesh;
+        glm::mat4 modelMatrix;
+    };
+    Array<ShadowMesh> shadowMeshes;
+    {
+        rmt_ScopedCPUSample(ShadowPass_CalculateLightBounds, 0);
+        glm::vec3 boundsMin(std::numeric_limits<float>::max());
+        glm::vec3 boundsMax(std::numeric_limits<float>::lowest());
+        bool hasBounds = false;
+        for (const auto view = registry.view<const SceneNodeComponent, const MeshComponent>();
+            const auto& [entity, nodeComponent, meshComponent] : view.each())
+        {
+            auto* node = SceneNode::FindNode(nodeComponent.id);
+            const auto mesh = meshComponent.GetMesh();
+            if (!node || !mesh || !node->IsActive()) continue;
+
+            const auto material = mesh->GetMaterial();
+            if (!material || (!material->castShadow && !material->receiveShadows)) continue;
+
+            const glm::mat4 modelMatrix = Matrix::ExpandAffine(node->GetGlobalAffineTransform());
+            const glm::vec3 center = glm::vec3(modelMatrix * glm::vec4(mesh->GetSphere().center, 1.0f));
+            const float maxScale = std::max({
+                glm::length(glm::vec3(modelMatrix[0])),
+                glm::length(glm::vec3(modelMatrix[1])),
+                glm::length(glm::vec3(modelMatrix[2]))});
+            const float radius = std::max(mesh->GetSphere().radius * maxScale, 0.0f);
+            boundsMin = glm::min(boundsMin, center - radius);
+            boundsMax = glm::max(boundsMax, center + radius);
+            if (material->castShadow) shadowMeshes.push_back({mesh, modelMatrix});
+            hasBounds = true;
+        }
+
+        if (!hasBounds || shadowMeshes.empty())
+        {
+            return;
+        }
+
+        const glm::vec3 center = (boundsMin + boundsMax) * 0.5f;
+        const float radius = std::max(glm::length(boundsMax - boundsMin) * 0.5f, 1.0f);
+        const float lightDistance = radius * 2.0f + 10.0f;
+        const glm::vec3 up = std::abs(glm::dot(lightDirection, glm::vec3(0.0f, 1.0f, 0.0f))) > 0.98f
+            ? glm::vec3(0.0f, 0.0f, 1.0f)
+            : glm::vec3(0.0f, 1.0f, 0.0f);
+        const glm::mat4 lightView = glm::lookAt(
+            center - lightDirection * lightDistance,
+            center,
+            up);
+        const glm::mat4 lightProjection = glm::ortho(
+            -radius,
+            radius,
+            -radius,
+            radius,
+            0.1f,
+            lightDistance + radius * 2.0f);
+        m_lightSpaceMatrix = lightProjection * lightView;
+    }
+
+    constexpr uint32_t shadowMapResolution = 2048;
+    if (!m_shadowMap)
+    {
+        const auto desc = TextureDescription::DepthTextureDesc(shadowMapResolution, shadowMapResolution);
+        m_shadowMap = GetGpuResourceFactory()->CreateRenderTarget(desc);
+    }
+    if (!m_shadowMap)
+    {
+        LOG_ERROR(LogSceneRenderer, "Failed to create a directional shadow map render target.");
+        return;
+    }
+
+    m_shadowMap->Bind(rs);
+    auto renderInterface = rs.GetRenderInterface();
+    PipelineState shadowState;
+    shadowState.depthTest = true;
+    shadowState.depthWrite = true;
+    shadowState.depthFunction = DepthFunction::Lesser;
+    shadowState.overrideBlendMode = BlendMode::None;
+    renderInterface->ApplyPipelineState(shadowState);
+    renderInterface->ClearDepth(1.0f);
+    m_shadowProgram->Bind();
+    m_shadowProgram->SetUniformMatrix("_LightSpaceMatrix", m_lightSpaceMatrix, false);
+    
+    {
+        rmt_ScopedCPUSample(ShadowPass_RenderShadowMap, 0);
+        rmt_ScopedOpenGLSample(ShadowPass_RenderShadowMap);
+        for (const auto& shadowMesh : shadowMeshes)
+        {
+            rmt_ScopedCPUSample(ShadowPass_RenderShadowMesh, 0)
+            const auto& mesh = shadowMesh.mesh;
+            if (!mesh->GetVertexBuffer() || !mesh->GetIndexBuffer()) continue;
+
+            const auto indexBuffer = mesh->GetIndexBuffer();
+            m_shadowProgram->SetUniformMatrix(
+                "_Model",
+                shadowMesh.modelMatrix,
+                false);
+            mesh->GetVertexBuffer()->Bind();
+            rs.DrawIndexed(indexBuffer);
+        }
+    }
+
+    m_shadowProgram->Unbind();
+    m_shadowMap->Unbind(rs);
+
+    sceneCtx.shadowMaps.emplace_back(ShadowMap {
+        .lightSpaceMatrix = m_lightSpaceMatrix,
+        .depthMap = m_shadowMap->GetDepthTextureProxy()
+    });
 }

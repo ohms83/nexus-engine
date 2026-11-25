@@ -50,6 +50,17 @@ NXS_NAMESPACE
             return m_passesByQueue[queue];
         }
 
+        void RegisterPerFrameRenderPass(RenderPassQueue queue, Ref<RenderPass> renderPass)
+        {
+            m_perFramePasses[queue] = renderPass;
+        }
+
+        Ref<RenderPass> GetPerFrameRenderPass(RenderPassQueue queue)
+        {
+            if(!m_perFramePasses.contains(queue)) return nullptr;
+            return m_perFramePasses[queue];
+        }
+
         //! Register an offscreen render target which can be referenced by renderpasses.
         void RegisterRenderTarget(const std::string& name, const Ref<RenderTarget>& target)
         {
@@ -78,5 +89,6 @@ NXS_NAMESPACE
     private:
         //! A list of render passes sorted by their priority.
         Dict<RenderPassQueue, Ref<RenderPass>> m_passesByQueue;
+        Dict<RenderPassQueue, Ref<RenderPass>> m_perFramePasses;
     };
 }

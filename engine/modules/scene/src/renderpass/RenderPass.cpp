@@ -138,7 +138,7 @@ Array<RenderCommand> RenderPass::CreateRenderCommands(const ViewContext& viewCtx
     return commands;
 }
 
-void RenderPass::Begin(RenderSystem& rs, const SceneRenderingContext& sceneCtx)
+void RenderPass::Begin(RenderSystem& rs, SceneRenderingContext& sceneCtx)
 {
     rmt_BeginCPUSampleDynamic(name.c_str(), 0);
     rmt_BeginOpenGLSampleDynamic(name.c_str());
@@ -150,9 +150,6 @@ void RenderPass::Begin(RenderSystem& rs, const SceneRenderingContext& sceneCtx)
 
     renderInterface->DebugMarker(name);
     renderInterface->SetGlobalShader(pipelineState.globalShader);
-
-    m_sceneCtx = sceneCtx;
-    NXS_ASSERT(m_sceneCtx.scene != nullptr);
 
     // Only sample the designated offscreen targets
     m_sampleTargets.clear();
@@ -188,9 +185,9 @@ void RenderPass::End(RenderSystem& rs, SceneRenderingContext& sceneCtx)
     rmt_EndCPUSample();
 }
 
-void RenderPass::Render(RenderSystem& rs, const ViewContext& viewCtx)
+void RenderPass::Render(RenderSystem& rs, const ViewContext& viewCtx, SceneRenderingContext& sceneCtx)
 {
-    const Scene& scene = *m_sceneCtx.scene;
+    const Scene& scene = *sceneCtx.scene;
     Array<RenderCommand> commands = CreateRenderCommands(viewCtx);
     AppendCommands(rs, viewCtx.visibleNodes, commands);
 
@@ -245,7 +242,7 @@ void RenderPass::Render(RenderSystem& rs, const ViewContext& viewCtx)
                 SetAmbientLightParams(*gpuProgram, *scene.GetRegistry());
                 SetDirectLightParams(*gpuProgram, scene, NXS_INVALID_ID);
                 SetPointLightParams(*gpuProgram, scene);
-                SetShadowMapParams(*gpuProgram, m_sceneCtx);
+                SetShadowMapParams(*gpuProgram, sceneCtx);
                 usingProgram = gpuProgram;
             }
 

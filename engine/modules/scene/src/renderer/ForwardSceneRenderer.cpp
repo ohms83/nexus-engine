@@ -6,12 +6,15 @@
 #include "nexus/scene/renderpass/EnvironmentPass.h"
 #include "nexus/scene/renderpass/AlphaPass.h"
 #include "nexus/scene/renderpass/OverlayPass.h"
+#include "nexus/scene/renderpass/ShadowPass.h"
 #include "nexus/graphics/GpuResourceFactory.h"
 
 USING_NAMESPACE_NXS;
 
 ForwardSceneRenderer::ForwardSceneRenderer(const RenderSystem& renderSystem)
 {
+    RegisterPerFrameRenderPass(RenderPassQueue::Shadow, NewRef<ShadowPass>());
+
     RegisterRenderPass(RenderPassQueue::DepthFill, NewRef<DepthPrePass>());
     RegisterRenderPass(RenderPassQueue::Opaque, NewRef<OpaquePass>());
     RegisterRenderPass(RenderPassQueue::Environment, NewRef<EnvironmentPass>());
