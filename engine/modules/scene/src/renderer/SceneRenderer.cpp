@@ -284,7 +284,6 @@ void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
 
     for (const auto& viewPasses : views)
     {
-        const auto* view = viewPasses.view;
         const auto& viewCtx = viewPasses.viewCtx;
         if (viewCtx.target) {
             viewCtx.target->Bind(renderSystem);
