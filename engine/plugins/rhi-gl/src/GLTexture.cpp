@@ -107,7 +107,52 @@ void GLTexture::LoadData(TextureTarget target, const uint8_t* data, uint32_t siz
 
 void GLTexture::LoadMipData(const uint8_t* data, uint32_t size, uint32_t mip)
 {
-    // TODO:
+    NXS_ASSERT_MSG(data, "Mip data must not be null.");
+    NXS_ASSERT_MSG(m_desc.numMips == 0 || mip < m_desc.numMips,
+        std::format("Mip level {} is outside the texture's {} mip levels.", mip, m_desc.numMips));
+    NXS_ASSERT_MSG(IsBinding(), "Invalid operation. The texture is unbound.");
+
+    const GLint mipWidth = std::max(1, m_desc.width >> mip);
+    const GLint mipHeight = std::max(1, m_desc.height >> mip);
+    const GLint gl_pixelFormats = GL::NxsPixelFormatToGL(m_desc.format);
+    const GLint gl_internalFormat = GL::ResolveTextureInternalFormat(
+        m_desc.format,
+        m_desc.colorSpace,
+        gl_pixelFormats);
+    const auto gl_dataType = GL::NxsDataToGLenum(m_desc.componentType);
+
+    const size_t bytesPerPixel = m_desc.channels * NxsDataTypeSize(m_desc.componentType);
+    NXS_ASSERT_MSG(size >= static_cast<uint32_t>(mipWidth) * static_cast<uint32_t>(mipHeight) * bytesPerPixel,
+        "Mip data size is smaller than the mip level dimensions.");
+
+    if (m_desc.kind == TextureKind::TextureCube)
+    {
+        for (uint32_t i = 0; i < UINT_CAST(TextureTarget::Num) - 1; ++i)
+        {
+            CALL_GL_FUNC(glTexImage2D(
+                GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+                CAST<GLint>(mip),
+                gl_internalFormat,
+                mipWidth,
+                mipHeight,
+                0,
+                gl_pixelFormats,
+                gl_dataType,
+                data));
+        }
+        return;
+    }
+
+    CALL_GL_FUNC(glTexImage2D(
+        GL_TEXTURE_2D,
+        CAST<GLint>(mip),
+        gl_internalFormat,
+        mipWidth,
+        mipHeight,
+        0,
+        gl_pixelFormats,
+        gl_dataType,
+        data));
 }
 
 void GLTexture::CopyData(const void* data, size_t bytes, const size_t offset)
