@@ -6,6 +6,7 @@
 #include "nexus/scene/renderpass/EnvironmentPass.h"
 #include "nexus/scene/renderpass/AlphaPass.h"
 #include "nexus/scene/renderpass/OverlayPass.h"
+#include "nexus/graphics/GpuResourceFactory.h"
 
 USING_NAMESPACE_NXS;
 
@@ -16,4 +17,10 @@ ForwardSceneRenderer::ForwardSceneRenderer(const RenderSystem& renderSystem)
     RegisterRenderPass(RenderPassQueue::Environment, NewRef<EnvironmentPass>());
     RegisterRenderPass(RenderPassQueue::Alpha, NewRef<AlphaPass>());
     RegisterRenderPass(RenderPassQueue::Overlay, NewRef<OverlayPass>());
+
+    auto* factory = GetGpuResourceFactory();
+    if (factory)
+    {
+        Init(*factory);
+    }
 }

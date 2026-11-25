@@ -76,35 +76,18 @@ NXS_NAMESPACE
             return NewRef<GLGpuProgram>();   
         }
 
-        NODISCARD Ref<RenderTarget> CreateRenderTarget(
-            const uint32_t width,
-            const uint32_t height,
-            const bool depthOnly) const override
+        NODISCARD Ref<RenderTarget> CreateRenderTarget(const TextureDescription& desc) const override
         {
-            TextureDescription colorDesc;
-            colorDesc.width = INT_CAST(width);
-            colorDesc.height = INT_CAST(height);
-            colorDesc.format = depthOnly ? PixelFormat::Depth : PixelFormat::RGBA;
+            const bool depthOnly = !IsColorPixel(desc.format);
+            TextureDescription depthDesc = TextureDescription::DepthTextureDesc(desc.width, desc.height);
 
-            TextureDescription depthDesc;
-            depthDesc.width = INT_CAST(width);
-            depthDesc.height = INT_CAST(height);
-            depthDesc.channels = 1;
-            depthDesc.format = PixelFormat::Depth;
-            depthDesc.filterMin = TextureFilterMode::Nearest;
-            depthDesc.filterMag = TextureFilterMode::Nearest;
-            depthDesc.wrapModeS = TextureWrapMode::ClampToEdge;
-            depthDesc.wrapModeT = TextureWrapMode::ClampToEdge;
-
-            auto colorTexture = depthOnly ? nullptr : CreateTextureProxy(colorDesc);
+            auto colorTexture = depthOnly ? nullptr : CreateTextureProxy(desc);
             auto depthTexture = CreateTextureProxy(depthDesc);
             return NewRef<GLRenderTarget>(
-                width,
-                height,
+                desc.width,
+                desc.height,
                 colorTexture,
-                depthTexture,
-                depthOnly ? PixelFormat::Depth : PixelFormat::RGBA,
-                depthOnly);
+                depthTexture);
         }
     };
 

@@ -136,6 +136,14 @@ NXS_NAMESPACE
         Num
     };
 
+    inline bool IsColorPixel(const PixelFormat format)
+    {
+        return format != PixelFormat::None &&
+            format != PixelFormat::Depth &&
+            format != PixelFormat::Stencil &&
+            format != PixelFormat::DepthStencil;
+    }
+
     template<typename T>
     bool IsA(T* obj)
     {

@@ -10,13 +10,11 @@ NXS_NAMESPACE
     class GLRenderTarget : public RenderTarget
     {
     public:
-        GLRenderTarget(
+        explicit GLRenderTarget(
             uint32_t width,
             uint32_t height,
             Ref<TextureProxy> colorTexture,
-            Ref<TextureProxy> depthTexture,
-            PixelFormat format = PixelFormat::RGBA,
-            bool depthOnly = false);
+            Ref<TextureProxy> depthTexture);
         ~GLRenderTarget() override;
 
         void Bind(RenderSystem& rs) override;
@@ -34,8 +32,6 @@ NXS_NAMESPACE
         Ref<TextureProxy> m_depthTexture;
         uint32_t m_width = 0;
         uint32_t m_height = 0;
-        PixelFormat m_format = PixelFormat::RGBA;
-        bool m_depthOnly = false;
         bool m_initialized = false;
     };
 }

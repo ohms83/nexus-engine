@@ -34,7 +34,7 @@ USING_NAMESPACE_NXS;
 
 DEFINE_LOG(SceneRenderer);
 
-void SceneRenderer::RenderDirectionalShadowMap(RenderSystem& renderSystem, SceneRenderingContext& sceneCtx)
+void SceneRenderer::RenderDirectionalShadowMap(RenderSystem& rs, SceneRenderingContext& sceneCtx)
 {
     rmt_ScopedCPUSample(SceneRenderer_RenderDirectionalShadowMap, 0);
     m_shadowMapReady = false;
@@ -137,10 +137,8 @@ void SceneRenderer::RenderDirectionalShadowMap(RenderSystem& renderSystem, Scene
     constexpr uint32_t shadowMapResolution = 2048;
     if (!m_shadowMap)
     {
-        m_shadowMap = GetGpuResourceFactory()->CreateRenderTarget(
-            shadowMapResolution,
-            shadowMapResolution,
-            true);
+        const auto desc = TextureDescription::DepthTextureDesc(shadowMapResolution, shadowMapResolution);
+        m_shadowMap = GetGpuResourceFactory()->CreateRenderTarget(desc);
     }
     if (!m_shadowMap)
     {
@@ -173,8 +171,8 @@ void SceneRenderer::RenderDirectionalShadowMap(RenderSystem& renderSystem, Scene
         m_shadowProgram = shader->GetGpuProgram();
     }
 
-    m_shadowMap->Bind(renderSystem);
-    auto renderInterface = renderSystem.GetRenderInterface();
+    m_shadowMap->Bind(rs);
+    auto renderInterface = rs.GetRenderInterface();
     PipelineState shadowState;
     shadowState.depthTest = true;
     shadowState.depthWrite = true;
@@ -200,12 +198,12 @@ void SceneRenderer::RenderDirectionalShadowMap(RenderSystem& renderSystem, Scene
                 shadowMesh.modelMatrix,
                 false);
             mesh->GetVertexBuffer()->Bind();
-            renderSystem.DrawIndexed(indexBuffer);
+            rs.DrawIndexed(indexBuffer);
         }
     }
 
     m_shadowProgram->Unbind();
-    m_shadowMap->Unbind(renderSystem);
+    m_shadowMap->Unbind(rs);
     m_shadowLightId = lightNode->GetId();
     m_shadowMapReady = true;
 
@@ -226,7 +224,7 @@ bool SceneRenderer::Init(const IGpuResourceFactory& factory)
     return m_initialized = true;
 }
 
-void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
+void SceneRenderer::Render(RenderSystem &rs, const Scene &scene)
 {
     rmt_ScopedCPUSample(SceneRenderer_Render, 0);
 
@@ -234,7 +232,7 @@ void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
         .scene = &scene
     };
 
-    RenderDirectionalShadowMap(renderSystem, sceneCtx);
+    RenderDirectionalShadowMap(rs, sceneCtx);
 
     Array<RenderCommand> commands;
     commands.reserve(1024);
@@ -286,21 +284,21 @@ void SceneRenderer::Render(RenderSystem &renderSystem, const Scene &scene)
     {
         const auto& viewCtx = viewPasses.viewCtx;
         if (viewCtx.target) {
-            viewCtx.target->Bind(renderSystem);
+            viewCtx.target->Bind(rs);
         }
 
-        viewCtx.ClearView(*renderSystem.GetRenderInterface());
+        viewCtx.ClearView(*rs.GetRenderInterface());
 
         for (const auto& queuedPass : viewPasses.passes)
         {
             auto& pass = queuedPass.pass;
-            pass->Begin(renderSystem, sceneCtx);
-            pass->Render(renderSystem, viewCtx);
-            pass->End(renderSystem, sceneCtx);
+            pass->Begin(rs, sceneCtx);
+            pass->Render(rs, viewCtx);
+            pass->End(rs, sceneCtx);
         }
 
         if (viewCtx.target) {
-            viewCtx.target->Unbind(renderSystem);
+            viewCtx.target->Unbind(rs);
         }
     }
 }

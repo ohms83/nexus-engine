@@ -10,8 +10,7 @@ ShadowPass::ShadowPass()
     targetType = RenderTargetType::Offscreen;
     offscreenTarget = AttachmentDesc {
         .name = AttachmentDesc::shadowMap,
-        .widht = 2048,
-        .height = 2048,
+        .textureDesc = TextureDescription::DepthTextureDesc(2048, 2048),
     };
 
     commandSortType = CommandSortType::FrontToBack;

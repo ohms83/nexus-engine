@@ -60,7 +60,11 @@ protected:
         camera->LookAt(glm::vec3(0), glm::vec3(0, 1, 0));
         camera->SetProjection(45.f, 512.f, 512.f, 0.1f, 100.f);
 
-        m_offscreenTarget = nxs::GetGpuResourceFactory()->CreateRenderTarget(512, 512, false);
+        nxs::TextureDescription desc = {
+            .width = 512,
+            .height = 512,
+        };
+        m_offscreenTarget = nxs::GetGpuResourceFactory()->CreateRenderTarget(desc);
         camera->SetRenderTarget(m_offscreenTarget);
         camera->Properties().profile.clearColor = nxs::Color3F::Black;
 

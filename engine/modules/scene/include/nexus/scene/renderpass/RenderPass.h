@@ -49,18 +49,12 @@ NXS_NAMESPACE
     struct AttachmentDesc
     {
         std::string name;
-        uint32_t widht = 0;
-        uint32_t height = 0;
+        TextureDescription textureDesc;
         Ref<RenderTarget> renderTarget;
-
-        inline bool IsValidDesc() const
-        {
-            return !name.empty() && widht > 0 && height > 0;
-        }
 
         inline bool IsValid() const
         {
-            return !name.empty() && widht > 0 && height > 0 && renderTarget != nullptr;
+            return !name.empty() && textureDesc.IsValidDesc() && renderTarget != nullptr;
         }
 
         static std::string shadowMap;

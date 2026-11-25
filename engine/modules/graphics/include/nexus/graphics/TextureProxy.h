@@ -82,6 +82,13 @@ NXS_NAMESPACE
         uint32_t numMips = 0;
 
         size_t GetBufferSize() const;
+
+        inline bool IsValidDesc() const
+        {
+            return width > 0 && height > 0 && format != PixelFormat::None && channels >= 1;
+        }
+
+        static TextureDescription DepthTextureDesc(int32_t width, int32_t height);
     };
 
     /**

@@ -13,15 +13,11 @@ GLRenderTarget::GLRenderTarget(
     const uint32_t width,
     const uint32_t height,
     Ref<TextureProxy> colorTexture,
-    Ref<TextureProxy> depthTexture,
-    const PixelFormat format,
-    const bool depthOnly)
+    Ref<TextureProxy> depthTexture)
     : m_colorTexture(std::move(colorTexture))
     , m_depthTexture(std::move(depthTexture))
     , m_width(width)
     , m_height(height)
-    , m_format(format)
-    , m_depthOnly(depthOnly)
 {
 }
 
@@ -62,13 +58,19 @@ void GLRenderTarget::Bind(RenderSystem& rs)
             CALL_GL_FUNC(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_colorTexture->GetHandle(), 0));
         }
         CALL_GL_FUNC(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_depthTexture->GetHandle(), 0));
-        if (m_depthOnly)
+        if (!m_colorTexture)
         {
             CALL_GL_FUNC(glDrawBuffer(GL_NONE));
             CALL_GL_FUNC(glReadBuffer(GL_NONE));
         }
         const auto status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-        NXS_ASSERT(status == GL_FRAMEBUFFER_COMPLETE);
+        NXS_ASSERT_MSG(status == GL_FRAMEBUFFER_COMPLETE,
+            std::format(
+                "Render target framebuffer is incomplete (status: 0x{:X}, size: {}x{}, color: {}).",
+                status,
+                m_width,
+                m_height,
+                m_colorTexture != nullptr));
         CALL_GL_FUNC(glBindFramebuffer(GL_FRAMEBUFFER, 0));
         m_initialized = true;
     }

@@ -37,7 +37,7 @@ NXS_NAMESPACE
         virtual bool Init(const IGpuResourceFactory& factory);
         bool IsInit() const { return m_initialized; }
 
-        virtual void Render(RenderSystem& renderSystem, const Scene& scene);
+        virtual void Render(RenderSystem& rs, const Scene& scene);
 
         void RegisterRenderPass(RenderPassQueue queue, Ref<RenderPass> renderPass)
         {
@@ -57,9 +57,17 @@ NXS_NAMESPACE
         }
 
     protected:
-        void RenderDirectionalShadowMap(RenderSystem& renderSystem, SceneRenderingContext& sceneCtx);
+        /**
+         * @brief Render the offscreen buffer to screen.
+         *
+         * @param rs
+         */
+        void RenderToScreen(RenderSystem& rs);
+        void RenderDirectionalShadowMap(RenderSystem& rs, SceneRenderingContext& sceneCtx);
 
         HashMap<std::string, Ref<RenderTarget>> m_renderTargets;
+        //! Main offscreen buffer
+        Ref<RenderTarget> m_screenBuffer;
         Ref<RenderTarget> m_shadowMap;
         Ref<GpuProgram> m_shadowProgram;
         glm::mat4 m_lightSpaceMatrix{1.0f};
