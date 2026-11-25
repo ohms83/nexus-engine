@@ -156,7 +156,7 @@ private:
             }
 
             const uint32_t size = UINT_CAST(width) * UINT_CAST(height) * 3;
-            cubemap->LoadData(CAST<nxs::CubeFace>(i), pixels, size);
+            cubemap->LoadData(CAST<nxs::TextureTarget>(i), pixels, size);
             stbi_image_free(pixels);
         }
 

@@ -27,9 +27,3 @@ TextureProxy::TextureProxy(const TextureDescription& desc)
 {
     
 }
-
-TextureProxy::TextureProxy(const TextureDescription& desc, TextureKind kind)
-    : m_desc(desc)
-{
-    m_desc.kind = kind;
-}

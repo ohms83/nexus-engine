@@ -128,6 +128,10 @@ NXS_NAMESPACE
         Stencil,
         //! 24-bit depth and 8-bit stencil buffer
         DepthStencil,
+        //! 16-bit per color RGB color without alpha
+        RGB_16F,
+        //! 16-bit per color RGBA color.
+        RGBA_16F,
 
         Num
     };

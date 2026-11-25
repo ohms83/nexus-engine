@@ -105,11 +105,6 @@ void GLTexture::LoadData(TextureTarget target, const uint8_t* data, uint32_t siz
         data));
 }
 
-void GLTexture::LoadData(Face face, const uint8_t* data, uint32_t size)
-{
-    LoadData(static_cast<TextureTarget>(UINT_CAST(face) + 1), data, size);
-}
-
 void GLTexture::LoadMipData(const uint8_t* data, uint32_t size, uint32_t mip)
 {
     // TODO:
