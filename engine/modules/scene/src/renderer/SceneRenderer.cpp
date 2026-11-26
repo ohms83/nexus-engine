@@ -183,27 +183,26 @@ void SceneRenderer::Render(RenderSystem &rs, const Scene &scene)
         if (viewCtx.target) {
             viewCtx.target->Bind(rs);
         }
+        else {
+            m_screenBuffer->Bind(rs);
+        }
 
         viewCtx.ClearView(*rs.GetRenderInterface());
 
         for (const auto& queuedPass : viewPasses.passes)
         {
             auto& pass = queuedPass.pass;
-            if (pass->targetType != RenderTargetType::Offscreen) {
-                m_screenBuffer->Bind(rs);
-            }
 
             pass->Begin(rs, sceneCtx);
             pass->Render(rs, viewCtx, sceneCtx);
             pass->End(rs, sceneCtx);
-
-            if (pass->targetType != RenderTargetType::Offscreen) {
-                m_screenBuffer->Unbind(rs);
-            }
         }
 
         if (viewCtx.target) {
             viewCtx.target->Unbind(rs);
+        }
+        else {
+            m_screenBuffer->Unbind(rs);
         }
     }
 
