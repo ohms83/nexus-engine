@@ -133,7 +133,7 @@ bool NexusEditor::Init_Internal()
     renderSystem.GetRenderInterface()->SetClearColor(0x303030ff);
 
     auto renderer = std::make_unique<nxs::ForwardSceneRenderer>(GetRenderSystem());
-    renderer->Init(*nxs::GetGpuResourceFactory(), renderSystem);
+    renderer->Init(nxs::GetGpuResourceFactory(), renderSystem);
     auto sceneManager = engine.GetSceneManager();
     auto scene = sceneManager->EmplaceAndChange<nxs::Scene>("Editor Scene");
     scene->SetRenderer(std::make_unique<nxs::ForwardSceneRenderer>(GetRenderSystem()));

@@ -50,7 +50,7 @@ namespace
     public:
         explicit CountingRenderer(bool fails)
         {
-            if (fails) RegisterRenderPass(RenderPassQueue::Opaque, std::make_shared<FailedInitPass>());
+            if (fails) RegisterRenderPass(RenderPassQueue::Opaque, NewRef<FailedInitPass>());
         }
 
         void Render(RenderSystem&, const Scene&) override { ++renders; }
@@ -90,7 +90,7 @@ namespace
     public:
         Ref<GpuProgram> CreateGpuProgram() const override
         {
-            program = std::make_shared<ShadowTestProgram>();
+            program = NewRef<ShadowTestProgram>();
             return program;
         }
         void ClearDepth(float) override {}
@@ -163,51 +163,53 @@ namespace
 
     Ref<Mesh> MakeShadowTestMesh(const Ref<Material>& material)
     {
-        auto mesh = std::make_shared<Mesh>("test");
+        auto mesh = NewRef<Mesh>("test");
         mesh->SetMaterial(material);
         mesh->SetSphere(Sphere(glm::vec3(0.0f), 1.0f));
-        mesh->SetVertexBuffer(std::make_shared<FakdeVertexBuffer>());
-        mesh->SetIndexBuffer(std::make_shared<FakeIndexBuffer>());
+        mesh->SetVertexBuffer(NewRef<FakdeVertexBuffer>());
+        mesh->SetIndexBuffer(NewRef<FakeIndexBuffer>());
         return mesh;
     }
 }
 
 TEST(SceneRendererTest, ExecutesSelectedPassesPerViewWithFreshCommandsAndClearMasks)
 {
-    auto scene = std::make_shared<Scene>("scene");
+    auto scene = NewRef<Scene>("scene");
     auto first = scene->EmplaceChild<CountingSceneView>("first");
     auto second = scene->EmplaceChild<CountingSceneView>("second");
     auto inactive = scene->EmplaceChild<CountingSceneView>("inactive");
     inactive->Activate(false);
-    auto otherScene = std::make_shared<Scene>("other");
+    auto otherScene = NewRef<Scene>("other");
     auto foreign = otherScene->EmplaceChild<CountingSceneView>("foreign");
-    auto material = std::make_shared<Material>("opaque", 1);
+    auto material = NewRef<Material>("opaque", 1);
     auto mesh = scene->EmplaceChild<SceneNode>("mesh");
     mesh->AddComponent<MeshComponent>()->SetMesh(MakeShadowTestMesh(material));
     first->visibleNodes.push_back(mesh.get());
     second->visibleNodes.push_back(mesh.get());
 
-    auto depth = std::make_shared<ViewTestPass>();
-    auto opaque = std::make_shared<ViewTestPass>();
+    auto depth = NewRef<ViewTestPass>();
+    auto opaque = NewRef<ViewTestPass>();
     first->profile.depthFill = true;
     second->profile.depthFill = true;
     second->profile.culling = CullingFlags::Opaque;
     depth->pipelineState.colorMask = glm::bvec4(false);
     depth->pipelineState.depthWrite = false;
     opaque->pipelineState.colorMask = glm::bvec4(true);
-    depth->pipelineState.globalShader = std::make_shared<ViewTestProgram>();
-    opaque->pipelineState.globalShader = std::make_shared<ViewTestProgram>();
+    depth->pipelineState.globalShader = NewRef<ViewTestProgram>();
+    opaque->pipelineState.globalShader = NewRef<ViewTestProgram>();
     int depthBegins = 0, depthEnds = 0, opaqueBegins = 0, opaqueEnds = 0;
     depth->onBegin = [&](RenderSystem&, SceneRenderingContext&) { ++depthBegins; };
     depth->onEnd = [&](RenderSystem&, SceneRenderingContext&) { ++depthEnds; };
     opaque->onBegin = [&](RenderSystem&, SceneRenderingContext&) { ++opaqueBegins; };
     opaque->onEnd = [&](RenderSystem&, SceneRenderingContext&) { ++opaqueEnds; };
 
+    auto rendering = NewRef<ViewTestRendering>();
+    RenderSystem renderSystem(rendering);
     SceneRenderer renderer;
+    FakeGpuResourceFactory factory;
     renderer.RegisterRenderPass(RenderPassQueue::DepthFill, depth);
     renderer.RegisterRenderPass(RenderPassQueue::Opaque, opaque);
-    auto rendering = std::make_shared<ViewTestRendering>();
-    RenderSystem renderSystem(rendering);
+    renderer.Init(&factory, renderSystem);
     renderer.Render(renderSystem, *scene);
     renderer.Render(renderSystem, *scene);
 
@@ -228,18 +230,20 @@ TEST(SceneRendererTest, ExecutesSelectedPassesPerViewWithFreshCommandsAndClearMa
 
 TEST(SceneRendererTest, EmptyViewStillRunsPassLifecycle)
 {
-    auto scene = std::make_shared<Scene>("scene");
+    auto scene = NewRef<Scene>("scene");
     auto view = scene->EmplaceChild<CountingSceneView>("empty");
-    auto pass = std::make_shared<ViewTestPass>();
-    pass->appendedMesh = MakeShadowTestMesh(std::make_shared<Material>("overlay", 1));
-    pass->pipelineState.globalShader = std::make_shared<ViewTestProgram>();
+    auto pass = NewRef<ViewTestPass>();
+    pass->appendedMesh = MakeShadowTestMesh(NewRef<Material>("overlay", 1));
+    pass->pipelineState.globalShader = NewRef<ViewTestProgram>();
     int begins = 0, ends = 0;
     pass->onBegin = [&](RenderSystem&, SceneRenderingContext&) { ++begins; };
     pass->onEnd = [&](RenderSystem&, SceneRenderingContext&) { ++ends; };
     SceneRenderer renderer;
     renderer.RegisterRenderPass(RenderPassQueue::Opaque, pass);
-    auto rendering = std::make_shared<ViewTestRendering>();
+    auto rendering = NewRef<ViewTestRendering>();
     RenderSystem renderSystem(rendering);
+    FakeGpuResourceFactory factory;
+    renderer.Init(&factory, renderSystem);
     renderer.Render(renderSystem, *scene);
     EXPECT_EQ(begins, 1);
     EXPECT_EQ(ends, 1);
@@ -249,15 +253,17 @@ TEST(SceneRendererTest, EmptyViewStillRunsPassLifecycle)
 
 TEST(SceneRendererTest, DisabledPassDoesNotRun)
 {
-    auto scene = std::make_shared<Scene>("scene");
+    auto scene = NewRef<Scene>("scene");
     scene->EmplaceChild<CountingSceneView>("view");
-    auto pass = std::make_shared<ViewTestPass>();
+    auto pass = NewRef<ViewTestPass>();
     pass->enabled = false;
     SceneRenderer renderer;
     renderer.RegisterRenderPass(RenderPassQueue::Opaque, pass);
-    auto rendering = std::make_shared<ViewTestRendering>();
+    auto rendering = NewRef<ViewTestRendering>();
     RenderSystem renderSystem(rendering);
+    FakeGpuResourceFactory factory;
 
+    renderer.Init(&factory, renderSystem);
     renderer.Render(renderSystem, *scene);
 
     EXPECT_EQ(pass->appendCalls, 0);
@@ -266,12 +272,12 @@ TEST(SceneRendererTest, DisabledPassDoesNotRun)
 
 TEST(SceneRendererTest, RenderProfileSelectsPassesInQueueOrder)
 {
-    auto scene = std::make_shared<Scene>("scene");
+    auto scene = NewRef<Scene>("scene");
     auto view = scene->EmplaceChild<CountingSceneView>("view");
     SceneRenderer renderer;
     Array<RenderPassQueue> executed;
     auto registerPass = [&](RenderPassQueue queue) {
-        auto pass = std::make_shared<ViewTestPass>();
+        auto pass = NewRef<ViewTestPass>();
         pass->onBegin = [&, queue](RenderSystem&, SceneRenderingContext&) { executed.push_back(queue); };
         renderer.RegisterRenderPass(queue, pass);
         return pass;
@@ -280,10 +286,12 @@ TEST(SceneRendererTest, RenderProfileSelectsPassesInQueueOrder)
     auto alpha = registerPass(RenderPassQueue::Alpha);
     registerPass(RenderPassQueue::Opaque);
     registerPass(RenderPassQueue::DepthFill);
-    auto rendering = std::make_shared<ViewTestRendering>();
+    auto rendering = NewRef<ViewTestRendering>();
     RenderSystem renderSystem(rendering);
+    FakeGpuResourceFactory factory;
 
     view->profile.depthFill = true;
+    renderer.Init(&factory, renderSystem);
     renderer.Render(renderSystem, *scene);
     EXPECT_EQ(executed, (Array<RenderPassQueue>{
         RenderPassQueue::DepthFill, RenderPassQueue::Opaque,
@@ -306,21 +314,23 @@ TEST(SceneRendererTest, RenderProfileSelectsPassesInQueueOrder)
 
 TEST(SceneRendererTest, RendersVisibleMeshThroughSceneCamera)
 {
-    auto scene = std::make_shared<Scene>("scene");
+    auto scene = NewRef<Scene>("scene");
     auto camera = scene->EmplaceChild<Camera>("camera");
     camera->SetPosition({0.0f, 0.0f, 5.0f});
     camera->LookAt(glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     camera->SetProjection(60.0f, 800.0f, 600.0f, 0.1f, 100.0f);
     auto mesh = scene->EmplaceChild<SceneNode>("mesh");
     mesh->AddComponent<MeshComponent>()->SetMesh(
-        MakeShadowTestMesh(std::make_shared<Material>("opaque", 1)));
+        MakeShadowTestMesh(NewRef<Material>("opaque", 1)));
 
-    auto pass = std::make_shared<ViewTestPass>();
-    pass->pipelineState.globalShader = std::make_shared<ViewTestProgram>();
-    SceneRenderer renderer;
-    renderer.RegisterRenderPass(RenderPassQueue::Opaque, pass);
-    auto rendering = std::make_shared<ViewTestRendering>();
+    auto pass = NewRef<ViewTestPass>();
+    pass->pipelineState.globalShader = NewRef<ViewTestProgram>();
+    auto rendering = NewRef<ViewTestRendering>();
     RenderSystem renderSystem(rendering);
+    FakeGpuResourceFactory factory;
+    SceneRenderer renderer;
+    renderer.Init(&factory, renderSystem);
+    renderer.RegisterRenderPass(RenderPassQueue::Opaque, pass);
     renderer.Render(renderSystem, *scene);
 
     EXPECT_EQ(rendering->clears, 1);
@@ -329,15 +339,15 @@ TEST(SceneRendererTest, RendersVisibleMeshThroughSceneCamera)
 
 TEST(SceneRendererTest, ViewportResizeConnectionFollowsRendererLifetime)
 {
-    auto rendering = std::make_shared<FakeRendering>();
+    auto rendering = NewRef<FakeRendering>();
     FakeGpuResourceFactory factory;
     RenderSystem renderSystem(rendering);
 
     {
         CountingRenderer renderer(false);
-        ASSERT_TRUE(renderer.Init(factory, renderSystem));
+        ASSERT_TRUE(renderer.Init(&factory, renderSystem));
         EXPECT_EQ(renderSystem.onViewportResize.slot_count(), 1u);
-        ASSERT_TRUE(renderer.Init(factory, renderSystem));
+        ASSERT_TRUE(renderer.Init(&factory, renderSystem));
         EXPECT_EQ(renderSystem.onViewportResize.slot_count(), 1u);
         renderSystem.onViewportResize(640u, 480u);
     }
@@ -345,21 +355,21 @@ TEST(SceneRendererTest, ViewportResizeConnectionFollowsRendererLifetime)
     EXPECT_EQ(renderSystem.onViewportResize.slot_count(), 0u);
 
     CountingRenderer failing(true);
-    EXPECT_FALSE(failing.Init(factory, renderSystem));
+    EXPECT_FALSE(failing.Init(&factory, renderSystem));
     EXPECT_EQ(renderSystem.onViewportResize.slot_count(), 0u);
 }
 
 TEST(SceneRendererTest, FailedRendererInitializationKeepsPreviousRenderer)
 {
-    auto scene = std::make_shared<Scene>("scene");
-    auto rendering = std::make_shared<FakeRendering>();
+    auto scene = NewRef<Scene>("scene");
+    auto rendering = NewRef<FakeRendering>();
     FakeGpuResourceFactory factory;
     RenderSystem renderSystem(rendering);
     GraphicsConfig fakeConfig {};
-    auto previous = std::make_shared<CountingRenderer>(false);
-    auto failing = std::make_shared<CountingRenderer>(true);
-    previous->Init(factory, renderSystem);
-    failing->Init(factory, renderSystem);
+    auto previous = NewRef<CountingRenderer>(false);
+    auto failing = NewRef<CountingRenderer>(true);
+    previous->Init(&factory, renderSystem);
+    failing->Init(&factory, renderSystem);
 
     scene->SetRenderer(previous);
     scene->SetRenderer(failing);
@@ -374,18 +384,20 @@ TEST(SceneRendererTest, FailedRendererInitializationKeepsPreviousRenderer)
 
 TEST(SceneRendererTest, InactiveAncestorExcludesCameraAndLight)
 {
-    auto scene = std::make_shared<Scene>("scene");
+    auto scene = NewRef<Scene>("scene");
     auto parent = scene->EmplaceChild<SceneNode>("parent");
     parent->EmplaceChild<Camera>("camera");
     parent->EmplaceChild<DirectionalLight>("light");
-    auto pass = std::make_shared<ViewTestPass>();
-    auto rendering = std::make_shared<ViewTestRendering>();
+    auto pass = NewRef<ViewTestPass>();
+    auto rendering = NewRef<ViewTestRendering>();
     RenderSystem renderSystem(rendering);
+    FakeGpuResourceFactory factory;
     SceneRenderer viewRenderer;
     viewRenderer.RegisterRenderPass(RenderPassQueue::Opaque, pass);
-    auto program = std::make_shared<ShadowTestProgram>();
+    auto program = NewRef<ShadowTestProgram>();
     LightParamsTestPass lightParamsPass;
 
+    viewRenderer.Init(&factory, renderSystem);
     viewRenderer.Render(renderSystem, *scene);
     EXPECT_EQ(pass->appendCalls, 1);
     lightParamsPass.SetDirectLightParams(*program, *scene);
@@ -400,19 +412,19 @@ TEST(SceneRendererTest, InactiveAncestorExcludesCameraAndLight)
 
 TEST(SceneRendererShadowTest, SelectsEnabledLightAndUpdatesPassParameters)
 {
-    auto scene = std::make_shared<Scene>("shadow");
+    auto scene = NewRef<Scene>("shadow");
     auto disabledLight = scene->EmplaceChild<DirectionalLight>("disabled");
     disabledLight->Direction() = glm::vec3(0.0f, -1.0f, 0.0f);
     disabledLight->Properties().canCastShadows = false;
     auto light = scene->EmplaceChild<DirectionalLight>("enabled");
     light->Direction() = glm::vec3(0.0f, -1.0f, 0.0f);
 
-    auto material = std::make_shared<Material>("shadow", 1);
+    auto material = NewRef<Material>("shadow", 1);
     material->castShadow = true;
     auto caster = scene->EmplaceChild<SceneNode>("caster");
     caster->AddComponent<MeshComponent>()->SetMesh(MakeShadowTestMesh(material));
 
-    auto rendering = std::make_shared<ShadowTestRendering>();
+    auto rendering = NewRef<ShadowTestRendering>();
     RenderSystem renderSystem(rendering);
     ShadowPass pass;
     ASSERT_TRUE(pass.Init(*rendering));
@@ -454,16 +466,16 @@ TEST(SceneRendererShadowTest, SelectsEnabledLightAndUpdatesPassParameters)
 
 TEST(SceneRendererShadowTest, NonCastingReceiverContributesBoundsButIsNotDrawn)
 {
-    auto scene = std::make_shared<Scene>("shadow");
+    auto scene = NewRef<Scene>("shadow");
     auto light = scene->EmplaceChild<DirectionalLight>("light");
     light->Direction() = glm::vec3(0.0f, -1.0f, 0.0f);
-    auto casterMaterial = std::make_shared<Material>("caster", 1);
+    auto casterMaterial = NewRef<Material>("caster", 1);
     casterMaterial->castShadow = true;
     casterMaterial->receiveShadows = false;
-    auto receiverMaterial = std::make_shared<Material>("receiver", 2);
+    auto receiverMaterial = NewRef<Material>("receiver", 2);
     receiverMaterial->castShadow = false;
     receiverMaterial->receiveShadows = true;
-    auto ignoredMaterial = std::make_shared<Material>("ignored", 3);
+    auto ignoredMaterial = NewRef<Material>("ignored", 3);
     ignoredMaterial->castShadow = false;
     ignoredMaterial->receiveShadows = false;
     auto caster = scene->EmplaceChild<SceneNode>("caster");
@@ -475,7 +487,7 @@ TEST(SceneRendererShadowTest, NonCastingReceiverContributesBoundsButIsNotDrawn)
     ignored->SetPosition(glm::vec3(1000.0f, 0.0f, 0.0f));
     ignored->AddComponent<MeshComponent>()->SetMesh(MakeShadowTestMesh(ignoredMaterial));
 
-    auto rendering = std::make_shared<ShadowTestRendering>();
+    auto rendering = NewRef<ShadowTestRendering>();
     RenderSystem renderSystem(rendering);
     ShadowPass pass;
     ASSERT_TRUE(pass.Init(*rendering));

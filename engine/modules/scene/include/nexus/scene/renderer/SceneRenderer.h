@@ -35,9 +35,9 @@ NXS_NAMESPACE
     class SceneRenderer
     {
     public:
-        virtual ~SceneRenderer() = default;
+        virtual ~SceneRenderer();
 
-        virtual bool Init(const IGpuResourceFactory& factory, RenderSystem& rs);
+        virtual bool Init(const IGpuResourceFactory* factory, RenderSystem& rs);
         bool IsInit() const { return m_initialized; }
 
         virtual void Render(RenderSystem& rs, const Scene& scene);
@@ -79,7 +79,8 @@ NXS_NAMESPACE
         void RenderToScreen(RenderSystem& rs);
 
         void OnViewportResize(uint32_t w, uint32_t h);
-        sigslot::scoped_connection viewportResizeConnection;
+        
+        sigslot::scoped_connection m_viewportResizeConnection;
 
         HashMap<std::string, Ref<RenderTarget>> m_renderTargets;
         //! Main offscreen buffer
@@ -87,11 +88,12 @@ NXS_NAMESPACE
         Ref<GpuProgram> m_screenShader;
         Ref<VertexBuffer> m_screenVertexBuffer;
         Ref<IndexBuffer> m_screenIndexBuffer;
+        const IGpuResourceFactory* m_gpuResourceFactory = nullptr;
         bool m_initialized = false;
 
     private:
         bool InitResources(const IGpuResourceFactory& factory, const GraphicsConfig& config);
-        void CreateOffscreenBuffer(const IGpuResourceFactory& factory, int32_t width, int32_t height);
+        void CreateOffscreenBuffer(int32_t width, int32_t height);
 
         //! A list of render passes sorted by their priority.
         Dict<RenderPassQueue, Ref<RenderPass>> m_passesByQueue;

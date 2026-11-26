@@ -28,12 +28,14 @@ USING_NAMESPACE_NXS;
 
 DEFINE_LOG(SceneRenderer);
 
-bool SceneRenderer::Init(const IGpuResourceFactory& factory, RenderSystem& rs)
+SceneRenderer::~SceneRenderer()
+{
+    m_viewportResizeConnection.disconnect();
+}
+
+bool SceneRenderer::Init(const IGpuResourceFactory* factory, RenderSystem& rs)
 {
     if (m_initialized) return true;
-
-    const auto& config = rs.GetGraphicsConfig();
-    CreateOffscreenBuffer(factory, config.screenWidth, config.screenHeight);
 
     Shader screenShader("_Screen", 0);
     constexpr auto vertexSource = R"(
@@ -57,7 +59,7 @@ bool SceneRenderer::Init(const IGpuResourceFactory& factory, RenderSystem& rs)
         }
     )";
     if (!screenShader.CompileFromSource(
-        factory,
+        *factory,
         vertexSource,
         fragmentSource,
         ""))
@@ -73,14 +75,14 @@ bool SceneRenderer::Init(const IGpuResourceFactory& factory, RenderSystem& rs)
     };
     static std::array<uint32_t, 3> fullscreenIndices = { 0, 1, 2 };
 
-    m_screenVertexBuffer = factory.CreateVertexBuffer();
+    m_screenVertexBuffer = factory->CreateVertexBuffer();
     m_screenVertexBuffer->Begin()
         .SetVertices(std::make_shared<BorrowBuffer>(fullscreenVertices))
         .SetUsage(BufferUsage::StaticDraw)
         .AddAttribute(VertexAttribute::VertexPosition2D)
         .Build();
 
-    m_screenIndexBuffer = factory.CreateIndexBuffer();
+    m_screenIndexBuffer = factory->CreateIndexBuffer();
     m_screenIndexBuffer->Begin()
         .SetIndices(std::make_shared<BorrowBuffer>(fullscreenIndices),
             FrontFace::CounterClockWise)
@@ -90,14 +92,15 @@ bool SceneRenderer::Init(const IGpuResourceFactory& factory, RenderSystem& rs)
 
     for (auto& [queue, pass] : m_passesByQueue)
     {
-        if (!pass->Init(factory)) return false;
+        if (!pass->Init(*factory)) return false;
     }
 
     for (auto& [queue, pass] : m_perFramePasses)
     {
-        if (!pass->Init(factory)) return false;
+        if (!pass->Init(*factory)) return false;
     }
-    viewportResizeConnection = rs.onViewportResize.connect(&SceneRenderer::OnViewportResize, this);
+    m_viewportResizeConnection = rs.onViewportResize.connect(&SceneRenderer::OnViewportResize, this);
+    m_gpuResourceFactory = factory;
     return m_initialized = true;
 }
 
@@ -112,7 +115,7 @@ void SceneRenderer::Render(RenderSystem &rs, const Scene &scene)
 
     for (auto& [queue, pass] : m_perFramePasses)
     {
-        if (pass->targetType != RenderTargetType::Offscreen) {
+        if (pass->targetType != RenderTargetType::Offscreen && m_screenBuffer) {
             m_screenBuffer->Bind(rs);
         }
 
@@ -120,7 +123,7 @@ void SceneRenderer::Render(RenderSystem &rs, const Scene &scene)
         pass->Render(rs, sceneCtx);
         pass->End(rs, sceneCtx);
 
-        if (pass->targetType != RenderTargetType::Offscreen) {
+        if (pass->targetType != RenderTargetType::Offscreen && m_screenBuffer) {
             m_screenBuffer->Unbind(rs);
         }
     }
@@ -177,7 +180,7 @@ void SceneRenderer::Render(RenderSystem &rs, const Scene &scene)
         if (viewCtx.target) {
             viewCtx.target->Bind(rs);
         }
-        else {
+        else if (m_screenBuffer) {
             m_screenBuffer->Bind(rs);
         }
 
@@ -195,7 +198,7 @@ void SceneRenderer::Render(RenderSystem &rs, const Scene &scene)
         if (viewCtx.target) {
             viewCtx.target->Unbind(rs);
         }
-        else {
+        else if (m_screenBuffer) {
             m_screenBuffer->Unbind(rs);
         }
     }
@@ -239,10 +242,12 @@ void SceneRenderer::RenderToScreen(RenderSystem& rs)
     m_screenShader->Unbind();
 }
 
-void SceneRenderer::CreateOffscreenBuffer(const IGpuResourceFactory& factory, int32_t width, int32_t height)
+void SceneRenderer::CreateOffscreenBuffer(int32_t width, int32_t height)
 {
+    if (!m_initialized || !m_gpuResourceFactory) return;
+
     m_screenBuffer.reset();
-    m_screenBuffer = GetGpuResourceFactory()->CreateRenderTarget( TextureDescription {
+    m_screenBuffer = m_gpuResourceFactory->CreateRenderTarget( TextureDescription {
         .width = width,
         .height = height,
         .format = PixelFormat::RGBA_16F,
@@ -260,5 +265,5 @@ void SceneRenderer::OnViewportResize(uint32_t w, uint32_t h)
 
     if (oldWidth == w && oldHeight == h) return;
 
-    CreateOffscreenBuffer(*GetGpuResourceFactory(), INT_CAST(w), INT_CAST(h));
+    CreateOffscreenBuffer(INT_CAST(w), INT_CAST(h));
 }
