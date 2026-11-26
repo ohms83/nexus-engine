@@ -58,24 +58,20 @@ bool ShadowPass::Init(const IGpuResourceFactory& factory)
     if (!shader->CompileFromSource(factory, vertexSource, fragmentSource, ""))
     {
         LOG_ERROR(LogShadowPass, "Failed to compile the directional shadow map shader.");
+        enabled = false;
         return false;
     }
     pipelineState.globalShader = shader->GetGpuProgram();
-    
-    // Initialize shadow map
-    constexpr uint32_t shadowMapResolution = 2048;
-    const auto desc = TextureDescription::DepthTextureDesc(shadowMapResolution, shadowMapResolution);
-    m_shadowMap = GetGpuResourceFactory()->CreateRenderTarget(desc);
-    if (!m_shadowMap)
-    {
-        LOG_ERROR(LogShadowPass, "Failed to create a directional shadow map render target.");
-        return false;
-    }
     return true;
 }
 
 void ShadowPass::Render(RenderSystem& rs, const SceneRenderingContext& sceneCtx)
 {
+    if (!enabled || !offscreenTarget.renderTarget || !pipelineState.globalShader)
+    {
+        return;
+    }
+
     rmt_ScopedCPUSample(ShadowPass_RenderDirectionalShadowMap, 0);
     const auto& registry = *sceneCtx.scene->GetRegistry();
 
@@ -112,6 +108,7 @@ void ShadowPass::Render(RenderSystem& rs, const SceneRenderingContext& sceneCtx)
         return;
     }
     const glm::vec3 lightDirection = unnormalizedDirection / directionLength;
+    m_shadowLightId = lightNode->GetId();
 
     struct ShadowMesh
     {
@@ -172,9 +169,9 @@ void ShadowPass::Render(RenderSystem& rs, const SceneRenderingContext& sceneCtx)
         m_lightSpaceMatrix = lightProjection * lightView;
     }
 
-    auto shadowProram = pipelineState.globalShader;
-    shadowProram->Bind();
-    shadowProram->SetUniformMatrix("_LightSpaceMatrix", m_lightSpaceMatrix, false);
+    auto shadowProgram = pipelineState.globalShader;
+    shadowProgram->Bind();
+    shadowProgram->SetUniformMatrix("_LightSpaceMatrix", m_lightSpaceMatrix, false);
     
     {
         rmt_ScopedCPUSample(ShadowPass_RenderShadowMap, 0);
@@ -186,33 +183,40 @@ void ShadowPass::Render(RenderSystem& rs, const SceneRenderingContext& sceneCtx)
             if (!mesh->GetVertexBuffer() || !mesh->GetIndexBuffer()) continue;
 
             const auto indexBuffer = mesh->GetIndexBuffer();
-            shadowProram->SetUniformMatrix(
+            shadowProgram->SetUniformMatrix(
                 "_Model",
                 shadowMesh.modelMatrix,
                 false);
             mesh->GetVertexBuffer()->Bind();
             rs.DrawIndexed(indexBuffer);
+            m_shadowMapRendered = true;
         }
     }
 
-    shadowProram->Unbind();
+    shadowProgram->Unbind();
 }
 
 void ShadowPass::Begin_Internal(RenderSystem& rs, SceneRenderingContext& sceneCtx)
 {
-    if (!m_shadowMap) return;
-    m_shadowMap->Bind(rs);
+    m_shadowMapRendered = false;
+    m_shadowLightId = NXS_INVALID_ID;
+    if (!offscreenTarget.renderTarget) return;
+    offscreenTarget.renderTarget->Bind(rs);
 
     rs.GetRenderInterface()->ClearDepth(1.0f);
 }
 
 void ShadowPass::End_Internal(RenderSystem& rs, SceneRenderingContext& sceneCtx)
 {
-    if (!m_shadowMap) return;
-    m_shadowMap->Unbind(rs);
+    if (!offscreenTarget.renderTarget) return;
+    offscreenTarget.renderTarget->Unbind(rs);
 
-    sceneCtx.shadowMaps.emplace_back(ShadowMap {
-        .lightSpaceMatrix = m_lightSpaceMatrix,
-        .depthMap = m_shadowMap->GetDepthTextureProxy()
-    });
+    if (m_shadowMapRendered)
+    {
+        sceneCtx.shadowMaps.emplace_back(ShadowMap {
+            .lightSpaceMatrix = m_lightSpaceMatrix,
+            .depthMap = offscreenTarget.renderTarget->GetDepthTextureProxy(),
+            .lightId = m_shadowLightId
+        });
+    }
 }

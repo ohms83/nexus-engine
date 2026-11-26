@@ -1,5 +1,6 @@
 #include "nexus/Nexus.h"
 #include "gtest/gtest.h"
+#include "nexus/scene/renderpass/ShadowPass.h"
 
 #include "helpers/TestRenderingInterface.h"
 
@@ -56,7 +57,7 @@ namespace
         int renders = 0;
     };
 
-    class ShadowTestProgram final : public GpuProgram
+    class ShadowTestProgram final : public FakeGpuProgram
     {
     public:
         void Bind() override {}
@@ -87,24 +88,15 @@ namespace
     class ShadowTestRendering final : public FakeRendering
     {
     public:
+        Ref<GpuProgram> CreateGpuProgram() const override
+        {
+            program = std::make_shared<ShadowTestProgram>();
+            return program;
+        }
         void ClearDepth(float) override {}
         void DrawIndexed(const Ref<IndexBuffer>) override { ++draws; }
+        mutable Ref<ShadowTestProgram> program;
         int draws = 0;
-    };
-
-    class ShadowTestRenderer final : public SceneRenderer
-    {
-    public:
-        // explicit ShadowTestRenderer(const Ref<ShadowTestProgram>& program)
-        // {
-        //     m_shadowProgram = program;
-        //     m_shadowMap = std::make_shared<FakeRenderTarget>();
-        // }
-        // using SceneRenderer::RenderDirectionalShadowMap;
-        // // using SceneRenderer::SetDirectLightParams;
-        // // using SceneRenderer::SetShadowMapParams;
-        // const glm::mat4& LightSpaceMatrix() const { return m_lightSpaceMatrix; }
-        // Identifier ShadowLightId() const { return m_shadowLightId; }
     };
 
     class LightParamsTestPass final : public RenderPass
@@ -385,106 +377,111 @@ TEST(SceneRendererTest, InactiveAncestorExcludesCameraAndLight)
 
 TEST(SceneRendererShadowTest, SelectsEnabledLightAndUpdatesPassParameters)
 {
-    // auto scene = std::make_shared<Scene>("shadow");
-    // auto lightA = scene->EmplaceChild<DirectionalLight>("A");
-    // auto lightB = scene->EmplaceChild<DirectionalLight>("B");
-    // lightA->Direction() = lightB->Direction() = glm::vec3(0.0f, -1.0f, 0.0f);
-    // auto lights = scene->GetRegistry()->view<SceneNodeComponent, DirectLightComponent>();
-    // auto* firstNode = SceneNode::FindNode(lights.get<SceneNodeComponent>(*lights.begin()).id);
-    // auto* first = firstNode->GetComponent<DirectLightComponent>();
-    // first->properties.canCastShadows = false;
-    // auto material = std::make_shared<Material>("shadow", 1);
-    // scene->EmplaceChild<SceneNode>("caster")->AddComponent<MeshComponent>()->SetMesh(MakeShadowTestMesh(material));
+    auto scene = std::make_shared<Scene>("shadow");
+    auto disabledLight = scene->EmplaceChild<DirectionalLight>("disabled");
+    disabledLight->Direction() = glm::vec3(0.0f, -1.0f, 0.0f);
+    disabledLight->Properties().canCastShadows = false;
+    auto light = scene->EmplaceChild<DirectionalLight>("enabled");
+    light->Direction() = glm::vec3(0.0f, -1.0f, 0.0f);
 
-    // auto program = std::make_shared<ShadowTestProgram>();
-    // auto rendering = std::make_shared<ShadowTestRendering>();
-    // RenderSystem renderSystem(rendering);
-    // ShadowTestRenderer renderer(program);
-    // LightParamsTestPass lightParamsPass;
-    // auto updateShadowMap = [&] {
-    //     SceneRenderingContext context { .scene = scene.get() };
-    //     renderer.RenderDirectionalShadowMap(renderSystem, context);
-    //     return context;
-    // };
+    auto material = std::make_shared<Material>("shadow", 1);
+    material->castShadow = true;
+    auto caster = scene->EmplaceChild<SceneNode>("caster");
+    caster->AddComponent<MeshComponent>()->SetMesh(MakeShadowTestMesh(material));
 
-    // auto context = updateShadowMap();
-    // lightParamsPass.SetDirectLightParams(*program, *scene);
-    // lightParamsPass.SetShadowMapParams(*program, context);
-    // EXPECT_EQ(rendering->draws, 1);
-    // EXPECT_EQ(program->ints["_NumDirectLight"], 2);
-    // EXPECT_EQ(program->ints["_DirectLights[0].castShadow"], 0);
-    // EXPECT_EQ(program->ints["_DirectLights[1].castShadow"], 1);
-    // EXPECT_EQ(program->ints["_HasShadowMap"], 1);
-    // EXPECT_EQ(program->textureUnits["_ShadowMap"], 15);
-    // EXPECT_EQ(context.shadowMaps.size(), 1u);
-    // EXPECT_TRUE(program->matrices.contains("_LightSpaceMatrix"));
-    // EXPECT_EQ(renderer.ShadowLightId(),
-    //     firstNode == lightA.get() ? lightB->GetId() : lightA->GetId());
+    auto rendering = std::make_shared<ShadowTestRendering>();
+    RenderSystem renderSystem(rendering);
+    ShadowPass pass;
+    ASSERT_TRUE(pass.Init(*rendering));
+    SceneRenderingContext context{ .scene = scene.get() };
 
-    // first->properties.canCastShadows = true;
-    // context = updateShadowMap();
-    // lightParamsPass.SetDirectLightParams(*program, *scene);
-    // EXPECT_EQ(rendering->draws, 2);
-    // EXPECT_EQ(program->ints["_DirectLights[0].castShadow"], 1);
+    pass.Begin(renderSystem, context);
+    pass.Render(renderSystem, context);
+    pass.End(renderSystem, context);
 
-    // firstNode->Activate(false);
-    // context = updateShadowMap();
-    // lightParamsPass.SetDirectLightParams(*program, *scene);
-    // EXPECT_EQ(rendering->draws, 3);
-    // EXPECT_EQ(program->ints["_NumDirectLight"], 1);
-    // EXPECT_EQ(program->ints["_DirectLights[0].castShadow"], 1);
+    EXPECT_EQ(rendering->draws, 1);
+    ASSERT_EQ(context.shadowMaps.size(), 1u);
+    EXPECT_NE(context.shadowMaps.front().depthMap, nullptr);
+    ASSERT_NE(rendering->program, nullptr);
+    EXPECT_TRUE(rendering->program->matrices.contains("_LightSpaceMatrix"));
+    EXPECT_TRUE(rendering->program->matrices.contains("_Model"));
 
-    // firstNode->Activate(true);
-    // lightA->Properties().canCastShadows = false;
-    // lightB->Properties().canCastShadows = false;
-    // context = updateShadowMap();
-    // lightParamsPass.SetDirectLightParams(*program, *scene);
-    // lightParamsPass.SetShadowMapParams(*program, context);
-    // EXPECT_EQ(rendering->draws, 3);
-    // EXPECT_TRUE(context.shadowMaps.empty());
-    // EXPECT_EQ(program->ints["_HasShadowMap"], 0);
+    LightParamsTestPass lightParamsPass;
+    lightParamsPass.SetDirectLightParams(
+        *rendering->program,
+        *scene,
+        context.shadowMaps.front().lightId);
+    lightParamsPass.SetShadowMapParams(*rendering->program, context);
+    int32_t expectedShadowLightIndex = 0;
+    for (const auto view = scene->GetRegistry()->view<const SceneNodeComponent, const DirectLightComponent>();
+         const auto& [entity, nodeComponent, directLight] : view.each())
+    {
+        const auto* node = SceneNode::FindNode(nodeComponent.id);
+        if (!node || !node->IsActive()) continue;
+        if (nodeComponent.id == context.shadowMaps.front().lightId) break;
+        ++expectedShadowLightIndex;
+    }
+    EXPECT_EQ(rendering->program->ints["_ShadowLightIndex"], expectedShadowLightIndex);
+    EXPECT_EQ(
+        rendering->program->ints["_DirectLights[0].castShadow"] +
+        rendering->program->ints["_DirectLights[1].castShadow"],
+        1);
+    EXPECT_EQ(rendering->program->ints["_HasShadowMap"], 1);
 }
 
 TEST(SceneRendererShadowTest, NonCastingReceiverContributesBoundsButIsNotDrawn)
 {
-    // auto scene = std::make_shared<Scene>("shadow");
-    // auto light = scene->EmplaceChild<DirectionalLight>("light");
-    // light->Direction() = glm::vec3(0.0f, -1.0f, 0.0f);
-    // auto casterMaterial = std::make_shared<Material>("caster", 1);
-    // casterMaterial->receiveShadows = false;
-    // auto receiverMaterial = std::make_shared<Material>("receiver", 2);
-    // receiverMaterial->castShadow = false;
-    // auto ignoredMaterial = std::make_shared<Material>("ignored", 3);
-    // ignoredMaterial->castShadow = false;
-    // ignoredMaterial->receiveShadows = false;
-    // auto caster = scene->EmplaceChild<SceneNode>("caster");
-    // caster->AddComponent<MeshComponent>()->SetMesh(MakeShadowTestMesh(casterMaterial));
-    // auto receiver = scene->EmplaceChild<SceneNode>("receiver");
-    // receiver->SetPosition(glm::vec3(100.0f, 0.0f, 0.0f));
-    // receiver->AddComponent<MeshComponent>()->SetMesh(MakeShadowTestMesh(receiverMaterial));
-    // auto ignored = scene->EmplaceChild<SceneNode>("ignored");
-    // ignored->SetPosition(glm::vec3(1000.0f, 0.0f, 0.0f));
-    // ignored->AddComponent<MeshComponent>()->SetMesh(MakeShadowTestMesh(ignoredMaterial));
+    auto scene = std::make_shared<Scene>("shadow");
+    auto light = scene->EmplaceChild<DirectionalLight>("light");
+    light->Direction() = glm::vec3(0.0f, -1.0f, 0.0f);
+    auto casterMaterial = std::make_shared<Material>("caster", 1);
+    casterMaterial->castShadow = true;
+    casterMaterial->receiveShadows = false;
+    auto receiverMaterial = std::make_shared<Material>("receiver", 2);
+    receiverMaterial->castShadow = false;
+    receiverMaterial->receiveShadows = true;
+    auto ignoredMaterial = std::make_shared<Material>("ignored", 3);
+    ignoredMaterial->castShadow = false;
+    ignoredMaterial->receiveShadows = false;
+    auto caster = scene->EmplaceChild<SceneNode>("caster");
+    caster->AddComponent<MeshComponent>()->SetMesh(MakeShadowTestMesh(casterMaterial));
+    auto receiver = scene->EmplaceChild<SceneNode>("receiver");
+    receiver->SetPosition(glm::vec3(100.0f, 0.0f, 0.0f));
+    receiver->AddComponent<MeshComponent>()->SetMesh(MakeShadowTestMesh(receiverMaterial));
+    auto ignored = scene->EmplaceChild<SceneNode>("ignored");
+    ignored->SetPosition(glm::vec3(1000.0f, 0.0f, 0.0f));
+    ignored->AddComponent<MeshComponent>()->SetMesh(MakeShadowTestMesh(ignoredMaterial));
 
-    // auto program = std::make_shared<ShadowTestProgram>();
-    // auto rendering = std::make_shared<ShadowTestRendering>();
-    // RenderSystem renderSystem(rendering);
-    // ShadowTestRenderer renderer(program);
-    // LightParamsTestPass lightParamsPass;
-    // SceneRenderingContext context { .scene = scene.get() };
-    // renderer.RenderDirectionalShadowMap(renderSystem, context);
-    // EXPECT_EQ(rendering->draws, 1);
-    // const auto clip = renderer.LightSpaceMatrix() * glm::vec4(100.0f, 0.0f, 0.0f, 1.0f);
-    // EXPECT_LE(std::abs(clip.x / clip.w), 1.0f);
-    // EXPECT_LE(std::abs(clip.y / clip.w), 1.0f);
-    // EXPECT_LE(std::abs(clip.z / clip.w), 1.0f);
-    // const auto ignoredClip = renderer.LightSpaceMatrix() * glm::vec4(1000.0f, 0.0f, 0.0f, 1.0f);
-    // EXPECT_GT(std::abs(ignoredClip.x / ignoredClip.w), 1.0f);
+    auto rendering = std::make_shared<ShadowTestRendering>();
+    RenderSystem renderSystem(rendering);
+    ShadowPass pass;
+    ASSERT_TRUE(pass.Init(*rendering));
+    SceneRenderingContext context{ .scene = scene.get() };
+    pass.Begin(renderSystem, context);
+    pass.Render(renderSystem, context);
+    pass.End(renderSystem, context);
 
-    // casterMaterial->castShadow = false;
-    // context = SceneRenderingContext { .scene = scene.get() };
-    // renderer.RenderDirectionalShadowMap(renderSystem, context);
-    // lightParamsPass.SetShadowMapParams(*program, context);
-    // EXPECT_EQ(rendering->draws, 1);
-    // EXPECT_EQ(program->ints["_HasShadowMap"], 0);
+    EXPECT_EQ(rendering->draws, 1);
+    ASSERT_EQ(context.shadowMaps.size(), 1u);
+    const auto& lightSpaceMatrix = context.shadowMaps.front().lightSpaceMatrix;
+    const auto receiverClip = lightSpaceMatrix * glm::vec4(100.0f, 0.0f, 0.0f, 1.0f);
+    EXPECT_LE(std::abs(receiverClip.x / receiverClip.w), 1.0f);
+    EXPECT_LE(std::abs(receiverClip.y / receiverClip.w), 1.0f);
+    EXPECT_LE(std::abs(receiverClip.z / receiverClip.w), 1.0f);
+    const auto ignoredClip = lightSpaceMatrix * glm::vec4(1000.0f, 0.0f, 0.0f, 1.0f);
+    EXPECT_GT(std::abs(ignoredClip.x / ignoredClip.w), 1.0f);
+
+    casterMaterial->castShadow = false;
+    casterMaterial->receiveShadows = false;
+    SceneRenderingContext noCastersContext{ .scene = scene.get() };
+    pass.Begin(renderSystem, noCastersContext);
+    pass.Render(renderSystem, noCastersContext);
+    pass.End(renderSystem, noCastersContext);
+    EXPECT_EQ(rendering->draws, 1);
+    EXPECT_TRUE(noCastersContext.shadowMaps.empty());
+    LightParamsTestPass lightParamsPass;
+    lightParamsPass.SetDirectLightParams(*rendering->program, *scene);
+    lightParamsPass.SetShadowMapParams(*rendering->program, noCastersContext);
+    EXPECT_EQ(rendering->program->ints["_ShadowLightIndex"], -1);
+    EXPECT_EQ(rendering->program->ints["_HasShadowMap"], 0);
 }

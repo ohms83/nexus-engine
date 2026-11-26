@@ -66,6 +66,7 @@ NXS_NAMESPACE
     {
         glm::mat4 lightSpaceMatrix;
         Ref<TextureProxy> depthMap;
+        Identifier lightId;
     };
 
     struct SceneRenderingContext
@@ -177,7 +178,10 @@ NXS_NAMESPACE
     protected:
         static bool IsNodeActive(const SceneNodeComponent& nodeComp);
         static void SetAmbientLightParams(GpuProgram& gpuProgram, const entt::registry& registry);
-        static void SetDirectLightParams(GpuProgram& gpuProgram, const SceneNode& scene, int32_t shadowLightId = -1);
+        static void SetDirectLightParams(
+            GpuProgram& gpuProgram,
+            const SceneNode& scene,
+            Identifier shadowLightId = NXS_INVALID_ID);
         static void SetPointLightParams(GpuProgram& gpuProgram, const SceneNode& scene);
         static void SetCameraUniforms(GpuProgram& gpuProgram, const glm::vec3& cameraPos, const glm::mat4& viewMtx, const glm::mat4& projectionMtx);
         static void SetShadowMapParams(GpuProgram& gpuProgram, const SceneRenderingContext& sceneCtx);

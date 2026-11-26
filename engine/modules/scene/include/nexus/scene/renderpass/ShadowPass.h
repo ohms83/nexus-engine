@@ -17,7 +17,8 @@ NXS_NAMESPACE
         void Begin_Internal(RenderSystem& rs, SceneRenderingContext& sceneCtx) override;
         void End_Internal(RenderSystem& rs, SceneRenderingContext& sceneCtx) override;
 
-        Ref<RenderTarget> m_shadowMap;
         glm::mat4 m_lightSpaceMatrix{1.0f};
+        Identifier m_shadowLightId = NXS_INVALID_ID;
+        bool m_shadowMapRendered = false;
     };
 }

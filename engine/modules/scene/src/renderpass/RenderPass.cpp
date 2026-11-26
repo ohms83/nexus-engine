@@ -240,7 +240,10 @@ void RenderPass::Render(RenderSystem& rs, const ViewContext& viewCtx, const Scen
 
                 SetCameraUniforms(*gpuProgram, viewCtx.position, viewCtx.viewMatrix, viewCtx.projectionMatrix);
                 SetAmbientLightParams(*gpuProgram, *scene.GetRegistry());
-                SetDirectLightParams(*gpuProgram, scene, NXS_INVALID_ID);
+                const Identifier shadowLightId = sceneCtx.shadowMaps.empty()
+                    ? NXS_INVALID_ID
+                    : sceneCtx.shadowMaps.front().lightId;
+                SetDirectLightParams(*gpuProgram, scene, shadowLightId);
                 SetPointLightParams(*gpuProgram, scene);
                 SetShadowMapParams(*gpuProgram, sceneCtx);
                 usingProgram = gpuProgram;
@@ -278,10 +281,14 @@ void RenderPass::SetAmbientLightParams(GpuProgram& gpuProgram, const entt::regis
     gpuProgram.SetUniformVector("_AmbientLight", color);
 }
 
-void RenderPass::SetDirectLightParams(GpuProgram& gpuProgram, const SceneNode& scene, int32_t shadowLightId)
+void RenderPass::SetDirectLightParams(
+    GpuProgram& gpuProgram,
+    const SceneNode& scene,
+    Identifier shadowLightId)
 {
     rmt_ScopedCPUSample(RenderPass_SetDirectLightParams, 0);
     int32_t numLight = 0;
+    int32_t shadowLightIndex = -1;
     const auto registry = scene.GetRegistry();
     for (const auto view = registry->view<SceneNodeComponent, DirectLightComponent>(); const auto& [entity, node, light] : view.each())
     {
@@ -312,12 +319,15 @@ void RenderPass::SetDirectLightParams(GpuProgram& gpuProgram, const SceneNode& s
         gpuProgram.SetUniformFloat(uniformLocationDiffuse, light.properties.diffuseIntensity);
         gpuProgram.SetUniformFloat(uniformLocationSpecular, light.properties.specularIntensity);
         gpuProgram.SetUniformFloat(uniformLocationCutoff, light.properties.cutoffRange);
-        gpuProgram.SetUniformInt(uniformLocationShadow, light.properties.canCastShadows ? 1 : 0);
+        const bool castsShadow = light.properties.canCastShadows && node.id == shadowLightId;
+        gpuProgram.SetUniformInt(uniformLocationShadow, castsShadow ? 1 : 0);
+        if (castsShadow) shadowLightIndex = numLight;
         rmt_EndCPUSample();
 
         numLight++;
     }
     gpuProgram.SetUniformInt("_NumDirectLight", numLight);
+    gpuProgram.SetUniformInt("_ShadowLightIndex", shadowLightIndex);
 }
 
 void RenderPass::SetPointLightParams(GpuProgram& gpuProgram, const SceneNode& scene)

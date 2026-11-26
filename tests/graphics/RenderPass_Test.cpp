@@ -115,13 +115,50 @@ TEST(RenderPassTest, OffscreenTargetIsCreatedDuringInit)
 
 TEST(RenderPassTest, ShadowPassCreatesShadowMapTargetDuringInit)
 {
-    FakeRendering factory;
+    class TrackingRenderTarget final : public FakeRenderTarget
+    {
+    public:
+        void Bind(RenderSystem&) override { ++binds; }
+        void Unbind(RenderSystem&) override { ++unbinds; }
+
+        int binds = 0;
+        int unbinds = 0;
+    };
+
+    class TrackingRendering final : public FakeRendering
+    {
+    public:
+        void ClearDepth(float) override {}
+        Ref<RenderTarget> CreateRenderTarget(const TextureDescription&) const override
+        {
+            ++targetCreations;
+            target = std::make_shared<TrackingRenderTarget>();
+            return target;
+        }
+
+        mutable int targetCreations = 0;
+        mutable Ref<TrackingRenderTarget> target;
+    };
+
+    auto factory = std::make_shared<TrackingRendering>();
     ShadowPass pass;
 
-    ASSERT_TRUE(pass.Init(factory));
+    ASSERT_TRUE(pass.Init(*factory));
+    ASSERT_EQ(factory->targetCreations, 1);
+    ASSERT_NE(factory->target, nullptr);
+    EXPECT_EQ(pass.offscreenTarget.renderTarget, factory->target);
     EXPECT_EQ(pass.offscreenTarget.name, AttachmentDesc::shadowMap);
     EXPECT_TRUE(pass.offscreenTarget.IsValid());
     EXPECT_EQ(pass.offscreenTarget.textureDesc.format, PixelFormat::Depth);
+
+    RenderSystem renderSystem(factory);
+    SceneRenderingContext sceneCtx;
+    pass.Begin(renderSystem, sceneCtx);
+    pass.End(renderSystem, sceneCtx);
+    EXPECT_EQ(factory->target->binds, 1);
+    EXPECT_EQ(factory->target->unbinds, 1);
+    ASSERT_EQ(sceneCtx.offscreenTargets.size(), 1u);
+    EXPECT_EQ(sceneCtx.offscreenTargets.front().renderTarget, factory->target);
 }
 
 TEST(RenderPassTest, BeginFiltersTargetsAndEndPropagatesOwnTarget)
