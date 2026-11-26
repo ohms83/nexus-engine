@@ -92,7 +92,6 @@ protected:
         inputManager.RegisterMouseAxisInputMap("skybox_camera_mouse", mouseInput);
 
         m_scene->SetSkybox(LoadSkybox());
-        m_scene->SetRenderer(std::make_unique<nxs::ForwardSceneRenderer>(GetRenderSystem()));
         return true;
     }
 
@@ -156,7 +155,7 @@ private:
             }
 
             const uint32_t size = UINT_CAST(width) * UINT_CAST(height) * 3;
-            cubemap->LoadData(CAST<nxs::TextureTarget>(i), pixels, size);
+            cubemap->LoadData(CAST<nxs::TextureTarget>(i + 1), pixels, size);
             stbi_image_free(pixels);
         }
 
