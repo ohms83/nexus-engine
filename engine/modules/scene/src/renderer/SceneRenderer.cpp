@@ -28,19 +28,12 @@ USING_NAMESPACE_NXS;
 
 DEFINE_LOG(SceneRenderer);
 
-bool SceneRenderer::Init(const IGpuResourceFactory& factory, const GraphicsConfig& config)
+bool SceneRenderer::Init(const IGpuResourceFactory& factory, RenderSystem& rs)
 {
     if (m_initialized) return true;
 
-    m_screenBuffer = factory.CreateRenderTarget( TextureDescription {
-        .width = config.screenWidth,
-        .height = config.screenHeight,
-        .format = PixelFormat::RGBA_16F,
-        .componentType = DataType::Float,
-        .colorSpace = TextureColorSpace::SRgb,
-        .wrapModeS = TextureWrapMode::ClampToEdge,
-        .wrapModeT = TextureWrapMode::ClampToEdge,
-    });
+    const auto& config = rs.GetGraphicsConfig();
+    CreateOffscreenBuffer(factory, config.screenWidth, config.screenHeight);
 
     Shader screenShader("_Screen", 0);
     constexpr auto vertexSource = R"(
@@ -104,6 +97,7 @@ bool SceneRenderer::Init(const IGpuResourceFactory& factory, const GraphicsConfi
     {
         if (!pass->Init(factory)) return false;
     }
+    viewportResizeConnection = rs.onViewportResize.connect(&SceneRenderer::OnViewportResize, this);
     return m_initialized = true;
 }
 
@@ -243,4 +237,28 @@ void SceneRenderer::RenderToScreen(RenderSystem& rs)
     rs.DrawIndexed(m_screenIndexBuffer);
     m_screenVertexBuffer->Unbind();
     m_screenShader->Unbind();
+}
+
+void SceneRenderer::CreateOffscreenBuffer(const IGpuResourceFactory& factory, int32_t width, int32_t height)
+{
+    m_screenBuffer.reset();
+    m_screenBuffer = GetGpuResourceFactory()->CreateRenderTarget( TextureDescription {
+        .width = width,
+        .height = height,
+        .format = PixelFormat::RGBA_16F,
+        .componentType = DataType::Float,
+        .colorSpace = TextureColorSpace::SRgb,
+        .wrapModeS = TextureWrapMode::ClampToEdge,
+        .wrapModeT = TextureWrapMode::ClampToEdge,
+    });
+}
+
+void SceneRenderer::OnViewportResize(uint32_t w, uint32_t h)
+{
+    const uint32_t oldWidth = m_screenBuffer ? m_screenBuffer->GetWidth() : 0;
+    const uint32_t oldHeight = m_screenBuffer ? m_screenBuffer->GetHeight() : 0;
+
+    if (oldWidth == w && oldHeight == h) return;
+
+    CreateOffscreenBuffer(*GetGpuResourceFactory(), INT_CAST(w), INT_CAST(h));
 }

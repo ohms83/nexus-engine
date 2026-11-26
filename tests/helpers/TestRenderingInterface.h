@@ -87,6 +87,8 @@ class FakeRenderTarget : public RenderTarget
 public:
     void Bind(RenderSystem&) override {}
     void Unbind(RenderSystem&) override {}
+    NODISCARD uint32_t GetWidth() const override { return 0; }
+    NODISCARD uint32_t GetHeight() const override { return 0; }
     NODISCARD Ref<TextureProxy> GetDepthTextureProxy() const override
     {
         return std::make_shared<FakeTexture>();

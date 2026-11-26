@@ -327,6 +327,28 @@ TEST(SceneRendererTest, RendersVisibleMeshThroughSceneCamera)
     EXPECT_EQ(rendering->drawMasks.size(), 1u);
 }
 
+TEST(SceneRendererTest, ViewportResizeConnectionFollowsRendererLifetime)
+{
+    auto rendering = std::make_shared<FakeRendering>();
+    FakeGpuResourceFactory factory;
+    RenderSystem renderSystem(rendering);
+
+    {
+        CountingRenderer renderer(false);
+        ASSERT_TRUE(renderer.Init(factory, renderSystem));
+        EXPECT_EQ(renderSystem.onViewportResize.slot_count(), 1u);
+        ASSERT_TRUE(renderer.Init(factory, renderSystem));
+        EXPECT_EQ(renderSystem.onViewportResize.slot_count(), 1u);
+        renderSystem.onViewportResize(640u, 480u);
+    }
+
+    EXPECT_EQ(renderSystem.onViewportResize.slot_count(), 0u);
+
+    CountingRenderer failing(true);
+    EXPECT_FALSE(failing.Init(factory, renderSystem));
+    EXPECT_EQ(renderSystem.onViewportResize.slot_count(), 0u);
+}
+
 TEST(SceneRendererTest, FailedRendererInitializationKeepsPreviousRenderer)
 {
     auto scene = std::make_shared<Scene>("scene");
@@ -336,8 +358,8 @@ TEST(SceneRendererTest, FailedRendererInitializationKeepsPreviousRenderer)
     GraphicsConfig fakeConfig {};
     auto previous = std::make_shared<CountingRenderer>(false);
     auto failing = std::make_shared<CountingRenderer>(true);
-    previous->Init(factory, fakeConfig);
-    failing->Init(factory, fakeConfig);
+    previous->Init(factory, renderSystem);
+    failing->Init(factory, renderSystem);
 
     scene->SetRenderer(previous);
     scene->SetRenderer(failing);

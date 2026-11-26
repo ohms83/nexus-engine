@@ -97,4 +97,5 @@ void RenderSystem::OnResize(const uint32_t pixel_w, const uint32_t pixel_h)
     m_config.screenWidth = CAST<int>(pixel_w);
     m_config.screenHeight = CAST<int>(pixel_h);
     m_renderingInterface->OnResize(pixel_w, pixel_h);
+    onViewportResize(pixel_w, pixel_h);
 }

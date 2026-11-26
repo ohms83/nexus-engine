@@ -11,6 +11,7 @@
 #include "nexus/geom/Frustum.h"
 
 #include "entt/entity/registry.hpp"
+#include "sigslot/signal.hpp"
 
 #include <string>
 #include <unordered_map>
@@ -36,7 +37,7 @@ NXS_NAMESPACE
     public:
         virtual ~SceneRenderer() = default;
 
-        virtual bool Init(const IGpuResourceFactory& factory, const GraphicsConfig& config);
+        virtual bool Init(const IGpuResourceFactory& factory, RenderSystem& rs);
         bool IsInit() const { return m_initialized; }
 
         virtual void Render(RenderSystem& rs, const Scene& scene);
@@ -77,6 +78,9 @@ NXS_NAMESPACE
          */
         void RenderToScreen(RenderSystem& rs);
 
+        void OnViewportResize(uint32_t w, uint32_t h);
+        sigslot::scoped_connection viewportResizeConnection;
+
         HashMap<std::string, Ref<RenderTarget>> m_renderTargets;
         //! Main offscreen buffer
         Ref<RenderTarget> m_screenBuffer;
@@ -86,6 +90,9 @@ NXS_NAMESPACE
         bool m_initialized = false;
 
     private:
+        bool InitResources(const IGpuResourceFactory& factory, const GraphicsConfig& config);
+        void CreateOffscreenBuffer(const IGpuResourceFactory& factory, int32_t width, int32_t height);
+
         //! A list of render passes sorted by their priority.
         Dict<RenderPassQueue, Ref<RenderPass>> m_passesByQueue;
         Dict<RenderPassQueue, Ref<RenderPass>> m_perFramePasses;

@@ -7,6 +7,8 @@
 #include "nexus/core/Color.h"
 #include "RenderingInterface.h"
 
+#include "sigslot/signal.hpp"
+
 NXS_NAMESPACE
 {
     class RenderSystem final
@@ -67,6 +69,8 @@ NXS_NAMESPACE
         {
             return m_config;
         }
+
+        sigslot::signal<uint32_t, uint32_t> onViewportResize;
 
     protected:
         //! Graphics configuration used to initialize the rendering interface.
