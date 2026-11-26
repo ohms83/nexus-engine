@@ -222,23 +222,27 @@ TEST(IReflectorTest, RenderProfileReflectsCullingAsFlags)
     profile.AcceptReflector(reflector);
     EXPECT_EQ(reflector.initialValue, 0xFFFFFFFFu);
     EXPECT_EQ(profile.culling, nxs::CullingFlags::All);
-    ASSERT_EQ(reflector.options.size(), 3u);
+    ASSERT_EQ(reflector.options.size(), 4u);
     EXPECT_EQ(reflector.options[0].name, "Opaque");
     EXPECT_EQ(reflector.options[0].mask, static_cast<uint32_t>(nxs::CullingFlags::Opaque));
-    EXPECT_EQ(reflector.options[1].name, "Alpha");
-    EXPECT_EQ(reflector.options[1].mask, static_cast<uint32_t>(nxs::CullingFlags::Alpha));
-    EXPECT_EQ(reflector.options[2].name, "Overlay");
-    EXPECT_EQ(reflector.options[2].mask, static_cast<uint32_t>(nxs::CullingFlags::Overlay));
+    EXPECT_EQ(reflector.options[1].name, "Environment");
+    EXPECT_EQ(reflector.options[1].mask, static_cast<uint32_t>(nxs::CullingFlags::Environment));
+    EXPECT_EQ(reflector.options[2].name, "Alpha");
+    EXPECT_EQ(reflector.options[2].mask, static_cast<uint32_t>(nxs::CullingFlags::Alpha));
+    EXPECT_EQ(reflector.options[3].name, "Overlay");
+    EXPECT_EQ(reflector.options[3].mask, static_cast<uint32_t>(nxs::CullingFlags::Overlay));
 
     int notifications = 0;
     auto connection = reflector.onValueChangedEvent.connect([&](const std::string& name) {
         EXPECT_EQ(name, "Culling");
-        EXPECT_EQ(static_cast<uint32_t>(profile.culling), 0xFFFFFFFDu);
+        EXPECT_EQ(static_cast<uint32_t>(profile.culling),
+            0xFFFFFFFFu ^ static_cast<uint32_t>(nxs::CullingFlags::Alpha));
         ++notifications;
     });
     reflector.change = true;
     profile.AcceptReflector(reflector);
-    EXPECT_EQ(static_cast<uint32_t>(profile.culling), 0xFFFFFFFDu);
+    EXPECT_EQ(static_cast<uint32_t>(profile.culling),
+        0xFFFFFFFFu ^ static_cast<uint32_t>(nxs::CullingFlags::Alpha));
     EXPECT_EQ(notifications, 1);
     reflector.onValueChangedEvent.disconnect(connection);
 }
