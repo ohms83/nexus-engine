@@ -208,7 +208,6 @@ void RenderingInterface::ApplyPipelineState(const PipelineState &state)
     {
         SetGlobalShader(state.globalShader);
     }
-
 }
 
 void RenderingInterface::SetFrontFace(FrontFace face)

@@ -17,7 +17,7 @@ NXS_NAMESPACE
         EnvironmentPass();
         bool Init(const IGpuResourceFactory& factory) override;
 
-        void Render(RenderSystem& rs, const ViewContext& viewCtx, SceneRenderingContext& sceneCtx) override;
+        void Render(RenderSystem& rs, const ViewContext& viewCtx, const SceneRenderingContext& sceneCtx) override;
 
     private:
         // Skybox

@@ -11,11 +11,13 @@ NXS_NAMESPACE
         virtual ~ShadowPass() = default;
 
         bool Init(const IGpuResourceFactory& factory) override;
-        void Render(RenderSystem& rs, const ViewContext& viewCtx, SceneRenderingContext& sceneCtx) override;
+        void Render(RenderSystem& rs, const SceneRenderingContext& sceneCtx) override;
 
     private:
+        void Begin_Internal(RenderSystem& rs, SceneRenderingContext& sceneCtx) override;
+        void End_Internal(RenderSystem& rs, SceneRenderingContext& sceneCtx) override;
+
         Ref<RenderTarget> m_shadowMap;
-        Ref<GpuProgram> m_shadowProgram;
         glm::mat4 m_lightSpaceMatrix{1.0f};
     };
 }

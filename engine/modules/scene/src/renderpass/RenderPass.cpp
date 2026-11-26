@@ -161,10 +161,10 @@ void RenderPass::Begin(RenderSystem& rs, SceneRenderingContext& sceneCtx)
         }
     }
 
-    Begin_Internal(rs);
+    Begin_Internal(rs, sceneCtx);
 
     // Hook
-    if (onBegin) onBegin(rs);
+    if (onBegin) onBegin(rs, sceneCtx);
 }
 
 void RenderPass::End(RenderSystem& rs, SceneRenderingContext& sceneCtx)
@@ -176,16 +176,16 @@ void RenderPass::End(RenderSystem& rs, SceneRenderingContext& sceneCtx)
     }
     // Reset the global shader.
     rs.GetRenderInterface()->SetGlobalShader(nullptr);
-    End_Internal(rs);
+    End_Internal(rs, sceneCtx);
     // Offscreen target is unbound by the caller (RenderPass/RenderSystem).
     // Hook
-    if (onEnd) onEnd(rs);
+    if (onEnd) onEnd(rs, sceneCtx);
 
     rmt_EndOpenGLSample();
     rmt_EndCPUSample();
 }
 
-void RenderPass::Render(RenderSystem& rs, const ViewContext& viewCtx, SceneRenderingContext& sceneCtx)
+void RenderPass::Render(RenderSystem& rs, const ViewContext& viewCtx, const SceneRenderingContext& sceneCtx)
 {
     const Scene& scene = *sceneCtx.scene;
     Array<RenderCommand> commands = CreateRenderCommands(viewCtx);

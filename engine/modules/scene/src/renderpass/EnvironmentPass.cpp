@@ -72,7 +72,7 @@ bool EnvironmentPass::Init(const IGpuResourceFactory& factory)
     return true;
 }
 
-void EnvironmentPass::Render(RenderSystem & rs, const ViewContext & viewCtx, SceneRenderingContext& sceneCtx)
+void EnvironmentPass::Render(RenderSystem & rs, const ViewContext & viewCtx, const SceneRenderingContext& sceneCtx)
 {
     Base::Render(rs, viewCtx, sceneCtx);
     

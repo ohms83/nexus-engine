@@ -23,7 +23,8 @@ ShadowPass::ShadowPass()
     commandSortType = CommandSortType::FrontToBack;
     pipelineState.depthTest = true;
     pipelineState.depthWrite = true;
-    pipelineState.depthFunction = DepthFunction::LesserOrEqual;
+    pipelineState.depthFunction = DepthFunction::Lesser;
+    pipelineState.overrideBlendMode = BlendMode::None;
 }
 
 bool ShadowPass::Init(const IGpuResourceFactory& factory)
@@ -60,10 +61,20 @@ bool ShadowPass::Init(const IGpuResourceFactory& factory)
         return false;
     }
     pipelineState.globalShader = shader->GetGpuProgram();
+    
+    // Initialize shadow map
+    constexpr uint32_t shadowMapResolution = 2048;
+    const auto desc = TextureDescription::DepthTextureDesc(shadowMapResolution, shadowMapResolution);
+    m_shadowMap = GetGpuResourceFactory()->CreateRenderTarget(desc);
+    if (!m_shadowMap)
+    {
+        LOG_ERROR(LogShadowPass, "Failed to create a directional shadow map render target.");
+        return false;
+    }
     return true;
 }
 
-void ShadowPass::Render(RenderSystem& rs, const ViewContext& viewCtx, SceneRenderingContext& sceneCtx)
+void ShadowPass::Render(RenderSystem& rs, const SceneRenderingContext& sceneCtx)
 {
     rmt_ScopedCPUSample(ShadowPass_RenderDirectionalShadowMap, 0);
     const auto& registry = *sceneCtx.scene->GetRegistry();
@@ -161,29 +172,9 @@ void ShadowPass::Render(RenderSystem& rs, const ViewContext& viewCtx, SceneRende
         m_lightSpaceMatrix = lightProjection * lightView;
     }
 
-    constexpr uint32_t shadowMapResolution = 2048;
-    if (!m_shadowMap)
-    {
-        const auto desc = TextureDescription::DepthTextureDesc(shadowMapResolution, shadowMapResolution);
-        m_shadowMap = GetGpuResourceFactory()->CreateRenderTarget(desc);
-    }
-    if (!m_shadowMap)
-    {
-        LOG_ERROR(LogSceneRenderer, "Failed to create a directional shadow map render target.");
-        return;
-    }
-
-    m_shadowMap->Bind(rs);
-    auto renderInterface = rs.GetRenderInterface();
-    PipelineState shadowState;
-    shadowState.depthTest = true;
-    shadowState.depthWrite = true;
-    shadowState.depthFunction = DepthFunction::Lesser;
-    shadowState.overrideBlendMode = BlendMode::None;
-    renderInterface->ApplyPipelineState(shadowState);
-    renderInterface->ClearDepth(1.0f);
-    m_shadowProgram->Bind();
-    m_shadowProgram->SetUniformMatrix("_LightSpaceMatrix", m_lightSpaceMatrix, false);
+    auto shadowProram = pipelineState.globalShader;
+    shadowProram->Bind();
+    shadowProram->SetUniformMatrix("_LightSpaceMatrix", m_lightSpaceMatrix, false);
     
     {
         rmt_ScopedCPUSample(ShadowPass_RenderShadowMap, 0);
@@ -195,7 +186,7 @@ void ShadowPass::Render(RenderSystem& rs, const ViewContext& viewCtx, SceneRende
             if (!mesh->GetVertexBuffer() || !mesh->GetIndexBuffer()) continue;
 
             const auto indexBuffer = mesh->GetIndexBuffer();
-            m_shadowProgram->SetUniformMatrix(
+            shadowProram->SetUniformMatrix(
                 "_Model",
                 shadowMesh.modelMatrix,
                 false);
@@ -204,7 +195,20 @@ void ShadowPass::Render(RenderSystem& rs, const ViewContext& viewCtx, SceneRende
         }
     }
 
-    m_shadowProgram->Unbind();
+    shadowProram->Unbind();
+}
+
+void ShadowPass::Begin_Internal(RenderSystem& rs, SceneRenderingContext& sceneCtx)
+{
+    if (!m_shadowMap) return;
+    m_shadowMap->Bind(rs);
+
+    rs.GetRenderInterface()->ClearDepth(1.0f);
+}
+
+void ShadowPass::End_Internal(RenderSystem& rs, SceneRenderingContext& sceneCtx)
+{
+    if (!m_shadowMap) return;
     m_shadowMap->Unbind(rs);
 
     sceneCtx.shadowMaps.emplace_back(ShadowMap {

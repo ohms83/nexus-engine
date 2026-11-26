@@ -118,8 +118,8 @@ NXS_NAMESPACE
         std::function<bool(const RenderCommand& command)> filter = nullptr;
 
         // Optional lifecycle hooks, called at the start / end of the pass.
-        std::function<void(RenderSystem&)> onBegin = nullptr;
-        std::function<void(RenderSystem&)> onEnd = nullptr;
+        std::function<void(RenderSystem&, SceneRenderingContext&)> onBegin = nullptr;
+        std::function<void(RenderSystem&, SceneRenderingContext&)> onEnd = nullptr;
 
         // Optional layer mask filtering. 0 => all layers.
         uint32_t layerMask = 0;
@@ -146,8 +146,8 @@ NXS_NAMESPACE
          */
         void End(RenderSystem& rs, SceneRenderingContext& sceneCtx);
 
-        virtual void Render(RenderSystem& rs, const ViewContext& viewCtx, SceneRenderingContext& sceneCtx);
-        virtual void Render(RenderSystem& rs, SceneRenderingContext& sceneCtx) {}
+        virtual void Render(RenderSystem& rs, const ViewContext& viewCtx, const SceneRenderingContext& sceneCtx);
+        virtual void Render(RenderSystem& rs, const SceneRenderingContext& sceneCtx) {}
 
         const Array<AttachmentDesc>& GetSampleTargets() const { return m_sampleTargets; }
 
@@ -183,8 +183,8 @@ NXS_NAMESPACE
         static void SetShadowMapParams(GpuProgram& gpuProgram, const SceneRenderingContext& sceneCtx);
 
     private:
-        virtual void Begin_Internal(RenderSystem& rs) {}
-        virtual void End_Internal(RenderSystem& rs) {}
+        virtual void Begin_Internal(RenderSystem& rs, SceneRenderingContext& sceneCtx) {}
+        virtual void End_Internal(RenderSystem& rs, SceneRenderingContext& sceneCtx) {}
 
         /**
          * @brief A list of offscreen targets that this pass might read/sample

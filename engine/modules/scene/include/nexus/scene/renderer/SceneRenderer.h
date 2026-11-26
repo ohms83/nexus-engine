@@ -74,16 +74,10 @@ NXS_NAMESPACE
          * @param rs
          */
         void RenderToScreen(RenderSystem& rs);
-        void RenderDirectionalShadowMap(RenderSystem& rs, SceneRenderingContext& sceneCtx);
 
         HashMap<std::string, Ref<RenderTarget>> m_renderTargets;
         //! Main offscreen buffer
         Ref<RenderTarget> m_screenBuffer;
-        Ref<RenderTarget> m_shadowMap;
-        Ref<GpuProgram> m_shadowProgram;
-        glm::mat4 m_lightSpaceMatrix{1.0f};
-        Identifier m_shadowLightId = 0;
-        bool m_shadowMapReady = false;
         bool m_initialized = false;
 
     private:
