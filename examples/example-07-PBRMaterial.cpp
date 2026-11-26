@@ -268,13 +268,13 @@ private:
 
     void InitLights()
     {
-        m_scene->Ambient() = {0.5f, 0.5f, 0.5f};
+        m_scene->Ambient() = {0.05f, 0.05f, 0.05f};
 
         m_lightRoot = m_scene->EmplaceChild<nxs::SceneNode>("Light Root");
 
         {
             auto light = m_scene->EmplaceChild<nxs::DirectionalLight>("Direct Light");
-            light->Properties().color =  {1, 1, 1};
+            light->Properties().color =  {0.5f, 0.5f, 0.5f};
             light->Direction() = {10, -10, 0};
         }
 
@@ -285,10 +285,10 @@ private:
             {-5, 5, -5},
         };
         nxs::Array<nxs::Color3F> lightColors = {
-            {1, 0, 0},
-            {0, 1, 0},
-            {0, 0, 1},
-            {1, 1, 0},
+            {0.5f, 0, 0},
+            {0, 0.5f, 0},
+            {0, 0, 0.5f},
+            {0.5f, 0.5f, 0},
         };
 
         for (size_t i = 0; i < lightPositions.size(); i++)

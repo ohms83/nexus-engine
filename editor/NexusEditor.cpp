@@ -21,11 +21,11 @@ static nxs::Identifier selectedNode = NXS_INVALID_ID;
 
 static void InitLight(nxs::Scene& scene)
 {
-    scene.Ambient() = {0.5, 0.5, 0.5};
+    scene.Ambient() = {0.05, 0.05, 0.05};
 
     {
         auto light = scene.EmplaceChild<nxs::DirectionalLight>("Direct Light 1");
-        light->Properties().color =  {1, 1, 1};
+        light->Properties().color =  {4, 4, 4};
         light->Direction() = {10, -10, 0};
     }
     {
@@ -38,7 +38,7 @@ static void InitLight(nxs::Scene& scene)
         pointLight.quadratic = 0.00001f;
 
         auto& properties = light->Properties();
-        properties.color = {1, 0, 0};
+        properties.color = {0.5f, 0, 0};
         properties.cutoffRange = 1000.f;
     }
     {
@@ -51,7 +51,7 @@ static void InitLight(nxs::Scene& scene)
         pointLight.quadratic = 0.00001f;
 
         auto& properties = light->Properties();
-        properties.color = {0, 1, 0};
+        properties.color = {0, 0.5f, 0};
         properties.cutoffRange = 1000.f;
     }
 }

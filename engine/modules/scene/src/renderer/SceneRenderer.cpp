@@ -52,10 +52,16 @@ bool SceneRenderer::Init(const IGpuResourceFactory* factory, RenderSystem& rs)
         #version 330 core
         in vec2 vScreenUv;
         uniform sampler2D _ScreenTexture;
-        out vec4 fragColor;
+        out vec4 FragColor;
         void main()
         {
-            fragColor = texture(_ScreenTexture, vScreenUv);
+            vec3 hdrColor = texture(_ScreenTexture, vScreenUv).rgb;
+            // reinhard tone mapping
+            vec3 mapped = hdrColor / (hdrColor + vec3(1.0));
+            // gamma correction 
+            const float gamma = 2.2;
+            mapped = pow(mapped, vec3(1.0 / gamma));
+            FragColor = vec4(mapped, 1.0);
         }
     )";
     if (!screenShader.CompileFromSource(
@@ -217,6 +223,9 @@ void SceneRenderer::RenderToScreen(RenderSystem& rs)
     m_screenBuffer->Unbind(rs);
 
     const auto renderInterface = rs.GetRenderInterface();
+    const bool framebufferSRGBSupported =
+        renderInterface->IsFramebufferSRGBSupported();
+    renderInterface->SetFramebufferSRGB(false);
     const auto& config = rs.GetGraphicsConfig();
     renderInterface->SetViewport(0, 0, config.screenWidth, config.screenHeight);
 
@@ -240,6 +249,7 @@ void SceneRenderer::RenderToScreen(RenderSystem& rs)
     rs.DrawIndexed(m_screenIndexBuffer);
     m_screenVertexBuffer->Unbind();
     m_screenShader->Unbind();
+    renderInterface->SetFramebufferSRGB(framebufferSRGBSupported);
 }
 
 void SceneRenderer::CreateOffscreenBuffer(int32_t width, int32_t height)
@@ -252,7 +262,7 @@ void SceneRenderer::CreateOffscreenBuffer(int32_t width, int32_t height)
         .height = height,
         .format = PixelFormat::RGBA_16F,
         .componentType = DataType::Float,
-        .colorSpace = TextureColorSpace::SRgb,
+        .colorSpace = TextureColorSpace::Linear,
         .wrapModeS = TextureWrapMode::ClampToEdge,
         .wrapModeT = TextureWrapMode::ClampToEdge,
     });
