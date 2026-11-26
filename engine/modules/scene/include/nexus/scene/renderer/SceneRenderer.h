@@ -79,7 +79,6 @@ NXS_NAMESPACE
         void RenderToScreen(RenderSystem& rs);
 
         void OnViewportResize(uint32_t w, uint32_t h);
-        
         sigslot::scoped_connection m_viewportResizeConnection;
 
         HashMap<std::string, Ref<RenderTarget>> m_renderTargets;
