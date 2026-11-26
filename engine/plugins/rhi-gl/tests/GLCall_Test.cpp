@@ -1,4 +1,5 @@
 #include "nexus/NxsGL.h"
+#include "nexus/GLTexture.h"
 
 #include <gtest/gtest.h>
 #include <iostream>
@@ -82,6 +83,28 @@ TEST(TextureInternalFormatTest, UnsupportedSrgbFormatUsesFallback)
             nxs::TextureColorSpace::SRgb,
             GL_DEPTH_COMPONENT),
         GL_DEPTH_COMPONENT);
+}
+
+TEST(TexturePixelFormatTest, HalfFloatFormatsUseBaseTransferFormats)
+{
+    EXPECT_EQ(nxs::GL::NxsPixelFormatToGL(nxs::PixelFormat::RGB_16F), GL_RGB);
+    EXPECT_EQ(nxs::GL::NxsPixelFormatToGL(nxs::PixelFormat::RGBA_16F), GL_RGBA);
+}
+
+TEST(TextureInternalFormatTest, HalfFloatFormatsUseSizedInternalFormats)
+{
+    EXPECT_EQ(
+        nxs::GL::ResolveTextureInternalFormat(
+            nxs::PixelFormat::RGB_16F,
+            nxs::TextureColorSpace::Linear,
+            GL_RGB),
+        GL_RGB16F);
+    EXPECT_EQ(
+        nxs::GL::ResolveTextureInternalFormat(
+            nxs::PixelFormat::RGBA_16F,
+            nxs::TextureColorSpace::Linear,
+            GL_RGBA),
+        GL_RGBA16F);
 }
 
 #if !defined(NXS_NO_LOG)

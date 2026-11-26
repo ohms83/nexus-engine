@@ -202,9 +202,20 @@ NXS_NAMESPACE
             TextureColorSpace colorSpace,
             GLint fallbackFormat)
         {
-            return colorSpace == TextureColorSpace::SRgb && IsSRGBCapableFormat(format)
-                ? GetSRGBFormat(format)
-                : fallbackFormat;
+            if (colorSpace == TextureColorSpace::SRgb && IsSRGBCapableFormat(format))
+            {
+                return GetSRGBFormat(format);
+            }
+
+            switch (format)
+            {
+            case PixelFormat::RGB_16F:
+                return GL_RGB16F;
+            case PixelFormat::RGBA_16F:
+                return GL_RGBA16F;
+            default:
+                return fallbackFormat;
+            }
         }
     }
 }

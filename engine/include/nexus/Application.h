@@ -56,6 +56,8 @@ NXS_NAMESPACE
 
         void RequestQuit();
 
+        NODISCARD const ApplicationConfig& GetAppConfig() const { return m_config; }
+
         NODISCARD WindowContext GetWindowContext() const;
 
         NODISCARD RenderSystem& GetRenderSystem() const

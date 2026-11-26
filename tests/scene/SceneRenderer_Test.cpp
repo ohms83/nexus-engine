@@ -333,10 +333,11 @@ TEST(SceneRendererTest, FailedRendererInitializationKeepsPreviousRenderer)
     auto rendering = std::make_shared<FakeRendering>();
     FakeGpuResourceFactory factory;
     RenderSystem renderSystem(rendering);
+    GraphicsConfig fakeConfig {};
     auto previous = std::make_shared<CountingRenderer>(false);
     auto failing = std::make_shared<CountingRenderer>(true);
-    previous->Init(factory);
-    failing->Init(factory);
+    previous->Init(factory, fakeConfig);
+    failing->Init(factory, fakeConfig);
 
     scene->SetRenderer(previous);
     scene->SetRenderer(failing);

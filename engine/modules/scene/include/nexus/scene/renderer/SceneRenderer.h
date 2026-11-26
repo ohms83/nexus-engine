@@ -24,6 +24,8 @@ NXS_NAMESPACE
     class Shader;
     class Mesh;
     class GpuProgram;
+    class VertexBuffer;
+    class IndexBuffer;
     class RenderTarget;
     struct LightProperties;
     struct PointLightComponent;
@@ -34,7 +36,7 @@ NXS_NAMESPACE
     public:
         virtual ~SceneRenderer() = default;
 
-        virtual bool Init(const IGpuResourceFactory& factory);
+        virtual bool Init(const IGpuResourceFactory& factory, const GraphicsConfig& config);
         bool IsInit() const { return m_initialized; }
 
         virtual void Render(RenderSystem& rs, const Scene& scene);
@@ -78,6 +80,9 @@ NXS_NAMESPACE
         HashMap<std::string, Ref<RenderTarget>> m_renderTargets;
         //! Main offscreen buffer
         Ref<RenderTarget> m_screenBuffer;
+        Ref<GpuProgram> m_screenShader;
+        Ref<VertexBuffer> m_screenVertexBuffer;
+        Ref<IndexBuffer> m_screenIndexBuffer;
         bool m_initialized = false;
 
     private:

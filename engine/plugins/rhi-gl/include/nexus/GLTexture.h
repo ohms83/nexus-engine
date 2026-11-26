@@ -80,6 +80,10 @@ NXS_NAMESPACE
                 return GL_RGB;
             case PixelFormat::RGBA:
                 return GL_RGBA;
+            case PixelFormat::RGB_16F:
+                return GL_RGB;
+            case PixelFormat::RGBA_16F:
+                return GL_RGBA;
             case PixelFormat::Depth:
                 return GL_DEPTH_COMPONENT;
             case PixelFormat::Stencil:

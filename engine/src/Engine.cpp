@@ -42,7 +42,7 @@ Engine& Engine::Initialize(WindowContext window, const GraphicsConfig& graphicsC
     s_engine->m_taskScheduler = NewRef<TaskScheduler>(NewRef<StandardTimeSource>());
 
     auto renderer = NewRef<ForwardSceneRenderer>(*s_engine->GetRenderSystem());
-    renderer->Init(*GetGpuResourceFactory());
+    renderer->Init(*GetGpuResourceFactory(), graphicsConfig);
     s_engine->m_sceneManager =  NewRef<SceneManager>(
         s_engine->GetTaskScheduler(),
         renderer

@@ -20,10 +20,4 @@ ForwardSceneRenderer::ForwardSceneRenderer(const RenderSystem& renderSystem)
     RegisterRenderPass(RenderPassQueue::Environment, NewRef<EnvironmentPass>());
     RegisterRenderPass(RenderPassQueue::Alpha, NewRef<AlphaPass>());
     RegisterRenderPass(RenderPassQueue::Overlay, NewRef<OverlayPass>());
-
-    auto* factory = GetGpuResourceFactory();
-    if (factory)
-    {
-        Init(*factory);
-    }
 }
