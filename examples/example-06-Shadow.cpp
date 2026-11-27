@@ -156,7 +156,7 @@ private:
         camera->SetPosition({5, 5, 5});
         camera->LookAt(glm::vec3(0), glm::vec3(0, 1, 0));
         camera->SetProjection(m_camera.fov, m_camera.width, m_camera.height, m_camera.nearZ, m_camera.farZ);
-        camera->Properties().profile.clearColor = nxs::Color3F::Grey;
+        camera->Properties().profile.clearColor = nxs::Color3F(0.1f, 0.6f, 0.85f);
 
         m_loadedModels.resize(modelPaths.size());
         m_loadedModels[0] = LoadModel(0);
@@ -189,7 +189,7 @@ private:
 
     void InitLights()
     {
-        m_scene->Ambient() = {0.2f, 0.2f, 0.2f};
+        m_scene->Ambient() = {0.05f, 0.05f, 0.05f};
         m_light = m_scene->EmplaceChild<nxs::DirectionalLight>("Direct Light");
         m_light->Properties().color = {1, 1, 1};
         m_light->Direction() = {0.7f, -1.0f, 0.3f};
