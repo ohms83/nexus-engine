@@ -53,9 +53,9 @@ TEST_F(MeshTest, SerializeDeserialize)
 
 TEST_F(MeshTest, PrimitiveCreatePlane)
 {
-    auto fakeRendering = std::make_shared<FakeRendering>();
+    auto fakeFactory = std::make_shared<FakeGpuResourceFactory>();
     auto material = resourceManager.Create<Material>("path/to/mat");
-    auto planeMesh = PrimitiveMesh::CreatePlane("plane", 2.0f, 3.0f, *fakeRendering, 1.0f, material);
+    auto planeMesh = PrimitiveMesh::CreatePlane("plane", 2.0f, 3.0f, *fakeFactory, 1.0f, material);
     ASSERT_NE(planeMesh, nullptr);
     EXPECT_EQ(planeMesh->GetName(), "plane");
     ASSERT_NE(planeMesh->GetVertexBuffer(), nullptr);
@@ -75,8 +75,8 @@ TEST_F(MeshTest, PrimitiveCreatePlane)
 
 TEST_F(MeshTest, PrimitiveCreateBox)
 {
-    FakeRendering fakeRendering;
-    auto boxMesh = PrimitiveMesh::CreateBox("box", {2.0f, 3.0f, 4.0f}, fakeRendering);
+    FakeGpuResourceFactory fakeFactory;
+    auto boxMesh = PrimitiveMesh::CreateBox("box", {2.0f, 3.0f, 4.0f}, fakeFactory);
 
     ASSERT_NE(boxMesh, nullptr);
     ASSERT_NE(boxMesh->GetVertexBuffer(), nullptr);
@@ -98,13 +98,13 @@ TEST_F(MeshTest, PrimitiveCreateSphere)
 {
     constexpr uint32_t sectorCount = 8;
     constexpr uint32_t stackCount = 4;
-    FakeRendering fakeRendering;
+    FakeGpuResourceFactory fakeFactory;
     auto sphereMesh = PrimitiveMesh::CreateSphere(
         "sphere",
         2.0f,
         sectorCount,
         stackCount,
-        fakeRendering);
+        fakeFactory);
 
     ASSERT_NE(sphereMesh, nullptr);
     ASSERT_NE(sphereMesh->GetVertexBuffer(), nullptr);

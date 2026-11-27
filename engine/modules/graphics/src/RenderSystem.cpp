@@ -14,16 +14,10 @@ USING_NAMESPACE_NXS;
 
 DEFINE_LOG(RenderSystem);
 
-RenderSystem::RenderSystem(const WindowContext window, const GraphicsConfig& config)
-    : m_config(config)
-    , m_timer(std::make_shared<HighResTimeSource>())
-{
-    m_renderingInterface = RenderingInterface::Create(window, config);
-    m_timer.Start();
-}
-
-RenderSystem::RenderSystem(Ref<RenderingInterface> renderingInterface)
-    : m_renderingInterface(renderingInterface)
+RenderSystem::RenderSystem(Ref<RenderingInterface> rhi, const IGpuResourceFactory* factory)
+    : m_config(rhi->GetConfig())
+    , m_rhi(rhi)
+    , m_gpuFactory(factory)
     , m_timer(std::make_shared<HighResTimeSource>())
 {
     m_timer.Start();
@@ -31,15 +25,15 @@ RenderSystem::RenderSystem(Ref<RenderingInterface> renderingInterface)
 
 RenderSystem::~RenderSystem()
 {
-    m_renderingInterface.reset();
+    m_rhi.reset();
 }
 
 void RenderSystem::ClearScreen() const
 {
     rmt_ScopedCPUSample(RenderSystem_ClearScreen, 0);
-    m_renderingInterface->ClearBuffer(
-        m_renderingInterface->GetClearColor(),
-        m_renderingInterface->GetClearDepth()
+    m_rhi->ClearBuffer(
+        m_rhi->GetClearColor(),
+        m_rhi->GetClearDepth()
     );
 }
 
@@ -51,7 +45,7 @@ void RenderSystem::BeginDraw()
     RenderDocCapture::BeginCaptureIfRequested();
     GraphicsProfiler::BeginFrame();
     m_timer.Tick();
-    m_renderingInterface->SetFramebufferSRGB(m_renderingInterface->IsFramebufferSRGBSupported());
+    m_rhi->SetFramebufferSRGB(m_rhi->IsFramebufferSRGBSupported());
     ClearScreen();
 
     m_drawCount = 0;
@@ -60,14 +54,14 @@ void RenderSystem::BeginDraw()
 
 void RenderSystem::DrawIndexed(Ref<IndexBuffer> indexBuffer)
 {
-    m_renderingInterface->DrawIndexed(indexBuffer);
+    m_rhi->DrawIndexed(indexBuffer);
     m_drawCount++;
     m_polygonCount += indexBuffer->NumPolygons();
 }
 
 void RenderSystem::DrawIndexedInstanced(Ref<IndexBuffer> indexBuffer, uint32_t instanceCount)
 {
-    m_renderingInterface->DrawIndexedInstanced(indexBuffer, instanceCount);
+    m_rhi->DrawIndexedInstanced(indexBuffer, instanceCount);
     m_drawCount++;
     m_polygonCount += indexBuffer->NumPolygons() * instanceCount;
 }
@@ -77,7 +71,7 @@ void RenderSystem::EndDraw()
     rmt_ScopedCPUSample(EndDraw, 0);
     {
         rmt_ScopedCPUSample(SwapBuffer, 0);
-        m_renderingInterface->SwapBuffer();
+        m_rhi->SwapBuffer();
     }
     // End RenderDoc capture if it was active for this frame
     RenderDocCapture::EndCaptureIfActive();
@@ -96,6 +90,6 @@ void RenderSystem::OnResize(const uint32_t pixel_w, const uint32_t pixel_h)
 {
     m_config.screenWidth = CAST<int>(pixel_w);
     m_config.screenHeight = CAST<int>(pixel_h);
-    m_renderingInterface->OnResize(pixel_w, pixel_h);
+    m_rhi->OnResize(pixel_w, pixel_h);
     onViewportResize(pixel_w, pixel_h);
 }

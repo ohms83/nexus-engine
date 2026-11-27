@@ -85,7 +85,7 @@ namespace
         std::unordered_map<std::string, int32_t> textureUnits;
     };
 
-    class ShadowTestRendering final : public FakeRendering
+    class ShadowTestFactory final : public FakeGpuResourceFactory
     {
     public:
         Ref<GpuProgram> CreateGpuProgram() const override
@@ -93,9 +93,14 @@ namespace
             program = NewRef<ShadowTestProgram>();
             return program;
         }
+        mutable Ref<ShadowTestProgram> program;
+    };
+
+    class ShadowTestRendering final : public FakeRendering
+    {
+    public:
         void ClearDepth(float) override {}
         void DrawIndexed(const Ref<IndexBuffer>) override { ++draws; }
-        mutable Ref<ShadowTestProgram> program;
         int draws = 0;
     };
 
@@ -172,6 +177,37 @@ namespace
     }
 }
 
+TEST(RenderSystemTest, UsesRenderingInterfaceConfigAndTracksResize)
+{
+    class ConfiguredRendering final : public FakeRendering
+    {
+    public:
+        ConfiguredRendering()
+        {
+            m_config.api = GraphicsAPI::OpenGL;
+            m_config.screenWidth = 1280;
+            m_config.screenHeight = 720;
+            m_config.vsync = true;
+        }
+
+        void OnResize(uint32_t, uint32_t) override {}
+    };
+
+    auto rendering = NewRef<ConfiguredRendering>();
+    FakeGpuResourceFactory factory;
+    RenderSystem renderSystem(rendering, &factory);
+    EXPECT_EQ(renderSystem.GetRenderInterface(), rendering);
+    EXPECT_EQ(renderSystem.GetGraphicsConfig().api, GraphicsAPI::OpenGL);
+    EXPECT_EQ(renderSystem.GetGraphicsConfig().screenWidth, 1280);
+    EXPECT_EQ(renderSystem.GetGraphicsConfig().screenHeight, 720);
+    EXPECT_TRUE(renderSystem.GetGraphicsConfig().vsync);
+
+    renderSystem.OnResize(640, 480);
+    EXPECT_EQ(renderSystem.GetGraphicsConfig().screenWidth, 640);
+    EXPECT_EQ(renderSystem.GetGraphicsConfig().screenHeight, 480);
+    EXPECT_TRUE(renderSystem.GetGraphicsConfig().vsync);
+}
+
 TEST(SceneRendererTest, ExecutesSelectedPassesPerViewWithFreshCommandsAndClearMasks)
 {
     auto scene = NewRef<Scene>("scene");
@@ -204,9 +240,9 @@ TEST(SceneRendererTest, ExecutesSelectedPassesPerViewWithFreshCommandsAndClearMa
     opaque->onEnd = [&](RenderSystem&, SceneRenderingContext&) { ++opaqueEnds; };
 
     auto rendering = NewRef<ViewTestRendering>();
-    RenderSystem renderSystem(rendering);
-    SceneRenderer renderer;
     FakeGpuResourceFactory factory;
+    RenderSystem renderSystem(rendering, &factory);
+    SceneRenderer renderer;
     renderer.RegisterRenderPass(RenderPassQueue::DepthFill, depth);
     renderer.RegisterRenderPass(RenderPassQueue::Opaque, opaque);
     renderer.Init(&factory, renderSystem);
@@ -241,8 +277,8 @@ TEST(SceneRendererTest, EmptyViewStillRunsPassLifecycle)
     SceneRenderer renderer;
     renderer.RegisterRenderPass(RenderPassQueue::Opaque, pass);
     auto rendering = NewRef<ViewTestRendering>();
-    RenderSystem renderSystem(rendering);
     FakeGpuResourceFactory factory;
+    RenderSystem renderSystem(rendering, &factory);
     renderer.Init(&factory, renderSystem);
     renderer.Render(renderSystem, *scene);
     EXPECT_EQ(begins, 1);
@@ -260,8 +296,8 @@ TEST(SceneRendererTest, DisabledPassDoesNotRun)
     SceneRenderer renderer;
     renderer.RegisterRenderPass(RenderPassQueue::Opaque, pass);
     auto rendering = NewRef<ViewTestRendering>();
-    RenderSystem renderSystem(rendering);
     FakeGpuResourceFactory factory;
+    RenderSystem renderSystem(rendering, &factory);
 
     renderer.Init(&factory, renderSystem);
     renderer.Render(renderSystem, *scene);
@@ -287,8 +323,8 @@ TEST(SceneRendererTest, RenderProfileSelectsPassesInQueueOrder)
     registerPass(RenderPassQueue::Opaque);
     registerPass(RenderPassQueue::DepthFill);
     auto rendering = NewRef<ViewTestRendering>();
-    RenderSystem renderSystem(rendering);
     FakeGpuResourceFactory factory;
+    RenderSystem renderSystem(rendering, &factory);
 
     view->profile.depthFill = true;
     renderer.Init(&factory, renderSystem);
@@ -326,8 +362,8 @@ TEST(SceneRendererTest, RendersVisibleMeshThroughSceneCamera)
     auto pass = NewRef<ViewTestPass>();
     pass->pipelineState.globalShader = NewRef<ViewTestProgram>();
     auto rendering = NewRef<ViewTestRendering>();
-    RenderSystem renderSystem(rendering);
     FakeGpuResourceFactory factory;
+    RenderSystem renderSystem(rendering, &factory);
     SceneRenderer renderer;
     renderer.Init(&factory, renderSystem);
     renderer.RegisterRenderPass(RenderPassQueue::Opaque, pass);
@@ -341,7 +377,7 @@ TEST(SceneRendererTest, ViewportResizeConnectionFollowsRendererLifetime)
 {
     auto rendering = NewRef<FakeRendering>();
     FakeGpuResourceFactory factory;
-    RenderSystem renderSystem(rendering);
+    RenderSystem renderSystem(rendering, &factory);
 
     {
         CountingRenderer renderer(false);
@@ -364,7 +400,7 @@ TEST(SceneRendererTest, FailedRendererInitializationKeepsPreviousRenderer)
     auto scene = NewRef<Scene>("scene");
     auto rendering = NewRef<FakeRendering>();
     FakeGpuResourceFactory factory;
-    RenderSystem renderSystem(rendering);
+    RenderSystem renderSystem(rendering, &factory);
     GraphicsConfig fakeConfig {};
     auto previous = NewRef<CountingRenderer>(false);
     auto failing = NewRef<CountingRenderer>(true);
@@ -390,8 +426,8 @@ TEST(SceneRendererTest, InactiveAncestorExcludesCameraAndLight)
     parent->EmplaceChild<DirectionalLight>("light");
     auto pass = NewRef<ViewTestPass>();
     auto rendering = NewRef<ViewTestRendering>();
-    RenderSystem renderSystem(rendering);
     FakeGpuResourceFactory factory;
+    RenderSystem renderSystem(rendering, &factory);
     SceneRenderer viewRenderer;
     viewRenderer.RegisterRenderPass(RenderPassQueue::Opaque, pass);
     auto program = NewRef<ShadowTestProgram>();
@@ -425,9 +461,10 @@ TEST(SceneRendererShadowTest, SelectsEnabledLightAndUpdatesPassParameters)
     caster->AddComponent<MeshComponent>()->SetMesh(MakeShadowTestMesh(material));
 
     auto rendering = NewRef<ShadowTestRendering>();
-    RenderSystem renderSystem(rendering);
+    ShadowTestFactory factory;
+    RenderSystem renderSystem(rendering, &factory);
     ShadowPass pass;
-    ASSERT_TRUE(pass.Init(*rendering));
+    ASSERT_TRUE(pass.Init(factory));
     SceneRenderingContext context{ .scene = scene.get() };
 
     pass.Begin(renderSystem, context);
@@ -437,16 +474,16 @@ TEST(SceneRendererShadowTest, SelectsEnabledLightAndUpdatesPassParameters)
     EXPECT_EQ(rendering->draws, 1);
     ASSERT_EQ(context.shadowMaps.size(), 1u);
     EXPECT_NE(context.shadowMaps.front().depthMap, nullptr);
-    ASSERT_NE(rendering->program, nullptr);
-    EXPECT_TRUE(rendering->program->matrices.contains("_LightSpaceMatrix"));
-    EXPECT_TRUE(rendering->program->matrices.contains("_Model"));
+    ASSERT_NE(factory.program, nullptr);
+    EXPECT_TRUE(factory.program->matrices.contains("_LightSpaceMatrix"));
+    EXPECT_TRUE(factory.program->matrices.contains("_Model"));
 
     LightParamsTestPass lightParamsPass;
     lightParamsPass.SetDirectLightParams(
-        *rendering->program,
+        *factory.program,
         *scene,
         context.shadowMaps.front().lightId);
-    lightParamsPass.SetShadowMapParams(*rendering->program, context);
+    lightParamsPass.SetShadowMapParams(*factory.program, context);
     int32_t expectedShadowLightIndex = 0;
     for (const auto view = scene->GetRegistry()->view<const SceneNodeComponent, const DirectLightComponent>();
          const auto& [entity, nodeComponent, directLight] : view.each())
@@ -456,12 +493,12 @@ TEST(SceneRendererShadowTest, SelectsEnabledLightAndUpdatesPassParameters)
         if (nodeComponent.id == context.shadowMaps.front().lightId) break;
         ++expectedShadowLightIndex;
     }
-    EXPECT_EQ(rendering->program->ints["_ShadowLightIndex"], expectedShadowLightIndex);
+    EXPECT_EQ(factory.program->ints["_ShadowLightIndex"], expectedShadowLightIndex);
     EXPECT_EQ(
-        rendering->program->ints["_DirectLights[0].castShadow"] +
-        rendering->program->ints["_DirectLights[1].castShadow"],
+        factory.program->ints["_DirectLights[0].castShadow"] +
+        factory.program->ints["_DirectLights[1].castShadow"],
         1);
-    EXPECT_EQ(rendering->program->ints["_HasShadowMap"], 1);
+    EXPECT_EQ(factory.program->ints["_HasShadowMap"], 1);
 }
 
 TEST(SceneRendererShadowTest, NonCastingReceiverContributesBoundsButIsNotDrawn)
@@ -488,9 +525,10 @@ TEST(SceneRendererShadowTest, NonCastingReceiverContributesBoundsButIsNotDrawn)
     ignored->AddComponent<MeshComponent>()->SetMesh(MakeShadowTestMesh(ignoredMaterial));
 
     auto rendering = NewRef<ShadowTestRendering>();
-    RenderSystem renderSystem(rendering);
+    ShadowTestFactory factory;
+    RenderSystem renderSystem(rendering, &factory);
     ShadowPass pass;
-    ASSERT_TRUE(pass.Init(*rendering));
+    ASSERT_TRUE(pass.Init(factory));
     SceneRenderingContext context{ .scene = scene.get() };
     pass.Begin(renderSystem, context);
     pass.Render(renderSystem, context);
@@ -515,8 +553,8 @@ TEST(SceneRendererShadowTest, NonCastingReceiverContributesBoundsButIsNotDrawn)
     EXPECT_EQ(rendering->draws, 1);
     EXPECT_TRUE(noCastersContext.shadowMaps.empty());
     LightParamsTestPass lightParamsPass;
-    lightParamsPass.SetDirectLightParams(*rendering->program, *scene);
-    lightParamsPass.SetShadowMapParams(*rendering->program, noCastersContext);
-    EXPECT_EQ(rendering->program->ints["_ShadowLightIndex"], -1);
-    EXPECT_EQ(rendering->program->ints["_HasShadowMap"], 0);
+    lightParamsPass.SetDirectLightParams(*factory.program, *scene);
+    lightParamsPass.SetShadowMapParams(*factory.program, noCastersContext);
+    EXPECT_EQ(factory.program->ints["_ShadowLightIndex"], -1);
+    EXPECT_EQ(factory.program->ints["_HasShadowMap"], 0);
 }

@@ -5,17 +5,32 @@
 #include "nexus/time/Timer.h"
 #include "nexus/debug/LogDispatcher.h"
 #include "nexus/core/Color.h"
+#include "nexus/Container.h"
+#include "nexus/memory/Memory.h"
+
+#include "RenderTarget.h"
 #include "RenderingInterface.h"
+#include "GpuResourceFactory.h"
 
 #include "sigslot/signal.hpp"
 
 NXS_NAMESPACE
 {
+    enum class FrameBufferType : int8_t
+    {
+        Color,
+        DepthStencil,
+        Position,
+        Normal,
+        Albedo,
+        Specular,
+        Num
+    };
+
     class RenderSystem final
     {
     public:
-        explicit RenderSystem(WindowContext window, const GraphicsConfig& config);
-        explicit RenderSystem(Ref<RenderingInterface> renderingInterface);
+        explicit RenderSystem(Ref<RenderingInterface> rhi, const IGpuResourceFactory* factory);
 
         ~RenderSystem();
 
@@ -32,20 +47,25 @@ NXS_NAMESPACE
 
         NODISCARD Ref<RenderingInterface> GetRenderInterface() const
         {
-            NXS_ASSERT_MSG(m_renderingInterface, "Rendering interface is not initialized");
-            return m_renderingInterface;
+            NXS_ASSERT_MSG(m_rhi, "Rendering interface is not initialized");
+            return m_rhi;
         }
 
         NODISCARD RenderContext GetRenderContext() const
         {
-            NXS_ASSERT_MSG(m_renderingInterface, "Rendering interface is not initialized");
-            return m_renderingInterface->GetRenderContext();
+            NXS_ASSERT_MSG(m_rhi, "Rendering interface is not initialized");
+            return m_rhi->GetRenderContext();
         }
 
         //! Get the time used for rendering the last frame in milliseconds.
         NODISCARD float GetrenderTime() const
         {
             return m_renderTime;
+        }
+
+        NODISCARD float GetDeltaTime() const
+        {
+            return m_timer.GetDeltaTime();
         }
 
         NODISCARD uint32_t GetFrameIndex() const
@@ -75,7 +95,11 @@ NXS_NAMESPACE
     protected:
         //! Graphics configuration used to initialize the rendering interface.
         GraphicsConfig m_config;
-        Ref<RenderingInterface> m_renderingInterface;
+        Ref<RenderingInterface> m_rhi;
+        const IGpuResourceFactory* m_gpuFactory;
+
+        HashMap<FrameBufferType, Ref<IBuffer>> m_frameBuffers;
+        Ref<RenderTarget> m_offscreenBuffer;
 
         uint32_t m_frameIndex = 0;
         uint32_t m_drawCount = 0;

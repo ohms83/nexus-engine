@@ -38,7 +38,7 @@ namespace
 TEST(DepthPrePassTest, InitializesDepthProgramAndUsesOpaqueDepthState)
 {
     DepthPrePass pass;
-    FakeRendering factory;
+    FakeGpuResourceFactory factory;
     ASSERT_TRUE(pass.Init(factory));
     ASSERT_NE(pass.pipelineState.globalShader, nullptr);
     auto program = pass.pipelineState.globalShader;
@@ -67,11 +67,11 @@ TEST(DepthPrePassTest, InitializesDepthProgramAndUsesOpaqueDepthState)
 TEST(DepthPrePassTest, FailedProgramInitializationIsReported)
 {
     DepthPrePass pass;
-    BadRendering factory;
+    BadFactory factory;
     EXPECT_FALSE(pass.Init(factory));
     EXPECT_EQ(pass.pipelineState.globalShader, nullptr);
     pass.globalShaderSources.clear();
-    FakeRendering goodFactory;
+    FakeGpuResourceFactory goodFactory;
     EXPECT_FALSE(pass.Init(goodFactory));
     EXPECT_EQ(pass.pipelineState.globalShader, nullptr);
 }
@@ -103,7 +103,7 @@ TEST(RenderPassTest, OffscreenTargetIsCreatedDuringInit)
         }
     };
 
-    FakeRendering factory;
+    FakeGpuResourceFactory factory;
     TestOffscreenPass pass;
 
     ASSERT_TRUE(pass.Init(factory));
@@ -125,10 +125,9 @@ TEST(RenderPassTest, ShadowPassCreatesShadowMapTargetDuringInit)
         int unbinds = 0;
     };
 
-    class TrackingRendering final : public FakeRendering
+    class TrackingFactory final : public FakeGpuResourceFactory
     {
     public:
-        void ClearDepth(float) override {}
         Ref<RenderTarget> CreateRenderTarget(const TextureDescription&) const override
         {
             ++targetCreations;
@@ -140,7 +139,7 @@ TEST(RenderPassTest, ShadowPassCreatesShadowMapTargetDuringInit)
         mutable Ref<TrackingRenderTarget> target;
     };
 
-    auto factory = std::make_shared<TrackingRendering>();
+    auto factory = std::make_shared<TrackingFactory>();
     ShadowPass pass;
 
     ASSERT_TRUE(pass.Init(*factory));
@@ -151,7 +150,8 @@ TEST(RenderPassTest, ShadowPassCreatesShadowMapTargetDuringInit)
     EXPECT_TRUE(pass.offscreenTarget.IsValid());
     EXPECT_EQ(pass.offscreenTarget.textureDesc.format, PixelFormat::Depth);
 
-    RenderSystem renderSystem(factory);
+    auto rhi = NewRef<FakeRendering>();
+    RenderSystem renderSystem(rhi, factory.get());
     SceneRenderingContext sceneCtx;
     pass.Begin(renderSystem, sceneCtx);
     pass.End(renderSystem, sceneCtx);

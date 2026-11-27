@@ -30,7 +30,7 @@ TEST(ShaderTest, SerializeDeserialize)
 
 TEST(ShaderTest, CompileExtractsUniforms)
 {
-    FakeRendering fake;
+    FakeGpuResourceFactory fake;
     Shader s("shaders/uniforms", 11);
 
     const std::string vert = R"(
@@ -62,7 +62,7 @@ TEST(ShaderTest, CompileExtractsUniforms)
 
 TEST(ShaderTest, CompileFailsWithBadGpuProgram)
 {
-    BadRendering bad;
+    BadFactory bad;
 
     Shader s("shaders/bad", 12);
     const std::string vert = R"(
@@ -79,7 +79,7 @@ TEST(ShaderTest, CompileFailsWithBadGpuProgram)
 
 TEST(ShaderTest, CompileFromFile_Success)
 {
-    FakeRendering fake;
+    FakeGpuResourceFactory fake;
     Shader s("shaders/file", 20);
 
     const auto tmp = std::filesystem::temp_directory_path();
@@ -103,7 +103,7 @@ TEST(ShaderTest, CompileFromFile_Success)
 
 TEST(ShaderTest, CompileFromFile_FailMissingFiles)
 {
-    FakeRendering fake;
+    FakeGpuResourceFactory fake;
     Shader s("shaders/file_missing", 21);
 
     bool ok = s.CompileFromFile(fake, "no_such.vert", "no_such.frag", "");
@@ -112,7 +112,7 @@ TEST(ShaderTest, CompileFromFile_FailMissingFiles)
 
 TEST(ShaderTest, CompileWithGeometryExtractsUniforms)
 {
-    FakeRendering fake;
+    FakeGpuResourceFactory fake;
     Shader s("shaders/geom", 22);
 
     const std::string vert = R"(
@@ -139,7 +139,7 @@ TEST(ShaderTest, CompileWithGeometryExtractsUniforms)
 
 TEST(ShaderTest, CompileThrowsWhenSourcesMissing)
 {
-    FakeRendering fake;
+    FakeGpuResourceFactory fake;
     Shader s("shaders/missing", 23);
     // No sources set -> Compile() should throw due to m_sources.at() usage
     EXPECT_THROW(s.Compile(fake), std::out_of_range);
@@ -147,7 +147,7 @@ TEST(ShaderTest, CompileThrowsWhenSourcesMissing)
 
 TEST(ShaderTest, UniformParsingEdgeCases)
 {
-    FakeRendering fake;
+    FakeGpuResourceFactory fake;
     Shader s("shaders/edge", 24);
 
     const std::string vert = R"(

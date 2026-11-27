@@ -38,7 +38,9 @@ NXS_NAMESPACE
 Engine& Engine::Initialize(WindowContext window, const GraphicsConfig& graphicsConfig)
 {
     s_engine = NewPtr<Engine>();
-    s_engine->m_renderSystem = NewRef<RenderSystem>(window, graphicsConfig);
+    auto rhi = RenderingInterface::Create(window, graphicsConfig);
+    auto gpuFactory = GetGpuResourceFactory();
+    s_engine->m_renderSystem = NewRef<RenderSystem>(rhi, gpuFactory);
     s_engine->m_taskScheduler = NewRef<TaskScheduler>(NewRef<StandardTimeSource>());
 
     auto renderer = NewRef<ForwardSceneRenderer>(*s_engine->GetRenderSystem());

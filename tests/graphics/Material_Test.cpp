@@ -29,7 +29,7 @@ namespace
         uint32_t Alloc() override { return 1; }
     };
 
-    class MaterialTestRendering final : public FakeRendering
+    class MaterialTestFactory final : public FakeGpuResourceFactory
     {
     public:
         Ref<GpuProgram> CreateGpuProgram() const override { return program; }
@@ -155,17 +155,17 @@ TEST_F(MaterialTest, LegacyMaterialDefaultsToCastingAndReceivingShadows)
 
 TEST_F(MaterialTest, UseUploadsReceiveShadowsFlag)
 {
-    MaterialTestRendering rendering;
+    MaterialTestFactory factory;
     auto shader = std::make_shared<Shader>("shader", 1);
-    ASSERT_TRUE(shader->CompileFromSource(rendering, "void main() {}", "void main() {}", ""));
+    ASSERT_TRUE(shader->CompileFromSource(factory, "void main() {}", "void main() {}", ""));
     Material material("material", 2);
     material.SetShader(shader);
 
     ASSERT_NE(material.Use(), nullptr);
-    EXPECT_FLOAT_EQ(rendering.program->receiveShadows, 1.0f);
+    EXPECT_FLOAT_EQ(factory.program->receiveShadows, 1.0f);
     material.receiveShadows = false;
     ASSERT_NE(material.Use(), nullptr);
-    EXPECT_FLOAT_EQ(rendering.program->receiveShadows, 0.0f);
+    EXPECT_FLOAT_EQ(factory.program->receiveShadows, 0.0f);
 }
 
 TEST_F(MaterialTest, MetallicRoughnessPropertiesSerialize)
