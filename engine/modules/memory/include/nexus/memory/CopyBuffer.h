@@ -31,6 +31,13 @@ NXS_NAMESPACE
          * @param size The data size in bytes.
          */
         explicit CopyBuffer(const uint8_t* data, size_t size);
+        
+
+        /**
+         * @brief Constructs an empty buffer.
+         * @param size The data size in bytes.
+         */
+        explicit CopyBuffer(size_t size);
 
         /**
          * @brief Deleted copy constructor.

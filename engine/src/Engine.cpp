@@ -45,6 +45,8 @@ Engine& Engine::Initialize(WindowContext window, const GraphicsConfig& graphicsC
 
     auto renderer = NewRef<ForwardSceneRenderer>(*s_engine->GetRenderSystem());
     renderer->Init(GetGpuResourceFactory(), *s_engine->GetRenderSystem());
+    renderer->SetTaskScheduler(s_engine->GetTaskScheduler());
+
     s_engine->m_sceneManager =  NewRef<SceneManager>(
         s_engine->GetTaskScheduler(),
         renderer

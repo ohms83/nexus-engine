@@ -7,6 +7,8 @@
 #include "nexus/NxsCommon.h"
 #include "nexus/ApplicationContext.h"
 #include "nexus/core/Color.h"
+#include "nexus/geom/Rect.h"
+#include "nexus/memory/Buffer.h"
 
 #include "GraphicsConfig.h"
 #include "GraphicsConst.h"
@@ -75,8 +77,10 @@ NXS_NAMESPACE
 
         virtual void SetViewport(int32_t x, int32_t y, int32_t w, int32_t h)
         {
-            NXS_ASSERT_MSG(false, "SetViewport not implemented for this graphics API.");
+            m_viewport = { {x, y}, {w, h} };
         }
+
+        const iRect& GetViewport() const { return m_viewport; }
 
         virtual void OnResize(uint32_t pixel_w, uint32_t pixel_h)
         {
@@ -95,9 +99,19 @@ NXS_NAMESPACE
             NXS_ASSERT_MSG(false, "DrawIndexedInstanced not implemented for this graphics API.");
         }
 
-        NODISCARD GraphicsAPI GetAPI() const
+        NODISCARD const GraphicsConfig GetConfig() const
         {
-            return m_graphicsAPI;
+            return m_config;
+        }
+
+        virtual void ReadFrameData(FrameBufferType type, Ref<IBuffer> outData) const
+        {
+            NXS_ASSERT_MSG(false, "ReadFrameData not implemented for this graphics API.");
+        }
+
+        virtual void ReadFrameSubData(FrameBufferType type, const iRect& region, Ref<IBuffer> outData) const
+        {
+            NXS_ASSERT_MSG(false, "ReadFrameSubData not implemented for this graphics API.");
         }
 
         virtual void SetColorMask(const glm::bvec4& mask) { m_pipelineState.colorMask = mask; }
@@ -150,9 +164,10 @@ NXS_NAMESPACE
 
     protected:
         RenderContext m_renderContext {};
-        GraphicsAPI m_graphicsAPI = GraphicsAPI::Undefined;
+        GraphicsConfig m_config;
         PipelineState m_pipelineState {
             .depthFunction = DepthFunction::None,
         };
+        iRect m_viewport;
     };
 }

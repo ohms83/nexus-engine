@@ -5,6 +5,7 @@
 #pragma once
 
 #include "nexus/NxsDefine.h"
+#include "nexus/debug/Assert.h"
 
 #include <array>
 #include <string>
@@ -159,4 +160,47 @@ NXS_NAMESPACE
         Stencil = 1 << 2,
         All     = 0xFF
     };
+
+    enum class FrameBufferType
+    {
+        //! RGBA color
+        Color3,
+        //! RGB color
+        Color4,
+        //! RGBA color where each component is a floating point value
+        Color3F,
+        //! RGB color
+        Color4F,
+        //! Depth value (float)
+        Depth,
+        //! Stencil value (integer)
+        Stencil,
+        //! 24bit depth value combined with 8 bit stencil
+        DepthStencil
+    };
+
+    inline size_t GetFrameBufferPixelSize(FrameBufferType type)
+    {
+        switch (type)
+        {
+        case FrameBufferType::Color3:
+            return 3;
+        case FrameBufferType::Color4:
+        case FrameBufferType::Depth:
+        case FrameBufferType::Stencil:
+        case FrameBufferType::DepthStencil:
+            return 4;
+            break;
+        case FrameBufferType::Color3F:
+            return 12;
+            break;
+        case FrameBufferType::Color4F:
+            return 16;
+            break;
+        default:
+            NXS_ASSERT_MSG(false, std::format("Unknown type {}", INT_CAST(type)));
+            break;
+        }
+        return 0;
+    }
 }

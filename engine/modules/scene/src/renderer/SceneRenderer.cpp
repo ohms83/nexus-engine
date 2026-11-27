@@ -7,6 +7,7 @@
 #include <format>
 #include <algorithm>
 #include <array>
+#include <cmath>
 
 #include "nexus/debug/Logger.h"
 #include "nexus/graphics/debug/Gizmos.h"
@@ -20,6 +21,10 @@
 #include "nexus/graphics/IndexBuffer.h"
 #include "nexus/memory/BorrowBuffer.h"
 #include "nexus/scene/Scene.h"
+#include "nexus/task/RepeatTask.h"
+#include "nexus/task/IntervalTask.h"
+#include "nexus/time/Timer.h"
+#include "nexus/math/Math.h"
 
 #include "Remotery.h"
 #include "nexus/graphics/GraphicsProfiler.h"
@@ -28,8 +33,15 @@ USING_NAMESPACE_NXS;
 
 DEFINE_LOG(SceneRenderer);
 
+SceneRenderer::SceneRenderer()
+{
+    m_timer = NewRef<Timer>(NewRef<StandardTimeSource>());
+    m_timer->Start();
+}
+
 SceneRenderer::~SceneRenderer()
 {
+    m_timer.reset();
     m_viewportResizeConnection.disconnect();
 }
 
@@ -52,12 +64,14 @@ bool SceneRenderer::Init(const IGpuResourceFactory* factory, RenderSystem& rs)
         #version 330 core
         in vec2 vScreenUv;
         uniform sampler2D _ScreenTexture;
+        uniform float _Exposure;
         out vec4 FragColor;
         void main()
         {
             vec3 hdrColor = texture(_ScreenTexture, vScreenUv).rgb;
+            vec3 exposed = hdrColor * _Exposure;
             // reinhard tone mapping
-            vec3 mapped = hdrColor / (hdrColor + vec3(1.0));
+            vec3 mapped = exposed / (exposed + vec3(1.0));
             // gamma correction 
             const float gamma = 2.2;
             mapped = pow(mapped, vec3(1.0 / gamma));
@@ -107,7 +121,25 @@ bool SceneRenderer::Init(const IGpuResourceFactory* factory, RenderSystem& rs)
     }
     m_viewportResizeConnection = rs.onViewportResize.connect(&SceneRenderer::OnViewportResize, this);
     m_gpuResourceFactory = factory;
-    return m_initialized = true;
+    m_initialized = true;
+    const auto& config = rs.GetGraphicsConfig();
+    CreateOffscreenBuffer(config.screenWidth, config.screenHeight);
+    return true;
+}
+
+void SceneRenderer::SetTaskScheduler(Ref<TaskScheduler> scheduler)
+{
+    if (m_taskScheduler)
+    {
+        if (m_luminanceSamplingTask != NXS_INVALID_ID) m_taskScheduler->StopTask(m_luminanceSamplingTask);
+        if (m_autoExposureEnabled != NXS_INVALID_ID) m_taskScheduler->StopTask(m_autoExposureEnabled);
+    }
+    m_taskScheduler = scheduler;
+
+    auto task = NewRef<RepeatTask>(-1, [&]() {
+        return UpdateAutoExposure();
+    });
+    m_luminanceSamplingTask = m_taskScheduler->ScheduleTask(task);
 }
 
 void SceneRenderer::Render(RenderSystem &rs, const Scene &scene)
@@ -220,8 +252,6 @@ void SceneRenderer::RenderToScreen(RenderSystem& rs)
         return;
     }
 
-    m_screenBuffer->Unbind(rs);
-
     const auto renderInterface = rs.GetRenderInterface();
     const bool framebufferSRGBSupported =
         renderInterface->IsFramebufferSRGBSupported();
@@ -244,6 +274,7 @@ void SceneRenderer::RenderToScreen(RenderSystem& rs)
         "_ScreenTexture",
         m_screenBuffer->GetColorTextureProxy(),
         0);
+    m_screenShader->SetUniformFloat("_Exposure", m_exposure);
 
     m_screenVertexBuffer->Bind();
     rs.DrawIndexed(m_screenIndexBuffer);
@@ -256,8 +287,7 @@ void SceneRenderer::CreateOffscreenBuffer(int32_t width, int32_t height)
 {
     if (!m_initialized || !m_gpuResourceFactory) return;
 
-    m_screenBuffer.reset();
-    m_screenBuffer = m_gpuResourceFactory->CreateRenderTarget( TextureDescription {
+    auto desc = TextureDescription {
         .width = width,
         .height = height,
         .format = PixelFormat::RGBA_16F,
@@ -265,7 +295,65 @@ void SceneRenderer::CreateOffscreenBuffer(int32_t width, int32_t height)
         .colorSpace = TextureColorSpace::Linear,
         .wrapModeS = TextureWrapMode::ClampToEdge,
         .wrapModeT = TextureWrapMode::ClampToEdge,
-    });
+        .filterMin = TextureFilterMode::LinearMipmapLinear,
+        .filterMag = TextureFilterMode::Linear,
+        .numMips = Math::ComputeMaxMipLevel(width, height),
+    };
+
+    m_screenBuffer.reset();
+    m_screenBuffer = m_gpuResourceFactory->CreateRenderTarget(desc);
+    if (!m_screenBuffer || !m_screenBuffer->GetColorTextureProxy())
+    {
+        m_screenBuffer.reset();
+        return;
+    }
+
+    m_screenTexels.reset();
+    m_screenTexels = NewRef<CopyBuffer>(desc.GetBufferSize());
+}
+
+bool SceneRenderer::UpdateAutoExposure()
+{
+    rmt_ScopedCPUSample(SceneRenderer_UpdateAutoExposure, 0);
+    if (!m_autoExposureEnabled || !m_screenBuffer) return false;
+
+    m_timer->Tick();
+    const float dt = std::max(0.0f, m_timer->GetDeltaTime());
+
+    const auto hdrTexture = m_screenBuffer->GetColorTextureProxy();
+    if (!hdrTexture)
+    {
+        LOG_ERROR(LogSceneRenderer, "The offscreen buffer doesn't have a color target!!");
+        return false;
+    }
+
+    hdrTexture->Bind();
+    hdrTexture->GenerateMipmaps();
+
+    glm::vec4 color {0};
+    const auto& desc = hdrTexture->GetDescription();
+    hdrTexture->ReadTexel(desc.numMips - 1, &color, sizeof(glm::vec4));
+
+    hdrTexture->Unbind();
+
+    const float averageLuminance = 
+            0.2126f * std::max(0.0f, color.r) +
+            0.7152f * std::max(0.0f, color.g) +
+            0.0722f * std::max(0.0f, color.b);
+
+    if (!std::isfinite(averageLuminance) || averageLuminance <= 0.0f) return true;
+
+    const float targetExposure = m_autoExposureTarget / averageLuminance;
+    if (!Math::Approx(targetExposure, m_exposure))
+    {
+        const float clampedTargetExposure = std::clamp(targetExposure, 0.05f, 20.0f);
+        const float blend = m_autoExposureSpeed <= 0.0f
+            ? 1.0f
+            : 1.0f - std::exp(-dt * m_autoExposureSpeed);
+
+        m_exposure += (clampedTargetExposure - m_exposure) * blend;
+    }
+    return true;
 }
 
 void SceneRenderer::OnViewportResize(uint32_t w, uint32_t h)

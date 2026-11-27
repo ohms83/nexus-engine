@@ -86,6 +86,20 @@ void RenderSystem::EndDraw()
     m_frameIndex++;
 }
 
+void RenderSystem::ReadFrameData(FrameBufferType type, Ref<IBuffer> outData) const
+{
+    size_t pixelSize = GetFrameBufferPixelSize(type);
+    outData->Resize(m_config.screenWidth * m_config.screenHeight * pixelSize);
+    m_rhi->ReadFrameData(type, outData);
+}
+
+void RenderSystem::ReadFrameSubData(FrameBufferType type, const iRect& region, Ref<IBuffer> outData) const
+{
+    size_t pixelSize = GetFrameBufferPixelSize(type);
+    outData->Resize(region.size.x * region.size.y * pixelSize);
+    m_rhi->ReadFrameSubData(type, region, outData);
+}
+
 void RenderSystem::OnResize(const uint32_t pixel_w, const uint32_t pixel_h)
 {
     m_config.screenWidth = CAST<int>(pixel_w);

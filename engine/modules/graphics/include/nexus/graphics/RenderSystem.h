@@ -7,6 +7,7 @@
 #include "nexus/core/Color.h"
 #include "nexus/Container.h"
 #include "nexus/memory/Memory.h"
+#include "nexus/geom/Rect.h"
 
 #include "RenderTarget.h"
 #include "RenderingInterface.h"
@@ -16,17 +17,6 @@
 
 NXS_NAMESPACE
 {
-    enum class FrameBufferType : int8_t
-    {
-        Color,
-        DepthStencil,
-        Position,
-        Normal,
-        Albedo,
-        Specular,
-        Num
-    };
-
     class RenderSystem final
     {
     public:
@@ -37,10 +27,12 @@ NXS_NAMESPACE
         void ClearScreen() const;
 
         void BeginDraw();
-        void Draw();
         void DrawIndexed(Ref<IndexBuffer> indexBuffer);
         void DrawIndexedInstanced(Ref<IndexBuffer> indexBuffer, uint32_t instanceCount);
         void EndDraw();
+
+        void ReadFrameData(FrameBufferType type, Ref<IBuffer> outData) const;
+        void ReadFrameSubData(FrameBufferType type, const iRect& region, Ref<IBuffer> outData) const;
 
         //! An event handler called when the window resize event occured.
         void OnResize(uint32_t pixel_w, uint32_t pixel_h);
@@ -97,9 +89,6 @@ NXS_NAMESPACE
         GraphicsConfig m_config;
         Ref<RenderingInterface> m_rhi;
         const IGpuResourceFactory* m_gpuFactory;
-
-        HashMap<FrameBufferType, Ref<IBuffer>> m_frameBuffers;
-        Ref<RenderTarget> m_offscreenBuffer;
 
         uint32_t m_frameIndex = 0;
         uint32_t m_drawCount = 0;

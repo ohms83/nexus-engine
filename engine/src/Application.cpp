@@ -416,7 +416,7 @@ void Application::InitImGui() const
     style.Colors[ImGuiCol_TitleBgActive].w = 0.85f; // Active title bar
     style.Colors[ImGuiCol_TitleBgCollapsed].w =.7f; // Collapsed title bar
 
-    if (const auto api = m_renderInterface->GetAPI(); api == GraphicsAPI::OpenGL)
+    if (const auto api = m_renderInterface->GetConfig().api; api == GraphicsAPI::OpenGL)
     {
         // Setup Platform/Renderer backends
         SDL_Window* sdlWindow = R_CAST<SDL_Window*>(m_window);
@@ -437,7 +437,7 @@ void Application::BeginDrawUI() const
 {
     rmt_ScopedCPUSample(BeginDrawUI, 0);
     m_renderInterface->SetFramebufferSRGB(false);
-    if (const auto api = m_renderInterface->GetAPI(); api == GraphicsAPI::OpenGL)
+    if (const auto api = m_renderInterface->GetConfig().api; api == GraphicsAPI::OpenGL)
     {
         ImGui_ImplOpenGL3_NewFrame();
     }
@@ -457,7 +457,7 @@ void Application::EndDrawUI() const
     rmt_ScopedCPUSample(EndDrawUI, 0);
     ImGui::Render();
 
-    if (const auto api = m_renderInterface->GetAPI(); api == GraphicsAPI::OpenGL)
+    if (const auto api = m_renderInterface->GetConfig().api; api == GraphicsAPI::OpenGL)
     {
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     }
@@ -482,7 +482,7 @@ void Application::DestroyImGui()
 {
     ImPlot::DestroyContext();
 
-    if (const auto api = m_renderInterface->GetAPI(); api == GraphicsAPI::OpenGL)
+    if (const auto api = m_renderInterface->GetConfig().api; api == GraphicsAPI::OpenGL)
     {
         ImGui_ImplOpenGL3_Shutdown();
     }

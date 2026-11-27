@@ -142,6 +142,7 @@ Ref<RenderingInterface> RenderingInterface::Create(WindowContext window, const G
     {
         LOG_FATAL(LogRenderingInterface, "OpenGL RHI plugin returned an empty rendering interface");
     }
+    renderingInterface->m_config = config;
     return renderingInterface;
 }
 

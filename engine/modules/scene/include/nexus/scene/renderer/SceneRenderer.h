@@ -9,10 +9,12 @@
 #include "nexus/graphics/RenderCommand.h"
 #include "nexus/scene/renderpass/RenderPass.h"
 #include "nexus/geom/Frustum.h"
+#include "nexus/memory/CopyBuffer.h"
 
 #include "entt/entity/registry.hpp"
 #include "sigslot/signal.hpp"
 
+#include <algorithm>
 #include <string>
 #include <unordered_map>
 
@@ -28,6 +30,8 @@ NXS_NAMESPACE
     class VertexBuffer;
     class IndexBuffer;
     class RenderTarget;
+    class TaskScheduler;
+    class Timer;
     struct LightProperties;
     struct PointLightComponent;
     struct DirectLightComponent;
@@ -35,10 +39,13 @@ NXS_NAMESPACE
     class SceneRenderer
     {
     public:
+        SceneRenderer();
         virtual ~SceneRenderer();
 
         virtual bool Init(const IGpuResourceFactory* factory, RenderSystem& rs);
         bool IsInit() const { return m_initialized; }
+
+        void SetTaskScheduler(Ref<TaskScheduler> scheduler);
 
         virtual void Render(RenderSystem& rs, const Scene& scene);
 
@@ -70,6 +77,14 @@ NXS_NAMESPACE
             m_renderTargets[name] = target;
         }
 
+        void SetAutoExposureEnabled(bool enabled) { m_autoExposureEnabled = enabled; }
+        NODISCARD bool IsAutoExposureEnabled() const { return m_autoExposureEnabled; }
+        void SetAutoExposureTarget(float targetLuminance) { m_autoExposureTarget = std::max(0.001f, targetLuminance); }
+        NODISCARD float GetAutoExposureTarget() const { return m_autoExposureTarget; }
+        void SetAutoExposureSpeed(float speed) { m_autoExposureSpeed = std::max(0.0f, speed); }
+        NODISCARD float GetAutoExposureSpeed() const { return m_autoExposureSpeed; }
+        NODISCARD float GetExposure() const { return m_exposure; }
+
     protected:
         /**
          * @brief Render the offscreen buffer to screen.
@@ -89,13 +104,25 @@ NXS_NAMESPACE
         Ref<IndexBuffer> m_screenIndexBuffer;
         const IGpuResourceFactory* m_gpuResourceFactory = nullptr;
         bool m_initialized = false;
+        bool m_autoExposureEnabled = true;
+        float m_autoExposureTarget = 0.18f;
+        float m_autoExposureSpeed = 1.0f;
+        float m_exposure = 1.0f;
 
     private:
         bool InitResources(const IGpuResourceFactory& factory, const GraphicsConfig& config);
         void CreateOffscreenBuffer(int32_t width, int32_t height);
 
+        bool UpdateAutoExposure();
+
         //! A list of render passes sorted by their priority.
         Dict<RenderPassQueue, Ref<RenderPass>> m_passesByQueue;
         Dict<RenderPassQueue, Ref<RenderPass>> m_perFramePasses;
+
+        Ref<TaskScheduler> m_taskScheduler;
+        TaskID m_luminanceSamplingTask = NXS_INVALID_ID;
+        TaskID m_updateExposureTask = NXS_INVALID_ID;
+        Ref<CopyBuffer> m_screenTexels;
+        Ref<Timer> m_timer;
     };
 }

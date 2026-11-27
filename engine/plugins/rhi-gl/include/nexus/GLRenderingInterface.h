@@ -25,6 +25,9 @@ NXS_NAMESPACE
 
         void SetViewport(int32_t x, int32_t y, int32_t w, int32_t h) override;
 
+        void ReadFrameData(FrameBufferType type, Ref<IBuffer> outData) const override;
+        void ReadFrameSubData(FrameBufferType type, const iRect& region, Ref<IBuffer> outData) const override;
+
         void OnResize(uint32_t pixel_w, uint32_t pixel_h) override;
 
         void DrawIndexed(const Ref<IndexBuffer> indexBuffer) override;

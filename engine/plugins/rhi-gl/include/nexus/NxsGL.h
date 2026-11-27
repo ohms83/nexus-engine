@@ -217,5 +217,50 @@ NXS_NAMESPACE
                 return fallbackFormat;
             }
         }
+
+        inline GLenum GetFrameBufferFormat(FrameBufferType type)
+        {
+            switch (type)
+            {
+            case FrameBufferType::Color3:
+            case FrameBufferType::Color3F:
+                return GL_RGB;
+            case FrameBufferType::Color4:
+            case FrameBufferType::Color4F:
+                return GL_RGBA;
+            case FrameBufferType::Depth:
+                return GL_DEPTH_COMPONENT;
+            case FrameBufferType::Stencil:
+                return GL_STENCIL_INDEX;
+            case FrameBufferType::DepthStencil:
+                return GL_DEPTH24_STENCIL8;
+            default:
+                NXS_ASSERT_MSG(false, std::format("Invalid framebuffer format {}!!", INT_CAST(type)));
+                break;
+            }
+            return GL_NONE;
+        }
+
+        inline GLenum GetFrameBufferInternalFormat(FrameBufferType type)
+        {
+            switch (type)
+            {
+            case FrameBufferType::Color3:
+            case FrameBufferType::Color4:
+                return GL_UNSIGNED_BYTE;
+            case FrameBufferType::Color3F:
+            case FrameBufferType::Color4F:
+            case FrameBufferType::Depth:
+                return GL_FLOAT;
+            case FrameBufferType::Stencil:
+                return GL_INT;
+            case FrameBufferType::DepthStencil:
+                return GL_UNSIGNED_INT_24_8;
+            default:
+                NXS_ASSERT_MSG(false, std::format("Invalid framebuffer format {}!!", INT_CAST(type)));
+                break;
+            }
+            return GL_NONE;
+        }
     }
 }

@@ -111,6 +111,9 @@ NXS_NAMESPACE
         void LoadData(const uint8_t* data, uint32_t size) override;
         void LoadData(TextureTarget target, const uint8_t* data, uint32_t size) override;
         void LoadMipData(const uint8_t* data, uint32_t size, uint32_t mip) override;
+        void GenerateMipmaps() override;
+        bool ReadTexel(uint32_t mip, void* data, size_t size) override;
+        bool ReadTexels(uint32_t mip, Ref<IBuffer> outBuffer) override;
 
         void CopyData(const void* data, size_t bytes, size_t) override;
     };

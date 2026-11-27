@@ -3,6 +3,7 @@
 #include <concepts>
 #include <type_traits>
 #include <float.h>
+#include <algorithm>
 
 #include "glm/glm.hpp"
 
@@ -93,6 +94,26 @@ namespace nxs
         inline float Degrees(float radians)
         {
             return glm::degrees<float>(radians);
+        }
+
+        inline uint32_t ComputeMaxMipLevel(const int32_t dimension)
+        {
+            if (dimension <= 1) return 1;
+
+            uint32_t numMips = 1;
+            int32_t mipDimension = dimension;
+            while (mipDimension > 1)
+            {
+                mipDimension >>= 1;
+                ++numMips;
+            }
+            return numMips;
+        }
+
+        inline uint32_t ComputeMaxMipLevel(const int32_t width, const int32_t height)
+        {
+            const int32_t maxDimension = std::max(width, height);
+            return ComputeMaxMipLevel(maxDimension);
         }
     }
 }

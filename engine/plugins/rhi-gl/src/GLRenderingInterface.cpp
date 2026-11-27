@@ -18,7 +18,7 @@ GLRenderingInterface::GLRenderingInterface(WindowContext window, const GraphicsC
     : RenderingInterface()
 {
     m_window = window;
-    m_graphicsAPI = GraphicsAPI::OpenGL;
+    m_config = config;
 
     // TODO: Make it configurable.
     SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
@@ -50,6 +50,14 @@ GLRenderingInterface::GLRenderingInterface(WindowContext window, const GraphicsC
     }
 
     SDL_GL_MakeCurrent(sdlWindow, renderContext);
+
+    if (config.vsync) {
+        SDL_GL_SetSwapInterval(1);
+    }
+    else if (!SDL_GL_SetSwapInterval(-1)) {
+        // The device doesn't support Adaptive VSYNC.
+        SDL_GL_SetSwapInterval(0);
+    }
 
     GLint colorEncoding = GL_LINEAR;
     CALL_GL_FUNC(glGetFramebufferAttachmentParameteriv(
@@ -140,7 +148,32 @@ void GLRenderingInterface::SetFramebufferSRGB(const bool enabled)
 
 void GLRenderingInterface::SetViewport(int32_t x, int32_t y, int32_t w, int32_t h)
 {
+    Base::SetViewport(x, y, w, h);
     CALL_GL_FUNC(glViewport(x, y, w, h));
+}
+
+void GLRenderingInterface::ReadFrameData(FrameBufferType type, Ref<IBuffer> outData) const
+{
+    rmt_ScopedCPUSample(GLRendering_ReadFrameData, 0);
+    CALL_GL_FUNC(glReadPixels(
+        0, 0,
+        m_config.screenWidth, m_config.screenHeight,
+        GL::GetFrameBufferFormat(type),
+        GL::GetFrameBufferInternalFormat(type),
+        outData->Data()
+    ));
+}
+
+void GLRenderingInterface::ReadFrameSubData(FrameBufferType type, const iRect& region, Ref<IBuffer> outData) const
+{
+    rmt_ScopedCPUSample(GLRendering_ReadFrameSubData, 0);
+    CALL_GL_FUNC(glReadPixels(
+        region.pos.x, region.pos.y,
+        region.size.x, region.size.y,
+        GL::GetFrameBufferFormat(type),
+        GL::GetFrameBufferInternalFormat(type),
+        outData->Data()
+    ));
 }
 
 void GLRenderingInterface::DrawIndexed(const Ref<IndexBuffer> indexBuffer)

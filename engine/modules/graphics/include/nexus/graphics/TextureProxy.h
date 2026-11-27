@@ -5,6 +5,7 @@
 #pragma once
 
 #include "nexus/NxsDefine.h"
+#include "nexus/memory/Buffer.h"
 
 #include "GpuResource.h"
 
@@ -116,6 +117,10 @@ NXS_NAMESPACE
             LoadData(data, size);
         }
         virtual void LoadMipData(const uint8_t* data, uint32_t size, uint32_t mip) = 0;
+        virtual void GenerateMipmaps() {}
+        virtual int32_t GetNumLevelMipmap() const { return m_desc.numMips; }
+        virtual bool ReadTexel(uint32_t mip, void* data, size_t size) { return false; }
+        virtual bool ReadTexels(uint32_t mip, Ref<IBuffer> outBuffer)  = 0;
 
     protected:
         uint32_t m_textureID = 0;

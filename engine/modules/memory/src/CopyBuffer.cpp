@@ -17,6 +17,16 @@ CopyBuffer::CopyBuffer(const uint8_t* data, size_t size)
     m_size = size;
 }
 
+CopyBuffer::CopyBuffer(size_t size)
+{
+    if (size == 0) return;
+
+    m_buffer = Ptr<uint8_t[]>(new uint8_t[size]);
+    NXS_ASSERT_MSG(m_buffer, std::format("Failed to allocate {} bytes!", size));
+    memset(m_buffer.get(), 0, size);
+    m_size = size;
+}
+
 CopyBuffer::CopyBuffer(CopyBuffer&& rhs) noexcept
 {
     m_buffer = std::move(rhs.m_buffer);
