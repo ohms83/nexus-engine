@@ -1,9 +1,15 @@
-#include "nexus/geom/Collider.h"
+#include "nexus/geom/Intersect.h"
+#include "nexus/geom/Box.h"
+#include "nexus/geom/Sphere.h"
+#include "nexus/geom/Ray.h"
+#include "nexus/geom/Plane.h"
+#include "nexus/geom/Frustum.h"
 
+#include "glm/gtx/intersect.hpp"
 
 NXS_NAMESPACE
 {
-    namespace Collider
+    namespace Geom
     {
         bool IsInside(const glm::vec3& point, const Box& box)
         {
@@ -95,6 +101,28 @@ NXS_NAMESPACE
             }
 
             return true;
+        }
+
+        bool Intersect(const Ray& ray, const Sphere& sphere)
+        {
+            float tmpOut;
+            return  glm::intersectRaySphere(ray.origin, ray.direction, sphere.center, sphere.RadiusSquare(), tmpOut);
+        }
+
+        bool Intersect(const Ray& ray, const Sphere& sphere, float& outDistance)
+        {
+            return  glm::intersectRaySphere(ray.origin, ray.direction, sphere.center, sphere.RadiusSquare(), outDistance);
+        }
+
+        bool Intersect(const Ray& ray, const Plane& plane)
+        {
+            float tmpOut;
+            return glm::intersectRayPlane(ray.origin, ray.direction, plane.distance * plane.normal, plane.normal, tmpOut);
+        }
+
+        bool Intersect(const Ray& ray, const Plane& plane, float& outDistance)
+        {
+            return glm::intersectRayPlane(ray.origin, ray.direction, plane.distance * plane.normal, plane.normal, outDistance);
         }
     }
 }

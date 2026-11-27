@@ -3,9 +3,6 @@
 #include "nexus/NxsCommon.h"
 #include "glm/gtx/intersect.hpp"
 
-#include "Sphere.h"
-#include "Plane.h"
-
 NXS_NAMESPACE
 {
     struct Ray
@@ -15,28 +12,6 @@ NXS_NAMESPACE
             : origin(org)
             , direction(dir)
         {}
-
-        NODISCARD bool Intersect(const Sphere& sphere)
-        {
-            float tmpOut;
-            return  glm::intersectRaySphere(origin, direction, sphere.center, sphere.RadiusSquare(), tmpOut);
-        }
-
-        NODISCARD bool Intersect(const Sphere& sphere, float& outDistance)
-        {
-            return  glm::intersectRaySphere(origin, direction, sphere.center, sphere.RadiusSquare(), outDistance);
-        }
-
-        NODISCARD bool Intersect(const Plane& plane)
-        {
-            float tmpOut;
-            return glm::intersectRayPlane(origin, direction, plane.distance * plane.normal, plane.normal, tmpOut);
-        }
-
-        NODISCARD bool Intersect(const Plane& plane, float& outDistance)
-        {
-            return glm::intersectRayPlane(origin, direction, plane.distance * plane.normal, plane.normal, outDistance);
-        }
 
         glm::vec3 origin;
         glm::vec3 direction;

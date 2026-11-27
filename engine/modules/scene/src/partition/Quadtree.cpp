@@ -1,6 +1,6 @@
 #include "nexus/scene/partition/Quadtree.h"
 #include "nexus/scene/SceneNode.h"
-#include "nexus/geom/Collider.h"
+#include "nexus/geom/Intersect.h"
 
 #include <algorithm>
 #include <array>
@@ -57,7 +57,7 @@ void Quadtree::AddNode(Ref<SceneNode> node, const Box& bound)
                 uint32_t childIndex = firstChild + q;
                 if (childIndex < m_tree.size() && m_tree[childIndex].create)
                 {
-                    if (Collider::IsIntersect(m_tree[childIndex].bound, bound))
+                    if (Geom::IsIntersect(m_tree[childIndex].bound, bound))
                     {
                         stack[top++] = childIndex;
                     }
@@ -151,7 +151,7 @@ void Quadtree::Subdivide(uint32_t nodeIndex)
             for (uint32_t i = 0; i < 4; ++i)
             {
                 uint32_t childIndex = firstChild + i;
-                if (Collider::IsIntersect(m_tree[childIndex].bound, item.bound))
+                if (Geom::IsIntersect(m_tree[childIndex].bound, item.bound))
                 {
                     m_tree[childIndex].nodeList.push_back(item);
                 }
@@ -238,7 +238,7 @@ void Quadtree::QueryInternal(const Frustum& frustum, Array<SceneNode*>& results)
 {
     rmt_ScopedCPUSample(Quadtree_QueryInternal, 0)
     if (m_tree.empty() || !m_tree[0].create) return;
-    if (!Collider::IsIntersect(m_tree[0].bound, frustum)) return;
+    if (!Geom::IsIntersect(m_tree[0].bound, frustum)) return;
 
     std::array<uint32_t, 128> stack;
     int top = 0;
@@ -252,7 +252,7 @@ void Quadtree::QueryInternal(const Frustum& frustum, Array<SceneNode*>& results)
         for (const auto& item : node.nodeList)
         {
             // Cull on the bound first; locking the weak_ptr is an atomic op.
-            if (!Collider::IsIntersect(item.bound, frustum)) continue;
+            if (!Geom::IsIntersect(item.bound, frustum)) continue;
             if (auto itemNode = item.node.lock())
             {
                 if (itemNode->IsActive())
@@ -270,7 +270,7 @@ void Quadtree::QueryInternal(const Frustum& frustum, Array<SceneNode*>& results)
                 uint32_t childIndex = firstChild + q;
                 if (childIndex < m_tree.size() && m_tree[childIndex].create)
                 {
-                    if (Collider::IsIntersect(m_tree[childIndex].bound, frustum))
+                    if (Geom::IsIntersect(m_tree[childIndex].bound, frustum))
                     {
                         stack[top++] = childIndex;
                     }
@@ -299,5 +299,5 @@ void Quadtree::Query(const Frustum& frustum, Array<SceneNode*>& results) const
 bool Quadtree::IsOverlap(const Box& bound) const
 {
     rmt_ScopedCPUSample(Quadtree_IsOverlap, 0)
-    return Collider::IsIntersect(m_bound, bound);
+    return Geom::IsIntersect(m_bound, bound);
 }

@@ -55,7 +55,7 @@
 #include "editor/widget/PropertyWindow.h"
 #include "editor/widget/SceneGraphWidget.h"
 #include "nexus/geom/Box.h"
-#include "nexus/geom/Collider.h"
+#include "nexus/geom/Intersect.h"
 #include "nexus/geom/Frustum.h"
 #include "nexus/geom/Plane.h"
 #include "nexus/geom/Ray.h"
