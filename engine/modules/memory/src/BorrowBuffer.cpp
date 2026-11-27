@@ -1,4 +1,4 @@
-#include "nexus/memory/BorrowBuffer.h"
+#include "nexus/memory/Memory.h"
 #include <cstring> // For memcpy
 
 USING_NAMESPACE_NXS;
@@ -30,4 +30,10 @@ uint64_t BorrowBuffer::CopyData(uint8_t* data, const uint64_t bytes, const uint6
     const auto numCopied = std::min(bytes, m_size - offset);
     memcpy(m_data + offset, data, numCopied);
     return numCopied;
+}
+
+uint64_t BorrowBuffer::Resize(uint64_t bytes)
+{
+    NXS_ASSERT_MSG(false, "BorrowBuffer is unresizable!!");
+    return 0;
 }

@@ -64,7 +64,9 @@ NXS_NAMESPACE
          * @param offset The starting offset within the buffer where the data will be copied.
          * @return The number of bytes successfully copied.
          */
-        virtual uint64_t CopyData(uint8_t* data, uint64_t bytes, uint64_t offset = 0) = 0;
+        MAYBE_UNUSED virtual uint64_t CopyData(uint8_t* data, uint64_t bytes, uint64_t offset = 0) = 0;
+
+        MAYBE_UNUSED virtual uint64_t Resize(uint64_t bytes) = 0;
 
         /**
          * @brief Releases the buffer's managed resource.

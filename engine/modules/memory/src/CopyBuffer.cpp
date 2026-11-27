@@ -1,7 +1,7 @@
 //
 // Created by nutta on 6/28/2025.
 //
-#include "nexus/memory/CopyBuffer.h"
+#include "nexus/memory/Memory.h"
 #include <algorithm>
 #include <cstring> // For memcpy
 
@@ -12,6 +12,7 @@ CopyBuffer::CopyBuffer(const uint8_t* data, size_t size)
     if (!data || size == 0) return;
 
     m_buffer = Ptr<uint8_t[]>(new uint8_t[size]);
+    NXS_ASSERT_MSG(m_buffer, std::format("Failed to allocate {} bytes!", size));
     memcpy(m_buffer.get(), data, size);
     m_size = size;
 }
@@ -65,6 +66,7 @@ uint64_t CopyBuffer::Resize(uint64_t bytes)
     auto newBuffer = Ptr<uint8_t[]>(new uint8_t[bytes]);
     if (!newBuffer)
     {
+        LOG_FATAL(LogMemory, std::format("Failed to allocate {} bytes!", bytes));
         return 0;
     }
 

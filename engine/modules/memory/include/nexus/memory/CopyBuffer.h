@@ -76,7 +76,7 @@ NXS_NAMESPACE
          */
         MAYBE_UNUSED uint64_t CopyData(uint8_t* data, uint64_t bytes, uint64_t offset = 0) override;
 
-        MAYBE_UNUSED uint64_t Resize(uint64_t bytes);
+        MAYBE_UNUSED uint64_t Resize(uint64_t bytes) override;
 
         /**
          * @brief Copies the content of a contiguous container into the buffer.
