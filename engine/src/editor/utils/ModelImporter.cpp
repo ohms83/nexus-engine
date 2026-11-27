@@ -22,7 +22,7 @@
 #include "nexus/scene/component/MeshComponent.h"
 #include "nexus/scene/component/GeometryComponent.h"
 
-#include "nexus/memory/OwningBuffer.h"
+#include "nexus/memory/CopyBuffer.h"
 
 #include "assimp/Importer.hpp"
 #include "assimp/scene.h"
@@ -222,7 +222,7 @@ void ModelImporter::ProcessMesh(Ref<SceneNode> sceneNode, const aiMesh* ai_mesh,
         vertices.emplace_back(vertex);
     }
 
-    auto vertexData = std::make_shared<OwningBuffer>();
+    auto vertexData = std::make_shared<CopyBuffer>();
     vertexData->Copy<Vertex>(vertices);
 
     vertexBuffer->Begin()
@@ -243,7 +243,7 @@ void ModelImporter::ProcessMesh(Ref<SceneNode> sceneNode, const aiMesh* ai_mesh,
         }
     }
 
-    auto indexData = std::make_shared<OwningBuffer>();
+    auto indexData = std::make_shared<CopyBuffer>();
     indexData->Copy<uint32_t>(indices);
 
     indexBuffer->Begin()

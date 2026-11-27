@@ -1,7 +1,7 @@
 #include "nexus/graphics/Mesh.h"
 #include "nexus/graphics/GpuResourceFactory.h"
 #include "nexus/graphics/RenderingInterface.h"
-#include "nexus/memory/OwningBuffer.h"
+#include "nexus/memory/CopyBuffer.h"
 #include "nexus/debug/LogDispatcher.h"
 
 USING_NAMESPACE_NXS;
@@ -81,7 +81,7 @@ Ref<Mesh> PrimitiveMesh::CreateSphere(
         }
     }
 
-    auto vertexData = std::make_shared<OwningBuffer>();
+    auto vertexData = std::make_shared<CopyBuffer>();
     vertexData->CopyData(
         R_CAST<uint8_t*>(vertices.data()),
         sizeof(Vertex) * vertices.size());
@@ -95,7 +95,7 @@ Ref<Mesh> PrimitiveMesh::CreateSphere(
         .AddAttribute(VertexAttribute {VertexAttribute::Type::TexCoord0, DataType::Float, 2})
     .Build();
 
-    auto indexData = std::make_shared<OwningBuffer>();
+    auto indexData = std::make_shared<CopyBuffer>();
     indexData->CopyData(
         R_CAST<uint8_t*>(indices.data()),
         sizeof(uint32_t) * indices.size());

@@ -7,42 +7,16 @@
 
 USING_NAMESPACE_NXS;
 
-TEST(OwningBufferTest, DefaultConstructor) {
-    OwningBuffer buffer;
+TEST(CopyBufferTest, DefaultConstructor) {
+    CopyBuffer buffer;
     EXPECT_FALSE(buffer.IsValid());
     EXPECT_EQ(buffer.Size(), 0);
     EXPECT_EQ(buffer.Data(), nullptr);
 }
 
-TEST(OwningBufferTest, TakeOwnershipAndGiveBack) {
-    constexpr uint64_t size = 10;
-    auto originalData = new uint8_t[size];
-    std::iota(originalData, originalData + size, 0); // Fill with 0, 1, 2...
-
-    OwningBuffer buffer;
-    buffer.Take(originalData, size);
-
-    EXPECT_TRUE(buffer.IsValid());
-    EXPECT_EQ(buffer.Size(), size);
-    EXPECT_EQ(originalData, nullptr); // The original pointer is now null
-
-    uint64_t newSize = 0;
-    const uint8_t* returnedData = buffer.Give(newSize);
-
-    EXPECT_FALSE(buffer.IsValid());
-    EXPECT_EQ(buffer.Size(), 0);
-    EXPECT_EQ(newSize, size);
-
-    // Verify the data and free the memory
-    for (uint64_t i = 0; i < size; ++i) {
-        EXPECT_EQ(returnedData[i], i);
-    }
-    delete[] returnedData;
-}
-
-TEST(OwningBufferTest, CopyDataWithResize) {
+TEST(CopyBufferTest, CopyDataWithResize) {
     constexpr uint64_t initialSize = 10;
-    OwningBuffer buffer;
+    CopyBuffer buffer;
     // Initial data is a 10-byte buffer.
     uint8_t initialData[10] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
     buffer.CopyData(initialData, initialSize);
@@ -62,9 +36,20 @@ TEST(OwningBufferTest, CopyDataWithResize) {
     }
 }
 
-TEST(OwningBufferTest, CopyFromVector) {
+TEST(CopyBufferTest, ConstructsFromIndependentCopy) {
+    uint8_t source[] = {1, 2, 3, 4};
+    CopyBuffer buffer(source, sizeof(source));
+
+    EXPECT_TRUE(buffer.IsValid());
+    EXPECT_EQ(buffer.Size(), sizeof(source));
+
+    source[0] = 99;
+    EXPECT_EQ(buffer.Data()[0], 1);
+}
+
+TEST(CopyBufferTest, CopyFromVector) {
     std::vector<int> myVector = {100, 200, 300};
-    OwningBuffer buffer;
+    CopyBuffer buffer;
 
     buffer.Copy(myVector);
     EXPECT_TRUE(buffer.IsValid());
@@ -77,6 +62,55 @@ TEST(OwningBufferTest, CopyFromVector) {
     for (uint64_t i = 0; i < myVector.size(); ++i) {
         EXPECT_EQ(reinterpret_cast<int*>(buffer.Data())[i], myVector[i]);
     }
+}
+
+TEST(CopyBufferTest, ReleaseInvalidatesBuffer) {
+    CopyBuffer buffer;
+    uint8_t source[] = {1, 2, 3};
+    buffer.CopyData(source, sizeof(source));
+
+    buffer.Release();
+
+    EXPECT_FALSE(buffer.IsValid());
+    EXPECT_EQ(buffer.Size(), 0);
+    EXPECT_EQ(buffer.Data(), nullptr);
+}
+
+TEST(CopyBufferTest, MoveConstructorTransfersOwnership) {
+    uint8_t source[] = {1, 2, 3};
+    CopyBuffer original(source, sizeof(source));
+    CopyBuffer moved(std::move(original));
+
+    EXPECT_TRUE(moved.IsValid());
+    EXPECT_EQ(moved.Size(), sizeof(source));
+    EXPECT_FALSE(original.IsValid());
+    EXPECT_EQ(original.Size(), 0);
+}
+
+TEST(CopyBufferTest, MoveAssignmentTransfersOwnership) {
+    uint8_t source[] = {1, 2, 3};
+    CopyBuffer original(source, sizeof(source));
+    CopyBuffer assigned;
+    assigned = std::move(original);
+
+    EXPECT_TRUE(assigned.IsValid());
+    EXPECT_EQ(assigned.Size(), sizeof(source));
+    EXPECT_FALSE(original.IsValid());
+    EXPECT_EQ(original.Size(), 0);
+}
+
+TEST(CopyBufferTest, ResizeCanShrinkOrBecomeEmpty) {
+    CopyBuffer buffer;
+    uint8_t source[] = {1, 2, 3, 4};
+    buffer.CopyData(source, sizeof(source));
+
+    EXPECT_EQ(buffer.Resize(2), 2);
+    EXPECT_EQ(buffer.Data()[0], 1);
+    EXPECT_EQ(buffer.Data()[1], 2);
+
+    EXPECT_EQ(buffer.Resize(0), 0);
+    EXPECT_FALSE(buffer.IsValid());
+    EXPECT_EQ(buffer.Data(), nullptr);
 }
 
 TEST(BorrowBufferTest, ConstructorAndRelease) {

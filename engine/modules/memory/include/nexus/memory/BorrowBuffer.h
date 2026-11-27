@@ -17,7 +17,7 @@ NXS_NAMESPACE
      * safe for managing static arrays, stack-allocated data, or other buffers
      * whose lifetime is controlled externally.
      * @warning The lifetime of the external data must exceed the lifetime of this BorrowBuffer object.
-     * @see OwningBuffer
+     * @see CopyBuffer
      */
     class BorrowBuffer final : public IBuffer
     {

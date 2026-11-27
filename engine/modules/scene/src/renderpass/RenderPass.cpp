@@ -15,7 +15,7 @@
 
 #include "nexus/math/Matrix.h"
 
-#include "nexus/memory/OwningBuffer.h"
+#include "nexus/memory/CopyBuffer.h"
 
 #include "nexus/debug/Assert.h"
 
@@ -34,16 +34,12 @@ static bool RenderInstancedMesh(RenderSystem& renderSystem, const RenderCommand&
     rmt_ScopedCPUSample(RenderPass_RenderInstancedMesh, 0);
     if (command.instanceModels.empty()) return false;
 
-    // Build an OwningBuffer holding all model matrices
+    // Build a CopyBuffer holding all model matrices.
     const auto instanceCount = static_cast<uint32_t>(command.instanceModels.size());
     const size_t bytes = instanceCount * sizeof(glm::mat4);
-    uint8_t* mem = new uint8_t[bytes];
-    // Copy matrices
-    for (uint32_t i = 0; i < instanceCount; ++i)
-    {
-        std::memcpy(&mem[i * sizeof(glm::mat4)], &command.instanceModels[i], sizeof(glm::mat4));
-    }
-    Ref<IBuffer> instanceBuffer = std::make_shared<OwningBuffer>(mem, bytes);
+    Ref<IBuffer> instanceBuffer = std::make_shared<CopyBuffer>(
+        R_CAST<const uint8_t*>(command.instanceModels.data()),
+        bytes);
 
     // Create instance attributes for mat4 as 4 vec4 attributes (layout locations 10..13)
     Array<VertexAttribute> attrs;
@@ -64,8 +60,6 @@ static bool RenderInstancedMesh(RenderSystem& renderSystem, const RenderCommand&
     GraphicsProfiler::RecordMaterialDraw(command.material ? command.material->GetId() : 0, command.indexCount, instanceCount);
     renderSystem.DrawIndexedInstanced(command.indexBuffer, instanceCount);
     command.vertexBuffer->DetachInstanceStreams();
-    // free temporary allocation (OwningBuffer::Take took ownership)
-    // OwningBuffer destructor will free it
     return true;
 }
 

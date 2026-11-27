@@ -96,7 +96,7 @@
 #include "nexus/math/Vector.h"
 #include "nexus/memory/BorrowBuffer.h"
 #include "nexus/memory/Buffer.h"
-#include "nexus/memory/OwningBuffer.h"
+#include "nexus/memory/CopyBuffer.h"
 #include "nexus/scene/Camera.h"
 #include "nexus/scene/Light.h"
 #include "nexus/scene/ModelNode.h"

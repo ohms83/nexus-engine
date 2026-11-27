@@ -6,7 +6,7 @@
 #include "nexus/graphics/GpuResourceFactory.h"
 #include "nexus/container/Array.h"
 #include "nexus/graphics/RenderingInterface.h"
-#include "nexus/memory/OwningBuffer.h"
+#include "nexus/memory/CopyBuffer.h"
 
 USING_NAMESPACE_NXS;
 
@@ -34,7 +34,7 @@ Ref<Mesh> PrimitiveMesh::CreatePlane(
         {{ 0.5f * width, 0.0f,  0.5f * height}, { 0.0f, 1.0f, 0.0f }, uvScale * glm::vec2(1.0f, 1.0f)},
         {{ 0.5f * width, 0.0f, -0.5f * height}, { 0.0f, 1.0f, 0.0f }, uvScale * glm::vec2(1.0f, 0.0f)},
     };
-    auto vertexData = std::make_shared<OwningBuffer>();
+    auto vertexData = std::make_shared<CopyBuffer>();
     vertexData->CopyData(
         R_CAST<uint8_t*>(vertices.data()),
         sizeof(Vertex) * vertices.size());
@@ -54,7 +54,7 @@ Ref<Mesh> PrimitiveMesh::CreatePlane(
         0, 2, 3,
     };
 
-    auto indexData = std::make_shared<OwningBuffer>();
+    auto indexData = std::make_shared<CopyBuffer>();
     indexData->CopyData(
         R_CAST<uint8_t*>(indices.data()),
         sizeof(uint32_t) * indices.size());

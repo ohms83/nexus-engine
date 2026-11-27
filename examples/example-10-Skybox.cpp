@@ -1,6 +1,6 @@
 #include "nexus/Nexus.h"
 #include "nexus/graphics/CubeTexture.h"
-#include "nexus/memory/OwningBuffer.h"
+#include "nexus/memory/CopyBuffer.h"
 
 #include <stb_image.h>
 

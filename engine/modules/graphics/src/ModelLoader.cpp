@@ -6,7 +6,7 @@
 
 #include "nexus/container/Array.h"
 #include "nexus/debug/LogDispatcher.h"
-#include "nexus/memory/OwningBuffer.h"
+#include "nexus/memory/CopyBuffer.h"
 
 #include "assimp/Importer.hpp"
 #include "assimp/scene.h"
@@ -321,7 +321,7 @@ void ModelLoader::ProcessMesh(const Ref<Model>& model, const aiMesh* mesh, const
         vertices.emplace_back(vertex);
     }
 
-    auto vertexData = std::make_shared<OwningBuffer>();
+    auto vertexData = std::make_shared<CopyBuffer>();
     vertexData->Copy<Vertex>(vertices);
 
     vertexBuffer->Begin()
@@ -342,7 +342,7 @@ void ModelLoader::ProcessMesh(const Ref<Model>& model, const aiMesh* mesh, const
         }
     }
 
-    auto indexData = std::make_shared<OwningBuffer>();
+    auto indexData = std::make_shared<CopyBuffer>();
     indexData->Copy<uint32_t>(indices);
 
     indexBuffer->Begin()

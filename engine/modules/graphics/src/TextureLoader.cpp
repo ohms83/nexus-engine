@@ -1,5 +1,5 @@
 #include "nexus/graphics/TextureLoader.h"
-#include "nexus/memory/OwningBuffer.h"
+#include "nexus/memory/CopyBuffer.h"
 #include "nexus/task/FutureWaitingTask.h"
 
 #include <future>
