@@ -90,6 +90,7 @@ NXS_NAMESPACE
         }
 
         static TextureDescription DepthTextureDesc(int32_t width, int32_t height);
+        static TextureDescription DepthCubeTextureDesc(int32_t width, int32_t height);
     };
 
     /**

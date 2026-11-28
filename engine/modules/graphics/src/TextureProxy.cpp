@@ -39,6 +39,13 @@ TextureDescription TextureDescription::DepthTextureDesc(int32_t width, int32_t h
     return depthDesc;
 }
 
+TextureDescription TextureDescription::DepthCubeTextureDesc(int32_t width, int32_t height)
+{
+    TextureDescription depthDesc = DepthTextureDesc(width, height);
+    depthDesc.kind = TextureKind::TextureCube;
+    return depthDesc;
+}
+
 TextureProxy::TextureProxy(const TextureDescription& desc)
     : m_desc(desc)
 {
