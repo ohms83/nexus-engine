@@ -197,15 +197,8 @@ private:
         m_light = m_scene->EmplaceChild<nxs::DirectionalLight>("Direct Light");
         m_light->Properties().color = {1, 1, 1};
         m_light->Direction() = {0.7f, -1.0f, 0.3f};
-        
 
         m_lightRoot = m_scene->EmplaceChild<nxs::SceneNode>("Light Root");
-
-        {
-            auto light = m_scene->EmplaceChild<nxs::DirectionalLight>("Direct Light");
-            light->Properties().color =  {0.5f, 0.5f, 0.5f};
-            light->Direction() = {10, -10, 0};
-        }
 
         nxs::Array<glm::vec3> lightPositions = {
             {5, 5, 5},
