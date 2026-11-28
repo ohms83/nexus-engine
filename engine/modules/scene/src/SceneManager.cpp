@@ -2,7 +2,7 @@
 #include "nexus/task/TaskScheduler.h"
 #include "nexus/task/OneshotTask.h"
 
-#include "Remotery.h"
+#include "tracy/Tracy.hpp"
 
 USING_NAMESPACE_NXS;
 
@@ -50,7 +50,7 @@ void SceneManager::Update(float dt)
 
 void SceneManager::Render(RenderSystem &renderSystem)
 {
-    rmt_ScopedCPUSample(SceneManager_Render, 0)
+    ZoneScopedN("SceneManager_Render");
     if (m_current) m_current->Render(renderSystem);
 }
 

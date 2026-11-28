@@ -26,7 +26,7 @@
 #include "nexus/time/Timer.h"
 #include "nexus/math/Math.h"
 
-#include "Remotery.h"
+#include "tracy/Tracy.hpp"
 #include "nexus/graphics/GraphicsProfiler.h"
 
 USING_NAMESPACE_NXS;
@@ -150,7 +150,7 @@ void SceneRenderer::SetTaskScheduler(Ref<TaskScheduler> scheduler)
 
 void SceneRenderer::Render(RenderSystem &rs, const Scene &scene)
 {
-    rmt_ScopedCPUSample(SceneRenderer_Render, 0);
+    ZoneScopedN("SceneRenderer_Render");
 
     NXS_ASSERT_MSG(m_initialized, "Scene renderer hasn't been initialized!!");
     SceneRenderingContext sceneCtx = {
@@ -320,7 +320,7 @@ void SceneRenderer::CreateOffscreenBuffer(int32_t width, int32_t height)
 
 bool SceneRenderer::UpdateAutoExposure()
 {
-    rmt_ScopedCPUSample(SceneRenderer_UpdateAutoExposure, 0);
+    ZoneScopedN("SceneRenderer_UpdateAutoExposure");
     if (!m_autoExposureEnabled || !m_screenBuffer) return false;
 
     m_timer->Tick();

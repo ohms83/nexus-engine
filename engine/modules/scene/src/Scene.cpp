@@ -5,7 +5,7 @@
 #include "nexus/debug/LogDispatcher.h"
 #include "nexus/graphics/RenderSystem.h"
 
-#include "Remotery.h"
+#include "tracy/Tracy.hpp"
 
 USING_NAMESPACE_NXS;
 
@@ -54,7 +54,7 @@ void Scene::RemoveChild(Ref<SceneNode> child, bool reparentDescendants)
 
 void Scene::Render(RenderSystem &renderSystem) const
 {
-    rmt_ScopedCPUSample(Scene_Render, 0)
+    ZoneScopedN("Scene_Render");
     if (m_renderer) m_renderer->Render(renderSystem, *this);
 }
 

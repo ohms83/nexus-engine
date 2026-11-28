@@ -9,7 +9,7 @@
 #include "nexus/math/Math.h"
 #include "nexus/memory/BorrowBuffer.h"
 
-#include "Remotery.h"
+#include "tracy/Tracy.hpp"
 
 USING_NAMESPACE_NXS;
 

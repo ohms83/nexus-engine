@@ -7,7 +7,7 @@
 #include <cmath>
 #include <span>
 
-#include "Remotery.h"
+#include "tracy/Tracy.hpp"
 
 USING_NAMESPACE_NXS;
 
@@ -34,7 +34,7 @@ Quadtree::Quadtree(uint32_t maxDepth, uint32_t partitionSize, const Box& worldBo
 
 void Quadtree::AddNode(Ref<SceneNode> node, const Box& bound)
 {
-    rmt_ScopedCPUSample(Quadtree_AddNode, 0)
+    ZoneScopedN("Quadtree_AddNode");
     if (!node || !IsOverlap(bound)) return;
     if (m_tree.empty()) return;
 
@@ -90,7 +90,7 @@ void Quadtree::AddNode(Ref<SceneNode> node, const Box& bound)
 
 void Quadtree::Subdivide(uint32_t nodeIndex)
 {
-    rmt_ScopedCPUSample(Quadtree_Subdivide, 0)
+    ZoneScopedN("Quadtree_Subdivide");
     if (nodeIndex >= m_tree.size()) return;
     auto& node = m_tree[nodeIndex];
     if (node.depth >= static_cast<int32_t>(m_maxDepth)) return;
@@ -172,7 +172,7 @@ void Quadtree::Subdivide(uint32_t nodeIndex)
 
 void Quadtree::Subdivide(int32_t depth, Quadrant quadrant)
 {
-    rmt_ScopedCPUSample(Quadtree_Subdivide, 0)
+    ZoneScopedN("Quadtree_Subdivide");
     if (depth <= 0 || quadrant == Quadrant::None)
     {
         Subdivide(0);
@@ -190,7 +190,7 @@ void Quadtree::Subdivide(int32_t depth, Quadrant quadrant)
 
 void Quadtree::UpdateNode(Identifier id, const Box& bound)
 {
-    rmt_ScopedCPUSample(Quadtree_UpdateNode, 0)
+    ZoneScopedN("Quadtree_UpdateNode");
     RemoveNode(id);
     if (auto* sceneNode = SceneNode::FindNode(id))
     {
@@ -200,7 +200,7 @@ void Quadtree::UpdateNode(Identifier id, const Box& bound)
 
 void Quadtree::RemoveNode(Identifier id)
 {
-    rmt_ScopedCPUSample(Quadtree_RemoveNode, 0)
+    ZoneScopedN("Quadtree_RemoveNode");
     for (auto& node : m_tree)
     {
         if (node.create && !node.nodeList.empty())
@@ -214,7 +214,7 @@ void Quadtree::RemoveNode(Identifier id)
 
 void Quadtree::RemoveAllNodes()
 {
-    rmt_ScopedCPUSample(Quadtree_RemoveAllNodes, 0)
+    ZoneScopedN("Quadtree_RemoveAllNodes");
     for (auto& node : m_tree)
     {
         node.create = false;
@@ -236,7 +236,7 @@ void Quadtree::RemoveAllNodes()
 
 void Quadtree::QueryInternal(const Frustum& frustum, Array<SceneNode*>& results) const
 {
-    rmt_ScopedCPUSample(Quadtree_QueryInternal, 0)
+    ZoneScopedN("Quadtree_QueryInternal");
     if (m_tree.empty() || !m_tree[0].create) return;
     if (!Geom::IsIntersect(m_tree[0].bound, frustum)) return;
 
@@ -282,7 +282,7 @@ void Quadtree::QueryInternal(const Frustum& frustum, Array<SceneNode*>& results)
 
 void Quadtree::Query(const Frustum& frustum, Array<SceneNode*>& results) const
 {
-    rmt_ScopedCPUSample(Quadtree_Query, 0)
+    ZoneScopedN("Quadtree_Query");
     const size_t startIndex = results.size();
     QueryInternal(frustum, results);
 
@@ -298,6 +298,6 @@ void Quadtree::Query(const Frustum& frustum, Array<SceneNode*>& results) const
 
 bool Quadtree::IsOverlap(const Box& bound) const
 {
-    rmt_ScopedCPUSample(Quadtree_IsOverlap, 0)
+    ZoneScopedN("Quadtree_IsOverlap");
     return Geom::IsIntersect(m_bound, bound);
 }

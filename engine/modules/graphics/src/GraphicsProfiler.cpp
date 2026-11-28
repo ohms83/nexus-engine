@@ -10,7 +10,7 @@
 #include <algorithm>
 #include <string>
 
-#include "Remotery.h"
+#include "tracy/Tracy.hpp"
 
 USING_NAMESPACE_NXS;
 
@@ -50,7 +50,7 @@ NXS_NAMESPACE
 
     void BeginFrame()
     {
-        rmt_ScopedCPUSample(GraphicsProfiler_BeginFrame, 0);
+        ZoneScopedN("GraphicsProfiler_BeginFrame");
         if (!s_isEnabled) return;
         s_frame.programs.clear();
         s_frame.textures.clear();
@@ -65,7 +65,7 @@ NXS_NAMESPACE
 
     void EndFrameAndReport()
     {
-        rmt_ScopedCPUSample(GraphicsProfiler_EndFrameAndReport, 0);
+        ZoneScopedN("GraphicsProfiler_EndFrameAndReport");
         if (!s_isEnabled) return;
 
         // Create top-N lists for programs and materials
@@ -124,7 +124,7 @@ NXS_NAMESPACE
 
     void RecordProgramBind(uint32_t programHandle)
     {
-        rmt_ScopedCPUSample(GraphicsProfiler_RecordProgramBind, 0);
+        ZoneScopedN("GraphicsProfiler_RecordProgramBind");
         if (!s_isEnabled || programHandle == 0) return;
         s_frame.programs.insert(programHandle);
         s_frame.programBindEvents.fetch_add(1);
@@ -132,21 +132,21 @@ NXS_NAMESPACE
 
     void RecordMaterialSwitching(uint32_t materialId)
     {
-        rmt_ScopedCPUSample(GraphicsProfiler_RecordMaterialSwitching, 0);
+        ZoneScopedN("GraphicsProfiler_RecordMaterialSwitching");
         if (!s_isEnabled || materialId == 0) return;
         s_frame.materialSwitch[materialId] += 1;
     }
 
     void RecordProgramDraw(uint32_t programHandle, uint32_t indexCount, uint32_t instanceCount)
     {
-        rmt_ScopedCPUSample(GraphicsProfiler_RecordProgramDraw, 0);
+        ZoneScopedN("GraphicsProfiler_RecordProgramDraw");
         if (!s_isEnabled || programHandle == 0) return;
         s_frame.programDraws[programHandle] += 1;
     }
 
     void RecordTextureBind(uint32_t textureHandle)
     {
-        rmt_ScopedCPUSample(GraphicsProfiler_RecordTextureBind, 0);
+        ZoneScopedN("GraphicsProfiler_RecordTextureBind");
         if (!s_isEnabled || textureHandle == 0) return;
         s_frame.textures.insert(textureHandle);
         s_frame.textureBindEvents.fetch_add(1);
@@ -154,7 +154,7 @@ NXS_NAMESPACE
 
     void RecordMaterialDraw(uint32_t materialId, uint32_t indexCount, uint32_t instanceCount)
     {
-        rmt_ScopedCPUSample(GraphicsProfiler_RecordMaterialDraw, 0);
+        ZoneScopedN("GraphicsProfiler_RecordMaterialDraw");
         if (!s_isEnabled || materialId == 0) return;
 
         auto& materialDrawData = s_frame.materialDraws[materialId];
@@ -165,7 +165,7 @@ NXS_NAMESPACE
 
     void RecordDrawCall(uint32_t indexCount, uint32_t instanceCount)
     {
-        rmt_ScopedCPUSample(GraphicsProfiler_RecordDrawCall, 0);
+        ZoneScopedN("GraphicsProfiler_RecordDrawCall");
         if (!s_isEnabled) return;
         s_frame.drawCalls++;
         s_frame.indices += static_cast<uint64_t>(indexCount) * static_cast<uint64_t>(instanceCount);

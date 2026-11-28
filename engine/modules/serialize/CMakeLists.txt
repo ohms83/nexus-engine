@@ -9,7 +9,7 @@ add_library(${TARGET_NAME} STATIC ${NXS_SERIALIZE_SOURCES})
 target_include_directories(${TARGET_NAME}
     PUBLIC ${NXS_SERIALIZE_PUBLIC_HEADER_DIR}
 
-    PRIVATE "${REMOTERY_SOURCE_DIR}"
+
     PRIVATE ${ENGINE_3RD_PARTY_DIR}/rapidjson/include
 )
 

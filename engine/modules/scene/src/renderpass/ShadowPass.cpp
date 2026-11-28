@@ -72,7 +72,7 @@ void ShadowPass::Render(RenderSystem& rs, const SceneRenderingContext& sceneCtx)
         return;
     }
 
-    rmt_ScopedCPUSample(ShadowPass_RenderDirectionalShadowMap, 0);
+    ZoneScopedN("ShadowPass_RenderDirectionalShadowMap");
     const auto& registry = *sceneCtx.scene->GetRegistry();
 
     SceneNode* lightNode = nullptr;
@@ -117,7 +117,7 @@ void ShadowPass::Render(RenderSystem& rs, const SceneRenderingContext& sceneCtx)
     };
     Array<ShadowMesh> shadowMeshes;
     {
-        rmt_ScopedCPUSample(ShadowPass_CalculateLightBounds, 0);
+        ZoneScopedN("ShadowPass_CalculateLightBounds");
         glm::vec3 boundsMin(std::numeric_limits<float>::max());
         glm::vec3 boundsMax(std::numeric_limits<float>::lowest());
         bool hasBounds = false;
@@ -174,11 +174,10 @@ void ShadowPass::Render(RenderSystem& rs, const SceneRenderingContext& sceneCtx)
     shadowProgram->SetUniformMatrix("_LightSpaceMatrix", m_lightSpaceMatrix, false);
     
     {
-        rmt_ScopedCPUSample(ShadowPass_RenderShadowMap, 0);
-        rmt_ScopedOpenGLSample(ShadowPass_RenderShadowMap);
+        ZoneScopedN("ShadowPass_RenderShadowMap");
         for (const auto& shadowMesh : shadowMeshes)
         {
-            rmt_ScopedCPUSample(ShadowPass_RenderShadowMesh, 0)
+            ZoneScopedN("ShadowPass_RenderShadowMesh");
             const auto& mesh = shadowMesh.mesh;
             if (!mesh->GetVertexBuffer() || !mesh->GetIndexBuffer()) continue;
 

@@ -19,7 +19,7 @@
 
 #include "nexus/debug/Assert.h"
 
-#include "Remotery.h"
+#include "tracy/Tracy.hpp"
 
 #include <ranges>
 
@@ -31,7 +31,7 @@ std::string AttachmentDesc::shadowMap = "shadowmap";
 
 static bool RenderInstancedMesh(RenderSystem& renderSystem, const RenderCommand& command, GpuProgram& gpuProgram)
 {
-    rmt_ScopedCPUSample(RenderPass_RenderInstancedMesh, 0);
+    ZoneScopedN("RenderPass_RenderInstancedMesh");
     if (command.instanceModels.empty()) return false;
 
     // Build a CopyBuffer holding all model matrices.
@@ -87,7 +87,7 @@ void RenderPass::ReleaseResources()
 
 Array<RenderCommand> RenderPass::CreateRenderCommands(const ViewContext& viewCtx) const
 {
-    rmt_ScopedCPUSample(RenderPass_CreateRenderCommands, 0);
+    ZoneScopedN("RenderPass_CreateRenderCommands");
     Array<RenderCommand> commands;
     for (const auto node : viewCtx.visibleNodes)
     {
@@ -134,10 +134,9 @@ Array<RenderCommand> RenderPass::CreateRenderCommands(const ViewContext& viewCtx
 
 void RenderPass::Begin(RenderSystem& rs, SceneRenderingContext& sceneCtx)
 {
-    rmt_BeginCPUSampleDynamic(name.c_str(), 0);
-    rmt_BeginOpenGLSampleDynamic(name.c_str());
+    ZoneTransientN(tracyRenderPass, name.c_str(), true);
 
-    rmt_ScopedCPUSample(RenderPass_BeginRenderPass, 0);
+    ZoneScopedN("RenderPass_BeginRenderPass");
     auto renderInterface = rs.GetRenderInterface();
     // NOTE: Pipeline state should be applied before anything.
     renderInterface->ApplyPipelineState(pipelineState);
@@ -175,8 +174,6 @@ void RenderPass::End(RenderSystem& rs, SceneRenderingContext& sceneCtx)
     // Hook
     if (onEnd) onEnd(rs, sceneCtx);
 
-    rmt_EndOpenGLSample();
-    rmt_EndCPUSample();
 }
 
 void RenderPass::Render(RenderSystem& rs, const ViewContext& viewCtx, const SceneRenderingContext& sceneCtx)
@@ -186,7 +183,7 @@ void RenderPass::Render(RenderSystem& rs, const ViewContext& viewCtx, const Scen
     AppendCommands(rs, viewCtx.visibleNodes, commands);
 
     {
-        rmt_ScopedCPUSample(RenderPass_SortMeshes, 0)
+        ZoneScopedN("RenderPass_SortMeshes");
         std::ranges::sort(commands, [](const RenderCommand& a, const RenderCommand& b) {
             return a.sortKey < b.sortKey;
         });
@@ -194,7 +191,7 @@ void RenderPass::Render(RenderSystem& rs, const ViewContext& viewCtx, const Scen
 
     Ref<GpuProgram> globalShader = pipelineState.globalShader;
     {
-        rmt_ScopedCPUSample(RenderPass_RenderMeshes, 0)
+        ZoneScopedN("RenderPass_RenderMeshes");
         Ref<GpuProgram> usingProgram = nullptr;
         Ref<Material> usingMaterial = nullptr;
         for (const auto& cmd : commands)
@@ -269,7 +266,7 @@ bool RenderPass::IsNodeActive(const SceneNodeComponent& nodeComp)
 
 void RenderPass::SetAmbientLightParams(GpuProgram& gpuProgram, const entt::registry& registry)
 {
-    rmt_ScopedCPUSample(RenderPass_SetAmbientLightParams, 0);
+    ZoneScopedN("RenderPass_SetAmbientLightParams");
     const auto ambientLightEnt = registry.view<AmbientLightComponent>().front();
     const auto color = ambientLightEnt == entt::null ? Color3F::Grey : registry.get<AmbientLightComponent>(ambientLightEnt).color;
     gpuProgram.SetUniformVector("_AmbientLight", color);
@@ -280,7 +277,7 @@ void RenderPass::SetDirectLightParams(
     const SceneNode& scene,
     Identifier shadowLightId)
 {
-    rmt_ScopedCPUSample(RenderPass_SetDirectLightParams, 0);
+    ZoneScopedN("RenderPass_SetDirectLightParams");
     int32_t numLight = 0;
     int32_t shadowLightIndex = -1;
     const auto registry = scene.GetRegistry();
@@ -288,7 +285,7 @@ void RenderPass::SetDirectLightParams(
     {
         if (!IsNodeActive(node)) continue;
 
-        rmt_BeginCPUSample(CreateUniformNames, 0);
+        ZoneScopedN("CreateUniformNames");
         // TODO: Cache the uniform names.
         const auto uniformLocation = std::format("_DirectLights[{}]", numLight);
         const auto uniformLocationColor = std::format("{}.properties.color", uniformLocation);
@@ -297,14 +294,12 @@ void RenderPass::SetDirectLightParams(
         const auto uniformLocationCutoff = std::format("{}.properties.cutoff", uniformLocation);
         const auto uniformLocationDirection = std::format("{}.direction", uniformLocation);
         const auto uniformLocationShadow = std::format("{}.castShadow", uniformLocation);
-        rmt_EndCPUSample();
-
-        rmt_BeginCPUSample(EmplaceUniformValues, 0);
+        {
+        ZoneScopedN("EmplaceUniformValues");
         SceneNode* nodePtr = SceneNode::FindNode(node.id);
         if (!nodePtr)
         {
             LOG_ERROR(LogSceneRenderer, std::format("SceneRenderer::SetDirectLightParams: SceneNode with ID {} not found.", node.id));
-            rmt_EndCPUSample();
             continue;
         }
         const auto direction = nodePtr->GetGlobalOrientation() * light.direction;
@@ -316,7 +311,7 @@ void RenderPass::SetDirectLightParams(
         const bool castsShadow = light.properties.canCastShadows && node.id == shadowLightId;
         gpuProgram.SetUniformInt(uniformLocationShadow, castsShadow ? 1 : 0);
         if (castsShadow) shadowLightIndex = numLight;
-        rmt_EndCPUSample();
+        }
 
         numLight++;
     }
@@ -326,14 +321,14 @@ void RenderPass::SetDirectLightParams(
 
 void RenderPass::SetPointLightParams(GpuProgram& gpuProgram, const SceneNode& scene)
 {
-    rmt_ScopedCPUSample(RenderPass_SetPointLightParams, 0);
+    ZoneScopedN("RenderPass_SetPointLightParams");
     int32_t numLight = 0;
     const auto registry = scene.GetRegistry();
     for (const auto view = registry->view<SceneNodeComponent, PointLightComponent>(); const auto& [entity, node, light] : view.each())
     {
         if (!IsNodeActive(node)) continue;
 
-        rmt_BeginCPUSample(CreateUniformNames, 0);
+        ZoneScopedN("CreateUniformNames");
         // TODO: Cache the uniform names.
         const auto uniformLocation = std::format("_PointLights[{}]", numLight);
         const auto uniformLocationColor = std::format("{}.properties.color", uniformLocation);
@@ -345,13 +340,11 @@ void RenderPass::SetPointLightParams(GpuProgram& gpuProgram, const SceneNode& sc
         const auto uniformLocationConst = std::format("{}.constant", uniformLocation);
         const auto uniformLocationLinear = std::format("{}.linear", uniformLocation);
         const auto uniformLocationQuad = std::format("{}.quadratic", uniformLocation);
-        rmt_EndCPUSample();
-
-        rmt_BeginCPUSample(EmplaceUniformValues, 0);
+        {
+        ZoneScopedN("EmplaceUniformValues");
         SceneNode* nodePtr = SceneNode::FindNode(node.id);
         if (!nodePtr) {
             LOG_ERROR(LogSceneRenderer, std::format("SceneRenderer::SetPointLightParams: SceneNode with ID {} not found.", node.id));
-            rmt_EndCPUSample();
             continue;
         }
         gpuProgram.SetUniformVector(uniformLocationPosition, nodePtr->GetGlobalPosition());
@@ -363,7 +356,7 @@ void RenderPass::SetPointLightParams(GpuProgram& gpuProgram, const SceneNode& sc
         gpuProgram.SetUniformFloat(uniformLocationConst, light.constant);
         gpuProgram.SetUniformFloat(uniformLocationLinear, light.linear);
         gpuProgram.SetUniformFloat(uniformLocationQuad, light.quadratic);
-        rmt_EndCPUSample();
+        }
 
         numLight++;
     }
@@ -372,7 +365,7 @@ void RenderPass::SetPointLightParams(GpuProgram& gpuProgram, const SceneNode& sc
 
 void RenderPass::SetCameraUniforms(GpuProgram& gpuProgram, const glm::vec3& cameraPos, const glm::mat4& viewMtx, const glm::mat4& projectionMtx)
 {
-    rmt_ScopedCPUSample(RenderPass_SetCameraUniforms, 0);
+    ZoneScopedN("RenderPass_SetCameraUniforms");
     gpuProgram.SetUniformVector("_CameraPos", cameraPos);
     gpuProgram.SetUniformMatrix("_View", viewMtx, false);
     gpuProgram.SetUniformMatrix("_Projection", projectionMtx, false);
@@ -380,7 +373,7 @@ void RenderPass::SetCameraUniforms(GpuProgram& gpuProgram, const glm::vec3& came
 
 void RenderPass::SetShadowMapParams(GpuProgram& gpuProgram, const SceneRenderingContext& sceneCtx)
 {
-    rmt_ScopedCPUSample(RenderPass_SetShadowMapParams, 0);
+    ZoneScopedN("RenderPass_SetShadowMapParams");
     const bool hasShadowMap = !sceneCtx.shadowMaps.empty() ;
     gpuProgram.SetUniformInt("_HasShadowMap", hasShadowMap ? 1 : 0);
     if (!hasShadowMap) 

@@ -6,6 +6,7 @@
 #include <thread>
 
 #include "nexus/Nexus.h"
+#include "tracy/Tracy.hpp"
 
 namespace
 {
@@ -34,8 +35,8 @@ public:
     {
         Application::Update();
 
-        rmt_BeginCPUSample(MakeDirty, 0);
-        
+        {
+        ZoneScopedN("MakeDirty");
         m_root->SetPosition(glm::vec3(1));
         m_root->SetOrientation(glm::quat {1, 0, 0, 0});
         m_root->SetScale(glm::vec3(1));
@@ -44,17 +45,18 @@ public:
             node.SetOrientation(glm::quat {1, 0, 0, 0});
             node.SetScale(glm::vec3(1));
         });
-        rmt_EndCPUSample();
+        }
 
         auto begin = std::chrono::high_resolution_clock::now();
-        rmt_BeginCPUSample(StressTest, 0);
+        {
+        ZoneScopedN("StressTest");
         for (auto node : m_leaveNodes)
         {
             (void)node->GetGlobalPosition();
             (void)node->GetGlobalOrientation();
             (void)node->GetGlobalScale();
         }
-        rmt_EndCPUSample();
+        }
 
         const auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::high_resolution_clock::now() - begin).count();

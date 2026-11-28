@@ -11,16 +11,15 @@ target_compile_definitions(${TARGET_NAME} PRIVATE NXS_RHI_PLUGIN_EXPORTS)
 target_include_directories(${TARGET_NAME}
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include
     PRIVATE ${ENGINE_3RD_PARTY_DIR}/glad/include
-    PRIVATE "${REMOTERY_SOURCE_DIR}"
 )
 
 target_link_libraries(${TARGET_NAME}
     # Links against the core RHI interface (brings in SDL3, nexus-core, etc. transitively)
     PRIVATE nexus-graphics
-    PRIVATE nexus-remotery
     PRIVATE SDL3::SDL3
     PRIVATE glad
     PRIVATE OpenGL::GL
+    PUBLIC nexus-3rdparty
 )
 
 # Output the plugin binary into <build_dir>/bin/plugins/ (or alongside your main executable)

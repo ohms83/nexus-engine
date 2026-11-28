@@ -5,7 +5,7 @@
 
 #include <ranges>
 
-#include "Remotery.h"
+#include "tracy/Tracy.hpp"
 
 USING_NAMESPACE_NXS;
 
@@ -33,7 +33,7 @@ void GpuProgram::Compile()
 
 int32_t GpuProgram::FindUniform(const std::string &name)
 {
-    rmt_ScopedCPUSample(GpuProgram_FindUniform, 0);
+    ZoneScopedN("GpuProgram_FindUniform");
     if (const auto& itr = m_uniforms.find(name); itr != m_uniforms.end()) return itr->second;
 
     int32_t location = FindUniform_Internal(name);

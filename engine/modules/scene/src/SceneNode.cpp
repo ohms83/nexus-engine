@@ -314,7 +314,7 @@ bool SceneNode::IsActive() const
 
 void SceneNode::AddChild(Ref<SceneNode> child)
 {
-    rmt_ScopedCPUSample(SceneNode_AddChild, 0);
+    ZoneScopedN("SceneNode_AddChild");
     if (!child) return;
 
     const auto self = GetSelf();
@@ -341,7 +341,7 @@ void SceneNode::AddChild(Ref<SceneNode> child)
 
 void SceneNode::SetPosition(const glm::vec3& position)
 {
-    rmt_ScopedCPUSample(SceneNode_SetPosition, 0);
+    ZoneScopedN("SceneNode_SetPosition");
     auto transform = GetComponent<TransformComponent>();
     if (!transform) return;
     transform->SetPosition(position);
@@ -349,7 +349,7 @@ void SceneNode::SetPosition(const glm::vec3& position)
 
 void SceneNode::SetOrientation(const glm::quat& orientation)
 {
-    rmt_ScopedCPUSample(SceneNode_SetOrientation, 0);
+    ZoneScopedN("SceneNode_SetOrientation");
     auto transform = GetComponent<TransformComponent>();
     if (!transform) return;
     transform->SetQuaternion(orientation);
@@ -357,7 +357,7 @@ void SceneNode::SetOrientation(const glm::quat& orientation)
 
 void SceneNode::SetScale(const glm::vec3& scale)
 {
-    rmt_ScopedCPUSample(SceneNode_SetScale, 0);
+    ZoneScopedN("SceneNode_SetScale");
     auto transform = GetComponent<TransformComponent>();
     if (!transform) return;
     transform->SetScale(scale);
@@ -365,7 +365,7 @@ void SceneNode::SetScale(const glm::vec3& scale)
 
 void SceneNode::SetLocalTransform(const glm::mat4& transform)
 {
-    rmt_ScopedCPUSample(SceneNode_SetLocalTransform, 0);
+    ZoneScopedN("SceneNode_SetLocalTransform");
     glm::mat4x3 affine(1.0f);
     for (glm::length_t column = 0; column < 4; ++column) affine[column] = glm::vec3(transform[column]);
     SetLocalAffineTransform(affine);
@@ -410,7 +410,7 @@ const glm::mat4x3& SceneNode::GetLocalAffineTransform() const
 
 void SceneNode::UpdateTransform() const
 {
-    rmt_ScopedCPUSample(SceneNode_UpdateTransform, 0);
+    ZoneScopedN("SceneNode_UpdateTransform");
     if (!m_transformDirty) return;
 
     const auto transform = GetComponent<TransformComponent>();
@@ -424,7 +424,7 @@ void SceneNode::UpdateTransform() const
 
 void SceneNode::UpdateGlobalTransform()
 {
-    rmt_ScopedCPUSample(SceneNode_UpdateGlobalTransform, 0);
+    ZoneScopedN("SceneNode_UpdateGlobalTransform");
     m_transformDirty = true;
     UpdateTransform();
     m_globalTransformDirty = true;
@@ -446,7 +446,7 @@ void SceneNode::InvalidateGlobalTransform()
 
 const glm::mat4x3& SceneNode::GetGlobalAffineTransform() const
 {
-    rmt_ScopedCPUSample(SceneNode_GetGlobalAffineTransform, 0);
+    ZoneScopedN("SceneNode_GetGlobalAffineTransform");
     if (m_globalTransformDirty)
     {
         UpdateTransform();
@@ -466,13 +466,13 @@ glm::mat4 SceneNode::GetGlobalTransform() const
 
 glm::vec3 SceneNode::GetGlobalPosition() const
 {
-    rmt_ScopedCPUSample(SceneNode_GetGlobalPosition, 0);
+    ZoneScopedN("SceneNode_GetGlobalPosition");
     return GetGlobalAffineTransform()[3];
 }
 
 glm::quat SceneNode::GetGlobalOrientation() const
 {
-    rmt_ScopedCPUSample(SceneNode_GetGlobalOrientation, 0);
+    ZoneScopedN("SceneNode_GetGlobalOrientation");
     const auto localOrientation = GetOrientation();
     const auto parent = m_parent.lock();
     return parent ? parent->GetGlobalOrientation() * localOrientation : localOrientation;
@@ -480,7 +480,7 @@ glm::quat SceneNode::GetGlobalOrientation() const
 
 glm::vec3 SceneNode::GetGlobalScale() const
 {
-    rmt_ScopedCPUSample(SceneNode_GetGlobalScale, 0);
+    ZoneScopedN("SceneNode_GetGlobalScale");
     const auto& globalTransform = GetGlobalAffineTransform();
     return {
         glm::length(globalTransform[0]),
@@ -548,7 +548,7 @@ void SceneNode::AddChildren(const ChildList& children)
 
 void SceneNode::RemoveChild(Ref<SceneNode> node, bool reparentDescendants)
 {
-    rmt_ScopedCPUSample(SceneNode_RemoveChild, 0);
+    ZoneScopedN("SceneNode_RemoveChild");
     if (IsShuttingDown() || !node) return;
 
     const size_t numRemoved = std::erase_if(m_children, [&](const Ref<SceneNode>& child) {
@@ -595,13 +595,13 @@ void SceneNode::RemoveAllChildren(bool removeDescendant)
 
 void SceneNode::GetAllChildren(ChildList& childrenList) const
 {
-    rmt_ScopedCPUSample(SceneNode_GetAllChildren, 0);
+    ZoneScopedN("SceneNode_GetAllChildren");
     for (auto child : m_children) childrenList.push_back(child);
 }
 
 void SceneNode::GetAllDescendants(ChildList& childrenList, bool parentFirst) const
 {
-    rmt_ScopedCPUSample(SceneNode_GetAllDescendants, 0);
+    ZoneScopedN("SceneNode_GetAllDescendants");
     for (auto child : m_children)
     {
         if (parentFirst) childrenList.push_back(child);
@@ -613,7 +613,7 @@ void SceneNode::GetAllDescendants(ChildList& childrenList, bool parentFirst) con
 
 Ref<SceneNode> SceneNode::FindChild(const Identifier id, bool recursive)
 {
-    rmt_ScopedCPUSample(SceneNode_FindChild, 0);
+    ZoneScopedN("SceneNode_FindChild");
     if (IsShuttingDown()) return nullptr;
 
     if (GetId() == id) return GetSelf();
@@ -632,14 +632,14 @@ Ref<SceneNode> SceneNode::FindChild(const Identifier id, bool recursive)
 
 NODISCARD SceneNode* SceneNode::FindNode(Identifier id)
 {
-    rmt_ScopedCPUSample(SceneNode_FindNode, 0);
+    ZoneScopedN("SceneNode_FindNode");
     auto it = s_nodeRegistry.find(id);
     return (it != s_nodeRegistry.end()) ? it->second : nullptr;
 }
 
 Ref<SceneNode> SceneNode::FindNodeWithName(const std::string& name)
 {
-    rmt_ScopedCPUSample(SceneNode_FindNodeWithName, 0);
+    ZoneScopedN("SceneNode_FindNodeWithName");
     if (IsShuttingDown()) return nullptr;
 
     for (const auto child : m_children)
@@ -678,7 +678,7 @@ void SceneNode::RemoveScript(Ref<Script> script)
 
 void SceneNode::Update(float dt)
 {
-    rmt_ScopedCPUSample(SceneNode_Update, 0);
+    ZoneScopedN("SceneNode_Update");
     std::ranges::for_each(m_scripts, [dt](Ref<Script> script) {
         script->Update(dt);
     });

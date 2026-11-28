@@ -6,7 +6,7 @@
 #include <algorithm>
 
 #include "nexus/time/TimerManager.h"
-#include "Remotery.h"
+#include "tracy/Tracy.hpp"
 
 USING_NAMESPACE_NXS;
 
@@ -53,19 +53,19 @@ void TaskScheduler::StopTask(TaskID id)
 
 void TaskScheduler::PreUpdate()
 {
-    rmt_ScopedCPUSample(TaskScheduler_PreUpdate, 0);
+    ZoneScopedN("TaskScheduler_PreUpdate");
     UpdateTaskGroup(UpdatePhase::PreUpdate);
 }
 
 void TaskScheduler::Update()
 {
-    rmt_ScopedCPUSample(TaskScheduler_Update, 0);
+    ZoneScopedN("TaskScheduler_Update");
     UpdateTaskGroup(UpdatePhase::Update);
 }
 
 void TaskScheduler::PostUpdate()
 {
-    rmt_ScopedCPUSample(TaskScheduler_PostUpdate, 0);
+    ZoneScopedN("TaskScheduler_PostUpdate");
     UpdateTaskGroup(UpdatePhase::PostUpdate);
 }
 

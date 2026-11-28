@@ -6,6 +6,14 @@ add_subdirectory(glad EXCLUDE_FROM_ALL)
 add_subdirectory(entt EXCLUDE_FROM_ALL)
 add_subdirectory(mimalloc EXCLUDE_FROM_ALL)
 
+FetchContent_Declare(
+  tracy
+  GIT_REPOSITORY https://github.com/wolfpld/tracy.git
+  GIT_TAG        v0.15.0
+  GIT_SHALLOW    TRUE
+)
+FetchContent_MakeAvailable(tracy)
+
 set(RAPIDJSON_BUILD_EXAMPLES OFF CACHE BOOL "Do not build rapidjson examples" FORCE)
 set(RAPIDJSON_BUILD_CXX20 ON CACHE BOOL "Build rapidjson with C++20" FORCE)
 set(RAPIDJSON_BUILD_TESTS OFF CACHE BOOL "Do not build rapidjson perftests and unittests" FORCE)
@@ -56,14 +64,6 @@ set(ENGINE_THIRD_PARTY_SOURCES
     "${STB_SOURCE_DIR}/stb_image.cpp"
 )
 
-add_library(nexus-remotery SHARED "${REMOTERY_SOURCE_DIR}/Remotery.c")
-target_compile_definitions(nexus-remotery PUBLIC RMT_DLL RMT_USE_OPENGL=1)
-if (WIN32)
-    target_link_libraries(nexus-remotery PRIVATE ws2_32)
-elseif (CMAKE_DL_LIBS)
-    target_link_libraries(nexus-remotery PRIVATE ${CMAKE_DL_LIBS})
-endif()
-
 # A static library containing sources from third-party libraries that don't have
 # their own CMake build system. This library is linked to engine modules that need it.
 add_library(nexus-3rdparty STATIC ${ENGINE_THIRD_PARTY_SOURCES})
@@ -78,12 +78,11 @@ target_include_directories(nexus-3rdparty
     PRIVATE "${IMPLOT_SOURCE_DIR}"
     PRIVATE "${XXHASH_SOURCE_DIR}"
     PRIVATE "${STB_SOURCE_DIR}"
-    PRIVATE "${REMOTERY_SOURCE_DIR}"
 )
 
 target_link_libraries(nexus-3rdparty
     PUBLIC mimalloc-static
-    PUBLIC nexus-remotery
+    PUBLIC TracyClient
 )
 
 target_compile_definitions(nexus-3rdparty

@@ -1,7 +1,7 @@
 #include "nexus/graphics/Model.h"
 #include "nexus/debug/LogDispatcher.h"
 
-#include "Remotery.h"
+#include "tracy/Tracy.hpp"
 
 #include <sstream>
 

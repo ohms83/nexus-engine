@@ -12,7 +12,7 @@
 #include <SDL3/SDL_filesystem.h>
 #include <SDL3/SDL_loadso.h>
 
-#include "Remotery.h"
+#include "tracy/Tracy.hpp"
 
 USING_NAMESPACE_NXS;
 
@@ -153,7 +153,7 @@ RenderingInterface::~RenderingInterface()
 
 void RenderingInterface::ApplyPipelineState(const PipelineState &state)
 {
-    rmt_ScopedCPUSample(RenderingInterface_ApplyPipelineState, 0);
+    ZoneScopedN("RenderingInterface_ApplyPipelineState");
     if (!glm::all(glm::equal(m_pipelineState.colorMask, state.colorMask)))
     {
         SetColorMask(state.colorMask);

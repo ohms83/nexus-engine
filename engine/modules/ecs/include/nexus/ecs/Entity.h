@@ -5,7 +5,7 @@
 #include "nexus/container/Array.h"
 #include <ranges>
 
-#include "Remotery.h"
+#include "tracy/Tracy.hpp"
 
 #if NXS_BUILD_DEBUG
     // Turning on/off entity deep profiling. The profiling can greatly affect performance.
@@ -16,7 +16,7 @@
 #endif
 
 #if ENTITY_PROFILING
-    #define ENT_SCOPED_CPU_SAMPLE(name, flag) rmt_ScopedCPUSample(name, flag)
+    #define ENT_SCOPED_CPU_SAMPLE(name, flag) ZoneScopedN(#name);
 #else
     #define ENT_SCOPED_CPU_SAMPLE(name, flag)
 #endif

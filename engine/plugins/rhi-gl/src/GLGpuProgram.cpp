@@ -5,7 +5,7 @@
 #include "nexus/GLGpuProgram.h"
 #include "glm/gtc/type_ptr.inl"
 
-#include "Remotery.h"
+#include "tracy/Tracy.hpp"
 #include "nexus/graphics/GraphicsProfiler.h"
 
 // GpuProgram sources
@@ -68,7 +68,7 @@ std::atomic<uint32_t> GLGpuProgram::s_bindingShader(0);
 // Function to compile a shader
 static GLuint CompileShader(const std::string& source, GpuProgram::Type type)
 {
-    rmt_ScopedCPUSample(GLGpuProgram_CompileShader, 0);
+    ZoneScopedN("GLGpuProgram_CompileShader");
     if (source.empty()) return 0;
 
     const auto gl_shaderType = GL::NxsShaderTypeToGLShader(type);
@@ -92,7 +92,7 @@ static GLuint CompileShader(const std::string& source, GpuProgram::Type type)
 
 GLGpuProgram::~GLGpuProgram()
 {
-    rmt_ScopedCPUSample(GLGpuProgram_Destructor, 0);
+    ZoneScopedN("GLGpuProgram_Destructor");
     CALL_GL_FUNC(glDeleteProgram(m_id));
 }
 
@@ -111,7 +111,7 @@ GpuProgram& GLGpuProgram::AddSource(const std::string& source, Type shaderType)
 
 void GLGpuProgram::Compile()
 {
-    rmt_ScopedCPUSample(GLGpuProgram_Compile, 0);
+    ZoneScopedN("GLGpuProgram_Compile");
     GpuProgram::Compile();
 
     for (const auto shaderId : m_shaderHandles) {
@@ -143,7 +143,7 @@ bool GLGpuProgram::IsBinding() const
 
 int32_t GLGpuProgram::FindUniform_Internal(const std::string& name) const
 {
-    rmt_ScopedCPUSample(GLGpuProgram_FindUniform_Internal, 0);
+    ZoneScopedN("GLGpuProgram_FindUniform_Internal");
     const auto location = glGetUniformLocation(m_id, name.c_str());
     CHECK_GL_ERROR(glGetUniformLocation);
     return location;
@@ -152,7 +152,7 @@ int32_t GLGpuProgram::FindUniform_Internal(const std::string& name) const
 bool GLGpuProgram::SetUniformInt(const std::string& name, const int32_t value)
 {
     CHECK_IF_BINDING(false);
-    rmt_ScopedCPUSample(GLGpuProgram_SetUniform_Int, 0);
+    ZoneScopedN("GLGpuProgram_SetUniform_Int");
     const auto location = FindUniform(name);
     if (location < 0) return false;
     CALL_GL_FUNC(glUniform1i(location, value));
@@ -162,7 +162,7 @@ bool GLGpuProgram::SetUniformInt(const std::string& name, const int32_t value)
 bool GLGpuProgram::SetUniformFloat(const std::string& name, const float value)
 {
     CHECK_IF_BINDING(false);
-    rmt_ScopedCPUSample(GLGpuProgram_SetUniform_Float, 0);
+    ZoneScopedN("GLGpuProgram_SetUniform_Float");
     const auto location = FindUniform(name);
     if (location < 0) return false;
     CALL_GL_FUNC(glUniform1f(location, value));
@@ -172,7 +172,7 @@ bool GLGpuProgram::SetUniformFloat(const std::string& name, const float value)
 bool GLGpuProgram::SetUniformVector(const std::string& name, const glm::vec2& vec)
 {
     CHECK_IF_BINDING(false);
-    rmt_ScopedCPUSample(GLGpuProgram_SetUniform_Vec2, 0);
+    ZoneScopedN("GLGpuProgram_SetUniform_Vec2");
     const auto location = FindUniform(name);
     if (location < 0) return false;
     CALL_GL_FUNC(glUniform2fv(location, 1, glm::value_ptr(vec)));
@@ -182,7 +182,7 @@ bool GLGpuProgram::SetUniformVector(const std::string& name, const glm::vec2& ve
 bool GLGpuProgram::SetUniformVector(const std::string& name, const glm::vec3& vec)
 {
     CHECK_IF_BINDING(false);
-    rmt_ScopedCPUSample(GLGpuProgram_SetUniform_Vec3, 0);
+    ZoneScopedN("GLGpuProgram_SetUniform_Vec3");
     const auto location = FindUniform(name);
     if (location < 0) return false;
     CALL_GL_FUNC(glUniform3fv(location, 1, glm::value_ptr(vec)));
@@ -192,7 +192,7 @@ bool GLGpuProgram::SetUniformVector(const std::string& name, const glm::vec3& ve
 bool GLGpuProgram::SetUniformVector(const std::string& name, const glm::vec4& vec)
 {
     CHECK_IF_BINDING(false);
-    rmt_ScopedCPUSample(GLGpuProgram_SetUniform_Vec4, 0);
+    ZoneScopedN("GLGpuProgram_SetUniform_Vec4");
     const auto location = FindUniform(name);
     if (location < 0) return false;
     CALL_GL_FUNC(glUniform4fv(location, 1, glm::value_ptr(vec)));
@@ -202,7 +202,7 @@ bool GLGpuProgram::SetUniformVector(const std::string& name, const glm::vec4& ve
 bool GLGpuProgram::SetUniformMatrix(const std::string& name, const glm::mat3& matrix, const bool tranpose)
 {
     CHECK_IF_BINDING(false);
-    rmt_ScopedCPUSample(GLGpuProgram_SetUniform_Mat3, 0);
+    ZoneScopedN("GLGpuProgram_SetUniform_Mat3");
     const auto location = FindUniform(name);
     if (location < 0) return false;
     CALL_GL_FUNC(glUniformMatrix3fv(location, 1, tranpose ? GL_TRUE : GL_FALSE, glm::value_ptr(matrix)));
@@ -212,7 +212,7 @@ bool GLGpuProgram::SetUniformMatrix(const std::string& name, const glm::mat3& ma
 bool GLGpuProgram::SetUniformMatrix(const std::string& name, const glm::mat4& matrix, const bool tranpose)
 {
     CHECK_IF_BINDING(false);
-    rmt_ScopedCPUSample(GLGpuProgram_SetUniform_Mat4, 0);
+    ZoneScopedN("GLGpuProgram_SetUniform_Mat4");
     const auto location = FindUniform(name);
     if (location < 0) return false;
     CALL_GL_FUNC(glUniformMatrix4fv(location, 1, tranpose ? GL_TRUE : GL_FALSE, glm::value_ptr(matrix)));
@@ -222,7 +222,7 @@ bool GLGpuProgram::SetUniformMatrix(const std::string& name, const glm::mat4& ma
 bool GLGpuProgram::SetUniformTexture2D(const std::string& name, Ref<const TextureProxy> texture, const int32_t textureUnit)
 {
     CHECK_IF_BINDING(false);
-    rmt_ScopedCPUSample(GLGpuProgram_SetUniform_Texture2D, 0);
+    ZoneScopedN("GLGpuProgram_SetUniform_Texture2D");
     const auto location = FindUniform(name);
     if (location < 0) return false;
     const GLint gl_textureUnit = GL_TEXTURE0 + textureUnit;
@@ -236,7 +236,7 @@ bool GLGpuProgram::SetUniformTexture2D(const std::string& name, Ref<const Textur
 bool GLGpuProgram::SetUniformTextureCube(const std::string& name, Ref<const TextureProxy> texture, const int32_t textureUnit)
 {
     CHECK_IF_BINDING(false);
-    rmt_ScopedCPUSample(GLGpuProgram_SetUniform_TextureCube, 0);
+    ZoneScopedN("GLGpuProgram_SetUniform_TextureCube");
     const auto location = FindUniform(name);
     if (!texture)
     {
@@ -267,7 +267,7 @@ bool GLGpuProgram::SetUniformTextureCube(const std::string& name, Ref<const Text
 
 void GLGpuProgram::Bind()
 {
-    rmt_ScopedCPUSample(GLGpuProgram_Bind, 0);
+    ZoneScopedN("GLGpuProgram_Bind");
     if (IsBinding()) return;
 
     CALL_GL_FUNC(glUseProgram(m_id));
@@ -278,14 +278,14 @@ void GLGpuProgram::Bind()
 
 void GLGpuProgram::Unbind()
 {
-    rmt_ScopedCPUSample(GLGpuProgram_Unbind, 0);
+    ZoneScopedN("GLGpuProgram_Unbind");
     CALL_GL_FUNC(glUseProgram(0));
     if (IsBinding()) s_bindingShader.store(0);
 }
 
 uint32_t GLGpuProgram::Alloc()
 {
-    rmt_ScopedCPUSample(GLGpuProgram_Alloc, 0);
+    ZoneScopedN("GLGpuProgram_Alloc");
     const auto programHandle = glCreateProgram();
     CHECK_GL_ERROR(glCreateProgram);
     return programHandle;
@@ -293,13 +293,13 @@ uint32_t GLGpuProgram::Alloc()
 
 void GLGpuProgram::Release()
 {
-    rmt_ScopedCPUSample(GLGpuProgram_Release, 0);
+    ZoneScopedN("GLGpuProgram_Release");
     CALL_GL_FUNC(glDeleteProgram(m_id));
 }
 
 void GLGpuProgram::ClearHandles()
 {
-    rmt_ScopedCPUSample(GLGpuProgram_ClearHandles, 0);
+    ZoneScopedN("GLGpuProgram_ClearHandles");
     for (const auto shaderId : m_shaderHandles) {
         CALL_GL_FUNC(glDeleteShader(shaderId));
     }
@@ -308,7 +308,7 @@ void GLGpuProgram::ClearHandles()
 
 void GLGpuProgram::CreateErrorGpuProgram()
 {
-    rmt_ScopedCPUSample(GLGpuProgram_CreateErrorGpuProgram, 0);
+    ZoneScopedN("GLGpuProgram_CreateErrorGpuProgram");
     GLint success = 1;
 
     m_id = Alloc();

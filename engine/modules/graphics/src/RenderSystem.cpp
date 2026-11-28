@@ -8,7 +8,7 @@
 #include "nexus/graphics/GraphicsProfiler.h"
 #include "nexus/graphics/RenderDocCapture.h"
 
-#include "Remotery.h"
+#include "tracy/Tracy.hpp"
 
 USING_NAMESPACE_NXS;
 
@@ -30,7 +30,7 @@ RenderSystem::~RenderSystem()
 
 void RenderSystem::ClearScreen() const
 {
-    rmt_ScopedCPUSample(RenderSystem_ClearScreen, 0);
+    ZoneScopedN("RenderSystem_ClearScreen");
     m_rhi->ClearBuffer(
         m_rhi->GetClearColor(),
         m_rhi->GetClearDepth()
@@ -39,9 +39,7 @@ void RenderSystem::ClearScreen() const
 
 void RenderSystem::BeginDraw()
 {
-    rmt_ScopedCPUSample(RenderSystem_BeginDraw, 0);
-    // Mark the start of a frame for Remotery with a dynamic name
-    rmt_BeginCPUSampleDynamic("Frame", 0);
+    ZoneScopedN("RenderSystem_BeginDraw");
     RenderDocCapture::BeginCaptureIfRequested();
     GraphicsProfiler::BeginFrame();
     m_timer.Tick();
@@ -68,20 +66,16 @@ void RenderSystem::DrawIndexedInstanced(Ref<IndexBuffer> indexBuffer, uint32_t i
 
 void RenderSystem::EndDraw()
 {
-    rmt_ScopedCPUSample(EndDraw, 0);
+    ZoneScopedN("EndDraw");
     {
-        rmt_ScopedCPUSample(SwapBuffer, 0);
+        ZoneScopedN("SwapBuffer");
         m_rhi->SwapBuffer();
     }
     // End RenderDoc capture if it was active for this frame
     RenderDocCapture::EndCaptureIfActive();
-    // Let Remotery gather GPU timestamps for the frame
-    rmt_MarkFrame();
-    // Report and end frame sampling
+    FrameMark;
+    // Report frame
     GraphicsProfiler::EndFrameAndReport();
-
-    // End dynamic frame CPU sample
-    rmt_EndCPUSample();
     m_renderTime = m_timer.GetDeltaTime() * 1000.f;
     m_frameIndex++;
 }

@@ -5,7 +5,7 @@
 #include "nexus/GLTexture.h"
 #include "nexus/math/Math.h"
 
-#include "Remotery.h"
+#include "tracy/Tracy.hpp"
 
 USING_NAMESPACE_NXS;
 
@@ -19,7 +19,7 @@ GLTexture::GLTexture(const TextureDescription& desc)
 
 void GLTexture::Bind() const
 {
-    rmt_ScopedCPUSample(GLTexture_Bind, 0);
+    ZoneScopedN("GLTexture_Bind");
     if (IsBinding()) return;
 
     const GLenum target = m_desc.kind == TextureKind::TextureCube
@@ -31,7 +31,7 @@ void GLTexture::Bind() const
 
 void GLTexture::Unbind() const
 {
-    rmt_ScopedCPUSample(GLTexture_Unbind, 0);
+    ZoneScopedN("GLTexture_Unbind");
     const GLenum target = m_desc.kind == TextureKind::TextureCube
         ? GL_TEXTURE_CUBE_MAP
         : GL_TEXTURE_2D;
@@ -46,7 +46,7 @@ bool GLTexture::IsBinding() const
 
 void GLTexture::LoadData(const uint8_t* data, const uint32_t size)
 {
-    rmt_ScopedCPUSample(GLTexture_LoadData, 0);
+    ZoneScopedN("GLTexture_LoadData");
     const GLint gl_pixelFormats = GL::NxsPixelFormatToGL(m_desc.format);
     const GLint gl_internalFormat = GL::ResolveTextureInternalFormat(
         m_desc.format,
@@ -80,7 +80,7 @@ void GLTexture::LoadData(const uint8_t* data, const uint32_t size)
 
 void GLTexture::LoadData(TextureTarget target, const uint8_t* data, uint32_t size)
 {
-    rmt_ScopedCPUSample(GLTexture_LoadData, 0);
+    ZoneScopedN("GLTexture_LoadData");
     if (m_desc.kind != TextureKind::TextureCube ||
         target == TextureTarget::Texture2D ||
         UINT_CAST(target) >= UINT_CAST(TextureTarget::Num))
@@ -110,7 +110,7 @@ void GLTexture::LoadData(TextureTarget target, const uint8_t* data, uint32_t siz
 
 void GLTexture::LoadMipData(const uint8_t* data, uint32_t size, uint32_t mip)
 {
-    rmt_ScopedCPUSample(GLTexture_LoadMipData, 0);
+    ZoneScopedN("GLTexture_LoadMipData");
     NXS_ASSERT_MSG(data, "Mip data must not be null.");
     NXS_ASSERT_MSG(m_desc.numMips == 0 || mip < m_desc.numMips,
         std::format("Mip level {} is outside the texture's {} mip levels.", mip, m_desc.numMips));
@@ -161,7 +161,7 @@ void GLTexture::LoadMipData(const uint8_t* data, uint32_t size, uint32_t mip)
 
 void GLTexture::GenerateMipmaps()
 {
-    rmt_ScopedCPUSample(GLTexture_GenerateMipmaps, 0);
+    ZoneScopedN("GLTexture_GenerateMipmaps");
     NXS_ASSERT_MSG(IsBinding(), "Invalid operation. The texture is unbound.");
     if (m_desc.kind != TextureKind::Texture2D) return;
     CALL_GL_FUNC(glGenerateMipmap(GL_TEXTURE_2D));
@@ -172,7 +172,7 @@ void GLTexture::GenerateMipmaps()
 
 bool GLTexture::ReadTexel(const uint32_t mip, void* data, const size_t size)
 {
-    rmt_ScopedCPUSample(GLTexture_ReadTexel, 0);
+    ZoneScopedN("GLTexture_ReadTexel");
     NXS_ASSERT_MSG(IsBinding(), "Invalid operation. The texture is unbound.");
     if (!data ||
         size < 16 ||
@@ -194,7 +194,7 @@ bool GLTexture::ReadTexel(const uint32_t mip, void* data, const size_t size)
 
 bool GLTexture::ReadTexels(uint32_t mip, Ref<IBuffer> outBuffer)
 {
-    rmt_ScopedCPUSample(GLTexture_ReadTexels, 0);
+    ZoneScopedN("GLTexture_ReadTexels");
     NXS_ASSERT_MSG(IsBinding(), "Invalid operation. The texture is unbound.");
     if (m_desc.kind != TextureKind::Texture2D) return false;
 
@@ -205,7 +205,7 @@ bool GLTexture::ReadTexels(uint32_t mip, Ref<IBuffer> outBuffer)
 
 void GLTexture::CopyData(const void* data, size_t bytes, const size_t offset)
 {
-    rmt_ScopedCPUSample(GLTexture_CopyData, 0);
+    ZoneScopedN("GLTexture_CopyData");
     NXS_ASSERT_MSG(IsBinding(), std::format("Invalid operation. The texture is unbound."));
     const GLint gl_pixelFormats = GL::NxsPixelFormatToGL(m_desc.format);
     const GLint xOffset = offset % m_desc.width;

@@ -8,7 +8,7 @@
 #include "nexus/scene/Scene.h"
 #include "nexus/scene/component/MeshComponent.h"
 
-#include "Remotery.h"
+#include "tracy/Tracy.hpp"
 
 USING_NAMESPACE_NXS;
 
@@ -68,7 +68,7 @@ void Camera::SetRenderTarget(Ref<RenderTarget> renderTarget)
 
 ViewContext Camera::CreateViewContext(const Scene& scene) const
 {
-    rmt_ScopedCPUSample(Camera_CreateViewContext, 0)
+    ZoneScopedN("Camera_CreateViewContext");
     auto cameraComp = GetComponent<CameraComponent>();
     NXS_ASSERT(cameraComp);
     const auto& renderProfile = cameraComp->profile;
@@ -89,12 +89,12 @@ ViewContext Camera::CreateViewContext(const Scene& scene) const
     auto partition = scene.GetPartition();
     if (partition)
     {
-        rmt_ScopedCPUSample(Camera_QueryPartition, 0)
+        ZoneNamedN(camera_query_partition_zone, "Camera_QueryPartition", true);
         partition->Query(viewFrustum, visibleNodes);
         return context;
     }
 
-    rmt_ScopedCPUSample(Camera_CullSceneNodes, 0)
+    ZoneNamedN(camera_cull_scene_nodes_zone, "Camera_CullSceneNodes", true);
     const auto& registry = scene.GetRegistry();
     for (const auto view = registry->view<SceneNodeComponent, MeshComponent>(); const auto& [entity, node, meshComp] : view.each())
     {
@@ -126,7 +126,7 @@ ViewContext Camera::CreateViewContext(const Scene& scene) const
 
 Frustum Camera::GetViewFrustum() const
 {
-    rmt_ScopedCPUSample(Camera_GetViewFrustum, 0)
+    ZoneScopedN("Camera_GetViewFrustum");
     return Properties().GetViewFrustum(GetGlobalPosition(), GetGlobalOrientation());
 }
 

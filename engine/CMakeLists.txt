@@ -14,7 +14,6 @@ set(IMGUI_SOURCE_DIR "${ENGINE_3RD_PARTY_DIR}/imgui" CACHE PATH "Path to Dear Im
 set(IMPLOT_SOURCE_DIR "${ENGINE_3RD_PARTY_DIR}/implot" CACHE PATH "Path to ImPlot source root")
 set(XXHASH_SOURCE_DIR "${ENGINE_3RD_PARTY_DIR}/xxHash" CACHE PATH "Path to xxHash source root")
 set(STB_SOURCE_DIR "${ENGINE_3RD_PARTY_DIR}/stb" CACHE PATH "Path to stb_image source root")
-set(REMOTERY_SOURCE_DIR ${ENGINE_3RD_PARTY_DIR}/Remotery/lib)
 set(MIMALLOC_SOURCE_DIR ${ENGINE_3RD_PARTY_DIR}/mimalloc)
 
 add_subdirectory(3rdparty EXCLUDE_FROM_ALL)
@@ -35,7 +34,6 @@ function(nexus_target_defaults TARGET_NAME)
         PUBLIC "${IMPLOT_SOURCE_DIR}"
         PRIVATE "${XXHASH_SOURCE_DIR}"
         PRIVATE "${STB_SOURCE_DIR}"
-        PRIVATE "${REMOTERY_SOURCE_DIR}"
     )
     # Link a single INTERFACE target that provides common compile definitions
     # and include directories to all engine targets.
@@ -55,6 +53,7 @@ target_compile_definitions(nexus-config INTERFACE
     $<$<CONFIG:Debug>:NXS_BUILD_DEBUG>
     $<$<CONFIG:RelWithDebInfo>:NXS_BUILD_RELWITHDEBINFO>
     $<$<CONFIG:Release>:NXS_BUILD_RELEASE>
+    $<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:TRACY_ENABLE>
 )
 target_include_directories(nexus-config INTERFACE
     ${ENGINE_INCLUDE_DIR}

@@ -9,7 +9,6 @@ add_library(${TARGET_NAME} STATIC ${NXS_ECS_SOURCES})
 
 target_include_directories(${TARGET_NAME}
     PUBLIC ${NXS_ECS_PUBLIC_HEADER_DIR}
-    PUBLIC ${REMOTERY_SOURCE_DIR}
 )
 
 target_link_libraries(${TARGET_NAME}
@@ -18,5 +17,6 @@ target_link_libraries(${TARGET_NAME}
     PUBLIC nexus-config
     PUBLIC nexus-container
     PUBLIC nexus-reflection
+    PUBLIC nexus-3rdparty
     PUBLIC EnTT
 )

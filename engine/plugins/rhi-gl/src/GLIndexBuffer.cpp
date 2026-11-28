@@ -7,7 +7,7 @@
 #include "nexus/GLGpuBuffer.h"
 #include "nexus/NxsGL.h"
 
-#include "Remotery.h"
+#include "tracy/Tracy.hpp"
 
 USING_NAMESPACE_NXS;
 
@@ -27,13 +27,13 @@ IndexBuffer& GLIndexBuffer::Begin()
 
 void GLIndexBuffer::Bind() const
 {
-    rmt_ScopedCPUSample(GLIndexBuffer_Bind, 0);
+    ZoneScopedN("GLIndexBuffer_Bind");
     CALL_GL_FUNC(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_handle));
 }
 
 void GLIndexBuffer::Unbind() const
 {
-    rmt_ScopedCPUSample(GLIndexBuffer_Unbind, 0);
+    ZoneScopedN("GLIndexBuffer_Unbind");
     if (!IsBinding()) return;
 
     CALL_GL_FUNC(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));

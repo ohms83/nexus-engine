@@ -6,7 +6,7 @@
 #include "nexus/container/Array.h"
 #include "nexus/GLGpuBuffer.h"
 
-#include "Remotery.h"
+#include "tracy/Tracy.hpp"
 
 USING_NAMESPACE_NXS;
 
@@ -30,14 +30,14 @@ VertexBuffer& GLVertexBuffer::Begin()
 
 void GLVertexBuffer::Bind() const
 {
-    rmt_ScopedCPUSample(GLVertexBuffer_Bind, 0);
+    ZoneScopedN("GLVertexBuffer_Bind");
     CALL_GL_FUNC(glBindVertexArray(m_handle));
     CALL_GL_FUNC(glBindBuffer(GL_ARRAY_BUFFER, m_vbo));
 }
 
 void GLVertexBuffer::Unbind() const
 {
-    rmt_ScopedCPUSample(GLVertexBuffer_Unbind, 0);
+    ZoneScopedN("GLVertexBuffer_Unbind");
     if (!IsBinding()) return;
 
     CALL_GL_FUNC(glBindVertexArray(0));

@@ -4,7 +4,7 @@
 #include "nexus/scene/SceneNode.h"
 #include "nexus/scene/component/MeshComponent.h"
 
-#include "Remotery.h"
+#include "tracy/Tracy.hpp"
 
 USING_NAMESPACE_NXS;
 
@@ -13,7 +13,7 @@ void OverlayPass::AppendCommands(
     const Array<SceneNode*>& visibleNodes,
     Array<RenderCommand>& outCommands) const
 {
-    rmt_ScopedCPUSample(OverlayPass_AppendGizmos, 0)
+    ZoneScopedN("OverlayPass_AppendGizmos");
     for (const auto node : visibleNodes)
     {
         const auto meshComp = node->GetComponent<MeshComponent>();

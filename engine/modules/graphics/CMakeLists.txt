@@ -12,7 +12,6 @@ target_include_directories(${TARGET_NAME}
 
     PUBLIC ${ENGINE_3RD_PARTY_DIR}/SDL/include
     PRIVATE "${STB_SOURCE_DIR}"
-    PRIVATE "${REMOTERY_SOURCE_DIR}"
 )
 
 target_link_libraries(${TARGET_NAME}

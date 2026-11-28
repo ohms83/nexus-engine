@@ -29,13 +29,11 @@
 #include "imgui_impl_opengl3.h"
 #include "imgui_impl_sdl3.h"
 #include "implot.h"
-#include "Remotery.h"
+#include "tracy/Tracy.hpp"
 
 USING_NAMESPACE_NXS;
 
 DEFINE_LOG(Application);
-
-static Remotery* s_rmt = nullptr;
 
 bool ApplicationConfig::LoadConfig(const std::string& filePath)
 {
@@ -108,17 +106,6 @@ bool Application::Init(const ApplicationConfig& info)
         std::make_shared<FileLogger>("debug.log"),
         std::make_shared<StdOutLogger>()
     });
-
-    if (m_config.allowProfile)
-    {
-        const auto result = rmt_CreateGlobalInstance(&s_rmt);
-        if (result != RMT_ERROR_NONE)
-        {
-            LOG_ERROR(LogApplication, std::format("Failed to initialize Remotery: error {}", static_cast<int>(result)));
-            return false;
-        }
-        rmt_SetCurrentThreadName("MainThread");
-    }
 
     //Initialize SDL
     if( SDL_Init( SDL_INIT_VIDEO ) == false )
@@ -207,7 +194,7 @@ int Application::BeginMainLoop()
     m_quit = false;
     while(true)
     {
-        rmt_ScopedCPUSample(MainLoop, 0);
+        ZoneScopedN("MainLoop");
         timerManager.Tick();
         m_deltaTime = m_timer->GetDeltaTime();
 
@@ -216,7 +203,7 @@ int Application::BeginMainLoop()
         if (m_quit) break;
 
         {
-            rmt_ScopedCPUSample(Update, 0);
+            ZoneScopedN("Update");
             taskScheduler->PreUpdate();
 
             // Update input
@@ -231,7 +218,7 @@ int Application::BeginMainLoop()
         }
 
         {
-            rmt_ScopedCPUSample(Render, 0);
+            ZoneScopedN("Render");
             m_renderSystem->BeginDraw();
             Gizmos::Clear();
 
@@ -268,7 +255,7 @@ WindowContext Application::GetWindowContext() const
 
 void Application::Update()
 {
-    rmt_ScopedCPUSample(Application_Update, 0);
+    ZoneScopedN("Application_Update");
     if (m_sceneManager)
     {
         m_sceneManager->Update(GetDeltaTime());
@@ -277,7 +264,7 @@ void Application::Update()
 
 void Application::Render(RenderSystem& renderSystem)
 {
-    rmt_ScopedCPUSample(Application_Render, 0);
+    ZoneScopedN("Application_Render");
     if (m_sceneManager)
     {
         m_sceneManager->Render(renderSystem);
@@ -435,7 +422,7 @@ void Application::InitImGui() const
 
 void Application::BeginDrawUI() const
 {
-    rmt_ScopedCPUSample(BeginDrawUI, 0);
+    ZoneScopedN("BeginDrawUI");
     m_renderInterface->SetFramebufferSRGB(false);
     if (const auto api = m_renderInterface->GetConfig().api; api == GraphicsAPI::OpenGL)
     {
@@ -454,7 +441,7 @@ void Application::BeginDrawUI() const
 
 void Application::EndDrawUI() const
 {
-    rmt_ScopedCPUSample(EndDrawUI, 0);
+    ZoneScopedN("EndDrawUI");
     ImGui::Render();
 
     if (const auto api = m_renderInterface->GetConfig().api; api == GraphicsAPI::OpenGL)

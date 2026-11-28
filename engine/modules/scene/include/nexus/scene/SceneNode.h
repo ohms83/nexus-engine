@@ -17,7 +17,7 @@
 #include <memory>
 #include <unordered_map>
 
-#include "Remotery.h"
+#include "tracy/Tracy.hpp"
 
 #define IMPLEMENT_NODE(Type) \
     IMPLEMENT_REFLECTION(Type); \
@@ -122,7 +122,7 @@ NXS_NAMESPACE
         template<typename T>
         NODISCARD Array<T*> GetAllDescendantsOfType(bool parentFirst) const
         {
-            rmt_ScopedCPUSample(SceneNode_GetAllDescendantsOfType, 0)
+            ZoneScopedN("SceneNode_GetAllDescendantsOfType");
             Array<T*> children;
             AppendAllDescendantsOfType<T>(children, parentFirst);
             return children;
@@ -131,7 +131,7 @@ NXS_NAMESPACE
         template<typename TVisitor>
         void VisitDescendants(TVisitor&& visitor) const
         {
-            rmt_ScopedCPUSample(SceneNode_VisitDescendants, 0)
+            ZoneScopedN("SceneNode_VisitDescendants");
             VisitDescendantsImpl(visitor);
         }
 
@@ -210,7 +210,7 @@ NXS_NAMESPACE
         {
             for (const auto& child : m_children)
             {
-                rmt_ScopedCPUSample(SceneNode_VisitDescendants_Visitor, 0)
+                ZoneScopedN("SceneNode_VisitDescendants_Visitor");
                 visitor(*child);
                 child->VisitDescendantsImpl(visitor);
             }
@@ -219,7 +219,7 @@ NXS_NAMESPACE
         template<typename T>
         void AppendAllDescendantsOfType(Array<T*>& children, bool parentFirst) const
         {
-            rmt_ScopedCPUSample(SceneNode_AppendAllDescendantsOfType, 0)
+            ZoneScopedN("SceneNode_AppendAllDescendantsOfType");
             for (const auto& child : m_children)
             {
                 auto tChild = D_CAST<T*>(child.get());

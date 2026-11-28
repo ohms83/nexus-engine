@@ -7,7 +7,7 @@
 #include "nexus/debug/LogDispatcher.h"
 #include "nexus/core/Path.h"
 
-#include "Remotery.h"
+#include "tracy/Tracy.hpp"
 
 #include <ranges>
 
@@ -112,7 +112,7 @@ bool Material::HasTextureType(TextureType type) const
 
 Ref<GpuProgram> Material::Use()
 {
-    rmt_ScopedCPUSample(Material_Use, 0)
+    ZoneScopedN("Material_Use");
     if (!m_shader)
     {
         LOG_WARNING(LogMaterial, std::format("Material does not have a shader"));

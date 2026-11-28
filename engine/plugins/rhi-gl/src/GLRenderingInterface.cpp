@@ -9,7 +9,8 @@
 #include "nexus/debug/Logger.h"
 #include "SDL3/SDL_error.h"
 
-#include "Remotery.h"
+#include "tracy/Tracy.hpp"
+#include "tracy/TracyOpenGL.hpp"
 #include "nexus/graphics/GraphicsProfiler.h"
 
 USING_NAMESPACE_NXS;
@@ -85,17 +86,12 @@ GLRenderingInterface::GLRenderingInterface(WindowContext window, const GraphicsC
 
     CALL_GL_FUNC(glEnable(GL_PROGRAM_POINT_SIZE));
 
-    // Initialize Remotery
-    rmt_BindOpenGL();
+    TracyGpuContext;
 }
 
 GLRenderingInterface::~GLRenderingInterface()
 {
     SDL_GLContext gl_context = R_CAST<SDL_GLContext>(m_renderContext.nativeContext);
-    if (gl_context && rmt_GetGlobalInstance())
-    {
-        rmt_UnbindOpenGL();
-    }
     SDL_GL_DestroyContext(gl_context);
 }
 
@@ -114,24 +110,25 @@ void GLRenderingInterface::ClearDepth(float depth)
 void GLRenderingInterface::ClearBuffer(const Color4F& color, float depth)
 {
     {
-        rmt_ScopedOpenGLSample(glClearColor);
+        TracyGpuZone("glClearColor");
         CALL_GL_FUNC(glClearColor(color.r, color.g, color.b, color.a));
     }
     {
-        rmt_ScopedOpenGLSample(glClearDepth);
+        TracyGpuZone("glClearDepth");
         CALL_GL_FUNC(glClearDepth(depth));
     }
     {
-        rmt_ScopedOpenGLSample(glClearBuffer);
+        TracyGpuZone("glClearBuffer");
         CALL_GL_FUNC(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
     }
 }
 
 void GLRenderingInterface::SwapBuffer()
 {
-    rmt_ScopedCPUSample(SDL_GL_SwapWindow, 0);
+    ZoneScopedN("SDL_GL_SwapWindow");
     SDL_Window* sdlWindow = R_CAST<SDL_Window*>(m_window);
     SDL_GL_SwapWindow(sdlWindow);
+    TracyGpuCollect;
 }
 
 void GLRenderingInterface::SetFramebufferSRGB(const bool enabled)
@@ -154,7 +151,7 @@ void GLRenderingInterface::SetViewport(int32_t x, int32_t y, int32_t w, int32_t 
 
 void GLRenderingInterface::ReadFrameData(FrameBufferType type, Ref<IBuffer> outData) const
 {
-    rmt_ScopedCPUSample(GLRendering_ReadFrameData, 0);
+    ZoneScopedN("GLRendering_ReadFrameData");
     CALL_GL_FUNC(glReadPixels(
         0, 0,
         m_config.screenWidth, m_config.screenHeight,
@@ -166,7 +163,7 @@ void GLRenderingInterface::ReadFrameData(FrameBufferType type, Ref<IBuffer> outD
 
 void GLRenderingInterface::ReadFrameSubData(FrameBufferType type, const iRect& region, Ref<IBuffer> outData) const
 {
-    rmt_ScopedCPUSample(GLRendering_ReadFrameSubData, 0);
+    ZoneScopedN("GLRendering_ReadFrameSubData");
     CALL_GL_FUNC(glReadPixels(
         region.pos.x, region.pos.y,
         region.size.x, region.size.y,
@@ -178,7 +175,7 @@ void GLRenderingInterface::ReadFrameSubData(FrameBufferType type, const iRect& r
 
 void GLRenderingInterface::DrawIndexed(const Ref<IndexBuffer> indexBuffer)
 {
-    rmt_ScopedCPUSample(GLRendering_DrawIndexed, 0);
+    ZoneScopedN("GLRendering_DrawIndexed");
     NXS_ASSERT(indexBuffer != nullptr);
     indexBuffer->Bind();
 
@@ -189,7 +186,7 @@ void GLRenderingInterface::DrawIndexed(const Ref<IndexBuffer> indexBuffer)
     NXS_ASSERT_MSG(gl_drawMode != GL_QUADS, "GL_QUADS is not a valid primitive type.");
     
     {
-        rmt_ScopedOpenGLSample(glDrawElements);
+        TracyGpuZone("glDrawElements");
         CALL_GL_FUNC(glDrawElements(
             gl_drawMode,      // mode
             CAST<GLsizei>(indexBuffer->GetNumIndexDraw()),    // count
@@ -203,7 +200,7 @@ void GLRenderingInterface::DrawIndexed(const Ref<IndexBuffer> indexBuffer)
 
 void GLRenderingInterface::DrawIndexedInstanced(const Ref<IndexBuffer> indexBuffer, const uint32_t instanceCount)
 {
-    rmt_ScopedCPUSample(GLRendering_DrawIndexedInstanced, 0);
+    ZoneScopedN("GLRendering_DrawIndexedInstanced");
     NXS_ASSERT(indexBuffer != nullptr);
     indexBuffer->Bind();
 
@@ -212,7 +209,7 @@ void GLRenderingInterface::DrawIndexedInstanced(const Ref<IndexBuffer> indexBuff
     const GLuint gl_drawMode = GL::NxsDrawModeToGL(indexBuffer->GetDrawMode());
     NXS_ASSERT_MSG(gl_drawMode != GL_QUADS, "GL_QUADS is not a valid primitive type.");
     {
-        rmt_ScopedOpenGLSample(glDrawElementsInstanced);
+        TracyGpuZone("glDrawElementsInstanced");
         CALL_GL_FUNC(glDrawElementsInstanced(
             gl_drawMode,
             CAST<GLsizei>(indexBuffer->GetNumIndexDraw()),

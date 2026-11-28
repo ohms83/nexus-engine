@@ -5,7 +5,7 @@
 #include "nexus/graphics/RenderSystem.h"
 #include "nexus/container/Array.h"
 
-#include "Remotery.h"
+#include "tracy/Tracy.hpp"
 
 USING_NAMESPACE_NXS;
 
@@ -32,7 +32,7 @@ GLRenderTarget::~GLRenderTarget()
 
 void GLRenderTarget::Bind(RenderSystem& rs)
 {
-    rmt_ScopedCPUSample(GLRenderTarget_Bind, 0);
+    ZoneScopedN("GLRenderTarget_Bind");
     auto renderInterface = rs.GetRenderInterface();
     if (!m_initialized)
     {

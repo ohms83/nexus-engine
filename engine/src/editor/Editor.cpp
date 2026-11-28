@@ -6,7 +6,7 @@
 #include "nexus/graphics/RenderSystem.h"
 #include "Application.h"
 
-#include "Remotery.h"
+#include "tracy/Tracy.hpp"
 
 USING_NAMESPACE_NXS;
 
@@ -31,14 +31,14 @@ WindowContext Editor::GetWindowContext() const
 // ReSharper disable once CppMemberFunctionMayBeStatic
 void Editor::Update()
 {
-    rmt_ScopedCPUSample(Editor_Update, 0);
+    ZoneScopedN("Editor_Update");
     m_menu->Update();
     UpdateWidgets();
 }
 
 void Editor::Draw(RenderSystem& renderSystem)
 {
-    rmt_ScopedCPUSample(Editor_Draw, 0);
+    ZoneScopedN("Editor_Draw");
     m_menu->Draw(renderSystem);
     DrawWidgets(renderSystem);
 }
@@ -51,7 +51,7 @@ void Editor::Clear()
 
 void Editor::UpdateWidgets()
 {
-    rmt_ScopedCPUSample(Editor_UpdateWidgets, 0);
+    ZoneScopedN("Editor_UpdateWidgets");
     for (const auto& widget : m_widgets)
     {
         widget->Update();
@@ -60,7 +60,7 @@ void Editor::UpdateWidgets()
 
 void Editor::DrawWidgets(RenderSystem& renderSystem) const
 {
-    rmt_ScopedCPUSample(Editor_DrawWidgets, 0);
+    ZoneScopedN("Editor_DrawWidgets");
     for (const auto& widget : m_widgets)
     {
         widget->Draw(renderSystem);
