@@ -108,6 +108,7 @@ NXS_NAMESPACE
         float m_autoExposureTarget = 0.18f;
         float m_autoExposureSpeed = 1.0f;
         float m_exposure = 1.0f;
+        bool m_sampleLuminance = false;
 
     private:
         bool InitResources(const IGpuResourceFactory& factory, const GraphicsConfig& config);

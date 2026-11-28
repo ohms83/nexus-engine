@@ -119,6 +119,12 @@ bool SceneRenderer::Init(const IGpuResourceFactory* factory, RenderSystem& rs)
     {
         if (!pass->Init(*factory)) return false;
     }
+
+    m_timer->ScheduleAction([&]() {
+        m_sampleLuminance = true;
+    }, 1);
+    m_sampleLuminance = false;
+
     m_viewportResizeConnection = rs.onViewportResize.connect(&SceneRenderer::OnViewportResize, this);
     m_gpuResourceFactory = factory;
     m_initialized = true;
@@ -328,7 +334,15 @@ bool SceneRenderer::UpdateAutoExposure()
     }
 
     hdrTexture->Bind();
-    hdrTexture->GenerateMipmaps();
+
+    if (m_sampleLuminance)
+    {
+        hdrTexture->GenerateMipmaps();
+        m_sampleLuminance = false;
+        m_timer->ScheduleAction([&]() {
+            m_sampleLuminance = true;
+        }, 1);
+    }
 
     glm::vec4 color {0};
     const auto& desc = hdrTexture->GetDescription();
