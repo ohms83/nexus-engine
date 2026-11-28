@@ -136,7 +136,12 @@ vec3 AccumulateLighting(
     // Accessing the global uniform _PointLights and _NumPointLight
     for (int i = 0; i < _NumPointLight; ++i) 
     {
-        result += CalcPointLight(material, _PointLights[i], fragPos, normal, viewDir);
+        vec3 pointLightContribution = CalcPointLight(material, _PointLights[i], fragPos, normal, viewDir);
+        vec3 toLight = _PointLights[i].position - fragPos;
+        float shadow = material.receiveShadows > 0.0 && i == _PointShadowIndex
+            ? CalcPointShadow(fragPos, normal, normalize(toLight))
+            : 0.0;
+        result += pointLightContribution * (1.0 - shadow);
     }
 
     return result;

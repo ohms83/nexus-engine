@@ -238,6 +238,24 @@ bool GLGpuProgram::SetUniformTextureCube(const std::string& name, Ref<const Text
     CHECK_IF_BINDING(false);
     rmt_ScopedCPUSample(GLGpuProgram_SetUniform_TextureCube, 0);
     const auto location = FindUniform(name);
+    if (!texture)
+    {
+        LOG_ERROR(LogOpenGL, std::format(
+            "Cannot bind cubemap uniform '{}': texture proxy is null.", name));
+        return false;
+    }
+    if (texture->GetHandle() == 0)
+    {
+        LOG_ERROR(LogOpenGL, std::format(
+            "Cannot bind cubemap uniform '{}': texture is not allocated.", name));
+        return false;
+    }
+    if (texture->GetDescription().kind != TextureKind::TextureCube)
+    {
+        LOG_ERROR(LogOpenGL, std::format(
+            "Cannot bind cubemap uniform '{}': texture proxy is not a cube texture.", name));
+        return false;
+    }
     if (location < 0) return false;
     const GLint gl_textureUnit = GL_TEXTURE0 + textureUnit;
     CALL_GL_FUNC(glActiveTexture(gl_textureUnit));
