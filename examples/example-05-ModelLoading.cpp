@@ -228,8 +228,6 @@ private:
         auto node = m_scene->EmplaceChild<nxs::SceneNode>("Model");
         node->AddComponent<nxs::ModelComponent>();
         node->SetScale(modelScales[0]);
-
-        m_scene->SetRenderer(std::make_unique<nxs::ForwardSceneRenderer>(GetRenderSystem()));
     }
 
     MAYBE_UNUSED nxs::Ref<nxs::IResourceLoader::LoadResult> LoadModel(const int index)

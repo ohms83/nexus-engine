@@ -176,8 +176,6 @@ private:
                 m_groundMaterial
             )
         );
-
-        m_scene->SetRenderer(std::make_unique<nxs::ForwardSceneRenderer>(GetRenderSystem()));
     }
 
     nxs::Ref<nxs::IResourceLoader::LoadResult> LoadModel(const size_t index)
