@@ -85,7 +85,7 @@ NXS_NAMESPACE
         float diffuseIntensity = 1.f;
         float specularIntensity = 1.f;
         float cutoffRange = FLT_MAX;
-        //! Currently only directional lights support shadow maps.
+        //! Enables shadow casting for supported directional and point lights.
         bool canCastShadows = true;
 
         Color3F DiffuseColor()
