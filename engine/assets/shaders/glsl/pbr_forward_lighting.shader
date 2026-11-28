@@ -210,8 +210,12 @@ void main()
             _PointLights[i].properties.diffuseIntensity;
         vec3 specularRadiance = _PointLights[i].properties.color * attenuation *
             _PointLights[i].properties.specularIntensity;
+        float shadow = _Material.receiveShadows > 0.0 && i == _PointShadowIndex
+            ? CalcPointShadow(FragPos, normal, lightDir)
+            : 0.0;
         color += EvaluateLight(diffuseRadiance, specularRadiance, normal, viewDir, lightDir,
-            baseColor.rgb, metalness, roughness, specularColor, _HasSpecularMap != 0);
+            baseColor.rgb, metalness, roughness, specularColor, _HasSpecularMap != 0) *
+            (1.0 - shadow);
     }
 
     vec3 emissive = _Material.emissive;
