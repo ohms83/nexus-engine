@@ -39,6 +39,12 @@ public:
         const auto selectedNode = m_sceneGraphWidget->GetSelectedNode();
         m_propertyWindow->SetSceneNode(selectedNode);
         UpdateModel();
+
+        const float dt = GetDeltaTime();
+        m_lightRoot->SetOrientation(glm::rotate(
+            m_lightRoot->GetOrientation(),
+            glm::radians(30.f * dt),
+            glm::vec3(0, 1, 0)));
     }
 
     void Render(nxs::RenderSystem& renderSystem) override
@@ -191,6 +197,36 @@ private:
         m_light = m_scene->EmplaceChild<nxs::DirectionalLight>("Direct Light");
         m_light->Properties().color = {1, 1, 1};
         m_light->Direction() = {0.7f, -1.0f, 0.3f};
+        
+
+        m_lightRoot = m_scene->EmplaceChild<nxs::SceneNode>("Light Root");
+
+        {
+            auto light = m_scene->EmplaceChild<nxs::DirectionalLight>("Direct Light");
+            light->Properties().color =  {0.5f, 0.5f, 0.5f};
+            light->Direction() = {10, -10, 0};
+        }
+
+        nxs::Array<glm::vec3> lightPositions = {
+            {5, 5, 5},
+            {-5, 5, 5},
+            {5, 5, -5},
+            {-5, 5, -5},
+        };
+        nxs::Array<nxs::Color3F> lightColors = {
+            {0.5f, 0, 0},
+            {0, 0.5f, 0},
+            {0, 0, 0.5f},
+            {0.5f, 0.5f, 0},
+        };
+
+        for (size_t i = 0; i < lightPositions.size(); i++)
+        {
+            auto light = m_lightRoot->EmplaceChild<nxs::PointLight>(std::format("Point Light {}", i));
+            light->Properties().color = lightColors[i];
+            light->SetPosition(lightPositions[i]);
+            light->Properties().diffuseIntensity = 400.0f;
+        }
     }
 
     void UpdateModel()
@@ -257,6 +293,7 @@ protected:
     glm::vec3 m_modelOffset {};
     std::string m_modelError;
     nxs::Ref<nxs::SceneNode> m_modelNode;
+    nxs::Ref<nxs::SceneNode> m_lightRoot;
     nxs::Ref<nxs::DirectionalLight> m_light;
     nxs::Ref<nxs::Material> m_groundMaterial;
     nxs::Ptr<nxs::ModelLoader> m_modelLoader;
