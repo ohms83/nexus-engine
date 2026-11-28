@@ -122,6 +122,5 @@ int main()
         true,
         0,
     };
-    config.allowProfile = true;
     return nxs::RunApplication<ProfilerStressApp>(config);
 }

@@ -322,7 +322,5 @@ int main()
         true,
         // maximize
         true,
-        // allowProfile
-        false,
     });
 }

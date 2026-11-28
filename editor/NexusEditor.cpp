@@ -62,9 +62,6 @@ int main()
 
     nxs::ApplicationConfig config;
     config.LoadConfig(configFile.string());
-#if 0
-    config.allowProfile = false;
-#endif
     return nxs::RunApplication<NexusEditor>(config);
 }
 

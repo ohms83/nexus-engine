@@ -47,7 +47,6 @@ bool ApplicationConfig::LoadConfig(const std::string& filePath)
     if (const auto value = parser.GetBoolValue(sectionName, "resizable"); value.has_value()) resizable = *value;
     if (const auto value = parser.GetBoolValue(sectionName, "editMode"); value.has_value()) editMode = *value;
     if (const auto value = parser.GetBoolValue(sectionName, "maximize"); value.has_value()) maximize = *value;
-    if (const auto value = parser.GetBoolValue(sectionName, "allowProfile"); value.has_value()) allowProfile = *value;
 
     graphicsConfig.LoadConfig(filePath);
     return true;

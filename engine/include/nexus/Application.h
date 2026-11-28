@@ -39,7 +39,6 @@ NXS_NAMESPACE
         bool resizable = false;
         bool editMode = true;
         bool maximize = true;
-        bool allowProfile = false;
         int32_t quitKey = SDLK_ESCAPE;
 
         bool LoadConfig(const std::string& filePath);
