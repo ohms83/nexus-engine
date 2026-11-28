@@ -89,6 +89,35 @@ TEST_F(TimerTest, ScheduledAction)
     ASSERT_FALSE(executed);
 }
 
+// Verify that a scheduled action fires after a single large update delta
+// that jumps beyond the action's delay, as can happen on a lagging frame.
+// The action is one-shot and must not fire again on later updates.
+TEST_F(TimerTest, ScheduledAction_LargeDeltaTime)
+{
+    bool executed = false;
+    timer_->Start();
+    timer_->ScheduleAction([&] {
+        executed = true;
+        std::cout << "Scheduled action" << std::endl;
+    }, 1);
+
+    timer_->Tick();
+    // Time is still 0. The action shouldn't be executed.
+    ASSERT_FALSE(executed);
+
+    // Advance the time with a large step.
+    time_source_->Advance(10);
+    timer_->Tick();
+    // The action should be executed.
+    ASSERT_TRUE(executed);
+
+    // Ensure it doesn't execute again on later updates (for one-shot tasks)
+    executed = false;
+    time_source_->Advance(10);
+    timer_->Tick();
+    ASSERT_FALSE(executed);
+}
+
 /**
  * Expected results:
  *   - Scheduled action must not be executed.

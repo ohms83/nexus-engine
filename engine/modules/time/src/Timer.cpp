@@ -35,7 +35,7 @@ void Timer::Tick()
     if (m_scheduledAction && !m_isExecuted)
     {
         m_countDown -= GetDeltaTime();
-        if (std::abs(m_countDown) < m_faultTolerance)
+        if (m_countDown < m_faultTolerance)
         {
             m_isExecuted = true;
             m_countDown = 0;
