@@ -134,7 +134,7 @@ Array<RenderCommand> RenderPass::CreateRenderCommands(const ViewContext& viewCtx
 
 void RenderPass::Begin(RenderSystem& rs, SceneRenderingContext& sceneCtx)
 {
-    ZoneTransientN(tracyRenderPass, name.c_str(), true);
+    // ZoneTransientN(tracyRenderPass, name.c_str(), true);
 
     ZoneScopedN("RenderPass_BeginRenderPass");
     auto renderInterface = rs.GetRenderInterface();

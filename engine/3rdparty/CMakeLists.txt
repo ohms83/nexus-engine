@@ -12,6 +12,8 @@ FetchContent_Declare(
   GIT_TAG        v0.15.0
   GIT_SHALLOW    TRUE
 )
+
+set(TRACY_ON_DEMAND ON)
 FetchContent_MakeAvailable(tracy)
 
 set(RAPIDJSON_BUILD_EXAMPLES OFF CACHE BOOL "Do not build rapidjson examples" FORCE)

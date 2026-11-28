@@ -234,9 +234,11 @@ void SceneRenderer::Render(RenderSystem &rs, const Scene &scene)
         {
             auto& pass = queuedPass.pass;
 
+            const uint32_t id = TracySectionEnter("%s", pass->name.c_str());
             pass->Begin(rs, sceneCtx);
             pass->Render(rs, viewCtx, sceneCtx);
             pass->End(rs, sceneCtx);
+            TracySectionLeave(id);
         }
 
         if (viewCtx.target) {

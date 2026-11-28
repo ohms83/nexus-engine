@@ -10,7 +10,9 @@
 #include "SDL3/SDL_error.h"
 
 #include "tracy/Tracy.hpp"
+#ifdef NXS_TRACY_GPU_PROFILING
 #include "tracy/TracyOpenGL.hpp"
+#endif
 #include "nexus/graphics/GraphicsProfiler.h"
 
 USING_NAMESPACE_NXS;
@@ -86,7 +88,9 @@ GLRenderingInterface::GLRenderingInterface(WindowContext window, const GraphicsC
 
     CALL_GL_FUNC(glEnable(GL_PROGRAM_POINT_SIZE));
 
+#ifdef NXS_TRACY_GPU_PROFILING
     TracyGpuContext;
+#endif
 }
 
 GLRenderingInterface::~GLRenderingInterface()
@@ -110,15 +114,21 @@ void GLRenderingInterface::ClearDepth(float depth)
 void GLRenderingInterface::ClearBuffer(const Color4F& color, float depth)
 {
     {
+#ifdef NXS_TRACY_GPU_PROFILING
         TracyGpuZone("glClearColor");
+#endif
         CALL_GL_FUNC(glClearColor(color.r, color.g, color.b, color.a));
     }
     {
+#ifdef NXS_TRACY_GPU_PROFILING
         TracyGpuZone("glClearDepth");
+#endif
         CALL_GL_FUNC(glClearDepth(depth));
     }
     {
+#ifdef NXS_TRACY_GPU_PROFILING
         TracyGpuZone("glClearBuffer");
+#endif
         CALL_GL_FUNC(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
     }
 }
@@ -128,7 +138,9 @@ void GLRenderingInterface::SwapBuffer()
     ZoneScopedN("SDL_GL_SwapWindow");
     SDL_Window* sdlWindow = R_CAST<SDL_Window*>(m_window);
     SDL_GL_SwapWindow(sdlWindow);
+#ifdef NXS_TRACY_GPU_PROFILING
     TracyGpuCollect;
+#endif
 }
 
 void GLRenderingInterface::SetFramebufferSRGB(const bool enabled)
@@ -186,7 +198,9 @@ void GLRenderingInterface::DrawIndexed(const Ref<IndexBuffer> indexBuffer)
     NXS_ASSERT_MSG(gl_drawMode != GL_QUADS, "GL_QUADS is not a valid primitive type.");
     
     {
+#ifdef NXS_TRACY_GPU_PROFILING
         TracyGpuZone("glDrawElements");
+#endif
         CALL_GL_FUNC(glDrawElements(
             gl_drawMode,      // mode
             CAST<GLsizei>(indexBuffer->GetNumIndexDraw()),    // count
@@ -209,7 +223,9 @@ void GLRenderingInterface::DrawIndexedInstanced(const Ref<IndexBuffer> indexBuff
     const GLuint gl_drawMode = GL::NxsDrawModeToGL(indexBuffer->GetDrawMode());
     NXS_ASSERT_MSG(gl_drawMode != GL_QUADS, "GL_QUADS is not a valid primitive type.");
     {
+#ifdef NXS_TRACY_GPU_PROFILING
         TracyGpuZone("glDrawElementsInstanced");
+#endif
         CALL_GL_FUNC(glDrawElementsInstanced(
             gl_drawMode,
             CAST<GLsizei>(indexBuffer->GetNumIndexDraw()),

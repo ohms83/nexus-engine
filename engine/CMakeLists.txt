@@ -16,6 +16,8 @@ set(XXHASH_SOURCE_DIR "${ENGINE_3RD_PARTY_DIR}/xxHash" CACHE PATH "Path to xxHas
 set(STB_SOURCE_DIR "${ENGINE_3RD_PARTY_DIR}/stb" CACHE PATH "Path to stb_image source root")
 set(MIMALLOC_SOURCE_DIR ${ENGINE_3RD_PARTY_DIR}/mimalloc)
 
+option(NXS_ENABLE_TRACY_GPU_PROFILING "Enable Tracy OpenGL GPU timer-query profiling" OFF)
+
 add_subdirectory(3rdparty EXCLUDE_FROM_ALL)
 
 find_package(Python3 COMPONENTS Interpreter REQUIRED)
@@ -54,6 +56,7 @@ target_compile_definitions(nexus-config INTERFACE
     $<$<CONFIG:RelWithDebInfo>:NXS_BUILD_RELWITHDEBINFO>
     $<$<CONFIG:Release>:NXS_BUILD_RELEASE>
     $<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:TRACY_ENABLE>
+    $<$<BOOL:${NXS_ENABLE_TRACY_GPU_PROFILING}>:NXS_TRACY_GPU_PROFILING>
 )
 target_include_directories(nexus-config INTERFACE
     ${ENGINE_INCLUDE_DIR}
