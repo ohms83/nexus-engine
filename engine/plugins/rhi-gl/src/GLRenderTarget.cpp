@@ -57,7 +57,19 @@ void GLRenderTarget::Bind(RenderSystem& rs)
         {
             CALL_GL_FUNC(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_colorTexture->GetHandle(), 0));
         }
-        CALL_GL_FUNC(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_depthTexture->GetHandle(), 0));
+        if (m_depthTexture->GetDescription().kind == TextureKind::TextureCube)
+        {
+            CALL_GL_FUNC(glFramebufferTexture2D(
+                GL_FRAMEBUFFER,
+                GL_DEPTH_ATTACHMENT,
+                GL_TEXTURE_CUBE_MAP_POSITIVE_X,
+                m_depthTexture->GetHandle(),
+                0));
+        }
+        else
+        {
+            CALL_GL_FUNC(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_depthTexture->GetHandle(), 0));
+        }
         if (!m_colorTexture)
         {
             CALL_GL_FUNC(glDrawBuffer(GL_NONE));
@@ -87,4 +99,23 @@ void GLRenderTarget::Unbind(RenderSystem& rs)
     // Restore viewport to screen size
     const auto& cfg = rs.GetGraphicsConfig();
     renderInterface->SetViewport(0, 0, cfg.screenWidth, cfg.screenHeight);
+}
+
+void GLRenderTarget::BindCubeFace(RenderSystem& rs, TextureTarget face)
+{
+    if (m_depthTexture->GetDescription().kind != TextureKind::TextureCube ||
+        face == TextureTarget::Texture2D ||
+        UINT_CAST(face) >= UINT_CAST(TextureTarget::Num))
+    {
+        return;
+    }
+
+    const uint32_t faceIndex = UINT_CAST(face) - UINT_CAST(TextureTarget::Texture2D) - 1;
+    CALL_GL_FUNC(glBindFramebuffer(GL_FRAMEBUFFER, m_fbo));
+    CALL_GL_FUNC(glFramebufferTexture2D(
+        GL_FRAMEBUFFER,
+        GL_DEPTH_ATTACHMENT,
+        GL_TEXTURE_CUBE_MAP_POSITIVE_X + faceIndex,
+        m_depthTexture->GetHandle(),
+        0));
 }

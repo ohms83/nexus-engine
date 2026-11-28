@@ -19,6 +19,7 @@ NXS_NAMESPACE
 
         void Bind(RenderSystem& rs) override;
         void Unbind(RenderSystem& rs) override;
+        void BindCubeFace(RenderSystem& rs, TextureTarget face) override;
 
         NODISCARD uint32_t GetFBO() const { return m_fbo; }
         NODISCARD uint32_t GetWidth() const override { return m_width; }

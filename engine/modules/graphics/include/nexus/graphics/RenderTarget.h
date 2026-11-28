@@ -42,5 +42,6 @@ NXS_NAMESPACE
         NODISCARD virtual uint32_t GetHeight() const = 0;
         NODISCARD virtual Ref<TextureProxy> GetColorTextureProxy() const { return nullptr; }
         NODISCARD virtual Ref<TextureProxy> GetDepthTextureProxy() const = 0;
+        virtual void BindCubeFace(RenderSystem& rs, TextureTarget face) {}
     };
 }
